@@ -1,0 +1,4 @@
+qtbitcointrader
+===============
+
+Qt Bitcoin Trader
