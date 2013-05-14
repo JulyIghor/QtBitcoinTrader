@@ -1,34 +1,34 @@
-v0.8
-- First public release
-
-v0.81
-- Minor bugs fixed
-- Improved stability
-- Added packet priority for buying and selling
-
-v0.82
+v0.87
+- Match more faster engine
+- Fixed some bugs
 - Improved socket stability
-
-v0.83
-- Added Fee Calculator
-
-v0.84
-- Interlaced software lag performance
-
-v0.85
-- Added SSL switcher
-- Fixed some dialogs
+- Tested on Linux, thanks to macman31
 
 v0.86
 - Fixed bug in Orders Log
 - Fixed bug in fee calculation
 - Fixed ui dialogs
 
-v0.87
-- Match more faster engine
-- Fixed some bugs
+v0.85
+- Added SSL switcher
+- Fixed some dialogs
+
+v0.84
+- Interlaced software lag performance
+
+v0.83
+- Added Fee Calculator
+
+v0.82
 - Improved socket stability
-- Tested on Linux, thanks to macman31
+
+v0.81
+- Minor bugs fixed
+- Improved stability
+- Added packet priority for buying and selling
+
+v0.8
+- First public release
 
 Created by July IGHOR
 Contact: julyighor@gmail.com
