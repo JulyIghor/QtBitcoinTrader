@@ -1,0 +1,14 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=QtBitcoinTrader
+Comment=Mt.Gox Bitcoin Trading Client
+Comment[ru]=Торговый клиент Mt.Gox Bitcoin
+Comment[uk]=Торговий клієнт Mt.Gox Bitcoin
+GenericName=Mt.Gox Bitcoin Trading Client
+GenericName[ru]=Торговый клиент Mt.Gox Bitcoin
+GenericName[uk]=Торговий клієнт Mt.Gox Bitcoin
+Exec=QtBitcoinTrader
+Icon=QtBitcoinTrader
+Terminal=false
+Type=Application
+Categories=Qt;Office;Finance;
