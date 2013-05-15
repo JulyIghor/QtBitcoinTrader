@@ -32,9 +32,9 @@ void JulyLightChanges::valueChanged(double val)
 {
 	changeTimer->stop();
 	if(lastValue<=val)
-		parentSheet->setStyleSheet("background: \""+colorH+"\"");
+		parentSheet->setStyleSheet("QLabel {background: \""+colorH+"\";}");
 	else
-		parentSheet->setStyleSheet("background: \""+colorL+"\"");
+		parentSheet->setStyleSheet("QLabel {background: \""+colorL+"\";}");
 	lastValue=val;
 	changeTimer->start(2000);
 }

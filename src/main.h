@@ -19,11 +19,9 @@
 #define logFileName *logFileName_
 #define appVerReal *appVerReal_
 #define appVerStr *appVerStr_
-#define validKeySign *validKeySign_
 #define useSSL *useSSL_
 
 extern bool *useSSL_;
-extern bool *validKeySign_;
 extern QByteArray *appVerStr_;
 extern LogThread *logThread;
 extern QByteArray *restKey_;

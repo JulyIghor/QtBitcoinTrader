@@ -44,7 +44,6 @@ private:
 
 	QString appDir;
 	bool authErrorOnce;
-	bool isValidKey();
 	bool showingMessage;
 	bool ordersLogLoaded;
 	void beep();
@@ -105,8 +104,6 @@ public slots:
 	void ordersCancelSelected();
 	void secondSlot();
 	void dataReceivedAuth(QByteArray);
-	void restKeyChanged(QString);
-	void restSignChanged(QString);
 	void ordersCancelAll();
 	void accountFeeChanged(double);
 

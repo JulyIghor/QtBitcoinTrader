@@ -82,7 +82,6 @@ void SocketThread::sendPendingData()
 	if(queryTime.elapsed()<200)return;
 	if(sendState==0)sendToApiNow("BTCUSD/money/order/lag","");
 	else
-	if(validKeySign)
 		switch(sendState)
 		{
 			case 1: sendToApiNow("BTCUSD/money/info",""); break;
@@ -127,15 +126,18 @@ void SocketThread::sendToApiSlot(QByteArray request, QByteArray command)
 void SocketThread::checkDataAndSend(QByteArray* data)
 {
 	if(data->size()<3)return;
-	if(data->at(0)!='{'&&data->at(data->size())!='}')return;
+	if(data->at(0)!='{'&&data->at(data->size()-1)!='}')return;
+
 	int leftl=0;
 	int rightl=0;
+
 	for(int n=0;n<data->size();n++)
 	{
 		if(data->at(n)=='{')leftl++;
 		else
 		if(data->at(n)=='}')rightl++;
 	}
+
 	if(leftl&&leftl==rightl)
 	{
 		emit dataReceived(*data);

@@ -87,8 +87,6 @@ BitcoinTrader::BitcoinTrader()
 	ui.rulesTable->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
 
 	QSettings settings(iniFileName,QSettings::IniFormat);
-	ui.restSignLine->setText(restSign);
-	ui.restKeyLine->setText(restKey);
 
 #ifdef Q_OS_WIN
 	useSSL=settings.value("OpenSSL",bool(QSysInfo::windowsVersion()>=0x0080)).toBool();
@@ -102,7 +100,7 @@ BitcoinTrader::BitcoinTrader()
 	ui.accountBTCBeep->setChecked(settings.value("AccountBTCBeep",false).toBool());
 	ui.accountUSDBeep->setChecked(settings.value("AccountUSDBeep",false).toBool());
 	ui.marketHighBeep->setChecked(settings.value("MarketHighBeep",false).toBool());
-	ui.marketLowBeep->setChecked(settings.value("MmarketLowBeep",false).toBool());
+	ui.marketLowBeep->setChecked(settings.value("MarketLowBeep",false).toBool());
 
 	socketThreadAuth=new SocketThread(1);
 	connect(socketThreadAuth,SIGNAL(dataReceived(QByteArray)),this,SLOT(dataReceivedAuth(QByteArray)));
@@ -125,7 +123,7 @@ BitcoinTrader::BitcoinTrader()
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 	secondTimer->setSingleShot(true);
 	secondTimer->start(1000);
-	resize(1280,800);
+	resize(1200,800);
 
 	httpUpdate=new QHttp("trader.uax.co",80,this);
 	connect(httpUpdate,SIGNAL(done(bool)),this,SLOT(httpUpdateDone(bool)));
@@ -220,7 +218,7 @@ void BitcoinTrader::saveSoundToggles()
 	settings.setValue("AccountBTCBeep",ui.accountBTCBeep->isChecked());
 	settings.setValue("AccountUSDBeep",ui.accountUSDBeep->isChecked());
 	settings.setValue("MarketHighBeep",ui.marketHighBeep->isChecked());
-	settings.setValue("MmarketLowBeep",ui.marketLowBeep->isChecked());
+	settings.setValue("MarketLowBeep",ui.marketLowBeep->isChecked());
 }
 
 void BitcoinTrader::accountFeeChanged(double val)
@@ -254,7 +252,7 @@ void BitcoinTrader::secondSlot()
 void BitcoinTrader::mtgoxLagChanged(double val)
 {
 	if(val>=1.0)
-		ui.lagValue->setStyleSheet("background: #ffaaaa");
+		ui.lagValue->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
 	else
 		ui.lagValue->setStyleSheet("");
 }
@@ -262,11 +260,6 @@ void BitcoinTrader::mtgoxLagChanged(double val)
 void BitcoinTrader::balanceChanged(double)
 {
 	updateLogTable();
-}
-
-bool BitcoinTrader::isValidKey()
-{
-	return !ui.restKeyLine->text().isEmpty()&&!ui.restSignLine->text().isEmpty();
 }
 
 void BitcoinTrader::dataReceivedAuth(QByteArray data)
@@ -362,7 +355,6 @@ void BitcoinTrader::dataReceivedAuth(QByteArray data)
 				if(findedData!="")//Update
 				{
 					if(findedData!=oidData)
-					{
 						for(int n=0;n<ui.ordersTable->rowCount();n++)
 						{
 							if(ui.ordersTable->item(n,6)->text().toAscii()==oid)
@@ -370,7 +362,7 @@ void BitcoinTrader::dataReceivedAuth(QByteArray data)
 								if(ui.ordersTable->item(n,2)->text()!="canceled")
 								{
 									ui.ordersTable->item(n,2)->setText(itemStatus);
-									ui.ordersTable->item(n,3)->setText(itemAmount);
+									ui.ordersTable->item(n,3)->setText(btcChar+" "+itemAmount);
 									ui.ordersTable->item(n,5)->setText("$ "+QString::number(itemAmount.toDouble()*itemPrice.toDouble(),'f',5));
 									setRowStateByText(n,itemStatus);
 									oidMap[oid]=oidData;
@@ -378,7 +370,6 @@ void BitcoinTrader::dataReceivedAuth(QByteArray data)
 								break;
 							}
 						}
-					}
 				}
 				else//Insert
 				{
@@ -412,15 +403,13 @@ void BitcoinTrader::dataReceivedAuth(QByteArray data)
 
 			QByteArray oid=getMidData("oid\":\"","\",\"",&data);
 			if(!oid.isEmpty())
-			for(int n=0;n<ui.ordersTable->rowCount();n++)
-			{
-				if(ui.ordersTable->item(n,6)->text().toAscii()==oid)
-				{
-					ui.ordersTable->item(n,2)->setText("canceled");
-					setRowState(n,0);
-					break;
-				}
-			}
+				for(int n=0;n<ui.ordersTable->rowCount();n++)
+					if(ui.ordersTable->item(n,6)->text().toAscii()==oid)
+					{
+						ui.ordersTable->item(n,2)->setText("canceled");
+						setRowState(n,0);
+						break;
+					}
 		}
 		else
 		if(data.startsWith("\"oid\""))
@@ -448,20 +437,14 @@ void BitcoinTrader::dataReceivedAuth(QByteArray data)
 				if(logType=="in"){logTypeInt=2;logType="<font color=\"blue\">(Bought)</font>";}
 				else 
 				if(logType=="fee"){logTypeInt=3;logType.clear();}
-				
 				if(logTypeInt)
 				{
 					QByteArray logValue=getMidData("\"Value\":{\"value\":\"","\",\"",&curLog);
-					/*int logValueDot=-1;
-					if(logValueDot+9<logValue.size())logValueDot=logValue.indexOf('.');
-					if(logValueDot==-1){logValue="Mt.Gox BUG";ordersLogLoaded=false;}
-					else logValue=logValue.left(logValueDot+9);*/
-					//QByteArray logBalance=getMidData("\"Balance\":{\"value\":\","\",\"",&curLog);
 					QByteArray logDate=getMidData("\"Date\":",",\"",&curLog);
 					QByteArray logText=getMidData(" at ","\",\"",&curLog);
 					curLog=getMidData("\"Info\":\"","\",\"",&curLog);
 	
-			newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString("yyyy-MM-dd HH:mm:ss")+"</font>  <font color=\"#996515\">"+btcChar+logValue+"</font> at <font color=\"darkgreen\">"+logText+"</font> "+logType+"<br>");
+				newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString("yyyy-MM-dd HH:mm:ss")+"</font>  <font color=\"#996515\">"+btcChar+logValue+"</font> at <font color=\"darkgreen\">"+logText+"</font> "+logType+"<br>");
 				}
 			}
 			ui.logTextEdit->setHtml(newLog);
@@ -494,7 +477,7 @@ void BitcoinTrader::dataReceivedAuth(QByteArray data)
 				authErrorOnce=true;
 				showingMessage=true;
 				QMessageBox::warning(this,"Mt.Gox Error","Identification required to access private API.\nPlease enter valid API key and Secret.\n\nTo get new API Keys:\nGo http://mtgox.com => \"Security Center\"  => \"Advanced API Key Creation\"\nCheck \"Info\" and \"Trade\"\nPress Create Key\nCopy and paste RestKey and RestSign to program.");
-				if(isLogEnabled)logThread->writeLog("Mt.Gox Error: Identification required to access private API\nPlease enter valid API key and Secret");
+				if(isLogEnabled)logThread->writeLog("Mt.Gox Error: Identification required to access private API\nPlease restart application, and enter valid API key and Secret");
 				showingMessage=false;
 				}
 			}
@@ -574,22 +557,6 @@ void BitcoinTrader::setRowState(int row, int state)
 	for(int n=0;n<6;n++)ui.ordersTable->item(row,n)->setBackgroundColor(nColor);
 }
 
-void BitcoinTrader::restKeyChanged(QString key)
-{
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	settings.setValue("RestKey",key);
-	restKey=key.toAscii();
-	validKeySign=isValidKey();
-}
-
-void BitcoinTrader::restSignChanged(QString key)
-{
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	settings.setValue("RestSign",key);
-	restSign=QByteArray::fromBase64(key.toAscii());
-	validKeySign=isValidKey();
-}
-
 void BitcoinTrader::ordersCancelAll()
 {
 	for(int n=0;n<ui.ordersTable->rowCount();n++)
@@ -644,7 +611,7 @@ void BitcoinTrader::lastSoftLagChanged(double val)
 	if(val>=2.0)
 	{
 		lastLagState=false;
-		ui.lastUpdate->setStyleSheet("background: #ffaaaa");
+		ui.lastUpdate->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
 	}
 	else
 	{

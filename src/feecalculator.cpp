@@ -39,7 +39,7 @@ FeeCalculator::~FeeCalculator()
 void FeeCalculator::profitLossChanged(double val)
 {
 	if(val<0)
-		ui.profitLoss->setStyleSheet("background: #ffaaaa");
+		ui.profitLoss->setStyleSheet("QLabel {background: #ffaaaa;}");
 	else
 		ui.profitLoss->setStyleSheet("");
 }
