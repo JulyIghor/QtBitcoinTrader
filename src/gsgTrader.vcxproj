@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E2B2F561-C724-41A4-B6C2-E700872F0FAC}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>
-    <ProjectName>BitcoinTrader</ProjectName>
+    <ProjectName>QtBitcoinTrader</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

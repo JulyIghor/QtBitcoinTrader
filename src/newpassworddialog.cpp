@@ -30,6 +30,7 @@ NewPasswordDialog::NewPasswordDialog(QMap<QByteArray,QByteArray> *names, QMap<QB
 	ui.currencyComboBox->addItem(QIcon(":/Resources/"+currencies.at(n)+".png"),currencies.at(n)+" - "+names->value(currencies.at(n),"USD"),currencies.at(n));
 	}
 	if(strUsd>-1)ui.currencyComboBox->setCurrentIndex(strUsd-1);
+	ui.currencyComboBox->setVisible(false);
 }
 
 NewPasswordDialog::~NewPasswordDialog()
