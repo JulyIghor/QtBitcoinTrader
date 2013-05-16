@@ -2,7 +2,9 @@
 //http://trader.uax.co
 //Bitcoin Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 
+#ifdef Q_OS_WIN
 #define USING_QTSINGLEAPPLICATION //QtSingleApplication uses only to prevent starting two programs at time. You can remove this line to not use this class.
+#endif
 
 #include "main.h"
 #include <QtGui/QApplication>
