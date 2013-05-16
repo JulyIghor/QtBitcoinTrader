@@ -26,15 +26,15 @@ JulyLightChanges::~JulyLightChanges()
 void JulyLightChanges::changeTimerSlot()
 {
 	parentSheet->setStyleSheet("");
-}//Please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
+}
 
 void JulyLightChanges::valueChanged(double val)
 {
 	changeTimer->stop();
 	if(lastValue<=val)
-		parentSheet->setStyleSheet("QLabel {background: \""+colorH+"\";}");
+		parentSheet->setStyleSheet("QDoubleSpinBox {background: \""+colorH+"\";}");
 	else
-		parentSheet->setStyleSheet("QLabel {background: \""+colorL+"\";}");
+		parentSheet->setStyleSheet("QDoubleSpinBox {background: \""+colorL+"\";}");
 	lastValue=val;
 	changeTimer->start(2000);
 }
