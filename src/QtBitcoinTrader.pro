@@ -38,6 +38,6 @@ SOURCES += addrulewindow.cpp \
            passworddialog.cpp \
            socketthread.cpp \
            tempwindow.cpp
-RESOURCES += gsgtrader.qrc
+RESOURCES += QtResource.qrc
 QT += network
 LIBS += -lcrypto
