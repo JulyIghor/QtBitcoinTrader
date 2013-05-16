@@ -16,6 +16,13 @@ This software helps you to open and cancel Mt.Gox orders vary fast.
 
 Change Log
 
+v0.90
+- Added all currencies supported by Mt.Gox
+- Minor fixes
+
+v0.89
+- Fixed critical bug
+
 v0.88
 - Addes Mt.Gox key and secret encryption with AES 256
 - Fixed some ui bugx

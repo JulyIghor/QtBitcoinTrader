@@ -32,12 +32,14 @@ extern QByteArray *appVerStr_;
 extern LogThread *logThread;
 extern QByteArray *restKey_;
 extern QByteArray *restSign_;
-extern BitcoinTrader *mainWindow_;
+extern QtBitcoinTrader *mainWindow_;
 extern quint64 *nonce_;
 extern bool *logEnabled_;
 extern QString *logFileName_;
 extern QString *iniFileName_;
 extern double *appVerReal_;
+extern QMap<QByteArray,QByteArray> *currencySignMap;
+extern QMap<QByteArray,QByteArray> *currencyNamesMap;
 //
 //quint64 getNextNonce()
 //{

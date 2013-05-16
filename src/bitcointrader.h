@@ -2,8 +2,8 @@
 //Feel free to contact me: julyighor@gmail.com
 //Bitcoin Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 
-#ifndef GSGTRADER_H
-#define GSGTRADER_H
+#ifndef QTBITCOINTRADER_H
+#define QTBITCOINTRADER_H
 
 #include <QtGui/QDialog>
 #include "ui_gsgtrader.h"
@@ -13,7 +13,7 @@
 #include <QHttp>
 #include <QCloseEvent>
 
-class BitcoinTrader : public QDialog
+class QtBitcoinTrader : public QDialog
 {
 	Q_OBJECT
 
@@ -31,10 +31,11 @@ public:
 	QTimer *secondTimer;
 	QTimer *updateCheckTimer;
 	SocketThread *socketThreadAuth;
-	BitcoinTrader();
-	~BitcoinTrader();
+	QtBitcoinTrader();
+	~QtBitcoinTrader();
 
 private:
+	bool constructorFinished;
 	bool apiDownState;
 	void setApiDown(bool);
 	void closeEvent(QCloseEvent *event);
@@ -75,6 +76,8 @@ private:
 	QDateTime lastUpdate;
 	QTime updateLogTime;
 public slots:
+	void currencyChanged(int);
+
 	void apiDownSlot();
 	void setSslEnabled(bool);
 	void calcButtonClicked();
@@ -139,4 +142,4 @@ public slots:
 	void sellBuyDelta05();
 };
 
-#endif // GSGTRADER_H
+#endif // QTBITCOINTRADER_H

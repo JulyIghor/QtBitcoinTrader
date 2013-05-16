@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>777</width>
-    <height>187</height>
+    <height>190</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -178,7 +178,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_42">
+         <widget class="QLabel" name="usdLabel4">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -264,7 +264,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_38">
+         <widget class="QLabel" name="usdLabel3">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -331,7 +331,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_35">
+         <widget class="QLabel" name="usdLabel1">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -398,7 +398,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_36">
+         <widget class="QLabel" name="usdLabel2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -515,7 +515,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="label_40">
+         <widget class="QLabel" name="btcLabel4">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -602,7 +602,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="label_37">
+         <widget class="QLabel" name="btcLabel1">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -719,7 +719,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="label_39">
+         <widget class="QLabel" name="btcLabel3">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -821,7 +821,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="label_41">
+         <widget class="QLabel" name="btcLabel2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -928,7 +928,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_43">
+         <widget class="QLabel" name="usdLabel5">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -1001,7 +1001,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QLabel" name="fiatReceived">
+         <widget class="QLabel" name="usdLabel6">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -1074,7 +1074,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_45">
+         <widget class="QLabel" name="usdLabel7">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
             <horstretch>0</horstretch>

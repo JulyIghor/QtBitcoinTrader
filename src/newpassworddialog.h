@@ -13,7 +13,7 @@ public:
 	QString getRestSign();
 	QString getRestKey();
 	QString getPassword();
-	NewPasswordDialog(QMap<QByteArray,QByteArray> *names, QMap<QByteArray,QByteArray> *signs);
+	NewPasswordDialog();
 	~NewPasswordDialog();
 
 private:

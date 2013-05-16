@@ -1,4 +1,5 @@
 #include "passworddialog.h"
+#include "main.h"
 
 #ifdef Q_OS_WIN
 #include "qtwin.h"
@@ -9,6 +10,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 {
 	resetData=false;
 	ui.setupUi(this);
+	setWindowTitle(windowTitle()+" v"+appVerStr);
 	setFixedSize(minimumSizeHint());
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	ui.okButton->setEnabled(false);

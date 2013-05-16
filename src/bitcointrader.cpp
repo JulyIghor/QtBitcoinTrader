@@ -19,9 +19,10 @@
 #include "qtwin.h"
 #endif
 
-BitcoinTrader::BitcoinTrader()
+QtBitcoinTrader::QtBitcoinTrader()
 	: QDialog()
 {
+	constructorFinished=false;
 	ordersLogLoaded=false;
 	appDir=QApplication::applicationDirPath()+"/";
 #ifdef Q_OS_WIN
@@ -49,10 +50,43 @@ BitcoinTrader::BitcoinTrader()
 
 	ui.setupUi(this);
 	accountFeeChanged(ui.accountFee->value());
-	setWindowTitle(windowTitle()+QString::number(appVerReal,'f',2));
+	setWindowTitle(windowTitle()+" v"+appVerStr);
 	setAttribute(Qt::WA_QuitOnClose,true);
 
 	setWindowFlags(Qt::Window);
+
+	{
+		QPixmap btcPixmap("://Resources/BTC.png");
+		ui.btcLabel2->setPixmap(btcPixmap);
+		ui.btcLabel3->setPixmap(btcPixmap);
+		ui.btcLabel4->setPixmap(btcPixmap);
+		ui.btcLabel5->setPixmap(btcPixmap);
+		ui.btcLabel6->setPixmap(btcPixmap);
+		ui.btcLabel7->setPixmap(btcPixmap);
+		ui.btcLabel8->setPixmap(btcPixmap);
+		ui.btcLabel9->setPixmap(btcPixmap);
+		ui.btcLabel10->setPixmap(btcPixmap);
+		ui.btcLabel11->setPixmap(btcPixmap);
+	}
+	{
+	int lastCurrency=-1;
+	QList<QByteArray> currencies=currencyNamesMap->keys();
+	QList<QByteArray> currenciesSorted;
+	currenciesSorted<<"USD"<<"EUR";
+	for(int n=0;n<currencies.count();n++)
+	{
+		if(currencies.at(n)=="BTC")continue;
+		if(currencies.at(n)=="USD")continue;
+		if(currencies.at(n)=="EUR")continue;
+		currenciesSorted<<currencies.at(n);
+	}
+	for(int n=0;n<currenciesSorted.count();n++)
+	{
+		if(currenciesSorted.at(n)==currencyStr)lastCurrency=n;
+		ui.currencyComboBox->addItem(currenciesSorted.at(n));
+	}
+	if(lastCurrency>-1)ui.currencyComboBox->setCurrentIndex(lastCurrency);
+	}
 
 #ifdef Q_OS_WIN
 	if(QtWin::isCompositionEnabled())
@@ -129,34 +163,63 @@ BitcoinTrader::BitcoinTrader()
 	connect(updateCheckTimer,SIGNAL(timeout()),this,SLOT(checkUpdate()));
 	checkUpdate();
 	updateCheckTimer->start(3600000);
+
+	constructorFinished=true;
+	currencyChanged(ui.currencyComboBox->currentIndex());
 }
 
-BitcoinTrader::~BitcoinTrader()
+QtBitcoinTrader::~QtBitcoinTrader()
 {
 }
 
-void BitcoinTrader::setApiDown(bool on)
+void QtBitcoinTrader::currencyChanged(int val)
 {
-	if(apiDownState==on)return;
-	if(on)
-	{
-		ui.lagValue->setVisible(false);
-		ui.apiDownLabel->setVisible(true);
-	}
-	else
-	{
-		ui.apiDownLabel->setVisible(false);
-		ui.lagValue->setVisible(true);
-	}
+	if(!constructorFinished||val<0)return;
+	currencyStr=ui.currencyComboBox->itemText(val).toAscii();
+	currencySign=currencySignMap->value(currencyStr,"$");
+	QSettings settings(iniFileName,QSettings::IniFormat);
+	settings.setValue("Currency",QString(currencyStr));
+	QPixmap curPix(":/Resources/"+currencyStr+".png");
+	ui.usdLabel0->setPixmap(curPix);
+	ui.usdLabel1->setPixmap(curPix);
+	ui.usdLabel2->setPixmap(curPix);
+	ui.usdLabel3->setPixmap(curPix);
+	ui.usdLabel4->setPixmap(curPix);
+	ui.usdLabel5->setPixmap(curPix);
+	ui.usdLabel6->setPixmap(curPix);
+	ui.usdLabel7->setPixmap(curPix);
+	ui.usdLabel8->setPixmap(curPix);
+	ui.usdLabel9->setPixmap(curPix);
+	ui.usdLabel10->setPixmap(curPix);
+	ui.usdLabel11->setPixmap(curPix);
+	ui.usdLabel12->setPixmap(curPix);
+	ui.usdLabel13->setPixmap(curPix);
+	ui.usdLabel14->setPixmap(curPix);
+	ui.usdLabel15->setPixmap(curPix);
+	ui.usdLabel16->setPixmap(curPix);
+	ui.usdLabel17->setPixmap(curPix);
+	ui.usdLabel18->setPixmap(curPix);
+	ui.usdLabel19->setPixmap(curPix);
+	ui.accountBTC->setValue(0.0);
+	ui.accountUSD->setValue(0.0);
+	firstPriceLoad=true;
+	ordersLogLoaded=false;
+}
+
+void QtBitcoinTrader::setApiDown(bool on)
+{
+	bool apiRealyDown=on&&apiDownState;
+	ui.lagValue->setVisible(!apiRealyDown);
+	ui.apiDownLabel->setVisible(apiRealyDown);
 	apiDownState=on;
 }
 
-void BitcoinTrader::apiDownSlot()
+void QtBitcoinTrader::apiDownSlot()
 {
 	setApiDown(true);
 }
 
-void BitcoinTrader::setSslEnabled(bool on)
+void QtBitcoinTrader::setSslEnabled(bool on)
 {
 	useSSL=on;
 	socketThreadAuth->reconnectApi();
@@ -164,19 +227,19 @@ void BitcoinTrader::setSslEnabled(bool on)
 	settings.setValue("OpenSSL",on);
 }
 
-void BitcoinTrader::checkUpdate()
+void QtBitcoinTrader::checkUpdate()
 {
 	httpUpdate->get("/API.php?Thread=Call&Object=General&Method=CheckUpdate");
 }
 
-QString BitcoinTrader::clearData(QString data)
+QString QtBitcoinTrader::clearData(QString data)
 {
 	while(data.count()&&(data.at(0)=='{'||data.at(0)=='['||data.at(0)=='\"'))data.remove(0,1);
 	while(data.count()&&(data.at(data.length()-1)=='}'||data.at(data.length()-1)==']'||data.at(data.length()-1)=='\"'))data.remove(data.length()-1,1);
 	return data;
 }
 
-void BitcoinTrader::httpUpdateDone(bool on)
+void QtBitcoinTrader::httpUpdateDone(bool on)
 {
 	if(on)return;
 	QString allData=httpUpdate->readAll();
@@ -210,7 +273,7 @@ void BitcoinTrader::httpUpdateDone(bool on)
 	}
 }
 
-void BitcoinTrader::saveSoundToggles()
+void QtBitcoinTrader::saveSoundToggles()
 {
 	QSettings settings(iniFileName,QSettings::IniFormat);
 	settings.setValue("AccountBTCBeep",ui.accountBTCBeep->isChecked());
@@ -219,14 +282,14 @@ void BitcoinTrader::saveSoundToggles()
 	settings.setValue("MarketLowBeep",ui.marketLowBeep->isChecked());
 }
 
-void BitcoinTrader::accountFeeChanged(double val)
+void QtBitcoinTrader::accountFeeChanged(double val)
 {
 	floatFee=val/100;
 	floatFeeDec=1.0-floatFee;
 	floatFeeInc=1.0+floatFee;
 }
 
-QByteArray BitcoinTrader::getMidData(QString a, QString b,QByteArray *data)
+QByteArray QtBitcoinTrader::getMidData(QString a, QString b,QByteArray *data)
 {
 	QByteArray rez;
 	if(b.isEmpty())b="\",";
@@ -240,14 +303,14 @@ QByteArray BitcoinTrader::getMidData(QString a, QString b,QByteArray *data)
 }
 
 
-void BitcoinTrader::secondSlot()
+void QtBitcoinTrader::secondSlot()
 {
 	ui.lastUpdate->setValue((double)lastUpdate.msecsTo(QDateTime::currentDateTime())/1000);
 	if(!ordersLogLoaded)updateLogTable();
 	secondTimer->start(1000);
 }
 
-void BitcoinTrader::mtgoxLagChanged(double val)
+void QtBitcoinTrader::mtgoxLagChanged(double val)
 {
 	if(val>=1.0)
 		ui.lagValue->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
@@ -255,12 +318,12 @@ void BitcoinTrader::mtgoxLagChanged(double val)
 		ui.lagValue->setStyleSheet("");
 }
 
-void BitcoinTrader::balanceChanged(double)
+void QtBitcoinTrader::balanceChanged(double)
 {
 	updateLogTable();
 }
 
-void BitcoinTrader::dataReceivedAuth(QByteArray data)
+void QtBitcoinTrader::dataReceivedAuth(QByteArray data)
 {
 	if(isLogEnabled)logThread->writeLog("Received: "+data);
 	setApiDown(false);
@@ -282,7 +345,7 @@ void BitcoinTrader::dataReceivedAuth(QByteArray data)
 			if(!btcBalance.isEmpty())ui.accountBTC->setValue(btcBalance.toDouble());
 
 			QByteArray usdBalance=getMidData(currencyStr+"\":{\"Balance\":{\"value\":\"","",&data);
-			if(!usdBalance.isEmpty())ui.accountUSD->setValue(usdBalance.toDouble());
+			ui.accountUSD->setValue(usdBalance.toDouble());
 
 			QByteArray monthValue=getMidData("Monthly_Volume\":{\"value\":\"","\",",&data);
 			if(!monthValue.isEmpty())ui.accountVolume->setValue(monthValue.toDouble());
@@ -511,7 +574,7 @@ void BitcoinTrader::dataReceivedAuth(QByteArray data)
 	}
 }
 
-void BitcoinTrader::insertIntoTable(QByteArray oid, QString data)
+void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 {
 	QStringList dataList=data.split(";");
 	if(dataList.count()!=5)return;
@@ -531,7 +594,7 @@ void BitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	ui.noOpenedOrdersLabel->setVisible(false);
 }
 
-void BitcoinTrader::setRowStateByText(int row, QByteArray text)
+void QtBitcoinTrader::setRowStateByText(int row, QByteArray text)
 {
 	if(text=="invalid")setRowState(row,4);
 	else 
@@ -540,7 +603,7 @@ void BitcoinTrader::setRowStateByText(int row, QByteArray text)
 	setRowState(row,2);
 }
 
-void BitcoinTrader::setRowState(int row, int state)
+void QtBitcoinTrader::setRowState(int row, int state)
 {
 	QColor nColor(255,255,255);
 	switch(state)
@@ -555,20 +618,20 @@ void BitcoinTrader::setRowState(int row, int state)
 	for(int n=0;n<6;n++)ui.ordersTable->item(row,n)->setBackgroundColor(nColor);
 }
 
-void BitcoinTrader::ordersCancelAll()
+void QtBitcoinTrader::ordersCancelAll()
 {
 	for(int n=0;n<ui.ordersTable->rowCount();n++)
 		if(ui.ordersTable->item(n,2)->text()!="canceled")
 			cancelOrderByOid(ui.ordersTable->item(n,6)->text().toAscii());
 }
 
-void BitcoinTrader::cancelOrderByOid(QByteArray oid)
+void QtBitcoinTrader::cancelOrderByOid(QByteArray oid)
 {
 	socketThreadAuth->sendToApi("BTC"+currencyStr+"/money/order/cancel","&oid="+oid);
 	if(isLogEnabled)logThread->writeLog("BTC"+currencyStr+"/money/order/cancel?nonce=*&oid="+oid);
 }
 
-void BitcoinTrader::ordersCancelSelected()
+void QtBitcoinTrader::ordersCancelSelected()
 {
 	int curRow=ui.ordersTable->currentRow();
 	if(curRow==-1||curRow>=ui.ordersTable->rowCount())return;
@@ -577,33 +640,33 @@ void BitcoinTrader::ordersCancelSelected()
 		cancelOrderByOid(oidToCancel.toAscii());
 }
 
-void BitcoinTrader::calcButtonClicked()
+void QtBitcoinTrader::calcButtonClicked()
 {
 	(new FeeCalculator)->show();
 }
 
-void BitcoinTrader::checkValidSellButtons()
+void QtBitcoinTrader::checkValidSellButtons()
 {
 	ui.sellBitcoinsButton->setEnabled(ui.sellBtcPerOrder->value()>=0.01&&ui.sellTotalBtc->value()>=0.01);
 	ui.sellBuyButtonSellBuy->setEnabled(ui.sellBitcoinsButton->isEnabled()&&ui.buyBitcoinsButton->isEnabled());
 }
 
-void BitcoinTrader::sellPricePerCoinAsMarketPrice()
+void QtBitcoinTrader::sellPricePerCoinAsMarketPrice()
 {
 	ui.sellPricePerCoin->setValue(ui.marketBuy->value());
 }
 
-void BitcoinTrader::sellTotalBtcToSellAllIn()
+void QtBitcoinTrader::sellTotalBtcToSellAllIn()
 {
 	ui.sellTotalBtc->setValue(ui.accountBTC->value());
 }
 
-void BitcoinTrader::sellTotalBtcToSellHalfIn()
+void QtBitcoinTrader::sellTotalBtcToSellHalfIn()
 {
 	ui.sellTotalBtc->setValue(ui.accountBTC->value()/2);
 }
 
-void BitcoinTrader::lastSoftLagChanged(double val)
+void QtBitcoinTrader::lastSoftLagChanged(double val)
 {
 	bool lastL=lastLagState;
 	if(val>=2.0)
@@ -628,7 +691,7 @@ void BitcoinTrader::lastSoftLagChanged(double val)
 }
 
 
-void BitcoinTrader::sellTotalBtcToSellChanged(double val)
+void QtBitcoinTrader::sellTotalBtcToSellChanged(double val)
 {
 	if(sellLockBtcToSell)return;
 	sellLockBtcToSell=true;
@@ -646,7 +709,7 @@ void BitcoinTrader::sellTotalBtcToSellChanged(double val)
 	sellLockBtcToSell=false;
 }
 
-void BitcoinTrader::sellPricePerCoinInUsdChanged(double)
+void QtBitcoinTrader::sellPricePerCoinInUsdChanged(double)
 {
 	if(!sellLockPricePerCoin)
 	{
@@ -659,7 +722,7 @@ void BitcoinTrader::sellPricePerCoinInUsdChanged(double)
 	checkValidSellButtons();
 }
 
-void BitcoinTrader::sellBtcPerOrderChanged(double val)
+void QtBitcoinTrader::sellBtcPerOrderChanged(double val)
 {
 	if(sellLockBtcPerOrder)return;
 	sellLockBtcPerOrder=true;
@@ -668,7 +731,7 @@ void BitcoinTrader::sellBtcPerOrderChanged(double val)
 	checkValidSellButtons();
 }
 
-void BitcoinTrader::sellOrdersCountChanged(int val)
+void QtBitcoinTrader::sellOrdersCountChanged(int val)
 {
 	if(val<1)return;
 	sellLockBtcPerOrder=true;
@@ -677,12 +740,12 @@ void BitcoinTrader::sellOrdersCountChanged(int val)
 	sellLockBtcPerOrder=false;
 }
 
-void BitcoinTrader::sellOrdersCountToDefault()
+void QtBitcoinTrader::sellOrdersCountToDefault()
 {
 	ui.sellOrdersCount->setValue(1);
 }
 
-void BitcoinTrader::sellAmountToReceiveChanged(double val)
+void QtBitcoinTrader::sellAmountToReceiveChanged(double val)
 {
 	if(sellLockAmountToReceive)return;
 	sellLockAmountToReceive=true;
@@ -703,7 +766,7 @@ void BitcoinTrader::sellAmountToReceiveChanged(double val)
 	checkValidSellButtons();
 }
 
-void BitcoinTrader::sellBitcoinButton()
+void QtBitcoinTrader::sellBitcoinButton()
 {
 	checkValidSellButtons();
 	if(ui.sellBitcoinsButton->isEnabled()==false)return;
@@ -727,7 +790,7 @@ void BitcoinTrader::sellBitcoinButton()
 }
 
 
-void BitcoinTrader::buyTotalToSpendInUsdChanged(double val)
+void QtBitcoinTrader::buyTotalToSpendInUsdChanged(double val)
 {
 	if(buyLockTotalSpend)return;
 	buyLockTotalSpend=true;
@@ -745,7 +808,7 @@ void BitcoinTrader::buyTotalToSpendInUsdChanged(double val)
 }
 
 
-void BitcoinTrader::buyBtcToBuyChanged(double val)
+void QtBitcoinTrader::buyBtcToBuyChanged(double val)
 {
 	ui.buyTotalBtcResult->setValue(val*floatFeeDec);
 	if(buyLockTotalBtc)return;
@@ -763,7 +826,7 @@ void BitcoinTrader::buyBtcToBuyChanged(double val)
 	checkValidBuyButtons();
 }
 
-void BitcoinTrader::buyPricePerCoinChanged(double)
+void QtBitcoinTrader::buyPricePerCoinChanged(double)
 {
 	if(!buyLockPricePerCoin)
 	{
@@ -776,25 +839,25 @@ void BitcoinTrader::buyPricePerCoinChanged(double)
 	checkValidBuyButtons();
 }
 
-void BitcoinTrader::checkValidBuyButtons()
+void QtBitcoinTrader::checkValidBuyButtons()
 {
 	ui.buyBitcoinsButton->setEnabled(ui.buyTotalBtc->value()>=0.01&&ui.buyBtcPerOrder->value()>=0.01);
 	ui.sellBuyButtonSellBuy->setEnabled(ui.sellBitcoinsButton->isEnabled()&&ui.buyBitcoinsButton->isEnabled());
 }
 
-void BitcoinTrader::buyOrdersCountChanged(int val)
+void QtBitcoinTrader::buyOrdersCountChanged(int val)
 {
 	buyLockBtcPerOrder=true;
 	ui.buyBtcPerOrder->setValue(ui.buyTotalBtc->value()/val);
 	buyLockBtcPerOrder=false;
 }
 
-void BitcoinTrader::buyOrdersCountToDefault()
+void QtBitcoinTrader::buyOrdersCountToDefault()
 {
 	ui.buyOrdersCount->setValue(1);
 }
 
-void BitcoinTrader::buyBtcPerOrderChanged(double val)
+void QtBitcoinTrader::buyBtcPerOrderChanged(double val)
 {
 	if(buyLockBtcPerOrder)return;
 	buyLockBtcPerOrder=true;
@@ -803,29 +866,29 @@ void BitcoinTrader::buyBtcPerOrderChanged(double val)
 	checkValidBuyButtons();
 }
 
-void BitcoinTrader::buyBtcToBuyAllIn()
+void QtBitcoinTrader::buyBtcToBuyAllIn()
 {
 	ui.buyTotalSpend->setValue(ui.accountUSD->value());
 }
 
-void BitcoinTrader::buyBtcToBuyHalfIn()
+void QtBitcoinTrader::buyBtcToBuyHalfIn()
 {
 	ui.buyTotalSpend->setValue(ui.accountUSD->value()/2);
 }
 
-void BitcoinTrader::buyPricePerCoinAsMarketPrice()
+void QtBitcoinTrader::buyPricePerCoinAsMarketPrice()
 {
 	ui.buyPricePerCoin->setValue(ui.marketSell->value());
 }
 
-void BitcoinTrader::ordersSelectionChanged()
+void QtBitcoinTrader::ordersSelectionChanged()
 {
 	ui.ordersCancelAllButton->setEnabled(ui.ordersTable->rowCount());
 	ui.ordersSelectNone->setEnabled(ui.ordersTable->selectedItems().count());
 	ui.ordersCancelSelected->setEnabled(ui.ordersSelectNone->isEnabled());
 }
 
-void BitcoinTrader::closeEvent(QCloseEvent *event)
+void QtBitcoinTrader::closeEvent(QCloseEvent *event)
 {
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Question);
@@ -837,7 +900,7 @@ void BitcoinTrader::closeEvent(QCloseEvent *event)
 	event->accept();
 }
 
-void BitcoinTrader::buyBitcoinsButton()
+void QtBitcoinTrader::buyBitcoinsButton()
 {
 	checkValidBuyButtons();
 	if(ui.buyBitcoinsButton->isEnabled()==false)return;
@@ -860,12 +923,12 @@ void BitcoinTrader::buyBitcoinsButton()
 	}
 }
 
-void BitcoinTrader::sellBuyAsMarketPrice()
+void QtBitcoinTrader::sellBuyAsMarketPrice()
 {
 	ui.sellBuyMidPrice->setValue(ui.marketLast->value());
 }
 
-void BitcoinTrader::updateLogTable()
+void QtBitcoinTrader::updateLogTable()
 {
 	if(updateLogTime.elapsed()<1000)return;
 	socketThreadAuth->sendToApi("money/wallet/history","&currency=BTC");
@@ -873,7 +936,7 @@ void BitcoinTrader::updateLogTable()
 	updateLogTime.restart();
 }
 
-void BitcoinTrader::sellBuyApply()
+void QtBitcoinTrader::sellBuyApply()
 {
 	double delta2=ui.sellBuyDelta->value()/2;
 	buyLockPricePerCoin=true;
@@ -894,7 +957,7 @@ void BitcoinTrader::sellBuyApply()
 
 }
 
-void BitcoinTrader::sellBuyButtonSellBuy()
+void QtBitcoinTrader::sellBuyButtonSellBuy()
 {
 	sellBuyApply();
 
@@ -912,32 +975,32 @@ void BitcoinTrader::sellBuyButtonSellBuy()
 	confirmBuySell=true;
 }
 
-void BitcoinTrader::sellBuyMidPriceChanged(double val)
+void QtBitcoinTrader::sellBuyMidPriceChanged(double val)
 {
 	ui.sellBuyDelta->setMinimum(val*floatFeeInc*floatFeeInc-val+0.05);
 }
 
-void BitcoinTrader::sellBuyDelta01()
+void QtBitcoinTrader::sellBuyDelta01()
 {
 	ui.sellBuyDelta->setValue(ui.sellBuyMidPrice->value()*floatFeeInc*floatFeeInc-ui.sellBuyMidPrice->value()+0.15);
 }
 
-void BitcoinTrader::sellBuyDelta02()
+void QtBitcoinTrader::sellBuyDelta02()
 {
 	ui.sellBuyDelta->setValue(ui.sellBuyMidPrice->value()*floatFeeInc*floatFeeInc-ui.sellBuyMidPrice->value()+0.25);
 }
 
-void BitcoinTrader::sellBuyDelta05()
+void QtBitcoinTrader::sellBuyDelta05()
 {
 	ui.sellBuyDelta->setValue(ui.sellBuyMidPrice->value()*floatFeeInc*floatFeeInc-ui.sellBuyMidPrice->value()+0.55);
 }
 
-void BitcoinTrader::copyDonateButton()
+void QtBitcoinTrader::copyDonateButton()
 {
 	QApplication::clipboard()->setText(ui.bitcoinAddress->text());
 }
 
-void BitcoinTrader::ruleAddButton()
+void QtBitcoinTrader::ruleAddButton()
 {
 	AddRuleWindow addRule;
 	if(addRule.exec()!=QDialog::Accepted)return;
@@ -955,22 +1018,22 @@ void BitcoinTrader::ruleAddButton()
 	ui.rulesTable->setVisible(true);
 }
 
-void BitcoinTrader::ruleRemove()
+void QtBitcoinTrader::ruleRemove()
 {
 	TempWindow(this).exec();
 }
 
-void BitcoinTrader::ruleRemoveAll()
+void QtBitcoinTrader::ruleRemoveAll()
 {
 	TempWindow(this).exec();
 }
 
-void BitcoinTrader::beep()
+void QtBitcoinTrader::beep()
 {
 	QApplication::beep();
 }
 
-void BitcoinTrader::accountUSDChanged(double){if(ui.accountUSDBeep->isChecked())beep();}
-void BitcoinTrader::accountBTCChanged(double){if(ui.accountBTCBeep->isChecked())beep();}
-void BitcoinTrader::marketLowChanged(double) {if(ui.marketLowBeep->isChecked()) beep();}
-void BitcoinTrader::marketHighChanged(double){if(ui.marketHighBeep->isChecked())beep();}
+void QtBitcoinTrader::accountUSDChanged(double){if(ui.accountUSDBeep->isChecked())beep();}
+void QtBitcoinTrader::accountBTCChanged(double){if(ui.accountBTCBeep->isChecked())beep();}
+void QtBitcoinTrader::marketLowChanged(double) {if(ui.marketLowBeep->isChecked()) beep();}
+void QtBitcoinTrader::marketHighChanged(double){if(ui.marketHighBeep->isChecked())beep();}

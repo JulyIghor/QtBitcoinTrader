@@ -5,7 +5,7 @@
 #ifdef Q_OS_WIN
 #define USING_QTSINGLEAPPLICATION //QtSingleApplication uses only to prevent starting two programs at time. You can remove this line to not use this class.
 #endif
-
+#include <QPlastiqueStyle>
 #include "main.h"
 #include <QtGui/QApplication>
 #include <QFileInfo>
@@ -20,13 +20,15 @@
 #include "qtsingleapplication.h"//https://github.com/connectedtable/qtsingleapplication
 #endif
 
+QMap<QByteArray,QByteArray> *currencySignMap;
+QMap<QByteArray,QByteArray> *currencyNamesMap;
 QByteArray *bitcoinSign_;
 QByteArray *currencySign_;
 QByteArray *currencyStr_;
 QByteArray *restKey_;
 QByteArray *restSign_;
 LogThread *logThread;
-BitcoinTrader *mainWindow_;
+QtBitcoinTrader *mainWindow_;
 quint64 *nonce_;
 bool *logEnabled_;
 QString *iniFileName_;
@@ -40,13 +42,15 @@ int main(int argc, char *argv[])
 {
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
-	appVerStr_=new QByteArray("0.89");
+	appVerStr_=new QByteArray("0.90");
 	appVerReal_=new double(appVerStr_->toDouble());
 	currencyStr_=new QByteArray();
 	currencySign_=new QByteArray();
 	validKeySign_=new bool(false);
 	bitcoinSign_=new QByteArray("BTC");
 	useSSL_=new bool(true);
+	currencySignMap=new QMap<QByteArray,QByteArray>;
+	currencyNamesMap=new QMap<QByteArray,QByteArray>;
 
 #ifdef Q_OS_WIN
 	if(argc>1)
@@ -75,6 +79,9 @@ int main(int argc, char *argv[])
 #else
 	QApplication a(argc,argv);
 #endif
+#ifndef Q_OS_WIN
+	a.setStyle(new QPlastiqueStyle);
+#endif
 	{
 	nonce_=new quint64(0);
 	logEnabled_=new bool(false);
@@ -90,8 +97,6 @@ int main(int argc, char *argv[])
 	restKey_=new QByteArray;
 	restSign_=new QByteArray;
 
-	QMap<QByteArray,QByteArray>currencySignMap;
-	QMap<QByteArray,QByteArray>currencyNamesMap;
 	{
 		QFile currencyFile("://Resources/Currencies.map");
 		currencyFile.open(QIODevice::ReadOnly);
@@ -101,8 +106,8 @@ int main(int argc, char *argv[])
 		{
 			QStringList currencyName=currencyList.at(n).split("=");
 			if(currencyName.count()!=3)continue;
-			currencyNamesMap.insert(currencyName.at(0).toAscii(),currencyName.at(1).toAscii());
-			currencySignMap.insert(currencyName.at(0).toAscii(),currencyName.at(2).toAscii());
+			currencyNamesMap->insert(currencyName.at(0).toAscii(),currencyName.at(1).toAscii());
+			currencySignMap->insert(currencyName.at(0).toAscii(),currencyName.at(2).toAscii());
 		}
 	}
 
@@ -116,14 +121,13 @@ int main(int argc, char *argv[])
 
 		if(cryptedData.isEmpty())
 		{
-			NewPasswordDialog newPassword(&currencyNamesMap, &currencySignMap);
+			NewPasswordDialog newPassword;
 			if(newPassword.exec()==QDialog::Rejected)return 0;
 			tryPassword=newPassword.getPassword();
 			restKey=newPassword.getRestKey().toAscii();
 			restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
 			cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign_->toBase64(),tryPassword.toAscii());
 			settings.setValue("CryptedData",QString(cryptedData.toBase64()));
-			settings.setValue("Currency",newPassword.getSelectedCurrency());
 			settings.remove("RestSign");
 			settings.remove("RestKey");
 			settings.sync();
@@ -137,7 +141,6 @@ int main(int argc, char *argv[])
 		}
 		if(!tryPassword.isEmpty())
 		{
-			QByteArray currentCurrency=settings.value("Currency","USD").toString().toAscii();
 			QStringList decryptedList=QString(JulyAES256::decrypt(cryptedData,tryPassword.toAscii())).split("\r\n");
 			if(decryptedList.count()==3&&decryptedList.first()=="Qt Bitcoin Trader")
 			{
@@ -147,10 +150,10 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	bitcoinSign=currencySignMap.value("BTC","BTC");
+	bitcoinSign=currencySignMap->value("BTC","BTC");
 	currencyStr=settings.value("Currency","USD").toString().toAscii();
-	currencySign=currencySignMap.value(currencyStr,"$");
-	mainWindow_=new BitcoinTrader;
+	currencySign=currencySignMap->value(currencyStr,"$");
+	mainWindow_=new QtBitcoinTrader;
 
 #ifdef USING_QTSINGLEAPPLICATION
 	a.setActivationWindow(mainWindow_);

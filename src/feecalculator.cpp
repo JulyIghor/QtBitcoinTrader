@@ -29,6 +29,22 @@ FeeCalculator::FeeCalculator()
 
 	ui.feeValue->setValue(mainWindow_->ui.accountFee->value());
 	ui.sellPrice->setValue((ui.buyPrice->value()+ui.buyPrice->value()*ui.feeValue->value()/100)*(1+ui.feeValue->value()/100)+0.01);
+	
+
+	QPixmap btcPixmap("://Resources/BTC.png");
+	ui.btcLabel1->setPixmap(btcPixmap);
+	ui.btcLabel2->setPixmap(btcPixmap);
+	ui.btcLabel3->setPixmap(btcPixmap);
+	ui.btcLabel4->setPixmap(btcPixmap);
+
+	QPixmap curPix(":/Resources/"+currencyStr+".png");
+	ui.usdLabel1->setPixmap(curPix);
+	ui.usdLabel2->setPixmap(curPix);
+	ui.usdLabel3->setPixmap(curPix);
+	ui.usdLabel4->setPixmap(curPix);
+	ui.usdLabel5->setPixmap(curPix);
+	ui.usdLabel6->setPixmap(curPix);
+	ui.usdLabel7->setPixmap(curPix);
 }
 
 FeeCalculator::~FeeCalculator()

@@ -1,4 +1,5 @@
 #include "newpassworddialog.h"
+#include "main.h"
 #ifdef Q_OS_WIN
 #include "qtwin.h"
 #endif
@@ -6,10 +7,11 @@
 #include <QUrl>
 #include <QFile>
 
-NewPasswordDialog::NewPasswordDialog(QMap<QByteArray,QByteArray> *names, QMap<QByteArray,QByteArray> *signs)
+NewPasswordDialog::NewPasswordDialog()
 	: QDialog()
 {
 	ui.setupUi(this);
+	setWindowTitle(windowTitle()+" v"+appVerStr);
 	ui.okButton->setEnabled(false);
 	setFixedSize(minimumSizeHint());
 	setWindowFlags(Qt::WindowCloseButtonHint);
@@ -21,16 +23,6 @@ NewPasswordDialog::NewPasswordDialog(QMap<QByteArray,QByteArray> *names, QMap<QB
 	}
 #endif
 
-	int strUsd=-1;
-	QList<QByteArray> currencies=names->keys();
-	for(int n=0;n<currencies.count();n++)
-	{
-	if(currencies.at(n)=="BTC")continue;
-	if(currencies.at(n)=="USD")strUsd=n;
-	ui.currencyComboBox->addItem(QIcon(":/Resources/"+currencies.at(n)+".png"),currencies.at(n)+" - "+names->value(currencies.at(n),"USD"),currencies.at(n));
-	}
-	if(strUsd>-1)ui.currencyComboBox->setCurrentIndex(strUsd-1);
-	ui.currencyComboBox->setVisible(false);
 }
 
 NewPasswordDialog::~NewPasswordDialog()
@@ -86,3 +78,4 @@ QByteArray NewPasswordDialog::getSelectedCurrency()
 	if(ui.currencyComboBox->currentIndex()==-1)return QByteArray("USD");
 	return ui.currencyComboBox->itemData(ui.currencyComboBox->currentIndex()).toString().toAscii();
 }
+
