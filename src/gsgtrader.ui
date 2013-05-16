@@ -405,10 +405,13 @@
            </font>
           </property>
           <property name="styleSheet">
-           <string notr="true">color: darkgreen</string>
+           <string notr="true"/>
           </property>
           <property name="text">
-           <string>$</string>
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="gsgtrader.qrc">:/Resources/Currencies.map</pixmap>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -431,10 +434,13 @@
            </font>
           </property>
           <property name="styleSheet">
-           <string notr="true">color: #996515</string>
+           <string notr="true"/>
           </property>
           <property name="text">
-           <string>฿</string>
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="gsgtrader.qrc">:/Resources/BTC.png</pixmap>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>

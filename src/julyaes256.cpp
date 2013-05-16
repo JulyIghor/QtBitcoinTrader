@@ -25,7 +25,7 @@ QByteArray JulyAES256::encrypt(const QByteArray &data, const QByteArray &passwor
 	QByteArray dataBuff;dataBuff.resize(data.size()+AES_BLOCK_SIZE);
 	EVP_CIPHER_CTX evpCipherCtx;
 	EVP_CIPHER_CTX_init(&evpCipherCtx);
-	EVP_EncryptInit(&evpCipherCtx,EVP_aes_256_cbc(),(const unsigned char*)sha256(password).data(),NULL);
+	EVP_EncryptInit(&evpCipherCtx,EVP_aes_256_cbc(),(const unsigned char*)sha256(password).data(),(const unsigned char*)sha256("JulyAES"+password).data());
 	EVP_EncryptUpdate(&evpCipherCtx,(unsigned char*)dataBuff.data(),&outLen,(const unsigned char*)data.data(),data.size());
 	int tempLen=outLen;
 	EVP_EncryptFinal(&evpCipherCtx,(unsigned char*)dataBuff.data()+tempLen,&outLen);
@@ -41,7 +41,7 @@ QByteArray JulyAES256::decrypt(const QByteArray &data, const QByteArray &passwor
 	QByteArray dataBuff;dataBuff.resize(data.size()+AES_BLOCK_SIZE);
 	EVP_CIPHER_CTX evpCipherCtx;
 	EVP_CIPHER_CTX_init(&evpCipherCtx);
-	EVP_DecryptInit(&evpCipherCtx,EVP_aes_256_cbc(),(const unsigned char*)sha256(password).data(),NULL);
+	EVP_DecryptInit(&evpCipherCtx,EVP_aes_256_cbc(),(const unsigned char*)sha256(password).data(),(const unsigned char*)sha256("JulyAES"+password).data());
 	EVP_DecryptUpdate(&evpCipherCtx,(unsigned char*)dataBuff.data(),&outLen,(const unsigned char*)data.data(),data.size());
 	int tempLen=outLen;
 	EVP_DecryptFinal(&evpCipherCtx,(unsigned char*)dataBuff.data()+tempLen,&outLen);

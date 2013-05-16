@@ -48,7 +48,6 @@ private:
 	bool ordersLogLoaded;
 	void beep();
 
-	QString btcChar;
 	void cancelOrderByOid(QByteArray);
 	bool lastLagState;
 	void setRowState(int row, int state);

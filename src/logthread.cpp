@@ -3,7 +3,6 @@
 //Bitcoin Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 
 #include "logthread.h"
-//#include <QDebug>
 #include <QDateTime>
 #include <QFile>
 #include <QApplication>

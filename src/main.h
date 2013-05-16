@@ -20,7 +20,13 @@
 #define appVerReal *appVerReal_
 #define appVerStr *appVerStr_
 #define useSSL *useSSL_
+#define currencyStr *currencyStr_
+#define currencySign *currencySign_
+#define bitcoinSign *bitcoinSign_
 
+extern QByteArray *bitcoinSign_;
+extern QByteArray *currencyStr_;
+extern QByteArray *currencySign_;
 extern bool *useSSL_;
 extern QByteArray *appVerStr_;
 extern LogThread *logThread;

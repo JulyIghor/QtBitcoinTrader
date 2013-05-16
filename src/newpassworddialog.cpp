@@ -4,9 +4,10 @@
 #endif
 #include <QDesktopServices>
 #include <QUrl>
+#include <QFile>
 
-NewPasswordDialog::NewPasswordDialog(QWidget *parent)
-	: QDialog(parent)
+NewPasswordDialog::NewPasswordDialog(QMap<QByteArray,QByteArray> *names, QMap<QByteArray,QByteArray> *signs)
+	: QDialog()
 {
 	ui.setupUi(this);
 	ui.okButton->setEnabled(false);
@@ -19,6 +20,16 @@ NewPasswordDialog::NewPasswordDialog(QWidget *parent)
 		setStyleSheet("QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;}");
 	}
 #endif
+
+	int strUsd=-1;
+	QList<QByteArray> currencies=names->keys();
+	for(int n=0;n<currencies.count();n++)
+	{
+	if(currencies.at(n)=="BTC")continue;
+	if(currencies.at(n)=="USD")strUsd=n;
+	ui.currencyComboBox->addItem(QIcon(":/Resources/"+currencies.at(n)+".png"),currencies.at(n)+" - "+names->value(currencies.at(n),"USD"),currencies.at(n));
+	}
+	if(strUsd>-1)ui.currencyComboBox->setCurrentIndex(strUsd-1);
 }
 
 NewPasswordDialog::~NewPasswordDialog()
@@ -67,4 +78,10 @@ void NewPasswordDialog::checkToEnableButton()
 		if(containsSpec&&containsDigit&&containsSpec)break;
 	}
 	ui.okButton->setEnabled(containsLetter&&containsDigit&&containsSpec);
+}
+
+QByteArray NewPasswordDialog::getSelectedCurrency()
+{
+	if(ui.currencyComboBox->currentIndex()==-1)return QByteArray("USD");
+	return ui.currencyComboBox->itemData(ui.currencyComboBox->currentIndex()).toString().toAscii();
 }

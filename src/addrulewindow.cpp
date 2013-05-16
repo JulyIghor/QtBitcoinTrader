@@ -47,7 +47,7 @@ QString AddRuleWindow::getGoesString()
 
 QString AddRuleWindow::getPriceString()
 {
-	return "$ "+ui.thanValue->text();
+	return currencySign+" "+ui.thanValue->text();
 }
 
 QString AddRuleWindow::getSellBuyString()

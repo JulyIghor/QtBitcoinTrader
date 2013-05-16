@@ -9,10 +9,11 @@ class NewPasswordDialog : public QDialog
 	Q_OBJECT
 
 public:
+	QByteArray getSelectedCurrency();
 	QString getRestSign();
 	QString getRestKey();
 	QString getPassword();
-	NewPasswordDialog(QWidget *parent = 0);
+	NewPasswordDialog(QMap<QByteArray,QByteArray> *names, QMap<QByteArray,QByteArray> *signs);
 	~NewPasswordDialog();
 
 private:
