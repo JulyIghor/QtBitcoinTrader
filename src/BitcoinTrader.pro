@@ -16,8 +16,10 @@ HEADERS += addrulewindow.h \
            logthread.h \
            main.h \
            socketthread.h \
-           tempwindow.h
-FORMS += addrulewindow.ui feecalculator.ui gsgtrader.ui tempwindow.ui
+           tempwindow.h \
+           newpassworddialog.h \
+           passworddialog.h
+FORMS += addrulewindow.ui feecalculator.ui gsgtrader.ui tempwindow.ui newpassworddialog.ui
 SOURCES += addrulewindow.cpp \
            bitcointrader.cpp \
            bitcointraderupdater.cpp \
@@ -27,6 +29,8 @@ SOURCES += addrulewindow.cpp \
            main.cpp \
            socketthread.cpp \
            tempwindow.cpp
+           newpassworddialog.cpp \
+           passworddialog.cpp
 RESOURCES += gsgtrader.qrc
 QT += network
 LIBS += -lcrypto
