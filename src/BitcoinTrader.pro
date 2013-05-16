@@ -19,6 +19,7 @@ HEADERS += addrulewindow.h \
            tempwindow.h \
            newpassworddialog.h \
            passworddialog.h
+
 FORMS += addrulewindow.ui feecalculator.ui gsgtrader.ui tempwindow.ui newpassworddialog.ui
 SOURCES += addrulewindow.cpp \
            bitcointrader.cpp \
