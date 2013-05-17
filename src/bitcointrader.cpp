@@ -207,6 +207,16 @@ void QtBitcoinTrader::currencyChanged(int val)
 	ui.marketLow->setValue(0.0);
 	ui.marketLast->setValue(0.0);
 	ui.marketVolume->setValue(0.0);
+	ui.buyTotalSpend->setValue(0.0);
+	ui.sellTotalBtc->setValue(0.0);
+	ui.buyPricePerCoin->setValue(0.01);
+	ui.sellPricePerCoin->setValue(0.01);
+	ui.sellBuyMidPrice->setValue(0.01);
+	ui.sellBuyDelta->setValue(0.01);
+	ui.sellBuyBtcPerOrder->setValue(0.01);
+	ui.buyOrdersCount->setValue(1);
+	ui.sellOrdersCount->setValue(1);
+	ui.sellBuyOrdersCount->setValue(2);
 	firstPriceLoad=true;
 	ordersLogLoaded=false;
 }
