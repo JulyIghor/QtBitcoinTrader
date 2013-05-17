@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
 	}
 #else
 	QApplication a(argc,argv);
+	a.setStyleSheet("QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
 #endif
 #ifndef Q_OS_WIN
 	a.setStyle(new QPlastiqueStyle);

@@ -11,7 +11,7 @@ TempWindow::TempWindow(QWidget *parent)
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	setFixedSize(size());
-	setStyleSheet("QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
+	//setStyleSheet("QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
 	setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
 }
 
