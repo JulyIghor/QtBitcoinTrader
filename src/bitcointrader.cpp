@@ -200,7 +200,6 @@ void QtBitcoinTrader::currencyChanged(int val)
 	ui.usdLabel17->setPixmap(curPix);
 	ui.usdLabel18->setPixmap(curPix);
 	ui.usdLabel19->setPixmap(curPix);
-	ui.accountBTC->setValue(0.0);
 	ui.accountUSD->setValue(0.0);
 	ui.marketBuy->setValue(0.0);
 	ui.marketSell->setValue(0.0);
