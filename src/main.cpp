@@ -2,10 +2,6 @@
 //http://trader.uax.co
 //Bitcoin Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 
-#ifdef Q_OS_WIN
-#define USING_QTSINGLEAPPLICATION //QtSingleApplication uses only to prevent starting two programs at time. You can remove this line to not use this class.
-#endif
-
 #include <QDir>
 #include <QPlastiqueStyle>
 #include "main.h"
@@ -18,11 +14,9 @@
 #include "julyaes256.h"
 #include <QTextCodec>
 #include <QDesktopServices>
+#include <QMessageBox>
 
-#ifdef USING_QTSINGLEAPPLICATION
-#include "qtsingleapplication.h"//https://github.com/connectedtable/qtsingleapplication
-#endif
-
+QByteArray *appDataDir_;
 QMap<QByteArray,QByteArray> *currencySignMap;
 QMap<QByteArray,QByteArray> *currencyNamesMap;
 QByteArray *bitcoinSign_;
@@ -45,7 +39,8 @@ int main(int argc, char *argv[])
 {
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
-	appVerStr_=new QByteArray("0.90");
+	appDataDir_=new QByteArray();
+	appVerStr_=new QByteArray("0.91");
 	appVerReal_=new double(appVerStr_->toDouble());
 	currencyStr_=new QByteArray();
 	currencySign_=new QByteArray();
@@ -55,34 +50,18 @@ int main(int argc, char *argv[])
 	currencySignMap=new QMap<QByteArray,QByteArray>;
 	currencyNamesMap=new QMap<QByteArray,QByteArray>;
 
-#ifdef Q_OS_WIN
 	if(argc>1)
 	{
-#ifdef USING_QTSINGLEAPPLICATION
-		QtSingleApplication a("BitcoinTraderUpdater",argc,argv);
-		if(a.isRunning())return 0;
-#else
 		QApplication a(argc,argv);
-#endif
 		if(a.arguments().last()=="/checkupdate")
 		{
 			BitcoinTraderUpdater updater;
 			return a.exec();
 		}
 	}
-#endif
 
-#ifdef USING_QTSINGLEAPPLICATION
-	QtSingleApplication a(argc, argv);
-	if(a.isRunning())
-	{
-		a.sendMessage("ActivateWindow");
-		return 0;
-	}
-#else
 	QApplication a(argc,argv);
-	a.setStyleSheet("QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
-#endif
+
 #ifndef Q_OS_WIN
 	a.setStyle(new QPlastiqueStyle);
 #endif
@@ -91,31 +70,27 @@ int main(int argc, char *argv[])
 	logEnabled_=new bool(false);
 
 #ifdef Q_OS_WIN
-	QString appFileName=QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/QtBitcoinTrader/";
-	if(!QFile::exists(appFileName))QDir().mkpath(appFileName);
+	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).toAscii()+"/QtBitcoinTrader/";
+	if(!QFile::exists(appDataDir))QDir().mkpath(appDataDir);
 	QString oldIni=QApplication::applicationDirPath()+"/"+QFileInfo(a.applicationFilePath()).completeBaseName()+".ini";
 
 	if(QFile::exists(oldIni))
 	{
-		QFile::copy(oldIni,appFileName+QFileInfo(a.applicationFilePath()).completeBaseName()+".ini");
+		QFile::copy(oldIni,appDataDir+QFileInfo(a.applicationFilePath()).completeBaseName()+".ini");
 		QFile::remove(oldIni);
 	}
 #else
-	QString appFileName=QDesktopServices::storageLocation(QDesktopServices::HomeLocation)+"/.config/QtBitcoinTrader/";
-	if(!QFile::exists(appFileName))QDir().mkpath(appFileName);
+	QString appDataDir=QDesktopServices::storageLocation(QDesktopServices::HomeLocation)+"/.config/QtBitcoinTrader/";
+	if(!QFile::exists(appDataDir))QDir().mkpath(appDataDir);
 #endif
-	appFileName+=QFileInfo(a.applicationFilePath()).completeBaseName();
-	logFileName_=new QString(appFileName+".log");
-	iniFileName_=new QString(appFileName+".ini");
+	a.setStyleSheet("QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}");
 
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	isLogEnabled=settings.value("LogEnabled",false).toBool();
-	settings.setValue("LogEnabled",isLogEnabled);
-	if(isLogEnabled)logThread=new LogThread;
+	logFileName_=new QString("QtBitcoinTrader.log");
+	iniFileName_=new QString("QtBitcoinTrader.ini");
+
 	nonce=QDateTime::currentDateTime().toMSecsSinceEpoch();
 	restKey_=new QByteArray;
 	restSign_=new QByteArray;
-
 	{
 		QFile currencyFile("://Resources/Currencies.map");
 		currencyFile.open(QIODevice::ReadOnly);
@@ -131,53 +106,79 @@ int main(int argc, char *argv[])
 	}
 
 	bool tryDecrypt=true;
+	bool showNewPasswordDialog=false;
 	while(tryDecrypt)
 	{
-		QByteArray cryptedData=QByteArray::fromBase64(settings.value("CryptedData","").toString().toAscii());
 		QString tryPassword;
 		restKey_->clear();
 		restSign_->clear();
 
-		if(cryptedData.isEmpty())
+		if(QDir(appDataDir,"*.ini").entryList().isEmpty()||showNewPasswordDialog)
 		{
 			NewPasswordDialog newPassword;
 			if(newPassword.exec()==QDialog::Rejected)return 0;
 			tryPassword=newPassword.getPassword();
+			newPassword.updateIniFileName();
 			restKey=newPassword.getRestKey().toAscii();
 			restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
-			cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign_->toBase64(),tryPassword.toAscii());
+			QByteArray cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign_->toBase64(),tryPassword.toAscii());
+			QSettings settings(iniFileName,QSettings::IniFormat);
 			settings.setValue("CryptedData",QString(cryptedData.toBase64()));
+			settings.setValue("ProfileName",newPassword.selectedProfileName());
 			settings.remove("RestSign");
 			settings.remove("RestKey");
 			settings.sync();
+
+			showNewPasswordDialog=false;
 		}
-		if(tryPassword.isEmpty())
-		{
 			PasswordDialog enterPassword;
 			if(enterPassword.exec()==QDialog::Rejected)return 0;
-			if(enterPassword.resetData){settings.remove("CryptedData");settings.sync();continue;}
+			if(enterPassword.resetData){QFile::remove(enterPassword.getIniFilePath());continue;}
+			if(enterPassword.newProfile){showNewPasswordDialog=true;continue;}
 			tryPassword=enterPassword.getPassword();
-		}
+
 		if(!tryPassword.isEmpty())
 		{
-			QStringList decryptedList=QString(JulyAES256::decrypt(cryptedData,tryPassword.toAscii())).split("\r\n");
-			if(decryptedList.count()==3&&decryptedList.first()=="Qt Bitcoin Trader")
+			iniFileName=enterPassword.getIniFilePath();
+
+			QString lockFilePath(QDesktopServices::storageLocation(QDesktopServices::TempLocation)+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(iniFileName_->toAscii(),QCryptographicHash::Sha1).toHex()));
+		
+			QFile::remove(lockFilePath);
+			if(QFile::exists(lockFilePath))
 			{
-				restKey=decryptedList.at(1).toAscii();
-				restSign=QByteArray::fromBase64(decryptedList.last().toAscii());
-				tryDecrypt=false;
+				QMessageBox::warning(0,"Qt Bitcoin Trader","This profile is already used by another instance.\nAPI does not allow to run two instances with same key sign pair.\nPlease create new profile if you want to use two instances.");
+				tryPassword.clear();
+			}
+			else
+			{
+				QFile *lockFile=new QFile(lockFilePath);
+				lockFile->open(QIODevice::WriteOnly);
+				lockFile->write("Qt Bitcoin Trader Lock File");
+
+				QSettings settings(iniFileName,QSettings::IniFormat);
+				QStringList decryptedList=QString(JulyAES256::decrypt(QByteArray::fromBase64(settings.value("CryptedData","").toString().toAscii()),tryPassword.toAscii())).split("\r\n");
+
+				if(decryptedList.count()==3&&decryptedList.first()=="Qt Bitcoin Trader")
+				{
+					restKey=decryptedList.at(1).toAscii();
+					restSign=QByteArray::fromBase64(decryptedList.last().toAscii());
+					tryDecrypt=false;
+				}
 			}
 		}
 	}
+
+	QSettings settings(iniFileName,QSettings::IniFormat);
+	isLogEnabled=settings.value("LogEnabled",false).toBool();
+	settings.setValue("LogEnabled",isLogEnabled);
 	bitcoinSign=currencySignMap->value("BTC","BTC");
 	currencyStr=settings.value("Currency","USD").toString().toAscii();
 	currencySign=currencySignMap->value(currencyStr,"$");
-	mainWindow_=new QtBitcoinTrader;
 
-#ifdef USING_QTSINGLEAPPLICATION
-	a.setActivationWindow(mainWindow_);
-	QObject::connect(mainWindow_,SIGNAL(finished(int)),&a,SLOT(quit()));
-#endif
+	if(isLogEnabled)logThread=new LogThread;
+
+	mainWindow_=new QtBitcoinTrader;
+	QObject::connect(mainWindow_,SIGNAL(quit()),&a,SLOT(quit()));
 	}
 	mainWindow_->show();
 	return a.exec();

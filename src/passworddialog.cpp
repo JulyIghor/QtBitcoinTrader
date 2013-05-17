@@ -4,11 +4,15 @@
 #ifdef Q_OS_WIN
 #include "qtwin.h"
 #endif
+#include <QDir>
+#include <QSettings>
+#include <QMessageBox>
 
 PasswordDialog::PasswordDialog(QWidget *parent)
 	: QDialog(parent)
 {
 	resetData=false;
+	newProfile=false;
 	ui.setupUi(this);
 	setWindowTitle(windowTitle()+" v"+appVerStr);
 	setFixedSize(minimumSizeHint());
@@ -16,18 +20,32 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	ui.okButton->setEnabled(false);
 #ifdef Q_OS_WIN
 	if(QtWin::isCompositionEnabled())
-	{
 		QtWin::extendFrameIntoClientArea(this);
-		//setStyleSheet("QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;}");
-	}
 #endif
-	//setStyleSheet(styleSheet()+" QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
 	setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
+
+	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
+	for(int n=0;n<settingsList.count();n++)
+		ui.profileComboBox->addItem(QSettings(appDataDir+settingsList.at(n),QSettings::IniFormat).value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
+	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem("Default Profile");
 }
 
 PasswordDialog::~PasswordDialog()
 {
 
+}
+
+QString PasswordDialog::getIniFilePath()
+{
+	int currIndex=ui.profileComboBox->currentIndex();
+	if(currIndex==-1)return appDataDir+"QtBitcoinTrader.ini";
+	return appDataDir+ui.profileComboBox->itemData(currIndex).toString();
+}
+
+void PasswordDialog::addNewProfile()
+{
+	newProfile=true;
+	accept();
 }
 
 QString PasswordDialog::getPassword()
@@ -37,6 +55,14 @@ QString PasswordDialog::getPassword()
 
 void PasswordDialog::resetDataSlot()
 {
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Question);
+	msgBox.setWindowTitle(windowTitle());
+	msgBox.setText("Are you sure to delete \""+ui.profileComboBox->currentText()+"\" profile?");
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::Yes);
+	if(msgBox.exec()!=QMessageBox::Yes)return;
+
 	resetData=true;
 	accept();
 }

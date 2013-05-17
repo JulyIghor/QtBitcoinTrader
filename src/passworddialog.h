@@ -11,10 +11,13 @@ class PasswordDialog : public QDialog
 public:
 	QString getPassword();
 	bool resetData;
+	bool newProfile;
+	QString getIniFilePath();
 	PasswordDialog(QWidget *parent = 0);
 	~PasswordDialog();
 private slots:
 	void resetDataSlot();
+	void addNewProfile();
 	void checkToEnableButton(QString);
 private: 
 	Ui::PasswordDialog ui;

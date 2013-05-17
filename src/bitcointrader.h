@@ -140,6 +140,8 @@ public slots:
 	void sellBuyDelta01();
 	void sellBuyDelta02();
 	void sellBuyDelta05();
+signals:
+	void quit();
 };
 
 #endif // QTBITCOINTRADER_H

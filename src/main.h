@@ -23,7 +23,9 @@
 #define currencyStr *currencyStr_
 #define currencySign *currencySign_
 #define bitcoinSign *bitcoinSign_
+#define appDataDir *appDataDir_
 
+extern QByteArray *appDataDir_;
 extern QByteArray *bitcoinSign_;
 extern QByteArray *currencyStr_;
 extern QByteArray *currencySign_;

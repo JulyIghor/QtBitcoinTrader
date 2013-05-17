@@ -17,12 +17,8 @@ NewPasswordDialog::NewPasswordDialog()
 	setWindowFlags(Qt::WindowCloseButtonHint);
 #ifdef Q_OS_WIN
 	if(QtWin::isCompositionEnabled())
-	{
 		QtWin::extendFrameIntoClientArea(this);
-		//setStyleSheet("QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;}");
-	}
 #endif
-	//setStyleSheet(styleSheet()+" QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
 	setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
 }
 
@@ -53,6 +49,24 @@ void NewPasswordDialog::getApiKeySecretButton()
 
 void NewPasswordDialog::checkToEnableButton()
 {
+	{
+		QString profileName=ui.profileNameEdit->text();
+		if(!profileName.isEmpty())
+		{
+			static QString allowedNameChars="()+,-.;=@[]^_`{}~ ";
+			QString allowedPName;
+			for(int n=0;n<profileName.length();n++)
+				if(profileName.at(n).isLetterOrNumber()||allowedNameChars.contains(profileName.at(n)))
+					allowedPName.append(profileName.at(n));
+
+			if(profileName!=allowedPName)
+			{
+				ui.profileNameEdit->setText(allowedPName);
+				return;
+			}
+		}
+	}
+
 	if(ui.restSignLine->text().isEmpty()||ui.restKeyLine->text().isEmpty()){ui.okButton->setEnabled(false);return;}
 
 	QString pass=ui.passwordEdit->text();
@@ -60,7 +74,7 @@ void NewPasswordDialog::checkToEnableButton()
 	if(pass!=ui.confirmEdit->text()){ui.confirmLabel->setStyleSheet("color: red;");ui.okButton->setEnabled(false);return;}
 	ui.confirmLabel->setStyleSheet("");
 
-	static QString allowedChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+	static QString allowedPassChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 	bool containsLetter=false;
 	bool containsDigit=false;
 	bool containsSpec=false;
@@ -68,8 +82,22 @@ void NewPasswordDialog::checkToEnableButton()
 	{
 		if(!containsLetter&&pass.at(n).isLetter())containsLetter=true;
 		if(!containsDigit&&pass.at(n).isDigit())containsDigit=true;
-		if(!containsSpec&&allowedChars.contains(pass.at(n)))containsSpec=true;
+		if(!containsSpec&&allowedPassChars.contains(pass.at(n)))containsSpec=true;
 		if(containsSpec&&containsDigit&&containsSpec)break;
 	}
 	ui.okButton->setEnabled(containsLetter&&containsDigit&&containsSpec);
+}
+
+void NewPasswordDialog::updateIniFileName()
+{
+	if(ui.profileNameEdit->text().isEmpty())
+	iniFileName=appDataDir+"QtBitcoinTrader.ini";
+	else
+	iniFileName=appDataDir+ui.profileNameEdit->text().toAscii()+".ini";
+}
+
+QString NewPasswordDialog::selectedProfileName()
+{
+	if(ui.profileNameEdit->text().isEmpty())return "Default Profile";
+	return ui.profileNameEdit->text();
 }
