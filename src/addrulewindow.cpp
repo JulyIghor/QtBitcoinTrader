@@ -18,6 +18,7 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 	//if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	setStyleSheet("QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
+	setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
 }
 
 AddRuleWindow::~AddRuleWindow()

@@ -23,6 +23,7 @@ NewPasswordDialog::NewPasswordDialog()
 	}
 #endif
 	setStyleSheet(styleSheet()+" QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
+	setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
 }
 
 NewPasswordDialog::~NewPasswordDialog()

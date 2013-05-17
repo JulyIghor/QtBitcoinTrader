@@ -22,6 +22,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	}
 #endif
 	setStyleSheet(styleSheet()+" QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
+	setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
 }
 
 PasswordDialog::~PasswordDialog()
