@@ -408,8 +408,8 @@ void QtBitcoinTrader::dataReceivedAuth(QByteArray data)
 				QByteArray itemPrice=getMidData("\"price\":{\"value\":\"","\",\"",&currentOrder);
 				QByteArray itemStatus=getMidData("\"status\":\"","\",\"",&currentOrder);
 				QByteArray itemDate=getMidData(",\"date\":",",",&currentOrder);
-
-				QString oidData=itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice;
+				QByteArray orderSign=currencySignMap->value(getMidData("\"currency\":\"","\",\"",&currentOrder),"$");
+				QString oidData=itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign;
 				QString findedData=oidMap.value(oid,"");
 
 				if(findedData!="")//Update
@@ -423,7 +423,8 @@ void QtBitcoinTrader::dataReceivedAuth(QByteArray data)
 								{
 									ui.ordersTable->item(n,2)->setText(itemStatus);
 									ui.ordersTable->item(n,3)->setText(bitcoinSign+" "+itemAmount);
-									ui.ordersTable->item(n,5)->setText(currencySign+" "+QString::number(itemAmount.toDouble()*itemPrice.toDouble(),'f',5));
+									ui.ordersTable->item(n,3)->setText(orderSign+" "+itemPrice);
+									ui.ordersTable->item(n,5)->setText(orderSign+" "+QString::number(itemAmount.toDouble()*itemPrice.toDouble(),'f',5));
 									setRowStateByText(n,itemStatus);
 									oidMap[oid]=oidData;
 								}
@@ -579,16 +580,17 @@ void QtBitcoinTrader::dataReceivedAuth(QByteArray data)
 void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 {
 	QStringList dataList=data.split(";");
-	if(dataList.count()!=5)return;
+	if(dataList.count()!=6)return;
 	int curRow=ui.ordersTable->rowCount();
+	QByteArray orderSign=dataList.at(5).toAscii();
 	ui.ordersTable->setRowCount(curRow+1);
 	ui.ordersTable->setRowHeight(curRow,30);
 	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString("yyyy-MM-dd HH:mm:ss")));ui.ordersTable->item(curRow,0)->setTextAlignment(Qt::AlignCenter);
 	ui.ordersTable->setItem(curRow,1,new QTableWidgetItem(dataList.at(1)));ui.ordersTable->item(curRow,1)->setTextAlignment(Qt::AlignCenter);
 	ui.ordersTable->setItem(curRow,2,new QTableWidgetItem(dataList.at(2)));ui.ordersTable->item(curRow,2)->setTextAlignment(Qt::AlignCenter);
 	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(bitcoinSign+" "+dataList.at(3)));ui.ordersTable->item(curRow,3)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
-	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(currencySign+" "+dataList.at(4)));ui.ordersTable->item(curRow,4)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
-	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(currencySign+" "+QString::number(dataList.at(3).toDouble()*dataList.at(4).toDouble(),'f',5)));ui.ordersTable->item(curRow,5)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
+	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+dataList.at(4)));ui.ordersTable->item(curRow,4)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
+	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(orderSign+" "+QString::number(dataList.at(3).toDouble()*dataList.at(4).toDouble(),'f',5)));ui.ordersTable->item(curRow,5)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
 	ui.ordersTable->setItem(curRow,6,new QTableWidgetItem(QString(oid)));ui.ordersTable->item(curRow,6)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
 	setRowStateByText(curRow,dataList.at(2).toAscii());
 	ordersSelectionChanged();

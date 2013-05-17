@@ -460,7 +460,7 @@
            <string notr="true">color: darkgreen</string>
           </property>
           <property name="text">
-           <string>$</string>
+           <string/>
           </property>
           <property name="pixmap">
            <pixmap resource="QtResource.qrc">:/Resources/Currencies.map</pixmap>
@@ -1430,17 +1430,17 @@
              </column>
              <column>
               <property name="text">
-               <string>Amount BTC</string>
+               <string>Amount</string>
               </property>
              </column>
              <column>
               <property name="text">
-               <string>Price USD</string>
+               <string>Price</string>
               </property>
              </column>
              <column>
               <property name="text">
-               <string>Total USD</string>
+               <string>Total</string>
               </property>
              </column>
              <column>

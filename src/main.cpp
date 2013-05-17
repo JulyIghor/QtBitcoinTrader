@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("0.91");
+	appVerStr_=new QByteArray("0.92");
 	appVerReal_=new double(appVerStr_->toDouble());
 	currencyStr_=new QByteArray();
 	currencySign_=new QByteArray();
