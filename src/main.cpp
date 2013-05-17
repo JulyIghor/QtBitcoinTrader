@@ -5,6 +5,8 @@
 #ifdef Q_OS_WIN
 #define USING_QTSINGLEAPPLICATION //QtSingleApplication uses only to prevent starting two programs at time. You can remove this line to not use this class.
 #endif
+
+#include <QDir>
 #include <QPlastiqueStyle>
 #include "main.h"
 #include <QtGui/QApplication>
@@ -15,6 +17,7 @@
 #include "newpassworddialog.h"
 #include "julyaes256.h"
 #include <QTextCodec>
+#include <QDesktopServices>
 
 #ifdef USING_QTSINGLEAPPLICATION
 #include "qtsingleapplication.h"//https://github.com/connectedtable/qtsingleapplication
@@ -85,9 +88,24 @@ int main(int argc, char *argv[])
 	{
 	nonce_=new quint64(0);
 	logEnabled_=new bool(false);
-	QString appFileName=a.applicationDirPath()+"/"+QFileInfo(a.applicationFilePath()).completeBaseName();
-	iniFileName_=new QString(appFileName+".ini");
+
+#ifdef Q_OS_WIN
+	QString appFileName=QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/QtBitcoinTrader/";
+	if(!QFile::exists(appFileName))QDir().mkpath(appFileName);
+	QString oldIni=QApplication::applicationDirPath()+"/"+QFileInfo(a.applicationFilePath()).completeBaseName()+".ini";
+
+	if(QFile::exists(oldIni))
+	{
+		QFile::copy(oldIni,appFileName+QFileInfo(a.applicationFilePath()).completeBaseName()+".ini");
+		QFile::remove(oldIni);
+	}
+#else
+	QString appFileName=QDesktopServices::storageLocation(QDesktopServices::HomeLocation)+"/.config/QtBitcoinTrader/";
+	if(!QFile::exists(appFileName))QDir().mkpath(appFileName);
+#endif
+	appFileName+=QFileInfo(a.applicationFilePath()).completeBaseName();
 	logFileName_=new QString(appFileName+".log");
+	iniFileName_=new QString(appFileName+".ini");
 
 	QSettings settings(iniFileName,QSettings::IniFormat);
 	isLogEnabled=settings.value("LogEnabled",false).toBool();

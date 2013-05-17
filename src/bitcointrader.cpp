@@ -49,6 +49,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 
 	ui.setupUi(this);
+
 	accountFeeChanged(ui.accountFee->value());
 	setWindowTitle(windowTitle()+" v"+appVerStr);
 	setAttribute(Qt::WA_QuitOnClose,true);
@@ -95,6 +96,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 		setStyleSheet("QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;}");
 	}
 #endif
+	setStyleSheet(styleSheet()+" QLabel {color: black;} QDoubleSpinBox {background: white;}");
 
 	setApiDown(false);
 
@@ -776,7 +778,7 @@ void QtBitcoinTrader::sellBitcoinButton()
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle("Please confirm transaction");
-	msgBox.setText("Are you sure to sell "+bitcoinSign+" "+ui.sellTotalBtc->text()+" for $ "+ui.sellPricePerCoin->text()+" ?");
+	msgBox.setText("Are you sure to sell "+bitcoinSign+" "+ui.sellTotalBtc->text()+" at $ "+ui.sellPricePerCoin->text()+" ?");
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	if(msgBox.exec()!=QMessageBox::Yes)return;
@@ -909,7 +911,7 @@ void QtBitcoinTrader::buyBitcoinsButton()
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle("Please confirm transaction");
-	msgBox.setText("Are you sure to buy "+bitcoinSign+" "+ui.buyTotalBtc->text()+" for $ "+ui.buyPricePerCoin->text()+" ?");
+	msgBox.setText("Are you sure to buy "+bitcoinSign+" "+ui.buyTotalBtc->text()+" at $ "+ui.buyPricePerCoin->text()+" ?");
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	if(msgBox.exec()!=QMessageBox::Yes)return;
@@ -964,7 +966,7 @@ void QtBitcoinTrader::sellBuyButtonSellBuy()
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle("Please confirm transaction");
-	msgBox.setText("Are you sure to buy "+bitcoinSign+" "+ui.buyTotalBtc->text()+" for $ "+ui.buyPricePerCoin->text()+" ?\nAre you sure to sell "+bitcoinSign+" "+ui.sellTotalBtc->text()+" for $ "+ui.sellPricePerCoin->text()+" ?");
+	msgBox.setText("Are you sure to buy "+bitcoinSign+" "+ui.buyTotalBtc->text()+" at $ "+ui.buyPricePerCoin->text()+" ?\nAre you sure to sell "+bitcoinSign+" "+ui.sellTotalBtc->text()+" for $ "+ui.sellPricePerCoin->text()+" ?");
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	if(msgBox.exec()!=QMessageBox::Yes)return;
