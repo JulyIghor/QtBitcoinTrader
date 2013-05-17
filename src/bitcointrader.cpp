@@ -8,6 +8,7 @@
 #include "main.h"
 #include "julylightchanges.h"
 #include "addrulewindow.h"
+#include <QFileInfo>
 #include <QClipboard>
 #include <QProcess>
 #include "tempwindow.h"
@@ -26,7 +27,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ordersLogLoaded=false;
 	appDir=QApplication::applicationDirPath()+"/";
 #ifdef Q_OS_WIN
-	QFile::remove(appDir+"BitcoinTrader.exe.bkp");
+	QFile::remove(appDir+QFileInfo(QApplication::applicationFilePath()).fileName()+".bkp");
 #endif
 	authErrorOnce=false;
 	showingMessage=false;
@@ -201,6 +202,12 @@ void QtBitcoinTrader::currencyChanged(int val)
 	ui.usdLabel19->setPixmap(curPix);
 	ui.accountBTC->setValue(0.0);
 	ui.accountUSD->setValue(0.0);
+	ui.marketBuy->setValue(0.0);
+	ui.marketSell->setValue(0.0);
+	ui.marketHigh->setValue(0.0);
+	ui.marketLow->setValue(0.0);
+	ui.marketLast->setValue(0.0);
+	ui.marketVolume->setValue(0.0);
 	firstPriceLoad=true;
 	ordersLogLoaded=false;
 }
