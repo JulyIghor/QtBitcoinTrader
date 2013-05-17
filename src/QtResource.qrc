@@ -21,5 +21,6 @@
     <file>Resources/SGD.png</file>
     <file>Resources/THB.png</file>
     <file>Resources/USD.png</file>
+    <file>Resources/QtBitcoinTrader.png</file>
   </qresource>
 </RCC>

@@ -22,7 +22,7 @@ NewPasswordDialog::NewPasswordDialog()
 		setStyleSheet("QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;}");
 	}
 #endif
-
+	setStyleSheet(styleSheet()+" QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
 }
 
 NewPasswordDialog::~NewPasswordDialog()
@@ -72,10 +72,3 @@ void NewPasswordDialog::checkToEnableButton()
 	}
 	ui.okButton->setEnabled(containsLetter&&containsDigit&&containsSpec);
 }
-
-QByteArray NewPasswordDialog::getSelectedCurrency()
-{
-	if(ui.currencyComboBox->currentIndex()==-1)return QByteArray("USD");
-	return ui.currencyComboBox->itemData(ui.currencyComboBox->currentIndex()).toString().toAscii();
-}
-

@@ -97,7 +97,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	}
 #endif
 	setStyleSheet(styleSheet()+" QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;}");
-
+	setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
 	setApiDown(false);
 
 	ui.ordersTableFrame->setVisible(false);
