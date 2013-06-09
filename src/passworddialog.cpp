@@ -47,8 +47,8 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 
 	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())
 		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),QFontMetrics(checkBoxes->font()).width(checkBoxes->text())+20));
-
-    setFixedSize(minimumSizeHint());
+	QSize minSizeHint=minimumSizeHint();
+	if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
 }
 
 PasswordDialog::~PasswordDialog()

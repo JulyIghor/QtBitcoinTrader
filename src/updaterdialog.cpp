@@ -88,7 +88,8 @@ bool canAutoUpdate=false;
 #endif
 		julyTranslator->translateUi(this);
 		ui.iconLabel->setPixmap(QPixmap(":/Resources/QtBitcoinTrader.png"));
-		resize(minimumSizeHint());
+		QSize minSizeHint=minimumSizeHint();
+		if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
 		show();
 	}
 	else

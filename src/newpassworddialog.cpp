@@ -22,7 +22,8 @@ NewPasswordDialog::NewPasswordDialog()
 	ui.setupUi(this);
 	setWindowTitle(windowTitle()+" v"+appVerStr);
 	ui.okButton->setEnabled(false);
-	setFixedSize(minimumSizeHint());
+	QSize minSizeHint=minimumSizeHint();
+	if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
 	setWindowFlags(Qt::WindowCloseButtonHint);
 #ifdef Q_OS_WIN
 	if(QtWin::isCompositionEnabled())

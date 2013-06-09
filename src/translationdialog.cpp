@@ -95,7 +95,8 @@ TranslationDialog::~TranslationDialog()
 
 void TranslationDialog::fixLayout()
 {
-	fonWidget.setFixedHeight(fonWidget.minimumSizeHint().height());
+	QSize minSizeHint=fonWidget.minimumSizeHint();
+	if(mainWindow.isValidSize(&minSizeHint))fonWidget.setFixedHeight(fonWidget.minimumSizeHint().height());
 }
 
 void TranslationDialog::resizeEvent(QResizeEvent *event)
@@ -197,5 +198,6 @@ void TranslationDialog::searchLang(QString filterText)
 			lineEdits[n]->setVisible(containsText);
 		}
 	}
-	fonWidget.setFixedHeight(fonWidget.minimumSizeHint().height());
+	QSize minSizeHint=fonWidget.minimumSizeHint();
+	if(mainWindow.isValidSize(&minSizeHint))fonWidget.setFixedHeight(fonWidget.minimumSizeHint().height());
 }

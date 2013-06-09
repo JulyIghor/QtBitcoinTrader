@@ -200,6 +200,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	julyTranslator->loadMapFromUi(this);
 	julyTranslator->saveToFile("LanguageDefault.lng");
 #endif
+	QSize minSizeHint=minimumSizeHint();
+	if(!mainWindow.isValidSize(&minSizeHint))minSizeHint=size();
 
 	resize(qMax(minimumSizeHint().width(),qMin(1024,(int)(currentDesktopRect.width()*0.95))),qMin((int)(currentDesktopRect.height()*0.95),700));
 	reloadLanguageList();
@@ -277,9 +279,12 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
 	foreach(QLabel* labels, par->findChildren<QLabel*>())
 		if(labels->text().length()&&labels->text().at(0)!='<')
 			labels->setMinimumWidth(qMin(labels->maximumWidth(),QFontMetrics(labels->font()).width(labels->text())));
-
+	QSize minSizeHint=par->minimumSizeHint();
+	if(mainWindow.isValidSize(&minSizeHint))
+	{
 	par->setMinimumSize(par->minimumSizeHint());
 	if(par->width()<par->minimumSizeHint().width())par->resize(par->minimumSizeHint().width(),par->height());
+	}
 }
 
 void QtBitcoinTrader::currencyChanged(int val)
@@ -454,9 +459,7 @@ QByteArray QtBitcoinTrader::getMidData(QString a, QString b,QByteArray *data)
 void QtBitcoinTrader::anyValueChanged()
 {
 	QSize minSizeHint=minimumSizeHint();
-	if(minSizeHint.width()<100||minSizeHint.width()>2000)return;
-	if(minSizeHint.height()<100||minSizeHint.height()>2000)return;
-	setMinimumSize(minSizeHint);
+	if(isValidSize(&minSizeHint))setMinimumSize(minSizeHint);
 }
 
 void QtBitcoinTrader::secondSlot()

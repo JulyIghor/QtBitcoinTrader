@@ -22,6 +22,7 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	bool isValidSize(QSize *sizeV){if(sizeV->width()<10||sizeV->width()>2000||sizeV->height()<10||sizeV->height()>2000)return false; return true;}
 	void reloadLanguageList(QString preferedLangFile="");
 	void fixAllChildButtonsAndLabels(QWidget *par);
 

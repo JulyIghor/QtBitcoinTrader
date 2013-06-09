@@ -56,7 +56,8 @@ FeeCalculator::FeeCalculator()
 	ui.usdLabel6->setPixmap(curPix);
 	ui.usdLabel7->setPixmap(curPix);
 
-	setMaximumSize(minimumSizeHint().width()+200,minimumSizeHint().height());
+	QSize minSizeHint=minimumSizeHint();
+	if(mainWindow.isValidSize(&minSizeHint))setMaximumSize(minimumSizeHint().width()+200,minimumSizeHint().height());
 
 #ifdef GENERATE_LANGUAGE_FILE
 	julyTranslator->loadMapFromUi(this);
