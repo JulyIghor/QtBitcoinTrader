@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TranslationDialog</class>
+ <widget class="QDialog" name="TranslationDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>435</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Qt Bitcoin Trader</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0" colspan="3">
+    <widget class="QGroupBox" name="makeYourTranslationButton">
+     <property name="accessibleName">
+      <string>MAKE_YOUR_TRANSLATION</string>
+     </property>
+     <property name="title">
+      <string>Make your translation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="1" colspan="2">
+       <widget class="QLineEdit" name="languageName"/>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <widget class="QScrollArea" name="scrollArea">
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>360</width>
+           <height>191</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string>TR00116</string>
+        </property>
+        <property name="text">
+         <string>Author:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
+        <property name="accessibleName">
+         <string>TR00047</string>
+        </property>
+        <property name="text">
+         <string>Language:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <widget class="QLabel" name="labelHowTo">
+        <property name="accessibleName">
+         <string>HOW_TO_TRANSLATE</string>
+        </property>
+        <property name="text">
+         <string>Please fill all fields. Than press Apply button and verify that translation looks good. Save translation file and send it to &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt;julyighor@gmail.com&lt;/a&gt;&lt;br&gt;
+After verification your translation will be added to next Qt Bitcoin Traderreleases.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="3">
+       <widget class="QGroupBox" name="searchGroupBox">
+        <property name="accessibleName">
+         <string>LANG_FILTER</string>
+        </property>
+        <property name="title">
+         <string>Filter</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <widget class="QLineEdit" name="searchLineEdit"/>
+         </item>
+         <item row="0" column="1">
+          <widget class="QToolButton" name="buttonClearSearch">
+           <property name="text">
+            <string>X</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <layout class="QGridLayout" name="authorLayout"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="buttonApply">
+     <property name="accessibleName">
+      <string>TR00039</string>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="buttonSaveAs">
+     <property name="whatsThis">
+      <string/>
+     </property>
+     <property name="accessibleName">
+      <string>SAVE_AS</string>
+     </property>
+     <property name="text">
+      <string>Save As</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="deleteTranslationButton">
+     <property name="accessibleName">
+      <string>DELETE_TRANSLATION</string>
+     </property>
+     <property name="text">
+      <string>Delete Translation</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>languageName</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>searchLineEdit</tabstop>
+  <tabstop>buttonClearSearch</tabstop>
+  <tabstop>buttonApply</tabstop>
+  <tabstop>buttonSaveAs</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonApply</sender>
+   <signal>clicked()</signal>
+   <receiver>TranslationDialog</receiver>
+   <slot>applyButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>425</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>152</x>
+     <y>470</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonSaveAs</sender>
+   <signal>clicked()</signal>
+   <receiver>TranslationDialog</receiver>
+   <slot>saveAsButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>300</x>
+     <y>418</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>329</x>
+     <y>505</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonClearSearch</sender>
+   <signal>clicked()</signal>
+   <receiver>searchLineEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>362</x>
+     <y>364</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>329</x>
+     <y>368</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>searchLineEdit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>TranslationDialog</receiver>
+   <slot>searchLang(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>258</x>
+     <y>363</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>518</x>
+     <y>371</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>deleteTranslationButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TranslationDialog</receiver>
+   <slot>deleteTranslationButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>178</x>
+     <y>423</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>479</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>whatIsLocale()</slot>
+  <slot>applyButton()</slot>
+  <slot>saveAsButton()</slot>
+  <slot>searchLang(QString)</slot>
+  <slot>deleteTranslationButton()</slot>
+ </slots>
+</ui>

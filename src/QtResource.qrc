@@ -1,0 +1,37 @@
+<RCC>
+  <qresource prefix="/">
+    <file>Resources/Mute.png</file>
+    <file>Resources/minus.png</file>
+    <file>Resources/multiply.png</file>
+    <file>Resources/equal.png</file>
+    <file>Resources/AUD.png</file>
+    <file>Resources/BTC.png</file>
+    <file>Resources/CAD.png</file>
+    <file>Resources/calc.png</file>
+    <file>Resources/CHF.png</file>
+    <file>Resources/CNY.png</file>
+    <file>Resources/Currencies.map</file>
+    <file>Resources/CZK.png</file>
+    <file>Resources/DKK.png</file>
+    <file>Resources/EUR.png</file>
+    <file>Resources/GBP.png</file>
+    <file>Resources/HKD.png</file>
+    <file>Resources/JPY.png</file>
+    <file>Resources/NOK.png</file>
+    <file>Resources/NZD.png</file>
+    <file>Resources/PLN.png</file>
+    <file>Resources/RUB.png</file>
+    <file>Resources/SEK.png</file>
+    <file>Resources/SGD.png</file>
+    <file>Resources/THB.png</file>
+    <file>Resources/USD.png</file>
+    <file>Resources/Public.key</file>
+    <file>Resources/QtBitcoinTrader.png</file>
+    <file>Resources/Language/English.lng</file>
+    <file>Resources/Language/Russian.lng</file>
+    <file>Resources/Language/Ukrainian.lng</file>
+    <file>Resources/Language/Spanish.lng</file>
+    <file>Resources/Language/Dutch.lng</file>
+    <file>Resources/Language/LangList.ini</file>
+  </qresource>
+</RCC>
