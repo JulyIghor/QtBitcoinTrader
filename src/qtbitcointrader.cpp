@@ -1022,7 +1022,12 @@ void QtBitcoinTrader::buyTotalToSpendInUsdChanged(double)
 void QtBitcoinTrader::buyBtcToBuyChanged(double val)
 {
 	ui.buyTotalBtcResult->setValue(val*floatFeeDec);
-	if(buyLockTotalBtc)return;
+	if(buyLockTotalBtc)
+	{
+		profitSellThanBuyCalc();
+		profitBuyThanSellCalc();
+		return;
+	}
 	buyLockTotalBtc=true;
 
 	buyLockTotalSpend=true;
@@ -1030,6 +1035,8 @@ void QtBitcoinTrader::buyBtcToBuyChanged(double val)
 	buyLockTotalSpend=false;
 
 	buyLockTotalBtc=false;
+	profitSellThanBuyCalc();
+	profitBuyThanSellCalc();
 	checkValidBuyButtons();
 }
 
