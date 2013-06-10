@@ -16,6 +16,7 @@
 #include "qtwin.h"
 #endif
 #include <QCryptographicHash>
+#include <QMessageBox>
 
 UpdaterDialog::UpdaterDialog(QWidget *parent)
 	: QDialog(parent)
@@ -23,25 +24,43 @@ UpdaterDialog::UpdaterDialog(QWidget *parent)
 	stateUpdate=0;
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
-	httpGet=new QHttp(this);
-	httpGet->setSocket(new QSslSocket(httpGet));
-	httpGet->setHost("raw.github.com", QHttp::ConnectionModeHttps,443);
+	httpGet=new QHttp("raw.github.com", QHttp::ConnectionModeHttps,443,this);
+	timeOutTimer=new QTimer(this);
+	connect(timeOutTimer,SIGNAL(timeout()),this,SLOT(exitSlot()));
 	connect(httpGet,SIGNAL(done(bool)),this,SLOT(httpDone(bool)));
+
 	httpGet->get("/JulyIGHOR/QtBitcoinTrader/master/versions.txt");
+	timeOutTimer->start(30000);
 }
 
 UpdaterDialog::~UpdaterDialog()
 {
 }
 
+void UpdaterDialog::exitSlot()
+{
+	QCoreApplication::quit();
+}
+
 void UpdaterDialog::httpDone(bool error)
 {
-	if(error){if(stateUpdate==1){if(httpGet->errorString()=="Request aborted")return;downloadError();}return;}
+	timeOutTimer->stop();
+	if(error)
+	{
+		if(isVisible())
+		{
+			if(httpGet->errorString()=="Request aborted")return;
+			downloadError();
+			return;
+		}
+		exitSlot();
+		return;
+	}
 
 	if(stateUpdate==0)
 	{
 		QByteArray dataReceived(httpGet->readAll().replace("\r",""));
-		if(dataReceived.size()>10245)QCoreApplication::quit();
+		if(dataReceived.size()>10245)exitSlot();
 		QMap<QString,QString>versionsMap;
 		QStringList dataList=QString(dataReceived).split("\n");
 		for(int n=0;n<dataList.count();n++)
@@ -71,7 +90,7 @@ bool canAutoUpdate=false;
 		if(!updateSignature.isEmpty())updateSignature=QByteArray::fromBase64(updateSignature);
 		updateChangeLog=versionsMap.value(os+"ChangeLog");
 		updateLink=versionsMap.value(os+"Bin");
-		if(updateVersion.toDouble()<=appVerReal){QCoreApplication::quit();return;}
+		if(updateVersion.toDouble()<=appVerReal){exitSlot();return;}
 		stateUpdate=1;
 		ui.autoUpdateGroupBox->setVisible(canAutoUpdate);
 		ui.changeLogText->setHtml(updateChangeLog);
@@ -132,7 +151,7 @@ bool canAutoUpdate=false;
             QFile(curBin).setPermissions(QFile(bkpBin).permissions());
 #endif
             QMessageBox::information(this,windowTitle(),julyTr("UPDATED_SUCCESSFULLY","Application updated successfully. Please restart application to apply changes."));
-			QCoreApplication::quit();
+			exitSlot();
 		}
 	}
 }
@@ -164,7 +183,7 @@ void UpdaterDialog::buttonUpdate()
 void UpdaterDialog::downloadError()
 {
 	QMessageBox::warning(this,windowTitle(),julyTr("DOWNLOAD_ERROR","Download error. Please try again.")+"<br>"+httpGet->errorString());
-	QCoreApplication::quit();
+	exitSlot();
 }
 
 void UpdaterDialog::dataReadProgress(int done,int total)

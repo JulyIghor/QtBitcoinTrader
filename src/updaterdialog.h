@@ -13,6 +13,7 @@
 #include <QDialog>
 #include "ui_updaterdialog.h"
 #include <QHttp>
+#include <QTimer>
 
 class UpdaterDialog : public QDialog
 {
@@ -23,6 +24,7 @@ public:
 	~UpdaterDialog();
 
 private:
+	QTimer *timeOutTimer;
 	void downloadError();
 	QString updateVersion;
 	QByteArray updateSignature;
@@ -33,6 +35,7 @@ private:
 	QHttp *httpGet;
 	Ui::UpdaterDialog ui;
 private slots:
+	void exitSlot();
 	void dataReadProgress(int done,int total);
 	void buttonUpdate();
 	void httpDone(bool);
