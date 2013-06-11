@@ -212,6 +212,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	connect(julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
 
 	if(checkForUpdates)checkUpdate();
+	
+	if(ui.langComboBox->count()==0)fixAllChildButtonsAndLabels(this);
 }
 
 void QtBitcoinTrader::checkUpdate()
