@@ -7,6 +7,7 @@
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
 // GNU General Public License version 3
 
+#ifdef USE_QTMULTIMEDIA
 #include <QtCore/qmath.h>
 #include <QtCore/qendian.h>
 #include "audioplayer.h"
@@ -158,3 +159,4 @@ qint64 Generator::bytesAvailable() const
 {
 	return m_buffer.size() + QIODevice::bytesAvailable();
 }
+#endif

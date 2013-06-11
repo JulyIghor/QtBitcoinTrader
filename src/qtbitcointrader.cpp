@@ -1344,8 +1344,10 @@ void QtBitcoinTrader::ruleRemoveAll()
 
 void QtBitcoinTrader::beep()
 {
+#ifdef USE_QTMULTIMEDIA
 	static AudioPlayer *player=new AudioPlayer(this);
 	player->beep();
+#endif
 	//QSound::play(beepFile);
 }
 

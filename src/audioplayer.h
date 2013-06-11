@@ -10,6 +10,7 @@
 #ifndef AUDIOPLAYER_H
 #define AUDIOPLAYER_H
 
+#ifdef USE_QTMULTIMEDIA
 #include <QAudioOutput>
 #include <QObject>
 #include <QTimer>
@@ -57,4 +58,5 @@ private slots:
 	void pullTimerExpired();
 };
 
+#endif
 #endif // AUDIOPLAYER_H

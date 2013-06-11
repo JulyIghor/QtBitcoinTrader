@@ -16,6 +16,8 @@
 
 //#define GENERATE_LANGUAGE_FILE//Used for make default language file
 
+#define USE_QTMULTIMEDIA
+
 #define julyTr julyTranslator->translateString
 
 #define hostName QByteArray("data.mtgox.com")
