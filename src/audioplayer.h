@@ -10,6 +10,8 @@
 #ifndef AUDIOPLAYER_H
 #define AUDIOPLAYER_H
 
+#include "main.h"
+
 #ifdef USE_QTMULTIMEDIA
 #include <QAudioOutput>
 #include <QObject>

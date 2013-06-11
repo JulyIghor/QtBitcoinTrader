@@ -6,7 +6,8 @@ TEMPLATE = app
 TARGET = QtBitcoinTrader
 DEPENDPATH += .
 INCLUDEPATH += .
-
+#CONFIG += mobility
+#MOBILITY = multimedia
 # Input
 
 HEADERS += aboutdialog.h \
@@ -57,5 +58,6 @@ SOURCES += aboutdialog.cpp \
            audioplayer.cpp
 RESOURCES += QtResource.qrc
 QT += network multimedia
+#QT += network mobility multimediakit
 LIBS += -lcrypto
 win32:RC_FILE = WinResource.rc

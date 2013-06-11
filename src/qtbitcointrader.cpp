@@ -1348,7 +1348,6 @@ void QtBitcoinTrader::beep()
 	static AudioPlayer *player=new AudioPlayer(this);
 	player->beep();
 #endif
-	//QSound::play(beepFile);
 }
 
 void QtBitcoinTrader::accountUSDChanged(double)
