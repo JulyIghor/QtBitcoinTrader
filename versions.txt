@@ -1,6 +1,6 @@
-Win32Ver=0.99
+Win32Ver=1.00
 MacVer=1.00
-SrcVer=0.99
+SrcVer=1.00
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/QtBitcoinTrader.exe
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTrader
 Win32ChangeLog=- Api engine rewrited. Works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
