@@ -3,8 +3,8 @@ MacVer=1.00
 SrcVer=1.00
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/QtBitcoinTrader.exe
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTrader
-Win32ChangeLog=- Api engine rewrited. Works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
-MacChangeLog=- Api engine rewrited. Works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
-SrcLog=- Api engine rewrited. Works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
+Win32ChangeLog=- Api engine rewrited. Now works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
+MacChangeLog=- Api engine rewrited. Now works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
+SrcLog=- Api engine rewrited. Now works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
 Win32Signature=nSF6uxEzbCNVKcKTvBPyvaZU4DLdnhTTfjqtXZYLQTKiVhJxQjZjYoiVmWZFQCdUPLbNORgpAr/x7CNlhu/+/sJBNKdd8VBdINa/utIgVgZ0Ph7GRnHBj/zn7UmGDxSqrZ4CLpNrWN6dnlzE2+lhxRbXgSSS/d+mQH9TmREK+ZrniMQrxTYCia5AtmupCueDqkkz8gOu3JYqIGDfZbj3a1DZqteTLYr+b3OyydsOJZG9DApHeoySaY7+JQBPOnb73kn943B20lO2hdPOv62NZIgB8cNEi5CZmYP6Glh42oN24JOdG+TeN0UrBBt7BfMw05apWUtGhfcmDjsLGjzR1w==
 MacSignature=eDRj8klrXDmsroFHdRYCjiD+B6BAFuTHWh/KxRnhhhGYvf9sp5CaSsI0HtsCWyDPp478DR+ypHB4HyTTC8aZRYAYE8gpx9acDu0RLpGdf/YmlI1BboO1IlYuJKqJg1Gjw3wq6iciCXkheP/m+FmEeKshpIdoTC1Ri7ikn8cpWohxD1YorXVrCQMT2LZHhP60m3YFgdIediiZ0Ng3ouMiQ0AvHOh3XlS+CYL69Ot2xcNdjqfEfJCmPxOomh6Q9xmuTnmj6H8OqD0CMmhpfbVo6OdyDfKDovSet+QiMdwCfkDmNlf89DyRKT/8oUoZJyoArZ++ZJCA1z+VsqD8rRCu2g==
