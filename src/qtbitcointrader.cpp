@@ -42,9 +42,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	profitSellThanBuyUnlocked=true;
 	profitBuyThanSellUnlocked=true;
 
-	logTextEditEmpty=true;
 	constructorFinished=false;
-	ordersLogLoaded=false;
 	appDir=QApplication::applicationDirPath()+"/";
 #ifdef Q_OS_WIN
 	QFile::remove(appDir+QFileInfo(QApplication::applicationFilePath()).fileName()+".bkp");
@@ -169,11 +167,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.logTextEdit->viewport()->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
 
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
-
-	secondTimer=new QTimer;
-	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
-	secondTimer->setSingleShot(true);
-	secondTimer->start(1000);
 
 	QSettings settingsMain(appDataDir+"/Settings.set",QSettings::IniFormat);
 	checkForUpdates=settingsMain.value("CheckForUpdates",true).toBool();
@@ -322,7 +315,6 @@ void QtBitcoinTrader::currencyChanged(int val)
 	emit clearValues();
 	marketPricesNotLoaded=true;
 	balanceNotLoaded=true;
-	ordersLogLoaded=false;
 }
 
 void QtBitcoinTrader::firstTicker()
@@ -462,12 +454,6 @@ void QtBitcoinTrader::anyValueChanged()
 	if(isValidSize(&minSizeHint))setMinimumSize(minSizeHint);
 }
 
-void QtBitcoinTrader::secondSlot()
-{
-	if(!ordersLogLoaded||logTextEditEmpty)emit getHistory(false);
-	secondTimer->start(1000);
-}
-
 void QtBitcoinTrader::mtgoxLagChanged(double val)
 {
 	if(val>=1.0)
@@ -598,7 +584,6 @@ void QtBitcoinTrader::ordersLogChanged(QString newLog)
 		ui.ordersLogGroupBox->setChecked(settings.value("LogExpanded",true).toBool());
 		ordersLogGroupBoxToggled(ui.ordersLogGroupBox->isChecked());
 	}
-	if(logTextEditEmpty&&newLog.size())logTextEditEmpty=false;
 	if(isLogEnabled)logThread->writeLog("Log Table Updated");
 }
 
@@ -1288,7 +1273,6 @@ void QtBitcoinTrader::languageChanged()
 	rulesLabels<<julyTr("RULES_T_STATE","State")<<julyTr("RULES_T_DESCR","Description")<<julyTr("RULES_T_ACTION","Action")<<julyTr("RULES_T_AMOUNT","Amount")<<julyTr("RULES_T_PRICE","Price");
 	ui.rulesTable->setHorizontalHeaderLabels(rulesLabels);
 	fixAllChildButtonsAndLabels(this);
-	ordersLogLoaded=false;
 	emit getHistory(true);
 	forcedReloadOrders=true;
 	emit reloadOrders();

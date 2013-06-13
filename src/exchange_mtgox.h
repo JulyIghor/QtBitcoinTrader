@@ -26,6 +26,7 @@ public:
 	~Exchange_MtGox();
 
 private:
+	QByteArray lastFetchDate;
 	bool sslEnabled;
 	bool tickerOnly;
 	int vipRequestCount;
@@ -54,13 +55,15 @@ private:
 	QTime softLagTime;
 	int apiDownCounter;
 	int secondPart;
-	QMap<int,int> requestIds;
+	QMap<int,int> requestIdsAuth;
+	QMap<int,int> requestIdsNoAuth;
 	QHttpRequestHeader headerAuth;
 	QHttpRequestHeader headerNoAuth;
 	QByteArray privateRestSign;
 	quint64 privateNonce;
 	int sendToApi(QByteArray method, bool auth=false, QByteArray commands=0);
-	QHttp *http;
+	QHttp *httpAuth;
+	QHttp *httpNoAuth;
 	QTimer *secondTimer;
 	void run();
 signals:
@@ -95,7 +98,8 @@ signals:
 private slots:
 	void sslErrors(const QList<QSslError> &);
 	void secondSlot();
-	void httpDone(int,bool);
+	void httpDoneAuth(int,bool);
+	void httpDoneNoAuth(int,bool);
 public slots:
 	void setSslEnabled(bool);
 	void clearValues();

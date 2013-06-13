@@ -28,6 +28,7 @@ Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	moveToThread(this);
 	softLagTime.restart();
 	privateNonce=QDateTime::currentDateTime().toMSecsSinceEpoch();
+	lastFetchDate=QByteArray::number(privateNonce)+"000";
 }
 
 Exchange_MtGox::~Exchange_MtGox()
@@ -84,9 +85,18 @@ void Exchange_MtGox::setSslEnabled(bool on)
 {
 	sslEnabled=on;
 	clearValues();
-	if(sslEnabled)http->setHost("data.mtgox.com",QHttp::ConnectionModeHttps);
+	requestIdsNoAuth.clear();
+	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
+	if(sslEnabled)
+	{
+		httpAuth->setHost("data.mtgox.com",QHttp::ConnectionModeHttp);
+		httpNoAuth->setHost("data.mtgox.com",QHttp::ConnectionModeHttps);
+	}
 	else
-	http->setHost("data.mtgox.com",QHttp::ConnectionModeHttp);
+	{
+		httpAuth->setHost("data.mtgox.com",QHttp::ConnectionModeHttp);
+		httpNoAuth->setHost("data.mtgox.com",QHttp::ConnectionModeHttp);
+	}
 }
 
 void Exchange_MtGox::clearValues()
@@ -107,9 +117,9 @@ void Exchange_MtGox::clearValues()
 	secondPart=0;
 	apiDownCounter=0;
 	lastHistory.clear();
-	requestIds.clear();
+	requestIdsAuth.clear();
 	lastOrders.clear();
-	if(http->hasPendingRequests())http->clearPendingRequests();
+	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
 }
 
 QByteArray Exchange_MtGox::getMidData(QString a, QString b,QByteArray *data)
@@ -132,14 +142,13 @@ void Exchange_MtGox::translateUnicodeStr(QString *str)
 	while((pos=rx.indexIn(*str,pos))!=-1)str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(0, 16)));
 }
 
-void Exchange_MtGox::httpDone(int cId, bool error)
+void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 {
-	int reqType=requestIds.value(cId,0);
-	if(vipRequestCount&&(reqType>=5&&reqType<=7))vipRequestCount--;
-	if(reqType>0)requestIds.remove(cId);else return;
+	int reqType=requestIdsNoAuth.value(cId,0);
+	if(reqType>0)requestIdsNoAuth.remove(cId);else return;
 	if(error)return;
 
-	QByteArray data=http->readAll();
+	QByteArray data=httpNoAuth->readAll();
 
 	bool lastApiDown=isApiDown;
 	if(data.size()&&data.at(0)!='{')apiDownCounter++;else {apiDownCounter=0;isApiDown=false;}
@@ -156,7 +165,118 @@ void Exchange_MtGox::httpDone(int cId, bool error)
 	{
 		switch(reqType)
 		{
-		case 1: apiLagChanged(getMidData("lag_secs\":",",\"",&data).toDouble()); break;//lag
+			case 1: apiLagChanged(getMidData("lag_secs\":",",\"",&data).toDouble()); break;//lag
+			case 3: //ticker
+				{
+					QByteArray tickerHigh=getMidData("high\":{\"value\":\"","",&data);
+					if(!tickerHigh.isEmpty())
+					{
+						double newTickerHigh=tickerHigh.toDouble();
+						if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(newTickerHigh);
+						lastTickerHigh=newTickerHigh;
+					}
+
+					QByteArray tickerLow=getMidData("low\":{\"value\":\"","",&data);
+					if(!tickerLow.isEmpty())
+					{
+						double newTickerLow=tickerLow.toDouble();
+						if(newTickerLow!=lastTickerLow)emit tickerLowChanged(newTickerLow);
+						lastTickerLow=newTickerLow;
+					}
+
+					QByteArray tickerSell=getMidData("sell\":{\"value\":\"","",&data);
+					if(!tickerSell.isEmpty())
+					{
+						double newTickerSell=tickerSell.toDouble();
+						if(newTickerSell!=lastTickerSell)emit tickerSellChanged(newTickerSell);
+						lastTickerSell=newTickerSell;
+					}
+
+					QByteArray tickerLast=getMidData("last\":{\"value\":\"","",&data);
+					if(!tickerLast.isEmpty())
+					{
+						double newTickerLast=tickerLast.toDouble();
+						if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
+						lastTickerLast=newTickerLast;
+					}
+
+					QByteArray tickerBuy=getMidData("buy\":{\"value\":\"","",&data);
+					if(!tickerBuy.isEmpty())
+					{
+						double newTickerBuy=tickerBuy.toDouble();
+						if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(newTickerBuy);
+						lastTickerBuy=newTickerBuy;
+					}
+
+					QByteArray tickerVolume=getMidData("vol\":{\"value\":\"","",&data);
+					if(!tickerVolume.isEmpty())
+					{
+						double newTickerVolume=tickerVolume.toDouble();
+						if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(newTickerVolume);
+						lastTickerVolume=newTickerVolume;
+					}
+					if(isFirstTicker)
+					{
+						emit firstTicker();
+						isFirstTicker=false;
+					}
+				}
+				break;//ticker
+			case 9: //money/trades/fetch
+				if(data.size()<32)break;
+				QStringList tradeList=QString(data).split("\"},{\"");
+				if(tradeList.count())
+				{
+					QByteArray tradeData=tradeList.last().toAscii();
+					lastFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
+					emit tickerLastChanged(getMidData("\"price\":\"","\",",&tradeData).toDouble());
+					//qDebug()<<lastFetchDate;
+				}
+				//for(int n=0;n<tradeList.count();n++)
+				//{
+				//	QByteArray tradeData=tradeList.at(n).toAscii();
+
+				//	QByteArray tradeDate=getMidData("date\":",",\"",&tradeData);
+				//	QByteArray tradePrice=getMidData("\"price\":\"","\",",&tradeData);
+				//	QByteArray tradeAmount=getMidData("\"amount\":\"","\",",&tradeData);
+				//	QByteArray tradeCurrency=getMidData("\"price_currency\":\"","\",\"",&tradeData);
+				//	QByteArray tradeType=getMidData("\"trade_type\":\"","\",\"",&tradeData);
+				//	if(n==tradeList.count()-1)
+				//	{
+				//		lastFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
+				//		emit tickerLastChanged(tradePrice.toDouble());
+				//	}
+				//	//qDebug()<<QDateTime::fromTime_t(tradeDate.toLongLong()).toString(dateTimeFormat)<<tradePrice<<tradeAmount<<tradeCurrency<<tradeType;
+				//}
+				break;
+		}
+	}
+}
+
+void Exchange_MtGox::httpDoneAuth(int cId, bool error)
+{
+	int reqType=requestIdsAuth.value(cId,0);
+	if(vipRequestCount&&(reqType>=5&&reqType<=7))vipRequestCount--;
+	if(reqType>0)requestIdsAuth.remove(cId);else return;
+	if(error)return;
+
+	QByteArray data=httpAuth->readAll();
+
+	bool lastApiDown=isApiDown;
+	if(data.size()&&data.at(0)!='{')apiDownCounter++;else {apiDownCounter=0;isApiDown=false;}
+	if(apiDownCounter==3)isApiDown=true;
+	if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
+	if(isApiDown)return;
+
+	emit softLagChanged(softLagTime.elapsed()/1000.0);
+	softLagTime.restart();
+
+	bool success=getMidData("{\"result\":\"","\",",&data)=="success";
+
+	if(success)
+	{
+		switch(reqType)
+		{
 		case 2: //info
 			{
 				if(apiLogin.isEmpty())
@@ -203,62 +323,6 @@ void Exchange_MtGox::httpDone(int cId, bool error)
 				}
 			}
 			break;//info
-		case 3: //ticker
-			{
-				QByteArray tickerHigh=getMidData("high\":{\"value\":\"","",&data);
-				if(!tickerHigh.isEmpty())
-				{
-					double newTickerHigh=tickerHigh.toDouble();
-					if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(newTickerHigh);
-					lastTickerHigh=newTickerHigh;
-				}
-
-				QByteArray tickerLow=getMidData("low\":{\"value\":\"","",&data);
-				if(!tickerLow.isEmpty())
-				{
-					double newTickerLow=tickerLow.toDouble();
-					if(newTickerLow!=lastTickerLow)emit tickerLowChanged(newTickerLow);
-					lastTickerLow=newTickerLow;
-				}
-
-				QByteArray tickerSell=getMidData("sell\":{\"value\":\"","",&data);
-				if(!tickerSell.isEmpty())
-				{
-					double newTickerSell=tickerSell.toDouble();
-					if(newTickerSell!=lastTickerSell)emit tickerSellChanged(newTickerSell);
-					lastTickerSell=newTickerSell;
-				}
-
-				QByteArray tickerLast=getMidData("last\":{\"value\":\"","",&data);
-				if(!tickerLast.isEmpty())
-				{
-					double newTickerLast=tickerLast.toDouble();
-					if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
-					lastTickerLast=newTickerLast;
-				}
-
-				QByteArray tickerBuy=getMidData("buy\":{\"value\":\"","",&data);
-				if(!tickerBuy.isEmpty())
-				{
-					double newTickerBuy=tickerBuy.toDouble();
-					if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(newTickerBuy);
-					lastTickerBuy=newTickerBuy;
-				}
-
-				QByteArray tickerVolume=getMidData("vol\":{\"value\":\"","",&data);
-				if(!tickerVolume.isEmpty())
-				{
-					double newTickerVolume=tickerVolume.toDouble();
-					if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(newTickerVolume);
-					lastTickerVolume=newTickerVolume;
-				}
-				if(isFirstTicker)
-				{
-					emit firstTicker();
-					isFirstTicker=false;
-				}
-			}
-			break;//ticker
 		case 4://orders
 			if(data.size()<=30){lastOrders.clear();emit ordersIsEmpty();break;}
 			if(lastOrders!=data)
@@ -336,6 +400,7 @@ void Exchange_MtGox::httpDone(int cId, bool error)
 			lastHistory=data;
 			}
 			break;//money/wallet/history
+		default: break;
 		}
 	}//success
 	else
@@ -350,14 +415,24 @@ void Exchange_MtGox::httpDone(int cId, bool error)
 void Exchange_MtGox::run()
 {
 	if(isLogEnabled)logThread->writeLog("Mt.Gox API Thread Started");
-	if(sslEnabled)http=new QHttp("data.mtgox.com",QHttp::ConnectionModeHttps);
-	else http=new QHttp("data.mtgox.com",QHttp::ConnectionModeHttp);
+	if(sslEnabled)
+	{
+		httpAuth=new QHttp("data.mtgox.com",QHttp::ConnectionModeHttps);
+		httpNoAuth=new QHttp("data.mtgox.com",QHttp::ConnectionModeHttps);
+	}
+	else
+	{
+		httpAuth=new QHttp("data.mtgox.com",QHttp::ConnectionModeHttp);
+		httpNoAuth=new QHttp("data.mtgox.com",QHttp::ConnectionModeHttp);
+	}
 
 	clearValues();
 
 	secondTimer=new QTimer;
-	connect(http,SIGNAL(requestFinished(int,bool)),this,SLOT(httpDone(int,bool)));
-	connect(http,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
+	connect(httpAuth,SIGNAL(requestFinished(int,bool)),this,SLOT(httpDoneAuth(int,bool)));
+	connect(httpNoAuth,SIGNAL(requestFinished(int,bool)),this,SLOT(httpDoneNoAuth(int,bool)));
+	connect(httpAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
+	connect(httpNoAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 	secondTimer->start(200);
@@ -367,8 +442,8 @@ void Exchange_MtGox::run()
 void Exchange_MtGox::cancelPendingRequests()
 {
 	if(vipRequestCount)return;
-	if(http->hasPendingRequests())http->clearPendingRequests();
-	requestIds.clear();
+	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
+	requestIdsAuth.clear();
 }
 
 void Exchange_MtGox::reloadOrders()
@@ -379,19 +454,25 @@ void Exchange_MtGox::reloadOrders()
 void Exchange_MtGox::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
-	if(requestIds.count()>8||vipRequestCount)return;//Max requests at time
-
-	if(requestIds.key(1,0)==0)requestIds[sendToApi("BTC"+currencyStr+"/money/order/lag",false)]=1;
-	if(requestIds.key(2,0)==0)requestIds[sendToApi("BTC"+currencyStr+"/money/info",true)]=2;
-	if(requestIds.key(3,0)==0)requestIds[sendToApi("BTC"+currencyStr+"/money/ticker",true)]=3;
-	if(!tickerOnly&&requestIds.key(4,0)==0)requestIds[sendToApi("BTC"+currencyStr+"/money/orders",true)]=4;
+	if(requestIdsAuth.count()<5&&!vipRequestCount)//Max pending requests at time
+	{
+	if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi("BTC"+currencyStr+"/money/info",true)]=2;
+	if(!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi("BTC"+currencyStr+"/money/orders",true)]=4;
+	}
+	if(requestIdsNoAuth.count()<10)//Max pending requests at time
+	{
+	if(requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi("BTC"+currencyStr+"/money/ticker",false)]=3;
+	if(requestIdsNoAuth.key(1,0)==0)requestIdsNoAuth[sendToApi("BTC"+currencyStr+"/money/order/lag",false)]=1;
+	if(requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi("BTC"+currencyStr+"/money/trades/fetch?since="+lastFetchDate,false)]=9;
+	}
+	if(lastHistory.isEmpty())getHistory(false);
 }
 
 void Exchange_MtGox::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	requestIds[sendToApi("money/wallet/history",true,"&currency=BTC")]=8;
+	requestIdsAuth[sendToApi("money/wallet/history",true,"&currency=BTC")]=8;
 }
 
 void Exchange_MtGox::buy(double apiBtcToBuy, double apiPriceToBuy)
@@ -400,7 +481,7 @@ void Exchange_MtGox::buy(double apiBtcToBuy, double apiPriceToBuy)
 	cancelPendingRequests();
 	vipRequestCount++;
 	QByteArray params="&type=bid&amount_int="+QByteArray::number(apiBtcToBuy*100000000,'f',0)+"&price_int="+QByteArray::number(apiPriceToBuy*100000,'f',0);
-	requestIds[sendToApi("BTC"+currencyStr+"/money/order/add",true,params)]=6;
+	requestIdsAuth[sendToApi("BTC"+currencyStr+"/money/order/add",true,params)]=6;
 	secondPart=3;
 	secondSlot();
 }
@@ -411,7 +492,7 @@ void Exchange_MtGox::sell(double apiBtcToSell, double apiPriceToSell)
 	cancelPendingRequests();
 	vipRequestCount++;
 	QByteArray params="&type=ask&amount_int="+QByteArray::number(apiBtcToSell*100000000,'f',0)+"&price_int="+QByteArray::number(apiPriceToSell*100000,'f',0);
-	requestIds[sendToApi("BTC"+currencyStr+"/money/order/add",true,params)]=7;
+	requestIdsAuth[sendToApi("BTC"+currencyStr+"/money/order/add",true,params)]=7;
 	secondPart=3;
 	secondSlot();
 }
@@ -421,7 +502,7 @@ void Exchange_MtGox::cancelOrder(QByteArray order)
 	if(tickerOnly)return;
 	cancelPendingRequests();
 	vipRequestCount++;
-	requestIds[sendToApi("BTC"+currencyStr+"/money/order/cancel",true,"&oid="+order)]=5;
+	requestIdsAuth[sendToApi("BTC"+currencyStr+"/money/order/cancel",true,"&oid="+order)]=5;
 	secondPart=3;
 	secondSlot();
 }
@@ -436,12 +517,12 @@ int Exchange_MtGox::sendToApi(QByteArray method, bool auth, QByteArray commands)
 		headerAuth.setRequest("POST","/api/2/"+method);
 		headerAuth.setContentLength(postData.size());
 		if(isLogEnabled)logThread->writeLog("/api/2/"+method+"?"+postData);
-		return http->request(headerAuth,postData);
+		return httpAuth->request(headerAuth,postData);
 	}
 	else
 	{
-		headerNoAuth.setRequest("POST","/api/2/"+method);
-		return http->request(headerNoAuth);
+		headerNoAuth.setRequest("GET","/api/2/"+method);
+		return httpNoAuth->request(headerNoAuth);
 	}
 	return 0;
 }

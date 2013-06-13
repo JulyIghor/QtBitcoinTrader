@@ -32,7 +32,6 @@ public:
 	Ui::QtBitcoinTraderClass ui;
 	
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
-	QTimer *secondTimer;
 	QtBitcoinTrader();
 	~QtBitcoinTrader();
 
@@ -61,7 +60,6 @@ private:
 	double lastMarketLowPrice;
 	double lastMarketHighPrice;
 
-	bool logTextEditEmpty;
 	bool constructorFinished;
 	void closeEvent(QCloseEvent *event);
 	void reject(){};
@@ -70,7 +68,6 @@ private:
 	QString appDir;
 	bool authErrorOnce;
 	bool showingMessage;
-	bool ordersLogLoaded;
 	void beep();
 
 	bool lastLagState;
@@ -170,7 +167,7 @@ public slots:
 	void ordersSelectionChanged();
 	void mtgoxLagChanged(double);
 	void ordersCancelSelected();
-	void secondSlot();
+
 	void ordersCancelAll();
 	void accountFeeChanged(double);
 
