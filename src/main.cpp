@@ -21,6 +21,8 @@
 #include <QDesktopServices>
 #include "translationdialog.h"
 #include <QMessageBox>
+#include <QDateTime>
+#include <QCryptographicHash>
 
 QByteArray *appDataDir_;
 QMap<QByteArray,QByteArray> *currencySignMap;
@@ -39,9 +41,9 @@ QString *logFileName_;
 double *appVerReal_;
 QByteArray *appVerStr_;
 bool *validKeySign_;
-bool *useSSL_;
 JulyTranslator *julyTranslator;
 QString *defaultLangFile_;
+QString *dateTimeFormat_;
 
 void pickDefaultLangFile()
 {
@@ -53,6 +55,8 @@ void pickDefaultLangFile()
 	if(sysLocale.startsWith("nl"))defaultLangFile=":/Resources/Language/Dutch.lng";
 	else 
 	if(sysLocale.startsWith("es"))defaultLangFile=":/Resources/Language/Spanish.lng";
+	else 
+	if(sysLocale.startsWith("nb"))defaultLangFile=":/Resources/Language/Norwegian.lng";
 	else defaultLangFile=":/Resources/Language/English.lng";
 }
 
@@ -63,19 +67,17 @@ int main(int argc, char *argv[])
 
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("0.99");
+	appVerStr_=new QByteArray("1.00");
 	appVerReal_=new double(appVerStr.toDouble());
 	currencyStr_=new QByteArray();
 	currencySign_=new QByteArray();
 	validKeySign_=new bool(false);
 	bitcoinSign_=new QByteArray("BTC");
 	defaultLangFile_=new QString();pickDefaultLangFile();
-	useSSL_=new bool(true);
 	currencySignMap=new QMap<QByteArray,QByteArray>;
 	currencyNamesMap=new QMap<QByteArray,QByteArray>;
+	dateTimeFormat_=new QString("yyyy-MM-dd HH:mm:ss");
 	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
-
-	
 
 #ifdef Q_OS_WIN
 	if(QFile::exists("./QtBitcoinTrader"))
@@ -97,7 +99,7 @@ int main(int argc, char *argv[])
     if(argc>1)
 	{
 		QApplication a(argc,argv);
-        if(a.arguments().last()=="/checkupdate")
+        if(a.arguments().last().startsWith("/checkupdate"))
 		{
 #ifndef Q_OS_WIN
 			a.setStyle(new QPlastiqueStyle);
@@ -109,7 +111,7 @@ int main(int argc, char *argv[])
 			if(langFile.isEmpty()||!langFile.isEmpty()&&!QFile::exists(langFile))langFile=defaultLangFile;
 			julyTranslator->loadFromFile(langFile);
 
-			UpdaterDialog updater;
+			UpdaterDialog updater(a.arguments().last()!="/checkupdate");
 			return a.exec();
 		}
 	}
@@ -162,9 +164,6 @@ int main(int argc, char *argv[])
 		if(langFile.isEmpty()||!langFile.isEmpty()&&!QFile::exists(langFile))langFile=defaultLangFile;
 			julyTranslator->loadFromFile(langFile);
 	}
-
-	//(new TranslationDialog)->show();
-	//return a.exec();
 
 	bool tryDecrypt=true;
 	bool showNewPasswordDialog=false;

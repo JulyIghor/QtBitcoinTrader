@@ -1293,6 +1293,9 @@
             <property name="wordWrap">
              <bool>false</bool>
             </property>
+            <property name="margin">
+             <number>4</number>
+            </property>
            </widget>
           </item>
          </layout>
@@ -2851,6 +2854,34 @@
       <property name="horizontalSpacing">
        <number>2</number>
       </property>
+      <item row="1" column="0" colspan="2">
+       <widget class="QPushButton" name="buttonBuyThenSellApply">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="accessibleName">
+         <string>TR00039</string>
+        </property>
+        <property name="text">
+         <string>Apply</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="usdLabel72">
         <property name="sizePolicy">
@@ -2920,34 +2951,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QPushButton" name="buttonBuyThenSellApply">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>60</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="accessibleName">
-         <string>TR00039</string>
-        </property>
-        <property name="text">
-         <string>Apply</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="2">
        <widget class="QToolButton" name="zeroBuyThanSellProfit">
         <property name="sizePolicy">
@@ -2988,7 +2991,7 @@
       <string>SELL_BITCOINS</string>
      </property>
      <property name="styleSheet">
-      <string notr="true">QGroupBox {color: green}</string>
+      <string notr="true">QGroupBox {color: blue}</string>
      </property>
      <property name="title">
       <string>SELL BITCOINS</string>

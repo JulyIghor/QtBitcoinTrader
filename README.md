@@ -13,6 +13,12 @@ This software helps you to open and cancel Mt.Gox orders vary fast.
 
 Change Log
 
+v1.00
+- Api engine rewrited. Works faster.
+- Api lag improvements.
+- Fixed minor bugs.
+- Added Norwegian translation.
+
 v0.99
 - Fixed minor bugs
 - Added Spanish translation

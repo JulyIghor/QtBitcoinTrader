@@ -19,7 +19,7 @@
 #define USE_QTMULTIMEDIA
 
 #define julyTr julyTranslator->translateString
-
+#define hmacSha512(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha512(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),64).toBase64()
 #define hostName QByteArray("data.mtgox.com")
 #define apiId QByteArray("2")
 #define restKey (*restKey_)
@@ -31,20 +31,20 @@
 #define logFileName (*logFileName_)
 #define appVerReal (*appVerReal_)
 #define appVerStr (*appVerStr_)
-#define useSSL (*useSSL_)
 #define currencyStr (*currencyStr_)
 #define currencySign (*currencySign_)
 #define bitcoinSign (*bitcoinSign_)
 #define appDataDir (*appDataDir_)
 #define defaultLangFile (*defaultLangFile_)
+#define dateTimeFormat (*dateTimeFormat_)
 
+extern QString *dateTimeFormat_;
 extern QString *defaultLangFile_;
 extern JulyTranslator *julyTranslator;
 extern QByteArray *appDataDir_;
 extern QByteArray *bitcoinSign_;
 extern QByteArray *currencyStr_;
 extern QByteArray *currencySign_;
-extern bool *useSSL_;
 extern QByteArray *appVerStr_;
 extern LogThread *logThread;
 extern QByteArray *restKey_;

@@ -17,14 +17,18 @@
 #endif
 #include <QCryptographicHash>
 #include <QMessageBox>
+#include <QClipboard>
+#include <QDesktopServices>
+#include <QUrl>
 
-UpdaterDialog::UpdaterDialog(QWidget *parent)
-	: QDialog(parent)
+UpdaterDialog::UpdaterDialog(bool fbMess)
+	: QDialog()
 {
+	feedbackMessage=fbMess;
 	stateUpdate=0;
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
-	httpGet=new QHttp("raw.github.com", QHttp::ConnectionModeHttps,443,this);
+	httpGet=new QHttp("raw.github.com",QHttp::ConnectionModeHttps,443,this);
 	timeOutTimer=new QTimer(this);
 	connect(timeOutTimer,SIGNAL(timeout()),this,SLOT(exitSlot()));
 	connect(httpGet,SIGNAL(done(bool)),this,SLOT(httpDone(bool)));
@@ -35,6 +39,13 @@ UpdaterDialog::UpdaterDialog(QWidget *parent)
 
 UpdaterDialog::~UpdaterDialog()
 {
+}
+
+void UpdaterDialog::copyDonateButton()
+{
+	QApplication::clipboard()->setText(ui.bitcoinAddress->text());
+	QDesktopServices::openUrl(QUrl("bitcoin:"+ui.bitcoinAddress->text()));
+	QMessageBox::information(this,"Qt Bitcoin Trader",julyTr("COPY_DONATE_MESSAGE","Bitcoin address copied to clipboard.<br>Thank you for support!"));
 }
 
 void UpdaterDialog::exitSlot()
@@ -53,6 +64,8 @@ void UpdaterDialog::httpDone(bool error)
 			downloadError();
 			return;
 		}
+		if(feedbackMessage)
+			QMessageBox::information(0,"Qt Bitcoin Trader",julyTr("UPDATE_ERROR","Cannot check for update. Network error: %1").arg(httpGet->errorString()));
 		exitSlot();
 		return;
 	}
@@ -90,7 +103,13 @@ bool canAutoUpdate=false;
 		if(!updateSignature.isEmpty())updateSignature=QByteArray::fromBase64(updateSignature);
 		updateChangeLog=versionsMap.value(os+"ChangeLog");
 		updateLink=versionsMap.value(os+"Bin");
-		if(updateVersion.toDouble()<=appVerReal){exitSlot();return;}
+		if(updateVersion.toDouble()<=appVerReal)
+		{
+			if(feedbackMessage)
+				QMessageBox::information(0,"Qt Bitcoin Trader",julyTr("UP_TO_DATE","Your version of Qt Bitcoin Trader is up to date."));
+			exitSlot();
+			return;
+		}
 		stateUpdate=1;
 		ui.autoUpdateGroupBox->setVisible(canAutoUpdate);
 		ui.changeLogText->setHtml(updateChangeLog);

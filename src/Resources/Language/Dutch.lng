@@ -59,7 +59,7 @@ Label_TR00109=Paswoord:
 Label_TR00111=Jou API Key and geheim worden gecodeerd door AES256.
 Label_TR00112=Your API Key and Secret are crypted by AES256.<br>Please enter password to decrypt data.<br>Or reset data and re-enter API keys.
 Label_TR00115=Taal:
-Label_TR00116=Auteur:
+Label_TR00116=Vertaler:
 Label_TR00118=If you want to translate Qt Bitcoin Trader to your native language.<br><br>Or if you want to fix errors in existing translation.<br>Please follow instructions.
 Label_TR00119=1) Press &quot;Create translation button&quot;<br><br>2) Make your changes for all fields. You can use Html formatting<br><br>3) Press &quot;Apply&quot; button and varify that all text fits good<br><br>4) Press &quot;Save As&quot; button and save language file<br><br>5) Send language file to <a href="mailto:julyighor@gmail.com"> julyighor@gmail.com</a>
 Label_TR00120=And after verification your translation will be added<br>to next version of Qt Bitcoin Trader.
@@ -201,6 +201,7 @@ String_ORDER_STATE_CANCELED=Geannuleerd
 String_ORDER_STATE_INVALID=Ongeldig
 String_ORDER_STATE_OPEN=open
 String_ORDER_STATE_PENDING=hangend
+String_ORDER_STATE_POST-PENDING=hangend
 String_ORDER_TYPE_ASK=vraag
 String_ORDER_TYPE_BID=bied
 String_RULES_T_ACTION=Actie
@@ -226,5 +227,7 @@ String_TRUNAUTHORIZED=Identification required to access private API.<br>Please e
 String_UPDATED_SUCCESSFULLY=Applicatie succesvol upgedate. Gelieve te herstarten.
 String_UPDATE_RELEASED_TEXT=Update vrijgegeven %1. Gelieve te downloaden van %2
 String_LANGUAGE_NAME=Dutch
-String_LANGUAGE_AUTHOR=mavis43<br><a href="bitcoin:17EdXQSScdsJdDtgq2qACfwk1cNm9hryy7">17EdXQSScdsJdDtgq2qACfwk1cNm9hryy7</a>
+String_LANGUAGE_AUTHOR=mavis43<br><a href="mailto:mavis43@gmail.com">mavis43@gmail.com</a><br>Schenken Bitcoin<br><a href="bitcoin:17EdXQSScdsJdDtgq2qACfwk1cNm9hryy7">17EdXQSScdsJdDtgq2qACfwk1cNm9hryy7</a>
 String_LANGUAGE_LOCALE=nl
+String_UP_TO_DATE=Your version of Qt Bitcoin Trader is up to date
+String_UPDATE_ERROR=Cannot check for update. Network error: %1

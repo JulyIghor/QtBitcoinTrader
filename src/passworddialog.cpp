@@ -25,25 +25,29 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	ui.setupUi(this);
     setWindowTitle(windowTitle()+" v"+appVerStr);
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
+	ui.updateCheckBox->setStyleSheet("QCheckBox {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent)}");
 	ui.okButton->setEnabled(false);
 #ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())
-		QtWin::extendFrameIntoClientArea(this);
+	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
 #endif
-
-	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
-	for(int n=0;n<settingsList.count();n++)
-		ui.profileComboBox->addItem(QSettings(appDataDir+settingsList.at(n),QSettings::IniFormat).value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
-	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem(julyTr("DEFAULT_PROFILE_NAME","Default Profile"));
 	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
 	ui.updateCheckBox->setChecked(settings.value("CheckForUpdates",true).toBool());
+	QString lastProfile=settings.value("LastProfile","").toString();
+	int lastProfileIndex=-1;
+	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
+	for(int n=0;n<settingsList.count();n++)
+	{
+		ui.profileComboBox->addItem(QSettings(appDataDir+settingsList.at(n),QSettings::IniFormat).value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
+		if(lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;
+	}
+	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem(julyTr("DEFAULT_PROFILE_NAME","Default Profile"));
+	if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);
 #ifdef GENERATE_LANGUAGE_FILE
 	julyTranslator->loadMapFromUi(this);
 	julyTranslator->saveToFile("LanguageDefault.lng");
 #endif
 
 	julyTranslator->translateUi(this);
-
 
 	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())
 		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),QFontMetrics(checkBoxes->font()).width(checkBoxes->text())+20));
@@ -55,6 +59,14 @@ PasswordDialog::~PasswordDialog()
 {
 	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
 	settings.setValue("CheckForUpdates",ui.updateCheckBox->isChecked());
+}
+
+void PasswordDialog::accept()
+{
+	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+	int currIndex=ui.profileComboBox->currentIndex();
+	if(currIndex>-1)settings.setValue("LastProfile",ui.profileComboBox->itemData(currIndex).toString());
+	QDialog::accept();
 }
 
 QString PasswordDialog::getIniFilePath()

@@ -3,8 +3,8 @@ MacVer=0.99
 SrcVer=0.99
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/QtBitcoinTrader.exe
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTrader
-Win32ChangeLog=- Fixed minor bugs<br>-Added Spanish translation<br>-Translation engine updated<br>-Checking update rewrited. Secure autoinstall for Mac and Win feature added.
-MacChangeLog=- Fixed minor bugs<br>-Added Spanish translation<br>-Translation engine updated<br>-Checking update rewrited. Secure autoinstall for Mac and Win feature added.
-SrcLog=- Fixed minor bugs<br>-Added Spanish translation<br>-Translation engine updated<br>-Checking update rewrited. Secure autoinstall for Mac and Win feature added.
-Win32Signature=ElVeFgOuQ+NEq/+0qFBVZkfHYNX6PIc08ckh1vb2nO7xyzHTlqWivfLjOMdCBfXSxv0h6/NtK/8sKcoauiaYwfGEH+SwGgrZZH+UEE4Fvps9D3WNwzy7GGO+80ViygnCBNfSviEjmmVbMcHWe9aMWoacN9nZPuKkiLyl0B6jPBSjN+EfHIR+Pp2v2YkTgj7N1HZS04PdGHx+vAzEg9nIz2rx9CWIBKFaRRCd48nW3I9QB198hEAaIi/DwmnmSeBSey2c0JxsJYD1b8KVjYrF8E/b/fjkw1xmYuRig5DxhpkZGk+1UjZFtEbgeH8W83EWRXEcfww0F3dCQ3X/S/W37Q==
-MacSignature=oX/dLfQl/81JYAN4Wl/zZb4lPqgT2W14BvZ7wt6hbY7eSR1ZvXtY7OV6VKg6aqQJMIoNCfiWOeagAbgtbaWAURdbw5PLeNuAAZV9alAuv1V0dhjILkhn3Q39N2UwDlJNq8uJKeR5ge5YJrZMf9WZ5w8ed/hMQZbo/S2IUjWSBVI65YIBInfRC4nKtIka+XkzQ+XNCXXgMfSX3lwALpWCeL4zWwDIktqhJ7WNppPoX5JWhKPGWGZ6EQSavZXZsWFGBkREkYE0rvmU/UX9+xyR8hRlgBTVRXgOdsexPE0dYGfAyhVGeUMpT6G9kJbnv6dCQyvjHiyqbArTHCq+t9Mjag==
+Win32ChangeLog=- Api engine rewrited. Works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
+MacChangeLog=- Api engine rewrited. Works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
+SrcLog=- Api engine rewrited. Works faster.<br>- Api lag improvements.<br>- Fixed minor bugs.<br>- Added Norwegian translation.
+Win32Signature=nSF6uxEzbCNVKcKTvBPyvaZU4DLdnhTTfjqtXZYLQTKiVhJxQjZjYoiVmWZFQCdUPLbNORgpAr/x7CNlhu/+/sJBNKdd8VBdINa/utIgVgZ0Ph7GRnHBj/zn7UmGDxSqrZ4CLpNrWN6dnlzE2+lhxRbXgSSS/d+mQH9TmREK+ZrniMQrxTYCia5AtmupCueDqkkz8gOu3JYqIGDfZbj3a1DZqteTLYr+b3OyydsOJZG9DApHeoySaY7+JQBPOnb73kn943B20lO2hdPOv62NZIgB8cNEi5CZmYP6Glh42oN24JOdG+TeN0UrBBt7BfMw05apWUtGhfcmDjsLGjzR1w==
+MacSignature=eDRj8klrXDmsroFHdRYCjiD+B6BAFuTHWh/KxRnhhhGYvf9sp5CaSsI0HtsCWyDPp478DR+ypHB4HyTTC8aZRYAYE8gpx9acDu0RLpGdf/YmlI1BboO1IlYuJKqJg1Gjw3wq6iciCXkheP/m+FmEeKshpIdoTC1Ri7ikn8cpWohxD1YorXVrCQMT2LZHhP60m3YFgdIediiZ0Ng3ouMiQ0AvHOh3XlS+CYL69Ot2xcNdjqfEfJCmPxOomh6Q9xmuTnmj6H8OqD0CMmhpfbVo6OdyDfKDovSet+QiMdwCfkDmNlf89DyRKT/8oUoZJyoArZ++ZJCA1z+VsqD8rRCu2g==

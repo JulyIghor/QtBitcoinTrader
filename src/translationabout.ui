@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>686</width>
-    <height>342</height>
+    <width>607</width>
+    <height>304</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -21,193 +21,6 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
-    <widget class="QGroupBox" name="aboutTranslationGroupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>120</height>
-      </size>
-     </property>
-     <property name="accessibleName">
-      <string>ABOUT_TRANSLATION</string>
-     </property>
-     <property name="title">
-      <string>About Translation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="langLabel">
-        <property name="accessibleName">
-         <string>TR00115</string>
-        </property>
-        <property name="text">
-         <string>Language:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="languageField">
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="accessibleName">
-         <string>TR00116</string>
-        </property>
-        <property name="text">
-         <string>Author:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="translationAuthor">
-        <property name="accessibleName">
-         <string>TR00116</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {color: black; border: 1px solid gray; background: white; padding:6px}</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="1" rowspan="2">
-    <widget class="QGroupBox" name="createTranslationGroupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="accessibleName">
-      <string>TR00117</string>
-     </property>
-     <property name="title">
-      <string>Create translation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0" colspan="3">
-       <widget class="QLabel" name="translateLabel1">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="accessibleName">
-         <string>TR00118</string>
-        </property>
-        <property name="text">
-         <string>If you want to translate Qt Bitcoin Trader to your native language.&lt;br&gt;
-Or if you want to fix errors in existing translation.&lt;br&gt;Please follow instructions.</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="3">
-       <widget class="QLabel" name="translateLabel3">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="accessibleName">
-         <string>TR00120</string>
-        </property>
-        <property name="text">
-         <string>And after verification your translation will be added&lt;br&gt;to next version of Qt Bitcoin Trader.</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="3">
-       <widget class="QLabel" name="translateLabel2">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="accessibleName">
-         <string>TR00119</string>
-        </property>
-        <property name="text">
-         <string>1) Press &amp;quot;Create translation button&amp;quot;&lt;br&gt;
-2) Make your changes for all fields. You can use Html formatting&lt;br&gt;
-3) Press &amp;quot;Apply&amp;quot; button and varify that all text fits good&lt;br&gt;
-4) Press &amp;quot;Save As&amp;quot; button and safe language file&lt;br&gt;
-5) Send language file to &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt; julyighor@gmail.com&lt;/a&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="3">
-       <widget class="QPushButton" name="createTranslationButton">
-        <property name="accessibleName">
-         <string>TR00121</string>
-        </property>
-        <property name="text">
-         <string>Create translation</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="0">
     <widget class="QGroupBox" name="aboutBitcoinTraderGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -331,6 +144,193 @@ Or if you want to fix errors in existing translation.&lt;br&gt;Please follow ins
          <string>Qt Bitcoin Trader is a free Open Source project&lt;br&gt;developed on pure C++ Qt and OpenSSL.&lt;br&gt;
 If you want to help make project better please donate: &lt;a href=&quot;bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc&quot;&gt;1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc&lt;/a&gt;&lt;br&gt;
 Feel free to send me recommendations and fixes to: &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt;julyighor@gmail.com&lt;/a&gt;&lt;br&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="1" rowspan="2">
+    <widget class="QGroupBox" name="createTranslationGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="accessibleName">
+      <string>TR00117</string>
+     </property>
+     <property name="title">
+      <string>Create translation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0" colspan="3">
+       <widget class="QLabel" name="translateLabel1">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string>TR00118</string>
+        </property>
+        <property name="text">
+         <string>If you want to translate Qt Bitcoin Trader to your native language.&lt;br&gt;
+Or if you want to fix errors in existing translation.&lt;br&gt;Please follow instructions.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="3">
+       <widget class="QLabel" name="translateLabel3">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string>TR00120</string>
+        </property>
+        <property name="text">
+         <string>And after verification your translation will be added&lt;br&gt;to next version of Qt Bitcoin Trader.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <widget class="QLabel" name="translateLabel2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string>TR00119</string>
+        </property>
+        <property name="text">
+         <string>1) Press &amp;quot;Create translation button&amp;quot;&lt;br&gt;
+2) Make your changes for all fields. You can use Html formatting&lt;br&gt;
+3) Press &amp;quot;Apply&amp;quot; button and varify that all text fits good&lt;br&gt;
+4) Press &amp;quot;Save As&amp;quot; button and safe language file&lt;br&gt;
+5) Send language file to &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt; julyighor@gmail.com&lt;/a&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <widget class="QPushButton" name="createTranslationButton">
+        <property name="accessibleName">
+         <string>TR00121</string>
+        </property>
+        <property name="text">
+         <string>Create translation</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="aboutTranslationGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>120</height>
+      </size>
+     </property>
+     <property name="accessibleName">
+      <string>ABOUT_TRANSLATION</string>
+     </property>
+     <property name="title">
+      <string>About Translation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="langLabel">
+        <property name="accessibleName">
+         <string>TR00115</string>
+        </property>
+        <property name="text">
+         <string>Language:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="languageField">
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="accessibleName">
+         <string>TR00116</string>
+        </property>
+        <property name="text">
+         <string>Translator:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="translationAuthor">
+        <property name="accessibleName">
+         <string>TR00116</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {color: black; border: 1px solid gray; background: white; padding:6px}</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

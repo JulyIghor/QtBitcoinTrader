@@ -24,7 +24,7 @@ HEADERS += aboutdialog.h \
            passworddialog.h \
            qtbitcointrader.h \
            ruleholder.h \
-           socketthread.h \
+           exchange_mtgox.h \
            translationdialog.h \
            translationline.h \
            updaterdialog.h \
@@ -51,7 +51,7 @@ SOURCES += aboutdialog.cpp \
            passworddialog.cpp \
            qtbitcointrader.cpp \
            ruleholder.cpp \
-           socketthread.cpp \
+           exchange_mtgox.cpp \
            translationdialog.cpp \
            translationline.cpp \
            updaterdialog.cpp \

@@ -10,8 +10,6 @@
 #include "julyspinboxfix.h"
 #include "main.h"
 
-#include <QDebug>
-
 JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox *parentSB, int minWid)
 	: QObject()
 {

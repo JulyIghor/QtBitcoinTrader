@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>360</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -25,7 +25,7 @@
   <property name="windowTitle">
    <string>Qt Bitcoin Trader</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_5">
+  <layout class="QGridLayout" name="gridLayout_6">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="font">
@@ -249,6 +249,109 @@ Download file will be validated by RSA2048 protected checksum.</string>
      </layout>
     </widget>
    </item>
+   <item row="4" column="0">
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>480</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="accessibleName">
+      <string>TR00053</string>
+     </property>
+     <property name="title">
+      <string>Donate</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <property name="margin">
+       <number>9</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="btcLabel11">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: #996515</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="bitcoinAddress">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="copyDonateButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="accessibleName">
+         <string>TR00054</string>
+        </property>
+        <property name="text">
+         <string>Copy</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="default">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -261,8 +364,8 @@ Download file will be validated by RSA2048 protected checksum.</string>
    <slot>buttonUpdate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>197</x>
-     <y>285</y>
+     <x>340</x>
+     <y>305</y>
     </hint>
     <hint type="destinationlabel">
      <x>202</x>
@@ -270,9 +373,26 @@ Download file will be validated by RSA2048 protected checksum.</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>copyDonateButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>UpdaterDialog</receiver>
+   <slot>copyDonateButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>322</x>
+     <y>392</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>408</x>
+     <y>453</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>buttonUpdate()</slot>
   <slot>buttonDownload()</slot>
+  <slot>copyDonateButton()</slot>
  </slots>
 </ui>

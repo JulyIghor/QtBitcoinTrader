@@ -12,7 +12,6 @@
 
 #include <QtGui/QDialog>
 #include "ui_qtbitcointrader.h"
-#include "socketthread.h"
 #include <QHttp>
 #include <QCloseEvent>
 #include "ruleholder.h"
@@ -28,21 +27,17 @@ public:
 
 	bool isValidSoftLag();
 
-	void apiSell(double btc, double price);
-	void apiBuy(double btc, double price);
-
 	void checkAndExecuteRule(QList<RuleHolder> *ruleHolder, double price);
 
 	Ui::QtBitcoinTraderClass ui;
-	bool confirmBuySell;
 	
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	QTimer *secondTimer;
-	SocketThread *socketThreadAuth;
 	QtBitcoinTrader();
 	~QtBitcoinTrader();
 
 private:
+	bool forcedReloadOrders;
 	bool checkForUpdates;
 	QList<RuleHolder> rulesLastPrice;
 	QList<RuleHolder> rulesMarketBuyPrice;
@@ -53,7 +48,6 @@ private:
 	QList<RuleHolder> rulesOrdersLastSellPrice;
 
 	void addRuleByHolderToTable(RuleHolder);
-	QString dateTimeFormat;
 	int lastLoadedCurrency;
 	void postWorkAtTableItem(QTableWidgetItem *);
 	void checkAllRules();
@@ -69,8 +63,6 @@ private:
 
 	bool logTextEditEmpty;
 	bool constructorFinished;
-	bool apiDownState;
-	void setApiDown(bool);
 	void closeEvent(QCloseEvent *event);
 	void reject(){};
 	QString clearData(QString data);
@@ -81,7 +73,6 @@ private:
 	bool ordersLogLoaded;
 	void beep();
 
-	void cancelOrderByOid(QByteArray);
 	bool lastLagState;
 	void setRuleStateBuGuid(quint64 guid, int state);
 	void setRulesTableRowState(int row, int state);
@@ -106,14 +97,29 @@ private:
 
 	QMap<QByteArray,QString> oidMap;
 	void insertIntoTable(QByteArray,QString);
-	QDateTime lastUpdate;
-	QTime updateLogTime;
 	bool profitSellThanBuyUnlocked;
 	bool profitBuyThanSellUnlocked;
 	void translateUnicodeStr(QString *str);
 	void cacheFirstRowGuid();
 	uint firstRowGuid;
 public slots:
+	void ordersChanged(QString);
+
+	void setApiDown(bool);
+
+	void identificationRequired();
+
+	void updateLogTable();
+	void ordersLogChanged(QString);
+
+	void accLastSellChanged(QByteArray,double);
+	void accLastBuyChanged(QByteArray,double);
+
+	void orderCanceled(QByteArray);
+	void ordersIsEmpty();
+	void firstTicker();
+	void firstAccInfo();
+
 	void anyValueChanged();
 	void ruleUp();
 	void ruleDown();
@@ -138,8 +144,7 @@ public slots:
 
 	void currencyChanged(int);
 
-	void apiDownSlot();
-	void setSslEnabled(bool);
+	void setSslEnabledSlot(bool);
 	void calcButtonClicked();
 	void checkUpdate();
 
@@ -162,12 +167,10 @@ public slots:
 	void ordersLastSellPriceChanged(double);
 
 	void balanceChanged(double);
-	void updateLogTable();
 	void ordersSelectionChanged();
 	void mtgoxLagChanged(double);
 	void ordersCancelSelected();
 	void secondSlot();
-	void dataReceivedAuth(QByteArray);
 	void ordersCancelAll();
 	void accountFeeChanged(double);
 
@@ -188,7 +191,14 @@ public slots:
 	void sellTotalBtcToSellChanged(double);
 	void lastSoftLagChanged(double);
 signals:
+	void setSslEnabled(bool);
+	void reloadOrders();
+	void cancelOrderByOid(QByteArray);
+	void apiSell(double btc, double price);
+	void apiBuy(double btc, double price);
+	void getHistory(bool);
 	void quit();
+	void clearValues();
 };
 
 #endif // QTBITCOINTRADER_H

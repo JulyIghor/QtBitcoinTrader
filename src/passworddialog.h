@@ -29,6 +29,7 @@ private slots:
 	void addNewProfile();
 	void checkToEnableButton(QString);
 private: 
+	void accept();
 	Ui::PasswordDialog ui;
 };
 

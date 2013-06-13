@@ -20,10 +20,11 @@ class UpdaterDialog : public QDialog
 	Q_OBJECT
 
 public:
-	UpdaterDialog(QWidget *parent = 0);
+	UpdaterDialog(bool feedbackMessage);
 	~UpdaterDialog();
 
 private:
+	bool feedbackMessage;
 	QTimer *timeOutTimer;
 	void downloadError();
 	QString updateVersion;
@@ -35,6 +36,7 @@ private:
 	QHttp *httpGet;
 	Ui::UpdaterDialog ui;
 private slots:
+	void copyDonateButton();
 	void exitSlot();
 	void dataReadProgress(int done,int total);
 	void buttonUpdate();
