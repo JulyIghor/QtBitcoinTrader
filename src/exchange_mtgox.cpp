@@ -11,7 +11,7 @@
 #include <openssl/hmac.h>
 #include "main.h"
 #include <QDateTime>
-#include <QSSlError>
+#include <QSslError>
 
 Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()
@@ -117,9 +117,11 @@ void Exchange_MtGox::clearValues()
 	secondPart=0;
 	apiDownCounter=0;
 	lastHistory.clear();
-	requestIdsAuth.clear();
 	lastOrders.clear();
+	requestIdsAuth.clear();
+	requestIdsNoAuth.clear();
 	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
+	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
 }
 
 QByteArray Exchange_MtGox::getMidData(QString a, QString b,QByteArray *data)
@@ -225,29 +227,22 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 			case 9: //money/trades/fetch
 				if(data.size()<32)break;
 				QStringList tradeList=QString(data).split("\"},{\"");
-				if(tradeList.count())
+				for(int n=0;n<tradeList.count();n++)
 				{
-					QByteArray tradeData=tradeList.last().toAscii();
-					lastFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
-					emit tickerLastChanged(getMidData("\"price\":\"","\",",&tradeData).toDouble());
-					//qDebug()<<lastFetchDate;
-				}
-				//for(int n=0;n<tradeList.count();n++)
-				//{
-				//	QByteArray tradeData=tradeList.at(n).toAscii();
+					QByteArray tradeData=tradeList.at(n).toAscii();
 
-				//	QByteArray tradeDate=getMidData("date\":",",\"",&tradeData);
-				//	QByteArray tradePrice=getMidData("\"price\":\"","\",",&tradeData);
-				//	QByteArray tradeAmount=getMidData("\"amount\":\"","\",",&tradeData);
-				//	QByteArray tradeCurrency=getMidData("\"price_currency\":\"","\",\"",&tradeData);
-				//	QByteArray tradeType=getMidData("\"trade_type\":\"","\",\"",&tradeData);
-				//	if(n==tradeList.count()-1)
-				//	{
-				//		lastFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
-				//		emit tickerLastChanged(tradePrice.toDouble());
-				//	}
-				//	//qDebug()<<QDateTime::fromTime_t(tradeDate.toLongLong()).toString(dateTimeFormat)<<tradePrice<<tradeAmount<<tradeCurrency<<tradeType;
-				//}
+					//QByteArray tradeDate=getMidData("date\":",",\"",&tradeData);
+					QByteArray tradePrice=getMidData("\"price\":\"","\",",&tradeData);
+					//QByteArray tradeAmount=getMidData("\"amount\":\"","\",",&tradeData);
+					//QByteArray tradeCurrency=getMidData("\"price_currency\":\"","\",\"",&tradeData);
+					//QByteArray tradeType=getMidData("\"trade_type\":\"","\",\"",&tradeData);
+					emit tickerLastChanged(getMidData("\"price\":\"","\",",&tradeData).toDouble());
+					if(n==tradeList.count()-1)
+					{
+						lastFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
+					}
+					//qDebug()<<QDateTime::fromTime_t(tradeDate.toLongLong()).toString(dateTimeFormat)<<tradePrice<<tradeAmount<<tradeCurrency<<tradeType;
+				}
 				break;
 		}
 	}
@@ -450,10 +445,11 @@ void Exchange_MtGox::reloadOrders()
 {
 	lastOrders.clear();
 }
-
+#include <QDebug>
 void Exchange_MtGox::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
+	qDebug()<<requestIdsAuth.count()<<requestIdsNoAuth.count();
 	if(requestIdsAuth.count()<5&&!vipRequestCount)//Max pending requests at time
 	{
 	if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi("BTC"+currencyStr+"/money/info",true)]=2;
@@ -461,8 +457,8 @@ void Exchange_MtGox::secondSlot()
 	}
 	if(requestIdsNoAuth.count()<10)//Max pending requests at time
 	{
-	if(requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi("BTC"+currencyStr+"/money/ticker",false)]=3;
 	if(requestIdsNoAuth.key(1,0)==0)requestIdsNoAuth[sendToApi("BTC"+currencyStr+"/money/order/lag",false)]=1;
+	if(requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi("BTC"+currencyStr+"/money/ticker",false)]=3;
 	if(requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi("BTC"+currencyStr+"/money/trades/fetch?since="+lastFetchDate,false)]=9;
 	}
 	if(lastHistory.isEmpty())getHistory(false);
