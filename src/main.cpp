@@ -122,13 +122,13 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef  Q_OS_WIN
-	QFile::remove(a.applicationFilePath()+".upd");
-	QFile::remove(a.applicationFilePath()+".bkp");
+	if(QFile::exists(a.applicationFilePath()+".upd"))QFile::remove(a.applicationFilePath()+".upd");
+	if(QFile::exists(a.applicationFilePath()+".bkp"))QFile::remove(a.applicationFilePath()+".bkp");
 #endif
 
 #ifdef  Q_OS_MAC
-	QFile::remove(a.applicationFilePath()+".upd");
-	QFile::remove(a.applicationFilePath()+".bkp");
+	if(QFile::exists(a.applicationFilePath()+".upd"))QFile::remove(a.applicationFilePath()+".upd");
+	if(QFile::exists(a.applicationFilePath()+".bkp"))QFile::remove(a.applicationFilePath()+".bkp");
 #endif
 
 	a.setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
@@ -195,7 +195,12 @@ int main(int argc, char *argv[])
 		}
 			PasswordDialog enterPassword;
 			if(enterPassword.exec()==QDialog::Rejected)return 0;
-			if(enterPassword.resetData){QFile::remove(enterPassword.getIniFilePath());continue;}
+			if(enterPassword.resetData)
+			{
+				if(QFile::exists(enterPassword.getIniFilePath()))
+					QFile::remove(enterPassword.getIniFilePath());
+				continue;
+			}
 			if(enterPassword.newProfile){showNewPasswordDialog=true;continue;}
 			tryPassword=enterPassword.getPassword();
 
@@ -205,7 +210,7 @@ int main(int argc, char *argv[])
 
 			QString lockFilePath(QDesktopServices::storageLocation(QDesktopServices::TempLocation)+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(iniFileName.toAscii(),QCryptographicHash::Sha1).toHex()));
 
-			QFile::remove(lockFilePath);
+			if(QFile::exists(lockFilePath))QFile::remove(lockFilePath);
 
 			bool profileLocked=QFile::exists(lockFilePath);
 			if(profileLocked)

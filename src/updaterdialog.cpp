@@ -144,8 +144,8 @@ bool canAutoUpdate=false;
 			QString curBin=QApplication::applicationFilePath();
 			QString updBin=curBin+".upd";
 			QString bkpBin=curBin+".bkp";
-			QFile::remove(updBin);
-			QFile::remove(bkpBin);
+			if(QFile::exists(updBin))QFile::remove(updBin);
+			if(QFile::exists(bkpBin))QFile::remove(bkpBin);
 			if(QFile::exists(updBin)||QFile::exists(bkpBin)){downloadError();return;}
 			{
 				QFile wrFile(updBin);

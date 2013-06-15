@@ -44,9 +44,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	constructorFinished=false;
 	appDir=QApplication::applicationDirPath()+"/";
-#ifdef Q_OS_WIN
-	QFile::remove(appDir+QFileInfo(QApplication::applicationFilePath()).fileName()+".bkp");
-#endif
+
 	authErrorOnce=false;
 	showingMessage=false;
 	lastLagState=false;
@@ -273,6 +271,13 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
 	par->setMinimumSize(par->minimumSizeHint());
 	if(par->width()<par->minimumSizeHint().width())par->resize(par->minimumSizeHint().width(),par->height());
 	}
+}
+
+void QtBitcoinTrader::loginChanged(QString text)
+{
+	ui.accountLoginLabel->setText(text);
+	ui.accountLoginLabel->setMinimumWidth(QFontMetrics(ui.accountLoginLabel->font()).width(text)+20);
+	anyValueChanged();
 }
 
 void QtBitcoinTrader::currencyChanged(int val)

@@ -100,6 +100,9 @@ private:
 	void cacheFirstRowGuid();
 	uint firstRowGuid;
 public slots:
+
+	void loginChanged(QString);
+
 	void ordersChanged(QString);
 
 	void setApiDown(bool);

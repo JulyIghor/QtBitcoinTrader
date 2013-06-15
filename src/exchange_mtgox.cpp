@@ -69,7 +69,7 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool ss
 	connect(this,SIGNAL(accFeeChanged(double)),mainClass->ui.accountFee,SLOT(setValue(double)));
 	connect(this,SIGNAL(accBtcBalanceChanged(double)),mainClass->ui.accountBTC,SLOT(setValue(double)));
 	connect(this,SIGNAL(accUsdBalanceChanged(double)),mainClass->ui.accountUSD,SLOT(setValue(double)));
-	connect(this,SIGNAL(loginChanged(QString)),mainClass->ui.accountLoginLabel,SLOT(setText(QString)));
+	connect(this,SIGNAL(loginChanged(QString)),mainClass,SLOT(loginChanged(QString)));
 
 	connect(this,SIGNAL(tickerHighChanged(double)),mainClass->ui.marketHigh,SLOT(setValue(double)));
 	connect(this,SIGNAL(tickerLowChanged(double)),mainClass->ui.marketLow,SLOT(setValue(double)));
@@ -445,11 +445,11 @@ void Exchange_MtGox::reloadOrders()
 {
 	lastOrders.clear();
 }
-#include <QDebug>
+
 void Exchange_MtGox::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
-	qDebug()<<requestIdsAuth.count()<<requestIdsNoAuth.count();
+
 	if(requestIdsAuth.count()<5&&!vipRequestCount)//Max pending requests at time
 	{
 	if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi("BTC"+currencyStr+"/money/info",true)]=2;

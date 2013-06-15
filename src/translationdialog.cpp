@@ -115,7 +115,7 @@ void TranslationDialog::deleteTranslationButton()
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	if(msgBox.exec()!=QMessageBox::Yes)return;
-	QFile::remove(julyTranslator->lastFile());
+	if(QFile::exists(julyTranslator->lastFile()))QFile::remove(julyTranslator->lastFile());
 	ui.deleteTranslationButton->setEnabled(QFile::exists(julyTranslator->lastFile()));
 	mainWindow.reloadLanguageList();
 	close();
@@ -178,7 +178,7 @@ void TranslationDialog::saveAsButton()
 
 	QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_TRANSLATION","Save Translation"),QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)+"/"+ui.languageName->text().replace("/","_").replace("\\","").replace(":","").replace("?","")+".lng","(*.lng)");
 	if(fileName.isEmpty())return;
-	QFile::remove(fileName);
+	if(QFile::exists(fileName))QFile::remove(fileName);
 	QFile::copy(julyTranslator->lastFile(),fileName);
 }
 
