@@ -157,6 +157,7 @@ String_CONFIRM_DELETE_PROFILE=Bent u zeker het profiel van "%1" te verwijderen
 String_CONFIRM_EXIT=Are you sure to close Application?<br>Active rules works only while application is running.<br>Note: rules table will be cleared.
 String_COPY_DONATE_MESSAGE=Bitcoin address copied to clipboard.<br>Thank you for support!
 String_DATETIME_FORMAT=yyyy-MM-dd HH:mm:ss
+String_TIME_FORMAT=HH:mm:ss
 String_DEFAULT_PROFILE_NAME=Standaard Profiel
 String_DOWNLOAD_ERROR=Download error. Probeer opnieuw
 String_EDIT_RULE=Bewerk regel

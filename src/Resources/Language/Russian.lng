@@ -157,6 +157,7 @@ String_CONFIRM_DELETE_PROFILE=Действительно удалить проф
 String_CONFIRM_EXIT=Действительно закрыть программу?<br>Активные правила работают только при запущенной программе.<br>Заметка: правила не сохраняются после перезапуска.
 String_COPY_DONATE_MESSAGE=Bitcoin адрес скопирован в буфер обмена.<br>Спасибо за поддержку!
 String_DATETIME_FORMAT=yyyy-MM-dd HH:mm:ss
+String_TIME_FORMAT=HH:mm:ss
 String_DEFAULT_PROFILE_NAME=Мой профиль
 String_DOWNLOAD_ERROR=Ошибка загрузки. Попробуйте еще раз.
 String_EDIT_RULE=Редактировать правило

@@ -157,6 +157,7 @@ String_CONFIRM_DELETE_PROFILE=¿Está seguro de eliminar "%1" perfil?
 String_CONFIRM_EXIT=¿Está seguro de cerrar aplicaciones<br>Reglas activas sólo funciona mientras se ejecuta la aplicación.<br>Nota: La tabla de reglas será borrado.
 String_COPY_DONATE_MESSAGE=Dirección Bitcoin copiado al portapapeles.<br>Gracias por tu apoyo!
 String_DATETIME_FORMAT=yyyy-MM-dd HH:mm:ss
+String_TIME_FORMAT=HH:mm:ss
 String_DEFAULT_PROFILE_NAME=Perfil predeterminado
 String_DOWNLOAD_ERROR=Download error. Please try again.
 String_EDIT_RULE=Editar regla

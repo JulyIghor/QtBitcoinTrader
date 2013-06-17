@@ -157,6 +157,7 @@ String_CONFIRM_DELETE_PROFILE=Er du sikker på at du vil slette profilen "%1"?
 String_CONFIRM_EXIT=Er du sikker på at du vil avslutte Programmet?<br>Aktive regler virker kun når programmet kjører.<br>Bemerk: regellisten vil bli tømmt.
 String_COPY_DONATE_MESSAGE=Bitcoin addressen har blitt kopiert til utvalgslisten.<br>Takk for din støtte!
 String_DATETIME_FORMAT=dd-MM-yyyy HH:mm:ss
+String_TIME_FORMAT=HH:mm:ss
 String_DEFAULT_PROFILE_NAME=Standard Profil
 String_DOWNLOAD_ERROR=Nedlastningsfeil. Vennligst prøv på nytt.
 String_EDIT_RULE=Rediger regel
