@@ -86,9 +86,10 @@ void Exchange_BTCe::setSslEnabled(bool on)
 	clearValues();
 	requestIdsNoAuth.clear();
 	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
+	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
 	if(sslEnabled)
 	{
-		httpAuth->setHost("btc-e.com",QHttp::ConnectionModeHttp);
+		httpAuth->setHost("btc-e.com",QHttp::ConnectionModeHttps);
 		httpNoAuth->setHost("btc-e.com",QHttp::ConnectionModeHttps);
 	}
 	else
@@ -410,7 +411,7 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 
 void Exchange_BTCe::run()
 {
-	if(isLogEnabled)logThread->writeLog("Mt.Gox API Thread Started");
+	if(isLogEnabled)logThread->writeLog("BTC-e API Thread Started");
 	if(sslEnabled)
 	{
 		httpAuth=new QHttp("btc-e.com",QHttp::ConnectionModeHttps);

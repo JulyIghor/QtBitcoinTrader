@@ -90,7 +90,7 @@ void Exchange_MtGox::setSslEnabled(bool on)
 	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
 	if(sslEnabled)
 	{
-		httpAuth->setHost("data.mtgox.com",QHttp::ConnectionModeHttp);
+		httpAuth->setHost("data.mtgox.com",QHttp::ConnectionModeHttps);
 		httpNoAuth->setHost("data.mtgox.com",QHttp::ConnectionModeHttps);
 	}
 	else
