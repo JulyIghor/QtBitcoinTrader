@@ -7,8 +7,8 @@
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
 // GNU General Public License version 3
 
-#ifndef EXCHANGE_MTGOX_H
-#define EXCHANGE_MTGOX_H
+#ifndef EXCHANGE_BTCE_H
+#define EXCHANGE_BTCE_H
 
 #include <QThread>
 #include <QHttp>
@@ -16,23 +16,22 @@
 #include <QTime>
 #include "qtbitcointrader.h"
 
-class Exchange_MtGox : public QThread
+class Exchange_BTCe : public QThread
 {
 	Q_OBJECT
 
 public:
 	void setupApi(QtBitcoinTrader *, bool tickerOnly=false, bool sslEn=true);
-	Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_MtGox();
+	Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey);
+	~Exchange_BTCe();
 
 private:
-	QByteArray lastFetchDate;
+	qint64 lastFetchTid;
 	bool sslEnabled;
 	bool tickerOnly;
 	int vipRequestCount;
 	void cancelPendingRequests();
 	bool isApiDown;
-	void translateUnicodeStr(QString *str);
 	QByteArray lastHistory;
 	QByteArray lastOrders;
 	bool isFirstTicker;
@@ -50,7 +49,6 @@ private:
 	double lastVolume;
 	double lastFee;
 
-	QString apiLogin;
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	QTime softLagTime;
 	int apiDownCounter;
@@ -65,6 +63,7 @@ private:
 	QHttp *httpAuth;
 	QHttp *httpNoAuth;
 	QTimer *secondTimer;
+	int lastOpenedOrders;
 	void run();
 signals:
 	void addLastTrade(double,qint64,double,QByteArray);
@@ -89,11 +88,9 @@ signals:
 	void tickerVolumeChanged(double);
 
 	void firstAccInfo();
-	void accVolumeChanged(double);
 	void accFeeChanged(double);
 	void accBtcBalanceChanged(double);
 	void accUsdBalanceChanged(double);
-	void loginChanged(QString);
 	void apiDownChanged(bool);
 	void apiLagChanged(double);
 	void softLagChanged(double);
@@ -112,4 +109,4 @@ public slots:
 	void cancelOrder(QByteArray);
 };
 
-#endif // EXCHANGE_MTGOX_H
+#endif // EXCHANGE_BTCE_H

@@ -13,6 +13,13 @@ This software helps you to open and cancel Mt.Gox orders vary fast.
 
 Change Log
 
+v1.02
+- BTC-E.com support added. Now you can trade with LTC
+- Added trade history display
+- Multi-monitor support (Detachable windows)
+- Improved connection stability
+- Fixed UI bugs, translation bugs and some minor bugs
+
 v1.01
 - Fixed traffic heavy load.
 - Added trades fetch to update last values faster.

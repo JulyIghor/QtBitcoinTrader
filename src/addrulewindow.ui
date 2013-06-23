@@ -285,6 +285,9 @@
              <bold>false</bold>
             </font>
            </property>
+           <property name="accessibleDescription">
+            <string>BTC_ICON</string>
+           </property>
            <property name="styleSheet">
             <string notr="true">color: #996515</string>
            </property>
@@ -309,6 +312,9 @@
              <width>120</width>
              <height>0</height>
             </size>
+           </property>
+           <property name="accessibleName">
+            <string>BTC</string>
            </property>
            <property name="prefix">
             <string/>
@@ -656,6 +662,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: darkgreen</string>
           </property>
@@ -680,6 +689,9 @@
             <width>120</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="accessibleName">
+           <string>PRICE</string>
           </property>
           <property name="prefix">
            <string/>
@@ -754,6 +766,9 @@
                <height>0</height>
               </size>
              </property>
+             <property name="accessibleName">
+              <string>PRICE</string>
+             </property>
              <property name="styleSheet">
               <string notr="true"/>
              </property>
@@ -785,6 +800,9 @@
                <weight>50</weight>
                <bold>false</bold>
               </font>
+             </property>
+             <property name="accessibleDescription">
+              <string>USD_ICON</string>
              </property>
              <property name="styleSheet">
               <string notr="true">color: darkgreen</string>

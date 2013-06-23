@@ -20,7 +20,7 @@
 #define USE_QTMULTIMEDIA
 
 #define julyTr julyTranslator->translateString
-#define hmacSha512(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha512(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),64).toBase64()
+#define hmacSha512(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha512(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),64)
 #define hostName QByteArray("data.mtgox.com")
 #define apiId QByteArray("2")
 #define restKey (*restKey_)
@@ -32,20 +32,32 @@
 #define logFileName (*logFileName_)
 #define appVerReal (*appVerReal_)
 #define appVerStr (*appVerStr_)
-#define currencyStr (*currencyStr_)
-#define currencySign (*currencySign_)
-#define bitcoinSign (*bitcoinSign_)
+#define currencyRequestPair (*currencyRequest_)
+#define currencyAStr (*currencyAStr_)
+#define currencyBStr (*currencyBStr_)
+#define currencyAStrLow (*currencyAStrLow_)
+#define currencyBStrLow (*currencyBStrLow_)
+#define currencyBSign (*currencyBSign_)
+#define currencyASign (*currencyASign_)
 #define appDataDir (*appDataDir_)
 #define defaultLangFile (*defaultLangFile_)
-#define dateTimeFormat (*dateTimeFormat_)
+#define localDateTimeFormat (*dateTimeFormat_)
+#define localTimeFormat (*timeFormat_)
+#define exchangeName (*exchangeName_)
 
+extern QByteArray *currencyRequest_;
+extern QString *exchangeName_;
+extern QString *timeFormat_;
 extern QString *dateTimeFormat_;
 extern QString *defaultLangFile_;
 extern JulyTranslator *julyTranslator;
 extern QByteArray *appDataDir_;
-extern QByteArray *bitcoinSign_;
-extern QByteArray *currencyStr_;
-extern QByteArray *currencySign_;
+extern QByteArray *currencyAStr_;
+extern QByteArray *currencyBStr_;
+extern QByteArray *currencyAStrLow_;
+extern QByteArray *currencyBStrLow_;
+extern QByteArray *currencyASign_;
+extern QByteArray *currencyBSign_;
 extern QByteArray *appVerStr_;
 extern LogThread *logThread;
 extern QByteArray *restKey_;
@@ -58,12 +70,4 @@ extern QString *iniFileName_;
 extern double *appVerReal_;
 extern QMap<QByteArray,QByteArray> *currencySignMap;
 extern QMap<QByteArray,QByteArray> *currencyNamesMap;
-//
-//quint64 getNextNonce()
-//{
-//	quint64 nextNonce=QDateTime::currentDateTime().toMSecsSinceEpoch()*1000000;
-//	if(nonce>=nextNonce-1000000)nextNonce+=1000000;
-//	nonce=nextNonce;
-//	return nextNonce;
-//}
 #endif // MAIN_H

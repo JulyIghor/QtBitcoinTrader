@@ -16,6 +16,8 @@
 #include <QDir>
 #include <QSettings>
 #include <QMessageBox>
+#include <QDesktopServices>
+#include <QCryptographicHash>
 
 PasswordDialog::PasswordDialog(QWidget *parent)
 	: QDialog(parent)
@@ -34,13 +36,18 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	ui.updateCheckBox->setChecked(settings.value("CheckForUpdates",true).toBool());
 	QString lastProfile=settings.value("LastProfile","").toString();
 	int lastProfileIndex=-1;
+	int firstUnlockedProfileIndex=-1;
 	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
 	for(int n=0;n<settingsList.count();n++)
 	{
 		ui.profileComboBox->addItem(QSettings(appDataDir+settingsList.at(n),QSettings::IniFormat).value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
-		if(lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;
+		bool isProfLocked=isProfileLocked(settingsList.at(n));
+
+		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;
+		if(firstUnlockedProfileIndex==-1&&!isProfLocked)firstUnlockedProfileIndex=n;
 	}
 	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem(julyTr("DEFAULT_PROFILE_NAME","Default Profile"));
+	if(firstUnlockedProfileIndex!=-1&&lastProfileIndex==-1)lastProfileIndex=firstUnlockedProfileIndex;
 	if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);
 #ifdef GENERATE_LANGUAGE_FILE
 	julyTranslator->loadMapFromUi(this);
@@ -59,6 +66,21 @@ PasswordDialog::~PasswordDialog()
 {
 	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
 	settings.setValue("CheckForUpdates",ui.updateCheckBox->isChecked());
+}
+
+QString PasswordDialog::lockFilePath(QString name)
+{
+	return QDesktopServices::storageLocation(QDesktopServices::TempLocation)+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(appDataDir+"/"+QFileInfo(name).fileName().toAscii(),QCryptographicHash::Sha1).toHex());
+}
+
+bool PasswordDialog::isProfileLocked(QString name)
+{
+	QString lockFileP=lockFilePath(name);
+
+#ifdef Q_OS_WIN
+	if(QFile::exists(lockFileP))QFile::remove(lockFileP);
+#endif
+	return QFile::exists(lockFileP);
 }
 
 void PasswordDialog::accept()
@@ -105,16 +127,25 @@ void PasswordDialog::checkToEnableButton(QString pass)
 {
 	if(pass.length()<8){ui.okButton->setEnabled(pass.length()>=8);return;}
 
-	static QString allowedChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-	bool containsLetter=false;
-	bool containsDigit=false;
-	bool containsSpec=false;
-	for(int n=0;n<pass.length();n++)
+	static QString allowedPassChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+	bool isValidPassword=pass.length()>14;
+	if(!isValidPassword)
 	{
-		if(!containsLetter&&pass.at(n).isLetter())containsLetter=true;
-		if(!containsDigit&&pass.at(n).isDigit())containsDigit=true;
-		if(!containsSpec&&allowedChars.contains(pass.at(n)))containsSpec=true;
-		if(containsSpec&&containsDigit&&containsSpec)break;
+		bool containsLetter=false;
+		bool containsDigit=false;
+		bool containsSpec=false;
+		bool containsUpCase=false;
+		bool containsDownCase=false;
+		for(int n=0;n<pass.length();n++)
+		{
+			if(!containsLetter&&pass.at(n).isLetter())containsLetter=true;
+			if(!containsDigit&&pass.at(n).isDigit())containsDigit=true;
+			if(!containsSpec&&allowedPassChars.contains(pass.at(n)))containsSpec=true;
+			if(!containsUpCase&&pass.at(n).isLetter()&&pass.at(n).isUpper())containsUpCase=true;
+			if(!containsDownCase&&pass.at(n).isLetter()&&pass.at(n).isLower())containsDownCase=true;
+			if(containsLetter&&containsDigit&&containsSpec||containsLetter&&containsDigit&&containsUpCase&&containsDownCase)
+			{isValidPassword=true;break;}
+		}
 	}
-	ui.okButton->setEnabled(containsLetter&&containsDigit&&containsSpec);
+	ui.okButton->setEnabled(isValidPassword);
 }

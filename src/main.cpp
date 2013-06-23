@@ -22,14 +22,16 @@
 #include "translationdialog.h"
 #include <QMessageBox>
 #include <QDateTime>
-#include <QCryptographicHash>
 
 QByteArray *appDataDir_;
 QMap<QByteArray,QByteArray> *currencySignMap;
 QMap<QByteArray,QByteArray> *currencyNamesMap;
-QByteArray *bitcoinSign_;
-QByteArray *currencySign_;
-QByteArray *currencyStr_;
+QByteArray *currencyASign_;
+QByteArray *currencyBSign_;
+QByteArray *currencyAStr_;
+QByteArray *currencyBStr_;
+QByteArray *currencyAStrLow_;
+QByteArray *currencyBStrLow_;
 QByteArray *restKey_;
 QByteArray *restSign_;
 LogThread *logThread;
@@ -44,10 +46,15 @@ bool *validKeySign_;
 JulyTranslator *julyTranslator;
 QString *defaultLangFile_;
 QString *dateTimeFormat_;
+QString *timeFormat_;
+QString *exchangeName_;
+QByteArray *currencyRequest_;
 
 void pickDefaultLangFile()
 {
 	QString sysLocale=QLocale().name();
+	if(sysLocale.startsWith("de"))defaultLangFile=":/Resources/Language/German.lng";
+	else 
 	if(sysLocale.startsWith("ru"))defaultLangFile=":/Resources/Language/Russian.lng";
 	else 
 	if(sysLocale.startsWith("uk"))defaultLangFile=":/Resources/Language/Ukrainian.lng";
@@ -67,16 +74,22 @@ int main(int argc, char *argv[])
 
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.01");
+	appVerStr_=new QByteArray("1.02");
 	appVerReal_=new double(appVerStr.toDouble());
-	currencyStr_=new QByteArray();
-	currencySign_=new QByteArray();
+	currencyBStr_=new QByteArray("USD");
+	currencyBStrLow_=new QByteArray("usd");
+	currencyBSign_=new QByteArray("USD");
 	validKeySign_=new bool(false);
-	bitcoinSign_=new QByteArray("BTC");
+	currencyASign_=new QByteArray("BTC");
+	currencyAStr_=new QByteArray("BTC");
+	currencyAStrLow_=new QByteArray("btc");
+	currencyRequest_=new QByteArray("BTCUSD");
 	defaultLangFile_=new QString();pickDefaultLangFile();
 	currencySignMap=new QMap<QByteArray,QByteArray>;
 	currencyNamesMap=new QMap<QByteArray,QByteArray>;
-	dateTimeFormat_=new QString("yyyy-MM-dd HH:mm:ss");
+	dateTimeFormat_=new QString(QLocale().dateTimeFormat(QLocale::ShortFormat));//"yyyy-MM-dd HH:mm:ss");
+	timeFormat_=new QString(QLocale().timeFormat(QLocale::ShortFormat));// "HH:mm:ss");
+	exchangeName_=new QString("Mt.Gox");
 	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
 
 #ifdef Q_OS_WIN
@@ -181,9 +194,20 @@ int main(int argc, char *argv[])
 			tryPassword=newPassword.getPassword();
 			newPassword.updateIniFileName();
 			restKey=newPassword.getRestKey().toAscii();
-			restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
-			QByteArray cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
 			QSettings settings(iniFileName,QSettings::IniFormat);
+			settings.setValue("ExchangeId",newPassword.getExchangeId());
+			QByteArray cryptedData;
+			if(newPassword.getExchangeId()==0)
+			{
+			restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
+			cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+			}
+			else
+			if(newPassword.getExchangeId()==1)
+			{
+				restSign=newPassword.getRestSign().toAscii();
+				cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+			}
 			settings.setValue("CryptedData",QString(cryptedData.toBase64()));
 			settings.setValue("ProfileName",newPassword.selectedProfileName());
 			settings.remove("RestSign");
@@ -207,12 +231,7 @@ int main(int argc, char *argv[])
 		if(!tryPassword.isEmpty())
 		{
 			iniFileName=enterPassword.getIniFilePath();
-
-			QString lockFilePath(QDesktopServices::storageLocation(QDesktopServices::TempLocation)+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(iniFileName.toAscii(),QCryptographicHash::Sha1).toHex()));
-
-			if(QFile::exists(lockFilePath))QFile::remove(lockFilePath);
-
-			bool profileLocked=QFile::exists(lockFilePath);
+			bool profileLocked=enterPassword.isProfileLocked(iniFileName);
 			if(profileLocked)
 			{
 				QMessageBox msgBox(0);
@@ -240,7 +259,7 @@ int main(int argc, char *argv[])
 					restKey=decryptedList.at(1).toAscii();
 					restSign=QByteArray::fromBase64(decryptedList.last().toAscii());
                     tryDecrypt=false;
-					lockFile=new QFile(lockFilePath);
+					lockFile=new QFile(enterPassword.lockFilePath(iniFileName));
                     lockFile->open(QIODevice::WriteOnly|QIODevice::Truncate);
 					lockFile->write("Qt Bitcoin Trader Lock File");
 				}
@@ -251,9 +270,9 @@ int main(int argc, char *argv[])
 	QSettings settings(iniFileName,QSettings::IniFormat);
 	isLogEnabled=settings.value("LogEnabled",false).toBool();
 	settings.setValue("LogEnabled",isLogEnabled);
-	bitcoinSign=currencySignMap->value("BTC","BTC");
-	currencyStr=settings.value("Currency","USD").toString().toAscii();
-	currencySign=currencySignMap->value(currencyStr,"$");
+	currencyASign=currencySignMap->value("BTC","BTC");
+	currencyBStr=settings.value("Currency","USD").toString().toAscii();
+	currencyBSign=currencySignMap->value(currencyBStr,"$");
 
 	if(isLogEnabled)logThread=new LogThread;
 
@@ -261,6 +280,7 @@ int main(int argc, char *argv[])
 	QObject::connect(mainWindow_,SIGNAL(quit()),&a,SLOT(quit()));
 	}
 	mainWindow.show();
+	mainWindow.loadUiSettings();
 	a.exec();
 	if(lockFile)
 	{

@@ -9,6 +9,7 @@
 
 #include "translationline.h"
 #include <QTextDocument>
+#include "main.h"
 
 TranslationLine::TranslationLine(QWidget *parent)
 	: QTextEdit(parent)
@@ -62,7 +63,7 @@ void TranslationLine::fixSize()
 
 void TranslationLine::setDefaultText(QString defText)
 {
-	if(defText!="yyyy-MM-dd HH:mm:ss"&&defText!="Mt.Gox:")defaultText=defText.replace("<br>","\n");
+	if(defText!="yyyy-MM-dd HH:mm:ss"&&defText!=exchangeName+":")defaultText=defText.replace("<br>","\n");
 }
 
 void TranslationLine::setItemText(QString text)

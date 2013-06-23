@@ -60,7 +60,17 @@ QString NewPasswordDialog::getRestKey()
 
 void NewPasswordDialog::getApiKeySecretButton()
 {
-	QDesktopServices::openUrl(QUrl("https://www.mtgox.com/security"));
+	switch(ui.exchangeComboBox->currentIndex())
+	{
+	case 0:	QDesktopServices::openUrl(QUrl("https://www.mtgox.com/security")); break;
+	case 1: QDesktopServices::openUrl(QUrl("https://btc-e.com/profile#api_keys")); break;
+	default: break;
+	}
+}
+
+int NewPasswordDialog::getExchangeId()
+{
+	return ui.exchangeComboBox->currentIndex();
 }
 
 void NewPasswordDialog::checkToEnableButton()
@@ -89,17 +99,26 @@ void NewPasswordDialog::checkToEnableButton()
 	ui.confirmLabel->setStyleSheet("");
 
 	static QString allowedPassChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-	bool containsLetter=false;
-	bool containsDigit=false;
-	bool containsSpec=false;
-	for(int n=0;n<pass.length();n++)
+	bool isValidPassword=pass.length()>14;
+	if(!isValidPassword)
 	{
-		if(!containsLetter&&pass.at(n).isLetter())containsLetter=true;
-		if(!containsDigit&&pass.at(n).isDigit())containsDigit=true;
-		if(!containsSpec&&allowedPassChars.contains(pass.at(n)))containsSpec=true;
-		if(containsSpec&&containsDigit&&containsSpec)break;
+		bool containsLetter=false;
+		bool containsDigit=false;
+		bool containsSpec=false;
+		bool containsUpCase=false;
+		bool containsDownCase=false;
+		for(int n=0;n<pass.length();n++)
+		{
+			if(!containsLetter&&pass.at(n).isLetter())containsLetter=true;
+			if(!containsDigit&&pass.at(n).isDigit())containsDigit=true;
+			if(!containsSpec&&allowedPassChars.contains(pass.at(n)))containsSpec=true;
+			if(!containsUpCase&&pass.at(n).isLetter()&&pass.at(n).isUpper())containsUpCase=true;
+			if(!containsDownCase&&pass.at(n).isLetter()&&pass.at(n).isLower())containsDownCase=true;
+			if(containsLetter&&containsDigit&&containsSpec||containsLetter&&containsDigit&&containsUpCase&&containsDownCase)
+			{isValidPassword=true;break;}
+		}
 	}
-	ui.okButton->setEnabled(containsLetter&&containsDigit&&containsSpec);
+	ui.okButton->setEnabled(isValidPassword);
 }
 
 void NewPasswordDialog::updateIniFileName()

@@ -41,20 +41,8 @@ FeeCalculator::FeeCalculator()
 	buyBtcChanged(ui.buyTotalBtc->value());//I'll remove this soon
 	setZeroProfitPrice();//and this too
 
-	QPixmap btcPixmap("://Resources/BTC.png");
-	ui.btcLabel1->setPixmap(btcPixmap);
-	ui.btcLabel2->setPixmap(btcPixmap);
-	ui.btcLabel3->setPixmap(btcPixmap);
-	ui.btcLabel4->setPixmap(btcPixmap);
-
-	QPixmap curPix(":/Resources/"+currencyStr+".png");
-	ui.usdLabel1->setPixmap(curPix);
-	ui.usdLabel2->setPixmap(curPix);
-	ui.usdLabel3->setPixmap(curPix);
-	ui.usdLabel4->setPixmap(curPix);
-	ui.usdLabel5->setPixmap(curPix);
-	ui.usdLabel6->setPixmap(curPix);
-	ui.usdLabel7->setPixmap(curPix);
+	mainWindow.fillAllBtcLabels(this,"BTC");
+	mainWindow.fillAllUsdLabels(this,currencyBStr);
 
 	QSize minSizeHint=minimumSizeHint();
 	if(mainWindow.isValidSize(&minSizeHint))setMaximumSize(minimumSizeHint().width()+200,minimumSizeHint().height());
@@ -64,6 +52,7 @@ FeeCalculator::FeeCalculator()
 	julyTranslator->saveToFile("LanguageDefault.lng");
 #endif
 	julyTranslator->translateUi(this);
+	setWindowTitle(julyTr("FEE_CALCULATOR_TITLE","%1 Fee Calculator").arg(exchangeName));
 
 	connect(julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
 }

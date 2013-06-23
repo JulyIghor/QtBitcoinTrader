@@ -31,12 +31,9 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
 #endif
 
-	QPixmap curPix(":/Resources/"+currencyStr+".png");
-	ui.labelUSD1->setPixmap(curPix);ui.labelUSD1->setToolTip(currencyStr);
-	ui.label_53->setPixmap(curPix);ui.label_53->setToolTip(currencyStr);
+	mainWindow.fillAllUsdLabels(this,currencyBStr);
 
-	QPixmap btcPix(":/Resources/BTC.png");
-	ui.btcLabel->setPixmap(btcPix);ui.btcLabel->setToolTip("BTC");
+	mainWindow.fillAllBtcLabels(this,"BTC");
 
 	new JulySpinBoxFix(ui.thanValue);
 	new JulySpinBoxFix(ui.btcValue);

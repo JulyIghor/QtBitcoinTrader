@@ -18,6 +18,7 @@ class NewPasswordDialog : public QDialog
 	Q_OBJECT
 
 public:
+	int getExchangeId();
 	QString selectedProfileName();
 	void updateIniFileName();
 	QString getRestSign();

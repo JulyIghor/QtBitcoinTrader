@@ -50,37 +50,84 @@
       <property name="horizontalSpacing">
        <number>4</number>
       </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="accessibleName">
-         <string>TR00084</string>
+      <item row="1" column="0">
+       <layout class="QGridLayout" name="gridLayout_7">
+        <property name="rightMargin">
+         <number>10</number>
         </property>
-        <property name="text">
-         <string>Buy BTC</string>
+        <property name="horizontalSpacing">
+         <number>2</number>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+        <property name="verticalSpacing">
+         <number>0</number>
         </property>
-        <property name="buddy">
-         <cstring>buyTotalBtc</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label_4">
-        <property name="accessibleName">
-         <string>TR00085</string>
-        </property>
-        <property name="text">
-         <string>Price</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="buddy">
-         <cstring>buyPrice</cstring>
-        </property>
-       </widget>
+        <item row="0" column="0">
+         <widget class="QLabel" name="btcLabel1">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="accessibleDescription">
+           <string>BTC_ICON</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: #996515</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>buyTotalBtc</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="buyTotalBtc">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>110</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="accessibleName">
+           <string>BTC</string>
+          </property>
+          <property name="prefix">
+           <string/>
+          </property>
+          <property name="decimals">
+           <number>8</number>
+          </property>
+          <property name="minimum">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>999999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item row="0" column="4">
        <widget class="QLabel" name="label_5">
@@ -114,6 +161,22 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_4">
+        <property name="accessibleName">
+         <string>TR00085</string>
+        </property>
+        <property name="text">
+         <string>Price</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="buddy">
+         <cstring>buyPrice</cstring>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="8">
        <widget class="QLabel" name="label_8">
         <property name="accessibleName">
@@ -130,78 +193,21 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <layout class="QGridLayout" name="gridLayout_7">
-        <property name="rightMargin">
-         <number>10</number>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="accessibleName">
+         <string>TR00084</string>
         </property>
-        <property name="horizontalSpacing">
-         <number>2</number>
+        <property name="text">
+         <string>Buy BTC</string>
         </property>
-        <property name="verticalSpacing">
-         <number>0</number>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
-        <item row="0" column="0">
-         <widget class="QLabel" name="btcLabel1">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: #996515</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="buddy">
-           <cstring>buyTotalBtc</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="buyTotalBtc">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>8</number>
-          </property>
-          <property name="minimum">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
+        <property name="buddy">
+         <cstring>buyTotalBtc</cstring>
+        </property>
+       </widget>
       </item>
       <item row="1" column="1">
        <widget class="QLabel" name="label_2">
@@ -235,76 +241,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>10</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="usdLabel1">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: darkgreen</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="buddy">
-           <cstring>buyPrice</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="buyPrice">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
       <item row="1" column="3">
        <widget class="QLabel" name="label_9">
         <property name="sizePolicy">
@@ -337,6 +273,85 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="usdLabel1">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: darkgreen</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>buyPrice</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="buyPrice">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>110</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="accessibleName">
+           <string>PRICE</string>
+          </property>
+          <property name="prefix">
+           <string/>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>999999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="1" column="4">
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <property name="spacing">
@@ -359,6 +374,9 @@
             <weight>50</weight>
             <bold>false</bold>
            </font>
+          </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
           </property>
           <property name="styleSheet">
            <string notr="true">color: darkgreen</string>
@@ -387,6 +405,12 @@
             <width>110</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="accessibleName">
+           <string>USD</string>
           </property>
           <property name="prefix">
            <string/>
@@ -465,6 +489,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="accessibleDescription">
+           <string>BTC_ICON</string>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #996515</string>
           </property>
@@ -492,6 +519,9 @@
             <width>110</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="accessibleName">
+           <string>BTC</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -573,6 +603,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="accessibleDescription">
+           <string>BTC_ICON</string>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: #996515</string>
           </property>
@@ -600,6 +633,9 @@
             <width>110</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="accessibleName">
+           <string>BTC</string>
           </property>
           <property name="prefix">
            <string/>
@@ -652,6 +688,22 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="8">
+       <widget class="QLabel" name="label_18">
+        <property name="accessibleName">
+         <string>TR00093</string>
+        </property>
+        <property name="text">
+         <string>Fiat (Received)</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="buddy">
+         <cstring>sellFiatReceived</cstring>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="4">
        <widget class="QLabel" name="label_16">
         <property name="accessibleName">
@@ -684,22 +736,6 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="8">
-       <widget class="QLabel" name="label_18">
-        <property name="accessibleName">
-         <string>TR00093</string>
-        </property>
-        <property name="text">
-         <string>Fiat (Received)</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="buddy">
-         <cstring>sellFiatReceived</cstring>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="0">
        <layout class="QGridLayout" name="gridLayout_10">
         <property name="rightMargin">
@@ -725,6 +761,9 @@
             <weight>50</weight>
             <bold>false</bold>
            </font>
+          </property>
+          <property name="accessibleDescription">
+           <string>BTC_ICON</string>
           </property>
           <property name="styleSheet">
            <string notr="true">color: #996515</string>
@@ -753,6 +792,9 @@
             <width>110</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="accessibleName">
+           <string>BTC</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -811,76 +853,6 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>10</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="usdLabel3">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: darkgreen</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="buddy">
-           <cstring>sellPrice</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="sellPrice">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
       <item row="3" column="3">
        <widget class="QLabel" name="label_12">
         <property name="sizePolicy">
@@ -913,6 +885,85 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="usdLabel3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: darkgreen</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>sellPrice</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="sellPrice">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>110</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="accessibleName">
+           <string>PRICE</string>
+          </property>
+          <property name="prefix">
+           <string/>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>999999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="3" column="4">
        <layout class="QHBoxLayout" name="horizontalLayout_9">
         <property name="spacing">
@@ -935,6 +986,9 @@
             <weight>50</weight>
             <bold>false</bold>
            </font>
+          </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
           </property>
           <property name="styleSheet">
            <string notr="true">color: darkgreen</string>
@@ -963,6 +1017,12 @@
             <width>110</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="accessibleName">
+           <string>USD</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -1044,6 +1104,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: darkgreen</string>
           </property>
@@ -1071,6 +1134,12 @@
             <width>110</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="accessibleName">
+           <string>USD</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -1149,6 +1218,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: darkgreen</string>
           </property>
@@ -1176,6 +1248,12 @@
             <width>110</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="accessibleName">
+           <string>USD</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -1272,7 +1350,7 @@
            <number>2</number>
           </property>
           <property name="minimum">
-           <double>0.250000000000000</double>
+           <double>0.100000000000000</double>
           </property>
           <property name="maximum">
            <double>0.600000000000000</double>
@@ -1307,6 +1385,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: darkgreen</string>
           </property>
@@ -1334,6 +1415,12 @@
             <width>110</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="accessibleName">
+           <string>USD</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>

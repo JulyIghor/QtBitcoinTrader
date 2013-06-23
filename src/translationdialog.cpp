@@ -199,6 +199,5 @@ void TranslationDialog::searchLang(QString filterText)
 			lineEdits[n]->setVisible(containsText);
 		}
 	}
-	QSize minSizeHint=fonWidget.minimumSizeHint();
-	if(mainWindow.isValidSize(&minSizeHint))fonWidget.setFixedHeight(fonWidget.minimumSizeHint().height());
+	fonWidget.setFixedHeight(fonWidget.minimumSizeHint().height());
 }

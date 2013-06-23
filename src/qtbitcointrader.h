@@ -15,15 +15,19 @@
 #include <QHttp>
 #include <QCloseEvent>
 #include "ruleholder.h"
+#include <QSystemTrayIcon>
 
 class QtBitcoinTrader : public QDialog
 {
 	Q_OBJECT
 
 public:
+	void loadUiSettings();
 	bool isValidSize(QSize *sizeV){if(sizeV->width()<3||sizeV->width()>2000||sizeV->height()<3||sizeV->height()>2000)return false; return true;}
 	void reloadLanguageList(QString preferedLangFile="");
 	void fixAllChildButtonsAndLabels(QWidget *par);
+	void fillAllBtcLabels(QWidget *par, QString curName);
+	void fillAllUsdLabels(QWidget *par, QString curName);
 
 	bool isValidSoftLag();
 
@@ -36,6 +40,14 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	QSystemTrayIcon *trayIcon;
+	int btcDecimals;
+	int usdDecimals;
+	int priceDecimals;
+	int exchangeId;
+	QString profileName;
+	void resizeEvent(QResizeEvent *);
+	void makeRitchValue(QString *text);
 	bool forcedReloadOrders;
 	bool checkForUpdates;
 	QList<RuleHolder> rulesLastPrice;
@@ -48,7 +60,7 @@ private:
 
 	void addRuleByHolderToTable(RuleHolder);
 	int lastLoadedCurrency;
-	void postWorkAtTableItem(QTableWidgetItem *);
+	void postWorkAtTableItem(QTableWidgetItem *, int align=0);
 	void checkAllRules();
 
 	void removeRuleByGuid(uint guid);
@@ -96,10 +108,46 @@ private:
 	void insertIntoTable(QByteArray,QString);
 	bool profitSellThanBuyUnlocked;
 	bool profitBuyThanSellUnlocked;
+	bool profitBuyThanSellChangedUnlocked;
+	bool profitSellThanBuyChangedUnlocked;
+
 	void translateUnicodeStr(QString *str);
 	void cacheFirstRowGuid();
 	uint firstRowGuid;
+
+	bool eventFilter(QObject *obj, QEvent *event);
+
+	void checkIsTabWidgetVisible();
+
+	void clearTimeOutedTrades();
+	bool isValidGeometry(QRect *geo);
+	bool isDetachedLog;
+	bool isDetachedTrades;
+	bool isDetachedRules;
+	bool isDetachedCharts;
 public slots:
+	void trayActivated(QSystemTrayIcon::ActivationReason);
+	void buttonMinimizeToTray();
+	void tabLogOrdersOnTop(bool);
+	void tabRulesOnTop(bool);
+	void tabTradesOnTop(bool);
+	void tabChartsOnTop(bool);
+
+	void secondSlot();
+	void setTradesScrollBarValue(int);
+	void tabTradesIndexChanged(int);
+	void tabTradesScrollUp();
+	void addLastTrade(double, qint64, double, QByteArray);
+
+	void detachLog();
+	void detachTrades();
+	void detachRules();
+	void detachCharts();
+
+	void attachLog();
+	void attachTrades();
+	void attachRules();
+	void attachCharts();
 
 	void loginChanged(QString);
 
@@ -120,7 +168,7 @@ public slots:
 	void firstTicker();
 	void firstAccInfo();
 
-	void anyValueChanged();
+	void fixWindowMinimumSize();
 	void ruleUp();
 	void ruleDown();
 
@@ -131,16 +179,17 @@ public slots:
 	void zeroBuyThanSellProfit();
 	void profitSellThanBuy();
 	void profitSellThanBuyChanged(double);
+	void profitSellThanBuyPrecChanged(double);
 	void profitSellThanBuyCalc();
 	void profitBuyThanSellCalc();
 	void profitBuyThanSell();
 	void profitBuyThanSellChanged(double);
+	void profitBuyThanSellPrecChanged(double);
 
 	void buttonNewWindow();
 
 	void checkValidRulesButtons();
 	void aboutTranslationButton();
-	void ordersLogGroupBoxToggled(bool);
 
 	void currencyChanged(int);
 
