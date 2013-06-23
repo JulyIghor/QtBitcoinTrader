@@ -18,6 +18,7 @@ v1.02
 - Added trade history display
 - Multi-monitor support (Detachable windows)
 - Improved connection stability
+- Added German translation
 - Fixed UI bugs, translation bugs and some minor bugs
 
 v1.01
