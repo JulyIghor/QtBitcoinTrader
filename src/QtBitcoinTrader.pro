@@ -29,7 +29,6 @@ HEADERS += aboutdialog.h \
            translationline.h \
            updaterdialog.h \
            audioplayer.h \
-           exchange_mtgox.h \
            exchange_btce.h
 FORMS += addrulewindow.ui \
          feecalculator.ui \
@@ -58,7 +57,6 @@ SOURCES += aboutdialog.cpp \
            translationline.cpp \
            updaterdialog.cpp \
            audioplayer.cpp \
-           exchange_mtgox.cpp \
            exchange_btce.cpp
 RESOURCES += QtResource.qrc
 QT += network multimedia
