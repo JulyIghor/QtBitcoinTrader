@@ -11,6 +11,22 @@ This software helps you to open and cancel Mt.Gox orders vary fast.
  1) Add realtime charts
  2) Make rules more advanced
 
+Download links
+https://sourceforge.net/projects/bitcointrader/
+http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml
+http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml
+
+Forums
+https://bitcointalk.org/index.php?topic=201062
+https://bitcointalk.org/index.php?topic=218044
+https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/
+
+Social
+
+http://www.facebook.com/QtBitcoinTrader
+http://twitter.com/QtBitcoinTrader
+http://vk.com/QtBitcoinTrader
+
 Change Log
 
 v1.02
