@@ -37,6 +37,11 @@ http://vk.com/QtBitcoinTrader
 
 Change Log
 
+v1.03
+- SSL security fix
+- Fixed translations
+- Small ui fix
+
 v1.02
 - BTC-E.com support added. Now you can trade with LTC
 - Added trade history display

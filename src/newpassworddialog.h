@@ -30,6 +30,7 @@ public:
 private:
 	Ui::NewPasswordDialog ui;
 private slots:
+	void exchangeChanged(QString);
 	void checkToEnableButton();
 	void getApiKeySecretButton();
 };

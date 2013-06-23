@@ -36,11 +36,18 @@ NewPasswordDialog::NewPasswordDialog()
 #endif
 
 	julyTranslator->translateUi(this);
+
+	ui.groupBoxApiKeyAndSecret->setTitle(julyTr("API_KEY_AND_SECRET","%1 API key and Secret").arg(ui.exchangeComboBox->currentText()));
 }
 
 NewPasswordDialog::~NewPasswordDialog()
 {
 
+}
+
+void NewPasswordDialog::exchangeChanged(QString name)
+{
+	ui.groupBoxApiKeyAndSecret->setTitle(julyTr("API_KEY_AND_SECRET","%1 API key and Secret").arg(name));
 }
 
 QString NewPasswordDialog::getPassword()
