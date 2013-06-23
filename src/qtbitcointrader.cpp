@@ -771,10 +771,11 @@ QByteArray QtBitcoinTrader::getMidData(QString a, QString b,QByteArray *data)
 void QtBitcoinTrader::fixWindowMinimumSize()
 {
 	static QTime lastFixedTime;
-	if(lastFixedTime.elapsed()<100)return;
+	if(lastFixedTime.elapsed()<500)return;
 	ui.marketGroupBox->setMinimumWidth(ui.marketGroupBox->minimumSizeHint().width());
 	ui.buyThenSellGroupBox->setMinimumWidth(ui.buyThenSellGroupBox->minimumSizeHint().width());
 	ui.sellThenBuyGroupBox->setMinimumWidth(ui.sellThenBuyGroupBox->minimumSizeHint().width());
+	ui.groupBoxAccount->setMinimumWidth(ui.groupBoxAccount->minimumSizeHint().width());
 	QSize minSizeHint=minimumSizeHint();
 	if(isValidSize(&minSizeHint))setMinimumSize(minSizeHint);
 	lastFixedTime.restart();
