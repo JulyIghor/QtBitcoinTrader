@@ -1,11 +1,12 @@
 Description
 
-This software helps you to open and cancel Mt.Gox orders vary fast.
- Real time data monitoring.
- Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
+This software helps you open and cancel Mt.Gox orders very fast. Real time data monitoring.
 
- I want to develop Trader App that can be configured for any rule and strategy.
- If you want to help me, than donate to 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
+Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
+
+I want to develop this Trader App so that it can be configured for any rule and strategy.
+ 
+If you want to help me, than donate to 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 
  Next ToDo:
  1) Add realtime charts

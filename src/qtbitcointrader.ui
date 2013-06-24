@@ -3327,7 +3327,7 @@ p, li { white-space: pre-wrap; }
               </font>
              </property>
              <property name="accessibleName">
-              <string>BUY_BITCOINS</string>
+              <string>BUY</string>
              </property>
              <property name="styleSheet">
               <string notr="true">QPushButton {color: red} QPushButton::disabled {color: gray}</string>
@@ -4252,7 +4252,7 @@ p, li { white-space: pre-wrap; }
               </font>
              </property>
              <property name="accessibleName">
-              <string>SELL_BITCOINS</string>
+              <string>SELL</string>
              </property>
              <property name="styleSheet">
               <string notr="true">QPushButton {color: blue} QPushButton::disabled {color: gray}</string>
