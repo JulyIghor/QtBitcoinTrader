@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.031");
+	appVerStr_=new QByteArray("1.032");
 	appVerReal_=new double(appVerStr.toDouble());
 	currencyBStr_=new QByteArray("USD");
 	currencyBStrLow_=new QByteArray("usd");
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	{
 		QFile currencyFile("://Resources/Currencies.map");
 		currencyFile.open(QIODevice::ReadOnly);
-		QStringList currencyList=QString(currencyFile.readAll()).split("\r\n");
+		QStringList currencyList=QString(currencyFile.readAll().replace("\r","")).split("\n");
 		currencyFile.close();
 		for(int n=0;n<currencyList.count();n++)
 		{

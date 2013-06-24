@@ -487,7 +487,7 @@ void QtBitcoinTrader::reloadLanguageList(QString preferedLangFile)
 	QStringList langList;
 	QFile resLanguage(":/Resources/Language/LangList.ini");
 	resLanguage.open(QIODevice::ReadOnly);
-	QStringList resourceLanguages=QString(resLanguage.readAll()).split("\r\n");
+	QStringList resourceLanguages=QString(resLanguage.readAll().replace("\r","")).split("\n");
 	for(int n=0;n<resourceLanguages.count();n++)if(!resourceLanguages.at(n).isEmpty())langList<<":/Resources/Language/"+resourceLanguages.at(n);
 	QStringList folderLangList=QDir(appDataDir+"Language","*.lng").entryList();
 	folderLangList.sort();
