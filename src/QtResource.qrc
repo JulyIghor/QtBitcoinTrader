@@ -28,8 +28,6 @@
     <file>Resources/CurrencySign/SGD.png</file>
     <file>Resources/CurrencySign/THB.png</file>
     <file>Resources/CurrencySign/USD.png</file>
-    <file>Resources/TradeDown.png</file>
-    <file>Resources/TradeUp.png</file>
     <file>Resources/Public.key</file>
     <file>Resources/QtBitcoinTrader.png</file>
     <file>Resources/Language/English.lng</file>

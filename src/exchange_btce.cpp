@@ -75,7 +75,7 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool ssl
 	connect(this,SIGNAL(tickerBuyChanged(double)),mainClass->ui.marketBuy,SLOT(setValue(double)));
 	connect(this,SIGNAL(tickerVolumeChanged(double)),mainClass->ui.marketVolume,SLOT(setValue(double)));
 
-	connect(this,SIGNAL(addLastTrade(double, qint64, double, QByteArray)),mainClass,SLOT(addLastTrade(double, qint64, double, QByteArray)));
+	connect(this,SIGNAL(addLastTrade(double, qint64, double, QByteArray, bool)),mainClass,SLOT(addLastTrade(double, qint64, double, QByteArray, bool)));
 
 	start();
 }
@@ -225,7 +225,7 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 				qint64 currentTid=getMidData("\"tid\":",",\"",&tradeData).toLongLong();
 				if(lastFetchTid>=currentTid)continue;
 				lastFetchTid=currentTid;
-				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),getMidData("date\":",",\"",&tradeData).toLongLong(),getMidData("\"price\":",",\"",&tradeData).toDouble(),getMidData("\"price_currency\":\"","\",\"",&tradeData));
+				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),getMidData("date\":",",\"",&tradeData).toLongLong(),getMidData("\"price\":",",\"",&tradeData).toDouble(),getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
 			}
 		}
 		break;//trades
@@ -436,11 +436,17 @@ void Exchange_BTCe::run()
 	exec();
 }
 
-void Exchange_BTCe::cancelPendingRequests()
+void Exchange_BTCe::cancelPendingAuthRequests()
 {
 	if(vipRequestCount)return;
 	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
 	requestIdsAuth.clear();
+}
+
+void Exchange_BTCe::cancelPendingNoAuthRequests()
+{
+	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
+	requestIdsNoAuth.clear();
 }
 
 void Exchange_BTCe::reloadOrders()
@@ -452,19 +458,21 @@ void Exchange_BTCe::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 
-	if(requestIdsAuth.count()<5&&!vipRequestCount)//Max pending requests at time
+	if(requestIdsAuth.count()<10&&!vipRequestCount)//Max pending requests at time
 	{
 		if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi("",true,"method=getInfo&")]=2;
 		if(!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi("",true,"method=OrderList&")]=4;
-	}
-	if(requestIdsNoAuth.count()<5)//Max pending requests at time
+	} else cancelPendingAuthRequests();
+
+	if(requestIdsNoAuth.count()<10)//Max pending requests at time
 	{
 		if(requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/ticker",false)]=3;
 		static int tradesCounter=0;
 		if(tradesCounter++==0)
 			if(requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/trades",false)]=9;
 		if(tradesCounter>3)tradesCounter=0;
-	}
+	} else cancelPendingNoAuthRequests();
+
 	if(lastHistory.isEmpty())getHistory(false);
 }
 
@@ -479,7 +487,7 @@ void Exchange_BTCe::getHistory(bool force)
 void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	cancelPendingRequests();
+	cancelPendingAuthRequests();
 	vipRequestCount++;
 	QByteArray params="method=Trade&pair="+currencyRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy)+"&amount="+QByteArray::number(apiBtcToBuy)+"&";
 	requestIdsAuth[sendToApi("",true,params)]=6;
@@ -492,7 +500,7 @@ void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
-	cancelPendingRequests();
+	cancelPendingAuthRequests();
 	vipRequestCount++;
 	QByteArray params="method=Trade&pair="+currencyRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell)+"&amount="+QByteArray::number(apiBtcToSell)+"&";
 	requestIdsAuth[sendToApi("",true,params)]=7;
@@ -505,7 +513,7 @@ void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
 void Exchange_BTCe::cancelOrder(QByteArray order)
 {
 	if(tickerOnly)return;
-	cancelPendingRequests();
+	cancelPendingAuthRequests();
 	vipRequestCount++;
 	order.prepend("method=CancelOrder&order_id=");
 	order.append("&");

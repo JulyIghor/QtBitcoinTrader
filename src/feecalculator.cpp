@@ -44,15 +44,17 @@ FeeCalculator::FeeCalculator()
 	mainWindow.fillAllBtcLabels(this,"BTC");
 	mainWindow.fillAllUsdLabels(this,currencyBStr);
 
-	QSize minSizeHint=minimumSizeHint();
-	if(mainWindow.isValidSize(&minSizeHint))setMaximumSize(minimumSizeHint().width()+200,minimumSizeHint().height());
-
 #ifdef GENERATE_LANGUAGE_FILE
 	julyTranslator->loadMapFromUi(this);
 	julyTranslator->saveToFile("LanguageDefault.lng");
 #endif
 	julyTranslator->translateUi(this);
 	setWindowTitle(julyTr("FEE_CALCULATOR_TITLE","%1 Fee Calculator").arg(exchangeName));
+
+	mainWindow.fixAllChildButtonsAndLabels(this);
+
+	QSize minSizeHint=minimumSizeHint();
+	if(mainWindow.isValidSize(&minSizeHint))setMaximumSize(minimumSizeHint().width()+200,minimumSizeHint().height());
 
 	connect(julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
 }

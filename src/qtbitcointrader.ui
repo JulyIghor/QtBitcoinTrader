@@ -1376,9 +1376,6 @@
           </item>
           <item row="0" column="3">
            <widget class="QToolButton" name="calcButton">
-            <property name="toolTip">
-             <string>Mt.Gox Fee Calculator</string>
-            </property>
             <property name="text">
              <string/>
             </property>
@@ -3110,9 +3107,6 @@ p, li { white-space: pre-wrap; }
               <width>110</width>
               <height>0</height>
              </size>
-            </property>
-            <property name="toolTip">
-             <string>Price - Fee</string>
             </property>
             <property name="styleSheet">
              <string notr="true">QDoubleSpinBox {border: 0px; background: transparent;}</string>

@@ -77,7 +77,7 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool ss
 	connect(this,SIGNAL(tickerBuyChanged(double)),mainClass->ui.marketBuy,SLOT(setValue(double)));
 	connect(this,SIGNAL(tickerVolumeChanged(double)),mainClass->ui.marketVolume,SLOT(setValue(double)));
 
-	connect(this,SIGNAL(addLastTrade(double, qint64, double, QByteArray)),mainClass,SLOT(addLastTrade(double, qint64, double, QByteArray)));
+	connect(this,SIGNAL(addLastTrade(double, qint64, double, QByteArray, bool)),mainClass,SLOT(addLastTrade(double, qint64, double, QByteArray, bool)));
 
 	start();
 }
@@ -232,7 +232,7 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 				for(int n=0;n<tradeList.count();n++)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
-					emit addLastTrade(getMidData("\"amount\":\"","\",",&tradeData).toDouble(),getMidData("date\":",",\"",&tradeData).toLongLong(),getMidData("\"price\":\"","\",",&tradeData).toDouble(),getMidData("\"price_currency\":\"","\",\"",&tradeData));
+					emit addLastTrade(getMidData("\"amount\":\"","\",",&tradeData).toDouble(),getMidData("date\":",",\"",&tradeData).toLongLong(),getMidData("\"price\":\"","\",",&tradeData).toDouble(),getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
 					if(n==tradeList.count()-1)
 						lastFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
 				}
@@ -439,11 +439,17 @@ void Exchange_MtGox::run()
 	exec();
 }
 
-void Exchange_MtGox::cancelPendingRequests()
+void Exchange_MtGox::cancelPendingAuthRequests()
 {
 	if(vipRequestCount)return;
 	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
 	requestIdsAuth.clear();
+}
+
+void Exchange_MtGox::cancelPendingNoAuthRequests()
+{
+	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
+	requestIdsNoAuth.clear();
 }
 
 void Exchange_MtGox::reloadOrders()
@@ -455,17 +461,17 @@ void Exchange_MtGox::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 
-	if(requestIdsAuth.count()<5&&!vipRequestCount)//Max pending requests at time
+	if(requestIdsAuth.count()<10&&!vipRequestCount)//Max pending requests at time
 	{
 	if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/info",true)]=2;
 	if(!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/orders",true)]=4;
-	}
+	} else cancelPendingAuthRequests();
 	if(requestIdsNoAuth.count()<10)//Max pending requests at time
 	{
 	if(requestIdsNoAuth.key(1,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/order/lag",false)]=1;
 	if(requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/ticker",false)]=3;
 	if(requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/trades/fetch?since="+lastFetchDate,false)]=9;
-	}
+	} else cancelPendingNoAuthRequests();
 	if(lastHistory.isEmpty())getHistory(false);
 }
 
@@ -479,7 +485,7 @@ void Exchange_MtGox::getHistory(bool force)
 void Exchange_MtGox::buy(double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	cancelPendingRequests();
+	cancelPendingAuthRequests();
 	vipRequestCount++;
 	QByteArray params="&type=bid&amount_int="+QByteArray::number(apiBtcToBuy*100000000,'f',0)+"&price_int="+QByteArray::number(apiPriceToBuy*100000,'f',0);
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params)]=6;
@@ -492,7 +498,7 @@ void Exchange_MtGox::buy(double apiBtcToBuy, double apiPriceToBuy)
 void Exchange_MtGox::sell(double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
-	cancelPendingRequests();
+	cancelPendingAuthRequests();
 	vipRequestCount++;
 	QByteArray params="&type=ask&amount_int="+QByteArray::number(apiBtcToSell*100000000,'f',0)+"&price_int="+QByteArray::number(apiPriceToSell*100000,'f',0);
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params)]=7;
@@ -505,7 +511,7 @@ void Exchange_MtGox::sell(double apiBtcToSell, double apiPriceToSell)
 void Exchange_MtGox::cancelOrder(QByteArray order)
 {
 	if(tickerOnly)return;
-	cancelPendingRequests();
+	cancelPendingAuthRequests();
 	vipRequestCount++;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/cancel",true,"&oid="+order)]=5;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/cancel",true,"&oid="+order,false)]=5;

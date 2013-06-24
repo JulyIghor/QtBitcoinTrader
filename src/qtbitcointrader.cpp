@@ -125,7 +125,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	QSettings settings(iniFileName,QSettings::IniFormat);
 
 	profileName=settings.value("ProfileName","Default Profile").toString();
-	setWindowTitle(windowTitle()+" v"+appVerStr+" ["+profileName+"]");
+	windowTitleP=windowTitle()+" v"+appVerStr+" ["+profileName+"]";
+	setWindowTitle(windowTitleP);
 
 	ui.sslCheck->setChecked(settings.value("OpenSSL",true).toBool());
 
@@ -338,7 +339,7 @@ void QtBitcoinTrader::resizeEvent(QResizeEvent *event)
 	fixWindowMinimumSize();
 }
 
-void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDouble, QByteArray curRency)
+void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDouble, QByteArray curRency, bool isAsk)
 {
 	int goingUp=-1;
 	double marketLast=ui.marketLast->value();
@@ -361,14 +362,24 @@ void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDou
 	newItem->setTextAlignment(Qt::AlignCenter);
 	newItem->setData(Qt::UserRole,dateT);
 	ui.tableTrades->setItem(0,1,newItem);
-	newItem=new QTableWidgetItem(usdValue);newItem->setTextColor(Qt::darkGreen);
-	newItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
+	if(isAsk)
+	{
+		newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_ASK","ask"));
+		newItem->setTextColor(Qt::red);
+	}
+	else
+	{
+		newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_BID","bid"));
+		newItem->setTextColor(Qt::darkBlue);
+	}
+	newItem->setTextAlignment(Qt::AlignCenter);
 	ui.tableTrades->setItem(0,2,newItem);
 
-	static QPixmap arrowUp(":/Resources/TradeUp.png");
-	static QPixmap arrowDown(":/Resources/TradeDown.png");
-	if(goingUp==1)ui.tableTrades->setItem(0,3,new QTableWidgetItem(arrowUp,""));else
-	if(goingUp==-1)ui.tableTrades->setItem(0,3,new QTableWidgetItem(arrowDown,""));
+	newItem=new QTableWidgetItem(usdValue);newItem->setTextColor(Qt::darkGreen);
+	newItem->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+	ui.tableTrades->setItem(0,3,newItem);
+
 	
 	if(ui.tradesAutoScrollCheck->isChecked()&&ui.tabLastTrades->isVisible())
 	{
@@ -1541,7 +1552,11 @@ void QtBitcoinTrader::marketHighChanged(double val)
 
 void QtBitcoinTrader::marketBuyChanged(double val)			{checkAndExecuteRule(&rulesMarketBuyPrice,val);}
 void QtBitcoinTrader::marketSellChanged(double val)			{checkAndExecuteRule(&rulesMarketSellPrice,val);}
-void QtBitcoinTrader::marketLastChanged(double val)			{checkAndExecuteRule(&rulesLastPrice,val);}
+void QtBitcoinTrader::marketLastChanged(double val)
+{
+	checkAndExecuteRule(&rulesLastPrice,val);
+	if(val>0.0)setWindowTitle("["+currencyBSign+QString::number(val,'f',3)+"] "+windowTitleP);
+}
 void QtBitcoinTrader::ordersLastBuyPriceChanged(double val)	{checkAndExecuteRule(&rulesOrdersLastBuyPrice,val);}
 void QtBitcoinTrader::ordersLastSellPriceChanged(double val){checkAndExecuteRule(&rulesOrdersLastSellPrice,val);}
 
@@ -1747,7 +1762,7 @@ void QtBitcoinTrader::languageChanged()
 	ui.rulesTable->setHorizontalHeaderLabels(rulesLabels);
 
 	QStringList tradesLabels;
-	tradesLabels<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_PRICE","Price")<<"";
+	tradesLabels<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_TYPE","Type")<<julyTr("ORDERS_PRICE","Price");
 	ui.tableTrades->setHorizontalHeaderLabels(tradesLabels);
 
 	ui.tabOrdersLog->setAccessibleName(julyTr("TAB_ORDERS_LOG","Orders Log"));

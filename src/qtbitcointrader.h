@@ -40,6 +40,7 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	QString windowTitleP;
 	QSystemTrayIcon *trayIcon;
 	int btcDecimals;
 	int usdDecimals;
@@ -137,7 +138,7 @@ public slots:
 	void setTradesScrollBarValue(int);
 	void tabTradesIndexChanged(int);
 	void tabTradesScrollUp();
-	void addLastTrade(double, qint64, double, QByteArray);
+	void addLastTrade(double, qint64, double, QByteArray, bool);
 
 	void detachLog();
 	void detachTrades();

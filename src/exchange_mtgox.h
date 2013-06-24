@@ -30,7 +30,8 @@ private:
 	bool sslEnabled;
 	bool tickerOnly;
 	int vipRequestCount;
-	void cancelPendingRequests();
+	void cancelPendingAuthRequests();
+	void cancelPendingNoAuthRequests();
 	bool isApiDown;
 	void translateUnicodeStr(QString *str);
 	QByteArray lastHistory;
@@ -67,7 +68,7 @@ private:
 	QTimer *secondTimer;
 	void run();
 signals:
-	void addLastTrade(double,qint64,double,QByteArray);
+	void addLastTrade(double,qint64,double,QByteArray,bool);
 
 	void ordersChanged(QString);
 	void identificationRequired();
