@@ -80,7 +80,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	ui.setupUi(this);
 
-	accountFeeChanged(ui.accountFee->value());
 	setAttribute(Qt::WA_QuitOnClose,true);
 
 	setWindowFlags(Qt::Window);
@@ -185,6 +184,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	{
 	case 1:
 		{//BTC-E
+			ui.accountFee->setValue(0.2);
 			btcDecimals=8;
 			usdDecimals=8;
 			priceDecimals=3;
@@ -222,6 +222,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 			exchangeName="Mt.Gox"; (new Exchange_MtGox(restSign,restKey))->setupApi(this,false,ui.sslCheck->isChecked());
 		}
 	}
+	accountFeeChanged(ui.accountFee->value());
 
 	reloadLanguageList();
 	resize(qMax(minimumSizeHint().width(),qMin(1024,(int)(currentDesktopRect.width()*0.95))),qMin((int)(currentDesktopRect.height()*0.95),700));
@@ -391,7 +392,7 @@ void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDou
 void QtBitcoinTrader::clearTimeOutedTrades()
 {
 	if(ui.tableTrades->rowCount()==0)return;
-	qint64 min5Date=QDateTime::currentDateTime().addSecs(-300).toTime_t();
+	qint64 min5Date=QDateTime::currentDateTime().addSecs(-600).toTime_t();
 	while(ui.tableTrades->rowCount()&&ui.tableTrades->item(ui.tableTrades->rowCount()-1,1)->data(Qt::UserRole).toLongLong()<min5Date)
 	{
 		ui.tradesVolume5m->setValue(ui.tradesVolume5m->value()-ui.tableTrades->item(ui.tableTrades->rowCount()-1,0)->data(Qt::UserRole).toDouble());
@@ -600,8 +601,22 @@ void QtBitcoinTrader::currencyChanged(int val)
 	ui.tradesVolume5m->setValue(0.0);
 
 	QString curCurrencyName=currencyNamesMap->value(currencyAStr,"BITCOINS");
-	ui.buyGroupbox->setTitle(julyTr("GROUPBOX_BUY","Buy %1").arg(curCurrencyName));
-	ui.sellGroupBox->setTitle(julyTr("GROUPBOX_SELL","Sell %1").arg(curCurrencyName));
+
+	QString buyGroupboxText=julyTr("GROUPBOX_BUY","Buy %1");
+	bool buyGroupboxCase=false; if(buyGroupboxText.length()>2)buyGroupboxCase=buyGroupboxText.at(2).isUpper();
+
+	if(buyGroupboxCase)buyGroupboxText=buyGroupboxText.arg(curCurrencyName.toUpper());
+	else buyGroupboxText=buyGroupboxText.arg(curCurrencyName);
+
+	ui.buyGroupbox->setTitle(buyGroupboxText);
+
+	QString sellGroupboxText=julyTr("GROUPBOX_SELL","Sell %1");
+	bool sellGroupboxCase=true; if(sellGroupboxText.length()>2)sellGroupboxCase=sellGroupboxText.at(2).isUpper();
+
+	if(sellGroupboxCase)sellGroupboxText=sellGroupboxText.arg(curCurrencyName.toUpper());
+	else sellGroupboxText=sellGroupboxText.arg(curCurrencyName);
+
+	ui.sellGroupBox->setTitle(sellGroupboxText);
 
 	emit clearValues();
 	marketPricesNotLoaded=true;
@@ -907,8 +922,8 @@ void QtBitcoinTrader::identificationRequired()
 		{
 			authErrorOnce=true;
 			showingMessage=true;
-			QMessageBox::warning(this,julyTr("AUTH_ERROR",exchangeName+" Error"),julyTr("TRUNAUTHORIZED","Identification required to access private API.\nPlease enter valid API key and Secret.\n\nTo get new API Keys:\nGo http://mtgox.com => \"Security Center\"  => \"Advanced API Key Creation\"\nCheck \"Info\" and \"Trade\"\nPress Create Key\nCopy and paste RestKey and RestSign to program."));
-			if(isLogEnabled)logThread->writeLog(exchangeName.toAscii()+" Error: Identification required to access private API\nPlease restart application, and enter valid API key and Secret");
+			QMessageBox::warning(this,julyTr("AUTH_ERROR",exchangeName+" Error"),julyTr("TRUNAUTHORIZED","Identification required to access private API.<br>Please enter valid API key and Secret."));
+			if(isLogEnabled)logThread->writeLog(exchangeName.toAscii()+" Error: Identification required to access private API<br>Please restart application, and enter valid API key and Secret");
 			showingMessage=false;
 		}
 	}
@@ -956,7 +971,10 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	ui.ordersTable->setRowCount(curRow+1);
 	ui.ordersTable->setRowHeight(curRow,30);
 	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat)));postWorkAtTableItem(ui.ordersTable->item(curRow,0));ui.ordersTable->item(curRow,0)->setData(Qt::UserRole,oid);
-	ui.ordersTable->setItem(curRow,1,new QTableWidgetItem(julyTr("ORDER_TYPE_"+dataList.at(1).toUpper(),dataList.at(1))));postWorkAtTableItem(ui.ordersTable->item(curRow,1));
+	QString orderType=dataList.at(1).toUpper();
+	QTableWidgetItem *newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_"+orderType,dataList.at(1)));
+	if(orderType=="ASK")newItem->setTextColor(Qt::blue); else newItem->setTextColor(Qt::red);
+	ui.ordersTable->setItem(curRow,1,newItem);postWorkAtTableItem(ui.ordersTable->item(curRow,1));
 	ui.ordersTable->setItem(curRow,2,new QTableWidgetItem(julyTr("ORDER_STATE_"+dataList.at(2).toUpper(),dataList.at(2))));postWorkAtTableItem(ui.ordersTable->item(curRow,2));
 	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(currencyASign+" "+dataList.at(3)));ui.ordersTable->item(curRow,3)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
 	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+QString::number(dataList.at(4).toDouble(),'f',priceDecimals)));ui.ordersTable->item(curRow,4)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
@@ -1555,7 +1573,11 @@ void QtBitcoinTrader::marketSellChanged(double val)			{checkAndExecuteRule(&rule
 void QtBitcoinTrader::marketLastChanged(double val)
 {
 	checkAndExecuteRule(&rulesLastPrice,val);
-	if(val>0.0)setWindowTitle("["+currencyBSign+QString::number(val,'f',3)+"] "+windowTitleP);
+	if(val>0.0)
+	{
+		if(isVisible())setWindowTitle("["+currencyBSign+QString::number(val,'f',3)+"] "+windowTitleP);
+		if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip("["+currencyBSign+QString::number(val,'f',3)+"] "+windowTitleP);
+	}
 }
 void QtBitcoinTrader::ordersLastBuyPriceChanged(double val)	{checkAndExecuteRule(&rulesOrdersLastBuyPrice,val);}
 void QtBitcoinTrader::ordersLastSellPriceChanged(double val){checkAndExecuteRule(&rulesOrdersLastSellPrice,val);}
@@ -1758,7 +1780,7 @@ void QtBitcoinTrader::languageChanged()
 	ordersLabels<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_TYPE","Type")<<julyTr("ORDERS_STATUS","Status")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_PRICE","Price")<<julyTr("ORDERS_TOTAL","Total");
 	ui.ordersTable->setHorizontalHeaderLabels(ordersLabels);
 	QStringList rulesLabels;
-	rulesLabels<<julyTr("RULES_T_STATE","State")<<julyTr("RULES_T_DESCR","Description")<<julyTr("RULES_T_ACTION","Action")<<julyTr("RULES_T_AMOUNT","Amount")<<julyTr("RULES_T_PRICE","Price");
+	rulesLabels<<julyTr("RULES_T_STATE","State")<<julyTr("RULES_T_DESCR","Description")<<julyTr("RULES_T_ACTION","Action")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("RULES_T_PRICE","Price");
 	ui.rulesTable->setHorizontalHeaderLabels(rulesLabels);
 
 	QStringList tradesLabels;
@@ -1789,6 +1811,10 @@ void QtBitcoinTrader::languageChanged()
 	QString curCurrencyName=currencyNamesMap->value(currencyAStr,"BITCOINS");
 	ui.buyGroupbox->setTitle(julyTr("GROUPBOX_BUY","Buy %1").arg(curCurrencyName));
 	ui.sellGroupBox->setTitle(julyTr("GROUPBOX_SELL","Sell %1").arg(curCurrencyName));
+
+	foreach(QToolButton* toolButton, findChildren<QToolButton*>())
+		if(toolButton->accessibleDescription()=="TOGGLE_SOUND")
+			toolButton->setToolTip(julyTr("TOGGLE_SOUND","Toggle sound notification on value change"));
 
 	ui.tableTrades->clearContents();
 	ui.tableTrades->setRowCount(0);

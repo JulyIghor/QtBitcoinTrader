@@ -610,6 +610,9 @@
         </item>
         <item row="0" column="7">
          <widget class="QToolButton" name="marketHighBeep">
+          <property name="accessibleDescription">
+           <string>TOGGLE_SOUND</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -627,6 +630,9 @@
         </item>
         <item row="1" column="7">
          <widget class="QToolButton" name="marketLowBeep">
+          <property name="accessibleDescription">
+           <string>TOGGLE_SOUND</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1082,6 +1088,9 @@
         </item>
         <item row="0" column="3">
          <widget class="QToolButton" name="accountBTCBeep">
+          <property name="accessibleDescription">
+           <string>TOGGLE_SOUND</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1099,6 +1108,9 @@
         </item>
         <item row="1" column="3">
          <widget class="QToolButton" name="accountUSDBeep">
+          <property name="accessibleDescription">
+           <string>TOGGLE_SOUND</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1984,6 +1996,9 @@ p, li { white-space: pre-wrap; }
         <layout class="QGridLayout" name="gridLayout_5">
          <item row="0" column="0">
           <widget class="QToolButton" name="ruleBeep">
+           <property name="accessibleDescription">
+            <string>TOGGLE_SOUND</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -2402,10 +2417,10 @@ p, li { white-space: pre-wrap; }
             </sizepolicy>
            </property>
            <property name="accessibleName">
-            <string>5MIN_VOLUME</string>
+            <string>XMIN_VOLUME</string>
            </property>
            <property name="text">
-            <string>5 min. Volume:</string>
+            <string>10 min. Volume:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2735,7 +2750,7 @@ p, li { white-space: pre-wrap; }
         <string/>
        </property>
        <property name="styleSheet">
-        <string notr="true">QGroupBox {color: red}</string>
+        <string notr="true">QGroupBox {color: blue}</string>
        </property>
        <property name="title">
         <string>BUY BITCOINS</string>
@@ -3324,7 +3339,7 @@ p, li { white-space: pre-wrap; }
               <string>BUY</string>
              </property>
              <property name="styleSheet">
-              <string notr="true">QPushButton {color: red} QPushButton::disabled {color: gray}</string>
+              <string notr="true">QPushButton {color: blue} QPushButton::disabled {color: gray}</string>
              </property>
              <property name="text">
               <string>BUY</string>
@@ -3682,7 +3697,7 @@ p, li { white-space: pre-wrap; }
         <string/>
        </property>
        <property name="styleSheet">
-        <string notr="true">QGroupBox {color: blue}</string>
+        <string notr="true">QGroupBox {color: red}</string>
        </property>
        <property name="title">
         <string>SELL BITCOINS</string>
@@ -4249,7 +4264,7 @@ p, li { white-space: pre-wrap; }
               <string>SELL</string>
              </property>
              <property name="styleSheet">
-              <string notr="true">QPushButton {color: blue} QPushButton::disabled {color: gray}</string>
+              <string notr="true">QPushButton {color: red} QPushButton::disabled {color: gray}</string>
              </property>
              <property name="text">
               <string>SELL</string>

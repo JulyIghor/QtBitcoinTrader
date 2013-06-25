@@ -165,7 +165,7 @@ bool canAutoUpdate=false;
 			QFile::rename(curBin,bkpBin);
 			if(!QFile::exists(bkpBin)){downloadError();return;}
 			QFile::rename(updBin,curBin);
-			if(!QFile::exists(curBin)){QMessageBox::critical(this,windowTitle(),"Critical error. Please reinstall application. Download it from http://sourceforge.net/projects/bitcointrader/<br>File not exists: "+curBin+"\n"+updBin);downloadError();return;}
+			if(!QFile::exists(curBin)){QMessageBox::critical(this,windowTitle(),"Critical error. Please reinstall application. Download it from http://sourceforge.net/projects/bitcointrader/<br>File not exists: "+curBin+"<br>"+updBin);downloadError();return;}
 #ifdef Q_OS_MAC
             QFile(curBin).setPermissions(QFile(bkpBin).permissions());
 #endif

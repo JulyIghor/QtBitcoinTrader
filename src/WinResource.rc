@@ -19,12 +19,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GigaSOFT Group"
             VALUE "FileDescription", "Qt Bitcoin Trader"
-            VALUE "FileVersion", "1, 0, 3, 0"
+            VALUE "FileVersion", "1, 0, 4, 0"
             VALUE "InternalName", "Qt Bitcoin Trader"
             VALUE "LegalCopyright", "Copyright (C) 2013"
             VALUE "OriginalFilename", "QtBitcoinTrader.exe"
             VALUE "ProductName", "Qt Bitcoin Trader Application"
-            VALUE "ProductVersion", "1, 0, 3, 0"
+            VALUE "ProductVersion", "1, 0, 4, 0"
         END
     END
 	BLOCK "VarFileInfo"

@@ -26,7 +26,6 @@
 #define restKey (*restKey_)
 #define restSign (*restSign_)
 #define mainWindow (*mainWindow_)
-#define nonce (*nonce_)
 #define isLogEnabled (*logEnabled_)
 #define iniFileName (*iniFileName_)
 #define logFileName (*logFileName_)
@@ -63,7 +62,6 @@ extern LogThread *logThread;
 extern QByteArray *restKey_;
 extern QByteArray *restSign_;
 extern QtBitcoinTrader *mainWindow_;
-extern quint64 *nonce_;
 extern bool *logEnabled_;
 extern QString *logFileName_;
 extern QString *iniFileName_;

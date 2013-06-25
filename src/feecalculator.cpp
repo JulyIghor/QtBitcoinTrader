@@ -49,7 +49,7 @@ FeeCalculator::FeeCalculator()
 	julyTranslator->saveToFile("LanguageDefault.lng");
 #endif
 	julyTranslator->translateUi(this);
-	setWindowTitle(julyTr("FEE_CALCULATOR_TITLE","%1 Fee Calculator").arg(exchangeName));
+	setWindowTitle(julyTr("FEE_CALCULATOR_TITLE","Calculator"));
 
 	mainWindow.fixAllChildButtonsAndLabels(this);
 

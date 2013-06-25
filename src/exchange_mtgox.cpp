@@ -27,7 +27,7 @@ Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	headerAuth.setValue("Rest-Key",pRestKey);
 	moveToThread(this);
 	softLagTime.restart();
-	privateNonce=QDateTime::currentDateTime().toMSecsSinceEpoch();
+	privateNonce=QDateTime::currentDateTime().toTime_t()*1000;
 }
 
 Exchange_MtGox::~Exchange_MtGox()
@@ -123,7 +123,7 @@ void Exchange_MtGox::clearValues()
 	requestIdsNoAuth.clear();
 	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
 	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
-	lastFetchDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-300).toMSecsSinceEpoch())+"000";
+	lastFetchDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-600).toTime_t())+"000000";
 }
 
 QByteArray Exchange_MtGox::getMidData(QString a, QString b,QByteArray *data)
@@ -306,6 +306,9 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 				}
 				if(isFirstAccInfo)
 				{
+					QByteArray rights=getMidData("Rights\":","]",&data);
+					bool isRightsGood=rights.contains("get_info")&&rights.contains("trade");
+					if(!isRightsGood)emit identificationRequired();
 					emit firstAccInfo();
 					isFirstAccInfo=false;
 				}

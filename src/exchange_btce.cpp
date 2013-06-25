@@ -27,7 +27,7 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	headerAuth.setValue("Key",pRestKey);
 	moveToThread(this);
 	softLagTime.restart();
-	privateNonce=QDateTime::currentDateTime().toMSecsSinceEpoch()/100-13718548840;
+	privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 }
 
 Exchange_BTCe::~Exchange_BTCe()
@@ -123,7 +123,8 @@ void Exchange_BTCe::clearValues()
 	requestIdsNoAuth.clear();
 	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
 	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
-	lastFetchTid=-QDateTime::currentDateTime().addSecs(-300).toMSecsSinceEpoch()/1000;
+	lastFetchTid=QDateTime::currentDateTime().addSecs(-600).toTime_t();
+	lastFetchTid=-lastFetchTid;
 }
 
 QByteArray Exchange_BTCe::getMidData(QString a, QString b,QByteArray *data)
@@ -290,6 +291,9 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 
 				if(isFirstAccInfo)
 				{
+					QByteArray rights=getMidData("rights\":{","}",&data);
+					bool isRightsGood=rights.contains("info\":1")&&rights.contains("trade\":1");
+					if(!isRightsGood)emit identificationRequired();
 					emit firstAccInfo();
 					isFirstAccInfo=false;
 				}
@@ -489,6 +493,7 @@ void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 	if(tickerOnly)return;
 	cancelPendingAuthRequests();
 	vipRequestCount++;
+	apiBtcToBuy=((int)(apiBtcToBuy*100000))/100000.0;
 	QByteArray params="method=Trade&pair="+currencyRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy)+"&amount="+QByteArray::number(apiBtcToBuy)+"&";
 	requestIdsAuth[sendToApi("",true,params)]=6;
 	requestIdsAuth[sendToApi("",true,params,false)]=6;
@@ -502,6 +507,7 @@ void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
 	if(tickerOnly)return;
 	cancelPendingAuthRequests();
 	vipRequestCount++;
+	apiBtcToSell=((int)(apiBtcToSell*100000))/100000.0;
 	QByteArray params="method=Trade&pair="+currencyRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell)+"&amount="+QByteArray::number(apiBtcToSell)+"&";
 	requestIdsAuth[sendToApi("",true,params)]=7;
 	requestIdsAuth[sendToApi("",true,params,false)]=7;

@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.032");
+	appVerStr_=new QByteArray("1.034");
 	appVerReal_=new double(appVerStr.toDouble());
 	currencyBStr_=new QByteArray("USD");
 	currencyBStrLow_=new QByteArray("usd");
@@ -87,10 +87,10 @@ int main(int argc, char *argv[])
 	defaultLangFile_=new QString();pickDefaultLangFile();
 	currencySignMap=new QMap<QByteArray,QByteArray>;
 	currencyNamesMap=new QMap<QByteArray,QByteArray>;
-	dateTimeFormat_=new QString(QLocale().dateTimeFormat(QLocale::ShortFormat));//"yyyy-MM-dd HH:mm:ss");
+	dateTimeFormat_=new QString(QLocale().dateTimeFormat(QLocale::ShortFormat));
 	timeFormat_=new QString(QLocale().timeFormat(QLocale::ShortFormat));// "HH:mm:ss");
 	exchangeName_=new QString("Mt.Gox");
-	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
+	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
 
 #ifdef Q_OS_WIN
 	if(QFile::exists("./QtBitcoinTrader"))
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 	}
 	if(appDataDir.isEmpty())
 	{
-	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).toAscii()+"/QtBitcoinTrader/";
+	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/QtBitcoinTrader/";
 	if(!QFile::exists(appDataDir))QDir().mkpath(appDataDir);
 	}
 #else
@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
 	QFile *lockFile=0;
 
 	{
-	nonce_=new quint64(0);
 	logEnabled_=new bool(false);
 
 	a.setStyleSheet(globalStyleSheet);
@@ -156,7 +155,6 @@ int main(int argc, char *argv[])
 	logFileName_=new QString("QtBitcoinTrader.log");
 	iniFileName_=new QString("QtBitcoinTrader.ini");
 
-	nonce=QDateTime::currentDateTime().toMSecsSinceEpoch();
 	restKey_=new QByteArray;
 	restSign_=new QByteArray;
 	{
