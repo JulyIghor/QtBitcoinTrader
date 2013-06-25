@@ -292,10 +292,13 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 				if(isFirstAccInfo)
 				{
 					QByteArray rights=getMidData("rights\":{","}",&data);
+					if(!rights.isEmpty())
+					{
 					bool isRightsGood=rights.contains("info\":1")&&rights.contains("trade\":1");
 					if(!isRightsGood)emit identificationRequired();
 					emit firstAccInfo();
 					isFirstAccInfo=false;
+					}
 				}
 			}
 			break;//info

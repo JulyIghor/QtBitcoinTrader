@@ -307,10 +307,13 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 				if(isFirstAccInfo)
 				{
 					QByteArray rights=getMidData("Rights\":","]",&data);
+					if(!rights.isEmpty())
+					{
 					bool isRightsGood=rights.contains("get_info")&&rights.contains("trade");
 					if(!isRightsGood)emit identificationRequired();
 					emit firstAccInfo();
 					isFirstAccInfo=false;
+					}
 				}
 			}
 			break;//info

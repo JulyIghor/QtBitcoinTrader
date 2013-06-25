@@ -226,6 +226,10 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	reloadLanguageList();
 	resize(qMax(minimumSizeHint().width(),qMin(1024,(int)(currentDesktopRect.width()*0.95))),qMin((int)(currentDesktopRect.height()*0.95),700));
+
+	int indexCurrency=ui.currencyComboBox->findText(settings.value("Currency","BTC/USD").toString());
+	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
+
 	constructorFinished=true;
 
 	checkValidRulesButtons();
@@ -583,7 +587,7 @@ void QtBitcoinTrader::currencyChanged(int val)
 	currencyRequestPair=ui.currencyComboBox->itemData(val,Qt::UserRole).toByteArray();
 
 	QSettings settings(iniFileName,QSettings::IniFormat);
-	settings.setValue("Currency",QString(currencyBStr).toUpper());
+	settings.setValue("Currency",ui.currencyComboBox->currentText());
 	if(currencyAChanged)ui.accountBTC->setValue(0.0);
 	if(currencyBChanged)ui.accountUSD->setValue(0.0);
 	ui.marketBuy->setValue(0.0);
