@@ -1,4 +1,4 @@
-Win32Ver=1.04
+Win32Ver=1.00
 MacVer=1.03
 SrcVer=1.03
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/QtBitcoinTrader.exe
