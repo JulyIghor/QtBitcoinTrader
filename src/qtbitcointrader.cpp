@@ -1127,7 +1127,7 @@ void QtBitcoinTrader::checkValidSellButtons()
 
 void QtBitcoinTrader::sellPricePerCoinAsMarketPrice()
 {
-	ui.sellPricePerCoin->setValue(ui.marketBuy->value());
+	ui.sellPricePerCoin->setValue(ui.marketSell->value());
 }
 
 void QtBitcoinTrader::sellTotalBtcToSellAllIn()
@@ -1380,7 +1380,7 @@ void QtBitcoinTrader::buyBtcToBuyHalfIn()
 
 void QtBitcoinTrader::buyPricePerCoinAsMarketPrice()
 {
-	ui.buyPricePerCoin->setValue(ui.marketSell->value());
+	ui.buyPricePerCoin->setValue(ui.marketBuy->value());
 }
 
 void QtBitcoinTrader::ordersSelectionChanged()
