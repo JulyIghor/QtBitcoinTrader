@@ -1,10 +1,10 @@
 Win32Ver=1.04
-MacVer=1.03
+MacVer=1.04
 SrcVer=1.04
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/QtBitcoinTrader.exe
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTrader
 Win32ChangeLog=v1.04<br>- Fixed UI bugs<br>- Added NMC and NVC to BTC-e<br>- Now last price displays in title<br>- Stability improvements in BTC-e exchange<br>- Many small improvements<br>- Translation fixes
-MacChangeLog=v1.03<br>- SSL switch security fix<br>- Fixed translations<br>- Small ui fix<br>v1.02<br>- BTC-E.com support added. Now you can trade with LTC<br>- Added trade history display<br>- Multi-monitor support (Detachable windows)<br>- Improved connection stability<br>- Fixed UI bugs, translation bugs and some minor bugs<br>- Added German translation<br>- Now you can minimize window to tray icon
+MacChangeLog=v1.04<br>- Fixed UI bugs<br>- Added NMC and NVC to BTC-e<br>- Now last price displays in title<br>- Stability improvements in BTC-e exchange<br>- Many small improvements<br>- Translation fixes
 SrcChangeLog=v1.04<br>- Fixed UI bugs<br>- Added NMC and NVC to BTC-e<br>- Now last price displays in title<br>- Stability improvements in BTC-e exchange<br>- Many small improvements<br>- Translation fixes
 Win32Signature=cbWA2eu3HAKrMsnssRXjiZEr2NITw+DneB4V9+/66GN0LctWtIZ9ypYr6B0GnyhJ5EGR+lj1W+E+snGZ8rKLVxVZ3UUN4xh5Ewkxv5pVkV5WIvqdcC8tCMiqOtPxUBMu8Xc0/6uD140grltTUPR9i/xeg8B0OGwJkbJK/xbW5gfm81/e433zdsUPrqqehJxTpK49ChorcP6fUu61QrF2rbUzzJF+kT3wtKnuJO4RHKYqE6qacsVRqhxmX5tze5SkIUcb2UWcTNSLt9Vr8JzT1UW3J+C14Txk9vjgUhJVzHPPzaDz6m/R8dd+spfltIRq+ImvlWDzILPPITGbtE3xgQ==
-MacSignature=kE3Y2iM6LHqbaXrfk855XdcbrYl8TFyi5Qk3ZtW64NFEucPySwLf0U51xKWWavdPl1AB+/I46Rt++ulc5s3xOpBbN+uJeade0ukPHh1xyvPB743TUU1k4BXs8SpdOVTUkpBuPA7tazU/iE+pRwtImnNE31UEI7UaMbG/RbwhixQzDsO4krhl+rVdmHyMhVvoNr3vs2O7AsJB/srqQfxVeoSySEc6kyk8a7ouqgPZ5lu1q60t38ZjFzVxv0O6t+m9yfisMtfwh0PQ0CefrmA5MCTwd5Q0xfkZwqdPIpt18JHKJXXQ+2oxUPTbQMrW1t0DWQbZ0UN3QGq61GZ0p1iqhg==
+MacSignature=EreOmZ2SzfW2PxsjWcFM/ADuEAlRCreh9I5bbb9S7sGBb3Kol7pb7FOdVHPibt7UtAin0PqJXzg2mdFXTyua++gHE3tEw58+qN5Y/v1tec9YnjCsQ3w7/3l+8AftK6RR0yHx7oFTzRBBTW1bCuCY+3ZK0s3x9lyAlF01pJT1/edTFvzhL2Kzcq8gnXIL8N0vbE1HkiEczzITyNRp+ytHubI3LVJS3Z91CeHGqNKKCw+d+DcPXbk6zo5mcFY8Ok+mfALxW+Hb0NJ3wjiWgowFIngkAt2RDE2Ol7K6VxPjFL1VCFUkefmN9qu9aduigJ/FJ/cL/E1tnJlms8I/XL4FSA==
