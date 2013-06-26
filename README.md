@@ -38,6 +38,14 @@ http://vk.com/QtBitcoinTrader
 
 Change Log
 
+v1.04
+- Fixed UI bugs
+- Added NMC and NVC to BTC-e
+- Now last price displays in title
+- Stability improvements in BTC-e exchange
+- Many small improvements
+- Translation fixes
+
 v1.03
 - SSL security fix
 - Fixed translations

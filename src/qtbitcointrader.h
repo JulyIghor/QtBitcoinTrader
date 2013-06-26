@@ -22,10 +22,16 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	QString upArrow;
+	QString downArrow;
+
+	void addPopupDialog(int);
+
 	void loadUiSettings();
 	bool isValidSize(QSize *sizeV){if(sizeV->width()<3||sizeV->width()>2000||sizeV->height()<3||sizeV->height()>2000)return false; return true;}
 	void reloadLanguageList(QString preferedLangFile="");
 	void fixAllChildButtonsAndLabels(QWidget *par);
+	void fixDecimals(QWidget *par);
 	void fillAllBtcLabels(QWidget *par, QString curName);
 	void fillAllUsdLabels(QWidget *par, QString curName);
 
@@ -45,6 +51,7 @@ private:
 	int btcDecimals;
 	int usdDecimals;
 	int priceDecimals;
+	int minTradeVolume;
 	int exchangeId;
 	QString profileName;
 	void resizeEvent(QResizeEvent *);

@@ -41,7 +41,7 @@ FeeCalculator::FeeCalculator()
 	buyBtcChanged(ui.buyTotalBtc->value());//I'll remove this soon
 	setZeroProfitPrice();//and this too
 
-	mainWindow.fillAllBtcLabels(this,"BTC");
+	mainWindow.fillAllBtcLabels(this,currencyAStr);
 	mainWindow.fillAllUsdLabels(this,currencyBStr);
 
 #ifdef GENERATE_LANGUAGE_FILE

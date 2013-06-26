@@ -2550,7 +2550,7 @@ p, li { white-space: pre-wrap; }
                </font>
               </property>
               <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This feature is not available now.&lt;br/&gt;I'm still working on it.&lt;br/&gt;You will receive update notify at same time it released.&lt;br/&gt;Thank you for support and feedbacks!&lt;br/&gt;&lt;br/&gt;Feel free to contact me: &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;julyighor@gmail.com&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Эта функция пока в разработке.&lt;br/&gt;Я еще работаю над ней.Скоро увидите еще много обновлений&lt;br/&gt;Спасибо за поддержку и отзывы!&lt;br/&gt;&lt;a href=&quot;https://sourceforge.net/projects/bitcointrader&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://sourceforge.net/projects/bitcointrader&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This feature is not available now.&lt;br/&gt;I'm still working on it.&lt;br/&gt;You will receive update notify at same time it released.&lt;br/&gt;Thank you for support and feedbacks!&lt;br/&gt;&lt;br/&gt;Feel free to contact me: &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;julyighor@gmail.com&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Эта функция пока в разработке.&lt;br/&gt;Я еще работаю над ней. Скоро увидите еще много обновлений.&lt;br/&gt;Спасибо за поддержку и отзывы!&lt;br/&gt;&lt;a href=&quot;https://sourceforge.net/projects/bitcointrader&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://sourceforge.net/projects/bitcointrader&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -2606,7 +2606,7 @@ p, li { white-space: pre-wrap; }
                </font>
               </property>
               <property name="accessibleDescription">
-               <string>BTC_ICON</string>
+               <string>DONATE_BTC_ICON</string>
               </property>
               <property name="styleSheet">
                <string notr="true">color: #996515</string>
@@ -4632,6 +4632,9 @@ p, li { white-space: pre-wrap; }
             <property name="text">
              <string>New Window</string>
             </property>
+            <property name="shortcut">
+             <string>Ctrl+N</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -4659,6 +4662,9 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="text">
              <string>Minimize to Tray</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+H</string>
             </property>
            </widget>
           </item>
@@ -4826,7 +4832,7 @@ p, li { white-space: pre-wrap; }
            </font>
           </property>
           <property name="accessibleDescription">
-           <string>BTC_ICON</string>
+           <string>DONATE_BTC_ICON</string>
           </property>
           <property name="styleSheet">
            <string notr="true">color: #996515</string>

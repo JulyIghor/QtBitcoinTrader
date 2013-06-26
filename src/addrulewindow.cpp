@@ -33,7 +33,7 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 
 	mainWindow.fillAllUsdLabels(this,currencyBStr);
 
-	mainWindow.fillAllBtcLabels(this,"BTC");
+	mainWindow.fillAllBtcLabels(this,currencyAStr);
 
 	new JulySpinBoxFix(ui.thanValue);
 	new JulySpinBoxFix(ui.btcValue);

@@ -288,6 +288,9 @@ Download file will be validated by RSA2048 protected checksum.</string>
           <bold>false</bold>
          </font>
         </property>
+        <property name="accessibleDescription">
+         <string>DONATE_BTC_ICON</string>
+        </property>
         <property name="styleSheet">
          <string notr="true">color: #996515</string>
         </property>

@@ -148,11 +148,17 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 
 	QByteArray data=httpNoAuth->readAll();
 
-	bool lastApiDown=isApiDown;
-	if(data.size()&&data.at(0)!='{')apiDownCounter++;else {apiDownCounter=0;isApiDown=false;}
-	if(apiDownCounter==3)isApiDown=true;
-	if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
-	if(isApiDown)return;
+	{
+		bool lastApiDown=isApiDown;
+		bool isUnknownRequest=data.size()==0||data.at(0)!='{';
+		if(isUnknownRequest)
+		{
+			if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
+		}
+		else {apiDownCounter=0;isApiDown=false;}
+		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
+		if(isUnknownRequest)return;
+	}
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 	softLagTime.restart();
@@ -253,11 +259,17 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 
 	QByteArray data=httpAuth->readAll();
 
-	bool lastApiDown=isApiDown;
-	if(data.size()&&data.at(0)!='{')apiDownCounter++;else {apiDownCounter=0;isApiDown=false;}
-	if(apiDownCounter==3)isApiDown=true;
-	if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
-	if(isApiDown)return;
+	{
+		bool lastApiDown=isApiDown;
+		bool isUnknownRequest=data.size()==0||data.at(0)!='{';
+		if(isUnknownRequest)
+		{
+			if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
+		}
+		else {apiDownCounter=0;isApiDown=false;}
+		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
+		if(isUnknownRequest)return;
+	}
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 	softLagTime.restart();
@@ -381,6 +393,7 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 									if((logTypeInt==1||logTypeInt==2)&&(lastSellPrice==0.0||lastBuyPrice==0.0))
 									{
 										currencyPair=QString(getMidData("pair\":\"","\",\"",&curLog)).toUpper().split("_");
+										if(currencyPair.count()!=2||currencyPair.first().isEmpty()||currencyPair.last().isEmpty())continue;
 										if(lastSellPrice==0.0&&logTypeInt==1)
 										{
 											lastSellPrice=priceValue.toDouble();
@@ -497,7 +510,8 @@ void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 	cancelPendingAuthRequests();
 	vipRequestCount++;
 	apiBtcToBuy=((int)(apiBtcToBuy*100000))/100000.0;
-	QByteArray params="method=Trade&pair="+currencyRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy)+"&amount="+QByteArray::number(apiBtcToBuy)+"&";
+	QByteArray btcToBuy=QByteArray::number(apiBtcToBuy);
+	QByteArray params="method=Trade&pair="+currencyRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy)+"&amount="+btcToBuy+"&";
 	requestIdsAuth[sendToApi("",true,params)]=6;
 	requestIdsAuth[sendToApi("",true,params,false)]=6;
 	requestIdsAuth[sendToApi("",true,params,false)]=6;

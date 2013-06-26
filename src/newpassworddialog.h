@@ -28,8 +28,10 @@ public:
 	~NewPasswordDialog();
 
 private:
+	bool isValidPassword();
 	Ui::NewPasswordDialog ui;
 private slots:
+	void okPressed();
 	void exchangeChanged(QString);
 	void checkToEnableButton();
 	void getApiKeySecretButton();

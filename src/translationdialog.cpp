@@ -83,7 +83,7 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 
         resize(640,640);
         fixLayout();
-	if(mainWindow_)mainWindow.ui.aboutTranslationButton->setEnabled(false);
+	if(mainWindow_)mainWindow.addPopupDialog(1);
 
     QTimer::singleShot(100,this,SLOT(fixLayout()));
 }
@@ -91,7 +91,7 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 TranslationDialog::~TranslationDialog()
 {
 	if(gridLayout)delete gridLayout;
-	if(mainWindow_)mainWindow.ui.aboutTranslationButton->setEnabled(true);
+	if(mainWindow_)mainWindow.addPopupDialog(-1);
 }
 
 void TranslationDialog::fixLayout()
@@ -114,6 +114,8 @@ void TranslationDialog::deleteTranslationButton()
 	msgBox.setText(julyTr("MESSAGE_CONFIRM_DELETE_TRANSLATION_TEXT","Are you sure to delete translation file?"));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
+	msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
+	msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
 	if(msgBox.exec()!=QMessageBox::Yes)return;
 	if(QFile::exists(julyTranslator->lastFile()))QFile::remove(julyTranslator->lastFile());
 	ui.deleteTranslationButton->setEnabled(QFile::exists(julyTranslator->lastFile()));
@@ -159,7 +161,8 @@ void TranslationDialog::applyButton()
 	}
 	resultList<<"String_LANGUAGE_NAME="+ui.languageName->text();
 	resultList<<"String_LANGUAGE_AUTHOR="+authorAbout->getValidText();
-	resultList<<"String_LANGUAGE_LOCALE="+locale().name();
+	QString localeName=locale().name();//if(localeName.contains("_"))localeName.split("_").first();
+	resultList<<"String_LANGUAGE_LOCALE="+localeName;
 	QFile writeFile(appDataDir+"Language/Custom.lng");
 	writeFile.open(QIODevice::WriteOnly|QIODevice::Truncate);
 	writeFile.write(resultList.join("\r\n").toUtf8());

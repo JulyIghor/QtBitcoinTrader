@@ -117,6 +117,8 @@ void PasswordDialog::resetDataSlot()
 	msgBox.setText(julyTr("CONFIRM_DELETE_PROFILE","Are you sure to delete \"%1\" profile?").arg(ui.profileComboBox->currentText()));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
+	msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
+	msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
 	if(msgBox.exec()!=QMessageBox::Yes)return;
 
 	resetData=true;
@@ -125,7 +127,7 @@ void PasswordDialog::resetDataSlot()
 
 void PasswordDialog::checkToEnableButton(QString pass)
 {
-	if(pass.length()<8){ui.okButton->setEnabled(pass.length()>=8);return;}
+	if(pass.length()<8){ui.okButton->setEnabled(false);return;}
 
 	static QString allowedPassChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 	bool isValidPassword=pass.length()>14;

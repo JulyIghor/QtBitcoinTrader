@@ -15,6 +15,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QFile>
+#include <QMessageBox>
 
 NewPasswordDialog::NewPasswordDialog()
 	: QDialog()
@@ -82,6 +83,9 @@ int NewPasswordDialog::getExchangeId()
 
 void NewPasswordDialog::checkToEnableButton()
 {
+	if(ui.passwordEdit->text()!=ui.confirmEdit->text()){ui.confirmLabel->setStyleSheet("color: red;");ui.okButton->setEnabled(false);return;}
+	else ui.confirmLabel->setStyleSheet("");
+
 	QString profileName=ui.profileNameEdit->text();
 	if(!profileName.isEmpty())
 	{
@@ -91,18 +95,24 @@ void NewPasswordDialog::checkToEnableButton()
 			if(profileName.at(n).isLetterOrNumber()||allowedNameChars.contains(profileName.at(n)))
 				allowedPName.append(profileName.at(n));
 
-		if(profileName!=allowedPName)
-		{
-			ui.profileNameEdit->setText(allowedPName);
-			return;
-		}
+		if(profileName!=allowedPName)ui.profileNameEdit->setText(allowedPName);
+	}
+	if(profileName.isEmpty())
+	{
+		ui.okButton->setEnabled(false);
+		return;
 	}
 
 	if(ui.restSignLine->text().isEmpty()||ui.restKeyLine->text().isEmpty()){ui.okButton->setEnabled(false);return;}
 
+	ui.okButton->setEnabled(true);
+}
+
+bool NewPasswordDialog::isValidPassword()
+{
 	QString pass=ui.passwordEdit->text();
-	if(pass.length()<8){ui.okButton->setEnabled(false);return;}
-	if(pass!=ui.confirmEdit->text()){ui.confirmLabel->setStyleSheet("color: red;");ui.okButton->setEnabled(false);return;}
+	if(pass.length()<8)return false;
+	if(pass!=ui.confirmEdit->text())return false;
 	ui.confirmLabel->setStyleSheet("");
 
 	static QString allowedPassChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
@@ -125,7 +135,7 @@ void NewPasswordDialog::checkToEnableButton()
 			{isValidPassword=true;break;}
 		}
 	}
-	ui.okButton->setEnabled(isValidPassword);
+	return isValidPassword;
 }
 
 void NewPasswordDialog::updateIniFileName()
@@ -140,4 +150,11 @@ QString NewPasswordDialog::selectedProfileName()
 {
 	if(ui.profileNameEdit->text().isEmpty())return "Default Profile";
 	return ui.profileNameEdit->text();
+}
+
+void NewPasswordDialog::okPressed()
+{
+	if(isValidPassword())accept();
+	else
+		QMessageBox::warning(this,"Qt Bitcoin Trader",julyTranslator->translateLabel("TR00100","Your password must be at least 8 characters and contain letters, digits, and special characters."));
 }
