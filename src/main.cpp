@@ -7,6 +7,7 @@
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
 // GNU General Public License version 3
 
+#include <QNetworkProxy>
 #include <QDir>
 #include <QPlastiqueStyle>
 #include "main.h"
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
 
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.04");
+	appVerStr_=new QByteArray("1.041");
 	appVerReal_=new double(appVerStr.toDouble());
 	currencyBStr_=new QByteArray("USD");
 	currencyBStrLow_=new QByteArray("usd");
@@ -148,6 +149,30 @@ int main(int argc, char *argv[])
 	QFile *lockFile=0;
 
 	{
+		//QSettings settingsProxy(a.applicationDirPath()+"/Proxy.ini",QSettings::IniFormat);
+		//QString proxyHost=settingsProxy.value("Host","").toString();settingsProxy.setValue("Host",proxyHost);
+		//bool proxyEnabled=settingsProxy.value("Enabled",false).toBool();settingsProxy.setValue("Enabled",proxyEnabled);
+		//qint16 proxyPort=settingsProxy.value("Port",8990).toUInt();settingsProxy.setValue("Port",proxyPort);
+		//QString proxyLogin=settingsProxy.value("Login","").toString();settingsProxy.setValue("Login",proxyLogin);
+		//QString proxyPassword=settingsProxy.value("Password","").toString();settingsProxy.setValue("Password",proxyPassword);
+		//int proxyType=settingsProxy.value("Type","").toInt();settingsProxy.setValue("Type",proxyType);
+		//if(proxyEnabled)
+		//{
+		//QNetworkProxy proxy;
+		//switch(proxyType)
+		//{
+		//	case 1:	proxy.setType(QNetworkProxy::Socks5Proxy); break;
+		//	case 3:	proxy.setType(QNetworkProxy::HttpProxy); break;
+		//	case 4:	proxy.setType(QNetworkProxy::HttpCachingProxy); break;
+		//	case 5:	proxy.setType(QNetworkProxy::FtpCachingProxy); break;
+		//	default:	proxy.setType(QNetworkProxy::DefaultProxy); break;
+		//}
+		//proxy.setHostName(proxyHost);
+		//proxy.setPort(proxyPort);
+		//proxy.setUser(proxyLogin);
+		//proxy.setPassword(proxyPassword);
+		//QNetworkProxy::setApplicationProxy(proxy);
+		//}
 	logEnabled_=new bool(false);
 
 	a.setStyleSheet(globalStyleSheet);

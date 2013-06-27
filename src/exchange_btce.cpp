@@ -148,17 +148,17 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 
 	QByteArray data=httpNoAuth->readAll();
 
-	{
-		bool lastApiDown=isApiDown;
-		bool isUnknownRequest=data.size()==0||data.at(0)!='{';
-		if(isUnknownRequest)
-		{
-			if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
-		}
-		else {apiDownCounter=0;isApiDown=false;}
-		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
-		if(isUnknownRequest)return;
-	}
+	//{
+	//	bool lastApiDown=isApiDown;
+	//	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
+	//	if(isUnknownRequest)
+	//	{
+	//		if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
+	//	}
+	//	else {apiDownCounter=0;isApiDown=false;}
+	//	if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
+	//	if(isUnknownRequest)return;
+	//}
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 	softLagTime.restart();
@@ -258,10 +258,9 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 	if(error)return;
 
 	QByteArray data=httpAuth->readAll();
-
 	{
 		bool lastApiDown=isApiDown;
-		bool isUnknownRequest=data.size()==0||data.at(0)!='{';
+		bool isUnknownRequest=data.size()==0||data.at(0)=='<';
 		if(isUnknownRequest)
 		{
 			if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
