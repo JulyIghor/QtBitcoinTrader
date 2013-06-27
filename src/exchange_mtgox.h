@@ -26,6 +26,7 @@ public:
 	~Exchange_MtGox();
 
 private:
+	QTime authRequestTime;
 	QByteArray lastFetchDate;
 	bool sslEnabled;
 	bool tickerOnly;

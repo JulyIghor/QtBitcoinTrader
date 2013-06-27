@@ -31,11 +31,6 @@ NewPasswordDialog::NewPasswordDialog()
 		QtWin::extendFrameIntoClientArea(this);
 #endif
 
-#ifdef GENERATE_LANGUAGE_FILE
-	julyTranslator->loadMapFromUi(this);
-	julyTranslator->saveToFile("LanguageDefault.lng");
-#endif
-
 	julyTranslator->translateUi(this);
 
 	ui.groupBoxApiKeyAndSecret->setTitle(julyTr("API_KEY_AND_SECRET","%1 API key and Secret").arg(ui.exchangeComboBox->currentText()));

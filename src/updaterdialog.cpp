@@ -120,10 +120,6 @@ bool canAutoUpdate=false;
 			QtWin::extendFrameIntoClientArea(this);
 #endif
 
-#ifdef GENERATE_LANGUAGE_FILE
-		julyTranslator->loadMapFromUi(this);
-		julyTranslator->saveToFile("LanguageDefault.lng");
-#endif
 		julyTranslator->translateUi(this);
 		ui.iconLabel->setPixmap(QPixmap(":/Resources/QtBitcoinTrader.png"));
 		QSize minSizeHint=minimumSizeHint();

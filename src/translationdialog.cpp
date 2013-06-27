@@ -26,11 +26,6 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	//setFixedSize(size());
 
-#ifdef GENERATE_LANGUAGE_FILE
-	julyTranslator->loadMapFromUi(this);
-	julyTranslator->saveToFile("LanguageDefault.lng");
-#endif
-
 #ifdef Q_OS_WIN
 	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
 #endif

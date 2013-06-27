@@ -30,6 +30,9 @@
     <file>Resources/CurrencySign/USD.png</file>
     <file>Resources/CurrencySign/NMC.png</file>
     <file>Resources/CurrencySign/NVC.png</file>
+    <file>Resources/CurrencySign/TRC.png</file>
+    <file>Resources/CurrencySign/PPC.png</file>
+    <file>Resources/CurrencySign/FTC.png</file>
     <file>Resources/Public.key</file>
     <file>Resources/QtBitcoinTrader.png</file>
     <file>Resources/Language/English.lng</file>

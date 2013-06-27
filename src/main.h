@@ -15,13 +15,10 @@
 #include "logthread.h"
 #include "julytranslator.h"
 
-//#define GENERATE_LANGUAGE_FILE//Used for make default language file
-
 #define USE_QTMULTIMEDIA
 
 #define julyTr julyTranslator->translateString
 #define hmacSha512(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha512(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),64)
-#define apiHostName QByteArray("data.mtgox.com")
 #define apiId QByteArray("2")
 #define restKey (*restKey_)
 #define restSign (*restSign_)
@@ -43,7 +40,9 @@
 #define localDateTimeFormat (*dateTimeFormat_)
 #define localTimeFormat (*timeFormat_)
 #define exchangeName (*exchangeName_)
+#define btcDecimals (*btcDecimals_)
 
+extern int *btcDecimals_;
 extern QByteArray *currencyRequest_;
 extern QString *exchangeName_;
 extern QString *timeFormat_;

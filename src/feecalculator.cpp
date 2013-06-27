@@ -44,10 +44,6 @@ FeeCalculator::FeeCalculator()
 	mainWindow.fillAllBtcLabels(this,currencyAStr);
 	mainWindow.fillAllUsdLabels(this,currencyBStr);
 
-#ifdef GENERATE_LANGUAGE_FILE
-	julyTranslator->loadMapFromUi(this);
-	julyTranslator->saveToFile("LanguageDefault.lng");
-#endif
 	julyTranslator->translateUi(this);
 	setWindowTitle(julyTr("FEE_CALCULATOR_TITLE","Calculator"));
 

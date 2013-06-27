@@ -26,6 +26,7 @@ Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	headerAuth=headerNoAuth;
 	headerAuth.setValue("Rest-Key",pRestKey);
 	moveToThread(this);
+	authRequestTime.restart();
 	softLagTime.restart();
 	privateNonce=QDateTime::currentDateTime().toTime_t()*1000;
 }
@@ -154,17 +155,11 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 
 	QByteArray data=httpNoAuth->readAll();
 
-	//{
-	//	bool lastApiDown=isApiDown;
-	//	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
-	//	if(isUnknownRequest)
-	//	{
-	//		if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
-	//	}
-	//	else {apiDownCounter=0;isApiDown=false;}
-	//	if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
-	//	if(isUnknownRequest)return;
-	//}
+	if(!isApiDown&&authRequestTime.elapsed()>30000)
+	{
+		isApiDown=true;
+		emit apiDownChanged(isApiDown);
+	}
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 	softLagTime.restart();
@@ -266,6 +261,7 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
 		if(isUnknownRequest)return;
 	}
+	authRequestTime.restart();
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 	softLagTime.restart();
@@ -377,24 +373,31 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 								if(logType=="withdraw"){logTypeInt=5;logType.clear();logType="<font color=\"brown\">("+julyTr("LOG_WITHDRAW","Withdraw").toAscii()+")</font>";}
 							if(logTypeInt)
 							{
+								QByteArray currencyA="USD";
+								QByteArray currencyB="USD";
 								QByteArray logValue=getMidData("\"Value\":{\"value\":\"","\",\"",&curLog);
 								QByteArray logDate=getMidData("\"Date\":",",\"",&curLog);
 								QByteArray logText=getMidData(" at ","\",\"",&curLog);
+								currencyA=getMidData("\"currency\":\"","\"",&curLog);
 								if((logTypeInt==1||logTypeInt==2)&&(lastSellPrice==0.0||lastBuyPrice==0.0))
 								{
 									QByteArray priceValue;
+									QByteArray priceSign;
 									for(int n=0;n<logText.size();n++)
 										if(QChar(logText.at(n)).isDigit()||logText.at(n)=='.')priceValue.append(logText.at(n));
-									QByteArray priceCurrency=logText.left(logText.size()-priceValue.size());
+										else priceSign.append(logText.at(n));
+									if(priceSign.isEmpty())priceSign="$";
+
+									currencyB=currencySignMap->key(priceSign,"$");
 									if(lastSellPrice==0.0&&logTypeInt==1)
 									{
 										lastSellPrice=priceValue.toDouble();
-										emit accLastSellChanged(priceCurrency,lastSellPrice);
+										emit accLastSellChanged(currencyB,lastSellPrice);
 									}
 									if(lastBuyPrice==0.0&&logTypeInt==2)
 									{
 										lastBuyPrice=priceValue.toDouble();
-										emit accLastBuyChanged(priceCurrency,lastBuyPrice);
+										emit accLastBuyChanged(currencyB,lastBuyPrice);
 									}
 								}
 
@@ -407,7 +410,7 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 								else
 								if(!logText.isEmpty())logText=" "+julyTr("AT"," at %1").arg(QString("<font color=\"darkgreen\">"+logText+"</font>").replace("fee",julyTr("LOG_FEE","fee"))).toAscii();
 
-								newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString(localDateTimeFormat)+"</font>&nbsp;<font color=\"#996515\">"+currencyASign+logValue+"</font>"+logText+" "+logType+"<br>");
+								newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString(localDateTimeFormat)+"</font>&nbsp;<font color=\"#996515\">"+currencySignMap->value(currencyA,"USD")+logValue+"</font>"+logText+" "+logType+"<br>");
 							}
 			}
 			emit ordersLogChanged(newLog);

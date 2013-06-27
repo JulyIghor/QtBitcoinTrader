@@ -109,63 +109,27 @@ void JulyTranslator::loadMapFromUi(QWidget *par)
 {
 	foreach(QPushButton* curButton, par->findChildren<QPushButton*>())
 		if(!curButton->accessibleName().isEmpty())
-		{
-#ifdef GENERATE_LANGUAGE_FILE
-if(buttonMap.value(curButton->accessibleName(),curButton->text())!=curButton->text())
-	qDebug()<<"Duplicated key:"<<curButton->accessibleName()<<buttonMap.value(curButton->accessibleName())<<curButton->text();
-#endif
 			buttonMap[curButton->accessibleName()]=curButton->text().replace("\n","<br>").replace("\r","");
-		}
 		
 	foreach(QCheckBox* curCheckBox, par->findChildren<QCheckBox*>())
 		if(!curCheckBox->accessibleName().isEmpty())
-		{
-#ifdef GENERATE_LANGUAGE_FILE
-if(checkBoxMap.value(curCheckBox->accessibleName(),curCheckBox->text())!=curCheckBox->text())
-	qDebug()<<"Duplicated key:"<<curCheckBox->accessibleName()<<checkBoxMap.value(curCheckBox->accessibleName())<<curCheckBox->text();
-#endif
 			checkBoxMap[curCheckBox->accessibleName()]=curCheckBox->text().replace("\n","<br>").replace("\r","");
-		}
 
 		foreach(QRadioButton* curCheckBox, par->findChildren<QRadioButton*>())
 			if(!curCheckBox->accessibleName().isEmpty())
-			{
-#ifdef GENERATE_LANGUAGE_FILE
-				if(checkBoxMap.value(curCheckBox->accessibleName(),curCheckBox->text())!=curCheckBox->text())
-					qDebug()<<"Duplicated key:"<<curCheckBox->accessibleName()<<checkBoxMap.value(curCheckBox->accessibleName())<<curCheckBox->text();
-#endif
 				checkBoxMap[curCheckBox->accessibleName()]=curCheckBox->text().replace("\n","<br>").replace("\r","");
-			}
 
 	foreach(QLabel* curLabel, par->findChildren<QLabel*>())
 		if(!curLabel->accessibleName().isEmpty())
-		{
-#ifdef GENERATE_LANGUAGE_FILE
-if(labelMap.value(curLabel->accessibleName(),curLabel->text())!=curLabel->text())
-	qDebug()<<"Duplicated key:"<<curLabel->accessibleName()<<labelMap.value(curLabel->accessibleName())<<curLabel->text();
-#endif
 			labelMap[curLabel->accessibleName()]=curLabel->text().replace("\n","<br>").replace("\r","");
-		}
 		
 	foreach(QGroupBox* curGroupBox, par->findChildren<QGroupBox*>())
 		if(!curGroupBox->accessibleName().isEmpty())
-		{
-#ifdef GENERATE_LANGUAGE_FILE
-if(groupBoxMap.value(curGroupBox->accessibleName(),curGroupBox->title())!=curGroupBox->title())
-	qDebug()<<"Duplicated key:"<<curGroupBox->accessibleName()<<groupBoxMap.value(curGroupBox->accessibleName())<<curGroupBox->title();
-#endif
 			groupBoxMap[curGroupBox->accessibleName()]=curGroupBox->title().replace("\n","<br>").replace("\r","");
-		}
 
 	foreach(QDoubleSpinBox* curSpinBox, par->findChildren<QDoubleSpinBox*>())
 		if(!curSpinBox->accessibleName().isEmpty())
-		{
-#ifdef GENERATE_LANGUAGE_FILE
-if(spinBoxMap.value(curSpinBox->accessibleName(),curSpinBox->suffix())!=curSpinBox->suffix())
-qDebug()<<"Duplicated key:"<<curSpinBox->accessibleName()<<spinBoxMap.value(curSpinBox->accessibleName())<<curSpinBox->suffix();
-#endif
 			spinBoxMap[curSpinBox->accessibleName()]=curSpinBox->suffix();
-		}
 }
 
 void JulyTranslator::translateUi(QWidget *par)

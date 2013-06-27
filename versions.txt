@@ -1,10 +1,10 @@
-Win32Ver=1.00
+Win32Ver=1.05
 MacVer=1.00
-SrcVer=1.00
+SrcVer=1.05
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/QtBitcoinTrader.exe
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTrader
-Win32ChangeLog=v1.04<br>- Fixed UI bugs<br>- Added NMC and NVC to BTC-e<br>- Now last price displays in title<br>- Stability improvements in BTC-e exchange<br>- Many small improvements<br>- Translation fixes
+Win32ChangeLog=v1.05<br>- Critical bugs fixed<br>- Calculations fixes<br>- Ui fixes<br>- Added PPC, FTC, RTC support<br>- Added proxy support
 MacChangeLog=v1.04<br>- Fixed UI bugs<br>- Added NMC and NVC to BTC-e<br>- Now last price displays in title<br>- Stability improvements in BTC-e exchange<br>- Many small improvements<br>- Translation fixes
-SrcChangeLog=v1.04<br>- Fixed UI bugs<br>- Added NMC and NVC to BTC-e<br>- Now last price displays in title<br>- Stability improvements in BTC-e exchange<br>- Many small improvements<br>- Translation fixes
-Win32Signature=cbWA2eu3HAKrMsnssRXjiZEr2NITw+DneB4V9+/66GN0LctWtIZ9ypYr6B0GnyhJ5EGR+lj1W+E+snGZ8rKLVxVZ3UUN4xh5Ewkxv5pVkV5WIvqdcC8tCMiqOtPxUBMu8Xc0/6uD140grltTUPR9i/xeg8B0OGwJkbJK/xbW5gfm81/e433zdsUPrqqehJxTpK49ChorcP6fUu61QrF2rbUzzJF+kT3wtKnuJO4RHKYqE6qacsVRqhxmX5tze5SkIUcb2UWcTNSLt9Vr8JzT1UW3J+C14Txk9vjgUhJVzHPPzaDz6m/R8dd+spfltIRq+ImvlWDzILPPITGbtE3xgQ==
+SrcChangeLog=v1.05<br>- Critical bugs fixed<br>- Calculations fixes<br>- Ui fixes<br>- Added PPC, FTC, RTC support<br>- Added proxy support
+Win32Signature=HKFoXPahEkIVZsYca8zIc+/3y8PngJHzIAsVCKX84NGGPkNuYlvO7Kby8mMNj3xM8vf2yD2TMbq/Ktz5yYePdKooqwtYmLlbec1XJJJKW1C+Uxkd5hxklVkPdNbR0Okxwb5vIsG3DgY4rVxFQK1/7axUy3PkfEImrYtIeqlInMD1ICVxAxNH9zeFeKILOj3+6HPACIJrC2d72M7h+Jtk3p2vqTmEWDzs2XqW7BtBkM1VwFj1z1kNpcitsgeMgMruhD/QWBRDuJeOoEBUeoswFicYjeQ8yx5mME1tmft3wvbkcqxKufv3lo1EG9JpXNyaycxSrCnTwrK6zF8OtMwXbg==
 MacSignature=EreOmZ2SzfW2PxsjWcFM/ADuEAlRCreh9I5bbb9S7sGBb3Kol7pb7FOdVHPibt7UtAin0PqJXzg2mdFXTyua++gHE3tEw58+qN5Y/v1tec9YnjCsQ3w7/3l+8AftK6RR0yHx7oFTzRBBTW1bCuCY+3ZK0s3x9lyAlF01pJT1/edTFvzhL2Kzcq8gnXIL8N0vbE1HkiEczzITyNRp+ytHubI3LVJS3Z91CeHGqNKKCw+d+DcPXbk6zo5mcFY8Ok+mfALxW+Hb0NJ3wjiWgowFIngkAt2RDE2Ol7K6VxPjFL1VCFUkefmN9qu9aduigJ/FJ/cL/E1tnJlms8I/XL4FSA==

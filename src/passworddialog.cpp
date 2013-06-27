@@ -49,10 +49,6 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem(julyTr("DEFAULT_PROFILE_NAME","Default Profile"));
 	if(firstUnlockedProfileIndex!=-1&&lastProfileIndex==-1)lastProfileIndex=firstUnlockedProfileIndex;
 	if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);
-#ifdef GENERATE_LANGUAGE_FILE
-	julyTranslator->loadMapFromUi(this);
-	julyTranslator->saveToFile("LanguageDefault.lng");
-#endif
 
 	julyTranslator->translateUi(this);
 

@@ -223,6 +223,9 @@
           <property name="accessibleName">
            <string>PRICE</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
@@ -350,6 +353,9 @@
           <property name="accessibleName">
            <string>PRICE</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
@@ -389,6 +395,9 @@
           </property>
           <property name="accessibleName">
            <string>PRICE</string>
+          </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -516,6 +525,9 @@
           <property name="accessibleName">
            <string>PRICE</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
@@ -584,6 +596,9 @@
           </property>
           <property name="accessibleName">
            <string>PRICE</string>
+          </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -959,6 +974,9 @@
           <property name="accessibleName">
            <string>BTC</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
@@ -1033,6 +1051,9 @@
           </property>
           <property name="accessibleName">
            <string>USD</string>
+          </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -1310,6 +1331,9 @@
              </property>
              <property name="accessibleName">
               <string>BTC</string>
+             </property>
+             <property name="accessibleDescription">
+              <string>CAN_BE_ZERO</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -1745,6 +1769,9 @@
            <property name="accessibleName">
             <string>PRICE</string>
            </property>
+           <property name="accessibleDescription">
+            <string>CAN_BE_ZERO</string>
+           </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
@@ -1803,6 +1830,9 @@
            </property>
            <property name="accessibleName">
             <string>PRICE</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>CAN_BE_ZERO</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -1926,7 +1956,7 @@ p, li { white-space: pre-wrap; }
             </font>
            </property>
            <property name="accessibleDescription">
-            <string>USD_ICON</string>
+            <string/>
            </property>
            <property name="styleSheet">
             <string notr="true">color: darkgreen</string>
@@ -1955,7 +1985,7 @@ p, li { white-space: pre-wrap; }
             </font>
            </property>
            <property name="accessibleDescription">
-            <string>USD_ICON</string>
+            <string/>
            </property>
            <property name="styleSheet">
             <string notr="true">color: darkgreen</string>
@@ -2378,6 +2408,9 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="accessibleName">
             <string>BTC</string>
+           </property>
+           <property name="accessibleDescription">
+            <string>CAN_BE_ZERO</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>

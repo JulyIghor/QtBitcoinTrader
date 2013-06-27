@@ -22,6 +22,12 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	QString numFromDouble(const double &value);
+	int usdDecimals;
+	int priceDecimals;
+	double minTradeVolume;
+	double minTradePrice;
+
 	QString upArrow;
 	QString downArrow;
 
@@ -48,10 +54,6 @@ public:
 private:
 	QString windowTitleP;
 	QSystemTrayIcon *trayIcon;
-	int btcDecimals;
-	int usdDecimals;
-	int priceDecimals;
-	int minTradeVolume;
 	int exchangeId;
 	QString profileName;
 	void resizeEvent(QResizeEvent *);

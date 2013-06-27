@@ -46,10 +46,6 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 	ui.exactPriceValue->setVisible(false);
 	ui.label_53->setVisible(false);//sorry for that label name
 
-#ifdef GENERATE_LANGUAGE_FILE
-	julyTranslator->loadMapFromUi(this);
-	julyTranslator->saveToFile("LanguageDefault.lng");
-#endif
 	languageChanged();
 	setMinimumSize(size());
 	setMaximumSize(width()+100,height());

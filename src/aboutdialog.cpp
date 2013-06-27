@@ -28,11 +28,6 @@ TranslationAbout::TranslationAbout(QWidget *)
 		QtWin::extendFrameIntoClientArea(this);
 #endif
 
-#ifdef GENERATE_LANGUAGE_FILE
-	julyTranslator->loadMapFromUi(this);
-	julyTranslator->saveToFile("LanguageDefault.lng");
-#endif
-
 	julyTranslator->translateUi(this);
 	ui.languageField->setText(julyTr("LANGUAGE_NAME","Invalid Language"));
 	ui.translationAuthor->setText(julyTr("LANGUAGE_AUTHOR","Invalid About"));

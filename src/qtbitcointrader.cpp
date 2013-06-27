@@ -43,6 +43,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	upArrow=QByteArray::fromBase64("4oaR");
 	downArrow=QByteArray::fromBase64("4oaT");
 	trayIcon=0;
+	minTradePrice=0.01;
 	btcDecimals=8;
 	usdDecimals=5;
 	priceDecimals=5;
@@ -88,11 +89,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	setWindowFlags(Qt::Window);
 
-	{
-		ui.usdLabelLastSell->setPixmap(QPixmap(":/Resources/CurrencySign/USD.png"));ui.usdLabelLastSell->setToolTip("USD");
-		ui.usdLabelLastBuy->setPixmap(QPixmap(":/Resources/CurrencySign/USD.png"));ui.usdLabelLastBuy->setToolTip("USD");
-	}
-
 #ifdef Q_OS_WIN
 	if(QtWin::isCompositionEnabled())
 		QtWin::extendFrameIntoClientArea(this);
@@ -100,9 +96,9 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	ui.ordersTableFrame->setVisible(false);
 
-	ui.ordersTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
 	ui.ordersTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
-	ui.ordersTable->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
+	ui.ordersTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
 	ui.ordersTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
 	ui.ordersTable->horizontalHeader()->setResizeMode(4,QHeaderView::ResizeToContents);
 	ui.ordersTable->horizontalHeader()->setResizeMode(5,QHeaderView::ResizeToContents);
@@ -116,9 +112,9 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.rulesTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
 	ui.rulesTable->horizontalHeader()->setResizeMode(4,QHeaderView::ResizeToContents);
 
-	ui.tableTrades->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
-	ui.tableTrades->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-	ui.tableTrades->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
+	ui.tableTrades->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
+	ui.tableTrades->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
+	ui.tableTrades->horizontalHeaderItem(1)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 	ui.tableTrades->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
 	ui.tableTrades->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
 	ui.tableTrades->horizontalHeaderItem(3)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
@@ -177,10 +173,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tabLastTrades->installEventFilter(this);
 	ui.tabCharts->installEventFilter(this);
 
-#ifdef GENERATE_LANGUAGE_FILE
-	julyTranslator->loadMapFromUi(this);
-	julyTranslator->saveToFile("LanguageDefault.lng");
-#endif
 	exchangeId=settings.value("ExchangeId",0).toInt();
 	switch(exchangeId)
 	{
@@ -203,7 +195,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 			for(int n=0;n<curencyList.count();n++)
 			{
 				QStringList curDataList=curencyList.at(n).split("=");
-				if(curDataList.count()!=4)continue;
+				if(curDataList.count()!=5)continue;
 				QString curName=curDataList.first();
 				curDataList.removeFirst();
 				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
@@ -223,7 +215,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 			for(int n=0;n<curencyList.count();n++)
 			{
 				QStringList curDataList=curencyList.at(n).split("=");
-				if(curDataList.count()!=4)continue;
+				if(curDataList.count()!=5)continue;
 				QString curName=curDataList.first();
 				curDataList.removeFirst();
 				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
@@ -377,21 +369,21 @@ void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDou
 	ui.marketLast->setValue(usdDouble);
 
 	ui.tradesVolume5m->setValue(ui.tradesVolume5m->value()+btcDouble);
-	QString btcValue=currencyASign+" "+QString::number(btcDouble,'f',btcDecimals);
-	QString usdValue=currencySignMap->value(curRency.toUpper(),"USD")+" "+QString::number(usdDouble,'f',priceDecimals);
+	QString btcValue=currencyASign+" "+numFromDouble(btcDouble);
+	QString usdValue=currencySignMap->value(curRency.toUpper(),"USD")+" "+numFromDouble(usdDouble);
 	if(marketLast<usdDouble)usdValue.append(" "+upArrow);
 	if(marketLast>usdDouble)usdValue.append(" "+downArrow);
 
 	QString dateValue=QDateTime::fromTime_t(dateT).toString(localDateTimeFormat);
 	ui.tableTrades->insertRow(0);
-	static QColor btcColor("#996515");
-	QTableWidgetItem *newItem=new QTableWidgetItem(btcValue);newItem->setTextColor(btcColor);
-	newItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-	ui.tableTrades->setItem(0,0,newItem);
-	newItem->setData(Qt::UserRole,btcDouble);
-	newItem=new QTableWidgetItem(dateValue);newItem->setTextColor(Qt::gray);
-	newItem->setTextAlignment(Qt::AlignCenter);
+
+	QTableWidgetItem *newItem=new QTableWidgetItem(dateValue);newItem->setTextColor(Qt::gray);postWorkAtTableItem(newItem,0);
 	newItem->setData(Qt::UserRole,dateT);
+	ui.tableTrades->setItem(0,0,newItem);
+
+	static QColor btcColor("#996515");
+	newItem=new QTableWidgetItem(btcValue);newItem->setTextColor(btcColor);postWorkAtTableItem(newItem,1);
+	newItem->setData(Qt::UserRole,btcDouble);
 	ui.tableTrades->setItem(0,1,newItem);
 
 	if(isAsk)
@@ -404,11 +396,10 @@ void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDou
 		newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_BID","bid"));
 		newItem->setTextColor(Qt::darkBlue);
 	}
-	newItem->setTextAlignment(Qt::AlignCenter);
+	postWorkAtTableItem(newItem,0);
 	ui.tableTrades->setItem(0,2,newItem);
 
-	newItem=new QTableWidgetItem(usdValue);newItem->setTextColor(Qt::darkGreen);
-	newItem->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+	newItem=new QTableWidgetItem(usdValue);newItem->setTextColor(Qt::darkGreen);postWorkAtTableItem(newItem,-1);
 	ui.tableTrades->setItem(0,3,newItem);
 
 	
@@ -423,9 +414,9 @@ void QtBitcoinTrader::clearTimeOutedTrades()
 {
 	if(ui.tableTrades->rowCount()==0)return;
 	qint64 min5Date=QDateTime::currentDateTime().addSecs(-600).toTime_t();
-	while(ui.tableTrades->rowCount()&&ui.tableTrades->item(ui.tableTrades->rowCount()-1,1)->data(Qt::UserRole).toLongLong()<min5Date)
+	while(ui.tableTrades->rowCount()&&ui.tableTrades->item(ui.tableTrades->rowCount()-1,0)->data(Qt::UserRole).toLongLong()<min5Date)
 	{
-		ui.tradesVolume5m->setValue(ui.tradesVolume5m->value()-ui.tableTrades->item(ui.tableTrades->rowCount()-1,0)->data(Qt::UserRole).toDouble());
+		ui.tradesVolume5m->setValue(ui.tradesVolume5m->value()-ui.tableTrades->item(ui.tableTrades->rowCount()-1,1)->data(Qt::UserRole).toDouble());
 		ui.tableTrades->removeRow(ui.tableTrades->rowCount()-1);
 	}
 }
@@ -591,11 +582,21 @@ void QtBitcoinTrader::fixDecimals(QWidget *par)
 {
 	foreach(QDoubleSpinBox* spinBox, par->findChildren<QDoubleSpinBox*>())
 	{
-		if(spinBox->accessibleName()=="BTC"){spinBox->setDecimals(btcDecimals);spinBox->setMinimum(minTradeVolume);}
+		if(spinBox->accessibleName()=="BTC")
+		{
+			spinBox->setDecimals(btcDecimals);
+			if(spinBox->accessibleDescription()!="CAN_BE_ZERO")
+				spinBox->setMinimum(minTradeVolume);
+		}
 		else
 			if(spinBox->accessibleName()=="USD")spinBox->setDecimals(usdDecimals);
 			else
-				if(spinBox->accessibleName()=="PRICE")spinBox->setDecimals(priceDecimals);
+				if(spinBox->accessibleName()=="PRICE")
+				{
+					spinBox->setDecimals(priceDecimals);
+					if(spinBox->accessibleDescription()!="CAN_BE_ZERO")
+						spinBox->setMinimum(minTradePrice);
+				}
 	}
 }
 
@@ -611,7 +612,7 @@ void QtBitcoinTrader::currencyChanged(int val)
 {
 	if(!constructorFinished||val<0)return;
 	QStringList curDataList=ui.currencyComboBox->itemData(val,Qt::UserRole).toStringList();
-	if(curDataList.count()!=3)return;
+	if(curDataList.count()!=4)return;
 	if(val!=lastLoadedCurrency)lastLoadedCurrency=val;else return;
 
 	QStringList curPair=ui.currencyComboBox->currentText().split("/");
@@ -631,6 +632,7 @@ void QtBitcoinTrader::currencyChanged(int val)
 	currencyRequestPair=curDataList.first().toAscii();
 	priceDecimals=curDataList.at(1).toInt();
 	minTradeVolume=curDataList.at(2).toDouble();
+	minTradePrice=curDataList.at(3).toDouble();
 
 	QSettings settings(iniFileName,QSettings::IniFormat);
 	settings.setValue("Currency",ui.currencyComboBox->currentText());
@@ -909,10 +911,20 @@ void QtBitcoinTrader::orderCanceled(QByteArray oid)
 		if(ui.ordersTable->item(n,0)->data(Qt::UserRole).toByteArray()==oid)
 		{
 			ui.ordersTable->item(n,2)->setData(Qt::UserRole,"canceled");
-			ui.ordersTable->item(n,2)->setText(julyTr("ORDER_STATE_CANCELED","canceled"));
+			ui.ordersTable->item(n,2)->setText(julyTr("ORDER_STATE_CANCELED","canceled"));postWorkAtTableItem(ui.ordersTable->item(n,2));
 			setOrdersTableRowState(n,0);
 			break;
 		}
+}
+
+QString QtBitcoinTrader::numFromDouble(const double &val)
+{
+	QString numberText=QString::number(val,'f',8);
+	int curPos=numberText.size()-1;
+	while(curPos>0&&numberText.at(curPos)=='0')numberText.remove(curPos--,1);
+	if(numberText.size()&&numberText.at(numberText.size()-1)=='.')numberText.append("0");
+	if(curPos==-1)numberText.append(".0");
+	return numberText;
 }
 
 void QtBitcoinTrader::ordersChanged(QString ordersData)
@@ -939,11 +951,15 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 					{
 						if(ui.ordersTable->item(n,2)->data(Qt::UserRole).toString()!="canceled")
 						{
-							if(forcedReloadOrders)ui.ordersTable->item(n,1)->setText(julyTr("ORDER_TYPE_"+oidDataList.at(1).toUpper(),oidDataList.at(1)));
-							ui.ordersTable->item(n,2)->setText(julyTr("ORDER_STATE_"+oidDataList.at(2).toUpper(),oidDataList.at(2)));
-							ui.ordersTable->item(n,3)->setText(oidDataList.at(6)+" "+oidDataList.at(3));
-							ui.ordersTable->item(n,4)->setText(oidDataList.at(5)+" "+QString::number(oidDataList.at(4).toDouble(),'f',priceDecimals));
-							ui.ordersTable->item(n,5)->setText(oidDataList.at(5)+" "+QString::number(oidDataList.at(3).toDouble()*oidDataList.at(4).toDouble(),'f',usdDecimals));
+							if(forcedReloadOrders)
+							{
+								ui.ordersTable->item(n,1)->setText(julyTr("ORDER_TYPE_"+oidDataList.at(1).toUpper(),oidDataList.at(1)));
+								postWorkAtTableItem(ui.ordersTable->item(n,1));
+							}
+							ui.ordersTable->item(n,2)->setText(julyTr("ORDER_STATE_"+oidDataList.at(2).toUpper(),oidDataList.at(2)));postWorkAtTableItem(ui.ordersTable->item(n,2));
+							ui.ordersTable->item(n,3)->setText(oidDataList.at(6)+" "+numFromDouble(oidDataList.at(3).toDouble()));
+							ui.ordersTable->item(n,4)->setText(oidDataList.at(5)+" "+numFromDouble(oidDataList.at(4).toDouble()));
+							ui.ordersTable->item(n,5)->setText(oidDataList.at(5)+" "+numFromDouble(oidDataList.at(3).toDouble()*oidDataList.at(4).toDouble()));
 							setOrdersTableRowStateByText(n,oidDataList.at(2).toAscii());
 							oidMap[oid]=oidData;
 						}
@@ -1000,7 +1016,7 @@ void QtBitcoinTrader::accLastSellChanged(QByteArray priceCurrency, double val)
 	ui.ordersLastSellPrice->setValue(val);
 	if(ui.usdLabelLastSell->toolTip()!=priceCurrency)
 	{
-		ui.usdLabelLastSell->setPixmap(QPixmap(":/Resources/CurrencySign/"+currencySignMap->key(priceCurrency.toUpper(),"$")+".png"));
+		ui.usdLabelLastSell->setPixmap(QPixmap(":/Resources/CurrencySign/"+priceCurrency.toUpper()+".png"));
 		ui.usdLabelLastSell->setToolTip(priceCurrency);
 	}
 }
@@ -1010,7 +1026,7 @@ void QtBitcoinTrader::accLastBuyChanged(QByteArray priceCurrency, double val)
 	ui.ordersLastBuyPrice->setValue(val);
 	if(ui.usdLabelLastBuy->toolTip()!=priceCurrency)
 	{
-		ui.usdLabelLastBuy->setPixmap(QPixmap(":/Resources/CurrencySign/"+currencySignMap->key(priceCurrency.toUpper(),"$")+".png"));
+		ui.usdLabelLastBuy->setPixmap(QPixmap(":/Resources/CurrencySign/"+priceCurrency.toUpper()+".png"));
 		ui.usdLabelLastBuy->setToolTip(priceCurrency);
 	}
 }
@@ -1036,9 +1052,9 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	if(orderType=="ASK")newItem->setTextColor(Qt::red); else newItem->setTextColor(Qt::blue);
 	ui.ordersTable->setItem(curRow,1,newItem);postWorkAtTableItem(ui.ordersTable->item(curRow,1));
 	ui.ordersTable->setItem(curRow,2,new QTableWidgetItem(julyTr("ORDER_STATE_"+dataList.at(2).toUpper(),dataList.at(2))));postWorkAtTableItem(ui.ordersTable->item(curRow,2));
-	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(dataList.at(6)+" "+QString::number(dataList.at(3).toDouble())));ui.ordersTable->item(curRow,3)->setTextAlignment(Qt::AlignCenter);
-	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+QString::number(dataList.at(4).toDouble())));ui.ordersTable->item(curRow,4)->setTextAlignment(Qt::AlignCenter);
-	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(orderSign+" "+QString::number(dataList.at(3).toDouble()*dataList.at(4).toDouble())));ui.ordersTable->item(curRow,5)->setTextAlignment(Qt::AlignCenter);
+	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(dataList.at(6)+" "+numFromDouble(dataList.at(3).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,3),0);
+	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+numFromDouble(dataList.at(4).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,4),0);
+	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(orderSign+" "+numFromDouble(dataList.at(3).toDouble()*dataList.at(4).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,5),0);
 
 	setOrdersTableRowStateByText(curRow,dataList.at(2).toAscii());
 	ordersSelectionChanged();
@@ -1659,10 +1675,22 @@ void QtBitcoinTrader::marketLastChanged(double val)
 	if(val>0.0)
 	{
 		static double lastValue=val;
-		static bool isUp=true;
-		isUp=lastValue<=val;
-		if(isVisible())setWindowTitle(currencyBSign+QString::number(val,'f',3)+" "+(isUp?upArrow:downArrow)+" "+windowTitleP);
-		if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip("["+currencyBSign+QString::number(val,'f',3)+"] "+windowTitleP);
+		static int priceDirection=0;
+		int lastPriceDirection=priceDirection;
+		if(lastValue<val)priceDirection=1;else
+		if(lastValue>val)priceDirection=-1;else
+		priceDirection=lastPriceDirection;
+		lastValue=val;
+
+		static QString directionChar("-");
+		switch(priceDirection)
+		{
+		case -1: directionChar=downArrow; break;
+		case 1: directionChar=upArrow; break;
+		default: break;
+		}
+		if(isVisible())setWindowTitle(currencyBSign+" "+numFromDouble(val)+" "+directionChar+" "+windowTitleP);
+		if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip(currencyBSign+" "+numFromDouble(val)+" "+directionChar+" "+windowTitleP);
 	}
 }
 void QtBitcoinTrader::ordersLastBuyPriceChanged(double val)	{checkAndExecuteRule(&rulesOrdersLastBuyPrice,val);}
@@ -1870,7 +1898,7 @@ void QtBitcoinTrader::languageChanged()
 	ui.rulesTable->setHorizontalHeaderLabels(rulesLabels);
 
 	QStringList tradesLabels;
-	tradesLabels<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_TYPE","Type")<<julyTr("ORDERS_PRICE","Price");
+	tradesLabels<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_TYPE","Type")<<julyTr("ORDERS_PRICE","Price");
 	ui.tableTrades->setHorizontalHeaderLabels(tradesLabels);
 
 	ui.tabOrdersLog->setAccessibleName(julyTr("TAB_ORDERS_LOG","Orders Log"));

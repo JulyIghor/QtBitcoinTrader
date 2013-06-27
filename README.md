@@ -38,6 +38,13 @@ http://vk.com/QtBitcoinTrader
 
 Change Log
 
+v1.05
+- Critical bugs fixed
+- Calculations fixes
+- Ui fixes
+- Added PPC, FTC, RTC support
+- Added proxy support
+
 v1.04
 - Fixed UI bugs
 - Added NMC and NVC to BTC-e
