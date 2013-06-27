@@ -921,10 +921,10 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 	QMap<QByteArray,bool> activeOrders;
 	for(int n=0;n<ordersList.count();n++)
 	{
-		//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign
+		//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign+";"+priceSign
 		QString oidData=ordersList.at(n);
 		QStringList oidDataList=oidData.split(";");
-		if(oidDataList.count()!=7)continue;
+		if(oidDataList.count()!=8)continue;
 		QByteArray oid=oidDataList.first().toAscii();
 		oidDataList.removeFirst();
 		oidData=oidDataList.join(";");
@@ -941,7 +941,7 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 						{
 							if(forcedReloadOrders)ui.ordersTable->item(n,1)->setText(julyTr("ORDER_TYPE_"+oidDataList.at(1).toUpper(),oidDataList.at(1)));
 							ui.ordersTable->item(n,2)->setText(julyTr("ORDER_STATE_"+oidDataList.at(2).toUpper(),oidDataList.at(2)));
-							ui.ordersTable->item(n,3)->setText(currencyASign+" "+oidDataList.at(3));
+							ui.ordersTable->item(n,3)->setText(oidDataList.at(6)+" "+oidDataList.at(3));
 							ui.ordersTable->item(n,4)->setText(oidDataList.at(5)+" "+QString::number(oidDataList.at(4).toDouble(),'f',priceDecimals));
 							ui.ordersTable->item(n,5)->setText(oidDataList.at(5)+" "+QString::number(oidDataList.at(3).toDouble()*oidDataList.at(4).toDouble(),'f',usdDecimals));
 							setOrdersTableRowStateByText(n,oidDataList.at(2).toAscii());
@@ -1025,7 +1025,7 @@ void QtBitcoinTrader::translateUnicodeStr(QString *str)
 void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 {
 	QStringList dataList=data.split(";");
-	if(dataList.count()!=6)return;
+	if(dataList.count()!=7)return;
 	int curRow=ui.ordersTable->rowCount();
 	QByteArray orderSign=dataList.at(5).toAscii();
 	ui.ordersTable->setRowCount(curRow+1);
@@ -1033,12 +1033,12 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat)));postWorkAtTableItem(ui.ordersTable->item(curRow,0));ui.ordersTable->item(curRow,0)->setData(Qt::UserRole,oid);
 	QString orderType=dataList.at(1).toUpper();
 	QTableWidgetItem *newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_"+orderType,dataList.at(1)));
-	if(orderType=="ASK")newItem->setTextColor(Qt::blue); else newItem->setTextColor(Qt::red);
+	if(orderType=="ASK")newItem->setTextColor(Qt::red); else newItem->setTextColor(Qt::blue);
 	ui.ordersTable->setItem(curRow,1,newItem);postWorkAtTableItem(ui.ordersTable->item(curRow,1));
 	ui.ordersTable->setItem(curRow,2,new QTableWidgetItem(julyTr("ORDER_STATE_"+dataList.at(2).toUpper(),dataList.at(2))));postWorkAtTableItem(ui.ordersTable->item(curRow,2));
-	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(currencyASign+" "+dataList.at(3)));ui.ordersTable->item(curRow,3)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
-	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+QString::number(dataList.at(4).toDouble(),'f',priceDecimals)));ui.ordersTable->item(curRow,4)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
-	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(orderSign+" "+QString::number(dataList.at(3).toDouble()*dataList.at(4).toDouble(),'f',usdDecimals)));ui.ordersTable->item(curRow,5)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
+	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(dataList.at(6)+" "+QString::number(dataList.at(3).toDouble())));ui.ordersTable->item(curRow,3)->setTextAlignment(Qt::AlignCenter);
+	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+QString::number(dataList.at(4).toDouble())));ui.ordersTable->item(curRow,4)->setTextAlignment(Qt::AlignCenter);
+	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(orderSign+" "+QString::number(dataList.at(3).toDouble()*dataList.at(4).toDouble())));ui.ordersTable->item(curRow,5)->setTextAlignment(Qt::AlignCenter);
 
 	setOrdersTableRowStateByText(curRow,dataList.at(2).toAscii());
 	ordersSelectionChanged();

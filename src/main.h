@@ -21,7 +21,7 @@
 
 #define julyTr julyTranslator->translateString
 #define hmacSha512(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha512(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),64)
-#define hostName QByteArray("data.mtgox.com")
+#define apiHostName QByteArray("data.mtgox.com")
 #define apiId QByteArray("2")
 #define restKey (*restKey_)
 #define restSign (*restSign_)

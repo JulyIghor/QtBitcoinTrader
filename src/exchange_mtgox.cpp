@@ -337,7 +337,7 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 				QByteArray currentOrder=getMidData("oid","\"actions\":",&data);
 				while(currentOrder.size())
 				{
-				rezultData.append(getMidData("\":\"","\",\"",&currentOrder)+";"+getMidData(",\"date\":",",",&currentOrder)+";"+getMidData("\"type\":\"","\",\"",&currentOrder)+";"+getMidData("\"status\":\"","\",\"",&currentOrder)+";"+getMidData("\"amount\":{\"value\":\"","\",\"",&currentOrder)+";"+getMidData("\"price\":{\"value\":\"","\",\"",&currentOrder)+";"+currencySignMap->value(getMidData("\"currency\":\"","\",\"",&currentOrder),"$")+"\n");
+				rezultData.append(getMidData("\":\"","\",\"",&currentOrder)+";"+getMidData(",\"date\":",",",&currentOrder)+";"+getMidData("\"type\":\"","\",\"",&currentOrder)+";"+getMidData("\"status\":\"","\",\"",&currentOrder)+";"+getMidData("\"amount\":{\"value\":\"","\",\"",&currentOrder)+";"+getMidData("\"price\":{\"value\":\"","\",\"",&currentOrder)+";"+currencySignMap->value(getMidData("\"currency\":\"","\",\"",&currentOrder),"$")+";"+currencySignMap->value(getMidData("\"item\":\"","\",\"",&currentOrder),"$")+"\n");
 				if(data.size()>currentOrder.size())data.remove(0,currentOrder.size());
 				currentOrder=getMidData("oid","\"actions\"",&data);
 				}
@@ -478,7 +478,7 @@ void Exchange_MtGox::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 
-	if(requestIdsAuth.count()<10&&!vipRequestCount)//Max pending requests at time
+	if(requestIdsAuth.count()<100&&!vipRequestCount)//Max pending requests at time
 	{
 	if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/info",true)]=2;
 	if(!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/orders",true)]=4;
@@ -496,7 +496,7 @@ void Exchange_MtGox::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(requestIdsNoAuth.key(8,0)==0)requestIdsAuth[sendToApi("money/wallet/history",true,"&currency=BTC")]=8;
+	if(requestIdsAuth.key(8,0)==0)requestIdsAuth[sendToApi("money/wallet/history",true,"&currency=BTC")]=8;
 }
 
 void Exchange_MtGox::buy(double apiBtcToBuy, double apiPriceToBuy)

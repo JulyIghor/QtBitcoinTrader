@@ -1743,7 +1743,7 @@
             </size>
            </property>
            <property name="accessibleName">
-            <string>USD</string>
+            <string>PRICE</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -1802,7 +1802,7 @@
             </size>
            </property>
            <property name="accessibleName">
-            <string>USD</string>
+            <string>PRICE</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>

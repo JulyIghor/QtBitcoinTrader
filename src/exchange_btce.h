@@ -52,6 +52,7 @@ private:
 
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	QTime softLagTime;
+	QTime authRequestTime;
 	int apiDownCounter;
 	int secondPart;
 	QMap<int,int> requestIdsAuth;

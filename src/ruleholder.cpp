@@ -45,7 +45,7 @@ bool RuleHolder::isBuying()
 
 QString RuleHolder::getDescriptionString()
 {
-		QString priceStr=currencyBSign+" "+QString::number(ruleCheckPrice,'f',5);
+		QString priceStr=currencyBSign+" "+QString::number(ruleCheckPrice);
 		if(ruleMoreLessEqual==1)
 		{
 			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_MORE","If market last price goes more than %1").arg(priceStr);
@@ -95,7 +95,7 @@ QString RuleHolder::getBitcoinsString()
 	if(ruleBtc==-4.0)return julyTr("SPEND_HALF_FUNDS","Spend Half my Funds");
 	if(ruleBtc==-5.0)return julyTr("NOT_USED","Not Used");
 
-	return currencyASign+" "+QString::number(ruleBtc,'f',8);
+	return currencyASign+" "+QString::number(ruleBtc);
 }
 
 QString RuleHolder::getPriceText()
@@ -110,6 +110,6 @@ QString RuleHolder::getPriceText()
 	if(rulePrice==-6.0)return julyTr("AS_ORDERS_LAST_BUY","Orders Last Buy");
 	if(rulePrice==-7.0)return julyTr("AS_ORDERS_LAST_SELL","Orders Last Sell");
 	if(rulePrice==-8.0)return julyTr("SAME_AS_RULE","Same as Rule Price");
-	return currencyBSign+" "+QString::number(rulePrice,'f',5);
+	return currencyBSign+" "+QString::number(rulePrice);
 }
 

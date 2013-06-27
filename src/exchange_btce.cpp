@@ -27,6 +27,7 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	headerAuth.setValue("Key",pRestKey);
 	moveToThread(this);
 	softLagTime.restart();
+	authRequestTime.restart();
 	privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 }
 
@@ -87,6 +88,7 @@ void Exchange_BTCe::setSslEnabled(bool on)
 	requestIdsNoAuth.clear();
 	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
 	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
+
 	if(sslEnabled)
 	{
 		httpAuth->setHost("btc-e.com",QHttp::ConnectionModeHttps);
@@ -159,6 +161,11 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 	//	if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
 	//	if(isUnknownRequest)return;
 	//}
+	if(!isApiDown&&authRequestTime.elapsed()>10000)
+	{
+		isApiDown=true;
+		emit apiDownChanged(isApiDown);
+	}
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 	softLagTime.restart();
@@ -269,6 +276,7 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
 		if(isUnknownRequest)return;
 	}
+	authRequestTime.restart();
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 	softLagTime.restart();
@@ -349,7 +357,8 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 					rezultData.append(itemStatus+";");
 					rezultData.append(getMidData("amount\":",",\"",&currentOrder)+";");
 					rezultData.append(getMidData("rate\":",",\"",&currentOrder)+";");
-					rezultData.append(currencySignMap->value(currencyPair.last().toAscii(),"$")+"\n");
+					rezultData.append(currencySignMap->value(currencyPair.last().toAscii(),"$")+";");
+					rezultData.append(currencySignMap->value(currencyPair.first().toAscii(),"$")+"\n");
 				}
 				emit ordersChanged(rezultData);
 			}
@@ -477,7 +486,7 @@ void Exchange_BTCe::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
 
-	if(requestIdsAuth.count()<10&&!vipRequestCount)//Max pending requests at time
+	if(requestIdsAuth.count()<100&&!vipRequestCount)//Max pending requests at time
 	{
 		if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi("",true,"method=getInfo&")]=2;
 		if(!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi("",true,"method=OrderList&")]=4;
@@ -499,8 +508,8 @@ void Exchange_BTCe::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(requestIdsNoAuth.key(8,0)==0)requestIdsAuth[sendToApi("",true,"method=TradeHistory&count=30&")]=8;
-	if(requestIdsNoAuth.key(10,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/fee",false)]=10;
+	if(requestIdsAuth.key(8,0)==0)requestIdsAuth[sendToApi("",true,"method=TradeHistory&count=30&")]=8;
+	if(requestIdsAuth.key(10,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/fee",false)]=10;
 }
 
 void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
@@ -551,7 +560,7 @@ int Exchange_BTCe::sendToApi(QByteArray method, bool auth, QByteArray commands, 
 	if(auth)
 	{
 		if(incNonce)privateNonce++;
-		QByteArray postData=QString(commands+"nonce="+QByteArray::number(privateNonce)).toUtf8();
+		QByteArray postData=commands+"nonce="+QByteArray::number(privateNonce);
 		headerAuth.setRequest("POST","/tapi"+method);
 		headerAuth.setValue("Sign",hmacSha512(privateRestSign,postData).toHex());
 		headerAuth.setContentLength(postData.size());
