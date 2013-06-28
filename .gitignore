@@ -64,3 +64,5 @@ UpgradeLog*.htm
 UpgradeLog*.XML
 Win32/
 x64/
+src/ui_*.h
+src/QtBitcoinTrader
