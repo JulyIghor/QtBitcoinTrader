@@ -28,7 +28,7 @@ Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	moveToThread(this);
 	authRequestTime.restart();
 	softLagTime.restart();
-	privateNonce=QDateTime::currentDateTime().toTime_t()*1000;
+	privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 }
 
 Exchange_MtGox::~Exchange_MtGox()
@@ -55,7 +55,7 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool ss
 	connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
 
-	connect(this,SIGNAL(identificationRequired()),mainClass,SLOT(identificationRequired()));
+	connect(this,SIGNAL(identificationRequired(QString)),mainClass,SLOT(identificationRequired(QString)));
 	connect(this,SIGNAL(apiDownChanged(bool)),mainClass,SLOT(setApiDown(bool)));
 	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
 	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
@@ -189,7 +189,7 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 						lastTickerLow=newTickerLow;
 					}
 
-					QByteArray tickerSell=getMidData("sell\":{\"value\":\"","",&data);
+					QByteArray tickerSell=getMidData("buy\":{\"value\":\"","",&data);
 					if(!tickerSell.isEmpty())
 					{
 						double newTickerSell=tickerSell.toDouble();
@@ -197,15 +197,7 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 						lastTickerSell=newTickerSell;
 					}
 
-					QByteArray tickerLast=getMidData("last\":{\"value\":\"","",&data);
-					if(!tickerLast.isEmpty())
-					{
-						double newTickerLast=tickerLast.toDouble();
-						if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
-						lastTickerLast=newTickerLast;
-					}
-
-					QByteArray tickerBuy=getMidData("buy\":{\"value\":\"","",&data);
+					QByteArray tickerBuy=getMidData("sell\":{\"value\":\"","",&data);
 					if(!tickerBuy.isEmpty())
 					{
 						double newTickerBuy=tickerBuy.toDouble();
@@ -222,6 +214,13 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 					}
 					if(isFirstTicker)
 					{
+						QByteArray tickerLast=getMidData("last\":{\"value\":\"","",&data);
+						if(!tickerLast.isEmpty())
+						{
+							double newTickerLast=tickerLast.toDouble();
+							if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
+							lastTickerLast=newTickerLast;
+						}
 						emit firstTicker();
 						isFirstTicker=false;
 					}
@@ -245,7 +244,8 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 {
 	int reqType=requestIdsAuth.value(cId,0);
-	if(vipRequestCount&&(reqType>=5&&reqType<=7))vipRequestCount--;
+	bool isVipRequest=reqType>=5&&reqType<=7;
+	if(vipRequestCount&&isVipRequest)vipRequestCount--;
 	if(reqType>0)requestIdsAuth.remove(cId);else return;
 	if(error)return;
 
@@ -317,7 +317,7 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 					if(!rights.isEmpty())
 					{
 					bool isRightsGood=rights.contains("get_info")&&rights.contains("trade");
-					if(!isRightsGood)emit identificationRequired();
+					if(!isRightsGood)emit identificationRequired("invalid_rights");
 					emit firstAccInfo();
 					isFirstAccInfo=false;
 					}
@@ -427,8 +427,7 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 		if(isLogEnabled)logThread->writeLog(errorString.toAscii()+" "+tokenString.toAscii());
 		if(errorString.isEmpty())return;
 		if(errorString=="Order not found")return;
-		if(errorString.startsWith("Identification required"))
-			if(tokenString!="login_error_invalid_nonce")emit identificationRequired();
+		if(!isVipRequest)emit identificationRequired(errorString+"<br>"+tokenString);
 	}
 }
 
@@ -455,7 +454,7 @@ void Exchange_MtGox::run()
 	connect(httpNoAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
-	secondTimer->start(200);
+	secondTimer->start(400);
 	exec();
 }
 
@@ -480,19 +479,23 @@ void Exchange_MtGox::reloadOrders()
 void Exchange_MtGox::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
+	static int requestCounter=1;
 
 	if(requestIdsAuth.count()<100&&!vipRequestCount)//Max pending requests at time
 	{
-	if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/info",true)]=2;
-	if(!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/orders",true)]=4;
+	if(requestCounter==1&&requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/info",true)]=2;
+	if(requestCounter==2&&!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/orders",true)]=4;
 	} else cancelPendingAuthRequests();
 	if(requestIdsNoAuth.count()<10)//Max pending requests at time
 	{
-	if(requestIdsNoAuth.key(1,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/order/lag",false)]=1;
-	if(requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/ticker",false)]=3;
-	if(requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/trades/fetch?since="+lastFetchDate,false)]=9;
+	if(requestCounter==3&&requestIdsNoAuth.key(1,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/order/lag",false)]=1;
+	if(requestCounter==4&&requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/ticker",false)]=3;
+	if(requestCounter==5&&requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/trades/fetch?since="+lastFetchDate,false)]=9;
 	} else cancelPendingNoAuthRequests();
-	if(lastHistory.isEmpty())getHistory(false);
+	if(requestCounter==6&&lastHistory.isEmpty())getHistory(false);
+
+	requestCounter++;
+	if(requestCounter>6)requestCounter=1;
 }
 
 void Exchange_MtGox::getHistory(bool force)

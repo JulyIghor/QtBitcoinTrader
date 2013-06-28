@@ -165,7 +165,7 @@ public slots:
 
 	void setApiDown(bool);
 
-	void identificationRequired();
+	void identificationRequired(QString);
 
 	void updateLogTable();
 	void ordersLogChanged(QString);

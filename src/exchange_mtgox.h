@@ -62,7 +62,7 @@ private:
 	QHttpRequestHeader headerAuth;
 	QHttpRequestHeader headerNoAuth;
 	QByteArray privateRestSign;
-	quint64 privateNonce;
+	quint32 privateNonce;
 	int sendToApi(QByteArray method, bool auth=false, QByteArray commands=0, bool incNonce=true);
 	QHttp *httpAuth;
 	QHttp *httpNoAuth;
@@ -72,7 +72,7 @@ signals:
 	void addLastTrade(double,qint64,double,QByteArray,bool);
 
 	void ordersChanged(QString);
-	void identificationRequired();
+	void identificationRequired(QString);
 
 	void ordersLogChanged(QString);
 

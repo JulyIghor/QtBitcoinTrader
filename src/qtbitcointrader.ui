@@ -4697,7 +4697,7 @@ p, li { white-space: pre-wrap; }
              <string>Minimize to Tray</string>
             </property>
             <property name="shortcut">
-             <string>Ctrl+H</string>
+             <string>Ctrl+M</string>
             </property>
            </widget>
           </item>

@@ -55,7 +55,7 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool ssl
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
 
-	connect(this,SIGNAL(identificationRequired()),mainClass,SLOT(identificationRequired()));
+	connect(this,SIGNAL(identificationRequired(QString)),mainClass,SLOT(identificationRequired(QString)));
 	connect(this,SIGNAL(apiDownChanged(bool)),mainClass,SLOT(setApiDown(bool)));
 	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
 	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
@@ -179,7 +179,7 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 				lastTickerLow=newTickerLow;
 			}
 
-			QByteArray tickerSell=getMidData("\"buy\":",",\"",&data);
+			QByteArray tickerSell=getMidData("\"sell\":",",\"",&data);
 			if(!tickerSell.isEmpty())
 			{
 				double newTickerSell=tickerSell.toDouble();
@@ -187,15 +187,7 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 				lastTickerSell=newTickerSell;
 			}
 
-			QByteArray tickerLast=getMidData("\"last\":",",\"",&data);
-			if(!tickerLast.isEmpty())
-			{
-				double newTickerLast=tickerLast.toDouble();
-				if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
-				lastTickerLast=newTickerLast;
-			}
-
-			QByteArray tickerBuy=getMidData("\"sell\":",",\"",&data);
+			QByteArray tickerBuy=getMidData("\"buy\":",",\"",&data);
 			if(!tickerBuy.isEmpty())
 			{
 				double newTickerBuy=tickerBuy.toDouble();
@@ -212,6 +204,13 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 			}
 			if(isFirstTicker)
 			{
+				QByteArray tickerLast=getMidData("\"last\":",",\"",&data);
+				if(!tickerLast.isEmpty())
+				{
+					double newTickerLast=tickerLast.toDouble();
+					if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
+					lastTickerLast=newTickerLast;
+				}
 				emit firstTicker();
 				isFirstTicker=false;
 			}
@@ -226,7 +225,7 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 				QByteArray tradeData=tradeList.at(n).toAscii();
 				if(lastFetchTid<0&&getMidData("date\":",",\"",&tradeData).toLongLong()<-lastFetchTid)continue;
 				qint64 currentTid=getMidData("\"tid\":",",\"",&tradeData).toLongLong();
-				if(lastFetchTid>=currentTid)continue;
+				if(currentTid<1000||lastFetchTid>=currentTid)continue;
 				lastFetchTid=currentTid;
 				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),getMidData("date\":",",\"",&tradeData).toLongLong(),getMidData("\"price\":",",\"",&tradeData).toDouble(),getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
 			}
@@ -249,7 +248,8 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 {
 	int reqType=requestIdsAuth.value(cId,0);
-	if(vipRequestCount&&(reqType>=5&&reqType<=7))vipRequestCount--;
+	bool isVipRequest=reqType>=5&&reqType<=7;
+	if(vipRequestCount&&isVipRequest)vipRequestCount--;
 	if(reqType>0)requestIdsAuth.remove(cId);else return;
 	if(error)return;
 
@@ -303,7 +303,7 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 					if(!rights.isEmpty())
 					{
 					bool isRightsGood=rights.contains("info\":1")&&rights.contains("trade\":1");
-					if(!isRightsGood)emit identificationRequired();
+					if(!isRightsGood)emit identificationRequired("invalid_rights");
 					emit firstAccInfo();
 					isFirstAccInfo=false;
 					}
@@ -422,7 +422,7 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 		QString errorString=getMidData("error\":\"","\"",&data);
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
-		if(errorString=="invalid sign")emit identificationRequired();
+		if(!isVipRequest)emit identificationRequired(errorString);
 	}
 }
 
@@ -449,7 +449,7 @@ void Exchange_BTCe::run()
 	connect(httpNoAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
-	secondTimer->start(500);
+	secondTimer->start(400);
 	exec();
 }
 
@@ -474,23 +474,24 @@ void Exchange_BTCe::reloadOrders()
 void Exchange_BTCe::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
+	static int requestCounter=1;
 
 	if(requestIdsAuth.count()<100&&!vipRequestCount)//Max pending requests at time
 	{
-		if(requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi("",true,"method=getInfo&")]=2;
-		if(!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi("",true,"method=OrderList&")]=4;
+		if(requestCounter==1&&requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi("",true,"method=getInfo&")]=2;
+		if(requestCounter==2&&!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi("",true,"method=OrderList&")]=4;
 	} else cancelPendingAuthRequests();
 
 	if(requestIdsNoAuth.count()<10)//Max pending requests at time
 	{
-		if(requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/ticker",false)]=3;
-		static int tradesCounter=0;
-		if(tradesCounter++==0)
-			if(requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/trades",false)]=9;
-		if(tradesCounter>3)tradesCounter=0;
+		if(requestCounter==3&&requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/ticker",false)]=3;
+		if(requestCounter==4&&requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/trades",false)]=9;
 	} else cancelPendingNoAuthRequests();
 
-	if(lastHistory.isEmpty())getHistory(false);
+	if(requestCounter==5&&lastHistory.isEmpty())getHistory(false);
+
+	requestCounter++;
+	if(requestCounter>5)requestCounter=1;
 }
 
 void Exchange_BTCe::getHistory(bool force)

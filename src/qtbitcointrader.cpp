@@ -361,6 +361,7 @@ void QtBitcoinTrader::resizeEvent(QResizeEvent *event)
 
 void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDouble, QByteArray curRency, bool isAsk)
 {
+	if(dateT<1000)return;
 	int goingUp=-1;
 	double marketLast=ui.marketLast->value();
 	if(marketLast<usdDouble)goingUp=1;else
@@ -990,7 +991,7 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 	forcedReloadOrders=false;
 }
 
-void QtBitcoinTrader::identificationRequired()
+void QtBitcoinTrader::identificationRequired(QString message)
 {
 	if(!showingMessage)
 	{
@@ -998,8 +999,9 @@ void QtBitcoinTrader::identificationRequired()
 		{
 			authErrorOnce=true;
 			showingMessage=true;
-			QMessageBox::warning(this,julyTr("AUTH_ERROR",exchangeName+" Error"),julyTr("TRUNAUTHORIZED","Identification required to access private API.<br>Please enter valid API key and Secret."));
-			if(isLogEnabled)logThread->writeLog(exchangeName.toAscii()+" Error: Identification required to access private API<br>Please restart application, and enter valid API key and Secret");
+			if(isLogEnabled)logThread->writeLog(exchangeName.toAscii()+" Error: Identification required to access private API<br>Please restart application, and enter valid API key and Secret<br>"+message.toAscii());
+			if(!message.isEmpty())message.prepend("<br><br>");
+			QMessageBox::warning(this,julyTr("AUTH_ERROR","%1 Error").arg(exchangeName),julyTr("TRUNAUTHORIZED","Identification required to access private API.<br>Please enter valid API key and Secret.")+message);
 			showingMessage=false;
 		}
 	}
@@ -1060,6 +1062,7 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	ordersSelectionChanged();
 	ui.ordersTableFrame->setVisible(true);
 	ui.noOpenedOrdersLabel->setVisible(false);
+	ui.ordersTable->sortItems(0,Qt::AscendingOrder);
 }
 
 void QtBitcoinTrader::setOrdersTableRowStateByText(int row, QByteArray text)
