@@ -38,6 +38,13 @@ http://vk.com/QtBitcoinTrader
 
 Change Log
 
+v1.06
+- Bugfix release
+- Fixed critical bug in Mt.Gox engine
+- Fixed Mac OS X "New window" bug
+- Fixed minor bugs
+- Improved buy/sell/cancel stability
+
 v1.05
 - Critical bugs fixed
 - Calculations fixes

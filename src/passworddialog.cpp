@@ -26,7 +26,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	newProfile=false;
 	ui.setupUi(this);
     setWindowTitle(windowTitle()+" v"+appVerStr);
-	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
+	setWindowFlags(Qt::WindowCloseButtonHint);
 	ui.updateCheckBox->setStyleSheet("QCheckBox {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent)}");
 	ui.okButton->setEnabled(false);
 #ifdef Q_OS_WIN

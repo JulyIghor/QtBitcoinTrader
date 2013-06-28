@@ -1,10 +1,10 @@
-Win32Ver=1.05
-MacVer=1.05
-SrcVer=1.05
+Win32Ver=1.06
+MacVer=1.06
+SrcVer=1.06
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/QtBitcoinTrader.exe
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTrader
-Win32ChangeLog=v1.05<br>- Critical bugs fixed<br>- Calculations fixes<br>- Ui fixes<br>- Added PPC, FTC, RTC support<br>- Added proxy support
-MacChangeLog=v1.05<br>- Critical bugs fixed<br>- Calculations fixes<br>- Ui fixes<br>- Added PPC, FTC, RTC support<br>- Added proxy support
-SrcChangeLog=v1.05<br>- Critical bugs fixed<br>- Calculations fixes<br>- Ui fixes<br>- Added PPC, FTC, RTC support<br>- Added proxy support
+Win32ChangeLog=v1.06<br>- Fixed critical bug in Mt.Gox engine<br>- Sorry for this, but you mast re-generate your Mt.Gox API keys<br>- Bugfix release<br>- Fixed Mac OS X "New window" bug<br>- Fixed minor bugs<br>- Improved buy/sell/cancel stability
+MacChangeLog=v1.06<br>- Fixed critical bug in Mt.Gox engine<br>- Sorry for this, but you mast re-generate your Mt.Gox API keys<br>- Bugfix release<br>- Fixed Mac OS X "New window" bug<br>- Fixed minor bugs<br>- Improved buy/sell/cancel stability
+SrcChangeLog=v1.06<br>- Fixed critical bug in Mt.Gox engine<br>- Sorry for this, but you mast re-generate your Mt.Gox API keys<br>- Bugfix release<br>- Fixed Mac OS X "New window" bug<br>- Fixed minor bugs<br>- Improved buy/sell/cancel stability
 Win32Signature=HKFoXPahEkIVZsYca8zIc+/3y8PngJHzIAsVCKX84NGGPkNuYlvO7Kby8mMNj3xM8vf2yD2TMbq/Ktz5yYePdKooqwtYmLlbec1XJJJKW1C+Uxkd5hxklVkPdNbR0Okxwb5vIsG3DgY4rVxFQK1/7axUy3PkfEImrYtIeqlInMD1ICVxAxNH9zeFeKILOj3+6HPACIJrC2d72M7h+Jtk3p2vqTmEWDzs2XqW7BtBkM1VwFj1z1kNpcitsgeMgMruhD/QWBRDuJeOoEBUeoswFicYjeQ8yx5mME1tmft3wvbkcqxKufv3lo1EG9JpXNyaycxSrCnTwrK6zF8OtMwXbg==
-MacSignature=WFaEPlKycMJjqOiALkD1jKtD7+iOBvfiaVX6hRsJ82pQr50XrLxywtGWp1eOholshGcI2ds/vuEQKLx11xKD8SpOOxUESCDlBNDOWtsj9gVfJhd5BJ/b5nH6klr3eETkIswWJYFnBFO+uI8t1ph2WMocdrLzOhH87LiPiSM/zW44KMd7t1Zr9fSpBoOs2hKD1jWVagFfCKDymsUwnq1VZemTxAQREIraFQ9sL+bu5DFV2emovCerckb75IbUckp3BLu+oMXDY8vZZcUhzPRtav0RgD6BX/GcKafjUeacKWfp/DBR+I8+SABRMERPLbuOumRuUe76HPxugu4K0knXSA==
+MacSignature=g5hoAb/wuNYylXXeneN3fTIO9+kJPLSxxzAdOmlKgaeHtEWUKBYusTJ9Nrzn13Mjo5QJhOs9DDakX6ZNZj+FCeoTMXafTp2HWIsdwTFZEVm/atXQTBA5ISUBCmeWo7QgmyL02EKhodqszMlGUTC0BiIviZWjzR6FWcWOyJraKvBfymULrLvTA6vBUkgtGaL53REn53PBeEqac5hTB5cX1R55z1088h5GULfwD9gSTRhAhjl0YBs4rK4xjg7t8MFIDIvwsltB9GsjYxwokiuli8M6yTsxgqFMRn/bo8jiFNFNtgTCDOh/19bq+MnEUzGqn7AjDckmvmutQvK1REmo2Q==

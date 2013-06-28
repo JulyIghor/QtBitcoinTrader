@@ -75,10 +75,10 @@ int main(int argc, char *argv[])
 {
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
-
+	
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.052");
+	appVerStr_=new QByteArray("1.06");
 	appVerReal_=new double(appVerStr.toDouble());
 	currencyBStr_=new QByteArray("USD");
 	currencyBStrLow_=new QByteArray("usd");

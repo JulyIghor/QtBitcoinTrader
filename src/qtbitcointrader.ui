@@ -3566,6 +3566,9 @@ p, li { white-space: pre-wrap; }
           <property name="accessibleName">
            <string>USD</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -4392,6 +4395,9 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="accessibleName">
            <string>BTC</string>
+          </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
           </property>
           <property name="prefix">
            <string/>

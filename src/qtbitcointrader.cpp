@@ -122,7 +122,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	QSettings settings(iniFileName,QSettings::IniFormat);
 
 	profileName=settings.value("ProfileName","Default Profile").toString();
-	windowTitleP=windowTitle()+" v"+appVerStr+" ["+profileName+"]";
+	windowTitleP=profileName+" - "+windowTitle()+" v"+appVerStr;
 	setWindowTitle(windowTitleP);
 
 	ui.sslCheck->setChecked(settings.value("OpenSSL",true).toBool());
@@ -1692,8 +1692,10 @@ void QtBitcoinTrader::marketLastChanged(double val)
 		case 1: directionChar=upArrow; break;
 		default: break;
 		}
-		if(isVisible())setWindowTitle(currencyBSign+" "+numFromDouble(val)+" "+directionChar+" "+windowTitleP);
-		if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip(currencyBSign+" "+numFromDouble(val)+" "+directionChar+" "+windowTitleP);
+		static QString titleText;
+		titleText=currencyBSign+" "+numFromDouble(val)+" "+directionChar+" "+windowTitleP;
+		if(isVisible())setWindowTitle(titleText);
+		if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip(titleText);
 	}
 }
 void QtBitcoinTrader::ordersLastBuyPriceChanged(double val)	{checkAndExecuteRule(&rulesOrdersLastBuyPrice,val);}
@@ -1946,7 +1948,7 @@ void QtBitcoinTrader::languageChanged()
 
 void QtBitcoinTrader::buttonNewWindow()
 {
-	QProcess::startDetached(QApplication::applicationFilePath());
+	QProcess::startDetached(QApplication::applicationFilePath(),QStringList());
 }
 
 bool QtBitcoinTrader::eventFilter(QObject *obj, QEvent *event)

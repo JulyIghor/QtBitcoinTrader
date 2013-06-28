@@ -514,6 +514,7 @@ void Exchange_MtGox::buy(double apiBtcToBuy, double apiPriceToBuy)
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params)]=6;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params,false)]=6;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params,false)]=6;
+	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params,false)]=6;
 	secondPart=3;
 	secondSlot();
 }
@@ -527,6 +528,7 @@ void Exchange_MtGox::sell(double apiBtcToSell, double apiPriceToSell)
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params)]=7;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params,false)]=7;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params,false)]=7;
+	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/add",true,params,false)]=7;
 	secondPart=3;
 	secondSlot();
 }
@@ -537,6 +539,7 @@ void Exchange_MtGox::cancelOrder(QByteArray order)
 	cancelPendingAuthRequests();
 	vipRequestCount++;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/cancel",true,"&oid="+order)]=5;
+	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/cancel",true,"&oid="+order,false)]=5;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/cancel",true,"&oid="+order,false)]=5;
 	requestIdsAuth[sendToApi(currencyRequestPair+"/money/order/cancel",true,"&oid="+order,false)]=5;
 	secondPart=3;
