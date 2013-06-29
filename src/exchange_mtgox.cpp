@@ -16,6 +16,7 @@
 Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()
 {
+	isApiDown=false;
 	sslEnabled=true;
 	tickerOnly=false;
 	vipRequestCount=0;
@@ -88,7 +89,9 @@ void Exchange_MtGox::setSslEnabled(bool on)
 	sslEnabled=on;
 	clearValues();
 	requestIdsNoAuth.clear();
+	requestIdsAuth.clear();
 	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
+	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
 	if(sslEnabled)
 	{
 		httpAuth->setHost("data.mtgox.com",QHttp::ConnectionModeHttps);
@@ -103,7 +106,6 @@ void Exchange_MtGox::setSslEnabled(bool on)
 
 void Exchange_MtGox::clearValues()
 {
-	isApiDown=false;
 	isFirstTicker=true;
 	isFirstAccInfo=true;
 	lastTickerHigh=0.0;
@@ -154,11 +156,15 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 	if(error)return;
 
 	QByteArray data=httpNoAuth->readAll();
+	{
+	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
 
-	if(!isApiDown&&authRequestTime.elapsed()>30000)
+	if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
 	{
 		isApiDown=true;
 		emit apiDownChanged(isApiDown);
+	}
+	if(isUnknownRequest)return;
 	}
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
@@ -250,6 +256,7 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 	if(error)return;
 
 	QByteArray data=httpAuth->readAll();
+	if(isLogEnabled)logThread->writeLog("AuthData: "+data);
 	{
 		bool lastApiDown=isApiDown;
 		bool isUnknownRequest=data.size()==0||data.at(0)=='<';
@@ -274,6 +281,7 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 		{
 		case 2: //info
 			{
+				if(isLogEnabled)logThread->writeLog("Info: "+data);
 				if(apiLogin.isEmpty())
 				{
 					QByteArray login=getMidData("Login\":\"","\",",&data);
@@ -569,6 +577,8 @@ int Exchange_MtGox::sendToApi(QByteArray method, bool auth, QByteArray commands,
 
 void Exchange_MtGox::sslErrors(const QList<QSslError> &errors)
 {
-	if(!isLogEnabled)return;
-	for(int n=0;n<errors.count();n++)logThread->writeLog("SSL Error: "+errors.at(n).errorString().toAscii());
+	QStringList errorList;
+	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
+	if(isLogEnabled)logThread->writeLog(errorList.join(" ").toAscii());
+	emit identificationRequired("SSL Error: "+errorList.join(" "));
 }
