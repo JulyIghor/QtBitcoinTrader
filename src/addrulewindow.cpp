@@ -66,7 +66,7 @@ void AddRuleWindow::languageChanged()
 
 void AddRuleWindow::buttonAddRule()
 {
-	if(checkIsValidRule())accept();
+	if(mainWindow.ui.ruleSequencialMode->isChecked()&&mainWindow.ui.rulesTable->rowCount()>0||checkIsValidRule())accept();
 	else QMessageBox::warning(this,windowTitle(),julyTr("INVALID_RULE_CHECK","This rule will be executed instantly.<br>This means that you make a mistake.<br>Please check values you entered."));
 }
 

@@ -283,7 +283,6 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 		case 2: //info
 			{
 				if(!success)return;
-				data="{\"success\":1,\"return\":{\"funds\":{\"usd\":0,\"btc\":0,\"ltc\":0,\"nmc\":0,\"rur\":518.329387,\"eur\":0,\"nvc\":0,\"trc\":0,\"ppc\":0,\"ftc\":0,\"cnc\":0},\"rights\":{\"info\":1,\"trade\":1,\"withdraw\":0},\"transaction_count\":3184,\"open_orders\":0,\"server_time\":1372510097}}";
 				QByteArray btcBalance=getMidData(currencyAStrLow+"\":",",\"",&data);
 				if(!btcBalance.isEmpty())
 				{
@@ -456,7 +455,7 @@ void Exchange_BTCe::run()
 	connect(httpNoAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
-	secondTimer->start(400);
+	secondTimer->start(300);
 	exec();
 }
 
