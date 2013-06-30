@@ -50,6 +50,7 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	void saveDetachedWindowsSettings(bool force=false);
 	QString windowTitleP;
 	QSystemTrayIcon *trayIcon;
 	int exchangeId;

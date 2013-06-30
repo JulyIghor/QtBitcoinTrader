@@ -445,7 +445,6 @@ void QtBitcoinTrader::tabTradesScrollUp()
 		timeLine.setEasingCurve(QEasingCurve::OutCubic);
 		timeLine.setLoopCount(1);
 	}
-	else
 	timeLine.stop();
 	int currentScrollPos=ui.tableTrades->verticalScrollBar()->value();
 	if(currentScrollPos==0)return;
@@ -1430,18 +1429,24 @@ void QtBitcoinTrader::closeEvent(QCloseEvent *event)
 	settings.setValue("TabTradesOnTop",ui.tabTradesOnTop->isChecked());
 	settings.setValue("TabChartsOnTop",ui.tabChartsOnTop->isChecked());
 
-	settings.setValue("DetachedLog",isDetachedLog);
-	settings.setValue("DetachedRules",isDetachedRules);
-	settings.setValue("DetachedTrades",isDetachedTrades);
-	settings.setValue("DetachedCharts",isDetachedCharts);
-	if(isDetachedLog)settings.setValue("DetachedLogGeometry",ui.tabOrdersLog->geometry());
-	if(isDetachedRules)settings.setValue("DetachedRulesGeometry",ui.tabRules->geometry());
-	if(isDetachedTrades)settings.setValue("DetachedTradesGeometry",ui.tabLastTrades->geometry());
-	if(isDetachedCharts)settings.setValue("DetachedChartsGeometry",ui.tabCharts->geometry());
+	saveDetachedWindowsSettings();
 	settings.setValue("TradesCurrentTab",ui.tabWidget->currentIndex());
 	settings.sync();
 	emit quit();
 	event->accept();
+}
+
+void QtBitcoinTrader::saveDetachedWindowsSettings(bool force)
+{
+	QSettings settings(iniFileName,QSettings::IniFormat);
+	settings.setValue("DetachedLog",isDetachedLog);
+	settings.setValue("DetachedRules",isDetachedRules);
+	settings.setValue("DetachedTrades",isDetachedTrades);
+	settings.setValue("DetachedCharts",isDetachedCharts);
+	if(isDetachedLog||force)settings.setValue("DetachedLogGeometry",ui.tabOrdersLog->geometry());
+	if(isDetachedRules||force)settings.setValue("DetachedRulesGeometry",ui.tabRules->geometry());
+	if(isDetachedTrades||force)settings.setValue("DetachedTradesGeometry",ui.tabLastTrades->geometry());
+	if(isDetachedCharts||force)settings.setValue("DetachedChartsGeometry",ui.tabCharts->geometry());
 }
 
 void QtBitcoinTrader::buyBitcoinsButton()
@@ -1848,6 +1853,7 @@ void QtBitcoinTrader::attachRules()
 	checkIsTabWidgetVisible();
 	ui.tabWidget->setCurrentWidget(ui.tabRules);
 	isDetachedRules=false;
+	saveDetachedWindowsSettings(true);
 }
 
 void QtBitcoinTrader::attachTrades()
@@ -1863,6 +1869,7 @@ void QtBitcoinTrader::attachTrades()
 	checkIsTabWidgetVisible();
 	ui.tabWidget->setCurrentWidget(ui.tabLastTrades);
 	isDetachedTrades=false;
+	saveDetachedWindowsSettings(true);
 }
 
 void QtBitcoinTrader::attachCharts()
@@ -1877,6 +1884,7 @@ void QtBitcoinTrader::attachCharts()
 	checkIsTabWidgetVisible();
 	ui.tabWidget->setCurrentWidget(ui.tabCharts);
 	isDetachedCharts=false;
+	saveDetachedWindowsSettings(true);
 }
 
 bool QtBitcoinTrader::isValidSoftLag()

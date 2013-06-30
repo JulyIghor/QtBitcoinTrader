@@ -99,19 +99,19 @@ signals:
 	void apiDownChanged(bool);
 	void apiLagChanged(double);
 	void softLagChanged(double);
-private slots:
-	void sslErrors(const QList<QSslError> &);
-	void secondSlot();
-	void httpDoneAuth(int,bool);
-	void httpDoneNoAuth(int,bool);
-public slots:
-	void setSslEnabled(bool);
-	void clearValues();
-	void reloadOrders();
-	void getHistory(bool);
-	void buy(double, double);
-	void sell(double, double);
-	void cancelOrder(QByteArray);
+	private slots:
+		void sslErrors(const QList<QSslError> &);
+		void secondSlot();
+		void httpDoneAuth(int,bool);
+		void httpDoneNoAuth(int,bool);
+		public slots:
+			void setSslEnabled(bool);
+			void clearValues();
+			void reloadOrders();
+			void getHistory(bool);
+			void buy(double, double);
+			void sell(double, double);
+			void cancelOrder(QByteArray);
 };
 
 #endif // EXCHANGE_MTGOX_H

@@ -43,17 +43,17 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool ss
 	tickerOnly=tickOnly;
 	if(!tickerOnly)
 	{
-	connect(mainClass,SIGNAL(setSslEnabled(bool)),this,SLOT(setSslEnabled(bool)));
-	connect(mainClass,SIGNAL(reloadOrders()),this,SLOT(reloadOrders()));
-	connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
-	connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
-	connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
-	connect(this,SIGNAL(ordersChanged(QString)),mainClass,SLOT(ordersChanged(QString)));
-	connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
-	connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
-	connect(this,SIGNAL(ordersLogChanged(QString)),mainClass,SLOT(ordersLogChanged(QString)));
-	connect(this,SIGNAL(orderCanceled(QByteArray)),mainClass,SLOT(orderCanceled(QByteArray)));
-	connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
+		connect(mainClass,SIGNAL(setSslEnabled(bool)),this,SLOT(setSslEnabled(bool)));
+		connect(mainClass,SIGNAL(reloadOrders()),this,SLOT(reloadOrders()));
+		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
+		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
+		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
+		connect(this,SIGNAL(ordersChanged(QString)),mainClass,SLOT(ordersChanged(QString)));
+		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
+		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
+		connect(this,SIGNAL(ordersLogChanged(QString)),mainClass,SLOT(ordersLogChanged(QString)));
+		connect(this,SIGNAL(orderCanceled(QByteArray)),mainClass,SLOT(orderCanceled(QByteArray)));
+		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
 
 	connect(this,SIGNAL(identificationRequired(QString)),mainClass,SLOT(identificationRequired(QString)));
@@ -157,14 +157,14 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 
 	QByteArray data=httpNoAuth->readAll();
 	{
-	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
+		bool isUnknownRequest=data.size()==0||data.at(0)=='<';
 
-	if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
-	{
-		isApiDown=true;
-		emit apiDownChanged(isApiDown);
-	}
-	if(isUnknownRequest)return;
+		if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
+		{
+			isApiDown=true;
+			emit apiDownChanged(isApiDown);
+		}
+		if(isUnknownRequest)return;
 	}
 
 	emit softLagChanged(softLagTime.elapsed()/1000.0);
@@ -176,73 +176,73 @@ void Exchange_MtGox::httpDoneNoAuth(int cId, bool error)
 	{
 		switch(reqType)
 		{
-			case 1: apiLagChanged(getMidData("lag_secs\":",",\"",&data).toDouble()); break;//lag
-			case 3: //ticker
+		case 1: apiLagChanged(getMidData("lag_secs\":",",\"",&data).toDouble()); break;//lag
+		case 3: //ticker
+			{
+				QByteArray tickerHigh=getMidData("high\":{\"value\":\"","",&data);
+				if(!tickerHigh.isEmpty())
 				{
-					QByteArray tickerHigh=getMidData("high\":{\"value\":\"","",&data);
-					if(!tickerHigh.isEmpty())
-					{
-						double newTickerHigh=tickerHigh.toDouble();
-						if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(newTickerHigh);
-						lastTickerHigh=newTickerHigh;
-					}
-
-					QByteArray tickerLow=getMidData("low\":{\"value\":\"","",&data);
-					if(!tickerLow.isEmpty())
-					{
-						double newTickerLow=tickerLow.toDouble();
-						if(newTickerLow!=lastTickerLow)emit tickerLowChanged(newTickerLow);
-						lastTickerLow=newTickerLow;
-					}
-
-					QByteArray tickerSell=getMidData("buy\":{\"value\":\"","",&data);
-					if(!tickerSell.isEmpty())
-					{
-						double newTickerSell=tickerSell.toDouble();
-						if(newTickerSell!=lastTickerSell)emit tickerSellChanged(newTickerSell);
-						lastTickerSell=newTickerSell;
-					}
-
-					QByteArray tickerBuy=getMidData("sell\":{\"value\":\"","",&data);
-					if(!tickerBuy.isEmpty())
-					{
-						double newTickerBuy=tickerBuy.toDouble();
-						if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(newTickerBuy);
-						lastTickerBuy=newTickerBuy;
-					}
-
-					QByteArray tickerVolume=getMidData("vol\":{\"value\":\"","",&data);
-					if(!tickerVolume.isEmpty())
-					{
-						double newTickerVolume=tickerVolume.toDouble();
-						if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(newTickerVolume);
-						lastTickerVolume=newTickerVolume;
-					}
-					if(isFirstTicker)
-					{
-						QByteArray tickerLast=getMidData("last\":{\"value\":\"","",&data);
-						if(!tickerLast.isEmpty())
-						{
-							double newTickerLast=tickerLast.toDouble();
-							if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
-							lastTickerLast=newTickerLast;
-						}
-						emit firstTicker();
-						isFirstTicker=false;
-					}
+					double newTickerHigh=tickerHigh.toDouble();
+					if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(newTickerHigh);
+					lastTickerHigh=newTickerHigh;
 				}
-				break;//ticker
-			case 9: //money/trades/fetch
-				if(data.size()<32)break;
-				QStringList tradeList=QString(data).split("\"},{\"");
-				for(int n=0;n<tradeList.count();n++)
+
+				QByteArray tickerLow=getMidData("low\":{\"value\":\"","",&data);
+				if(!tickerLow.isEmpty())
 				{
-					QByteArray tradeData=tradeList.at(n).toAscii();
-					emit addLastTrade(getMidData("\"amount\":\"","\",",&tradeData).toDouble(),getMidData("date\":",",\"",&tradeData).toLongLong(),getMidData("\"price\":\"","\",",&tradeData).toDouble(),getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
-					if(n==tradeList.count()-1)
-						lastFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
+					double newTickerLow=tickerLow.toDouble();
+					if(newTickerLow!=lastTickerLow)emit tickerLowChanged(newTickerLow);
+					lastTickerLow=newTickerLow;
 				}
-				break;
+
+				QByteArray tickerSell=getMidData("buy\":{\"value\":\"","",&data);
+				if(!tickerSell.isEmpty())
+				{
+					double newTickerSell=tickerSell.toDouble();
+					if(newTickerSell!=lastTickerSell)emit tickerSellChanged(newTickerSell);
+					lastTickerSell=newTickerSell;
+				}
+
+				QByteArray tickerBuy=getMidData("sell\":{\"value\":\"","",&data);
+				if(!tickerBuy.isEmpty())
+				{
+					double newTickerBuy=tickerBuy.toDouble();
+					if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(newTickerBuy);
+					lastTickerBuy=newTickerBuy;
+				}
+
+				QByteArray tickerVolume=getMidData("vol\":{\"value\":\"","",&data);
+				if(!tickerVolume.isEmpty())
+				{
+					double newTickerVolume=tickerVolume.toDouble();
+					if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(newTickerVolume);
+					lastTickerVolume=newTickerVolume;
+				}
+				if(isFirstTicker)
+				{
+					QByteArray tickerLast=getMidData("last\":{\"value\":\"","",&data);
+					if(!tickerLast.isEmpty())
+					{
+						double newTickerLast=tickerLast.toDouble();
+						if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
+						lastTickerLast=newTickerLast;
+					}
+					emit firstTicker();
+					isFirstTicker=false;
+				}
+			}
+			break;//ticker
+		case 9: //money/trades/fetch
+			if(data.size()<32)break;
+			QStringList tradeList=QString(data).split("\"},{\"");
+			for(int n=0;n<tradeList.count();n++)
+			{
+				QByteArray tradeData=tradeList.at(n).toAscii();
+				emit addLastTrade(getMidData("\"amount\":\"","\",",&tradeData).toDouble(),getMidData("date\":",",\"",&tradeData).toLongLong(),getMidData("\"price\":\"","\",",&tradeData).toDouble(),getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
+				if(n==tradeList.count()-1)
+					lastFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
+			}
+			break;
 		}
 	}
 }
@@ -324,10 +324,10 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 					QByteArray rights=getMidData("Rights\":","]",&data);
 					if(!rights.isEmpty())
 					{
-					bool isRightsGood=rights.contains("get_info")&&rights.contains("trade");
-					if(!isRightsGood)emit identificationRequired("invalid_rights");
-					emit firstAccInfo();
-					isFirstAccInfo=false;
+						bool isRightsGood=rights.contains("get_info")&&rights.contains("trade");
+						if(!isRightsGood)emit identificationRequired("invalid_rights");
+						emit firstAccInfo();
+						isFirstAccInfo=false;
 					}
 				}
 			}
@@ -341,17 +341,17 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 				QByteArray currentOrder=getMidData("oid","\"actions\":",&data);
 				while(currentOrder.size())
 				{
-				rezultData.append(getMidData("\":\"","\",\"",&currentOrder)+";"+getMidData(",\"date\":",",",&currentOrder)+";"+getMidData("\"type\":\"","\",\"",&currentOrder)+";"+getMidData("\"status\":\"","\",\"",&currentOrder)+";"+getMidData("\"amount\":{\"value\":\"","\",\"",&currentOrder)+";"+getMidData("\"price\":{\"value\":\"","\",\"",&currentOrder)+";"+currencySignMap->value(getMidData("\"currency\":\"","\",\"",&currentOrder),"$")+";"+currencySignMap->value(getMidData("\"item\":\"","\",\"",&currentOrder),"$")+"\n");
-				if(data.size()>currentOrder.size())data.remove(0,currentOrder.size());
-				currentOrder=getMidData("oid","\"actions\"",&data);
+					rezultData.append(getMidData("\":\"","\",\"",&currentOrder)+";"+getMidData(",\"date\":",",",&currentOrder)+";"+getMidData("\"type\":\"","\",\"",&currentOrder)+";"+getMidData("\"status\":\"","\",\"",&currentOrder)+";"+getMidData("\"amount\":{\"value\":\"","\",\"",&currentOrder)+";"+getMidData("\"price\":{\"value\":\"","\",\"",&currentOrder)+";"+currencySignMap->value(getMidData("\"currency\":\"","\",\"",&currentOrder),"$")+";"+currencySignMap->value(getMidData("\"item\":\"","\",\"",&currentOrder),"$")+"\n");
+					if(data.size()>currentOrder.size())data.remove(0,currentOrder.size());
+					currentOrder=getMidData("oid","\"actions\"",&data);
 				}
 				emit ordersChanged(rezultData);
 			}
 			break;//orders
 		case 5: //order/cancel
 			{
-			QByteArray oid=getMidData("oid\":\"","\",\"",&data);
-			if(!oid.isEmpty())emit orderCanceled(oid);
+				QByteArray oid=getMidData("oid\":\"","\",\"",&data);
+				if(!oid.isEmpty())emit orderCanceled(oid);
 			}
 			break;//order/cancel
 		case 6: if(isLogEnabled)logThread->writeLog("Buy OK: "+data);break;//order/buy
@@ -359,70 +359,70 @@ void Exchange_MtGox::httpDoneAuth(int cId, bool error)
 		case 8: //money/wallet/history 
 			if(lastHistory!=data)
 			{
-			double lastBuyPrice=0.0;
-			double lastSellPrice=0.0;
-			QString newLog(data);
-			translateUnicodeStr(&newLog);
-			QStringList dataList=newLog.split("\"Index\"");
-			newLog.clear();
-			for(int n=0;n<dataList.count();n++)
-			{
-				QByteArray curLog(dataList.at(n).toAscii());
-				QByteArray logType=getMidData("\"Type\":\"","\",\"",&curLog);
-				int logTypeInt=0;
-				if(logType=="out"){logTypeInt=1;logType="<font color=\"red\">("+julyTr("LOG_SOLD","Sold").toAscii()+")</font>";}
-				else 
-					if(logType=="in"){logTypeInt=2;logType="<font color=\"blue\">("+julyTr("LOG_BOUGHT","Bought").toAscii()+")</font>";}
+				double lastBuyPrice=0.0;
+				double lastSellPrice=0.0;
+				QString newLog(data);
+				translateUnicodeStr(&newLog);
+				QStringList dataList=newLog.split("\"Index\"");
+				newLog.clear();
+				for(int n=0;n<dataList.count();n++)
+				{
+					QByteArray curLog(dataList.at(n).toAscii());
+					QByteArray logType=getMidData("\"Type\":\"","\",\"",&curLog);
+					int logTypeInt=0;
+					if(logType=="out"){logTypeInt=1;logType="<font color=\"red\">("+julyTr("LOG_SOLD","Sold").toAscii()+")</font>";}
 					else 
-						if(logType=="fee"){logTypeInt=3;logType.clear();}
+						if(logType=="in"){logTypeInt=2;logType="<font color=\"blue\">("+julyTr("LOG_BOUGHT","Bought").toAscii()+")</font>";}
 						else 
-							if(logType=="deposit"){logTypeInt=4;logType.clear();logType="<font color=\"green\">("+julyTr("LOG_DEPOSIT","Deposit").toAscii()+")</font>";}
-							else
-								if(logType=="withdraw"){logTypeInt=5;logType.clear();logType="<font color=\"brown\">("+julyTr("LOG_WITHDRAW","Withdraw").toAscii()+")</font>";}
-							if(logTypeInt)
-							{
-								QByteArray currencyA="USD";
-								QByteArray currencyB="USD";
-								QByteArray logValue=getMidData("\"Value\":{\"value\":\"","\",\"",&curLog);
-								QByteArray logDate=getMidData("\"Date\":",",\"",&curLog);
-								QByteArray logText=getMidData(" at ","\",\"",&curLog);
-								currencyA=getMidData("\"currency\":\"","\"",&curLog);
-								if((logTypeInt==1||logTypeInt==2)&&(lastSellPrice==0.0||lastBuyPrice==0.0))
-								{
-									QByteArray priceValue;
-									QByteArray priceSign;
-									for(int n=0;n<logText.size();n++)
-										if(QChar(logText.at(n)).isDigit()||logText.at(n)=='.')priceValue.append(logText.at(n));
-										else priceSign.append(logText.at(n));
-									if(priceSign.isEmpty())priceSign="$";
-
-									currencyB=currencySignMap->key(priceSign,"$");
-									if(lastSellPrice==0.0&&logTypeInt==1)
-									{
-										lastSellPrice=priceValue.toDouble();
-										emit accLastSellChanged(currencyB,lastSellPrice);
-									}
-									if(lastBuyPrice==0.0&&logTypeInt==2)
-									{
-										lastBuyPrice=priceValue.toDouble();
-										emit accLastBuyChanged(currencyB,lastBuyPrice);
-									}
-								}
-
-								if(logTypeInt==3&&logText.isEmpty())
-								{
-									logText="<font color=\"darkgreen\">";
-									logText.append(" ("+julyTr("LOG_FEE","fee")+")");
-									logText.append("</font>");
-								}
+							if(logType=="fee"){logTypeInt=3;logType.clear();}
+							else 
+								if(logType=="deposit"){logTypeInt=4;logType.clear();logType="<font color=\"green\">("+julyTr("LOG_DEPOSIT","Deposit").toAscii()+")</font>";}
 								else
-								if(!logText.isEmpty())logText=" "+julyTr("AT"," at %1").arg(QString("<font color=\"darkgreen\">"+logText+"</font>").replace("fee",julyTr("LOG_FEE","fee"))).toAscii();
+									if(logType=="withdraw"){logTypeInt=5;logType.clear();logType="<font color=\"brown\">("+julyTr("LOG_WITHDRAW","Withdraw").toAscii()+")</font>";}
+									if(logTypeInt)
+									{
+										QByteArray currencyA="USD";
+										QByteArray currencyB="USD";
+										QByteArray logValue=getMidData("\"Value\":{\"value\":\"","\",\"",&curLog);
+										QByteArray logDate=getMidData("\"Date\":",",\"",&curLog);
+										QByteArray logText=getMidData(" at ","\",\"",&curLog);
+										currencyA=getMidData("\"currency\":\"","\"",&curLog);
+										if((logTypeInt==1||logTypeInt==2)&&(lastSellPrice==0.0||lastBuyPrice==0.0))
+										{
+											QByteArray priceValue;
+											QByteArray priceSign;
+											for(int n=0;n<logText.size();n++)
+												if(QChar(logText.at(n)).isDigit()||logText.at(n)=='.')priceValue.append(logText.at(n));
+												else priceSign.append(logText.at(n));
+												if(priceSign.isEmpty())priceSign="$";
 
-								newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString(localDateTimeFormat)+"</font>&nbsp;<font color=\"#996515\">"+currencySignMap->value(currencyA,"USD")+logValue+"</font>"+logText+" "+logType+"<br>");
-							}
-			}
-			emit ordersLogChanged(newLog);
-			lastHistory=data;
+												currencyB=currencySignMap->key(priceSign,"$");
+												if(lastSellPrice==0.0&&logTypeInt==1)
+												{
+													lastSellPrice=priceValue.toDouble();
+													emit accLastSellChanged(currencyB,lastSellPrice);
+												}
+												if(lastBuyPrice==0.0&&logTypeInt==2)
+												{
+													lastBuyPrice=priceValue.toDouble();
+													emit accLastBuyChanged(currencyB,lastBuyPrice);
+												}
+										}
+
+										if(logTypeInt==3&&logText.isEmpty())
+										{
+											logText="<font color=\"darkgreen\">";
+											logText.append(" ("+julyTr("LOG_FEE","fee")+")");
+											logText.append("</font>");
+										}
+										else
+											if(!logText.isEmpty())logText=" "+julyTr("AT"," at %1").arg(QString("<font color=\"darkgreen\">"+logText+"</font>").replace("fee",julyTr("LOG_FEE","fee"))).toAscii();
+
+										newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString(localDateTimeFormat)+"</font>&nbsp;<font color=\"#996515\">"+currencySignMap->value(currencyA,"USD")+logValue+"</font>"+logText+" "+logType+"<br>");
+									}
+				}
+				emit ordersLogChanged(newLog);
+				lastHistory=data;
 			}
 			break;//money/wallet/history
 		default: break;
@@ -491,14 +491,14 @@ void Exchange_MtGox::secondSlot()
 
 	if(requestIdsAuth.count()<100&&!vipRequestCount)//Max pending requests at time
 	{
-	if(requestCounter==1&&requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/info",true)]=2;
-	if(requestCounter==2&&!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/orders",true)]=4;
+		if(requestCounter==1&&requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/info",true)]=2;
+		if(requestCounter==2&&!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/money/orders",true)]=4;
 	} else cancelPendingAuthRequests();
 	if(requestIdsNoAuth.count()<10)//Max pending requests at time
 	{
-	if(requestCounter==3&&requestIdsNoAuth.key(1,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/order/lag",false)]=1;
-	if(requestCounter==4&&requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/ticker",false)]=3;
-	if(requestCounter==5&&requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/trades/fetch?since="+lastFetchDate,false)]=9;
+		if(requestCounter==3&&requestIdsNoAuth.key(1,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/order/lag",false)]=1;
+		if(requestCounter==4&&requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/ticker",false)]=3;
+		if(requestCounter==5&&requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/money/trades/fetch?since="+lastFetchDate,false)]=9;
 	} else cancelPendingNoAuthRequests();
 	if(requestCounter==6&&lastHistory.isEmpty())getHistory(false);
 

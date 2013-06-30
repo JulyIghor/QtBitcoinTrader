@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 	
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.067");
+	appVerStr_=new QByteArray("1.0671");
 	appVerReal_=new double(appVerStr.toDouble());
 	currencyBStr_=new QByteArray("USD");
 	currencyBStrLow_=new QByteArray("usd");
