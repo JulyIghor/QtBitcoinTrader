@@ -462,7 +462,7 @@ void Exchange_MtGox::run()
 	connect(httpNoAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
-	secondTimer->start(300);
+	secondTimer->start(200);
 	exec();
 }
 

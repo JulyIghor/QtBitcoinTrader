@@ -1141,7 +1141,7 @@ void QtBitcoinTrader::calcButtonClicked()
 
 void QtBitcoinTrader::checkValidSellButtons()
 {
-	ui.sellBitcoinsButton->setEnabled(ui.sellTotalBtc->value()>=0.01&&ui.sellTotalBtc->value()<=ui.accountBTC->value());
+	ui.sellBitcoinsButton->setEnabled(ui.sellTotalBtc->value()>=minTradeVolume&&ui.sellTotalBtc->value()<=ui.accountBTC->value());
 }
 
 void QtBitcoinTrader::sellPricePerCoinAsMarketPrice()
@@ -1322,7 +1322,7 @@ void QtBitcoinTrader::buyPricePerCoinChanged(double)
 
 void QtBitcoinTrader::checkValidBuyButtons()
 {
-	ui.buyBitcoinsButton->setEnabled(ui.buyTotalBtc->value()>=0.01&&ui.buyTotalBtc->value()<=ui.accountUSD->value());
+	ui.buyBitcoinsButton->setEnabled(ui.buyTotalBtc->value()>=minTradeVolume&&ui.buyTotalSpend->value()<=ui.accountUSD->value());
 }
 
 void QtBitcoinTrader::cacheFirstRowGuid()
