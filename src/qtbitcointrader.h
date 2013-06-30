@@ -25,8 +25,6 @@ public:
 	QString numFromDouble(const double &value);
 	int usdDecimals;
 	int priceDecimals;
-	double minTradeVolume;
-	double minTradePrice;
 
 	QString upArrow;
 	QString downArrow;

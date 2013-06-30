@@ -316,6 +316,9 @@
            <property name="accessibleName">
             <string>BTC</string>
            </property>
+           <property name="accessibleDescription">
+            <string>CAN_BE_ZERO</string>
+           </property>
            <property name="prefix">
             <string/>
            </property>
@@ -323,7 +326,7 @@
             <number>8</number>
            </property>
            <property name="minimum">
-            <double>0.010000000000000</double>
+            <double>0.000000000000000</double>
            </property>
            <property name="maximum">
             <double>999999999.000000000000000</double>
@@ -693,6 +696,9 @@
           <property name="accessibleName">
            <string>PRICE</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="prefix">
            <string/>
           </property>
@@ -700,7 +706,7 @@
            <number>5</number>
           </property>
           <property name="minimum">
-           <double>0.010000000000000</double>
+           <double>0.000000000000000</double>
           </property>
           <property name="maximum">
            <double>999999999.000000000000000</double>
@@ -769,6 +775,9 @@
              <property name="accessibleName">
               <string>PRICE</string>
              </property>
+             <property name="accessibleDescription">
+              <string>CAN_BE_ZERO</string>
+             </property>
              <property name="styleSheet">
               <string notr="true"/>
              </property>
@@ -779,7 +788,7 @@
               <number>5</number>
              </property>
              <property name="minimum">
-              <double>0.010000000000000</double>
+              <double>0.000000000000000</double>
              </property>
              <property name="maximum">
               <double>999999999.000000000000000</double>

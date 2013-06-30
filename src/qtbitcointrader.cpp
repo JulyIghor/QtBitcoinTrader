@@ -1141,7 +1141,7 @@ void QtBitcoinTrader::calcButtonClicked()
 
 void QtBitcoinTrader::checkValidSellButtons()
 {
-	ui.sellBitcoinsButton->setEnabled(ui.sellTotalBtc->value()>=minTradeVolume&&ui.sellTotalBtc->value()<=ui.accountBTC->value());
+	ui.sellBitcoinsButton->setEnabled(ui.sellTotalBtc->value()>=minTradeVolume&&ui.sellTotalBtc->value()<=ui.accountBTC->value()&&ui.sellTotalBtc->value()>0.0);
 }
 
 void QtBitcoinTrader::sellPricePerCoinAsMarketPrice()
@@ -1322,7 +1322,7 @@ void QtBitcoinTrader::buyPricePerCoinChanged(double)
 
 void QtBitcoinTrader::checkValidBuyButtons()
 {
-	ui.buyBitcoinsButton->setEnabled(ui.buyTotalBtc->value()>=minTradeVolume&&ui.buyTotalSpend->value()<=ui.accountUSD->value());
+	ui.buyBitcoinsButton->setEnabled(ui.buyTotalBtc->value()>=minTradeVolume&&ui.buyTotalSpend->value()<=ui.accountUSD->value()&&ui.buyTotalSpend->value()>0.0);
 }
 
 void QtBitcoinTrader::cacheFirstRowGuid()
@@ -1738,7 +1738,7 @@ void QtBitcoinTrader::checkAndExecuteRule(QList<RuleHolder> *ruleHolder, double 
 					if(priceToExec==-8.0)priceToExec=priceToExec;
 				}			
 
-				if(ruleBtc>=0.01)
+				if(ruleBtc>=minTradeVolume)
 				{
 				if(isBuying)emit apiBuy(ruleBtc,priceToExec);
 				else emit apiSell(ruleBtc,priceToExec);

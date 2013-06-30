@@ -53,6 +53,8 @@ QString *timeFormat_;
 QString *exchangeName_;
 QByteArray *currencyRequest_;
 int *btcDecimals_;
+double *minTradePrice_;
+double *minTradeVolume_;
 
 void pickDefaultLangFile()
 {
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
 	
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.066");
+	appVerStr_=new QByteArray("1.067");
 	appVerReal_=new double(appVerStr.toDouble());
 	currencyBStr_=new QByteArray("USD");
 	currencyBStrLow_=new QByteArray("usd");
@@ -95,6 +97,8 @@ int main(int argc, char *argv[])
 	timeFormat_=new QString(QLocale().timeFormat(QLocale::ShortFormat));// "HH:mm:ss");
 	exchangeName_=new QString("Mt.Gox");
 	btcDecimals_=new int(8);
+	minTradePrice_=new double(0.01);
+	minTradeVolume_=new double(0.01);
 
 	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
 

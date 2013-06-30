@@ -25,7 +25,7 @@ RuleHolder::RuleHolder(int moreLessEqual, double price, double bitcoins, uint gu
 
 bool RuleHolder::isAchieved(double price)
 {
-	if(price<0.1)return false;
+	if(price<minTradePrice)return false;
 	if(waitingGoodLag)return true;
 	if(ruleMoreLessEqual==-1&&ruleCheckPrice>price)return true;
 	if(ruleMoreLessEqual==1&&ruleCheckPrice<price)return true;
