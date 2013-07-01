@@ -9,7 +9,7 @@
 
 #ifndef MAIN_H
 #define MAIN_H
-//#include <QDebug>////////////
+#include <QDebug>////////////
 
 #include "qtbitcointrader.h"
 #include "logthread.h"

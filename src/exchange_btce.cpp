@@ -504,7 +504,7 @@ void Exchange_BTCe::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(requestIdsAuth.key(8,0)==0)requestIdsAuth[sendToApi("",true,"method=TradeHistory&count=30&")]=8;
+	if(requestIdsAuth.key(8,0)==0)requestIdsAuth[sendToApi("",true,"method=TradeHistory&")]=8;
 	if(requestIdsAuth.key(10,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/fee",false)]=10;
 }
 

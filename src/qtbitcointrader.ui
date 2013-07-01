@@ -3279,7 +3279,7 @@ p, li { white-space: pre-wrap; }
              </font>
             </property>
             <property name="accessibleDescription">
-             <string>BTC_ICON</string>
+             <string>USD_ICON</string>
             </property>
             <property name="styleSheet">
              <string notr="true">color: darkgreen</string>
@@ -3431,7 +3431,7 @@ p, li { white-space: pre-wrap; }
              </font>
             </property>
             <property name="accessibleDescription">
-             <string>BTC_ICON</string>
+             <string>USD_ICON</string>
             </property>
             <property name="styleSheet">
              <string notr="true">color: darkgreen</string>
