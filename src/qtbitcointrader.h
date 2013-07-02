@@ -23,8 +23,6 @@ class QtBitcoinTrader : public QDialog
 
 public:
 	QString numFromDouble(const double &value);
-	int usdDecimals;
-	int priceDecimals;
 
 	QString upArrow;
 	QString downArrow;
@@ -39,8 +37,6 @@ public:
 	void fillAllBtcLabels(QWidget *par, QString curName);
 	void fillAllUsdLabels(QWidget *par, QString curName);
 
-	bool isValidSoftLag();
-
 	void checkAndExecuteRule(QList<RuleHolder> *ruleHolder, double price);
 
 	Ui::QtBitcoinTraderClass ui;
@@ -50,6 +46,7 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	bool isValidSoftLag;
 	void saveDetachedWindowsSettings(bool force=false);
 	QString windowTitleP;
 	QSystemTrayIcon *trayIcon;
@@ -66,6 +63,8 @@ private:
 	QList<RuleHolder> rulesMarketLowPrice;
 	QList<RuleHolder> rulesOrdersLastBuyPrice;
 	QList<RuleHolder> rulesOrdersLastSellPrice;
+	QList<RuleHolder> rulesBtcBalance;
+	QList<RuleHolder> rulesUsdBalance;
 
 	void addRuleByHolderToTable(RuleHolder);
 	int lastLoadedCurrency;
@@ -87,11 +86,9 @@ private:
 	QString clearData(QString data);
 
 	QString appDir;
-	bool authErrorOnce;
 	bool showingMessage;
 	void beep();
 
-	bool lastLagState;
 	void setRuleStateBuGuid(quint64 guid, int state);
 	void setRulesTableRowState(int row, int state);
 	void setOrdersTableRowState(int row, int state);
@@ -135,6 +132,8 @@ private:
 	bool isDetachedRules;
 	bool isDetachedCharts;
 public slots:
+	void setSoftLagValue(int);
+	void softLagTimeLineSlot(int);
 	void trayActivated(QSystemTrayIcon::ActivationReason);
 	void buttonMinimizeToTray();
 	void tabLogOrdersOnTop(bool);
@@ -202,7 +201,6 @@ public slots:
 
 	void currencyChanged(int);
 
-	void setSslEnabledSlot(bool);
 	void calcButtonClicked();
 	void checkUpdate();
 
@@ -247,9 +245,7 @@ public slots:
 	void sellTotalBtcToSellAllIn();
 	void sellTotalBtcToSellHalfIn();
 	void sellTotalBtcToSellChanged(double);
-	void lastSoftLagChanged(double);
 signals:
-	void setSslEnabled(bool);
 	void reloadOrders();
 	void cancelOrderByOid(QByteArray);
 	void apiSell(double btc, double price);

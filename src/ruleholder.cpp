@@ -25,7 +25,7 @@ RuleHolder::RuleHolder(int moreLessEqual, double price, double bitcoins, uint gu
 
 bool RuleHolder::isAchieved(double price)
 {
-	if(price<minTradePrice)return false;
+	if(rulePriceType!=8&&rulePriceType!=9&&price<minTradePrice)return false;
 	if(waitingGoodLag)return true;
 	if(ruleMoreLessEqual==-1&&ruleCheckPrice>price)return true;
 	if(ruleMoreLessEqual==1&&ruleCheckPrice<price)return true;
@@ -45,7 +45,10 @@ bool RuleHolder::isBuying()
 
 QString RuleHolder::getDescriptionString()
 {
-		QString priceStr=currencyBSign+" "+mainWindow.numFromDouble(ruleCheckPrice);
+		QString priceStr=mainWindow.numFromDouble(ruleCheckPrice);
+		if(rulePriceType==8)priceStr.prepend(currencyASign+" ");
+		else priceStr.prepend(currencyBSign+" ");
+
 		if(ruleMoreLessEqual==1)
 		{
 			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_MORE","If market last price goes more than %1").arg(priceStr);
@@ -55,6 +58,8 @@ QString RuleHolder::getDescriptionString()
 			if(rulePriceType==5)return julyTr("IF_MARKET_LOW_MORE","If market low price goes more than %1").arg(priceStr);
 			if(rulePriceType==6)return julyTr("IF_MARKET_LAST_BUY_MORE","If orders last buy price goes more than %1").arg(priceStr);
 			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_MORE","If orders last sell price goes more than %1").arg(priceStr);
+			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_MORE","If %1 balance goes more than %2").arg(QString(currencyAStr)).arg(priceStr);
+			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_MORE","If %1 balance goes more than %2").arg(QString(currencyBStr)).arg(priceStr);
 		}
 		if(ruleMoreLessEqual==-1)
 		{
@@ -65,6 +70,8 @@ QString RuleHolder::getDescriptionString()
 			if(rulePriceType==5)return julyTr("IF_MARKET_LOW_LESS","If market low price goes less than %1").arg(priceStr);
 			if(rulePriceType==6)return julyTr("IF_MARKET_LAST_BUY_LESS","If orders last buy price goes less than %1").arg(priceStr);
 			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_LESS","If orders last sell price goes less than %1").arg(priceStr);
+			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_LESS","If %1 balance goes less than %2").arg(QString(currencyAStr)).arg(priceStr);
+			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_LESS","If %1 balance goes less than %2").arg(QString(currencyBStr)).arg(priceStr);
 		}
 		if(ruleMoreLessEqual==0)
 		{
@@ -75,16 +82,17 @@ QString RuleHolder::getDescriptionString()
 			if(rulePriceType==5)return julyTr("IF_MARKET_LOW_EQUAL","If market low price equal to %1").arg(priceStr);
 			if(rulePriceType==6)return julyTr("IF_MARKET_LAST_BUY_EQUAL","If orders last buy price equal to %1").arg(priceStr);
 			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_EQUAL","If orders last sell price equal to %1").arg(priceStr);
+			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_EQUAL","If %1 balance equal to %2").arg(QString(currencyAStr)).arg(priceStr);
+			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_EQUAL","If %1 balance equal to %2").arg(QString(currencyBStr)).arg(priceStr);
 		}
 		return priceStr;
 }
 
-
 QString RuleHolder::getSellOrBuyString()
 {
 	if(ruleBtc==-5.0)return julyTr("CANCEL_ALL_ORDERS","Cancel All Orders");
-	if(buying)return julyTr("BUY","Buy");
-	return julyTr("SELL","Sell");
+	if(buying)return julyTr("ORDER_TYPE_BID","Buy");
+	return julyTr("ORDER_TYPE_ASK","Sell");
 }
 
 QString RuleHolder::getBitcoinsString()

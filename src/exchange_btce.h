@@ -11,7 +11,7 @@
 #define EXCHANGE_BTCE_H
 
 #include <QThread>
-#include <QHttp>
+#include <QNetworkAccessManager>
 #include <QTimer>
 #include <QTime>
 #include "qtbitcointrader.h"
@@ -21,17 +21,13 @@ class Exchange_BTCe : public QThread
 	Q_OBJECT
 
 public:
-	void setupApi(QtBitcoinTrader *, bool tickerOnly=false, bool sslEn=true);
+	void setupApi(QtBitcoinTrader *, bool tickerOnly=false);
 	Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey);
 	~Exchange_BTCe();
 
 private:
 	qint64 lastFetchTid;
-	bool sslEnabled;
 	bool tickerOnly;
-	int vipRequestCount;
-	void cancelPendingAuthRequests();
-	void cancelPendingNoAuthRequests();
 	bool isApiDown;
 	QByteArray lastHistory;
 	QByteArray lastOrders;
@@ -55,15 +51,16 @@ private:
 	QTime authRequestTime;
 	int apiDownCounter;
 	int secondPart;
-	QMap<int,int> requestIdsAuth;
-	QMap<int,int> requestIdsNoAuth;
-	QHttpRequestHeader headerAuth;
-	QHttpRequestHeader headerNoAuth;
 	QByteArray privateRestSign;
-	quint64 privateNonce;
-	int sendToApi(QByteArray method, bool auth=false, QByteArray commands=0, bool incNonce=true);
-	QHttp *httpAuth;
-	QHttp *httpNoAuth;
+	QByteArray privateRestKey;
+	quint32 privateNonce;
+
+	QMap<QNetworkReply*,int> requestsMap;
+	QMap<QNetworkReply*,qint32> timeStampMap;
+	void removeReplay(QNetworkReply*);
+	bool isReplayPending(int);
+
+	void sendToApi(int reqType, QByteArray method, bool auth=false, QByteArray commands=0, bool incNonce=true);
 	QTimer *secondTimer;
 	int lastOpenedOrders;
 	void run();
@@ -95,14 +92,12 @@ signals:
 	void accUsdBalanceChanged(double);
 	void apiDownChanged(bool);
 	void apiLagChanged(double);
-	void softLagChanged(double);
+	void softLagChanged(int);
 private slots:
-	void sslErrors(const QList<QSslError> &);
+	void requestFinished(QNetworkReply *);
+	void sslErrorsSlot(QNetworkReply *, const QList<QSslError> &);
 	void secondSlot();
-	void httpDoneAuth(int,bool);
-	void httpDoneNoAuth(int,bool);
 public slots:
-	void setSslEnabled(bool);
 	void clearValues();
 	void reloadOrders();
 	void getHistory(bool);

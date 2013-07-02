@@ -24,7 +24,6 @@ FeeCalculator::FeeCalculator()
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
-	mainWindow.fixAllChildButtonsAndLabels(this);
 #ifdef Q_OS_WIN
 	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
 #endif
@@ -45,13 +44,8 @@ FeeCalculator::FeeCalculator()
 	mainWindow.fillAllUsdLabels(this,currencyBStr);
 
 	julyTranslator->translateUi(this);
-	setWindowTitle(julyTr("FEE_CALCULATOR_TITLE","Calculator"));
 
-	mainWindow.fixAllChildButtonsAndLabels(this);
-
-	QSize minSizeHint=minimumSizeHint();
-	if(mainWindow.isValidSize(&minSizeHint))setMaximumSize(minimumSizeHint().width()+200,minimumSizeHint().height());
-
+	languageChanged();
 	connect(julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
 }
 
@@ -60,9 +54,25 @@ FeeCalculator::~FeeCalculator()
 
 }
 
+void FeeCalculator::setStaysOnTop(bool on)
+{
+	hide();
+	if(on)setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
+	else  setWindowFlags(Qt::WindowCloseButtonHint);
+	show();
+#ifdef Q_OS_WIN
+	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
+#endif
+}
+
 void FeeCalculator::languageChanged()
 {
 	julyTranslator->translateUi(this);
+	setWindowTitle(julyTr("FEE_CALCULATOR_TITLE","Calculator"));
+
+	mainWindow.fixAllChildButtonsAndLabels(this);
+	QSize minSizeHint=minimumSizeHint();
+	if(mainWindow.isValidSize(&minSizeHint))setMaximumSize(minimumSizeHint().width()+200,minimumSizeHint().height());
 }
 
 void FeeCalculator::setZeroProfitPrice()

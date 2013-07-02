@@ -9,7 +9,7 @@
 
 #ifndef MAIN_H
 #define MAIN_H
-#include <QDebug>////////////
+//#include <QDebug>////////////
 
 #include "qtbitcointrader.h"
 #include "logthread.h"
@@ -41,12 +41,22 @@
 #define localTimeFormat (*timeFormat_)
 #define exchangeName (*exchangeName_)
 #define btcDecimals (*btcDecimals_)
+#define usdDecimals (*usdDecimals_)
+#define priceDecimals (*priceDecimals_)
 #define minTradeVolume (*minTradeVolume_)
 #define minTradePrice (*minTradePrice_)
+#define currentTimeStamp (*currentTimeStamp_)
+#define httpRequestInterval (*httpRequestInterval_)
+#define httpRequestTimeout (*httpRequestTimeout_)
 
+extern int *httpRequestInterval_;
+extern int *httpRequestTimeout_;
+extern qint32 *currentTimeStamp_;
 extern double *minTradeVolume_;
 extern double *minTradePrice_;
 extern int *btcDecimals_;
+extern int *usdDecimals_;
+extern int *priceDecimals_;
 extern QByteArray *currencyRequest_;
 extern QString *exchangeName_;
 extern QString *timeFormat_;

@@ -34,7 +34,7 @@ JulySpinBoxFix::~JulySpinBoxFix()
 
 void JulySpinBoxFix::valueChanged(QString text)
 {
-	const QFontMetrics spinBoxFontMetrics(parentSpinBox->font());
+	static QFontMetrics spinBoxFontMetrics(parentSpinBox->font());
 	if(pMinimumWidth==0)
 		parentSpinBox->setMinimumWidth(spinBoxFontMetrics.width(text)+spinMargin);
 	else 

@@ -16,6 +16,7 @@
 #include <QUrl>
 #include <QFile>
 #include <QMessageBox>
+#include <QSettings>
 
 NewPasswordDialog::NewPasswordDialog()
 	: QDialog()
@@ -139,6 +140,9 @@ void NewPasswordDialog::updateIniFileName()
 	iniFileName=appDataDir+"QtBitcoinTrader.ini";
 	else
 	iniFileName=appDataDir+ui.profileNameEdit->text().toAscii()+".ini";
+
+	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+	settings.setValue("LastProfile",iniFileName);
 }
 
 QString NewPasswordDialog::selectedProfileName()

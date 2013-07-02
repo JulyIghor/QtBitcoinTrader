@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1160</width>
+    <width>1132</width>
     <height>749</height>
    </rect>
   </property>
@@ -905,7 +905,7 @@
            <string> sec</string>
           </property>
           <property name="decimals">
-           <number>4</number>
+           <number>3</number>
           </property>
           <property name="minimum">
            <double>0.000000000000000</double>
@@ -2583,7 +2583,7 @@ p, li { white-space: pre-wrap; }
                </font>
               </property>
               <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This feature is not available now.&lt;br/&gt;I'm still working on it.&lt;br/&gt;You will receive update notify at same time it released.&lt;br/&gt;Thank you for support and feedbacks!&lt;br/&gt;&lt;br/&gt;Feel free to contact me: &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;julyighor@gmail.com&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Эта функция пока в разработке.&lt;br/&gt;Я еще работаю над ней. Скоро увидите еще много обновлений.&lt;br/&gt;Спасибо за поддержку и отзывы!&lt;br/&gt;&lt;a href=&quot;https://sourceforge.net/projects/bitcointrader&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://sourceforge.net/projects/bitcointrader&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This feature is not available now.&lt;br/&gt;I'm still working on it.&lt;br/&gt;You will receive update notify at same time it released.&lt;br/&gt;Thank you for support and feedbacks!&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Эта функция пока в разработке.&lt;br/&gt;Я еще работаю над ней. Скоро увидите еще много обновлений.&lt;br/&gt;Спасибо за поддержку и отзывы!</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -4585,28 +4585,6 @@ p, li { white-space: pre-wrap; }
         <string>General</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_50">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="accessibleName">
-           <string>TR00049</string>
-          </property>
-          <property name="text">
-           <string>Security:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="openExternalLinks">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QComboBox" name="langComboBox">
           <property name="sizePolicy">
@@ -4639,23 +4617,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QCheckBox" name="sslCheck">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="accessibleName">
-           <string>TR00050</string>
-          </property>
-          <property name="text">
-           <string>Use SSL Socket</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="2">
+        <item row="1" column="0" colspan="2">
          <layout class="QHBoxLayout" name="horizontalLayout_17">
           <item>
            <widget class="QPushButton" name="buttonNewWindow">
@@ -4721,7 +4683,7 @@ p, li { white-space: pre-wrap; }
           </item>
          </layout>
         </item>
-        <item row="4" column="0" colspan="2">
+        <item row="3" column="0" colspan="2">
          <layout class="QHBoxLayout" name="horizontalLayout_16">
           <property name="spacing">
            <number>8</number>
@@ -4812,7 +4774,7 @@ p, li { white-space: pre-wrap; }
           </item>
          </layout>
         </item>
-        <item row="3" column="0" colspan="2">
+        <item row="2" column="0" colspan="2">
          <widget class="QPushButton" name="aboutTranslationButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -5101,22 +5063,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>1</x>
      <y>583</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>lastUpdate</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>lastSoftLagChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1219</x>
-     <y>83</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>669</x>
-     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -6044,22 +5990,6 @@ p, li { white-space: pre-wrap; }
     </hint>
     <hint type="destinationlabel">
      <x>1020</x>
-     <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>lastUpdate</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>fixWindowMinimumSize()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1219</x>
-     <y>83</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>996</x>
      <y>0</y>
     </hint>
    </hints>

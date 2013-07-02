@@ -6,32 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>781</width>
-    <height>167</height>
+    <width>791</width>
+    <height>181</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Mt.Gox Fee Calculator</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
-    <number>4</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>4</number>
-   </property>
-   <property name="bottomMargin">
-    <number>4</number>
-   </property>
-   <property name="horizontalSpacing">
-    <number>2</number>
-   </property>
-   <property name="verticalSpacing">
-    <number>4</number>
-   </property>
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
@@ -1463,6 +1445,16 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="4" colspan="3">
+       <widget class="QCheckBox" name="widgetStaysOnTop">
+        <property name="accessibleName">
+         <string>STAYS_ON_TOP</string>
+        </property>
+        <property name="text">
+         <string>Stay on Top</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -1499,7 +1491,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>146</x>
-     <y>-21</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1515,7 +1507,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>239</x>
-     <y>-60</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1531,7 +1523,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>408</x>
-     <y>-87</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1547,7 +1539,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
-     <y>-109</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1562,7 +1554,7 @@
      <y>102</y>
     </hint>
     <hint type="destinationlabel">
-     <x>-74</x>
+     <x>0</x>
      <y>106</y>
     </hint>
    </hints>
@@ -1578,7 +1570,7 @@
      <y>103</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1085</x>
+     <x>790</x>
      <y>113</y>
     </hint>
    </hints>
@@ -1594,8 +1586,8 @@
      <y>99</y>
     </hint>
     <hint type="destinationlabel">
-     <x>807</x>
-     <y>211</y>
+     <x>790</x>
+     <y>180</y>
     </hint>
    </hints>
   </connection>
@@ -1611,7 +1603,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>149</x>
-     <y>229</y>
+     <y>180</y>
     </hint>
    </hints>
   </connection>
@@ -1627,7 +1619,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>710</x>
-     <y>209</y>
+     <y>180</y>
     </hint>
    </hints>
   </connection>
@@ -1643,7 +1635,23 @@
     </hint>
     <hint type="destinationlabel">
      <x>307</x>
-     <y>221</y>
+     <y>180</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>widgetStaysOnTop</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FeeCalculator</receiver>
+   <slot>setStaysOnTop(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>395</x>
+     <y>146</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>410</x>
+     <y>242</y>
     </hint>
    </hints>
   </connection>
@@ -1659,5 +1667,6 @@
   <slot>feeChanged(double)</slot>
   <slot>profitLossChanged(double)</slot>
   <slot>setZeroProfitPrice()</slot>
+  <slot>setStaysOnTop(bool)</slot>
  </slots>
 </ui>

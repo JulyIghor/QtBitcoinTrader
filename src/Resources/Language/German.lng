@@ -91,7 +91,6 @@ CheckBox_CHECK_RULE_PRICE=Preis der Bedingung
 CheckBox_CONCURRENT_MODE=Alle Bedingungen simultan prüfen
 CheckBox_SEQUENTIAL_MODE=Bedingungen sequenziell prüfen
 CheckBox_STAYS_ON_TOP=Im Vordergrund bleiben
-CheckBox_TR00050=Benutze SSL Verbindung
 CheckBox_TR00057=Markt: Letzter Preis
 CheckBox_TR00058=Markt: Kaufpreis
 CheckBox_TR00059=Markt: Verkaufspreis
@@ -244,3 +243,9 @@ String_LANGUAGE_AUTHOR=Diabolicus<br><a href="mailto:spirou666@gmx.de">spirou666
 String_LANGUAGE_LOCALE=de
 String_YES=Yes
 String_NO=No
+String_IF_BALANCE_GOES_MORE=If %1 balance goes more than %2
+String_IF_BALANCE_GOES_LESS=If %1 balance goes less than %2
+String_IF_BALANCE_GOES_EQUAL=If %1 balance equal to %2
+String_IF_BALANCE=%1 Balance
+String_CANCEL_ALL_ORDERS=Cancel All Orders
+String_NOT_USED=Not Used

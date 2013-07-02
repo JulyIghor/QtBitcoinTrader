@@ -45,7 +45,7 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 
 	ui.exactPriceValue->setVisible(false);
 	ui.label_53->setVisible(false);//sorry for that label name
-
+	ui.priceBtcIcon->setVisible(false);
 	languageChanged();
 	setMinimumSize(size());
 	setMaximumSize(width()+100,height());
@@ -61,6 +61,9 @@ AddRuleWindow::~AddRuleWindow()
 void AddRuleWindow::languageChanged()
 {
 	julyTranslator->translateUi(this);
+	ui.checkBtcBalance->setText(julyTr("IF_BALANCE","%1 Balance").arg(QString(currencyAStr)));
+	ui.checkUsdBalance->setText(julyTr("IF_BALANCE","%1 Balance").arg(QString(currencyBStr)));
+
 	mainWindow.fixAllChildButtonsAndLabels(this);
 }
 
@@ -79,6 +82,8 @@ bool AddRuleWindow::checkIsValidRule()
 	if(ui.checkMarketLow->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.marketLow->value()))return false;
 	if(ui.checkOrdersLastBuyPrice->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ordersLastBuyPrice->value()))return false;
 	if(ui.checkOrdersLastSellPrice->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ordersLastSellPrice->value()))return false;
+	if(ui.checkBtcBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.accountBTC->value()))return false;
+	if(ui.checkUsdBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.accountUSD->value()))return false;
 	return true;
 }
 
@@ -110,6 +115,8 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder holder)
 	case 5: ui.checkMarketLow->setChecked(true);break;
 	case 6: ui.checkOrdersLastBuyPrice->setChecked(true);break;
 	case 7: ui.checkOrdersLastSellPrice->setChecked(true);break;
+	case 8: ui.checkBtcBalance->setChecked(true);break;
+	case 9: ui.checkUsdBalance->setChecked(true);break;
 	default: break;
 	}
 
@@ -191,6 +198,8 @@ RuleHolder AddRuleWindow::getRuleHolder()
 	if(ui.checkMarketLow->isChecked())ruleSellType=5;
 	if(ui.checkOrdersLastBuyPrice->isChecked())ruleSellType=6;
 	if(ui.checkOrdersLastSellPrice->isChecked())ruleSellType=7;
+	if(ui.checkBtcBalance->isChecked())ruleSellType=8;
+	if(ui.checkUsdBalance->isChecked())ruleSellType=9;
 
 	static uint ruleGuid=1;
 	return RuleHolder(moreLessEqual, ui.thanValue->value(), btcValue, ++ruleGuid, isBuying, ruleSellPrice, ruleSellType);
@@ -199,4 +208,33 @@ RuleHolder AddRuleWindow::getRuleHolder()
 void AddRuleWindow::setOrdersBackInvisible(bool on)
 {
 	ui.sellBack->setEnabled(!on);
+}
+
+void AddRuleWindow::ifChanged(bool on)
+{
+	if(!on)return;
+
+	ui.priceBtcIcon->setVisible(ui.checkBtcBalance->isChecked());
+	ui.priceUsdIcon->setVisible(!ui.priceUsdIcon->isVisible());
+
+	if(ui.checkBtcBalance->isChecked())
+	{
+		ui.thanValue->setDecimals(btcDecimals);
+		ui.thanValue->setValue(mainWindow.ui.accountBTC->value());
+	}
+	else
+	if(ui.checkUsdBalance->isChecked())
+	{
+		ui.thanValue->setDecimals(usdDecimals);
+		ui.thanValue->setValue(mainWindow.ui.accountUSD->value());
+	}
+	else
+	{
+		ui.thanValue->setDecimals(priceDecimals);
+		ui.thanValue->setValue(mainWindow.ui.marketLast->value());
+	}
+	double oldValue=ui.thanValue->value();
+	ui.thanValue->setValue(0.123456789);
+	ui.thanValue->setValue(oldValue);
+	setMinimumSize(minimumSizeHint());
 }

@@ -29,6 +29,7 @@ private:
 public slots:
 	void languageChanged();
 public slots:
+	void ifChanged(bool);
 	void setOrdersBackInvisible(bool);
 	void amountChanged();
 	void buttonAddRule();

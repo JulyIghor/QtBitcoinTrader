@@ -12,20 +12,15 @@
 #include "main.h"
 #include <QDateTime>
 #include <QSslError>
+#include <QNetworkReply>
 
 Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()
 {
 	isApiDown=false;
-	sslEnabled=true;
 	tickerOnly=false;
-	vipRequestCount=0;
 	privateRestSign=pRestSign;
-	headerNoAuth.setValue("Host","btc-e.com");
-	headerNoAuth.setValue("User-Agent","Qt Bitcoin Trader v"+appVerStr);
-	headerNoAuth.setContentType("application/x-www-form-urlencoded");
-	headerAuth=headerNoAuth;
-	headerAuth.setValue("Key",pRestKey);
+	privateRestKey=pRestKey;
 	moveToThread(this);
 	softLagTime.restart();
 	authRequestTime.restart();
@@ -37,13 +32,11 @@ Exchange_BTCe::~Exchange_BTCe()
 	if(isLogEnabled)logThread->writeLog("BTC-E API Thread Deleted");
 }
 
-void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool sslEn)
+void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 {
-	sslEnabled=sslEn;
 	tickerOnly=tickOnly;
 	if(!tickerOnly)
 	{
-		connect(mainClass,SIGNAL(setSslEnabled(bool)),this,SLOT(setSslEnabled(bool)));
 		connect(mainClass,SIGNAL(reloadOrders()),this,SLOT(reloadOrders()));
 		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
 		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
@@ -65,7 +58,7 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool ssl
 	connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));
 	connect(this,SIGNAL(firstAccInfo()),mainClass,SLOT(firstAccInfo()));
 	connect(this,SIGNAL(apiLagChanged(double)),mainClass->ui.lagValue,SLOT(setValue(double)));
-	connect(this,SIGNAL(softLagChanged(double)),mainClass->ui.lastUpdate,SLOT(setValue(double)));
+	connect(this,SIGNAL(softLagChanged(int)),mainClass,SLOT(setSoftLagValue(int)));
 	connect(this,SIGNAL(accFeeChanged(double)),mainClass->ui.accountFee,SLOT(setValue(double)));
 	connect(this,SIGNAL(accBtcBalanceChanged(double)),mainClass->ui.accountBTC,SLOT(setValue(double)));
 	connect(this,SIGNAL(accUsdBalanceChanged(double)),mainClass->ui.accountUSD,SLOT(setValue(double)));
@@ -80,27 +73,6 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly, bool ssl
 	connect(this,SIGNAL(addLastTrade(double, qint64, double, QByteArray, bool)),mainClass,SLOT(addLastTrade(double, qint64, double, QByteArray, bool)));
 
 	start();
-}
-
-void Exchange_BTCe::setSslEnabled(bool on)
-{
-	sslEnabled=on;
-	clearValues();
-	requestIdsNoAuth.clear();
-	requestIdsAuth.clear();
-	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
-	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
-
-	if(sslEnabled)
-	{
-		httpAuth->setHost("btc-e.com",QHttp::ConnectionModeHttps);
-		httpNoAuth->setHost("btc-e.com",QHttp::ConnectionModeHttps);
-	}
-	else
-	{
-		httpAuth->setHost("btc-e.com",QHttp::ConnectionModeHttp);
-		httpNoAuth->setHost("btc-e.com",QHttp::ConnectionModeHttp);
-	}
 }
 
 void Exchange_BTCe::clearValues()
@@ -122,10 +94,7 @@ void Exchange_BTCe::clearValues()
 	apiDownCounter=0;
 	lastHistory.clear();
 	lastOrders.clear();
-	requestIdsAuth.clear();
-	requestIdsNoAuth.clear();
-	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
-	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
+
 	lastFetchTid=QDateTime::currentDateTime().addSecs(-600).toTime_t();
 	lastFetchTid=-lastFetchTid;
 }
@@ -143,30 +112,52 @@ QByteArray Exchange_BTCe::getMidData(QString a, QString b,QByteArray *data)
 	return rez;
 }
 
-void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
+void Exchange_BTCe::requestFinished(QNetworkReply *replay)
 {
-	int reqType=requestIdsNoAuth.value(cId,0);
-	if(reqType>0)requestIdsNoAuth.remove(cId);else return;
-	if(error)return;
+	QByteArray data=replay->readAll();
+	int reqType=requestsMap.value(replay,0);
+	bool isAuthRequest=reqType>199;
 
-	QByteArray data=httpNoAuth->readAll();
-	{
 	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
 
-	if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
+	if(isAuthRequest)
 	{
-		isApiDown=true;
-		emit apiDownChanged(isApiDown);
+		bool lastApiDown=isApiDown;
+		if(isUnknownRequest)
+		{
+			if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
+		}
+		else
+		{
+			if(isLogEnabled)logThread->writeLog("AuthData: "+data);
+			authRequestTime.restart();
+			apiDownCounter=0;
+			isApiDown=false;
+		}
+		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
 	}
-	if(isUnknownRequest)return;
+	else
+	{
+		if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
+		{
+			if(++apiDownCounter>3)
+			{
+				isApiDown=true;
+				emit apiDownChanged(isApiDown);
+			}
+		}
 	}
 
-	emit softLagChanged(softLagTime.elapsed()/1000.0);
+	if(isUnknownRequest)return;
+
+	emit softLagChanged(softLagTime.elapsed());
 	softLagTime.restart();
+
+	bool success=getMidData("success\":",",",&data)!="0";
 
 	switch(reqType)
 	{
-	case 3: //ticker
+	case 103: //ticker
 		{
 			QByteArray tickerHigh=getMidData("high\":",",\"",&data);
 			if(!tickerHigh.isEmpty())
@@ -221,7 +212,7 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 			}
 		}
 		break;//ticker
-	case 9: //trades
+	case 109: //trades
 		{
 			if(data.size()<10)break;
 			QStringList tradeList=QString(data).split("},{");
@@ -236,7 +227,7 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 			}
 		}
 		break;//trades
-	case 10: //Fee
+	case 110: //Fee
 		{
 			QByteArray tradeFee=getMidData("trade\":","}",&data);
 			if(!tradeFee.isEmpty())
@@ -247,229 +238,189 @@ void Exchange_BTCe::httpDoneNoAuth(int cId, bool error)
 			}
 		}
 		break;// Fee
-	}
-}
-
-void Exchange_BTCe::httpDoneAuth(int cId, bool error)
-{
-	int reqType=requestIdsAuth.value(cId,0);
-	bool isVipRequest=reqType>=5&&reqType<=7;
-	if(vipRequestCount&&isVipRequest)vipRequestCount--;
-	if(reqType>0)requestIdsAuth.remove(cId);else return;
-	if(error)return;
-
-	QByteArray data=httpAuth->readAll();
-	if(isLogEnabled)logThread->writeLog("AuthData: "+data);
-	{
-		bool lastApiDown=isApiDown;
-		bool isUnknownRequest=data.size()==0||data.at(0)=='<';
-		if(isUnknownRequest)
+	case 202: //info
 		{
-			if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
-		}
-		else {apiDownCounter=0;isApiDown=false;}
-		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
-		if(isUnknownRequest)return;
-	}
-	authRequestTime.restart();
-
-	emit softLagChanged(softLagTime.elapsed()/1000.0);
-	softLagTime.restart();
-
-	bool success=getMidData("success\":",",",&data)=="1";
-	
-		switch(reqType)
-		{
-		case 2: //info
+			if(!success)break;
+			QByteArray btcBalance=getMidData(currencyAStrLow+"\":",",\"",&data);
+			if(!btcBalance.isEmpty())
 			{
-				if(!success)return;
-				QByteArray btcBalance=getMidData(currencyAStrLow+"\":",",\"",&data);
-				if(!btcBalance.isEmpty())
-				{
-					double newBtcBalance=btcBalance.toDouble();
-					if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(newBtcBalance);
-					lastBtcBalance=newBtcBalance;
-				}
+				double newBtcBalance=btcBalance.toDouble();
+				if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(newBtcBalance);
+				lastBtcBalance=newBtcBalance;
+			}
 
-				QByteArray usdBalance=getMidData("\""+currencyBStrLow+"\":",",\"",&data);
-				if(!usdBalance.isEmpty())
-				{
-					double newUsdBalance=usdBalance.toDouble();
-					if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(newUsdBalance);
-					lastUsdBalance=newUsdBalance;
-				}
+			QByteArray usdBalance=getMidData("\""+currencyBStrLow+"\":",",\"",&data);
+			if(!usdBalance.isEmpty())
+			{
+				double newUsdBalance=usdBalance.toDouble();
+				if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(newUsdBalance);
+				lastUsdBalance=newUsdBalance;
+			}
 
-				int openedOrders=getMidData("open_orders\":",",\"",&data).toInt();
-				if(openedOrders==0&&lastOpenedOrders){lastOrders.clear(); emit ordersIsEmpty();}
-				lastOpenedOrders=openedOrders;
+			int openedOrders=getMidData("open_orders\":",",\"",&data).toInt();
+			if(openedOrders==0&&lastOpenedOrders){lastOrders.clear(); emit ordersIsEmpty();}
+			lastOpenedOrders=openedOrders;
 
-				if(isFirstAccInfo)
+			if(isFirstAccInfo)
+			{
+				QByteArray rights=getMidData("rights\":{","}",&data);
+				if(!rights.isEmpty())
 				{
-					QByteArray rights=getMidData("rights\":{","}",&data);
-					if(!rights.isEmpty())
-					{
 					bool isRightsGood=rights.contains("info\":1")&&rights.contains("trade\":1");
 					if(!isRightsGood)emit identificationRequired("invalid_rights");
 					emit firstAccInfo();
 					isFirstAccInfo=false;
-					}
 				}
 			}
-			break;//info
-		case 4://orders
-			if(!success)return;
-			if(data.size()<=30)break;
-			if(lastOrders!=data)
-			{
-				lastOrders=data;
-				data.replace("return\":{\"","},\"");
-				QString rezultData;
-				QStringList ordersList=QString(data).split("},\"");
-				if(ordersList.count())ordersList.removeFirst();
-				if(ordersList.count()==0)return;
-
-				for(int n=0;n<ordersList.count();n++)
-				{//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign
-					QByteArray currentOrder="{"+ordersList.at(n).toAscii()+"}";
-					QByteArray itemStatus;
-					int itemStatusInt=getMidData("status\":","}",&currentOrder).toInt();
-					switch(itemStatusInt)
-					{
-					case 0: itemStatus="open"; break;
-					case 1: itemStatus="PENDING1"; break;
-					case 2: itemStatus="INVALID2"; break;
-					case 3: itemStatus="CANCELED3"; break;
-					default: itemStatus="INVALID4";
-					}
-					QByteArray tradeType=getMidData("type\":\"","\",\"",&currentOrder);
-					if(tradeType=="buy")tradeType="bid";
-					else if(tradeType=="sell")tradeType="ask";
-					QStringList currencyPair=QString(getMidData("pair\":\"","\",\"",&currentOrder)).toUpper().split("_");
-					if(currencyPair.count()!=2)continue;
-					rezultData.append(getMidData("{","\":{",&currentOrder)+";");
-					rezultData.append(getMidData("timestamp_created\":",",\"",&currentOrder)+";");
-					rezultData.append(tradeType+";");
-					rezultData.append(itemStatus+";");
-					rezultData.append(getMidData("amount\":",",\"",&currentOrder)+";");
-					rezultData.append(getMidData("rate\":",",\"",&currentOrder)+";");
-					rezultData.append(currencySignMap->value(currencyPair.last().toAscii(),"$")+";");
-					rezultData.append(currencySignMap->value(currencyPair.first().toAscii(),"$")+"\n");
-				}
-				emit ordersChanged(rezultData);
-			}
-			break;//orders
-		case 5: //order/cancel
-			if(success)
-			{
-				QByteArray oid=getMidData("order_id\":",",\"",&data);
-				if(!oid.isEmpty())emit orderCanceled(oid);
-			}
-			break;//order/cancel
-		case 6: if(isLogEnabled)logThread->writeLog("Buy OK: "+data);break;//order/buy
-		case 7: if(isLogEnabled)logThread->writeLog("Sell OK: "+data);break;//order/sell
-		case 8: ///history
-			if(!success)return;
-			if(lastHistory!=data)
-			{
-				double lastBuyPrice=0.0;
-				double lastSellPrice=0.0;
-				QString newLog(data);
-				QStringList dataList=newLog.split("\":{\"");
-				if(dataList.count())dataList.removeFirst();
-				if(dataList.count())dataList.removeFirst();
-				if(dataList.count()==0)return;
-				newLog.clear();
-				for(int n=0;n<dataList.count();n++)
-				{
-					QByteArray curLog(dataList.at(n).toAscii());
-					QByteArray logType=getMidData("type\":\"","\",\"",&curLog);
-					int logTypeInt=0;
-					if(logType=="sell"){logTypeInt=1;logType="<font color=\"red\">("+julyTr("LOG_SOLD","Sold").toAscii()+")</font>";}
-					else 
-						if(logType=="buy"){logTypeInt=2;logType="<font color=\"blue\">("+julyTr("LOG_BOUGHT","Bought").toAscii()+")</font>";}
-							if(logTypeInt)
-								{
-									QByteArray logValue=getMidData("amount\":",",\"",&curLog);
-									QByteArray logDate=getMidData("timestamp\":","}",&curLog);
-									QByteArray priceValue=getMidData("rate\":",",\"",&curLog);
-									QStringList currencyPair;
-									if((logTypeInt==1||logTypeInt==2)&&(lastSellPrice==0.0||lastBuyPrice==0.0))
-									{
-										currencyPair=QString(getMidData("pair\":\"","\",\"",&curLog)).toUpper().split("_");
-										if(currencyPair.count()!=2||currencyPair.first().isEmpty()||currencyPair.last().isEmpty())continue;
-										if(lastSellPrice==0.0&&logTypeInt==1)
-										{
-											lastSellPrice=priceValue.toDouble();
-											emit accLastSellChanged(currencyPair.last().toAscii(),lastSellPrice);
-										}
-										if(lastBuyPrice==0.0&&logTypeInt==2)
-										{
-											lastBuyPrice=priceValue.toDouble();
-											emit accLastBuyChanged(currencyPair.last().toAscii(),lastBuyPrice);
-										}
-									}
-									if(currencyPair.count()!=2)continue;
-									QString priceText="<font color=\"darkgreen\">"+currencySignMap->value(currencyPair.last().toAscii(),"USD")+" "+priceValue+"</font>";
-									newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString(localDateTimeFormat).toAscii()+"</font>&nbsp;");
-									newLog.append("<font color=\"#996515\">");
-									newLog.append(currencySignMap->value(currencyPair.first().toAscii(),"BTC"));
-									newLog.append(" "+logValue+"</font> "+julyTr("AT"," at %1").arg(priceText).toAscii()+" "+logType+"<br>");
-								}
-				}
-				emit ordersLogChanged(newLog);
-				lastHistory=data;
-			}
-			break;//money/wallet/history
-		default: break;
 		}
-	
-	if(!success)
+		break;//info
+	case 204://orders
+		if(data.size()<=30)break;
+		if(lastOrders!=data)
+		{
+			lastOrders=data;
+			if(!success&&data.contains("no orders"))
+			{
+				success=true;
+				emit ordersIsEmpty();
+				break;
+			}
+			data.replace("return\":{\"","},\"");
+			QString rezultData;
+			QStringList ordersList=QString(data).split("},\"");
+			if(ordersList.count())ordersList.removeFirst();
+			if(ordersList.count()==0)return;
+
+			for(int n=0;n<ordersList.count();n++)
+			{//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign
+				QByteArray currentOrder="{"+ordersList.at(n).toAscii()+"}";
+				QByteArray itemStatus;
+				int itemStatusInt=getMidData("status\":","}",&currentOrder).toInt();
+				switch(itemStatusInt)
+				{
+				case 0: itemStatus="open"; break;
+				case 1: itemStatus="PENDING1"; break;
+				case 2: itemStatus="INVALID2"; break;
+				case 3: itemStatus="CANCELED3"; break;
+				default: itemStatus="INVALID4";
+				}
+				QByteArray tradeType=getMidData("type\":\"","\",\"",&currentOrder);
+				if(tradeType=="buy")tradeType="bid";
+				else if(tradeType=="sell")tradeType="ask";
+				QStringList currencyPair=QString(getMidData("pair\":\"","\",\"",&currentOrder)).toUpper().split("_");
+				if(currencyPair.count()!=2)continue;
+				rezultData.append(getMidData("{","\":{",&currentOrder)+";");
+				rezultData.append(getMidData("timestamp_created\":",",\"",&currentOrder)+";");
+				rezultData.append(tradeType+";");
+				rezultData.append(itemStatus+";");
+				rezultData.append(getMidData("amount\":",",\"",&currentOrder)+";");
+				rezultData.append(getMidData("rate\":",",\"",&currentOrder)+";");
+				rezultData.append(currencySignMap->value(currencyPair.last().toAscii(),"$")+";");
+				rezultData.append(currencySignMap->value(currencyPair.first().toAscii(),"$")+"\n");
+			}
+			emit ordersChanged(rezultData);
+		}
+		break;//orders
+	case 305: //order/cancel
+		if(success)
+		{
+			QByteArray oid=getMidData("order_id\":",",\"",&data);
+			if(!oid.isEmpty())emit orderCanceled(oid);
+		}
+		break;//order/cancel
+	case 306: if(isLogEnabled)logThread->writeLog("Buy OK: "+data);break;//order/buy
+	case 307: if(isLogEnabled)logThread->writeLog("Sell OK: "+data);break;//order/sell
+	case 208: ///history
+		if(!success)break;
+		if(lastHistory!=data)
+		{
+			double lastBuyPrice=0.0;
+			double lastSellPrice=0.0;
+			QString newLog(data);
+			QStringList dataList=newLog.split("\":{\"");
+			if(dataList.count())dataList.removeFirst();
+			if(dataList.count())dataList.removeFirst();
+			if(dataList.count()==0)return;
+			newLog.clear();
+			for(int n=0;n<dataList.count();n++)
+			{
+				QByteArray curLog(dataList.at(n).toAscii());
+				QByteArray logType=getMidData("type\":\"","\",\"",&curLog);
+				int logTypeInt=0;
+				if(logType=="sell"){logTypeInt=1;logType="<font color=\"red\">("+julyTr("LOG_SOLD","Sold").toAscii()+")</font>";}
+				else 
+					if(logType=="buy"){logTypeInt=2;logType="<font color=\"blue\">("+julyTr("LOG_BOUGHT","Bought").toAscii()+")</font>";}
+					if(logTypeInt)
+					{
+						QByteArray logValue=getMidData("amount\":",",\"",&curLog);
+						QByteArray logDate=getMidData("timestamp\":","}",&curLog);
+						QByteArray priceValue=getMidData("rate\":",",\"",&curLog);
+						QStringList currencyPair;
+						if((logTypeInt==1||logTypeInt==2)&&(lastSellPrice==0.0||lastBuyPrice==0.0))
+						{
+							currencyPair=QString(getMidData("pair\":\"","\",\"",&curLog)).toUpper().split("_");
+							if(currencyPair.count()!=2||currencyPair.first().isEmpty()||currencyPair.last().isEmpty())continue;
+							if(lastSellPrice==0.0&&logTypeInt==1)
+							{
+								lastSellPrice=priceValue.toDouble();
+								emit accLastSellChanged(currencyPair.last().toAscii(),lastSellPrice);
+							}
+							if(lastBuyPrice==0.0&&logTypeInt==2)
+							{
+								lastBuyPrice=priceValue.toDouble();
+								emit accLastBuyChanged(currencyPair.last().toAscii(),lastBuyPrice);
+							}
+						}
+						if(currencyPair.count()!=2)continue;
+						QString priceText="<font color=\"darkgreen\">"+currencySignMap->value(currencyPair.last().toAscii(),"USD")+" "+priceValue+"</font>";
+						newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString(localDateTimeFormat).toAscii()+"</font>&nbsp;");
+						newLog.append("<font color=\"#996515\">");
+						newLog.append(currencySignMap->value(currencyPair.first().toAscii(),"BTC"));
+						newLog.append(" "+logValue+"</font> "+julyTr("AT"," at %1").arg(priceText).toAscii()+" "+logType+"<br>");
+					}
+			}
+			emit ordersLogChanged(newLog);
+			lastHistory=data;
+		}
+		break;//money/wallet/history
+	default: break;
+	}
+
+	if(isAuthRequest&&!success)
 	{
 		QString errorString=getMidData("error\":\"","\"",&data);
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
-		if(!isVipRequest)emit identificationRequired(errorString);
+		if(reqType<300)
+		{
+			static int invalidRequestCount=0;
+			if(invalidRequestCount++>5)
+				emit identificationRequired(errorString+"<br>"+replay->url().toString().toAscii());
+		}
 	}
+	removeReplay(replay);
 }
 
 void Exchange_BTCe::run()
 {
 	if(isLogEnabled)logThread->writeLog("BTC-e API Thread Started");
-	if(sslEnabled)
-	{
-		httpAuth=new QHttp("btc-e.com",QHttp::ConnectionModeHttps);
-		httpNoAuth=new QHttp("btc-e.com",QHttp::ConnectionModeHttps);
-	}
-	else
-	{
-		httpAuth=new QHttp("btc-e.com",QHttp::ConnectionModeHttp);
-		httpNoAuth=new QHttp("btc-e.com",QHttp::ConnectionModeHttp);
-	}
 
 	clearValues();
 
 	secondTimer=new QTimer;
-	connect(httpAuth,SIGNAL(requestFinished(int,bool)),this,SLOT(httpDoneAuth(int,bool)));
-	connect(httpNoAuth,SIGNAL(requestFinished(int,bool)),this,SLOT(httpDoneNoAuth(int,bool)));
-	connect(httpAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
-	connect(httpNoAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
-
+	secondTimer->setSingleShot(true);
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
-	secondTimer->start(200);
+	secondSlot();
 	exec();
 }
 
-void Exchange_BTCe::cancelPendingAuthRequests()
+bool Exchange_BTCe::isReplayPending(int reqType)
 {
-	if(vipRequestCount)return;
-	if(httpAuth->hasPendingRequests())httpAuth->clearPendingRequests();
-	requestIdsAuth.clear();
-}
-
-void Exchange_BTCe::cancelPendingNoAuthRequests()
-{
-	if(httpNoAuth->hasPendingRequests())httpNoAuth->clearPendingRequests();
-	requestIdsNoAuth.clear();
+	QNetworkReply *pendingReplay=requestsMap.key(reqType,0);
+	if(pendingReplay==0)return false;
+	if(timeStampMap.value(pendingReplay,0)+httpRequestTimeout>currentTimeStamp)return true;
+	removeReplay(pendingReplay);
+	return false;
 }
 
 void Exchange_BTCe::reloadOrders()
@@ -479,40 +430,44 @@ void Exchange_BTCe::reloadOrders()
 
 void Exchange_BTCe::secondSlot()
 {
-	emit softLagChanged(softLagTime.elapsed()/1000.0);
+	emit softLagChanged(softLagTime.elapsed());
 	static int requestCounter=1;
 
-	if(requestIdsAuth.count()<100&&!vipRequestCount)//Max pending requests at time
+	if(requestCounter==5)
 	{
-		if(requestCounter==1&&requestIdsAuth.key(2,0)==0)requestIdsAuth[sendToApi("",true,"method=getInfo&")]=2;
-		if(requestCounter==2&&!tickerOnly&&requestIdsAuth.key(4,0)==0)requestIdsAuth[sendToApi("",true,"method=OrderList&")]=4;
-	} else cancelPendingAuthRequests();
+		if(!lastHistory.isEmpty())requestCounter=1; else getHistory(false);
+	}
 
-	if(requestIdsNoAuth.count()<10)//Max pending requests at time
+	if(requestCounter==1&&!isReplayPending(202))sendToApi(202,"",true,"method=getInfo&");
+	if(requestCounter==2)
 	{
-		if(requestCounter==3&&requestIdsNoAuth.key(3,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/ticker",false)]=3;
-		if(requestCounter==4&&requestIdsNoAuth.key(9,0)==0)requestIdsNoAuth[sendToApi(currencyRequestPair+"/trades",false)]=9;
-	} else cancelPendingNoAuthRequests();
-
-	if(requestCounter==5&&lastHistory.isEmpty())getHistory(false);
+		if(lastOpenedOrders==0)requestCounter=3;
+		else
+		{
+			if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,"method=OrderList&");
+		}
+	}
+	
+	if(requestCounter==3&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/ticker",false);
+	if(requestCounter==4&&!isReplayPending(109))sendToApi(109,currencyRequestPair+"/trades",false);
 
 	requestCounter++;
 	if(requestCounter>5)requestCounter=1;
+	
+	secondTimer->start(httpRequestInterval);
 }
 
 void Exchange_BTCe::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(requestIdsAuth.key(8,0)==0)requestIdsAuth[sendToApi("",true,"method=TradeHistory&")]=8;
-	if(requestIdsAuth.key(10,0)==0)requestIdsAuth[sendToApi(currencyRequestPair+"/fee",false)]=10;
+	if(!isReplayPending(208))sendToApi(208,"",true,"method=TradeHistory&");
+	if(!isReplayPending(110))sendToApi(110,currencyRequestPair+"/fee",false);
 }
 
 void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	cancelPendingAuthRequests();
-	vipRequestCount++;
 	QByteArray btcToBuy=QByteArray::number(apiBtcToBuy,'f',8);
 	int digitsToCut=btcDecimals;
 	if(digitsToCut>6)digitsToCut--;
@@ -523,9 +478,10 @@ void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 		if(toCut>0)btcToBuy.remove(btcToBuy.size()-toCut-1,toCut);
 	}
 	QByteArray params="method=Trade&pair="+currencyRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy)+"&amount="+btcToBuy+"&";
-	requestIdsAuth[sendToApi("",true,params)]=6;
-	requestIdsAuth[sendToApi("",true,params,false)]=6;
-	requestIdsAuth[sendToApi("",true,params,false)]=6;
+	isReplayPending(306);
+	sendToApi(306,"",true,params);
+	sendToApi(306,"",true,params,false);
+	sendToApi(306,"",true,params,false);
 	secondPart=3;
 	secondSlot();
 }
@@ -533,8 +489,7 @@ void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
-	cancelPendingAuthRequests();
-	vipRequestCount++;
+
 	QByteArray btcToSell=QByteArray::number(apiBtcToSell,'f',8);
 	int dotPos=btcToSell.indexOf('.');
 	if(dotPos>0)
@@ -543,9 +498,10 @@ void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
 		if(toCut>0)btcToSell.remove(btcToSell.size()-toCut-1,toCut);
 	}
 	QByteArray params="method=Trade&pair="+currencyRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell)+"&amount="+btcToSell+"&";
-	requestIdsAuth[sendToApi("",true,params)]=7;
-	requestIdsAuth[sendToApi("",true,params,false)]=7;
-	requestIdsAuth[sendToApi("",true,params,false)]=7;
+	isReplayPending(307);
+	sendToApi(307,"",true,params);
+	sendToApi(307,"",true,params,false);
+	sendToApi(307,"",true,params,false);
 	secondPart=3;
 	secondSlot();
 }
@@ -553,46 +509,85 @@ void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
 void Exchange_BTCe::cancelOrder(QByteArray order)
 {
 	if(tickerOnly)return;
-	cancelPendingAuthRequests();
-	vipRequestCount++;
+
 	order.prepend("method=CancelOrder&order_id=");
 	order.append("&");
-	requestIdsAuth[sendToApi("",true,order)]=5;
-	requestIdsAuth[sendToApi("",true,order,false)]=5;
-	requestIdsAuth[sendToApi("",true,order,false)]=5;
+	isReplayPending(305);
+	sendToApi(305,"",true,order);
+	sendToApi(305,"",true,order,false);
+	sendToApi(305,"",true,order,false);
 	secondPart=3;
 	secondSlot();
 }
 
-int Exchange_BTCe::sendToApi(QByteArray method, bool auth, QByteArray commands, bool incNonce)
+void Exchange_BTCe::removeReplay(QNetworkReply* replay)
 {
+	replay->abort();
+	requestsMap.remove(replay);
+	timeStampMap.remove(replay);
+	replay->deleteLater();
+}
+
+void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, QByteArray commands, bool incNonce)
+{
+	static QUrl httpsUrl("https://btc-e.com");
+
+	static QNetworkAccessManager networkManager(this);
+
+	static QNetworkRequest requestAuth;
+	static QNetworkRequest requestNoAuth;
+
+	static bool firstSetup=true;
+	if(firstSetup)
+	{ 
+		firstSetup=false;
+		connect(&networkManager,SIGNAL(finished(QNetworkReply *)),this,SLOT(requestFinished(QNetworkReply *)));
+		connect(&networkManager,SIGNAL(sslErrors(QNetworkReply *, const QList<QSslError> &)),this,SLOT(sslErrorsSlot(QNetworkReply *, const QList<QSslError> &)));
+
+		requestNoAuth.setPriority(QNetworkRequest::LowPriority);
+		requestAuth.setPriority(QNetworkRequest::HighPriority);
+
+		requestNoAuth.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
+		requestNoAuth.setRawHeader("User-Agent","Qt Bitcoin Trader v"+appVerStr);
+
+		requestAuth.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
+		requestAuth.setRawHeader("User-Agent","Qt Bitcoin Trader v"+appVerStr);
+		requestAuth.setRawHeader("Key",privateRestKey);
+	}
+
 	if(auth)
 	{
 		if(incNonce)privateNonce++;
 		QByteArray postData=commands+"nonce="+QByteArray::number(privateNonce);
-		headerAuth.setRequest("POST","/tapi"+method);
-		headerAuth.setValue("Sign",hmacSha512(privateRestSign,postData).toHex());
-		headerAuth.setContentLength(postData.size());
-		if(isLogEnabled)logThread->writeLog("/tapi?"+method+"?"+postData);
-		return httpAuth->request(headerAuth,postData);
+		requestAuth.setRawHeader("Sign",hmacSha512(privateRestSign,postData).toHex());
+		requestAuth.setHeader(QNetworkRequest::ContentLengthHeader,postData.size());
+		if(isLogEnabled)logThread->writeLog("/tapi"+method+"?"+postData);
+		
+		httpsUrl.setEncodedPath("tapi/"+method);
+		requestAuth.setUrl(httpsUrl);
+		QNetworkReply *replay=networkManager.post(requestAuth,postData);
+		requestsMap[replay]=reqType;
+		timeStampMap[replay]=currentTimeStamp;
 	}
 	else
 	{
-		if(commands.isEmpty())
-		{
-			headerNoAuth.setRequest("GET","/api/2/"+method);
-			return httpNoAuth->request(headerNoAuth);
-		}
-		headerNoAuth.setRequest("POST","/api/2/"+method);
-		return httpNoAuth->request(headerNoAuth,commands);
+		httpsUrl.setEncodedPath("api/2/"+method);
+		requestNoAuth.setUrl(httpsUrl);
+
+		QNetworkReply *replay=0;
+		if(commands.isEmpty())replay=networkManager.get(requestNoAuth);
+		else replay=networkManager.post(requestNoAuth,commands);
+
+		requestsMap[replay]=reqType;
+		timeStampMap[replay]=currentTimeStamp;
 	}
-	return 0;
 }
 
-void Exchange_BTCe::sslErrors(const QList<QSslError> &errors)
+void Exchange_BTCe::sslErrorsSlot(QNetworkReply *replay, const QList<QSslError> &errors)
 {
+	removeReplay(replay);
 	QStringList errorList;
 	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
 	if(isLogEnabled)logThread->writeLog(errorList.join(" ").toAscii());
-	emit identificationRequired("SSL Error: "+errorList.join(" "));
+	emit identificationRequired("SSL Error: "+errorList.join(" ")+replay->errorString());
 }

@@ -29,6 +29,7 @@ private:
 public slots:
 	void languageChanged();
 private slots:
+	void setStaysOnTop(bool);
 	void setZeroProfitPrice();
 	void profitLossChanged(double);
 	void buyBtcChanged(double);

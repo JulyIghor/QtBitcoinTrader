@@ -53,8 +53,13 @@ QString *timeFormat_;
 QString *exchangeName_;
 QByteArray *currencyRequest_;
 int *btcDecimals_;
+int *usdDecimals_;
+int *priceDecimals_;
 double *minTradePrice_;
 double *minTradeVolume_;
+qint32 *currentTimeStamp_;
+int *httpRequestInterval_;
+int *httpRequestTimeout_;
 
 void pickDefaultLangFile()
 {
@@ -80,7 +85,7 @@ int main(int argc, char *argv[])
 	
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.0672");
+	appVerStr_=new QByteArray("1.0682");
 	appVerReal_=new double(appVerStr.toDouble());if(appVerStr.size()>4)appVerStr.insert(4,".");
 	currencyBStr_=new QByteArray("USD");
 	currencyBStrLow_=new QByteArray("usd");
@@ -97,10 +102,16 @@ int main(int argc, char *argv[])
 	timeFormat_=new QString(QLocale().timeFormat(QLocale::ShortFormat));// "HH:mm:ss");
 	exchangeName_=new QString("Mt.Gox");
 	btcDecimals_=new int(8);
+	usdDecimals_=new int(5);
+	priceDecimals_=new int(5);
+
 	minTradePrice_=new double(0.01);
 	minTradeVolume_=new double(0.01);
+	currentTimeStamp_=new qint32(QDateTime::currentDateTime().toTime_t());
+	httpRequestInterval_=new int(400);
+	httpRequestTimeout_=new int(5);
 
-	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,160); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
+	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
 
 #ifdef Q_OS_WIN
 	if(QFile::exists("./QtBitcoinTrader"))

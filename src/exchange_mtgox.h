@@ -11,7 +11,7 @@
 #define EXCHANGE_MTGOX_H
 
 #include <QThread>
-#include <QHttp>
+#include <QNetworkAccessManager>
 #include <QTimer>
 #include <QTime>
 #include "qtbitcointrader.h"
@@ -21,18 +21,14 @@ class Exchange_MtGox : public QThread
 	Q_OBJECT
 
 public:
-	void setupApi(QtBitcoinTrader *, bool tickerOnly=false, bool sslEn=true);
+	void setupApi(QtBitcoinTrader *, bool tickerOnly=false);
 	Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey);
 	~Exchange_MtGox();
 
 private:
 	QTime authRequestTime;
 	QByteArray lastFetchDate;
-	bool sslEnabled;
 	bool tickerOnly;
-	int vipRequestCount;
-	void cancelPendingAuthRequests();
-	void cancelPendingNoAuthRequests();
 	bool isApiDown;
 	void translateUnicodeStr(QString *str);
 	QByteArray lastHistory;
@@ -57,15 +53,16 @@ private:
 	QTime softLagTime;
 	int apiDownCounter;
 	int secondPart;
-	QMap<int,int> requestIdsAuth;
-	QMap<int,int> requestIdsNoAuth;
-	QHttpRequestHeader headerAuth;
-	QHttpRequestHeader headerNoAuth;
 	QByteArray privateRestSign;
+	QByteArray privateRestKey;
 	quint32 privateNonce;
-	int sendToApi(QByteArray method, bool auth=false, QByteArray commands=0, bool incNonce=true);
-	QHttp *httpAuth;
-	QHttp *httpNoAuth;
+
+	QMap<QNetworkReply*,int> requestsMap;
+	QMap<QNetworkReply*,qint32> timeStampMap;
+	void removeReplay(QNetworkReply*);
+	bool isReplayPending(int);
+
+	void sendToApi(int reqType, QByteArray method, bool auth=false, QByteArray commands=0, bool incNonce=true);
 	QTimer *secondTimer;
 	void run();
 signals:
@@ -98,20 +95,18 @@ signals:
 	void loginChanged(QString);
 	void apiDownChanged(bool);
 	void apiLagChanged(double);
-	void softLagChanged(double);
-	private slots:
-		void sslErrors(const QList<QSslError> &);
-		void secondSlot();
-		void httpDoneAuth(int,bool);
-		void httpDoneNoAuth(int,bool);
-		public slots:
-			void setSslEnabled(bool);
-			void clearValues();
-			void reloadOrders();
-			void getHistory(bool);
-			void buy(double, double);
-			void sell(double, double);
-			void cancelOrder(QByteArray);
+	void softLagChanged(int);
+private slots:
+	void requestFinished(QNetworkReply *);
+	void sslErrorsSlot(QNetworkReply *, const QList<QSslError> &);
+	void secondSlot();
+public slots:
+	void clearValues();
+	void reloadOrders();
+	void getHistory(bool);
+	void buy(double, double);
+	void sell(double, double);
+	void cancelOrder(QByteArray);
 };
 
 #endif // EXCHANGE_MTGOX_H

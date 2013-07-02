@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>950</width>
+    <width>1024</width>
     <height>329</height>
    </rect>
   </property>
@@ -81,80 +81,6 @@
       <string>Add new rule</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="2">
-       <widget class="QGroupBox" name="groupBox_3">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QGroupBox {background: white; border-radius: 8px; border: 1px solid gray;}</string>
-        </property>
-        <property name="title">
-         <string/>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QRadioButton" name="checkGoesAbove">
-           <property name="accessibleName">
-            <string>TR00065</string>
-           </property>
-           <property name="text">
-            <string>Goes More Than</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="checkEqual">
-           <property name="accessibleName">
-            <string>TR00066</string>
-           </property>
-           <property name="text">
-            <string>Equal To</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="checkGoesBelow">
-           <property name="accessibleName">
-            <string>TR00067</string>
-           </property>
-           <property name="text">
-            <string>Goes Less Than</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="accessibleName">
-         <string>TR00056</string>
-        </property>
-        <property name="text">
-         <string>If</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QGroupBox" name="groupBox">
         <property name="sizePolicy">
@@ -240,6 +166,77 @@
            </property>
            <property name="text">
             <string>Orders Last Sell Price</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkBtcBalance">
+           <property name="accessibleName">
+            <string/>
+           </property>
+           <property name="text">
+            <string>BTC Balance</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkUsdBalance">
+           <property name="accessibleName">
+            <string/>
+           </property>
+           <property name="text">
+            <string>USD Balance</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QGroupBox {background: white; border-radius: 8px; border: 1px solid gray;}</string>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QRadioButton" name="checkGoesAbove">
+           <property name="accessibleName">
+            <string>TR00065</string>
+           </property>
+           <property name="text">
+            <string>Goes More Than</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkEqual">
+           <property name="accessibleName">
+            <string>TR00066</string>
+           </property>
+           <property name="text">
+            <string>Equal To</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkGoesBelow">
+           <property name="accessibleName">
+            <string>TR00067</string>
+           </property>
+           <property name="text">
+            <string>Goes Less Than</string>
            </property>
           </widget>
          </item>
@@ -642,78 +639,28 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="3">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="spacing">
-         <number>4</number>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
         </property>
-        <item>
-         <widget class="QLabel" name="labelUSD1">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="accessibleDescription">
-           <string>USD_ICON</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: darkgreen</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="thanValue">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>120</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="accessibleName">
-           <string>PRICE</string>
-          </property>
-          <property name="accessibleDescription">
-           <string>CAN_BE_ZERO</string>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
+        <property name="accessibleName">
+         <string>TR00056</string>
+        </property>
+        <property name="text">
+         <string>If</string>
+        </property>
+       </widget>
       </item>
       <item row="0" column="6">
        <widget class="QWidget" name="sellBack" native="true">
@@ -792,6 +739,9 @@
              </property>
              <property name="maximum">
               <double>999999999.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
              </property>
             </widget>
            </item>
@@ -974,6 +924,111 @@
          </item>
         </layout>
        </widget>
+      </item>
+      <item row="0" column="3">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <item>
+         <widget class="QLabel" name="priceBtcIcon">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="accessibleDescription">
+           <string>BTC_ICON</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: #996515</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="priceUsdIcon">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="accessibleDescription">
+           <string>USD_ICON</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: #996515</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="thanValue">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="accessibleName">
+           <string/>
+          </property>
+          <property name="accessibleDescription">
+           <string/>
+          </property>
+          <property name="prefix">
+           <string/>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>999999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -1186,7 +1241,7 @@
      <y>240</y>
     </hint>
     <hint type="destinationlabel">
-     <x>784</x>
+     <x>793</x>
      <y>276</y>
     </hint>
    </hints>
@@ -1223,10 +1278,155 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>checkLastPrice</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>103</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>135</x>
+     <y>-21</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkMarketBuy</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>143</x>
+     <y>87</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>155</x>
+     <y>-61</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkMarketSell</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>123</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>-12</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkMarketHigh</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>76</x>
+     <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>93</x>
+     <y>-30</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkMarketLow</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>137</x>
+     <y>159</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>45</x>
+     <y>-21</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkOrdersLastBuyPrice</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>176</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>-49</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkOrdersLastSellPrice</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>104</x>
+     <y>199</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>235</x>
+     <y>-78</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBtcBalance</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>227</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>246</x>
+     <y>-41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkUsdBalance</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>89</x>
+     <y>250</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>230</x>
+     <y>-30</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>buttonAddRule()</slot>
   <slot>amountChanged()</slot>
   <slot>setOrdersBackInvisible(bool)</slot>
+  <slot>ifChanged(bool)</slot>
  </slots>
 </ui>
