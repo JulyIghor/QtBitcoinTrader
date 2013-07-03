@@ -1207,21 +1207,10 @@ void QtBitcoinTrader::setSoftLagValue(int mseconds)
 {
 	static int lastSoftLag=-1;
 	if(lastSoftLag==mseconds)return;
-	static QTimeLine logTimeLine(300,this);
-	if(lastSoftLag==-1)
-	{
-		connect(&logTimeLine,SIGNAL(frameChanged(int)),this,SLOT(softLagTimeLineSlot(int)));
-		logTimeLine.setLoopCount(1);
-	}
-	isValidSoftLag=mseconds<2000;
-	logTimeLine.stop();
-	logTimeLine.setFrameRange(ui.lastUpdate->value()*1000,mseconds);
-	logTimeLine.start();
-}
 
-void QtBitcoinTrader::softLagTimeLineSlot(int val)
-{
-	double newSoftLagValue=val/1000.0;
+	isValidSoftLag=mseconds<2000;
+
+	double newSoftLagValue=mseconds/1000.0;
 	ui.lastUpdate->setValue(newSoftLagValue);
 
 	static bool lastSoftLagValid=newSoftLagValue<2.0;
@@ -1231,7 +1220,7 @@ void QtBitcoinTrader::softLagTimeLineSlot(int val)
 	{
 		lastSoftLagValid=softLagValid;
 		if(!softLagValid)ui.lastUpdate->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
-					else ui.lastUpdate->setStyleSheet("");
+		else ui.lastUpdate->setStyleSheet("");
 		checkValidSellButtons();
 		checkValidBuyButtons();
 		ui.ordersControls->setEnabled(softLagValid);

@@ -134,7 +134,6 @@ private:
 	bool isDetachedCharts;
 public slots:
 	void setSoftLagValue(int);
-	void softLagTimeLineSlot(int);
 	void trayActivated(QSystemTrayIcon::ActivationReason);
 	void buttonMinimizeToTray();
 	void tabLogOrdersOnTop(bool);

@@ -38,6 +38,9 @@ http://vk.com/QtBitcoinTrader
 
 Change Log
 
+v1.07.01
+- Hotfix. High CPU load fix. Nonce error fix
+
 v1.07
 - Improved connection stability
 - API engine rewrited

@@ -12,6 +12,7 @@
 
 #include <QThread>
 #include <QNetworkAccessManager>
+#include <QHttp>
 #include <QTimer>
 #include <QTime>
 #include "qtbitcointrader.h"
@@ -26,6 +27,7 @@ public:
 	~Exchange_MtGox();
 
 private:
+	QHttp *httpAuth;
 	QTime authRequestTime;
 	QByteArray lastFetchDate;
 	bool tickerOnly;
@@ -57,8 +59,14 @@ private:
 	QByteArray privateRestKey;
 	quint32 privateNonce;
 
-	QMap<QNetworkReply*,int> requestsMap;
-	QMap<QNetworkReply*,qint32> timeStampMap;
+	QMap<QNetworkReply*,int> noAuthRequestMap;
+	QMap<QNetworkReply*,qint32> noAuthTimeStampMap;
+
+	int vipRequestCount;
+	QMap<int,int> authRequestMap;
+	QMap<int,qint32> authTimeStampMap;
+
+	void removePendingId(int);
 	void removeReplay(QNetworkReply*);
 	bool isReplayPending(int);
 
@@ -97,6 +105,8 @@ signals:
 	void apiLagChanged(double);
 	void softLagChanged(int);
 private slots:
+	void httpDoneAuth(int,bool);
+	void sslErrors(const QList<QSslError> &);
 	void requestFinished(QNetworkReply *);
 	void sslErrorsSlot(QNetworkReply *, const QList<QSslError> &);
 	void secondSlot();

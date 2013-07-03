@@ -17,6 +17,8 @@
 Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()
 {
+	vipRequestCount=0;
+	httpAuth=0;
 	isApiDown=false;
 	tickerOnly=false;
 	privateRestSign=pRestSign;
@@ -115,36 +117,16 @@ QByteArray Exchange_BTCe::getMidData(QString a, QString b,QByteArray *data)
 void Exchange_BTCe::requestFinished(QNetworkReply *replay)
 {
 	QByteArray data=replay->readAll();
-	int reqType=requestsMap.value(replay,0);
-	bool isAuthRequest=reqType>199;
+	int reqType=noAuthRequestMap.value(replay,0);
 
 	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
 
-	if(isAuthRequest)
+	if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
 	{
-		bool lastApiDown=isApiDown;
-		if(isUnknownRequest)
+		if(++apiDownCounter>3)
 		{
-			if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
-		}
-		else
-		{
-			if(isLogEnabled)logThread->writeLog("AuthData: "+data);
-			authRequestTime.restart();
-			apiDownCounter=0;
-			isApiDown=false;
-		}
-		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
-	}
-	else
-	{
-		if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
-		{
-			if(++apiDownCounter>3)
-			{
-				isApiDown=true;
-				emit apiDownChanged(isApiDown);
-			}
+			isApiDown=true;
+			emit apiDownChanged(isApiDown);
 		}
 	}
 
@@ -152,8 +134,6 @@ void Exchange_BTCe::requestFinished(QNetworkReply *replay)
 
 	emit softLagChanged(softLagTime.elapsed());
 	softLagTime.restart();
-
-	bool success=getMidData("success\":",",",&data)!="0";
 
 	switch(reqType)
 	{
@@ -238,6 +218,41 @@ void Exchange_BTCe::requestFinished(QNetworkReply *replay)
 			}
 		}
 		break;// Fee
+	default: break;
+	}
+	removeReplay(replay);
+}
+
+void Exchange_BTCe::httpDoneAuth(int cId, bool error)
+{
+	int reqType=authRequestMap.value(cId,0);
+	if(reqType>0)removePendingId(reqType);
+
+	if(vipRequestCount&&reqType>300)vipRequestCount--;
+	if(error)return;
+
+	QByteArray data=httpAuth->readAll();
+
+	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
+
+	bool success=getMidData("success\":",",",&data)!="0";
+
+	bool lastApiDown=isApiDown;
+	if(isUnknownRequest)
+	{
+		if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
+	}
+	else
+	{
+		if(isLogEnabled)logThread->writeLog("AuthData: "+data);
+		authRequestTime.restart();
+		apiDownCounter=0;
+		isApiDown=false;
+	}
+	if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
+
+	switch(reqType)
+	{
 	case 202: //info
 		{
 			if(!success)break;
@@ -384,26 +399,25 @@ void Exchange_BTCe::requestFinished(QNetworkReply *replay)
 		}
 		break;//money/wallet/history
 	default: break;
-	}
+		}
 
-	if(isAuthRequest&&!success)
+	if(!success)
 	{
 		QString errorString=getMidData("error\":\"","\"",&data);
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
-		if(reqType<300)
-		{
-			static int invalidRequestCount=0;
-			if(invalidRequestCount++>5)
-				emit identificationRequired(errorString+"<br>"+replay->url().toString().toAscii());
-		}
+		if(reqType<300)emit identificationRequired(errorString);
 	}
-	removeReplay(replay);
 }
 
 void Exchange_BTCe::run()
 {
 	if(isLogEnabled)logThread->writeLog("BTC-e API Thread Started");
+
+	httpAuth=new QHttp("btc-e.com",QHttp::ConnectionModeHttps);
+	httpAuth->setParent(this);
+	connect(httpAuth,SIGNAL(requestFinished(int,bool)),this,SLOT(httpDoneAuth(int,bool)));
+	connect(httpAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 
 	clearValues();
 
@@ -416,9 +430,17 @@ void Exchange_BTCe::run()
 
 bool Exchange_BTCe::isReplayPending(int reqType)
 {
-	QNetworkReply *pendingReplay=requestsMap.key(reqType,0);
+	if(reqType>200)
+	{
+		int pendingId=authRequestMap.key(reqType,0);
+		if(pendingId==0)return false;
+		if(authTimeStampMap.value(pendingId,0)+httpRequestTimeout>currentTimeStamp)return true;
+		removePendingId(pendingId);
+		return false;
+	}
+	QNetworkReply *pendingReplay=noAuthRequestMap.key(reqType,0);
 	if(pendingReplay==0)return false;
-	if(timeStampMap.value(pendingReplay,0)+httpRequestTimeout>currentTimeStamp)return true;
+	if(noAuthTimeStampMap.value(pendingReplay,0)+httpRequestTimeout>currentTimeStamp)return true;
 	removeReplay(pendingReplay);
 	return false;
 }
@@ -438,10 +460,11 @@ void Exchange_BTCe::secondSlot()
 		if(!lastHistory.isEmpty())requestCounter=1; else getHistory(false);
 	}
 
-	if(requestCounter==1&&!isReplayPending(202))sendToApi(202,"",true,"method=getInfo&");
-	if(requestCounter==2)
+	if(requestCounter==1&&!isReplayPending(202)||vipRequestCount)sendToApi(202,"",true,"method=getInfo&");
+
+	if(requestCounter==2||vipRequestCount)
 	{
-		if(lastOpenedOrders==0)requestCounter=3;
+		if(vipRequestCount==0&&lastOpenedOrders==0)requestCounter=3;
 		else
 		{
 			if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,"method=OrderList&");
@@ -520,11 +543,22 @@ void Exchange_BTCe::cancelOrder(QByteArray order)
 	secondSlot();
 }
 
+void Exchange_BTCe::removePendingId(int id)
+{
+	authRequestMap.remove(id);
+	authTimeStampMap.remove(id);
+	if(authRequestMap.count()==0&&httpAuth->hasPendingRequests())
+	{
+		httpAuth->clearPendingRequests();
+		vipRequestCount=0;
+	}
+}
+
 void Exchange_BTCe::removeReplay(QNetworkReply* replay)
 {
 	replay->abort();
-	requestsMap.remove(replay);
-	timeStampMap.remove(replay);
+	noAuthRequestMap.remove(replay);
+	noAuthTimeStampMap.remove(replay);
 	replay->deleteLater();
 }
 
@@ -534,7 +568,7 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, QByteAr
 
 	static QNetworkAccessManager networkManager(this);
 
-	static QNetworkRequest requestAuth;
+	static QHttpRequestHeader headerAuth;
 	static QNetworkRequest requestNoAuth;
 
 	static bool firstSetup=true;
@@ -544,30 +578,35 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, QByteAr
 		connect(&networkManager,SIGNAL(finished(QNetworkReply *)),this,SLOT(requestFinished(QNetworkReply *)));
 		connect(&networkManager,SIGNAL(sslErrors(QNetworkReply *, const QList<QSslError> &)),this,SLOT(sslErrorsSlot(QNetworkReply *, const QList<QSslError> &)));
 
-		requestNoAuth.setPriority(QNetworkRequest::LowPriority);
-		requestAuth.setPriority(QNetworkRequest::HighPriority);
-
 		requestNoAuth.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
 		requestNoAuth.setRawHeader("User-Agent","Qt Bitcoin Trader v"+appVerStr);
 
-		requestAuth.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
-		requestAuth.setRawHeader("User-Agent","Qt Bitcoin Trader v"+appVerStr);
-		requestAuth.setRawHeader("Key",privateRestKey);
+		headerAuth.setValue("Host","btc-e.com");
+		headerAuth.setValue("User-Agent","Qt Bitcoin Trader v"+appVerStr);
+		headerAuth.setContentType("application/x-www-form-urlencoded");
+		headerAuth.setValue("Key",privateRestKey);
 	}
 
 	if(auth)
 	{
 		if(incNonce)privateNonce++;
 		QByteArray postData=commands+"nonce="+QByteArray::number(privateNonce);
-		requestAuth.setRawHeader("Sign",hmacSha512(privateRestSign,postData).toHex());
-		requestAuth.setHeader(QNetworkRequest::ContentLengthHeader,postData.size());
 		if(isLogEnabled)logThread->writeLog("/tapi"+method+"?"+postData);
-		
-		httpsUrl.setEncodedPath("tapi/"+method);
-		requestAuth.setUrl(httpsUrl);
-		QNetworkReply *replay=networkManager.post(requestAuth,postData);
-		requestsMap[replay]=reqType;
-		timeStampMap[replay]=currentTimeStamp;
+
+		headerAuth.setRequest("POST","/tapi"+method);
+		headerAuth.setValue("Sign",hmacSha512(privateRestSign,postData).toHex());
+		headerAuth.setContentLength(postData.size());
+
+		if(reqType>300&&vipRequestCount==0&&httpAuth->hasPendingRequests())
+		{
+			foreach(QNetworkReply* replay, noAuthRequestMap.keys())removeReplay(replay);
+			httpAuth->clearPendingRequests();
+		}
+
+		int replayId=httpAuth->request(headerAuth,postData);
+		if(reqType>300)vipRequestCount++;
+		authRequestMap[replayId]=reqType;
+		authTimeStampMap[replayId]=currentTimeStamp;
 	}
 	else
 	{
@@ -578,16 +617,21 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, QByteAr
 		if(commands.isEmpty())replay=networkManager.get(requestNoAuth);
 		else replay=networkManager.post(requestNoAuth,commands);
 
-		requestsMap[replay]=reqType;
-		timeStampMap[replay]=currentTimeStamp;
+		noAuthRequestMap[replay]=reqType;
+		noAuthTimeStampMap[replay]=currentTimeStamp;
 	}
 }
 
 void Exchange_BTCe::sslErrorsSlot(QNetworkReply *replay, const QList<QSslError> &errors)
 {
 	removeReplay(replay);
+	sslErrors(errors);
+}
+
+void Exchange_BTCe::sslErrors(const QList<QSslError> &errors)
+{
 	QStringList errorList;
 	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
 	if(isLogEnabled)logThread->writeLog(errorList.join(" ").toAscii());
-	emit identificationRequired("SSL Error: "+errorList.join(" ")+replay->errorString());
+	emit identificationRequired("SSL Error: "+errorList.join(" "));
 }

@@ -13,11 +13,11 @@
 #include <QDateTime>
 #include <QSslError>
 #include <QNetworkReply>
-#include <QMutex>
 
 Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()
 {
+	vipRequestCount=0;
 	isApiDown=false;
 	tickerOnly=false;
 	privateRestSign=pRestSign;
@@ -122,46 +122,25 @@ void Exchange_MtGox::translateUnicodeStr(QString *str)
 void Exchange_MtGox::requestFinished(QNetworkReply *replay)
 {
 	QByteArray data=replay->readAll();
-	int reqType=requestsMap.value(replay,0);
-	bool isAuthRequest=reqType>199;
+	int reqType=noAuthRequestMap.value(replay,0);
 
 	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
 
-	if(isAuthRequest)
+	if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
 	{
-		bool lastApiDown=isApiDown;
-		if(isUnknownRequest)
+		if(++apiDownCounter>3)
 		{
-			if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
-		}
-		else
-		{
-			if(isLogEnabled)logThread->writeLog("AuthData: "+data);
-			authRequestTime.restart();
-			apiDownCounter=0;
-			isApiDown=false;
-		}
-		if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
-	}
-	else
-	{
-		if(isUnknownRequest||!isApiDown&&authRequestTime.elapsed()>15000)
-		{
-			if(++apiDownCounter>3)
-			{
-				isApiDown=true;
-				emit apiDownChanged(isApiDown);
-			}
+			isApiDown=true;
+			emit apiDownChanged(isApiDown);
 		}
 	}
 
 	if(isUnknownRequest)return;
 
+	bool success=getMidData("{\"result\":\"","\",",&data)=="success";
 
 	emit softLagChanged(softLagTime.elapsed());
 	softLagTime.restart();
-
-	bool success=getMidData("{\"result\":\"","\",",&data)=="success";
 
 	switch(reqType)
 	{
@@ -239,6 +218,41 @@ void Exchange_MtGox::requestFinished(QNetworkReply *replay)
 				}
 			}
 			break;
+		default: break;
+	}
+	removeReplay(replay);
+}
+
+void Exchange_MtGox::httpDoneAuth(int cId, bool error)
+{
+	int reqType=authRequestMap.value(cId,0);
+	if(reqType>0)removePendingId(reqType);
+
+	if(vipRequestCount&&reqType>300)vipRequestCount--;
+	if(error)return;
+
+	QByteArray data=httpAuth->readAll();
+
+	bool isUnknownRequest=data.size()==0||data.at(0)=='<';
+
+	bool success=getMidData("{\"result\":\"","\",",&data)=="success";
+
+	bool lastApiDown=isApiDown;
+	if(isUnknownRequest)
+	{
+		if(++apiDownCounter>3||softLagTime.elapsed()>2000)isApiDown=true;
+	}
+	else
+	{
+		if(isLogEnabled)logThread->writeLog("AuthData: "+data);
+		authRequestTime.restart();
+		apiDownCounter=0;
+		isApiDown=false;
+	}
+	if(lastApiDown!=isApiDown)emit apiDownChanged(isApiDown);
+
+	switch(reqType)
+	{
 		case 202: //info
 			{
 				if(!success)break;
@@ -390,28 +404,27 @@ void Exchange_MtGox::requestFinished(QNetworkReply *replay)
 			}
 			break;//money/wallet/history
 		default: break;
-	}
-
-	if(isAuthRequest&&!success)
-	{
-		QString errorString=getMidData("error\":\"","\"",&data);
-		QString tokenString=getMidData("token\":\"","\"}",&data);
-		if(isLogEnabled)logThread->writeLog(errorString.toAscii()+" "+tokenString.toAscii());
-		if(errorString.isEmpty())return;
-		if(errorString=="Order not found")return;
-		if(reqType<300)
-		{
-			static int invalidRequestCount=0;
-			if(invalidRequestCount++>5)
-				emit identificationRequired(errorString+"<br>"+tokenString+"<br>"+replay->url().toString().toAscii());
 		}
-	}
-	removeReplay(replay);
+
+		if(!success)
+		{
+			QString errorString=getMidData("error\":\"","\"",&data);
+			QString tokenString=getMidData("token\":\"","\"}",&data);
+			if(isLogEnabled)logThread->writeLog(errorString.toAscii()+" "+tokenString.toAscii());
+			if(errorString.isEmpty())return;
+			if(errorString=="Order not found")return;
+			if(reqType<300)emit identificationRequired(errorString+"<br>"+tokenString);
+		}
 }
 
 void Exchange_MtGox::run()
 {
 	if(isLogEnabled)logThread->writeLog("Mt.Gox API Thread Started");
+
+	httpAuth=new QHttp("data.mtgox.com",QHttp::ConnectionModeHttps);
+	httpAuth->setParent(this);
+	connect(httpAuth,SIGNAL(requestFinished(int,bool)),this,SLOT(httpDoneAuth(int,bool)));
+	connect(httpAuth,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 
 	clearValues();
 
@@ -431,6 +444,8 @@ void Exchange_MtGox::secondSlot()
 {
 	emit softLagChanged(softLagTime.elapsed());
 	static int requestCounter=1;
+	if(vipRequestCount&&requestCounter!=4&&!tickerOnly&&!isReplayPending(204))
+					sendToApi(204,currencyRequestPair+"/money/orders",true);
 	switch(requestCounter)
 	{
 	case 1: if(!isReplayPending(101)){sendToApi(101,currencyRequestPair+"/money/order/lag",false);break;}
@@ -450,9 +465,17 @@ void Exchange_MtGox::secondSlot()
 
 bool Exchange_MtGox::isReplayPending(int reqType)
 {
-	QNetworkReply *pendingReplay=requestsMap.key(reqType,0);
+	if(reqType>200)
+	{
+		int pendingId=authRequestMap.key(reqType,0);
+		if(pendingId==0)return false;
+		if(authTimeStampMap.value(pendingId,0)+httpRequestTimeout>currentTimeStamp)return true;
+		removePendingId(pendingId);
+		return false;
+	}
+	QNetworkReply *pendingReplay=noAuthRequestMap.key(reqType,0);
 	if(pendingReplay==0)return false;
-	if(timeStampMap.value(pendingReplay,0)+5>currentTimeStamp)return true;
+	if(noAuthTimeStampMap.value(pendingReplay,0)+5>currentTimeStamp)return true;
 	removeReplay(pendingReplay);
 	return false;
 }
@@ -499,23 +522,32 @@ void Exchange_MtGox::cancelOrder(QByteArray order)
 	secondSlot();
 }
 
+void Exchange_MtGox::removePendingId(int id)
+{
+	authRequestMap.remove(id);
+	authTimeStampMap.remove(id);
+	if(authRequestMap.count()==0&&httpAuth->hasPendingRequests())
+	{
+		httpAuth->clearPendingRequests();
+		vipRequestCount=0;
+	}
+}
+
 void Exchange_MtGox::removeReplay(QNetworkReply* replay)
 {
 	replay->abort();
-	requestsMap.remove(replay);
-	timeStampMap.remove(replay);
+	noAuthRequestMap.remove(replay);
+	noAuthTimeStampMap.remove(replay);
 	replay->deleteLater();
 }
 
 void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, QByteArray commands, bool incNonce)
 {
-	static QMutex mutex;
-	mutex.lock();
 	static QUrl httpsUrl("https://data.mtgox.com");
 
 	static QNetworkAccessManager networkManager(this);
 
-	static QNetworkRequest requestAuth;
+	static QHttpRequestHeader headerAuth;
 	static QNetworkRequest requestNoAuth;
 
 	static bool firstSetup=true;
@@ -528,11 +560,10 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, QByteA
 	requestNoAuth.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
 	requestNoAuth.setRawHeader("User-Agent","Qt Bitcoin Trader v"+appVerStr);
 
-	requestAuth.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
-	requestAuth.setRawHeader("User-Agent","Qt Bitcoin Trader v"+appVerStr);
-	requestAuth.setRawHeader("Rest-Key",privateRestKey);
-	requestAuth.setPriority(QNetworkRequest::HighPriority);
-	requestNoAuth.setPriority(QNetworkRequest::LowPriority);
+	headerAuth.setValue("Host","data.mtgox.com");
+	headerAuth.setValue("User-Agent","Qt Bitcoin Trader v"+appVerStr);
+	headerAuth.setContentType("application/x-www-form-urlencoded");
+	headerAuth.setValue("Rest-Key",privateRestKey);
 	}
 
 	if(auth)
@@ -541,15 +572,23 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, QByteA
 		QByteArray postData="nonce="+QByteArray::number(privateNonce);
 		postData.append(postData.right(6));postData.append(commands);
 		QByteArray forHash=method+"0"+postData;forHash[method.size()]=0;
-		requestAuth.setRawHeader("Rest-Sign",hmacSha512(privateRestSign,forHash).toBase64());
-		requestAuth.setHeader(QNetworkRequest::ContentLengthHeader,postData.size());
+
+		headerAuth.setValue("Rest-Sign",hmacSha512(privateRestSign,forHash).toBase64());
+		headerAuth.setRequest("POST","/api/2/"+method);
+		headerAuth.setContentLength(postData.size());
+
 		if(isLogEnabled)logThread->writeLog("/api/2/"+method+"?"+postData);
 
-		httpsUrl.setEncodedPath("api/2/"+method);
-		requestAuth.setUrl(httpsUrl);
-		QNetworkReply *replay=networkManager.post(requestAuth,postData);
-		requestsMap[replay]=reqType;
-		timeStampMap[replay]=currentTimeStamp;
+		if(reqType>300&&vipRequestCount==0&&httpAuth->hasPendingRequests())
+		{
+			foreach(QNetworkReply* replay, noAuthRequestMap.keys())removeReplay(replay);
+			httpAuth->clearPendingRequests();
+		}
+
+		int replayId=httpAuth->request(headerAuth,postData);
+		if(reqType>300)vipRequestCount++;
+		authRequestMap[replayId]=reqType;
+		authTimeStampMap[replayId]=currentTimeStamp;
 	}
 	else
 	{
@@ -560,17 +599,21 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, QByteA
 		if(commands.isEmpty())replay=networkManager.get(requestNoAuth);
 		else replay=networkManager.post(requestNoAuth,commands);
 
-		requestsMap[replay]=reqType;
-		timeStampMap[replay]=currentTimeStamp;
+		noAuthRequestMap[replay]=reqType;
+		noAuthTimeStampMap[replay]=currentTimeStamp;
 	}
-	mutex.unlock();
 }
 
 void Exchange_MtGox::sslErrorsSlot(QNetworkReply *replay, const QList<QSslError> &errors)
 {
 	removeReplay(replay);
+	sslErrors(errors);
+}
+
+void Exchange_MtGox::sslErrors(const QList<QSslError> &errors)
+{
 	QStringList errorList;
 	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
 	if(isLogEnabled)logThread->writeLog(errorList.join(" ").toAscii());
-	emit identificationRequired("SSL Error: "+errorList.join(" ")+replay->errorString());
+	emit identificationRequired("SSL Error: "+errorList.join(" "));
 }
