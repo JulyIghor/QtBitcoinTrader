@@ -2021,7 +2021,7 @@ p, li { white-space: pre-wrap; }
        </widget>
        <widget class="QWidget" name="tabRules">
         <attribute name="title">
-         <string>Rules for creating Orders</string>
+         <string>Rules</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_5">
          <item row="0" column="0">
@@ -2329,7 +2329,7 @@ p, li { white-space: pre-wrap; }
        </widget>
        <widget class="QWidget" name="tabLastTrades">
         <attribute name="title">
-         <string>Last Trades</string>
+         <string>Trades</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_23">
          <item row="1" column="0" colspan="7">
@@ -2539,6 +2539,216 @@ p, li { white-space: pre-wrap; }
            <property name="text">
             <string>Stay on Top</string>
            </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabDepth">
+        <attribute name="title">
+         <string>Depth</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_29">
+         <item row="0" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_18">
+           <item>
+            <spacer name="horizontalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>11</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="tabDepthOnTop">
+             <property name="accessibleName">
+              <string>STAYS_ON_TOP</string>
+             </property>
+             <property name="text">
+              <string>Stay on Top</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="detachDepth">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="whatsThis">
+              <string/>
+             </property>
+             <property name="accessibleName">
+              <string>DETACH_TAB</string>
+             </property>
+             <property name="text">
+              <string>Detach</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox_12">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>130</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QGroupBox {background: #FFEEEE; border-radius 8px; border: 1px solid black;}</string>
+           </property>
+           <property name="title">
+            <string/>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_28">
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelNotAvailable_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This feature is not available now.&lt;br/&gt;I'm still working on it.&lt;br/&gt;You will receive update notify at same time it released.&lt;br/&gt;Thank you for support and feedbacks!&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Эта функция пока в разработке.&lt;br/&gt;Я еще работаю над ней. Скоро увидите еще много обновлений.&lt;br/&gt;Спасибо за поддержку и отзывы!</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="openExternalLinks">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QGroupBox" name="groupBox_11">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="accessibleName">
+            <string>TR00053</string>
+           </property>
+           <property name="title">
+            <string>Donate</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_27">
+            <property name="margin">
+             <number>9</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="btcLabel11_3">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="accessibleDescription">
+               <string>DONATE_BTC_ICON</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: #996515</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="bitcoinAddress_3">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</string>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="copyDonateButton_3">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="accessibleName">
+               <string>TR00054</string>
+              </property>
+              <property name="text">
+               <string>Copy</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+              <property name="default">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
@@ -4945,8 +5155,8 @@ p, li { white-space: pre-wrap; }
    <slot>ordersCancelAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>367</x>
-     <y>328</y>
+     <x>361</x>
+     <y>346</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -4962,7 +5172,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>242</x>
-     <y>563</y>
+     <y>613</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -4977,8 +5187,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyBtcToBuyAllIn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>323</x>
-     <y>507</y>
+     <x>326</x>
+     <y>557</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -4993,8 +5203,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyBtcToBuyHalfIn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>409</x>
-     <y>507</y>
+     <x>408</x>
+     <y>557</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -5010,7 +5220,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>242</x>
-     <y>534</y>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -5025,8 +5235,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyPricePerCoinAsMarketPrice()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>404</x>
-     <y>536</y>
+     <x>408</x>
+     <y>586</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -5042,7 +5252,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>242</x>
-     <y>505</y>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -5057,8 +5267,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyBitcoinsButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>404</x>
-     <y>616</y>
+     <x>408</x>
+     <y>666</y>
     </hint>
     <hint type="destinationlabel">
      <x>1</x>
@@ -5073,7 +5283,7 @@ p, li { white-space: pre-wrap; }
    <slot>accountFeeChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>285</x>
+     <x>267</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -5089,8 +5299,8 @@ p, li { white-space: pre-wrap; }
    <slot>ordersCancelSelected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>546</x>
-     <y>328</y>
+     <x>533</x>
+     <y>346</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -5121,7 +5331,7 @@ p, li { white-space: pre-wrap; }
    <slot>mtgoxLagChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1171</x>
+     <x>1064</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -5137,8 +5347,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellTotalBtcToSellAllIn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>751</x>
-     <y>507</y>
+     <x>753</x>
+     <y>557</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5153,8 +5363,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellBitcoinButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>829</x>
-     <y>616</y>
+     <x>836</x>
+     <y>666</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5169,8 +5379,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellPricePerCoinAsMarketPrice()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>829</x>
-     <y>536</y>
+     <x>836</x>
+     <y>586</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5185,8 +5395,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellTotalBtcToSellChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>670</x>
-     <y>505</y>
+     <x>668</x>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5201,8 +5411,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellAmountToReceiveChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>670</x>
-     <y>563</y>
+     <x>668</x>
+     <y>613</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5217,8 +5427,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellPricePerCoinInUsdChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>670</x>
-     <y>534</y>
+     <x>668</x>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5233,8 +5443,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellTotalBtcToSellHalfIn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>838</x>
-     <y>507</y>
+     <x>836</x>
+     <y>557</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5281,8 +5491,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleAddButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>711</x>
-     <y>439</y>
+     <x>665</x>
+     <y>175</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5297,8 +5507,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemoveAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>981</x>
-     <y>439</y>
+     <x>665</x>
+     <y>175</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5313,8 +5523,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1117</x>
-     <y>439</y>
+     <x>665</x>
+     <y>175</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5329,8 +5539,8 @@ p, li { white-space: pre-wrap; }
    <slot>copyDonateButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1218</x>
-     <y>688</y>
+     <x>1111</x>
+     <y>728</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5377,7 +5587,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketHighChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>824</x>
+     <x>726</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -5393,7 +5603,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketLowChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>824</x>
+     <x>726</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -5409,7 +5619,7 @@ p, li { white-space: pre-wrap; }
    <slot>calcButtonClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
+     <x>294</x>
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
@@ -5473,7 +5683,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketLastChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1013</x>
+     <x>906</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -5489,7 +5699,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketBuyChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>687</x>
+     <x>598</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -5505,7 +5715,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketSellChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>687</x>
+     <x>598</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -5521,8 +5731,8 @@ p, li { white-space: pre-wrap; }
    <slot>aboutTranslationButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1218</x>
-     <y>600</y>
+     <x>1111</x>
+     <y>625</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5537,8 +5747,8 @@ p, li { white-space: pre-wrap; }
    <slot>checkValidRulesButtons()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1095</x>
-     <y>343</y>
+     <x>648</x>
+     <y>195</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5553,8 +5763,8 @@ p, li { white-space: pre-wrap; }
    <slot>buttonNewWindow()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1099</x>
-     <y>570</y>
+     <x>1000</x>
+     <y>589</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5569,7 +5779,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>483</x>
+     <x>447</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -5585,7 +5795,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>483</x>
+     <x>447</x>
      <y>81</y>
     </hint>
     <hint type="destinationlabel">
@@ -5601,7 +5811,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>851</x>
+     <x>753</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -5617,7 +5827,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>851</x>
+     <x>753</x>
      <y>83</y>
     </hint>
     <hint type="destinationlabel">
@@ -5633,8 +5843,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitBuyThanSellChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>676</y>
+     <x>173</x>
+     <y>726</y>
     </hint>
     <hint type="destinationlabel">
      <x>798</x>
@@ -5649,8 +5859,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitBuyThanSell()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>403</x>
-     <y>678</y>
+     <x>408</x>
+     <y>728</y>
     </hint>
     <hint type="destinationlabel">
      <x>585</x>
@@ -5666,7 +5876,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>836</x>
-     <y>678</y>
+     <y>728</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -5681,8 +5891,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitSellThanBuyChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>590</x>
-     <y>676</y>
+     <x>601</x>
+     <y>726</y>
     </hint>
     <hint type="destinationlabel">
      <x>506</x>
@@ -5697,8 +5907,8 @@ p, li { white-space: pre-wrap; }
    <slot>zeroBuyThanSellProfit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>200</x>
-     <y>678</y>
+     <x>198</x>
+     <y>728</y>
     </hint>
     <hint type="destinationlabel">
      <x>544</x>
@@ -5713,8 +5923,8 @@ p, li { white-space: pre-wrap; }
    <slot>zeroSellThanBuyProfit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>633</x>
-     <y>678</y>
+     <x>626</x>
+     <y>728</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -5729,8 +5939,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleEditButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>846</x>
-     <y>439</y>
+     <x>665</x>
+     <y>175</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5745,8 +5955,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleUp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>678</x>
-     <y>151</y>
+     <x>583</x>
+     <y>130</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5761,8 +5971,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleDown()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>707</x>
-     <y>151</y>
+     <x>595</x>
+     <y>130</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5777,8 +5987,8 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>649</x>
-     <y>151</y>
+     <x>571</x>
+     <y>130</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5793,8 +6003,8 @@ p, li { white-space: pre-wrap; }
    <slot>languageComboBoxChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1099</x>
-     <y>504</y>
+     <x>1111</x>
+     <y>554</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5809,7 +6019,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>285</x>
+     <x>267</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -5825,7 +6035,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
+     <x>164</x>
      <y>79</y>
     </hint>
     <hint type="destinationlabel">
@@ -5889,7 +6099,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>687</x>
+     <x>598</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -5905,7 +6115,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>687</x>
+     <x>598</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -5921,7 +6131,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>824</x>
+     <x>726</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -5937,7 +6147,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>824</x>
+     <x>726</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -5953,7 +6163,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1013</x>
+     <x>906</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -5969,7 +6179,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1013</x>
+     <x>906</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -5985,7 +6195,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1171</x>
+     <x>1064</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -6002,7 +6212,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>242</x>
-     <y>505</y>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
      <x>622</x>
@@ -6018,7 +6228,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>242</x>
-     <y>563</y>
+     <y>613</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -6033,8 +6243,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>676</y>
+     <x>173</x>
+     <y>726</y>
     </hint>
     <hint type="destinationlabel">
      <x>334</x>
@@ -6049,8 +6259,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>590</x>
-     <y>676</y>
+     <x>601</x>
+     <y>726</y>
     </hint>
     <hint type="destinationlabel">
      <x>301</x>
@@ -6065,8 +6275,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>670</x>
-     <y>505</y>
+     <x>668</x>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
      <x>698</x>
@@ -6081,8 +6291,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>670</x>
-     <y>563</y>
+     <x>668</x>
+     <y>613</y>
     </hint>
     <hint type="destinationlabel">
      <x>681</x>
@@ -6097,8 +6307,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachLog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1215</x>
-     <y>152</y>
+     <x>1108</x>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6113,8 +6323,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachRules()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1215</x>
-     <y>152</y>
+     <x>648</x>
+     <y>130</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6129,8 +6339,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachTrades()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1215</x>
-     <y>152</y>
+     <x>648</x>
+     <y>133</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6145,8 +6355,8 @@ p, li { white-space: pre-wrap; }
    <slot>copyDonateButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1199</x>
-     <y>326</y>
+     <x>665</x>
+     <y>172</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6161,8 +6371,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachCharts()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1214</x>
-     <y>153</y>
+     <x>665</x>
+     <y>160</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6177,8 +6387,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitBuyThanSellPrecChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>291</x>
-     <y>672</y>
+     <x>335</x>
+     <y>726</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -6193,8 +6403,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitSellThanBuyPrecChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>682</x>
-     <y>675</y>
+     <x>763</x>
+     <y>726</y>
     </hint>
     <hint type="destinationlabel">
      <x>690</x>
@@ -6225,8 +6435,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabLogOrdersOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1134</x>
-     <y>149</y>
+     <x>1027</x>
+     <y>150</y>
     </hint>
     <hint type="destinationlabel">
      <x>1210</x>
@@ -6241,8 +6451,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabRulesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1134</x>
-     <y>149</y>
+     <x>636</x>
+     <y>130</y>
     </hint>
     <hint type="destinationlabel">
      <x>1192</x>
@@ -6257,8 +6467,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabTradesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1134</x>
-     <y>149</y>
+     <x>634</x>
+     <y>133</y>
     </hint>
     <hint type="destinationlabel">
      <x>1233</x>
@@ -6273,8 +6483,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabChartsOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1133</x>
-     <y>150</y>
+     <x>665</x>
+     <y>160</y>
     </hint>
     <hint type="destinationlabel">
      <x>1236</x>
@@ -6305,12 +6515,60 @@ p, li { white-space: pre-wrap; }
    <slot>buttonMinimizeToTray()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1140</x>
-     <y>563</y>
+     <x>1110</x>
+     <y>589</y>
     </hint>
     <hint type="destinationlabel">
      <x>1285</x>
      <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>copyDonateButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>QtBitcoinTraderClass</receiver>
+   <slot>copyDonateButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1043</x>
+     <y>464</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1206</x>
+     <y>473</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tabDepthOnTop</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QtBitcoinTraderClass</receiver>
+   <slot>tabDepthOnTop(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>977</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1265</x>
+     <y>301</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>detachDepth</sender>
+   <signal>clicked()</signal>
+   <receiver>QtBitcoinTraderClass</receiver>
+   <slot>detachDepth()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1095</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1199</x>
+     <y>164</y>
     </hint>
    </hints>
   </connection>
@@ -6395,5 +6653,7 @@ p, li { white-space: pre-wrap; }
   <slot>tabTradesOnTop(bool)</slot>
   <slot>tabChartsOnTop(bool)</slot>
   <slot>buttonMinimizeToTray()</slot>
+  <slot>tabDepthOnTop(bool)</slot>
+  <slot>detachDepth()</slot>
  </slots>
 </ui>

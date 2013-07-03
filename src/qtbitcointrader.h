@@ -130,6 +130,7 @@ private:
 	bool isDetachedLog;
 	bool isDetachedTrades;
 	bool isDetachedRules;
+	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
 	void setSoftLagValue(int);
@@ -140,6 +141,7 @@ public slots:
 	void tabRulesOnTop(bool);
 	void tabTradesOnTop(bool);
 	void tabChartsOnTop(bool);
+	void tabDepthOnTop(bool);
 
 	void secondSlot();
 	void setTradesScrollBarValue(int);
@@ -151,11 +153,13 @@ public slots:
 	void detachTrades();
 	void detachRules();
 	void detachCharts();
+	void detachDepth();
 
 	void attachLog();
 	void attachTrades();
 	void attachRules();
 	void attachCharts();
+	void attachDepth();
 
 	void loginChanged(QString);
 

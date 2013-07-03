@@ -249,3 +249,4 @@ String_IF_BALANCE_GOES_EQUAL=Якщо баланс %1 дорівнює %2
 String_IF_BALANCE=Баланс %1
 String_CANCEL_ALL_ORDERS=Видалити всі ордери
 String_NOT_USED=Нема
+String_TAB_DEPTH=Стакан

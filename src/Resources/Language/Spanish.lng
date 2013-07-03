@@ -249,3 +249,4 @@ String_IF_BALANCE_GOES_EQUAL=If %1 balance equal to %2
 String_IF_BALANCE=%1 Balance
 String_CANCEL_ALL_ORDERS=Cancel All Orders
 String_NOT_USED=Not Used
+String_TAB_DEPTH=Depth

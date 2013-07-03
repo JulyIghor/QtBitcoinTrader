@@ -52,6 +52,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	isDetachedLog=false;
 	isDetachedTrades=false;
 	isDetachedRules=false;
+	isDetachedDepth=false;
 	isDetachedCharts=false;
 
 	forcedReloadOrders=true;
@@ -170,11 +171,13 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tabRulesOnTop->setVisible(false);
 	ui.tabTradesOnTop->setVisible(false);
 	ui.tabChartsOnTop->setVisible(false);
+	ui.tabDepthOnTop->setVisible(false);
 
 	ui.tabOrdersLog->installEventFilter(this);
 	ui.tabRules->installEventFilter(this);
 	ui.tabLastTrades->installEventFilter(this);
 	ui.tabCharts->installEventFilter(this);
+	ui.tabDepth->installEventFilter(this);
 
 	exchangeId=settings.value("ExchangeId",0).toInt();
 	switch(exchangeId)
@@ -277,6 +280,7 @@ void QtBitcoinTrader::buttonMinimizeToTray()
 	if(ui.tabOrdersLog->parent()==0)ui.tabOrdersLog->hide();
 	if(ui.tabLastTrades->parent()==0)ui.tabLastTrades->hide();
 	if(ui.tabRules->parent()==0)ui.tabRules->hide();
+	if(ui.tabDepth->parent()==0)ui.tabDepth->hide();
 	if(ui.tabCharts->parent()==0)ui.tabCharts->hide();
 }
 
@@ -287,6 +291,7 @@ void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason)
 	if(ui.tabOrdersLog->parent()==0)ui.tabOrdersLog->show();
 	if(ui.tabLastTrades->parent()==0)ui.tabLastTrades->show();
 	if(ui.tabRules->parent()==0)ui.tabRules->show();
+	if(ui.tabDepth->parent()==0)ui.tabDepth->show();
 	if(ui.tabCharts->parent()==0)ui.tabCharts->show();
 	trayIcon->hide();
 	delete trayIcon; trayIcon=0;
@@ -319,6 +324,15 @@ void QtBitcoinTrader::tabTradesOnTop(bool on)
 	ui.tabLastTrades->show();
 }
 
+void QtBitcoinTrader::tabDepthOnTop(bool on)
+{
+	if(!isDetachedDepth)return;
+	ui.tabDepth->hide();
+	if(on)ui.tabDepth->setWindowFlags(Qt::Window|Qt::WindowStaysOnTopHint);
+	else  ui.tabDepth->setWindowFlags(Qt::Window);
+	ui.tabDepth->show();
+}
+
 void QtBitcoinTrader::tabChartsOnTop(bool on)
 {
 	if(!isDetachedCharts)return;
@@ -343,6 +357,8 @@ void QtBitcoinTrader::loadUiSettings()
 	if(settings.value("DetachedRules",isDetachedRules).toBool())detachRules();
 	
 	if(settings.value("DetachedTrades",isDetachedRules).toBool())detachTrades();
+
+	if(settings.value("DetachedDepth",isDetachedDepth).toBool())detachDepth();
 
 	if(settings.value("DetachedCharts",isDetachedRules).toBool())detachCharts();
 	
@@ -418,11 +434,13 @@ void QtBitcoinTrader::clearTimeOutedTrades()
 {
 	if(ui.tableTrades->rowCount()==0)return;
 	qint64 min5Date=QDateTime::currentDateTime().addSecs(-600).toTime_t();
+	int lastSliderValue=ui.tableTrades->verticalScrollBar()->value();
 	while(ui.tableTrades->rowCount()&&ui.tableTrades->item(ui.tableTrades->rowCount()-1,0)->data(Qt::UserRole).toLongLong()<min5Date)
 	{
 		ui.tradesVolume5m->setValue(ui.tradesVolume5m->value()-ui.tableTrades->item(ui.tableTrades->rowCount()-1,1)->data(Qt::UserRole).toDouble());
 		ui.tableTrades->removeRow(ui.tableTrades->rowCount()-1);
 	}
+	ui.tableTrades->verticalScrollBar()->setValue(qMin(lastSliderValue,ui.tableTrades->verticalScrollBar()->maximum()));
 }
 
 void QtBitcoinTrader::secondSlot()
@@ -447,7 +465,7 @@ void QtBitcoinTrader::tabTradesScrollUp()
 	{
 		connect(&timeLine,SIGNAL(frameChanged(int)),this,SLOT(setTradesScrollBarValue(int)));
 		timeLine.setDuration(600);
-		timeLine.setEasingCurve(QEasingCurve::OutCubic);
+		timeLine.setEasingCurve(QEasingCurve::OutQuad);
 		timeLine.setLoopCount(1);
 	}
 	timeLine.stop();
@@ -1005,6 +1023,28 @@ void QtBitcoinTrader::identificationRequired(QString message)
 			message.prepend(julyTr("TRUNAUTHORIZED","Identification required to access private API.<br>Please enter valid API key and Secret."));
 			}
 			lastMessageTime.restart();
+
+			bool haveSslFix=false;
+#ifdef  Q_OS_WIN
+			haveSslFix=message.startsWith("SSL");
+#endif
+			if(haveSslFix)
+			{
+				QMessageBox msgBox(this);
+				msgBox.setIcon(QMessageBox::Warning);
+				msgBox.setWindowTitle(julyTr("AUTH_ERROR","%1 Error").arg(exchangeName));
+				msgBox.setText(message);
+				msgBox.setStandardButtons(QMessageBox::Retry | QMessageBox::Ok);
+				msgBox.setDefaultButton(QMessageBox::Retry);
+				msgBox.setButtonText(QMessageBox::Retry,julyTr("INSTALL_SSL_CERT","Install SSL certificate"));
+				if(msgBox.exec()==QMessageBox::Retry)
+				{
+					QString tempCertPath=QDir().tempPath()+"/Thawte_Primary_Root_CA.cer";
+					QFile::copy(":/Resources/Thawte_Primary_Root_CA.cer",tempCertPath);
+					QDesktopServices::openUrl("\""+tempCertPath.replace('\\','/')+"\"");
+				}
+			}
+			else
 			QMessageBox::warning(this,julyTr("AUTH_ERROR","%1 Error").arg(exchangeName),message);
 			showingMessage=false;
 		}
@@ -1444,6 +1484,7 @@ void QtBitcoinTrader::closeEvent(QCloseEvent *event)
 	settings.setValue("TabLogOrdersOnTop",ui.tabOrdersLogOnTop->isChecked());
 	settings.setValue("TabRulesOnTop",ui.tabRulesOnTop->isChecked());
 	settings.setValue("TabTradesOnTop",ui.tabTradesOnTop->isChecked());
+	settings.setValue("TabDepthOnTop",ui.tabDepthOnTop->isChecked());
 	settings.setValue("TabChartsOnTop",ui.tabChartsOnTop->isChecked());
 
 	saveDetachedWindowsSettings();
@@ -1461,11 +1502,13 @@ void QtBitcoinTrader::saveDetachedWindowsSettings(bool force)
 	settings.setValue("DetachedLog",isDetachedLog);
 	settings.setValue("DetachedRules",isDetachedRules);
 	settings.setValue("DetachedTrades",isDetachedTrades);
+	settings.setValue("DetachedDepth",isDetachedDepth);
 	settings.setValue("DetachedCharts",isDetachedCharts);
 	}
 	if(isDetachedLog)settings.setValue("DetachedLogGeometry",ui.tabOrdersLog->geometry());
 	if(isDetachedRules)settings.setValue("DetachedRulesGeometry",ui.tabRules->geometry());
 	if(isDetachedTrades)settings.setValue("DetachedTradesGeometry",ui.tabLastTrades->geometry());
+	if(isDetachedDepth)settings.setValue("DetachedDepthGeometry",ui.tabDepth->geometry());
 	if(isDetachedCharts)settings.setValue("DetachedChartsGeometry",ui.tabCharts->geometry());
 }
 
@@ -1846,6 +1889,23 @@ void QtBitcoinTrader::detachTrades()
 	checkIsTabWidgetVisible();
 }
 
+void QtBitcoinTrader::detachDepth()
+{
+	ui.tabDepth->setParent(0);
+	ui.tabDepth->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
+	ui.detachDepth->setVisible(false);
+	ui.tabDepthOnTop->setVisible(true);
+
+	QSettings settings(iniFileName,QSettings::IniFormat);
+	QRect newGeometry=settings.value("DetachedDepthGeometry",ui.tabDepth->geometry()).toRect();
+	if(isValidGeometry(&newGeometry))ui.tabDepth->setGeometry(newGeometry);
+
+	ui.tabDepthOnTop->setChecked(settings.value("TabDepthOnTop",false).toBool());
+	isDetachedDepth=true;
+	tabDepthOnTop(ui.tabDepthOnTop->isChecked());
+	checkIsTabWidgetVisible();
+}
+
 void QtBitcoinTrader::detachCharts()
 {
 	ui.tabCharts->setParent(0);
@@ -1901,15 +1961,39 @@ void QtBitcoinTrader::attachTrades()
 	isDetachedTrades=false;
 }
 
+void QtBitcoinTrader::attachDepth()
+{
+	saveDetachedWindowsSettings(true);
+	ui.tabDepthOnTop->setVisible(false);
+	ui.detachDepth->setVisible(true);
+	int newTabPos=3;
+	if(isDetachedLog&&isDetachedRules&&isDetachedTrades)newTabPos=0;
+	else if(isDetachedLog&&isDetachedRules||isDetachedRules&&isDetachedTrades||isDetachedLog&&isDetachedTrades)newTabPos=1;
+	else if(isDetachedLog||isDetachedRules||isDetachedTrades)newTabPos=2;
+	ui.tabWidget->insertTab(newTabPos,ui.tabDepth,ui.tabDepth->accessibleName());
+	checkIsTabWidgetVisible();
+	ui.tabWidget->setCurrentWidget(ui.tabDepth);
+	isDetachedDepth=false;
+}
+
 void QtBitcoinTrader::attachCharts()
 {
 	saveDetachedWindowsSettings(true);
 	ui.tabChartsOnTop->setVisible(false);
 	ui.detachCharts->setVisible(true);
-	int newTabPos=3;
-	if(isDetachedLog&&isDetachedRules&&isDetachedTrades)newTabPos=0;
-	else if(isDetachedLog&&isDetachedRules||isDetachedRules&&isDetachedTrades||isDetachedLog&&isDetachedTrades)newTabPos=1;
-	else if(isDetachedLog||isDetachedRules||isDetachedTrades)newTabPos=2;
+	int newTabPos=4;
+	if(isDetachedLog&&isDetachedRules&&isDetachedTrades&&isDetachedDepth)newTabPos=0;
+	else if(isDetachedLog&&isDetachedRules&&isDetachedDepth||
+			isDetachedLog&&isDetachedRules&&isDetachedTrades||
+			isDetachedLog&&isDetachedDepth&&isDetachedTrades||
+			isDetachedRules&&isDetachedDepth&&isDetachedTrades)newTabPos=1;
+	else if(isDetachedLog&&isDetachedRules||
+		isDetachedLog&&isDetachedDepth||
+		isDetachedLog&&isDetachedTrades||
+		isDetachedRules&&isDetachedDepth||
+		isDetachedRules&&isDetachedTrades||
+		isDetachedDepth&&isDetachedTrades)newTabPos=2;
+	else if(isDetachedLog||isDetachedRules||isDetachedDepth||isDetachedTrades)newTabPos=3;
 	ui.tabWidget->insertTab(newTabPos,ui.tabCharts,ui.tabCharts->accessibleName());
 	checkIsTabWidgetVisible();
 	ui.tabWidget->setCurrentWidget(ui.tabCharts);
@@ -1949,6 +2033,10 @@ void QtBitcoinTrader::languageChanged()
 	ui.tabLastTrades->setAccessibleName(julyTr("TAB_LAST_TRADES","Last Trades"));
 	ui.tabLastTrades->setWindowTitle(ui.tabLastTrades->accessibleName()+" ["+profileName+"]");
 	if(isDetachedTrades){julyTranslator->translateUi(ui.tabLastTrades);fixAllChildButtonsAndLabels(ui.tabLastTrades);}
+
+	ui.tabDepth->setAccessibleName(julyTr("TAB_DEPTH","Depth"));
+	ui.tabDepth->setWindowTitle(ui.tabDepth->accessibleName()+" ["+profileName+"]");
+	if(isDetachedDepth){julyTranslator->translateUi(ui.tabDepth);fixAllChildButtonsAndLabels(ui.tabDepth);}
 
 	ui.tabCharts->setAccessibleName(julyTr("TAB_CHARTS","Charts"));
 	ui.tabCharts->setWindowTitle(ui.tabCharts->accessibleName()+" ["+profileName+"]");
@@ -1992,6 +2080,8 @@ bool QtBitcoinTrader::eventFilter(QObject *obj, QEvent *event)
 		if(obj==ui.tabRules)QTimer::singleShot(50,this,SLOT(attachRules()));
 		else
 		if(obj==ui.tabLastTrades)QTimer::singleShot(50,this,SLOT(attachTrades()));
+		else
+		if(obj==ui.tabDepth)QTimer::singleShot(50,this,SLOT(attachDepth()));
 		else
 		if(obj==ui.tabCharts)QTimer::singleShot(50,this,SLOT(attachCharts()));
 	}

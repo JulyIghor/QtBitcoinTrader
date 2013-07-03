@@ -38,6 +38,15 @@ http://vk.com/QtBitcoinTrader
 
 Change Log
 
+v1.07
+- Improved connection stability
+- API engine rewrited
+- Added balances triggers to rules
+- Fixed RUR currency in BTC-e
+- Fixed auto-scroll mode in last trades
+- Fixed many minor bugs
+- Now all binaries is digitally signed
+
 v1.06
 - Bugfix release
 - Fixed critical bug in Mt.Gox engine
