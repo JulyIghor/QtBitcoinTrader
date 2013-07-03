@@ -1,6 +1,6 @@
-Win32Ver=1.07
-MacVer=1.07
-SrcVer=1.07
+Win32Ver=1.00
+MacVer=1.00
+SrcVer=1.00
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/QtBitcoinTrader.exe
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTrader
 Win32ChangeLog=v1.07<br>- Improved connection stability<br>- API engine rewrited<br>- Added balances triggers to rules<br>- Fixed RUR currency in BTC-e<br>- Fixed auto-scroll mode in last trades<br>- Fixed many minor bugs<br>- Now all binaries is digitally signed
