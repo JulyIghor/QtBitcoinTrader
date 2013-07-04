@@ -244,6 +244,8 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 	}
 	else
 	{
+		emit softLagChanged(softLagTime.elapsed());
+		softLagTime.restart();
 		if(isLogEnabled)logThread->writeLog("AuthData: "+data);
 		authRequestTime.restart();
 		apiDownCounter=0;
