@@ -117,7 +117,6 @@ QString RuleHolder::getPriceText()
 	if(rulePrice==-5.0)return julyTr("AS_MARKET_LOW","Market Low");
 	if(rulePrice==-6.0)return julyTr("AS_ORDERS_LAST_BUY","Orders Last Buy");
 	if(rulePrice==-7.0)return julyTr("AS_ORDERS_LAST_SELL","Orders Last Sell");
-	if(rulePrice==-8.0)return julyTr("SAME_AS_RULE","Same as Rule Price");
 	return currencyBSign+" "+mainWindow.numFromDouble(rulePrice);
 }
 

@@ -216,7 +216,6 @@ String_RULE_CONFIRM_REMOVE_ALL=Ben je zeker dat je alle regels wilt verwijderen?
 String_RULE_STATE_DISABLED=uitgeschakeld
 String_RULE_STATE_DONE=uitgevoerd
 String_RULE_STATE_PENDING=Hangend
-String_SAME_AS_RULE=Zelfde als regelprijs
 String_SAVE_TRANSLATION=Save translation file
 String_SELL=verkoop
 String_SELL_ALL_BTC=Verkoop al

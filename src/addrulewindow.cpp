@@ -161,7 +161,6 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder holder)
 	if(fillRulePrice==-5.0)ui.checkMarketLow_2->setChecked(true);
 	if(fillRulePrice==-6.0)ui.checkOrdersLastBuyPrice_2->setChecked(true);
 	if(fillRulePrice==-7.0)ui.checkOrdersLastSellPrice_2->setChecked(true);
-	if(fillRulePrice==-8.0)ui.checkRulePrice->setChecked(true);
 	}
 }
 
@@ -184,7 +183,6 @@ RuleHolder AddRuleWindow::getRuleHolder()
 	if(ui.checkMarketLow_2->isChecked())ruleSellPrice=-5.0;
 	if(ui.checkOrdersLastBuyPrice_2->isChecked())ruleSellPrice=-6.0;
 	if(ui.checkOrdersLastSellPrice_2->isChecked())ruleSellPrice=-7.0;
-	if(ui.checkRulePrice->isChecked())ruleSellPrice=-8.0;
 
 	int moreLessEqual=0;
 	if(ui.checkGoesAbove->isChecked())moreLessEqual=1;
@@ -214,24 +212,30 @@ void AddRuleWindow::ifChanged(bool on)
 {
 	if(!on)return;
 
-	ui.priceBtcIcon->setVisible(ui.checkBtcBalance->isChecked());
-	ui.priceUsdIcon->setVisible(!ui.priceUsdIcon->isVisible());
-
 	if(ui.checkBtcBalance->isChecked())
 	{
 		ui.thanValue->setDecimals(btcDecimals);
 		ui.thanValue->setValue(mainWindow.ui.accountBTC->value());
+
+		ui.priceBtcIcon->setVisible(true);
+		ui.priceUsdIcon->setVisible(false);
 	}
 	else
 	if(ui.checkUsdBalance->isChecked())
 	{
 		ui.thanValue->setDecimals(usdDecimals);
 		ui.thanValue->setValue(mainWindow.ui.accountUSD->value());
+
+		ui.priceBtcIcon->setVisible(false);
+		ui.priceUsdIcon->setVisible(true);
 	}
 	else
 	{
 		ui.thanValue->setDecimals(priceDecimals);
 		ui.thanValue->setValue(mainWindow.ui.marketLast->value());
+
+		ui.priceBtcIcon->setVisible(false);
+		ui.priceUsdIcon->setVisible(true);
 	}
 	double oldValue=ui.thanValue->value();
 	ui.thanValue->setValue(0.123456789);

@@ -220,7 +220,6 @@ String_RULE_CONFIRM_REMOVE_ALL=Are you sure to remove all rules?
 String_RULE_STATE_DISABLED=disabled
 String_RULE_STATE_DONE=done
 String_RULE_STATE_PENDING=pending
-String_SAME_AS_RULE=Same as Rule Price
 String_SAVE_TRANSLATION=Save translation file
 String_SELL=sell
 String_SELL_ALL_BTC=All I have

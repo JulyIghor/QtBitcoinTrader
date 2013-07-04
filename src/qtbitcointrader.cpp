@@ -1800,7 +1800,6 @@ void QtBitcoinTrader::checkAndExecuteRule(QList<RuleHolder> *ruleHolder, double 
 					if(priceToExec==-5.0)priceToExec=ui.marketLow->value();
 					if(priceToExec==-6.0)priceToExec=ui.ordersLastBuyPrice->value();
 					if(priceToExec==-7.0)priceToExec=ui.ordersLastSellPrice->value();
-					if(priceToExec==-8.0)priceToExec=priceToExec;
 				}			
 
 				if(ruleBtc>=minTradeVolume)

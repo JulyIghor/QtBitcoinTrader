@@ -216,7 +216,6 @@ String_RULE_CONFIRM_REMOVE_ALL=¿Está seguro de eliminar todas las reglas?
 String_RULE_STATE_DISABLED=discapacitado
 String_RULE_STATE_DONE=hecho
 String_RULE_STATE_PENDING=pendiente
-String_SAME_AS_RULE=Igual que la Regla Precio
 String_SAVE_TRANSLATION=Guardar archivo de traducción
 String_SELL=vender
 String_SELL_ALL_BTC=Vende Toda

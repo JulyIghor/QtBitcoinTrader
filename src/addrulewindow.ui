@@ -803,19 +803,6 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
-               <widget class="QRadioButton" name="checkRulePrice">
-                <property name="accessibleName">
-                 <string>CHECK_RULE_PRICE</string>
-                </property>
-                <property name="text">
-                 <string>Same as Rule Price</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QRadioButton" name="checkLastPrice_2">
                 <property name="accessibleName">
                  <string>TR00057</string>
@@ -824,7 +811,7 @@
                  <string>Market Last Price</string>
                 </property>
                 <property name="checked">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>

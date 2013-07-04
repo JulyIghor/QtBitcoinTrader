@@ -216,7 +216,6 @@ String_RULE_CONFIRM_REMOVE_ALL=Er du sikker på at du vil fjerne alle reglene?
 String_RULE_STATE_DISABLED=inaktiv
 String_RULE_STATE_DONE=utført
 String_RULE_STATE_PENDING=under utførelse
-String_SAME_AS_RULE=Samme som Regelpris
 String_SAVE_TRANSLATION=Lagre transaksjonsfil
 String_SELL=selg
 String_SELL_ALL_BTC=Selg Alle

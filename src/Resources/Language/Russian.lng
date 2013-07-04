@@ -220,7 +220,6 @@ String_RULE_CONFIRM_REMOVE_ALL=Подтвердите удаление всех 
 String_RULE_STATE_DISABLED=отключено
 String_RULE_STATE_DONE=выполнено
 String_RULE_STATE_PENDING=ожидает
-String_SAME_AS_RULE=Как в правиле
 String_SAVE_TRANSLATION=Сохранить файл перевода
 String_SELL=продать
 String_SELL_ALL_BTC=все средства
