@@ -44,6 +44,8 @@ bool *logEnabled_;
 QString *iniFileName_;
 QString *logFileName_;
 double *appVerReal_;
+double *appVerLastReal_;
+bool *appVerIsBeta_;
 QByteArray *appVerStr_;
 bool *validKeySign_;
 JulyTranslator *julyTranslator;
@@ -85,8 +87,15 @@ int main(int argc, char *argv[])
 	
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
-	appVerStr_=new QByteArray("1.0703");
-	appVerReal_=new double(appVerStr.toDouble());if(appVerStr.size()>4)appVerStr.insert(4,".");
+	appVerIsBeta_=new bool(false);
+	appVerStr_=new QByteArray("1.0705");
+	appVerReal_=new double(appVerStr.toDouble());
+	if(appVerStr.size()>4)
+	{
+		appVerStr.insert(4,".");
+		if(appVerStr.at(appVerStr.size()-1)!='0')appVerIsBeta=true;
+	}
+	appVerLastReal_=new double(appVerReal);
 	currencyBStr_=new QByteArray("USD");
 	currencyBStrLow_=new QByteArray("usd");
 	currencyBSign_=new QByteArray("USD");
@@ -198,6 +207,8 @@ int main(int argc, char *argv[])
 		if(!QFile::exists(appDataDir+"Language"))QDir().mkpath(appDataDir+"Language");
 		QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
 		QString langFile=settings.value("LanguageFile","").toString();
+		appVerLastReal=settings.value("Version",1.0).toDouble();
+		settings.setValue("Version",appVerReal);
 		if(langFile.isEmpty()||!langFile.isEmpty()&&!QFile::exists(langFile))langFile=defaultLangFile;
 			julyTranslator->loadFromFile(langFile);
 	}
@@ -303,7 +314,6 @@ int main(int argc, char *argv[])
 	mainWindow_=new QtBitcoinTrader;
 	QObject::connect(mainWindow_,SIGNAL(quit()),&a,SLOT(quit()));
 	}
-	mainWindow.show();
 	mainWindow.loadUiSettings();
 	a.exec();
 	if(lockFile)

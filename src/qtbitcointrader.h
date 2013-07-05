@@ -10,14 +10,15 @@
 #ifndef QTBITCOINTRADER_H
 #define QTBITCOINTRADER_H
 
-#include <QtGui/QDialog>
+#include <QtGui/QWidget>
 #include "ui_qtbitcointrader.h"
 #include <QHttp>
 #include <QCloseEvent>
 #include "ruleholder.h"
 #include <QSystemTrayIcon>
+#include <QSettings>
 
-class QtBitcoinTrader : public QDialog
+class QtBitcoinTrader : public QWidget
 {
 	Q_OBJECT
 
@@ -46,6 +47,8 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	QSettings *iniSettings;
+	QRect currentDesktopRect;
 	bool isValidSoftLag;
 	void saveDetachedWindowsSettings(bool force=false);
 	QString windowTitleP;
@@ -126,13 +129,17 @@ private:
 	void checkIsTabWidgetVisible();
 
 	void clearTimeOutedTrades();
-	bool isValidGeometry(QRect *geo);
+	bool isValidGeometry(QRect *geo, int yMargin=20);
+	QRect rectInRect(QRect aRect, QSize bSize);
+	void saveWindowState(QWidget *, QString name);
+	void loadWindowState(QWidget *, QString name);
 	bool isDetachedLog;
 	bool isDetachedTrades;
 	bool isDetachedRules;
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void maximizeMainWindow();
 	void setSoftLagValue(int);
 	void trayActivated(QSystemTrayIcon::ActivationReason);
 	void buttonMinimizeToTray();

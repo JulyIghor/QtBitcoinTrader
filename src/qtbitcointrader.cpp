@@ -38,7 +38,7 @@
 #endif
 
 QtBitcoinTrader::QtBitcoinTrader()
-	: QDialog()
+	: QWidget()
 {
 	isValidSoftLag=true;
 	upArrow=QByteArray::fromBase64("4oaR");
@@ -119,17 +119,17 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tableTrades->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
 	ui.tableTrades->horizontalHeaderItem(3)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 
-	QSettings settings(iniFileName,QSettings::IniFormat);
+	iniSettings=new QSettings(iniFileName,QSettings::IniFormat,this);
 
-	profileName=settings.value("ProfileName","Default Profile").toString();
+	profileName=iniSettings->value("ProfileName","Default Profile").toString();
 	windowTitleP=profileName+" - "+windowTitle()+" v"+appVerStr;
 	setWindowTitle(windowTitleP);
 
-	ui.accountBTCBeep->setChecked(settings.value("AccountBTCBeep",false).toBool());
-	ui.accountUSDBeep->setChecked(settings.value("AccountUSDBeep",false).toBool());
-	ui.marketHighBeep->setChecked(settings.value("MarketHighBeep",false).toBool());
-	ui.marketLowBeep->setChecked(settings.value("MarketLowBeep",false).toBool());
-	ui.ruleBeep->setChecked(settings.value("RuleExecutedBeep",false).toBool());
+	ui.accountBTCBeep->setChecked(iniSettings->value("AccountBTCBeep",false).toBool());
+	ui.accountUSDBeep->setChecked(iniSettings->value("AccountUSDBeep",false).toBool());
+	ui.marketHighBeep->setChecked(iniSettings->value("MarketHighBeep",false).toBool());
+	ui.marketLowBeep->setChecked(iniSettings->value("MarketLowBeep",false).toBool());
+	ui.ruleBeep->setChecked(iniSettings->value("RuleExecutedBeep",false).toBool());
 
 	ordersSelectionChanged();
 
@@ -152,6 +152,10 @@ QtBitcoinTrader::QtBitcoinTrader()
 	checkForUpdates=settingsMain.value("CheckForUpdates",true).toBool();
 	httpRequestInterval=settingsMain.value("HttpRequestsInterval",400).toInt();
 	if(httpRequestInterval<50)httpRequestInterval=400;
+	if(appVerLastReal<1.0703)
+	{
+		if(httpRequestInterval==400)httpRequestInterval=200;
+	}
 	settingsMain.setValue("HttpRequestsInterval",httpRequestInterval);
 
 	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",5).toInt();
@@ -160,13 +164,13 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	int screenCount=QApplication::desktop()->screenCount();
 	QPoint cursorPos=QCursor::pos();
-	QRect currentDesktopRect(0,0,1024,720);
+	currentDesktopRect=QRect(0,0,1024,720);
 	for(int n=0;n<screenCount;n++)
 	{
-		if(QApplication::desktop()->screen(n)->rect().contains(cursorPos))
+		if(QApplication::desktop()->screenGeometry(n).contains(cursorPos))
 			currentDesktopRect=QApplication::desktop()->availableGeometry(n);
 	}
-	
+
 	ui.tabOrdersLogOnTop->setVisible(false);
 	ui.tabRulesOnTop->setVisible(false);
 	ui.tabTradesOnTop->setVisible(false);
@@ -179,7 +183,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tabCharts->installEventFilter(this);
 	ui.tabDepth->installEventFilter(this);
 
-	exchangeId=settings.value("ExchangeId",0).toInt();
+	exchangeId=iniSettings->value("ExchangeId",0).toInt();
 	switch(exchangeId)
 	{
 	case 1:
@@ -236,9 +240,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	accountFeeChanged(ui.accountFee->value());
 
 	reloadLanguageList();
-	resize(qMax(minimumSizeHint().width(),qMin(1024,(int)(currentDesktopRect.width()*0.95))),qMin((int)(currentDesktopRect.height()*0.95),700));
 
-	int indexCurrency=ui.currencyComboBox->findText(settings.value("Currency","BTC/USD").toString());
+	int indexCurrency=ui.currencyComboBox->findText(iniSettings->value("Currency","BTC/USD").toString());
 	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
 
 	constructorFinished=true;
@@ -249,6 +252,9 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	if(checkForUpdates)QProcess::startDetached(QApplication::applicationFilePath(),QStringList("/checkupdate"));
 	if(ui.langComboBox->count()==0)fixAllChildButtonsAndLabels(this);
+
+	iniSettings->sync();
+
 	secondSlot();
 }
 
@@ -342,29 +348,38 @@ void QtBitcoinTrader::tabChartsOnTop(bool on)
 	ui.tabCharts->show();
 }
 
-bool QtBitcoinTrader::isValidGeometry(QRect *geo)
+bool QtBitcoinTrader::isValidGeometry(QRect *geo, int yMargin)
 {
-	static QRect allDesktopsRect=QApplication::desktop()->geometry();
-	return geo->width()>100&&geo->height()>100&&allDesktopsRect.contains(QPoint(geo->topLeft().x(),geo->topLeft().y()-20))&&allDesktopsRect.contains(geo->bottomRight());
+	QRect allDesktopsRect=QApplication::desktop()->geometry();
+	return geo->width()>100&&geo->height()>100&&allDesktopsRect.contains(QPoint(geo->topLeft().x(),geo->topLeft().y()-yMargin),true)&&allDesktopsRect.contains(geo->bottomRight(),true);
 }
 
 void QtBitcoinTrader::loadUiSettings()
 {
-	QSettings settings(iniFileName,QSettings::IniFormat);
+	if(iniSettings->value("DetachedLog",isDetachedLog).toBool())detachLog();
 
-	if(settings.value("DetachedLog",isDetachedLog).toBool())detachLog();
-
-	if(settings.value("DetachedRules",isDetachedRules).toBool())detachRules();
+	if(iniSettings->value("DetachedRules",isDetachedRules).toBool())detachRules();
 	
-	if(settings.value("DetachedTrades",isDetachedRules).toBool())detachTrades();
+	if(iniSettings->value("DetachedTrades",isDetachedRules).toBool())detachTrades();
 
-	if(settings.value("DetachedDepth",isDetachedDepth).toBool())detachDepth();
+	if(iniSettings->value("DetachedDepth",isDetachedDepth).toBool())detachDepth();
 
-	if(settings.value("DetachedCharts",isDetachedRules).toBool())detachCharts();
+	if(iniSettings->value("DetachedCharts",isDetachedRules).toBool())detachCharts();
 	
-	int savedTab=settings.value("TradesCurrentTab",0).toInt();
+	int savedTab=iniSettings->value("TradesCurrentTab",0).toInt();
 	if(savedTab<ui.tabWidget->count())ui.tabWidget->setCurrentIndex(savedTab);
-	settings.sync();
+
+	//resize(qMax(minimumSizeHint().width(),qMin(1024,(int)(currentDesktopRect.width()*0.95))),
+	//	   qMin((int)(currentDesktopRect.height()*0.95),700));
+
+	loadWindowState(this,"Window");
+	iniSettings->sync();
+	show();
+}
+
+void QtBitcoinTrader::maximizeMainWindow()
+{
+	
 }
 
 void QtBitcoinTrader::checkUpdate()
@@ -659,8 +674,7 @@ void QtBitcoinTrader::currencyChanged(int val)
 	minTradeVolume=curDataList.at(2).toDouble();
 	minTradePrice=curDataList.at(3).toDouble();
 
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	settings.setValue("Currency",ui.currencyComboBox->currentText());
+	iniSettings->setValue("Currency",ui.currencyComboBox->currentText());
 	if(currencyAChanged)ui.accountBTC->setValue(0.0);
 	if(currencyBChanged)ui.accountUSD->setValue(0.0);
 	ui.marketBuy->setValue(0.0);
@@ -699,6 +713,8 @@ void QtBitcoinTrader::currencyChanged(int val)
 	marketPricesNotLoaded=true;
 	balanceNotLoaded=true;
 	fixDecimals(this);
+
+	iniSettings->sync();
 }
 
 void QtBitcoinTrader::firstTicker()
@@ -846,12 +862,12 @@ QString QtBitcoinTrader::clearData(QString data)
 void QtBitcoinTrader::saveSoundToggles()
 {
 	if(!constructorFinished)return;
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	settings.setValue("AccountBTCBeep",ui.accountBTCBeep->isChecked());
-	settings.setValue("AccountUSDBeep",ui.accountUSDBeep->isChecked());
-	settings.setValue("MarketHighBeep",ui.marketHighBeep->isChecked());
-	settings.setValue("MarketLowBeep",ui.marketLowBeep->isChecked());
-	settings.setValue("RuleExecutedBeep",ui.ruleBeep->isChecked());
+	iniSettings->setValue("AccountBTCBeep",ui.accountBTCBeep->isChecked());
+	iniSettings->setValue("AccountUSDBeep",ui.accountUSDBeep->isChecked());
+	iniSettings->setValue("MarketHighBeep",ui.marketHighBeep->isChecked());
+	iniSettings->setValue("MarketLowBeep",ui.marketLowBeep->isChecked());
+	iniSettings->setValue("RuleExecutedBeep",ui.ruleBeep->isChecked());
+	iniSettings->sync();
 }
 
 void QtBitcoinTrader::accountFeeChanged(double val)
@@ -1468,37 +1484,60 @@ void QtBitcoinTrader::closeEvent(QCloseEvent *event)
 	msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
 	if(msgBox.exec()!=QMessageBox::Yes){event->ignore();return;}
 	}
-	QSettings settings(iniFileName,QSettings::IniFormat);
-
-	settings.setValue("TabLogOrdersOnTop",ui.tabOrdersLogOnTop->isChecked());
-	settings.setValue("TabRulesOnTop",ui.tabRulesOnTop->isChecked());
-	settings.setValue("TabTradesOnTop",ui.tabTradesOnTop->isChecked());
-	settings.setValue("TabDepthOnTop",ui.tabDepthOnTop->isChecked());
-	settings.setValue("TabChartsOnTop",ui.tabChartsOnTop->isChecked());
-
 	saveDetachedWindowsSettings();
-	settings.setValue("TradesCurrentTab",ui.tabWidget->currentIndex());
-	settings.sync();
+	iniSettings->setValue("TradesCurrentTab",ui.tabWidget->currentIndex());
+
+	saveWindowState(this,"Window");
+	iniSettings->sync();
+
 	emit quit();
 	event->accept();
 }
 
+
+void QtBitcoinTrader::saveWindowState(QWidget *par, QString name)
+{
+	bool windowMaximized=par->windowState()==Qt::WindowMaximized;
+	iniSettings->setValue(name+"Maximized",windowMaximized);
+	if(windowMaximized)iniSettings->setValue(name+"Geometry",rectInRect(par->geometry(),par->minimumSizeHint()));
+	else	   iniSettings->setValue(name+"Geometry",par->geometry());
+}
+
+void QtBitcoinTrader::loadWindowState(QWidget *par, QString name)
+{
+	QRect savedGeometry=iniSettings->value(name+"Geometry",par->geometry()).toRect();
+	if(isValidGeometry(&savedGeometry,0))par->setGeometry(savedGeometry);
+	if(iniSettings->value(name+"Maximized",false).toBool())par->setWindowState(Qt::WindowMaximized);
+}
+
 void QtBitcoinTrader::saveDetachedWindowsSettings(bool force)
 {
-	QSettings settings(iniFileName,QSettings::IniFormat);
 	if(!force)
 	{
-	settings.setValue("DetachedLog",isDetachedLog);
-	settings.setValue("DetachedRules",isDetachedRules);
-	settings.setValue("DetachedTrades",isDetachedTrades);
-	settings.setValue("DetachedDepth",isDetachedDepth);
-	settings.setValue("DetachedCharts",isDetachedCharts);
+	iniSettings->setValue("DetachedLog",isDetachedLog);
+	iniSettings->setValue("DetachedRules",isDetachedRules);
+	iniSettings->setValue("DetachedTrades",isDetachedTrades);
+	iniSettings->setValue("DetachedDepth",isDetachedDepth);
+	iniSettings->setValue("DetachedCharts",isDetachedCharts);
 	}
-	if(isDetachedLog)settings.setValue("DetachedLogGeometry",ui.tabOrdersLog->geometry());
-	if(isDetachedRules)settings.setValue("DetachedRulesGeometry",ui.tabRules->geometry());
-	if(isDetachedTrades)settings.setValue("DetachedTradesGeometry",ui.tabLastTrades->geometry());
-	if(isDetachedDepth)settings.setValue("DetachedDepthGeometry",ui.tabDepth->geometry());
-	if(isDetachedCharts)settings.setValue("DetachedChartsGeometry",ui.tabCharts->geometry());
+	if(isDetachedLog)saveWindowState(ui.tabOrdersLog,"DetachedLog");
+	if(isDetachedRules)saveWindowState(ui.tabRules,"DetachedRules");
+	if(isDetachedTrades)saveWindowState(ui.tabLastTrades,"DetachedTrades");
+	if(isDetachedDepth)saveWindowState(ui.tabDepth,"DetachedDepth");
+	if(isDetachedCharts)saveWindowState(ui.tabCharts,"DetachedCharts");
+
+	iniSettings->setValue("TabLogOrdersOnTop",ui.tabOrdersLogOnTop->isChecked());
+	iniSettings->setValue("TabRulesOnTop",ui.tabRulesOnTop->isChecked());
+	iniSettings->setValue("TabTradesOnTop",ui.tabTradesOnTop->isChecked());
+	iniSettings->setValue("TabDepthOnTop",ui.tabDepthOnTop->isChecked());
+	iniSettings->setValue("TabChartsOnTop",ui.tabChartsOnTop->isChecked());
+
+	iniSettings->sync();
+}
+
+QRect QtBitcoinTrader::rectInRect(QRect aRect, QSize bSize)
+{
+	return QRect(aRect.x()+(aRect.width()-bSize.width())/2.0,aRect.y()+(aRect.height()-bSize.height())/2.0,bSize.width(),bSize.height());
 }
 
 void QtBitcoinTrader::buyBitcoinsButton()
@@ -1832,12 +1871,8 @@ void QtBitcoinTrader::detachLog()
 	ui.tabOrdersLog->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachOrdersLog->setVisible(false);
 	ui.tabOrdersLogOnTop->setVisible(true);
-
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	QRect newGeometry=settings.value("DetachedLogGeometry",ui.tabOrdersLog->geometry()).toRect();
-	if(isValidGeometry(&newGeometry))ui.tabOrdersLog->setGeometry(newGeometry);
-
-	ui.tabOrdersLogOnTop->setChecked(settings.value("TabOrdersOnTop",false).toBool());
+	loadWindowState(ui.tabOrdersLog,"DetachedLog");
+	ui.tabOrdersLogOnTop->setChecked(iniSettings->value("TabLogOrdersOnTop",false).toBool());
 	isDetachedLog=true;
 	tabLogOrdersOnTop(ui.tabOrdersLogOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -1849,12 +1884,8 @@ void QtBitcoinTrader::detachRules()
 	ui.tabRules->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachRules->setVisible(false);
 	ui.tabRulesOnTop->setVisible(true);
-
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	QRect newGeometry=settings.value("DetachedRulesGeometry",ui.tabRules->geometry()).toRect();
-	if(isValidGeometry(&newGeometry))ui.tabRules->setGeometry(newGeometry);
-
-	ui.tabRulesOnTop->setChecked(settings.value("TabRulesOnTop",false).toBool());
+	loadWindowState(ui.tabRules,"DetachedRules");
+	ui.tabRulesOnTop->setChecked(iniSettings->value("TabRulesOnTop",false).toBool());
 	isDetachedRules=true;
 	tabRulesOnTop(ui.tabRulesOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -1866,12 +1897,8 @@ void QtBitcoinTrader::detachTrades()
 	ui.tabLastTrades->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachTrades->setVisible(false);
 	ui.tabTradesOnTop->setVisible(true);
-
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	QRect newGeometry=settings.value("DetachedTradesGeometry",ui.tabLastTrades->geometry()).toRect();
-	if(isValidGeometry(&newGeometry))ui.tabLastTrades->setGeometry(newGeometry);
-
-	ui.tabTradesOnTop->setChecked(settings.value("TabTradesOnTop",false).toBool());
+	loadWindowState(ui.tabLastTrades,"DetachedTrades");
+	ui.tabTradesOnTop->setChecked(iniSettings->value("TabTradesOnTop",false).toBool());
 	isDetachedTrades=true;
 	tabTradesOnTop(ui.tabTradesOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -1883,12 +1910,8 @@ void QtBitcoinTrader::detachDepth()
 	ui.tabDepth->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachDepth->setVisible(false);
 	ui.tabDepthOnTop->setVisible(true);
-
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	QRect newGeometry=settings.value("DetachedDepthGeometry",ui.tabDepth->geometry()).toRect();
-	if(isValidGeometry(&newGeometry))ui.tabDepth->setGeometry(newGeometry);
-
-	ui.tabDepthOnTop->setChecked(settings.value("TabDepthOnTop",false).toBool());
+	loadWindowState(ui.tabDepth,"DetachedDepth");
+	ui.tabDepthOnTop->setChecked(iniSettings->value("TabDepthOnTop",false).toBool());
 	isDetachedDepth=true;
 	tabDepthOnTop(ui.tabDepthOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -1900,12 +1923,8 @@ void QtBitcoinTrader::detachCharts()
 	ui.tabCharts->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachCharts->setVisible(false);
 	ui.tabChartsOnTop->setVisible(true);
-
-	QSettings settings(iniFileName,QSettings::IniFormat);
-	QRect newGeometry=settings.value("DetachedChartsGeometry",ui.tabCharts->geometry()).toRect();
-	if(isValidGeometry(&newGeometry))ui.tabCharts->setGeometry(newGeometry);
-
-	ui.tabChartsOnTop->setChecked(settings.value("TabChartsOnTop",false).toBool());
+	loadWindowState(ui.tabCharts,"DetachedCharts");
+	ui.tabChartsOnTop->setChecked(iniSettings->value("TabChartsOnTop",false).toBool());
 	isDetachedCharts=true;
 	tabChartsOnTop(ui.tabChartsOnTop->isChecked());
 	checkIsTabWidgetVisible();

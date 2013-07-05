@@ -33,7 +33,8 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	connect(timeOutTimer,SIGNAL(timeout()),this,SLOT(exitSlot()));
 	connect(httpGet,SIGNAL(done(bool)),this,SLOT(httpDone(bool)));
 
-	httpGet->get("/JulyIGHOR/QtBitcoinTrader/master/versions.txt");
+	if(appVerIsBeta)httpGet->get("/JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
+			else	httpGet->get("/JulyIGHOR/QtBitcoinTrader/master/versions.txt");
 	timeOutTimer->start(30000);
 }
 

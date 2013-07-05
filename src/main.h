@@ -26,6 +26,8 @@
 #define iniFileName (*iniFileName_)
 #define logFileName (*logFileName_)
 #define appVerReal (*appVerReal_)
+#define appVerLastReal (*appVerLastReal_)
+#define appVerIsBeta (*appVerIsBeta_)
 #define appVerStr (*appVerStr_)
 #define currencyRequestPair (*currencyRequest_)
 #define currencyAStr (*currencyAStr_)
@@ -78,6 +80,8 @@ extern bool *logEnabled_;
 extern QString *logFileName_;
 extern QString *iniFileName_;
 extern double *appVerReal_;
+extern double *appVerLastReal_;
+extern bool *appVerIsBeta_;
 extern QMap<QByteArray,QByteArray> *currencySignMap;
 extern QMap<QByteArray,QByteArray> *currencyNamesMap;
 #endif // MAIN_H
