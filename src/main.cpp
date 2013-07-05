@@ -88,10 +88,10 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0705");
+	appVerStr_=new QByteArray("1.0706");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
-	{
+	{ 
 		appVerStr.insert(4,".");
 		if(appVerStr.at(appVerStr.size()-1)!='0')appVerIsBeta=true;
 	}
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	currencySignMap=new QMap<QByteArray,QByteArray>;
 	currencyNamesMap=new QMap<QByteArray,QByteArray>;
 	dateTimeFormat_=new QString(QLocale().dateTimeFormat(QLocale::ShortFormat));
-	timeFormat_=new QString(QLocale().timeFormat(QLocale::ShortFormat));// "HH:mm:ss");
+	timeFormat_=new QString(QLocale().timeFormat(QLocale::ShortFormat));
 	exchangeName_=new QString("Mt.Gox");
 	btcDecimals_=new int(8);
 	usdDecimals_=new int(5);

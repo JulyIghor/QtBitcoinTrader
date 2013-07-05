@@ -4795,16 +4795,6 @@ p, li { white-space: pre-wrap; }
         <string>General</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="1">
-         <widget class="QComboBox" name="langComboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label_51">
           <property name="sizePolicy">
@@ -4827,8 +4817,42 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="langComboBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="0" colspan="2">
          <layout class="QHBoxLayout" name="horizontalLayout_17">
+          <item>
+           <widget class="QCheckBox" name="widgetStaysOnTop">
+            <property name="accessibleName">
+             <string>STAYS_ON_TOP</string>
+            </property>
+            <property name="text">
+             <string>Stay on Top</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="minimizeOnCloseCheckBox">
+            <property name="accessibleName">
+             <string>CLOSE_TO_TRAY</string>
+            </property>
+            <property name="text">
+             <string>Close to tray</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_19">
           <item>
            <widget class="QPushButton" name="buttonNewWindow">
             <property name="sizePolicy">
@@ -4861,7 +4885,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="buttonMinimizeToTray">
+           <widget class="QPushButton" name="aboutTranslationButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -4881,13 +4905,10 @@ p, li { white-space: pre-wrap; }
              </size>
             </property>
             <property name="accessibleName">
-             <string>MINIMIZE_TO_TRAY</string>
+             <string>TR00048</string>
             </property>
             <property name="text">
-             <string>Minimize to Tray</string>
-            </property>
-            <property name="shortcut">
-             <string>Ctrl+M</string>
+             <string>About</string>
             </property>
            </widget>
           </item>
@@ -4983,34 +5004,6 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
          </layout>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QPushButton" name="aboutTranslationButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="accessibleName">
-           <string>TR00048</string>
-          </property>
-          <property name="text">
-           <string>About</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
@@ -5491,8 +5484,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleAddButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>665</x>
-     <y>175</y>
+     <x>697</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5507,8 +5500,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemoveAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>665</x>
-     <y>175</y>
+     <x>970</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5523,8 +5516,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>665</x>
-     <y>175</y>
+     <x>1107</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5731,8 +5724,8 @@ p, li { white-space: pre-wrap; }
    <slot>aboutTranslationButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1111</x>
-     <y>625</y>
+     <x>1110</x>
+     <y>624</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5764,7 +5757,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>1000</x>
-     <y>589</y>
+     <y>624</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5939,8 +5932,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleEditButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>665</x>
-     <y>175</y>
+     <x>834</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5955,8 +5948,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleUp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>583</x>
-     <y>130</y>
+     <x>617</x>
+     <y>152</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5971,8 +5964,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleDown()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>595</x>
-     <y>130</y>
+     <x>646</x>
+     <y>152</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5987,8 +5980,8 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>571</x>
-     <y>130</y>
+     <x>588</x>
+     <y>152</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6323,8 +6316,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachRules()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>648</x>
-     <y>130</y>
+     <x>1108</x>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6339,8 +6332,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachTrades()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>648</x>
-     <y>133</y>
+     <x>1108</x>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6355,8 +6348,8 @@ p, li { white-space: pre-wrap; }
    <slot>copyDonateButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>665</x>
-     <y>172</y>
+     <x>1098</x>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6371,8 +6364,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachCharts()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>665</x>
-     <y>160</y>
+     <x>1107</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6451,8 +6444,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabRulesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>636</x>
-     <y>130</y>
+     <x>1027</x>
+     <y>150</y>
     </hint>
     <hint type="destinationlabel">
      <x>1192</x>
@@ -6467,8 +6460,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabTradesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>634</x>
-     <y>133</y>
+     <x>1027</x>
+     <y>150</y>
     </hint>
     <hint type="destinationlabel">
      <x>1233</x>
@@ -6483,8 +6476,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabChartsOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>665</x>
-     <y>160</y>
+     <x>1026</x>
+     <y>151</y>
     </hint>
     <hint type="destinationlabel">
      <x>1236</x>
@@ -6505,22 +6498,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>202</x>
      <y>309</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonMinimizeToTray</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>buttonMinimizeToTray()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1110</x>
-     <y>589</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1285</x>
-     <y>572</y>
     </hint>
    </hints>
   </connection>
@@ -6569,6 +6546,22 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>1199</x>
      <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>widgetStaysOnTop</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QtBitcoinTraderClass</receiver>
+   <slot>setWindowStaysOnTop(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>925</x>
+     <y>577</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1158</x>
+     <y>562</y>
     </hint>
    </hints>
   </connection>
@@ -6655,5 +6648,6 @@ p, li { white-space: pre-wrap; }
   <slot>buttonMinimizeToTray()</slot>
   <slot>tabDepthOnTop(bool)</slot>
   <slot>detachDepth()</slot>
+  <slot>setWindowStaysOnTop(bool)</slot>
  </slots>
 </ui>

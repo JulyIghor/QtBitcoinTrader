@@ -1,6 +1,7 @@
 <RCC>
   <qresource prefix="/"> 
     <file>Resources/Thawte_Primary_Root_CA.cer</file>
+    <file>Resources/exit.png</file>
     <file>Resources/Mute.png</file>
     <file>Resources/minus.png</file>
     <file>Resources/multiply.png</file>

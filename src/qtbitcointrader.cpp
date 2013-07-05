@@ -40,6 +40,7 @@
 QtBitcoinTrader::QtBitcoinTrader()
 	: QWidget()
 {
+	trayMenu=0;
 	isValidSoftLag=true;
 	upArrow=QByteArray::fromBase64("4oaR");
 	downArrow=QByteArray::fromBase64("4oaT");
@@ -130,6 +131,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.marketHighBeep->setChecked(iniSettings->value("MarketHighBeep",false).toBool());
 	ui.marketLowBeep->setChecked(iniSettings->value("MarketLowBeep",false).toBool());
 	ui.ruleBeep->setChecked(iniSettings->value("RuleExecutedBeep",false).toBool());
+
+	ui.minimizeOnCloseCheckBox->setChecked(iniSettings->value("CloseToTray",false).toBool());
 
 	ordersSelectionChanged();
 
@@ -261,6 +264,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 QtBitcoinTrader::~QtBitcoinTrader()
 {
 	if(trayIcon)trayIcon->hide();
+	if(trayMenu)delete trayMenu;
 }
 
 void QtBitcoinTrader::addPopupDialog(int val)
@@ -268,7 +272,6 @@ void QtBitcoinTrader::addPopupDialog(int val)
 	static int currentPopupDialogs=0;
 	currentPopupDialogs+=val;
 	ui.aboutTranslationButton->setEnabled(currentPopupDialogs==0);
-	ui.buttonMinimizeToTray->setEnabled(currentPopupDialogs==0);
 	ui.buttonNewWindow->setEnabled(currentPopupDialogs==0);
 }
 
@@ -279,6 +282,11 @@ void QtBitcoinTrader::buttonMinimizeToTray()
 		trayIcon=new QSystemTrayIcon(QIcon(":/Resources/QtBitcoinTrader.png"),this);
 		trayIcon->setToolTip(windowTitle());
 		connect(trayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(trayActivated(QSystemTrayIcon::ActivationReason)));
+		trayMenu=new QMenu;
+		trayIcon->setContextMenu(trayMenu);
+		trayMenu->addAction(QIcon(":/Resources/exit.png"),"Exit");
+		trayMenu->actions().last()->setWhatsThis("EXIT");
+		connect(trayMenu->actions().first(),SIGNAL(triggered(bool)),this,SLOT(exitApp()));
 	}
 	trayIcon->show();
 	trayIcon->showMessage(windowTitleP,windowTitle());
@@ -290,9 +298,17 @@ void QtBitcoinTrader::buttonMinimizeToTray()
 	if(ui.tabCharts->parent()==0)ui.tabCharts->hide();
 }
 
-void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason)
+void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason reazon)
 {
 	if(trayIcon==0)return;
+	if(reazon==QSystemTrayIcon::Context)
+	{
+		QList<QAction*> tList=trayMenu->actions();
+		for(int n=0;n<tList.count();n++)
+			tList.at(n)->setText(julyTr(tList.at(n)->whatsThis(),tList.at(n)->text()));
+		trayMenu->exec();
+		return;
+	}
 	show();
 	if(ui.tabOrdersLog->parent()==0)ui.tabOrdersLog->show();
 	if(ui.tabLastTrades->parent()==0)ui.tabLastTrades->show();
@@ -300,6 +316,7 @@ void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason)
 	if(ui.tabDepth->parent()==0)ui.tabDepth->show();
 	if(ui.tabCharts->parent()==0)ui.tabCharts->show();
 	trayIcon->hide();
+	delete trayMenu; trayMenu=0;
 	delete trayIcon; trayIcon=0;
 }
 
@@ -369,17 +386,12 @@ void QtBitcoinTrader::loadUiSettings()
 	int savedTab=iniSettings->value("TradesCurrentTab",0).toInt();
 	if(savedTab<ui.tabWidget->count())ui.tabWidget->setCurrentIndex(savedTab);
 
-	//resize(qMax(minimumSizeHint().width(),qMin(1024,(int)(currentDesktopRect.width()*0.95))),
-	//	   qMin((int)(currentDesktopRect.height()*0.95),700));
+	ui.widgetStaysOnTop->setChecked(iniSettings->value("WindowOnTop",false).toBool());
 
 	loadWindowState(this,"Window");
 	iniSettings->sync();
-	show();
-}
-
-void QtBitcoinTrader::maximizeMainWindow()
-{
 	
+	setWindowStaysOnTop(ui.widgetStaysOnTop->isChecked());
 }
 
 void QtBitcoinTrader::checkUpdate()
@@ -1472,6 +1484,12 @@ void QtBitcoinTrader::ordersSelectionChanged()
 
 void QtBitcoinTrader::closeEvent(QCloseEvent *event)
 {
+	if(ui.minimizeOnCloseCheckBox->isChecked())
+	{
+		event->ignore();
+		buttonMinimizeToTray();
+		return;
+	}
 	if(ui.rulesTable->rowCount())
 	{
 	QMessageBox msgBox(this);
@@ -1484,13 +1502,8 @@ void QtBitcoinTrader::closeEvent(QCloseEvent *event)
 	msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
 	if(msgBox.exec()!=QMessageBox::Yes){event->ignore();return;}
 	}
-	saveDetachedWindowsSettings();
-	iniSettings->setValue("TradesCurrentTab",ui.tabWidget->currentIndex());
 
-	saveWindowState(this,"Window");
-	iniSettings->sync();
-
-	emit quit();
+	exitApp();
 	event->accept();
 }
 
@@ -2093,4 +2106,34 @@ bool QtBitcoinTrader::eventFilter(QObject *obj, QEvent *event)
 		if(obj==ui.tabCharts)QTimer::singleShot(50,this,SLOT(attachCharts()));
 	}
 	return QObject::eventFilter(obj, event);
+}
+
+void QtBitcoinTrader::setWindowStaysOnTop(bool on)
+{
+	hide();
+	if(on)setWindowFlags(Qt::Window|Qt::WindowStaysOnTopHint);
+	else  setWindowFlags(Qt::Window);
+
+#ifdef Q_OS_WIN
+	if(QtWin::isCompositionEnabled())
+		QtWin::extendFrameIntoClientArea(this);
+#endif
+
+	show();
+}
+
+void QtBitcoinTrader::exitApp()
+{
+	if(trayIcon)trayIcon->hide();
+
+	saveDetachedWindowsSettings();
+	iniSettings->setValue("TradesCurrentTab",ui.tabWidget->currentIndex());
+	iniSettings->setValue("CloseToTray",ui.minimizeOnCloseCheckBox->isChecked());
+
+	iniSettings->setValue("WindowOnTop",ui.widgetStaysOnTop->isChecked());
+
+	saveWindowState(this,"Window");
+	iniSettings->sync();
+
+	emit quit();
 }

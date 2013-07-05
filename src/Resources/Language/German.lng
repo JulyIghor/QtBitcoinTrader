@@ -116,7 +116,7 @@ Button_DELETE_TRANSLATION=Löschen
 Button_DETACH_TAB=Fenster ablösen
 Button_EXIT=Schließen
 Button_INSTALL=Installieren
-Button_MINIMIZE_TO_TRAY=Minimieren
+CheckBox_CLOSE_TO_TRAY=Close to Tray
 Button_OK=OK
 Button_RULE_EDIT=Bedingung bearbeiten
 Button_RULE_REMOVE_ALL=Alle entfernen
@@ -249,3 +249,4 @@ String_YES=Ja
 String_LANGUAGE_NAME=Deutsch
 String_LANGUAGE_AUTHOR=Diabolicus<br><a href="mailto:spirou666@gmx.de">spirou666@gmx.de</a><br>Donate Bitcoin:<br><a href="bitcoin:1Drv4D9FFmbyKsvg2zfqR5wq2b6akTvV8f">1Drv4D9FFmbyKsvg2zfqR5wq2b6akTvV8f</a>
 String_LANGUAGE_LOCALE=de_DE
+String_EXIT=Exit

@@ -17,6 +17,7 @@
 #include "ruleholder.h"
 #include <QSystemTrayIcon>
 #include <QSettings>
+#include <QMenu>
 
 class QtBitcoinTrader : public QWidget
 {
@@ -47,6 +48,7 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	QMenu *trayMenu;
 	QSettings *iniSettings;
 	QRect currentDesktopRect;
 	bool isValidSoftLag;
@@ -139,7 +141,8 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
-	void maximizeMainWindow();
+	void exitApp();
+	void setWindowStaysOnTop(bool);
 	void setSoftLagValue(int);
 	void trayActivated(QSystemTrayIcon::ActivationReason);
 	void buttonMinimizeToTray();
