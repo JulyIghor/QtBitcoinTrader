@@ -99,6 +99,9 @@ void Exchange_BTCe::clearValues()
 
 	lastFetchTid=QDateTime::currentDateTime().addSecs(-600).toTime_t();
 	lastFetchTid=-lastFetchTid;
+
+	foreach(int pendingId, authRequestMap.keys())removePendingId(pendingId);
+	httpAuth->clearPendingRequests();
 }
 
 QByteArray Exchange_BTCe::getMidData(QString a, QString b,QByteArray *data)
@@ -598,7 +601,6 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, QByteAr
 		headerAuth.setRequest("POST","/tapi"+method);
 		headerAuth.setValue("Sign",hmacSha512(privateRestSign,postData).toHex());
 		headerAuth.setContentLength(postData.size());
-
 		if(reqType>300&&vipRequestCount==0&&httpAuth->hasPendingRequests())
 		{
 			foreach(QNetworkReply* replay, noAuthRequestMap.keys())removeReplay(replay);

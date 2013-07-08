@@ -97,6 +97,9 @@ void Exchange_MtGox::clearValues()
 	lastHistory.clear();
 	lastOrders.clear();
 	lastFetchDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-600).toTime_t())+"000000";
+
+	foreach(int pendingId, authRequestMap.keys())removePendingId(pendingId);
+	httpAuth->clearPendingRequests();
 }
 
 QByteArray Exchange_MtGox::getMidData(QString a, QString b,QByteArray *data)
