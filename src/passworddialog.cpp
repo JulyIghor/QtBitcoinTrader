@@ -1,5 +1,5 @@
 // Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
+// I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
 // Or send e-mail directly to julyighor@gmail.com
@@ -40,7 +40,13 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
 	for(int n=0;n<settingsList.count();n++)
 	{
-		ui.profileComboBox->addItem(QSettings(appDataDir+settingsList.at(n),QSettings::IniFormat).value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
+		QSettings settIni(appDataDir+settingsList.at(n),QSettings::IniFormat);
+		if(settIni.value("CryptedData","").toByteArray().isEmpty())
+		{
+			QFile::remove(appDataDir+settingsList.at(n));//I'll add ini backup function here
+			continue;
+		}
+		ui.profileComboBox->addItem(settIni.value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
 
 		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;

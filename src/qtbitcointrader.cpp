@@ -1,5 +1,5 @@
 ﻿// Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
+// I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
 // Or send e-mail directly to julyighor@gmail.com
@@ -38,7 +38,7 @@
 #endif
 
 QtBitcoinTrader::QtBitcoinTrader()
-	: QWidget()
+	: QDialog()
 {
 	trayMenu=0;
 	isValidSoftLag=true;
@@ -89,11 +89,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	setAttribute(Qt::WA_QuitOnClose,true);
 
 	setWindowFlags(Qt::Window);
-
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())
-		QtWin::extendFrameIntoClientArea(this);
-#endif
 
 	ui.ordersTableFrame->setVisible(false);
 
@@ -153,17 +148,37 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	QSettings settingsMain(appDataDir+"/Settings.set",QSettings::IniFormat);
 	checkForUpdates=settingsMain.value("CheckForUpdates",true).toBool();
-	httpRequestInterval=settingsMain.value("HttpRequestsInterval",400).toInt();
-	if(httpRequestInterval<50)httpRequestInterval=400;
-	if(appVerLastReal<1.0703)
-	{
-		if(httpRequestInterval==400)httpRequestInterval=200;
-	}
-	settingsMain.setValue("HttpRequestsInterval",httpRequestInterval);
+	httpRequestInterval=settingsMain.value("HttpRequestsInterval",500).toInt();
+	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",3000).toInt();
 
-	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",5).toInt();
-	if(httpRequestTimeout<1)httpRequestTimeout=5;
+	if(appVerLastReal<1.0712)
+	{
+		httpRequestInterval=500;
+		httpRequestTimeout=3000;
+	}
+	if(httpRequestInterval<50)httpRequestInterval=500;
+	if(httpRequestTimeout<100)httpRequestTimeout=3000;
+
+	settingsMain.setValue("HttpRequestsInterval",httpRequestInterval);
 	settingsMain.setValue("HttpRequestsTimeout",httpRequestTimeout);
+
+	httpConnectionsCount=settingsMain.value("HttpConnectionsCount",3).toInt();
+	httpSwapSocketsAfterPacketsCount=settingsMain.value("HttpSwapSocketAfterPacketsCount",40).toInt();
+	
+	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
+
+
+	if(appVerLastReal<1.0722)
+	{
+		httpSplitPackets=false;
+	}
+
+	if(httpConnectionsCount<1)httpConnectionsCount=2;
+	if(httpSwapSocketsAfterPacketsCount<5)httpSwapSocketsAfterPacketsCount=40;
+
+	settingsMain.setValue("HttpConnectionsCount",httpConnectionsCount);
+	settingsMain.setValue("HttpSwapSocketAfterPacketsCount",httpSwapSocketsAfterPacketsCount);
+	settingsMain.setValue("HttpSplitPackets",httpSplitPackets);
 
 	int screenCount=QApplication::desktop()->screenCount();
 	QPoint cursorPos=QCursor::pos();
@@ -213,7 +228,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 				curDataList.removeFirst();
 				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
 			}
-			
+
 			(new Exchange_BTCe(restSign,restKey))->setupApi(this,false);
 		}break;
 	default:
@@ -248,6 +263,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
 
 	constructorFinished=true;
+	languageChanged();
 
 	checkValidRulesButtons();
 	currencyChanged(ui.currencyComboBox->currentIndex());
@@ -590,7 +606,6 @@ void QtBitcoinTrader::reloadLanguageList(QString preferedLangFile)
 	}
 	if(selectedLangId>-1)ui.langComboBox->setCurrentIndex(selectedLangId);
 	julyTranslator->loadFromFile(preferedLangFile);
-	constructorFinished=true;
 	languageChanged();
 }
 
@@ -721,7 +736,12 @@ void QtBitcoinTrader::currencyChanged(int val)
 
 	ui.sellGroupBox->setTitle(sellGroupboxText);
 
-	emit clearValues();
+	static int firstLoad=0;
+	if(firstLoad++>1)
+	{
+		firstLoad=3;
+		emit clearValues();
+	}
 	marketPricesNotLoaded=true;
 	balanceNotLoaded=true;
 	fixDecimals(this);
@@ -1208,7 +1228,7 @@ void QtBitcoinTrader::ordersCancelSelected()
 
 void QtBitcoinTrader::calcButtonClicked()
 {
-	(new FeeCalculator)->show();
+	new FeeCalculator;
 }
 
 void QtBitcoinTrader::checkValidSellButtons()
@@ -1513,13 +1533,17 @@ void QtBitcoinTrader::saveWindowState(QWidget *par, QString name)
 	bool windowMaximized=par->windowState()==Qt::WindowMaximized;
 	iniSettings->setValue(name+"Maximized",windowMaximized);
 	if(windowMaximized)iniSettings->setValue(name+"Geometry",rectInRect(par->geometry(),par->minimumSizeHint()));
-	else	   iniSettings->setValue(name+"Geometry",par->geometry());
+	else	   iniSettings->setValue(name+"Geometry",QRect(par->x(),par->y(),par->width(),par->height()));
 }
 
 void QtBitcoinTrader::loadWindowState(QWidget *par, QString name)
 {
 	QRect savedGeometry=iniSettings->value(name+"Geometry",par->geometry()).toRect();
-	if(isValidGeometry(&savedGeometry,0))par->setGeometry(savedGeometry);
+	if(isValidGeometry(&savedGeometry,0))
+	{
+		par->resize(savedGeometry.size());
+		par->move(savedGeometry.topLeft());
+	}
 	if(iniSettings->value(name+"Maximized",false).toBool())par->setWindowState(Qt::WindowMaximized);
 }
 
@@ -1550,7 +1574,7 @@ void QtBitcoinTrader::saveDetachedWindowsSettings(bool force)
 
 QRect QtBitcoinTrader::rectInRect(QRect aRect, QSize bSize)
 {
-	return QRect(aRect.x()+(aRect.width()-bSize.width())/2.0,aRect.y()+(aRect.height()-bSize.height())/2.0,bSize.width(),bSize.height());
+	return QRect(aRect.x()+(aRect.width()-bSize.width())/2.0,aRect.y()+(aRect.height()-bSize.height())/2.0,bSize.width(),qMax(bSize.height(),300));
 }
 
 void QtBitcoinTrader::buyBitcoinsButton()
@@ -2118,7 +2142,6 @@ void QtBitcoinTrader::setWindowStaysOnTop(bool on)
 	if(QtWin::isCompositionEnabled())
 		QtWin::extendFrameIntoClientArea(this);
 #endif
-
 	show();
 }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
+// I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
 // Or send e-mail directly to julyighor@gmail.com
@@ -11,11 +11,10 @@
 #define EXCHANGE_MTGOX_H
 
 #include <QThread>
-#include <QNetworkAccessManager>
-#include <QHttp>
 #include <QTimer>
 #include <QTime>
 #include "qtbitcointrader.h"
+#include "julyhttp.h"
 
 class Exchange_MtGox : public QThread
 {
@@ -27,14 +26,15 @@ public:
 	~Exchange_MtGox();
 
 private:
-	QHttp *httpAuth;
+	void clearVariables();
+	JulyHttp *julyHttp;
 	QTime authRequestTime;
 	QByteArray lastFetchDate;
 	bool tickerOnly;
-	bool isApiDown;
 	void translateUnicodeStr(QString *str);
 	QByteArray lastHistory;
 	QByteArray lastOrders;
+	bool lastInfoReceived;
 	bool isFirstTicker;
 	bool isFirstAccInfo;
 
@@ -52,25 +52,15 @@ private:
 
 	QString apiLogin;
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
-	QTime softLagTime;
 	int apiDownCounter;
 	int secondPart;
 	QByteArray privateRestSign;
 	QByteArray privateRestKey;
 	quint32 privateNonce;
 
-	QMap<QNetworkReply*,int> noAuthRequestMap;
-	QMap<QNetworkReply*,qint32> noAuthTimeStampMap;
-
-	int vipRequestCount;
-	QMap<int,int> authRequestMap;
-	QMap<int,qint32> authTimeStampMap;
-
-	void removePendingId(int);
-	void removeReplay(QNetworkReply*);
 	bool isReplayPending(int);
 
-	void sendToApi(int reqType, QByteArray method, bool auth=false, QByteArray commands=0, bool incNonce=true);
+	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 	QTimer *secondTimer;
 	void run();
 signals:
@@ -105,10 +95,8 @@ signals:
 	void apiLagChanged(double);
 	void softLagChanged(int);
 private slots:
-	void httpDoneAuth(int,bool);
 	void sslErrors(const QList<QSslError> &);
-	void requestFinished(QNetworkReply *);
-	void sslErrorsSlot(QNetworkReply *, const QList<QSslError> &);
+	void dataReceivedAuth(QByteArray,int);
 	void secondSlot();
 public slots:
 	void clearValues();

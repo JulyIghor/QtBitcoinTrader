@@ -1,5 +1,5 @@
 // Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
+// I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
 // Or send e-mail directly to julyighor@gmail.com
@@ -49,7 +49,13 @@
 #define currentTimeStamp (*currentTimeStamp_)
 #define httpRequestInterval (*httpRequestInterval_)
 #define httpRequestTimeout (*httpRequestTimeout_)
+#define httpConnectionsCount (*httpConnectionsCount_)
+#define httpSwapSocketsAfterPacketsCount (*httpSwapSocketsAfterPacketsCount_)
+#define httpSplitPackets (*httpSplitPackets_)
 
+extern bool *httpSplitPackets_;
+extern int *httpSwapSocketsAfterPacketsCount_;
+extern int *httpConnectionsCount_;
 extern int *httpRequestInterval_;
 extern int *httpRequestTimeout_;
 extern qint32 *currentTimeStamp_;

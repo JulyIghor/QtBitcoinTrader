@@ -1,5 +1,5 @@
 // Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
+// I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
 // Or send e-mail directly to julyighor@gmail.com
@@ -47,6 +47,9 @@ FeeCalculator::FeeCalculator()
 
 	languageChanged();
 	connect(julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
+
+	if(mainWindow.ui.widgetStaysOnTop->isChecked())ui.widgetStaysOnTop->setChecked(true);
+	else setStaysOnTop(false);
 }
 
 FeeCalculator::~FeeCalculator()

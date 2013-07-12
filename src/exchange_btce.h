@@ -1,5 +1,5 @@
 // Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
+// I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
 // Or send e-mail directly to julyighor@gmail.com
@@ -11,8 +11,7 @@
 #define EXCHANGE_BTCE_H
 
 #include <QThread>
-#include <QHttp>
-#include <QNetworkAccessManager>
+#include "julyhttp.h"
 #include <QTimer>
 #include <QTime>
 #include "qtbitcointrader.h"
@@ -27,7 +26,8 @@ public:
 	~Exchange_BTCe();
 
 private:
-	QHttp *httpAuth;
+	void clearVariables();
+	JulyHttp *julyHttp;
 
 	qint64 lastFetchTid;
 	bool tickerOnly;
@@ -50,26 +50,18 @@ private:
 	double lastFee;
 
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
-	QTime softLagTime;
+
+	qint64 lastPriceDate;
+
 	QTime authRequestTime;
 	int apiDownCounter;
-	int secondPart;
 	QByteArray privateRestSign;
 	QByteArray privateRestKey;
 	quint32 privateNonce;
 
-	QMap<QNetworkReply*,int> noAuthRequestMap;
-	QMap<QNetworkReply*,qint32> noAuthTimeStampMap;
-
-	int vipRequestCount;
-	QMap<int,int> authRequestMap;
-	QMap<int,qint32> authTimeStampMap;
-
-	void removePendingId(int);
-	void removeReplay(QNetworkReply*);
 	bool isReplayPending(int);
 
-	void sendToApi(int reqType, QByteArray method, bool auth=false, QByteArray commands=0, bool incNonce=true);
+	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 	QTimer *secondTimer;
 	int lastOpenedOrders;
 	void run();
@@ -103,10 +95,8 @@ signals:
 	void apiLagChanged(double);
 	void softLagChanged(int);
 private slots:
-	void httpDoneAuth(int,bool);
 	void sslErrors(const QList<QSslError> &);
-	void requestFinished(QNetworkReply *);
-	void sslErrorsSlot(QNetworkReply *, const QList<QSslError> &);
+	void dataReceivedAuth(QByteArray,int);
 	void secondSlot();
 public slots:
 	void clearValues();

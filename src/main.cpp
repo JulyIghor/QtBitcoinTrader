@@ -1,5 +1,5 @@
 // Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
+// I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
 // Or send e-mail directly to julyighor@gmail.com
@@ -62,6 +62,9 @@ double *minTradeVolume_;
 qint32 *currentTimeStamp_;
 int *httpRequestInterval_;
 int *httpRequestTimeout_;
+int *httpSwapSocketsAfterPacketsCount_;
+int *httpConnectionsCount_;
+bool *httpSplitPackets_;
 
 void pickDefaultLangFile()
 {
@@ -88,7 +91,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0707");
+	appVerStr_=new QByteArray("1.0725");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -113,14 +116,17 @@ int main(int argc, char *argv[])
 	btcDecimals_=new int(8);
 	usdDecimals_=new int(5);
 	priceDecimals_=new int(5);
+	httpSwapSocketsAfterPacketsCount_=new int(30);
+	httpConnectionsCount_=new int(3);
 
 	minTradePrice_=new double(0.01);
 	minTradeVolume_=new double(0.01);
 	currentTimeStamp_=new qint32(QDateTime::currentDateTime().toTime_t());
 	httpRequestInterval_=new int(400);
 	httpRequestTimeout_=new int(5);
+	httpSplitPackets_=new bool(true);
 
-	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
+	QString globalStyleSheet="QDialog {background: lightgray;} QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
 
 #ifdef Q_OS_WIN
 	if(QFile::exists("./QtBitcoinTrader"))
@@ -266,6 +272,7 @@ int main(int argc, char *argv[])
 		if(!tryPassword.isEmpty())
 		{
 			iniFileName=enterPassword.getIniFilePath();
+			logFileName=iniFileName;logFileName.replace(".ini",".log",Qt::CaseInsensitive);
 			bool profileLocked=enterPassword.isProfileLocked(iniFileName);
 			if(profileLocked)
 			{

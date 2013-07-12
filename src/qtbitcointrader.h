@@ -1,5 +1,5 @@
 // Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
+// I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
 // Or send e-mail directly to julyighor@gmail.com
@@ -10,7 +10,7 @@
 #ifndef QTBITCOINTRADER_H
 #define QTBITCOINTRADER_H
 
-#include <QtGui/QWidget>
+#include <QtGui/QDialog>
 #include "ui_qtbitcointrader.h"
 #include <QHttp>
 #include <QCloseEvent>
@@ -19,7 +19,7 @@
 #include <QSettings>
 #include <QMenu>
 
-class QtBitcoinTrader : public QWidget
+class QtBitcoinTrader : public QDialog
 {
 	Q_OBJECT
 
