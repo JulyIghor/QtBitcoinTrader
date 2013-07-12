@@ -4,6 +4,6 @@ MacVer=1.0701
 SrcChangeLog=v1.07.01<br>Beta update
 SrcVer=1.0701
 Win32Bin=https://dl.dropboxusercontent.com/u/860231/QtBitcoinTrader.exe
-Win32ChangeLog=Beta update<br>New Fastest socket engine on Mt.Gox.<br>Please test and feel free to email me bug reports.
-Win32Signature=rJG9dljXTWu5GG6R5LWAcwoCo3ZqZj0768IfVeWZy0i0LghZep4g7zLNinrBBfBrJOQD91ECgN8lo4wArQgWRAglEzELtDvDgMMQ9H9VsHUyp5Ye06s9JKYxqSSZfZvClE0oCo6ztcmHijIxA3/x8IZlNgd2tNUi3p9HEp1GwWXi3yCAz/vlr02L6XVhJRVzZK6c2Yz829kiSUDvL/qBQp271AtD4WNusn+6HW8138+QLVUxCq/nm04mZs4pWEXhJVjFmmVZ91I85Mdz/pAdc2LAxIthZc5jdfQO8SmKGSjlCENqi4Z+N7JVxkHhbvO3ymh7JIKky3J/PEN8kjP+mw==
-Win32Ver=1.0713
+Win32ChangeLog=Beta update<br>Pre-release<br>New Fastest socket engine on BTC-E Mt.Gox.<br>Please test and feel free to email me bug reports.
+Win32Signature=Xqek/q+tjG7nzoNxvWpPJXp2UjpMa1dHot3pertIKVt1NMFggjYfbP2C6Qu+Nmrr3CnyfCCkgKSc0P8/4owJ/4sSqdRmc5hleWKiYcTETTqJ/O5NI2q8/57/KyrEjs0vtlsesPfEG16DtbuMvedDxmHkJyCXcyAmo3dKqgLOAfgAGfO1PqTR8Tx/0b2UUg3fkrC+2VmC5MCQMz3CWClYTsu7TaqImL3QxdsM/Oe20SE2GTOFjw2sWfrO9EfiKT+7X503GzmYVUsf5+CBcWBcHIIbXNfYxzUKIA6Xz/lBksNoNS6ve7xigB9qs4btb6LwXPL7g0dWBISGO6nqkbrC3Q==
+Win32Ver=1.0716
