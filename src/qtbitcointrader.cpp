@@ -156,7 +156,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	httpSwapSocketsAfterPacketsCount=settingsMain.value("HttpSwapSocketAfterPacketsCount",50).toInt();
 	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
 
-	if(appVerLastReal<1.0726)
+	if(appVerLastReal<1.0727)
 	{
 		httpSwapSocketsAfterPacketsCount=50;
 		httpConnectionsCount=6;
