@@ -9,8 +9,8 @@
 
 #ifndef MAIN_H
 #define MAIN_H
-#include <QDebug>////////////
-#define showDebug(text) qDebug()<<text//////////
+//#include <QDebug>////////////
+//#define showDebug(text) qDebug()<<text//////////
 
 #include "qtbitcointrader.h"
 #include "logthread.h"
@@ -50,13 +50,9 @@
 #define currentTimeStamp (*currentTimeStamp_)
 #define httpRequestInterval (*httpRequestInterval_)
 #define httpRequestTimeout (*httpRequestTimeout_)
-#define httpConnectionsCount (*httpConnectionsCount_)
-#define httpSwapSocketsAfterPacketsCount (*httpSwapSocketsAfterPacketsCount_)
 #define httpSplitPackets (*httpSplitPackets_)
 
 extern bool *httpSplitPackets_;
-extern int *httpSwapSocketsAfterPacketsCount_;
-extern int *httpConnectionsCount_;
 extern int *httpRequestInterval_;
 extern int *httpRequestTimeout_;
 extern qint32 *currentTimeStamp_;

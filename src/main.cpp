@@ -62,8 +62,6 @@ double *minTradeVolume_;
 qint32 *currentTimeStamp_;
 int *httpRequestInterval_;
 int *httpRequestTimeout_;
-int *httpSwapSocketsAfterPacketsCount_;
-int *httpConnectionsCount_;
 bool *httpSplitPackets_;
 
 void pickDefaultLangFile()
@@ -93,7 +91,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0727");
+	appVerStr_=new QByteArray("1.0728");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -118,8 +116,6 @@ int main(int argc, char *argv[])
 	btcDecimals_=new int(8);
 	usdDecimals_=new int(5);
 	priceDecimals_=new int(5);
-	httpSwapSocketsAfterPacketsCount_=new int(30);
-	httpConnectionsCount_=new int(3);
 
 	minTradePrice_=new double(0.01);
 	minTradeVolume_=new double(0.01);

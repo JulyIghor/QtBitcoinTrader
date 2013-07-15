@@ -199,15 +199,15 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 		julyHttp=new JulyHttp("data.mtgox.com","Rest-Key: "+privateRestKey+"\r\n",this);
 		connect(julyHttp,SIGNAL(softLagChanged(int)),mainWindow_,SLOT(setSoftLagValue(int)));
 		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
-		connect(julyHttp,SIGNAL(errorSignal(QString)),this,SLOT(socketErrorSlot(QString)));
-		connect(julyHttp,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
+		connect(julyHttp,SIGNAL(errorSignal(QString)),mainWindow_,SLOT(showErrorMessage(QString)));
+		connect(julyHttp,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 		connect(julyHttp,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceivedAuth(QByteArray,int)));
 	}
 
 	if(auth)
 	{
 		QByteArray postData="nonce="+QByteArray::number(++privateNonce);
-		postData.append(postData.right(6));postData.append(commands);
+		postData.append("000000");postData.append(commands);
 		QByteArray forHash=method+'\0'+postData;
 		bool isVipRequest=reqType>300;
 		if(sendNow)
@@ -223,12 +223,6 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 		else 
 			julyHttp->prepareData(reqType, "GET /api/2/"+method);
 	}
-}
-
-void Exchange_MtGox::socketErrorSlot(QString text)
-{
-	julyHttp->isDisabled=true;
-	emit showErrorMessage(text);
 }
 
 void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)

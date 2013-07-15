@@ -19,7 +19,6 @@ class JulyHttp : public QObject
 	Q_OBJECT
 
 public:
-	bool isDisabled;
 	void clearPendingData();
 	void reConnect(bool mastAbort=true);
 	bool isReqTypePending(int);
@@ -33,15 +32,15 @@ public:
 	~JulyHttp();
 
 private:
+	QSslSocket *socket;
+	bool isDisabled;
 	QByteArray cookie;
-	int incomingPacketsCount;
-	void swapSockets();
+	int outGoingPacketsCount;
 	void pickNextConnectedSocket();
 	QSslSocket *getStableSocket();
 	void setupSocket(QSslSocket *socket);
 	bool isSocketConnected(QSslSocket *socket);
 	void reconnectSocket(QSslSocket *socket, bool mastAbort);
-	QList<QSslSocket *>socketsList;
 	void setApiDown(bool);
 	QTime requestDelay;
 	bool apiDownState;
@@ -69,17 +68,17 @@ private:
 	QByteArray restKeyLine;
 	QByteArray httpHeader;
 	QString hostName;
-private slots:
-	void sslErrorsSlot(const QList<QSslError> &);
-	void errorSlot(QAbstractSocket::SocketError);
-	void sendPendingData();
-	void readSocket();
+	private slots:
+		void sslErrorsSlot(const QList<QSslError> &);
+		void errorSlot(QAbstractSocket::SocketError);
+		void sendPendingData();
+		void readSocket();
 signals:
-	void errorSignal(QString);
-	void sslErrors(const QList<QSslError> &);
-	void softLagChanged(int);
-	void apiDown(bool);
-	void dataReceived(QByteArray,int);
+		void errorSignal(QString);
+		void sslErrorSignal(const QList<QSslError> &);
+		void softLagChanged(int);
+		void apiDown(bool);
+		void dataReceived(QByteArray,int);
 };
 
 #endif // JULYHTTP_H

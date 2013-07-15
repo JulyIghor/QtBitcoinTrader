@@ -152,28 +152,22 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	httpRequestInterval=settingsMain.value("HttpRequestsInterval",500).toInt();
 	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",1987).toInt();
-	httpConnectionsCount=settingsMain.value("HttpConnectionsCount",6).toInt();
-	httpSwapSocketsAfterPacketsCount=settingsMain.value("HttpSwapSocketAfterPacketsCount",50).toInt();
+
 	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
 
-	if(appVerLastReal<1.0727)
+	if(appVerLastReal<1.0728)
 	{
-		httpSwapSocketsAfterPacketsCount=50;
-		httpConnectionsCount=6;
 		httpRequestInterval=500;
-		httpRequestTimeout=1987;
+		httpRequestTimeout=1500;
 		httpSplitPackets=false;
+		settingsMain.remove("HttpConnectionsCount");
+		settingsMain.remove("HttpSwapSocketAfterPacketsCount");
 	}
 	if(httpRequestInterval<50)httpRequestInterval=500;
-	if(httpRequestTimeout<100)httpRequestTimeout=1987;
-	if(httpConnectionsCount<1)httpConnectionsCount=6;
-	if(httpConnectionsCount>100)httpConnectionsCount=6;
-	if(httpSwapSocketsAfterPacketsCount<5)httpSwapSocketsAfterPacketsCount=50;
+	if(httpRequestTimeout<100)httpRequestTimeout=1500;
 
 	settingsMain.setValue("HttpRequestsInterval",httpRequestInterval);
 	settingsMain.setValue("HttpRequestsTimeout",httpRequestTimeout);
-	settingsMain.setValue("HttpConnectionsCount",httpConnectionsCount);
-	settingsMain.setValue("HttpSwapSocketAfterPacketsCount",httpSwapSocketsAfterPacketsCount);
 	settingsMain.setValue("HttpSplitPackets",httpSplitPackets);
 
 	int screenCount=QApplication::desktop()->screenCount();

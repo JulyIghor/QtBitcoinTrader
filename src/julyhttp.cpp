@@ -16,14 +16,11 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	: QObject(parent)
 {
 	isDisabled=false;
-	incomingPacketsCount=0;
+	outGoingPacketsCount=0;
 
-	for(int n=0;n<httpConnectionsCount;n++)
-	{
-		socketsList<<new QSslSocket(this);
-		setupSocket(socketsList.last());
-	}
-
+	socket=new QSslSocket(this);
+	setupSocket(socket);
+	
 	requestTimeOut.restart();
 	requestDelay.restart();
 	hostName=hostN;
@@ -35,8 +32,6 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	apiDownCount=0;
 	restKeyLine=restLine;
 
-	if(isLogEnabled)logThread->writeLog("httpConnectionsCount="+QByteArray::number(httpConnectionsCount));
-
 	QTimer *secondTimer=new QTimer(this);
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(sendPendingData()));
 	secondTimer->start(300);
@@ -44,7 +39,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 
 JulyHttp::~JulyHttp()
 {
-	for(int n=0;n<socketsList.count();n++)socketsList.at(n)->abort();
+	socket->abort();
 }
 
 void JulyHttp::setupSocket(QSslSocket *socket)
@@ -66,7 +61,7 @@ void JulyHttp::reConnect(bool mastAbort)
 {
 	if(isDisabled)return;
 	softLagChanged(requestDelay.elapsed());
-	for(int n=0;n<socketsList.count();n++)reconnectSocket(socketsList.at(n),mastAbort);
+	reconnectSocket(socket,mastAbort);
 	retryRequest();
 }
 
@@ -94,16 +89,13 @@ void JulyHttp::setApiDown(bool httpError)
 void JulyHttp::readSocket()
 {
 	if(isDisabled)return;
-	QSslSocket *socketSender=qobject_cast<QSslSocket *>(QObject::sender());
 
-	if(++incomingPacketsCount>httpSwapSocketsAfterPacketsCount)swapSockets();
-	
 	int currentLineDataType=0;
 	emit softLagChanged(requestDelay.elapsed());
-	while(socketSender->bytesAvailable())
+	while(socket->bytesAvailable())
 	{
 		static	QByteArray currentLine;
-		currentLine=socketSender->readLine();
+		currentLine=socket->readLine();
 
 		if(isLogEnabled)logThread->writeLog("RCV: "+currentLine);
 
@@ -119,7 +111,7 @@ void JulyHttp::readSocket()
 			endOfPacket=false;
 			continue;
 		}
-		
+
 		switch(currentLineDataType)
 		{
 		case 0:
@@ -159,10 +151,10 @@ void JulyHttp::readSocket()
 				if(isLogEnabled)logThread->writeLog("Overloaded packet: "+buffer);
 				buffer.remove(0,buffer.size()-packetChunkSize);
 			}
-			
+
 			bool unknownPacket=packetChunkSize!=buffer.size()||buffer.size()&&buffer[0]=='<';
 			setApiDown(unknownPacket);
-	
+
 			requestDelay.restart();
 
 			if(!unknownPacket&&requestList.count())
@@ -171,6 +163,14 @@ void JulyHttp::readSocket()
 				if(isLogEnabled)logThread->writeLog("RCV: "+buffer);
 			}
 			else if(isLogEnabled)logThread->writeLog("Unknown response: "+buffer);
+
+			if(socket->bytesAvailable())
+			{
+				QByteArray dataToMatch=socket->readAll();
+				if(dataToMatch!="\r\n")
+					if(isLogEnabled)logThread->writeLog("To match: "+dataToMatch);
+			}
+
 			takeFirstRequest();
 			clearRequest();
 			sendPendingData();
@@ -300,24 +300,23 @@ void JulyHttp::takeFirstRequest()
 	takeRequestAt(0);
 }
 
-void JulyHttp::swapSockets()
-{
-	incomingPacketsCount=0;
-	for(int n=1;n<socketsList.count();n++)socketsList.swap(n-1,n);
-}
-
-void JulyHttp::pickNextConnectedSocket()
-{
-	swapSockets();
-	while(socketsList.first()->state()!=QAbstractSocket::ConnectedState)swapSockets();
-}
-
 void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 {
-	QSslSocket *socketSender=qobject_cast<QSslSocket *>(QObject::sender());
-	if(isLogEnabled)logThread->writeLog("SocetError: "+socketSender->errorString().toAscii());
-	if(socketError==QAbstractSocket::RemoteHostClosedError)reconnectSocket(socketSender,false);
-	else emit errorSignal(socketSender->errorString());
+	setApiDown(true);
+
+	if(isLogEnabled)logThread->writeLog("SocetError: "+socket->errorString().toAscii());
+	if(socketError==QAbstractSocket::RemoteHostClosedError||
+		socketError==QAbstractSocket::SocketTimeoutError||
+		socketError==QAbstractSocket::NetworkError)reconnectSocket(socket,false);
+	else
+	{
+		if(socketError==QAbstractSocket::ProxyAuthenticationRequiredError)
+		{
+			isDisabled=true;
+			socket->abort();
+		}
+		emit errorSignal(socket->errorString());
+	}
 }
 
 bool JulyHttp::isSocketConnected(QSslSocket *socket)
@@ -327,18 +326,17 @@ bool JulyHttp::isSocketConnected(QSslSocket *socket)
 
 QSslSocket *JulyHttp::getStableSocket()
 {
-	for(int n=0;n<socketsList.count();n++)
-	if(isSocketConnected(socketsList.at(n)))return socketsList.at(n);
-	else reconnectSocket(socketsList.at(n),false);
+		if(isSocketConnected(socket))return socket;
+		else reconnectSocket(socket,false);
 
-	if(socketsList.first()->state()!=QAbstractSocket::UnconnectedState)socketsList.first()->waitForConnected();
-	if(socketsList.first()->state()!=QAbstractSocket::ConnectedState)
-	{
-		reConnect();
-		socketsList.first()->waitForConnected();
-	}
-	else reconnectSocket(socketsList.first(),false);
-	return socketsList.first();
+		if(socket->state()!=QAbstractSocket::UnconnectedState)socket->waitForConnected(5000);
+		if(socket->state()!=QAbstractSocket::ConnectedState)
+		{
+			reconnectSocket(socket,false);
+			socket->waitForConnected(5000);
+		}
+		else reconnectSocket(socket,false);
+		return socket;
 }
 
 void JulyHttp::sendPendingData()
@@ -346,18 +344,17 @@ void JulyHttp::sendPendingData()
 	if(isDisabled)return;
 	if(requestList.count()==0)return;
 
+	softLagChanged(requestDelay.elapsed());
+
 	QSslSocket *currentSocket=getStableSocket();
+	if(requestList.count()==0)return;
 	QByteArray *pendingRequest=pendingRequestMap.value(currentSocket,0);
 	if(pendingRequest==requestList.first().first)
 	{
-		if(requestTimeOut.elapsed()<httpRequestTimeout)
-		{
-			softLagChanged(requestDelay.elapsed());
-			return;
-		}
+		if(requestTimeOut.elapsed()<httpRequestTimeout)return;
 		else
 		{
-			if(isLogEnabled)logThread->writeLog(QString("Request timeout: %0<%1").arg(requestTimeOut.elapsed()).arg(httpRequestTimeout).toAscii());
+			if(isLogEnabled)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(httpRequestTimeout).toAscii());
 			if(requestRetryCount>0){retryRequest();return;}
 		}
 	}
@@ -381,7 +378,6 @@ void JulyHttp::sendPendingData()
 		{
 			currentSocket->write(*pendingRequest);
 			currentSocket->flush();
-			currentSocket->waitForBytesWritten();
 		}
 	}
 	else if(isLogEnabled)logThread->writeLog("PendingRequest pointer not exist");
@@ -389,5 +385,5 @@ void JulyHttp::sendPendingData()
 
 void JulyHttp::sslErrorsSlot(const QList<QSslError> &val)
 {
-	emit sslErrors(val);
+	emit sslErrorSignal(val);
 }

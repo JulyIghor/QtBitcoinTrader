@@ -96,7 +96,6 @@ signals:
 	void apiLagChanged(double);
 	void softLagChanged(int);
 private slots:
-	void socketErrorSlot(QString);
 	void sslErrors(const QList<QSslError> &);
 	void dataReceivedAuth(QByteArray,int);
 	void secondSlot();

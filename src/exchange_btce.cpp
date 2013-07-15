@@ -399,12 +399,6 @@ void Exchange_BTCe::reloadOrders()
 	lastOrders.clear();
 }
 
-void Exchange_BTCe::socketErrorSlot(QString text)
-{
-	julyHttp->isDisabled=true;
-	emit (text);
-}
-
 void Exchange_BTCe::secondSlot()
 {
 	if(lastHistory.isEmpty())getHistory(false);
@@ -476,8 +470,8 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 		julyHttp=new JulyHttp("btc-e.com","Key: "+privateRestKey+"\r\n",this);
 		connect(julyHttp,SIGNAL(softLagChanged(int)),mainWindow_,SLOT(setSoftLagValue(int)));
 		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
-		connect(julyHttp,SIGNAL(errorSignal(QString)),this,SLOT(socketErrorSlot(QString)));
-		connect(julyHttp,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
+		connect(julyHttp,SIGNAL(errorSignal(QString)),mainWindow_,SLOT(showErrorMessage(QString)));
+		connect(julyHttp,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 		connect(julyHttp,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceivedAuth(QByteArray,int)));
 	}
 
