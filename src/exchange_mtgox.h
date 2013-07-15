@@ -67,7 +67,7 @@ signals:
 	void addLastTrade(double,qint64,double,QByteArray,bool);
 
 	void ordersChanged(QString);
-	void identificationRequired(QString);
+	void showErrorMessage(QString);
 
 	void ordersLogChanged(QString);
 
@@ -95,6 +95,7 @@ signals:
 	void apiLagChanged(double);
 	void softLagChanged(int);
 private slots:
+	void socketErrorSlot(QString);
 	void sslErrors(const QList<QSslError> &);
 	void dataReceivedAuth(QByteArray,int);
 	void secondSlot();

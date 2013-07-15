@@ -119,6 +119,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	profileName=iniSettings->value("ProfileName","Default Profile").toString();
 	windowTitleP=profileName+" - "+windowTitle()+" v"+appVerStr;
+	if(isLogEnabled)windowTitleP.append(" [DEBUG MODE]");
 	setWindowTitle(windowTitleP);
 
 	ui.accountBTCBeep->setChecked(iniSettings->value("AccountBTCBeep",false).toBool());
@@ -148,34 +149,29 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	QSettings settingsMain(appDataDir+"/Settings.set",QSettings::IniFormat);
 	checkForUpdates=settingsMain.value("CheckForUpdates",true).toBool();
-	httpRequestInterval=settingsMain.value("HttpRequestsInterval",500).toInt();
-	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",3000).toInt();
 
-	if(appVerLastReal<1.0712)
+	httpRequestInterval=settingsMain.value("HttpRequestsInterval",500).toInt();
+	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",1987).toInt();
+	httpConnectionsCount=settingsMain.value("HttpConnectionsCount",6).toInt();
+	httpSwapSocketsAfterPacketsCount=settingsMain.value("HttpSwapSocketAfterPacketsCount",50).toInt();
+	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
+
+	if(appVerLastReal<1.0726)
 	{
+		httpSwapSocketsAfterPacketsCount=50;
+		httpConnectionsCount=6;
 		httpRequestInterval=500;
-		httpRequestTimeout=3000;
+		httpRequestTimeout=1987;
+		httpSplitPackets=false;
 	}
 	if(httpRequestInterval<50)httpRequestInterval=500;
-	if(httpRequestTimeout<100)httpRequestTimeout=3000;
+	if(httpRequestTimeout<100)httpRequestTimeout=1987;
+	if(httpConnectionsCount<1)httpConnectionsCount=6;
+	if(httpConnectionsCount>100)httpConnectionsCount=6;
+	if(httpSwapSocketsAfterPacketsCount<5)httpSwapSocketsAfterPacketsCount=50;
 
 	settingsMain.setValue("HttpRequestsInterval",httpRequestInterval);
 	settingsMain.setValue("HttpRequestsTimeout",httpRequestTimeout);
-
-	httpConnectionsCount=settingsMain.value("HttpConnectionsCount",3).toInt();
-	httpSwapSocketsAfterPacketsCount=settingsMain.value("HttpSwapSocketAfterPacketsCount",40).toInt();
-	
-	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
-
-
-	if(appVerLastReal<1.0722)
-	{
-		httpSplitPackets=false;
-	}
-
-	if(httpConnectionsCount<1)httpConnectionsCount=2;
-	if(httpSwapSocketsAfterPacketsCount<5)httpSwapSocketsAfterPacketsCount=40;
-
 	settingsMain.setValue("HttpConnectionsCount",httpConnectionsCount);
 	settingsMain.setValue("HttpSwapSocketAfterPacketsCount",httpSwapSocketsAfterPacketsCount);
 	settingsMain.setValue("HttpSplitPackets",httpSplitPackets);
@@ -1056,7 +1052,7 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 	forcedReloadOrders=false;
 }
 
-void QtBitcoinTrader::identificationRequired(QString message)
+void QtBitcoinTrader::showErrorMessage(QString message)
 {
 	static QTime lastMessageTime;
 	if(!showingMessage&&lastMessageTime.elapsed()>10000)
@@ -1065,38 +1061,46 @@ void QtBitcoinTrader::identificationRequired(QString message)
 		{
 			showingMessage=true;
 			if(isLogEnabled)logThread->writeLog(exchangeName.toAscii()+" Error: "+message.toAscii());
-			if(!message.startsWith("SSL"))
-			{
-			if(!message.isEmpty())message.prepend("<br><br>");
-			message.prepend(julyTr("TRUNAUTHORIZED","Identification required to access private API.<br>Please enter valid API key and Secret."));
-			}
 			lastMessageTime.restart();
-
-			bool haveSslFix=false;
-#ifdef  Q_OS_WIN
-			haveSslFix=message.startsWith("SSL");
-#endif
-			if(haveSslFix)
+			if(message.startsWith("I:>"))
 			{
-				QMessageBox msgBox(this);
-				msgBox.setIcon(QMessageBox::Warning);
-				msgBox.setWindowTitle(julyTr("AUTH_ERROR","%1 Error").arg(exchangeName));
-				msgBox.setText(message);
-				msgBox.setStandardButtons(QMessageBox::Retry | QMessageBox::Ok);
-				msgBox.setDefaultButton(QMessageBox::Retry);
-				msgBox.setButtonText(QMessageBox::Retry,julyTr("INSTALL_SSL_CERT","Install SSL certificate"));
-				if(msgBox.exec()==QMessageBox::Retry)
-				{
-					QString tempCertPath=QDir().tempPath()+"/Thawte_Primary_Root_CA.cer";
-					QFile::copy(":/Resources/Thawte_Primary_Root_CA.cer",tempCertPath);
-					QDesktopServices::openUrl("\""+tempCertPath.replace('\\','/')+"\"");
-				}
+				message.remove(0,3);
+				identificationRequired(message);
 			}
 			else
 			QMessageBox::warning(this,julyTr("AUTH_ERROR","%1 Error").arg(exchangeName),message);
 			showingMessage=false;
 		}
 	}
+}
+
+void QtBitcoinTrader::identificationRequired(QString message)
+{
+	if(!message.isEmpty())message.prepend("<br><br>");
+		message.prepend(julyTr("TRUNAUTHORIZED","Identification required to access private API.<br>Please enter valid API key and Secret."));
+
+		bool haveSslFix=false;
+#ifdef  Q_OS_WIN
+		haveSslFix=message.startsWith("SSL");
+#endif
+		if(haveSslFix)
+		{
+			QMessageBox msgBox(this);
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setWindowTitle(julyTr("AUTH_ERROR","%1 Error").arg(exchangeName));
+			msgBox.setText(message);
+			msgBox.setStandardButtons(QMessageBox::Retry | QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Retry);
+			msgBox.setButtonText(QMessageBox::Retry,julyTr("INSTALL_SSL_CERT","Install SSL certificate"));
+			if(msgBox.exec()==QMessageBox::Retry)
+			{
+				QString tempCertPath=QDir().tempPath()+"/Thawte_Primary_Root_CA.cer";
+				QFile::copy(":/Resources/Thawte_Primary_Root_CA.cer",tempCertPath);
+				QDesktopServices::openUrl("\""+tempCertPath.replace('\\','/')+"\"");
+			}
+		}
+		else
+			QMessageBox::warning(this,julyTr("AUTH_ERROR","%1 Error").arg(exchangeName),message);
 }
 
 void QtBitcoinTrader::ordersLogChanged(QString newLog)

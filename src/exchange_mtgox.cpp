@@ -47,7 +47,7 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
 
-	connect(this,SIGNAL(identificationRequired(QString)),mainClass,SLOT(identificationRequired(QString)));
+	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
 	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
 	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
 
@@ -199,6 +199,7 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 		julyHttp=new JulyHttp("data.mtgox.com","Rest-Key: "+privateRestKey+"\r\n",this);
 		connect(julyHttp,SIGNAL(softLagChanged(int)),mainWindow_,SLOT(setSoftLagValue(int)));
 		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
+		connect(julyHttp,SIGNAL(errorSignal(QString)),this,SLOT(socketErrorSlot(QString)));
 		connect(julyHttp,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 		connect(julyHttp,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceivedAuth(QByteArray,int)));
 	}
@@ -222,6 +223,12 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 		else 
 			julyHttp->prepareData(reqType, "GET /api/2/"+method);
 	}
+}
+
+void Exchange_MtGox::socketErrorSlot(QString text)
+{
+	julyHttp->isDisabled=true;
+	emit showErrorMessage(text);
 }
 
 void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
@@ -381,7 +388,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					if(!rights.isEmpty())
 					{
 						bool isRightsGood=rights.contains("get_info")&&rights.contains("trade");
-						if(!isRightsGood)emit identificationRequired("invalid_rights");
+						if(!isRightsGood)emit showErrorMessage("I:>invalid_rights");
 						emit firstAccInfo();
 						isFirstAccInfo=false;
 					}
@@ -526,7 +533,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		if(errorString=="Order not found")return;
 		errorString.append("<br>"+tokenString);
 		errorString.append("<br>"+QString::number(reqType));
-		emit identificationRequired(errorString);
+		emit showErrorMessage("I:>"+errorString);
 	}
 	else errorCount=0;
 }
@@ -536,5 +543,5 @@ void Exchange_MtGox::sslErrors(const QList<QSslError> &errors)
 	QStringList errorList;
 	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
 	if(isLogEnabled)logThread->writeLog(errorList.join(" ").toAscii());
-	emit identificationRequired("SSL Error: "+errorList.join(" "));
+	emit showErrorMessage("SSL Error: "+errorList.join(" "));
 }

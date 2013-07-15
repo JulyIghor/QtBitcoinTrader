@@ -19,6 +19,7 @@ class JulyHttp : public QObject
 	Q_OBJECT
 
 public:
+	bool isDisabled;
 	void clearPendingData();
 	void reConnect(bool mastAbort=true);
 	bool isReqTypePending(int);
@@ -55,7 +56,7 @@ private:
 	void retryRequest();
 
 	QTime requestTimeOut;
-	QByteArray *pendingRequest;
+	QMap<QSslSocket *,QByteArray *>pendingRequestMap;
 	QList<QPair<QByteArray*,int>>requestList;
 	QMap<QByteArray*,int> retryCountMap;
 	QMap<int,int> reqTypePending;
@@ -70,11 +71,11 @@ private:
 	QString hostName;
 private slots:
 	void sslErrorsSlot(const QList<QSslError> &);
-	void connected();
 	void errorSlot(QAbstractSocket::SocketError);
 	void sendPendingData();
 	void readSocket();
 signals:
+	void errorSignal(QString);
 	void sslErrors(const QList<QSslError> &);
 	void softLagChanged(int);
 	void apiDown(bool);

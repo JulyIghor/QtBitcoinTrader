@@ -141,6 +141,7 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void showErrorMessage(QString);
 	void exitApp();
 	void setWindowStaysOnTop(bool);
 	void setSoftLagValue(int);

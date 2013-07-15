@@ -75,6 +75,8 @@ void pickDefaultLangFile()
 	else 
 	if(sysLocale.startsWith("uk"))defaultLangFile=":/Resources/Language/Ukrainian.lng";
 	else 
+	if(sysLocale.startsWith("pl"))defaultLangFile=":/Resources/Language/Polish.lng";
+	else 
 	if(sysLocale.startsWith("nl"))defaultLangFile=":/Resources/Language/Dutch.lng";
 	else 
 	if(sysLocale.startsWith("es"))defaultLangFile=":/Resources/Language/Spanish.lng";
@@ -91,7 +93,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0726");
+	appVerStr_=new QByteArray("1.0727");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -316,7 +318,11 @@ int main(int argc, char *argv[])
 	currencyBStr=settings.value("Currency","USD").toString().toAscii();
 	currencyBSign=currencySignMap->value(currencyBStr,"$");
 
-	if(isLogEnabled)logThread=new LogThread;
+	if(isLogEnabled)
+	{
+		logThread=new LogThread;
+		logThread->writeLog("Proxy settings: "+proxy.hostName().toAscii()+":"+QByteArray::number(proxy.port())+" "+proxy.user().toAscii());
+	}
 
 	mainWindow_=new QtBitcoinTrader;
 	QObject::connect(mainWindow_,SIGNAL(quit()),&a,SLOT(quit()));
