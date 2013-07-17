@@ -56,12 +56,12 @@ private:
 
 	QTime requestTimeOut;
 	QMap<QSslSocket *,QByteArray *>pendingRequestMap;
-	QList<QPair<QByteArray*,int>>requestList;
+	QList<QPair<QByteArray*,int> >requestList;
 	QMap<QByteArray*,int> retryCountMap;
 	QMap<int,int> reqTypePending;
 	QMap<QByteArray*,bool> skipOnceMap;
 
-	QList<QPair<QByteArray*,int>>preparedList;
+	QList<QPair<QByteArray*,int> >preparedList;
 
 	void takeFirstRequest();
 	void takeRequestAt(int);
