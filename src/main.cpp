@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0728");
+	appVerStr_=new QByteArray("1.0729");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -164,9 +164,6 @@ int main(int argc, char *argv[])
 	}
 
 	QApplication a(argc,argv);
-#ifndef Q_OS_WIN
-	a.setStyle(new QPlastiqueStyle);
-#endif
 
 #ifdef  Q_OS_WIN
 	if(QFile::exists(a.applicationFilePath()+".upd"))QFile::remove(a.applicationFilePath()+".upd");
@@ -183,9 +180,51 @@ int main(int argc, char *argv[])
 
 	{
 		QNetworkProxy proxy;
-		QList<QNetworkProxy> proxyList=QNetworkProxyFactory::systemProxyForQuery(QNetworkProxyQuery(QUrl("https://")));
-		if(proxyList.count())proxy=proxyList.first();
-		QNetworkProxy::setApplicationProxy(proxy);
+		QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+
+		bool plastiqueStyle=false;
+#ifndef Q_OS_WIN
+		plastiqueStyle=true;
+#endif
+		plastiqueStyle=settings.value("PlastiqueStyle",plastiqueStyle).toBool();
+		settings.setValue("PlastiqueStyle",plastiqueStyle);
+		if(plastiqueStyle)a.setStyle(new QPlastiqueStyle);
+
+		settings.beginGroup("Proxy");
+
+		bool proxyEnabled=settings.value("Enabled",true).toBool();
+		bool proxyAuto=settings.value("Auto",true).toBool();
+		QString proxyHost=settings.value("Host","127.0.0.1").toString();
+		quint16 proxyPort=settings.value("Port",1234).toInt();
+		QString proxyUser=settings.value("User","username").toString();
+		QString proxyPassword=settings.value("Password","password").toString();
+
+
+		settings.setValue("Enabled",proxyEnabled);
+		settings.setValue("Auto",proxyAuto);
+		settings.setValue("Host",proxyHost);
+		settings.setValue("Port",proxyPort);
+		settings.setValue("User",proxyUser);
+		settings.setValue("Password",proxyPassword);
+
+		settings.endGroup();
+		if(proxyEnabled)
+		{
+			if(proxyAuto)
+			{
+				QList<QNetworkProxy> proxyList=QNetworkProxyFactory::systemProxyForQuery(QNetworkProxyQuery(QUrl("https://")));
+				if(proxyList.count())proxy=proxyList.first();
+			}
+			else
+			{
+				proxy.setHostName(proxyHost);
+				proxy.setUser(proxyUser);
+				proxy.setPort(proxyPort);
+				proxy.setPassword(proxyPassword);
+				proxy.setType(QNetworkProxy::HttpProxy);
+			}
+			QNetworkProxy::setApplicationProxy(proxy);
+		}
 
 	logEnabled_=new bool(false);
 
@@ -307,7 +346,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	QSettings settings(iniFileName,QSettings::IniFormat);
 	isLogEnabled=settings.value("LogEnabled",false).toBool();
 	settings.setValue("LogEnabled",isLogEnabled);
 	currencyASign=currencySignMap->value("BTC","BTC");
@@ -319,7 +357,6 @@ int main(int argc, char *argv[])
 		logThread=new LogThread;
 		logThread->writeLog("Proxy settings: "+proxy.hostName().toAscii()+":"+QByteArray::number(proxy.port())+" "+proxy.user().toAscii());
 	}
-
 	mainWindow_=new QtBitcoinTrader;
 	QObject::connect(mainWindow_,SIGNAL(quit()),&a,SLOT(quit()));
 	}

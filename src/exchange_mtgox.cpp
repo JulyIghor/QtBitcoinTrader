@@ -11,7 +11,6 @@
 #include <openssl/hmac.h>
 #include "main.h"
 #include <QDateTime>
-#include <QSslError>
 
 Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()

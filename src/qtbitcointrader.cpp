@@ -120,6 +120,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	profileName=iniSettings->value("ProfileName","Default Profile").toString();
 	windowTitleP=profileName+" - "+windowTitle()+" v"+appVerStr;
 	if(isLogEnabled)windowTitleP.append(" [DEBUG MODE]");
+	else if(appVerIsBeta)windowTitleP.append(" [BETA]");
+
 	setWindowTitle(windowTitleP);
 
 	ui.accountBTCBeep->setChecked(iniSettings->value("AccountBTCBeep",false).toBool());
@@ -155,7 +157,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
 
-	if(appVerLastReal<1.0728)
+	if(appVerLastReal<1.0729)
 	{
 		httpRequestInterval=500;
 		httpRequestTimeout=1500;
@@ -192,56 +194,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tabDepth->installEventFilter(this);
 
 	exchangeId=iniSettings->value("ExchangeId",0).toInt();
-	switch(exchangeId)
-	{
-	case 1:
-		{//BTC-E
-			ui.accountFee->setValue(0.2);
-			btcDecimals=8;
-			usdDecimals=8;
-			priceDecimals=3;
-			exchangeName="BTC-E";
-			ui.loginVolumeBack->setVisible(false);
-			ui.exchangeLagBack->setVisible(false);
-			ui.lagValue->setVisible(false);
-			ui.lagMtgoxLabel->setVisible(false);
-
-			QFile curMap(":/Resources/CurrenciesBTCe.map");
-			curMap.open(QIODevice::ReadOnly);
-			QStringList curencyList=QString(curMap.readAll().replace("\r","")).split("\n");
-			curMap.close();
-			for(int n=0;n<curencyList.count();n++)
-			{
-				QStringList curDataList=curencyList.at(n).split("=");
-				if(curDataList.count()!=5)continue;
-				QString curName=curDataList.first();
-				curDataList.removeFirst();
-				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
-			}
-
-			(new Exchange_BTCe(restSign,restKey))->setupApi(this,false);
-		}break;
-	default:
-		{
-			btcDecimals=8;
-			usdDecimals=5;
-			priceDecimals=5;
-			QFile curMap(":/Resources/CurrenciesMtGox.map");
-			curMap.open(QIODevice::ReadOnly);
-			QStringList curencyList=QString(curMap.readAll().replace("\r","")).split("\n");
-			curMap.close();
-			for(int n=0;n<curencyList.count();n++)
-			{
-				QStringList curDataList=curencyList.at(n).split("=");
-				if(curDataList.count()!=5)continue;
-				QString curName=curDataList.first();
-				curDataList.removeFirst();
-				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
-			}
-
-			exchangeName="Mt.Gox"; (new Exchange_MtGox(restSign,restKey))->setupApi(this,false);
-		}
-	}
 
 	setApiDown(false);
 
@@ -379,6 +331,57 @@ bool QtBitcoinTrader::isValidGeometry(QRect *geo, int yMargin)
 
 void QtBitcoinTrader::loadUiSettings()
 {
+	switch(exchangeId)
+	{
+	case 1:
+		{//BTC-E
+			ui.accountFee->setValue(0.2);
+			btcDecimals=8;
+			usdDecimals=8;
+			priceDecimals=3;
+			exchangeName="BTC-E";
+			ui.loginVolumeBack->setVisible(false);
+			ui.exchangeLagBack->setVisible(false);
+			ui.lagValue->setVisible(false);
+			ui.lagMtgoxLabel->setVisible(false);
+
+			QFile curMap(":/Resources/CurrenciesBTCe.map");
+			curMap.open(QIODevice::ReadOnly);
+			QStringList curencyList=QString(curMap.readAll().replace("\r","")).split("\n");
+			curMap.close();
+			for(int n=0;n<curencyList.count();n++)
+			{
+				QStringList curDataList=curencyList.at(n).split("=");
+				if(curDataList.count()!=5)continue;
+				QString curName=curDataList.first();
+				curDataList.removeFirst();
+				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
+			}
+
+			(new Exchange_BTCe(restSign,restKey))->setupApi(this,false);
+		}break;
+	default:
+		{
+			btcDecimals=8;
+			usdDecimals=5;
+			priceDecimals=5;
+			QFile curMap(":/Resources/CurrenciesMtGox.map");
+			curMap.open(QIODevice::ReadOnly);
+			QStringList curencyList=QString(curMap.readAll().replace("\r","")).split("\n");
+			curMap.close();
+			for(int n=0;n<curencyList.count();n++)
+			{
+				QStringList curDataList=curencyList.at(n).split("=");
+				if(curDataList.count()!=5)continue;
+				QString curName=curDataList.first();
+				curDataList.removeFirst();
+				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
+			}
+
+			exchangeName="Mt.Gox"; (new Exchange_MtGox(restSign,restKey))->setupApi(this,false);
+		}
+	}
+
 	if(iniSettings->value("DetachedLog",isDetachedLog).toBool())detachLog();
 
 	if(iniSettings->value("DetachedRules",isDetachedRules).toBool())detachRules();
@@ -1137,8 +1140,8 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	int curRow=ui.ordersTable->rowCount();
 	QByteArray orderSign=dataList.at(5).toAscii();
 	ui.ordersTable->setRowCount(curRow+1);
-	ui.ordersTable->setRowHeight(curRow,30);
-	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat)));postWorkAtTableItem(ui.ordersTable->item(curRow,0));ui.ordersTable->item(curRow,0)->setData(Qt::UserRole,oid);
+	ui.ordersTable->setRowHeight(curRow,26);
+	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localTimeFormat)));postWorkAtTableItem(ui.ordersTable->item(curRow,0));ui.ordersTable->item(curRow,0)->setData(Qt::UserRole,oid);ui.ordersTable->item(curRow,0)->setToolTip(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat));
 	QString orderType=dataList.at(1).toUpper();
 	QTableWidgetItem *newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_"+orderType,dataList.at(1)));
 	if(orderType=="ASK")newItem->setTextColor(Qt::red); else newItem->setTextColor(Qt::blue);
@@ -1633,7 +1636,7 @@ void QtBitcoinTrader::addRuleByHolderInToTable(RuleHolder holder, int preferedRo
 	if(curRow==-1)curRow=ui.rulesTable->rowCount();
 
 	ui.rulesTable->insertRow(curRow);
-	ui.rulesTable->setRowHeight(curRow,30);
+	ui.rulesTable->setRowHeight(curRow,26);
 	ui.rulesTable->setItem(curRow,0,new QTableWidgetItem());postWorkAtTableItem(ui.rulesTable->item(curRow,0));ui.rulesTable->item(curRow,0)->setData(Qt::UserRole,holder.getRuleGuid());
 	ui.rulesTable->setItem(curRow,1,new QTableWidgetItem(holder.getDescriptionString()));postWorkAtTableItem(ui.rulesTable->item(curRow,1));
 	ui.rulesTable->setItem(curRow,2,new QTableWidgetItem(holder.getSellOrBuyString()));postWorkAtTableItem(ui.rulesTable->item(curRow,2));

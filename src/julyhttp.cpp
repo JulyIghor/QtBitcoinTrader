@@ -164,13 +164,14 @@ void JulyHttp::readSocket()
 			}
 			else if(isLogEnabled)logThread->writeLog("Unknown response: "+buffer);
 
+			QByteArray dataToMatch;
 			if(socket->bytesAvailable())
 			{
-				QByteArray dataToMatch=socket->readAll();
+				dataToMatch=socket->readAll();
 				if(dataToMatch!="\r\n")
 					if(isLogEnabled)logThread->writeLog("To match: "+dataToMatch);
 			}
-
+			//qDebug()<<"endOfPacket"<<dataToMatch.size()<<buffer.size()<<requestList.count()<<buffer.left(10);
 			takeFirstRequest();
 			clearRequest();
 			sendPendingData();
@@ -280,6 +281,7 @@ void JulyHttp::sendData(int reqType, bool isVip, const QByteArray &method, int r
 void JulyHttp::takeRequestAt(int pos)
 {
 	if(requestList.count()<=pos)return;
+	//qDebug()<<"takeRequestAt"<<pos;
 	QPair<QByteArray*,int> reqPair=requestList.at(pos);
 	reqTypePending[reqPair.second]=reqTypePending.value(reqPair.second,1)-1;
 	retryCountMap.remove(reqPair.first);

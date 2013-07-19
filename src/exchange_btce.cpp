@@ -11,7 +11,6 @@
 #include <openssl/hmac.h>
 #include "main.h"
 #include <QDateTime>
-#include <QSslError>
 
 Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()
@@ -255,14 +254,15 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 		}
 		break;//info
 	case 204://orders
+		{
 		if(data.size()<=30)break;
+		bool isEmptyOrders=!success&&errorString=="no orders";if(isEmptyOrders)success=true;
 		if(lastOrders!=data)
 		{
 			lastOrders=data;
-			if(!success&&errorString=="no orders")
+			if(isEmptyOrders)
 			{
 				emit ordersIsEmpty();
-				success=true;
 				break;
 			}
 			data.replace("return\":{\"","},\"");
@@ -300,8 +300,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			}
 			emit ordersChanged(rezultData);
 		}
-		success=true;
 		break;//orders
+		}
 	case 305: //order/cancel
 		if(success)
 		{
@@ -312,6 +312,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	case 306: if(isLogEnabled)logThread->writeLog("Buy OK: "+data);break;//order/buy
 	case 307: if(isLogEnabled)logThread->writeLog("Sell OK: "+data);break;//order/sell
 	case 208: ///history
+		{
+		bool isEmptyOrders=!success&&errorString=="no trades";if(isEmptyOrders)success=true;
 		if(lastHistory!=data)
 		{
 			lastHistory=data;
@@ -364,6 +366,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			emit ordersLogChanged(newLog);
 		}
 		break;//money/wallet/history
+		}
 	default: break;
 	}
 
@@ -371,6 +374,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	{
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
+		if(errorString=="no orders")return;
 		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 }
