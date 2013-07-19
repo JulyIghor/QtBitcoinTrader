@@ -19,6 +19,7 @@ HEADERS += aboutdialog.h \
            julyaes256.h \
            julylightchanges.h \
            julyrsa.h \
+	   julyhttp.h \
            julyspinboxfix.h \
            julytranslator.h \
            logthread.h \
@@ -53,6 +54,7 @@ SOURCES += aboutdialog.cpp \
            julyaes256.cpp \
            julylightchanges.cpp \
            julyrsa.cpp \
+	   julyhttp.cpp \
            julyspinboxfix.cpp \
            julytranslator.cpp \
            logthread.cpp \
