@@ -307,18 +307,14 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 	setApiDown(true);
 
 	if(isLogEnabled)logThread->writeLog("SocetError: "+socket->errorString().toAscii());
-	if(socketError==QAbstractSocket::RemoteHostClosedError||
-		socketError==QAbstractSocket::SocketTimeoutError||
-		socketError==QAbstractSocket::NetworkError)reconnectSocket(socket,false);
-	else
+
+	if(socketError==QAbstractSocket::ProxyAuthenticationRequiredError)
 	{
-		if(socketError==QAbstractSocket::ProxyAuthenticationRequiredError)
-		{
-			isDisabled=true;
-			socket->abort();
-		}
+		isDisabled=true;
 		emit errorSignal(socket->errorString());
+		socket->abort();
 	}
+	else reconnectSocket(socket,false);
 }
 
 bool JulyHttp::isSocketConnected(QSslSocket *socket)
