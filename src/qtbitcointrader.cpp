@@ -217,7 +217,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
 
 	constructorFinished=true;
-	languageChanged();
 
 	checkValidRulesButtons();
 	currencyChanged(ui.currencyComboBox->currentIndex());
@@ -413,6 +412,8 @@ void QtBitcoinTrader::loadUiSettings()
 	iniSettings->sync();
 	
 	setWindowStaysOnTop(ui.widgetStaysOnTop->isChecked());
+
+	languageChanged();
 }
 
 void QtBitcoinTrader::checkUpdate()
