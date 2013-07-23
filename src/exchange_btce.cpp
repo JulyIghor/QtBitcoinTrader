@@ -49,6 +49,7 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
 
+	connect(this,SIGNAL(depthUpdateOrder(double,double,bool)),mainClass,SLOT(depthUpdateOrder(double,double,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
 	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
 	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
@@ -92,7 +93,9 @@ void Exchange_BTCe::clearVariables()
 	apiDownCounter=0;
 	lastHistory.clear();
 	lastOrders.clear();
-
+	lastDepthBidsMap.clear();
+	lastDepthAsksMap.clear();
+	lastDepthData.clear();
 	lastFetchTid=QDateTime::currentDateTime().addSecs(-600).toTime_t();
 	lastFetchTid=-lastFetchTid;
 }
@@ -217,6 +220,54 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			}
 		}
 		break;// Fee
+	case 111: //depth
+		if(data.startsWith("{\"asks\":["))
+		{
+			if(lastDepthData!=data)
+			{
+				lastDepthData=data;
+				QMap<double,double> currentAsksMap;
+				QStringList asksList=QString(getMidData("asks\":[[","]]",&data)).split("],[");
+				//while(asksList.count()>100)asksList.removeLast();
+				for(int n=0;n<asksList.count();n++)
+				{
+					QStringList currentPair=asksList.at(n).split(",");
+					if(currentPair.count()!=2)continue;
+					double priceDouble=currentPair.first().toDouble();
+					double amount=currentPair.last().toDouble();
+					if(priceDouble>0.0&&amount>0.0&&lastDepthAsksMap.value(priceDouble,0.0)!=amount)
+					{
+						currentAsksMap[priceDouble]=amount;
+						emit depthUpdateOrder(priceDouble,amount,true);
+					}
+				}
+				foreach(double price, lastDepthAsksMap)
+					if(currentAsksMap.value(price,0)==0)emit depthUpdateOrder(price,0.0,true);
+				lastDepthAsksMap=currentAsksMap;
+
+				QMap<double,double> currentBidsMap;
+				QStringList bidsList=QString(getMidData("bids\":[[","]]",&data)).split("],[");
+				//while(bidsList.count()>100)bidsList.removeLast();
+				for(int n=0;n<bidsList.count();n++)
+				{
+					QStringList currentPair=bidsList.at(n).split(",");
+					if(currentPair.count()!=2)continue;
+					double priceDouble=currentPair.first().toDouble();
+					double amount=currentPair.last().toDouble();
+					if(priceDouble>0.0&&amount>0.0&&lastDepthBidsMap.value(priceDouble,0.0)!=amount)
+					{
+						currentBidsMap[priceDouble]=amount;
+						emit depthUpdateOrder(priceDouble,amount,false);
+					}
+					if(priceDouble>0.0&&amount>0.0)emit depthUpdateOrder(priceDouble,amount,false);
+				}
+				foreach(double price, lastDepthBidsMap)
+					if(currentBidsMap.value(price,0)==0)emit depthUpdateOrder(price,0.0,false);
+				lastDepthBidsMap=currentBidsMap;
+			}
+		}
+		else if(isLogEnabled)logThread->writeLog("Invalid depth data:"+data);
+		break;
 	case 202: //info
 		{
 			if(!success)break;
@@ -405,6 +456,7 @@ void Exchange_BTCe::reloadOrders()
 
 void Exchange_BTCe::secondSlot()
 {
+	static int infoCounter=0;
 	if(lastHistory.isEmpty())getHistory(false);
 
 	if(!isReplayPending(202))sendToApi(202,"",true,httpSplitPackets,"method=getInfo&");
@@ -413,9 +465,12 @@ void Exchange_BTCe::secondSlot()
 	
 	if(!isReplayPending(103))sendToApi(103,currencyRequestPair+"/ticker",false,httpSplitPackets);
 	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/trades",false,httpSplitPackets);
+	if(infoCounter==0&&!isReplayPending(111))sendToApi(111,currencyRequestPair+"/depth",false,httpSplitPackets);
 
 	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 
+	infoCounter++;
+	if(infoCounter>19)infoCounter=0;
 	secondTimer->start(httpRequestInterval);
 }
 

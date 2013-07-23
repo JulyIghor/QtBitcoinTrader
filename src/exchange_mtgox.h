@@ -26,10 +26,13 @@ public:
 	~Exchange_MtGox();
 
 private:
+	QMap<double,double> lastDepthAsksMap;
+	QMap<double,double> lastDepthBidsMap;
 	void clearVariables();
 	JulyHttp *julyHttp;
 	QTime authRequestTime;
 	QByteArray lastFetchDate;
+	QByteArray lastDepthData;
 	bool tickerOnly;
 	void translateUnicodeStr(QString *str);
 	QByteArray lastHistory;
@@ -64,6 +67,8 @@ private:
 	QTimer *secondTimer;
 	void run();
 signals:
+	void depthUpdateOrder(double,double,bool);
+
 	void addLastTrade(double,qint64,double,QByteArray,bool);
 
 	void ordersChanged(QString);

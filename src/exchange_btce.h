@@ -26,6 +26,9 @@ public:
 	~Exchange_BTCe();
 
 private:
+	QMap<double,double> lastDepthAsksMap;
+	QMap<double,double> lastDepthBidsMap;
+	QByteArray lastDepthData;
 	void clearVariables();
 	JulyHttp *julyHttp;
 
@@ -66,6 +69,7 @@ private:
 	int lastOpenedOrders;
 	void run();
 signals:
+	void depthUpdateOrder(double,double,bool);
 	void showErrorMessage(QString);
 	void addLastTrade(double,qint64,double,QByteArray,bool);
 

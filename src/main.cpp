@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0729");
+	appVerStr_=new QByteArray("1.0730");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
         if(a.arguments().last().startsWith("/checkupdate"))
 		{
 #ifndef Q_OS_WIN
-			a.setStyle(new QPlastiqueStyle);
+			if(plastiqueStyle)a.setStyle(new QPlastiqueStyle);
 #endif
 			a.setStyleSheet(globalStyleSheet);
 
@@ -357,6 +357,7 @@ int main(int argc, char *argv[])
 		logThread=new LogThread;
 		logThread->writeLog("Proxy settings: "+proxy.hostName().toAscii()+":"+QByteArray::number(proxy.port())+" "+proxy.user().toAscii());
 	}
+	a.setQuitOnLastWindowClosed(false);
 	mainWindow_=new QtBitcoinTrader;
 	QObject::connect(mainWindow_,SIGNAL(quit()),&a,SLOT(quit()));
 	}

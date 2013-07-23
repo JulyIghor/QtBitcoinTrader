@@ -115,6 +115,18 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tableTrades->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
 	ui.tableTrades->horizontalHeaderItem(3)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 
+	ui.sellOrdersTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
+	ui.sellOrdersTable->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+	ui.sellOrdersTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
+	ui.sellOrdersTable->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
+	ui.sellOrdersTable->horizontalHeaderItem(2)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+
+	ui.buyOrdersTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
+	ui.buyOrdersTable->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+	ui.buyOrdersTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
+	ui.buyOrdersTable->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
+	ui.buyOrdersTable->horizontalHeaderItem(2)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+
 	iniSettings=new QSettings(iniFileName,QSettings::IniFormat,this);
 
 	profileName=iniSettings->value("ProfileName","Default Profile").toString();
@@ -729,6 +741,13 @@ void QtBitcoinTrader::currencyChanged(int val)
 
 	ui.sellGroupBox->setTitle(sellGroupboxText);
 
+	depthAsksMap.clear();
+	depthBidsMap.clear();
+	ui.sellOrdersTable->clearContents();
+	ui.sellOrdersTable->setRowCount(0);
+	ui.buyOrdersTable->clearContents();
+	ui.buyOrdersTable->setRowCount(0);
+
 	static int firstLoad=0;
 	if(firstLoad++>1)
 	{
@@ -1140,8 +1159,7 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	int curRow=ui.ordersTable->rowCount();
 	QByteArray orderSign=dataList.at(5).toAscii();
 	ui.ordersTable->setRowCount(curRow+1);
-	ui.ordersTable->setRowHeight(curRow,26);
-	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localTimeFormat)));postWorkAtTableItem(ui.ordersTable->item(curRow,0));ui.ordersTable->item(curRow,0)->setData(Qt::UserRole,oid);ui.ordersTable->item(curRow,0)->setToolTip(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat));
+	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat)));postWorkAtTableItem(ui.ordersTable->item(curRow,0));ui.ordersTable->item(curRow,0)->setData(Qt::UserRole,oid);ui.ordersTable->item(curRow,0)->setToolTip(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat));
 	QString orderType=dataList.at(1).toUpper();
 	QTableWidgetItem *newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_"+orderType,dataList.at(1)));
 	if(orderType=="ASK")newItem->setTextColor(Qt::red); else newItem->setTextColor(Qt::blue);
@@ -1636,7 +1654,6 @@ void QtBitcoinTrader::addRuleByHolderInToTable(RuleHolder holder, int preferedRo
 	if(curRow==-1)curRow=ui.rulesTable->rowCount();
 
 	ui.rulesTable->insertRow(curRow);
-	ui.rulesTable->setRowHeight(curRow,26);
 	ui.rulesTable->setItem(curRow,0,new QTableWidgetItem());postWorkAtTableItem(ui.rulesTable->item(curRow,0));ui.rulesTable->item(curRow,0)->setData(Qt::UserRole,holder.getRuleGuid());
 	ui.rulesTable->setItem(curRow,1,new QTableWidgetItem(holder.getDescriptionString()));postWorkAtTableItem(ui.rulesTable->item(curRow,1));
 	ui.rulesTable->setItem(curRow,2,new QTableWidgetItem(holder.getSellOrBuyString()));postWorkAtTableItem(ui.rulesTable->item(curRow,2));
@@ -2067,6 +2084,11 @@ void QtBitcoinTrader::languageChanged()
 	tradesLabels<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_TYPE","Type")<<julyTr("ORDERS_PRICE","Price");
 	ui.tableTrades->setHorizontalHeaderLabels(tradesLabels);
 
+	QStringList depthLabels;
+	depthLabels<<julyTr("ORDERS_PRICE","Price")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_TOTAL","Total");
+	ui.sellOrdersTable->setHorizontalHeaderLabels(depthLabels);
+	ui.buyOrdersTable->setHorizontalHeaderLabels(depthLabels);
+
 	ui.tabOrdersLog->setAccessibleName(julyTr("TAB_ORDERS_LOG","Orders Log"));
 	ui.tabOrdersLog->setWindowTitle(ui.tabOrdersLog->accessibleName()+" ["+profileName+"]");
 	if(isDetachedLog){julyTranslator->translateUi(ui.tabOrdersLog);fixAllChildButtonsAndLabels(ui.tabOrdersLog);}
@@ -2144,6 +2166,73 @@ void QtBitcoinTrader::setWindowStaysOnTop(bool on)
 		QtWin::extendFrameIntoClientArea(this);
 #endif
 	show();
+}
+
+void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
+{
+	QTableWidget *currentTable=ui.buyOrdersTable;
+	QMap<double,double> *depthMap=&depthBidsMap;
+
+	if(isAsk)
+	{
+		currentTable=ui.sellOrdersTable;
+		depthMap=&depthAsksMap;
+	}
+	if(volume==0)//Remove item
+	{
+		for(int n=0;n<currentTable->rowCount();n++)
+			if(currentTable->item(n,0)->data(Qt::UserRole).toDouble()==price)
+			{
+				currentTable->removeRow(n);
+				//qDebug()<<isAsk<<"Removed:"<<price<<" from pos: "<<n;
+				break;
+			}
+		depthMap->remove(price);
+		return;
+	}
+	if(depthMap->value(price,0)==0)//Insert item
+	{
+		int insertPos=currentTable->rowCount();
+		if(isAsk)
+		{
+		for(int n=0;n<currentTable->rowCount();n++)
+			if(currentTable->item(n,0)->data(Qt::UserRole).toDouble()>price)
+			{
+				insertPos=n;
+				//qDebug()<<isAsk<<"Insert:"<<price<<" into pos: "<<insertPos;
+				break;
+			}
+		}
+		else
+		{
+			for(int n=0;n<currentTable->rowCount();n++)
+				if(currentTable->item(n,0)->data(Qt::UserRole).toDouble()<price)
+				{
+					insertPos=n;
+					//qDebug()<<isAsk<<"Insert:"<<price<<" into pos: "<<insertPos;
+					break;
+				}
+		}
+		currentTable->insertRow(insertPos);
+		static QColor btcColor("#996515");
+		currentTable->setItem(insertPos,0,new QTableWidgetItem(currencyBSign+" "+numFromDouble(price)));postWorkAtTableItem(currentTable->item(insertPos,0),1);currentTable->item(insertPos,0)->setData(Qt::UserRole,price);currentTable->item(insertPos,0)->setTextColor(Qt::darkGreen);
+		currentTable->setItem(insertPos,1,new QTableWidgetItem(currencyASign+" "+numFromDouble(volume)));postWorkAtTableItem(currentTable->item(insertPos,1));currentTable->item(insertPos,1)->setTextColor(btcColor);
+		currentTable->setItem(insertPos,2,new QTableWidgetItem(currencyBSign+" "+numFromDouble(price*volume)));postWorkAtTableItem(currentTable->item(insertPos,2),-1);
+		depthMap->insert(price,volume);currentTable->item(insertPos,2)->setTextColor(Qt::darkGreen);
+	}
+	else//Update item
+	if(depthMap->value(price)!=volume)
+	{
+		for(int n=0;n<currentTable->rowCount();n++)
+			if(currentTable->item(n,0)->data(Qt::UserRole).toDouble()==price)
+			{
+				currentTable->item(n,1)->setText(currencyASign+" "+numFromDouble(volume));
+				currentTable->item(n,2)->setText(currencyBSign+" "+numFromDouble(volume*price));
+				(*depthMap)[price]=volume;
+				//qDebug()<<isAsk<<"Update:"<<price<<" at pos: "<<n;
+				break;
+			}
+	}
 }
 
 void QtBitcoinTrader::exitApp()

@@ -48,6 +48,8 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	QMap<double,double> depthAsksMap;
+	QMap<double,double> depthBidsMap;
 	QMenu *trayMenu;
 	QSettings *iniSettings;
 	QRect currentDesktopRect;
@@ -141,6 +143,7 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void depthUpdateOrder(double,double,bool);
 	void showErrorMessage(QString);
 	void exitApp();
 	void setWindowStaysOnTop(bool);

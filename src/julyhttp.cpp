@@ -105,6 +105,7 @@ void JulyHttp::readSocket()
 			if(!buffer.isEmpty())
 			{
 				if(isLogEnabled)logThread->writeLog("Buffer not empty:"+buffer);
+				//qDebug()<<"http start over: "<<buffer.left(200);
 				buffer.clear();
 			}
 			currentLineDataType=1;

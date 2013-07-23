@@ -46,6 +46,7 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
 
+	connect(this,SIGNAL(depthUpdateOrder(double,double,bool)),mainClass,SLOT(depthUpdateOrder(double,double,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
 	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
 	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
@@ -90,6 +91,9 @@ void Exchange_MtGox::clearVariables()
 	apiDownCounter=0;
 	lastHistory.clear();
 	lastOrders.clear();
+	lastDepthBidsMap.clear();
+	lastDepthAsksMap.clear();
+	lastDepthData.clear();
 	lastInfoReceived=false;
 	lastFetchDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-600).toTime_t())+"000000";
 }
@@ -143,7 +147,9 @@ void Exchange_MtGox::secondSlot()
 	if(!lastInfoReceived||infoCounter==0&&!isReplayPending(202))sendToApi(202,currencyRequestPair+"/money/info",true,httpSplitPackets);
 
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,currencyRequestPair+"/money/orders",true,httpSplitPackets);
-	
+
+	if(infoCounter==0&&!isReplayPending(111))sendToApi(111,currencyRequestPair+"/money/depth/fetch",false,httpSplitPackets);
+
 	if(!isReplayPending(101))sendToApi(101,currencyRequestPair+"/money/order/lag",false,httpSplitPackets);
 	if((infoCounter==0||infoCounter==10)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
 	if(!isReplayPending(104))sendToApi(104,currencyRequestPair+"/money/ticker_fast",false,httpSplitPackets);
@@ -330,6 +336,52 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 			}
 			else if(isLogEnabled)logThread->writeLog("Invalid trades fetch data:"+data);
 		}
+		break;
+	case 111: //depth
+		if(data.startsWith("{\"result\":\"success\",\"data\":{\"now\""))
+		{
+			if(lastDepthData!=data)
+			{
+				lastDepthData=data;
+				QMap<double,double> currentAsksMap;
+				QStringList asksList=QString(getMidData("\"asks\":[{","}]",&data)).split("},{");
+				//while(asksList.count()>100)asksList.removeLast();
+				for(int n=0;n<asksList.count();n++)
+				{
+					QByteArray currentRow=asksList.at(n).toAscii();
+					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
+					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
+					if(priceDouble>0.0&&amount>0.0&&lastDepthAsksMap.value(priceDouble,0.0)!=amount)
+					{
+						currentAsksMap[priceDouble]=amount;
+						emit depthUpdateOrder(priceDouble,amount,true);
+					}
+				}
+				foreach(double price, lastDepthAsksMap)
+					if(currentAsksMap.value(price,0)==0)emit depthUpdateOrder(price,0.0,true);
+				lastDepthAsksMap=currentAsksMap;
+
+				QMap<double,double> currentBidsMap;
+				QStringList bidsList=QString(getMidData("\"bids\":[{","}]",&data)).split("},{");
+				//while(bidsList.count()>100)bidsList.removeLast();
+				for(int n=0;n<bidsList.count();n++)
+				{
+					QByteArray currentRow=bidsList.at(n).toAscii();
+					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
+					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
+					if(priceDouble>0.0&&amount>0.0&&lastDepthBidsMap.value(priceDouble,0.0)!=amount)
+					{
+						currentBidsMap[priceDouble]=amount;
+						emit depthUpdateOrder(priceDouble,amount,false);
+					}
+					if(priceDouble>0.0&&amount>0.0)emit depthUpdateOrder(priceDouble,amount,false);
+				}
+				foreach(double price, lastDepthBidsMap)
+					if(currentBidsMap.value(price,0)==0)emit depthUpdateOrder(price,0.0,false);
+				lastDepthBidsMap=currentBidsMap;
+			}
+		}
+		else if(isLogEnabled)logThread->writeLog("Invalid depth data:"+data);
 		break;
 	case 202: //info
 		{
