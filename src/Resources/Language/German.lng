@@ -1,3 +1,5 @@
+Label_BUY_ORDERS=Buy orders
+Label_SELL_ORDERS=Sell orders
 Label_EXCHANGE=Handelsplatz:
 Label_FEE_LABEL=Gebühr:
 Label_HOW_TO_TRANSLATE=Fülle bitte sämtliche Felder aus. Klicke anschließend auf "Bestätigen" und überprüfe, ob deine Übersetzung stimmt. Danach speichere die Übersetzungsdatei und schicke sie per E-Mail an <a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Nach einer Überprüfung wird deine Übersetzung mit der nächsten Qt Trader Version veröffentlicht.

@@ -1,3 +1,5 @@
+Label_BUY_ORDERS=Buy orders
+Label_SELL_ORDERS=Sell orders
 Label_FEE_LABEL=Vergoeding
 Label_HOW_TO_TRANSLATE=Please fill all fields. Than press Apply button and verify that translation looks good. Save translation file and send it to <a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>After verification your translation will be added to next Qt Bitcoin Trader releases.
 Label_LOGIN_LABEL=Login:

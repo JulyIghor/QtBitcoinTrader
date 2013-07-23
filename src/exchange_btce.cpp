@@ -426,6 +426,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
 		if(errorString=="no orders")return;
+		if(!errorString.contains("nonce"))//temporary disabled
 		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 }
@@ -469,8 +470,7 @@ void Exchange_BTCe::secondSlot()
 
 	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 
-	infoCounter++;
-	if(infoCounter>19)infoCounter=0;
+	if(++infoCounter>9)infoCounter=0;
 	secondTimer->start(httpRequestInterval);
 }
 

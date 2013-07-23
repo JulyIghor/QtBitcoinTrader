@@ -151,7 +151,7 @@ void Exchange_MtGox::secondSlot()
 	if(infoCounter==0&&!isReplayPending(111))sendToApi(111,currencyRequestPair+"/money/depth/fetch",false,httpSplitPackets);
 
 	if(!isReplayPending(101))sendToApi(101,currencyRequestPair+"/money/order/lag",false,httpSplitPackets);
-	if((infoCounter==0||infoCounter==10)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
+	if((infoCounter==0)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
 	if(!isReplayPending(104))sendToApi(104,currencyRequestPair+"/money/ticker_fast",false,httpSplitPackets);
 
 	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/money/trades/fetch?since="+lastFetchDate,false,httpSplitPackets);
@@ -159,8 +159,7 @@ void Exchange_MtGox::secondSlot()
 		if(!isReplayPending(208))sendToApi(208,"money/wallet/history",true,httpSplitPackets,"&currency=BTC");
 	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 
-	infoCounter++;
-	if(infoCounter>19)infoCounter=0;
+	if(++infoCounter>9)infoCounter=0;
 	secondTimer->start(httpRequestInterval);
 }
 
@@ -578,6 +577,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		if(errorString=="Order not found")return;
 		errorString.append("<br>"+tokenString);
 		errorString.append("<br>"+QString::number(reqType));
+		if(!errorString.contains("nonce"))//temporary disabled
 		emit showErrorMessage("I:>"+errorString);
 	}
 	else errorCount=0;

@@ -1,3 +1,5 @@
+Label_BUY_ORDERS=Buy orders
+Label_SELL_ORDERS=Sell orders
 Label_EXCHANGE=Børs:
 Label_FEE_LABEL=Gebyr:
 Label_HOW_TO_TRANSLATE=Vennligst fyll inn alle felt. Klikk deretter Utfør-knappen og se til at oversettelsen er korrekt.<br>Lagre oversettelsesfilen og send den til <a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Etter bekreftelse vil din oversettelse bli lagt til i kommende Qt Bitcoin Trader utgivelser.
