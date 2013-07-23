@@ -307,7 +307,7 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 {
 	setApiDown(true);
 
-	if(isLogEnabled)logThread->writeLog("SocetError: "+socket->errorString().toAscii());
+	if(isLogEnabled)logThread->writeLog("SocketError: "+socket->errorString().toAscii());
 
 	if(socketError==QAbstractSocket::ProxyAuthenticationRequiredError)
 	{

@@ -148,9 +148,6 @@ int main(int argc, char *argv[])
 		QApplication a(argc,argv);
         if(a.arguments().last().startsWith("/checkupdate"))
 		{
-#ifndef Q_OS_WIN
-			if(plastiqueStyle)a.setStyle(new QPlastiqueStyle);
-#endif
 			a.setStyleSheet(globalStyleSheet);
 
 			QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
