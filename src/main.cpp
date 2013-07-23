@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
         if(a.arguments().last().startsWith("/checkupdate"))
 		{
 #ifndef Q_OS_WIN
-			if(plastiqueStyle)a.setStyle(new QPlastiqueStyle);
+			a.setStyle(new QPlastiqueStyle);
 #endif
 			a.setStyleSheet(globalStyleSheet);
 
