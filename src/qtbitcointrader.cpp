@@ -161,11 +161,15 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
+	int defaultSectionSize=QFontMetrics(font()).boundingRect("ASDF0123456789").height()*2;
+	foreach(QTableWidget* tables, findChildren<QTableWidget*>())
+		tables->verticalHeader()->setDefaultSectionSize(defaultSectionSize);
+	
 	QSettings settingsMain(appDataDir+"/Settings.set",QSettings::IniFormat);
 	checkForUpdates=settingsMain.value("CheckForUpdates",true).toBool();
 
 	httpRequestInterval=settingsMain.value("HttpRequestsInterval",500).toInt();
-	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",1987).toInt();
+	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",1500).toInt();
 
 	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
 

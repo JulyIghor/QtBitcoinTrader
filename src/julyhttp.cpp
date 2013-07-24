@@ -105,7 +105,7 @@ void JulyHttp::readSocket()
 			if(!buffer.isEmpty())
 			{
 				if(isLogEnabled)logThread->writeLog("Buffer not empty:"+buffer);
-				//qDebug()<<"http start over: "<<buffer.left(200);
+				//qDebug()<<"buffer not empty. http start over: "<<buffer.left(200);
 				buffer.clear();
 			}
 			currentLineDataType=1;
@@ -160,8 +160,11 @@ void JulyHttp::readSocket()
 
 			if(!unknownPacket&&requestList.count())
 			{
+				if(!buffer.isEmpty())
+				{
 				emit dataReceived(buffer,requestList.first().second);
 				if(isLogEnabled)logThread->writeLog("RCV: "+buffer);
+				}
 			}
 			else if(isLogEnabled)logThread->writeLog("Unknown response: "+buffer);
 
@@ -354,6 +357,7 @@ void JulyHttp::sendPendingData()
 		else
 		{
 			if(isLogEnabled)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(httpRequestTimeout).toAscii());
+			reconnectSocket(socket,true);
 			if(requestRetryCount>0){retryRequest();return;}
 		}
 	}

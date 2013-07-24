@@ -466,11 +466,16 @@ void Exchange_BTCe::secondSlot()
 	
 	if(!isReplayPending(103))sendToApi(103,currencyRequestPair+"/ticker",false,httpSplitPackets);
 	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/trades",false,httpSplitPackets);
-	if(infoCounter==0&&!isReplayPending(111))sendToApi(111,currencyRequestPair+"/depth",false,httpSplitPackets);
+	if(infoCounter==3&&!isReplayPending(111))sendToApi(111,currencyRequestPair+"/depth",false,httpSplitPackets);
 
 	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 
-	if(++infoCounter>9)infoCounter=0;
+	if(++infoCounter>9)
+	{
+		infoCounter=0;
+		quint32 syncNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
+		if(privateNonce<syncNonce)privateNonce=syncNonce;
+	}
 	secondTimer->start(httpRequestInterval);
 }
 

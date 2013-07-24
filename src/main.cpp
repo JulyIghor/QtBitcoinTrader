@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0731");
+	appVerStr_=new QByteArray("1.0732");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 	httpRequestTimeout_=new int(5);
 	httpSplitPackets_=new bool(true);
 
-	QString globalStyleSheet="QDialog {background: lightgray;} QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
+	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
 
 #ifdef Q_OS_WIN
 	if(QFile::exists("./QtBitcoinTrader"))

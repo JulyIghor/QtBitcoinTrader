@@ -148,7 +148,7 @@ void Exchange_MtGox::secondSlot()
 
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,currencyRequestPair+"/money/orders",true,httpSplitPackets);
 
-	if(infoCounter==0&&!isReplayPending(111))sendToApi(111,currencyRequestPair+"/money/depth/fetch",false,httpSplitPackets);
+	if(infoCounter==3&&!isReplayPending(111))sendToApi(111,currencyRequestPair+"/money/depth/fetch",false,httpSplitPackets);
 
 	if(!isReplayPending(101))sendToApi(101,currencyRequestPair+"/money/order/lag",false,httpSplitPackets);
 	if((infoCounter==0)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
@@ -159,7 +159,12 @@ void Exchange_MtGox::secondSlot()
 		if(!isReplayPending(208))sendToApi(208,"money/wallet/history",true,httpSplitPackets,"&currency=BTC");
 	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 
-	if(++infoCounter>9)infoCounter=0;
+	if(++infoCounter>9)
+	{
+		infoCounter=0;
+		quint32 syncNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
+		if(privateNonce<syncNonce)privateNonce=syncNonce;
+	}
 	secondTimer->start(httpRequestInterval);
 }
 
