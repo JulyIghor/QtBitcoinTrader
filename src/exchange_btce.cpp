@@ -411,7 +411,9 @@ void Exchange_BTCe::httpDoneAuth(int cId, bool error)
 		QString errorString=getMidData("error\":\"","\"",&data);
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
-		if(reqType<300)emit identificationRequired(errorString);
+		if(reqType<300)
+			if(errorString.compare("no trades")!=0)
+				emit identificationRequired(errorString);
 	}
 }
 
