@@ -206,7 +206,7 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 	if(julyHttp==0)
 	{ 
 		julyHttp=new JulyHttp("data.mtgox.com","Rest-Key: "+privateRestKey+"\r\n",this);
-		connect(julyHttp,SIGNAL(softLagChanged(int)),mainWindow_,SLOT(setSoftLagValue(int)));
+		connect(julyHttp,SIGNAL(anyDataReceived()),mainWindow_,SLOT(anyDataReceived()));
 		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
 		connect(julyHttp,SIGNAL(errorSignal(QString)),mainWindow_,SLOT(showErrorMessage(QString)));
 		connect(julyHttp,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
@@ -344,12 +344,13 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 	case 111: //depth
 		if(data.startsWith("{\"result\":\"success\",\"data\":{\"now\""))
 		{
+			emit depthUpdateOrder(0.0,0.0,true);
 			if(lastDepthData!=data)
 			{
 				lastDepthData=data;
 				QMap<double,double> currentAsksMap;
 				QStringList asksList=QString(getMidData("\"asks\":[{","}]",&data)).split("},{");
-				//while(asksList.count()>100)asksList.removeLast();
+				if(depthCountLimit)while(asksList.count()>depthCountLimit)asksList.removeLast();
 				for(int n=0;n<asksList.count();n++)
 				{
 					QByteArray currentRow=asksList.at(n).toAscii();
@@ -362,12 +363,13 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					}
 				}
 				foreach(double price, lastDepthAsksMap)
-					if(currentAsksMap.value(price,0)==0)emit depthUpdateOrder(price,0.0,true);
+					if(currentAsksMap.value(price,0)==0)
+						emit depthUpdateOrder(price,0.0,true);
 				lastDepthAsksMap=currentAsksMap;
 
 				QMap<double,double> currentBidsMap;
 				QStringList bidsList=QString(getMidData("\"bids\":[{","}]",&data)).split("},{");
-				//while(bidsList.count()>100)bidsList.removeLast();
+				if(depthCountLimit)while(bidsList.count()>depthCountLimit)bidsList.removeFirst();
 				for(int n=0;n<bidsList.count();n++)
 				{
 					QByteArray currentRow=bidsList.at(n).toAscii();

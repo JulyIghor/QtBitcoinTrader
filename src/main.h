@@ -10,7 +10,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 //#include <QDebug>////////////
-//#define showDebug(text) qDebug()<<text//////////
+//#define showDebug(text) qDebug()<<QTime::currentTime().toString(localTimeFormat)+"> "+text//////////
 
 #include "qtbitcointrader.h"
 #include "logthread.h"
@@ -51,7 +51,9 @@
 #define httpRequestInterval (*httpRequestInterval_)
 #define httpRequestTimeout (*httpRequestTimeout_)
 #define httpSplitPackets (*httpSplitPackets_)
+#define depthCountLimit (*depthCountLimit_)
 
+extern int *depthCountLimit_;
 extern bool *httpSplitPackets_;
 extern int *httpRequestInterval_;
 extern int *httpRequestTimeout_;

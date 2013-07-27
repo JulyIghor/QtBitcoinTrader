@@ -32,6 +32,15 @@ public:
 	~JulyHttp();
 
 private:
+	QMap<QSslSocket *,QByteArray *>pendingRequestMap;
+	bool connectionClose;
+	qint64 bytesDone;
+	uint contentLength;
+	bool waitingReplay;
+	bool readingHeader;
+	qint64 chunkedSize;
+
+	void abortSocket();
 	QSslSocket *socket;
 	bool isDisabled;
 	QByteArray cookie;
@@ -42,20 +51,17 @@ private:
 	bool isSocketConnected(QSslSocket *socket);
 	void reconnectSocket(QSslSocket *socket, bool mastAbort);
 	void setApiDown(bool);
-	QTime requestDelay;
 	bool apiDownState;
 	int apiDownCount;
 	int requestRetryCount;
 	bool packetIsChunked;
 	QByteArray buffer;
-	qint32 packetChunkSize;
 	bool nextPacketMastBeSize;
 	bool endOfPacket;
 	void clearRequest();
 	void retryRequest();
 
 	QTime requestTimeOut;
-	QMap<QSslSocket *,QByteArray *>pendingRequestMap;
 	QList<QPair<QByteArray*,int> >requestList;
 	QMap<QByteArray*,int> retryCountMap;
 	QMap<int,int> reqTypePending;
@@ -74,9 +80,10 @@ private:
 		void sendPendingData();
 		void readSocket();
 signals:
+		void dataProgress(double);
+		void anyDataReceived();
 		void errorSignal(QString);
 		void sslErrorSignal(const QList<QSslError> &);
-		void softLagChanged(int);
 		void apiDown(bool);
 		void dataReceived(QByteArray,int);
 };

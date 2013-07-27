@@ -18,6 +18,7 @@
 #include <QSystemTrayIcon>
 #include <QSettings>
 #include <QMenu>
+#include <QTime>
 
 class QtBitcoinTrader : public QDialog
 {
@@ -48,6 +49,8 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	QTime softLagTime;
+	QTime depthLagTime;
 	QMap<double,double> depthAsksMap;
 	QMap<double,double> depthBidsMap;
 	QMenu *trayMenu;
@@ -143,6 +146,7 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void anyDataReceived();
 	void depthUpdateOrder(double,double,bool);
 	void showErrorMessage(QString);
 	void exitApp();

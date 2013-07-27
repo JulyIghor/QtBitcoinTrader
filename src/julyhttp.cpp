@@ -15,6 +15,12 @@
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent)
 	: QObject(parent)
 {
+	connectionClose=false;
+	bytesDone=0;
+	contentLength=0;
+	chunkedSize=-1;
+	readingHeader=false;
+	waitingReplay=false;
 	isDisabled=false;
 	outGoingPacketsCount=0;
 
@@ -22,7 +28,6 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	setupSocket(socket);
 	
 	requestTimeOut.restart();
-	requestDelay.restart();
 	hostName=hostN;
 	httpHeader.append(" HTTP/1.1\r\n");
 	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+appVerStr+"\r\n");
@@ -39,7 +44,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 
 JulyHttp::~JulyHttp()
 {
-	socket->abort();
+	abortSocket();
 }
 
 void JulyHttp::setupSocket(QSslSocket *socket)
@@ -60,16 +65,23 @@ void JulyHttp::clearPendingData()
 void JulyHttp::reConnect(bool mastAbort)
 {
 	if(isDisabled)return;
-	softLagChanged(requestDelay.elapsed());
 	reconnectSocket(socket,mastAbort);
 	retryRequest();
+}
+
+void JulyHttp::abortSocket()
+{
+	if(socket==0)return;
+	socket->blockSignals(true);
+	socket->abort();
+	socket->blockSignals(false);
 }
 
 void JulyHttp::reconnectSocket(QSslSocket *socket, bool mastAbort)
 {
 	if(isDisabled)return;
 	if(socket==0)return;
-	if(mastAbort)socket->abort();
+	if(mastAbort)abortSocket();
 	if(socket->state()==QAbstractSocket::UnconnectedState||socket->state()==QAbstractSocket::UnconnectedState)
 		socket->connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
 }
@@ -90,96 +102,164 @@ void JulyHttp::readSocket()
 {
 	if(isDisabled)return;
 
-	int currentLineDataType=0;
-	emit softLagChanged(requestDelay.elapsed());
-	while(socket->bytesAvailable())
+	emit anyDataReceived();
+	requestTimeOut.restart();
+
+	if(!waitingReplay)
 	{
-		static	QByteArray currentLine;
-		currentLine=socket->readLine();
+		connectionClose=false;
+		buffer.clear();
+		waitingReplay=true;
+		readingHeader=true;
+		contentLength=0;
+	}
 
-		if(isLogEnabled)logThread->writeLog("RCV: "+currentLine);
-
-		if(currentLine.isEmpty())continue;
-		if(currentLine.startsWith("HTTP/1"))
+	while(readingHeader)
+	{
+		bool endFound=false;
+		QString currentLine;
+		while(!endFound&&socket->canReadLine())
 		{
-			if(!buffer.isEmpty())
-			{
-				if(isLogEnabled)logThread->writeLog("Buffer not empty:"+buffer);
-				//qDebug()<<"buffer not empty. http start over: "<<buffer.left(200);
-				buffer.clear();
-			}
-			currentLineDataType=1;
-			endOfPacket=false;
-			continue;
-		}
-
-		switch(currentLineDataType)
-		{
-		case 0:
-			if(nextPacketMastBeSize&&currentLine.size()>1&&currentLine.size()<=8&&currentLine.right(2)=="\r\n")
-			{
-				currentLine.remove(currentLine.size()-2,2);
-				quint16 currentChunkSize=currentLine.toUShort(0,16);
-				if(currentChunkSize==0)endOfPacket=true;
-				else packetChunkSize+=currentChunkSize;
-				nextPacketMastBeSize=false;
-				break;
-			}
+			currentLine=socket->readLine().toLower();
+			if(currentLine==QLatin1String("\r\n")||
+			   currentLine==QLatin1String("\n")||
+			   currentLine.isEmpty())endFound=true;
 			else
 			{
-				if(currentLine.size()>1&&currentLine.right(2)=="\r\n")
+				if(currentLine.startsWith("set-cookie"))cookie=currentLine.toAscii();
+				else
+				if(currentLine.startsWith("transfer-encoding")&&
+				   currentLine.endsWith("chunked\r\n"))chunkedSize=0;
+				else
+				if(currentLine.startsWith(QLatin1String("content-length")))
 				{
-					currentLine.remove(currentLine.size()-2,2);
-					nextPacketMastBeSize=true;
+					QStringList pairList=currentLine.split(":");
+					if(pairList.count()==2)contentLength=pairList.last().trimmed().toUInt();
 				}
-				requestTimeOut.restart();
-				buffer.append(currentLine);
-				if(buffer.size()>5&&buffer.at(0)=='<'&&buffer.right(5)=="html>")buffer.clear();
+				else
+				if(currentLine.startsWith(QLatin1String("connection"))&&
+					currentLine.endsWith(QLatin1String("close\r\n")))connectionClose=true;
 			}
-			break;
-		case 1:
-			if(currentLine.toLower().startsWith("set-cookie:"))cookie=currentLine;
-			if(currentLine.endsWith("chunked")){packetIsChunked=true;break;}
-			if(currentLine!="\r\n")break;
-			currentLineDataType=0;
-			nextPacketMastBeSize=true;
-			break;
 		}
-		if(endOfPacket)
+		if(!endFound)
 		{
-			if(packetChunkSize<buffer.size())
+			retryRequest();
+			return;
+		}
+		readingHeader=false;
+	}
+
+	bool allDataReaded=false;
+
+		qint64 readSize=socket->bytesAvailable();
+		QByteArray *dataArray=0;
+		if(chunkedSize!=-1)
+		{
+			while(true)
 			{
-				if(isLogEnabled)logThread->writeLog("Overloaded packet: "+buffer);
-				buffer.remove(0,buffer.size()-packetChunkSize);
-			}
-
-			bool unknownPacket=packetChunkSize!=buffer.size()||buffer.size()&&buffer[0]=='<';
-			setApiDown(unknownPacket);
-
-			requestDelay.restart();
-
-			if(!unknownPacket&&requestList.count())
-			{
-				if(!buffer.isEmpty())
+				if(chunkedSize==0)
 				{
-				emit dataReceived(buffer,requestList.first().second);
-				if(isLogEnabled)logThread->writeLog("RCV: "+buffer);
+					if(!socket->canReadLine())break;
+					QString sizeString=socket->readLine();
+					int tPos=sizeString.indexOf(QLatin1Char(';'));
+					if(tPos!=-1)sizeString.truncate(tPos);
+					bool ok;
+					chunkedSize=sizeString.toInt(&ok,16);
+					if(!ok)
+					{
+						if(isLogEnabled)logThread->writeLog("Invalid size");
+						if(dataArray){delete dataArray;dataArray=0;}
+						retryRequest();
+						return;
+					}
+					if(chunkedSize==0)chunkedSize=-2;
+				}
+
+				while(chunkedSize==-2&&socket->canReadLine())
+				{
+					QString currentLine=socket->readLine();
+					 if(currentLine==QLatin1String("\r\n")||
+						currentLine==QLatin1String("\n"))chunkedSize=-1;
+				}
+				if(chunkedSize==-1)
+				{
+					allDataReaded=true;
+					break;
+				}
+
+				readSize=socket->bytesAvailable();
+				if(readSize==0)break;
+				if(readSize==chunkedSize||readSize==chunkedSize+1)
+				{
+					readSize=chunkedSize-1;
+					if(readSize==0)break;
+				}
+
+				qint64 bytesToRead=chunkedSize<0?readSize:qMin(readSize,chunkedSize);
+				if(!dataArray)dataArray=new QByteArray;
+				uint oldDataSize=dataArray->size();
+				dataArray->resize(oldDataSize+bytesToRead);
+				qint64 read=socket->read(dataArray->data()+oldDataSize,bytesToRead);
+				dataArray->resize(oldDataSize+read);
+
+				chunkedSize-=read;
+				if(chunkedSize==0&&readSize-read>=2)
+				{
+					char twoBytes[2];
+					socket->read(twoBytes,2);
+					if(twoBytes[0]!='\r'||twoBytes[1]!='\n')
+					{
+						if(isLogEnabled)logThread->writeLog("Invalid HTTP chunked body");
+						if(dataArray){delete dataArray;dataArray=0;}
+						retryRequest();
+						return;
+					}
 				}
 			}
-			else if(isLogEnabled)logThread->writeLog("Unknown response: "+buffer);
-
-			QByteArray dataToMatch;
-			if(socket->bytesAvailable())
+		} 
+		else
+			if(contentLength>0)
 			{
-				dataToMatch=socket->readAll();
-				if(dataToMatch!="\r\n")
-					if(isLogEnabled)logThread->writeLog("To match: "+dataToMatch);
+			readSize=qMin(qint64(contentLength-bytesDone),readSize);
+			if(readSize>0)
+			{
+				if(dataArray){delete dataArray;dataArray=0;}
+				dataArray=new QByteArray;
+				dataArray->resize(readSize);
+				dataArray->resize(socket->read(dataArray->data(),readSize));
 			}
-			//qDebug()<<"endOfPacket"<<dataToMatch.size()<<buffer.size()<<requestList.count()<<buffer.left(10);
-			takeFirstRequest();
-			clearRequest();
-			sendPendingData();
+			if(bytesDone+socket->bytesAvailable()+readSize==contentLength)allDataReaded=true;
+			}
+			else 
+			if(readSize>0)
+			{
+			if(!dataArray)dataArray=new QByteArray(socket->readAll());
+			}
+
+		if(dataArray)
+		{
+			readSize=dataArray->size();
+				buffer.append(*dataArray);
+				if(dataArray){delete dataArray;dataArray=0;}
+				if(contentLength>0)
+					emit dataProgress((bytesDone+socket->bytesAvailable())/contentLength);
 		}
+		if(dataArray){delete dataArray;dataArray=0;}
+
+	if(allDataReaded)
+	{
+		if(!buffer.isEmpty()&&requestList.count())
+		{
+			bool apiMaybeDown=buffer[0]=='<';
+			setApiDown(apiMaybeDown);
+			if(!apiMaybeDown)emit dataReceived(buffer,requestList.first().second);
+		}
+		waitingReplay=false;
+		readingHeader=true;
+		takeFirstRequest();
+		clearRequest();
+		if(connectionClose)reConnect(true);
+		sendPendingData();
 	}
 }
 
@@ -199,9 +279,8 @@ void JulyHttp::retryRequest()
 void JulyHttp::clearRequest()
 {
 	requestRetryCount=0;
-	packetIsChunked=false;
 	buffer.clear();
-	packetChunkSize=0;
+	chunkedSize=-1;
 	nextPacketMastBeSize=false;
 	endOfPacket=false;
 }
@@ -285,7 +364,6 @@ void JulyHttp::sendData(int reqType, bool isVip, const QByteArray &method, int r
 void JulyHttp::takeRequestAt(int pos)
 {
 	if(requestList.count()<=pos)return;
-	//qDebug()<<"takeRequestAt"<<pos;
 	QPair<QByteArray*,int> reqPair=requestList.at(pos);
 	reqTypePending[reqPair.second]=reqTypePending.value(reqPair.second,1)-1;
 	retryCountMap.remove(reqPair.first);
@@ -316,7 +394,7 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 	{
 		isDisabled=true;
 		emit errorSignal(socket->errorString());
-		socket->abort();
+		abortSocket();
 	}
 	else reconnectSocket(socket,false);
 }
@@ -328,25 +406,23 @@ bool JulyHttp::isSocketConnected(QSslSocket *socket)
 
 QSslSocket *JulyHttp::getStableSocket()
 {
-		if(isSocketConnected(socket))return socket;
-		else reconnectSocket(socket,false);
+	if(isSocketConnected(socket))return socket;
+	else reconnectSocket(socket,false);
 
-		if(socket->state()!=QAbstractSocket::UnconnectedState)socket->waitForConnected(5000);
-		if(socket->state()!=QAbstractSocket::ConnectedState)
-		{
-			reconnectSocket(socket,false);
-			socket->waitForConnected(5000);
-		}
-		else reconnectSocket(socket,false);
-		return socket;
+	if(socket->state()!=QAbstractSocket::UnconnectedState)socket->waitForConnected(5000);
+	if(socket->state()!=QAbstractSocket::ConnectedState)
+	{
+		reconnectSocket(socket,false);
+		socket->waitForConnected(5000);
+	}
+	else reconnectSocket(socket,false);
+	return socket;
 }
 
 void JulyHttp::sendPendingData()
 {
 	if(isDisabled)return;
 	if(requestList.count()==0)return;
-
-	softLagChanged(requestDelay.elapsed());
 
 	QSslSocket *currentSocket=getStableSocket();
 	if(requestList.count()==0)return;
@@ -367,10 +443,8 @@ void JulyHttp::sendPendingData()
 		pendingRequest=pendingRequestMap.value(currentSocket,0);
 	}
 	clearRequest();
-	softLagChanged(requestDelay.elapsed());
 	requestRetryCount=retryCountMap.value(pendingRequest,1);
 	if(requestRetryCount<1||requestRetryCount>100)requestRetryCount=1;
-	requestDelay.restart();
 	requestTimeOut.restart();
 	if(isLogEnabled)logThread->writeLog("SND: "+*pendingRequest);
 
@@ -379,6 +453,12 @@ void JulyHttp::sendPendingData()
 		if(skipOnceMap.value(pendingRequest,false)==true)skipOnceMap.remove(pendingRequest);
 		else
 		{
+			if(currentSocket->bytesAvailable())
+			{
+				if(isLogEnabled)logThread->writeLog("Cleared previous data: "+currentSocket->readAll());
+				else currentSocket->readAll();
+			}
+			waitingReplay=false;
 			currentSocket->write(*pendingRequest);
 			currentSocket->flush();
 		}

@@ -58,7 +58,6 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));
 	connect(this,SIGNAL(firstAccInfo()),mainClass,SLOT(firstAccInfo()));
 	connect(this,SIGNAL(apiLagChanged(double)),mainClass->ui.lagValue,SLOT(setValue(double)));
-	connect(this,SIGNAL(softLagChanged(int)),mainClass,SLOT(setSoftLagValue(int)));
 	connect(this,SIGNAL(accFeeChanged(double)),mainClass->ui.accountFee,SLOT(setValue(double)));
 	connect(this,SIGNAL(accBtcBalanceChanged(double)),mainClass->ui.accountBTC,SLOT(setValue(double)));
 	connect(this,SIGNAL(accUsdBalanceChanged(double)),mainClass->ui.accountUSD,SLOT(setValue(double)));
@@ -223,12 +222,13 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	case 111: //depth
 		if(data.startsWith("{\"asks\":["))
 		{
+			emit depthUpdateOrder(0.0,0.0,true);
 			if(lastDepthData!=data)
 			{
 				lastDepthData=data;
 				QMap<double,double> currentAsksMap;
 				QStringList asksList=QString(getMidData("asks\":[[","]]",&data)).split("],[");
-				//while(asksList.count()>100)asksList.removeLast();
+				if(depthCountLimit)while(asksList.count()>depthCountLimit)asksList.removeLast();
 				for(int n=0;n<asksList.count();n++)
 				{
 					QStringList currentPair=asksList.at(n).split(",");
@@ -247,7 +247,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 
 				QMap<double,double> currentBidsMap;
 				QStringList bidsList=QString(getMidData("bids\":[[","]]",&data)).split("],[");
-				//while(bidsList.count()>100)bidsList.removeLast();
+				if(depthCountLimit)while(bidsList.count()>depthCountLimit)bidsList.removeLast();
 				for(int n=0;n<bidsList.count();n++)
 				{
 					QStringList currentPair=bidsList.at(n).split(",");
@@ -532,7 +532,7 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 	if(julyHttp==0)
 	{ 
 		julyHttp=new JulyHttp("btc-e.com","Key: "+privateRestKey+"\r\n",this);
-		connect(julyHttp,SIGNAL(softLagChanged(int)),mainWindow_,SLOT(setSoftLagValue(int)));
+		connect(julyHttp,SIGNAL(anyDataReceived()),mainWindow_,SLOT(anyDataReceived()));
 		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
 		connect(julyHttp,SIGNAL(errorSignal(QString)),mainWindow_,SLOT(showErrorMessage(QString)));
 		connect(julyHttp,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
