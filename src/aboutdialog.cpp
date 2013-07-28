@@ -14,11 +14,11 @@
 #endif
 #include "translationdialog.h"
 
-TranslationAbout::TranslationAbout(QWidget *)
+TranslationAbout::TranslationAbout(QWidget *par)
 	: QDialog()
 {
 	ui.setupUi(this);
-	setWindowFlags(Qt::WindowCloseButtonHint);
+	setWindowFlags(Qt::WindowCloseButtonHint|par->windowFlags());
 	setWindowModality(Qt::ApplicationModal);
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	//setFixedSize(size());
@@ -44,7 +44,9 @@ TranslationAbout::~TranslationAbout()
 void TranslationAbout::createTranslation()
 {
 	accept();
-	(new TranslationDialog)->show();
+	TranslationDialog *translationDialog=new TranslationDialog;
+	translationDialog->setWindowFlags(windowFlags());
+	translationDialog->show();
 }
 
 void TranslationAbout::buttonCheckUpdates()

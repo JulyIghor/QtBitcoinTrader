@@ -123,18 +123,16 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tableTrades->horizontalHeaderItem(3)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 
 	ui.depthAsksTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
-	//ui.sellOrdersTable->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 	ui.depthAsksTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
 	ui.depthAsksTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
 	ui.depthAsksTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
-	//ui.sellOrdersTable->horizontalHeaderItem(2)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+	ui.depthAsksTable->horizontalHeader()->setMinimumSectionSize(0);
 
 	ui.depthBidsTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
-	//ui.buyOrdersTable->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 	ui.depthBidsTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
 	ui.depthBidsTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
 	ui.depthBidsTable->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
-	//ui.buyOrdersTable->horizontalHeaderItem(2)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+	ui.depthBidsTable->horizontalHeader()->setMinimumSectionSize(0);
 
 	iniSettings=new QSettings(iniFileName,QSettings::IniFormat,this);
 
@@ -434,7 +432,8 @@ void QtBitcoinTrader::loadUiSettings()
 	loadWindowState(this,"Window");
 	iniSettings->sync();
 	
-	setWindowStaysOnTop(ui.widgetStaysOnTop->isChecked());
+	if(!ui.widgetStaysOnTop->isChecked())
+		setWindowStaysOnTop(ui.widgetStaysOnTop->isChecked());
 
 	languageChanged();
 }
@@ -447,6 +446,8 @@ void QtBitcoinTrader::checkUpdate()
 void QtBitcoinTrader::resizeEvent(QResizeEvent *event)
 {
 	event->accept();
+	depthAsksLastScrollValue=-1;
+	depthBidsLastScrollValue=-1;
 	fixWindowMinimumSize();
 }
 
@@ -1750,6 +1751,7 @@ void QtBitcoinTrader::ruleEditButton()
 	if(curRow<0)return;
 
 	AddRuleWindow addRule;
+	addRule.setWindowFlags(windowFlags());
 	RuleHolder curHolder=getRuleHolderByGuid(ui.rulesTable->item(curRow,0)->data(Qt::UserRole).toUInt());
 	if(curHolder.invalidHolder)return;
 	addRule.fillByRuleHolder(curHolder);
@@ -1792,6 +1794,7 @@ void QtBitcoinTrader::addRuleByHolderInToTable(RuleHolder holder, int preferedRo
 void QtBitcoinTrader::ruleAddButton()
 {
 	AddRuleWindow addRule;
+	addRule.setWindowFlags(windowFlags());
 	if(addRule.exec()!=QDialog::Accepted)return;
 
 	addRuleByHolderInToTable(addRule.getRuleHolder());
@@ -2081,6 +2084,8 @@ void QtBitcoinTrader::detachDepth()
 	isDetachedDepth=true;
 	tabDepthOnTop(ui.tabDepthOnTop->isChecked());
 	checkIsTabWidgetVisible();
+	depthAsksLastScrollValue=-1;
+	depthBidsLastScrollValue=-1;
 }
 
 void QtBitcoinTrader::detachCharts()
@@ -2147,6 +2152,8 @@ void QtBitcoinTrader::attachDepth()
 	checkIsTabWidgetVisible();
 	ui.tabWidget->setCurrentWidget(ui.tabDepth);
 	isDetachedDepth=false;
+	depthAsksLastScrollValue=-1;
+	depthBidsLastScrollValue=-1;
 }
 
 void QtBitcoinTrader::attachCharts()
