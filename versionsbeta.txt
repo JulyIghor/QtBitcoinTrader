@@ -5,5 +5,5 @@ SrcChangeLog=Beta update<br>Pre-release<br>New Fastest socket engine on BTC-E an
 SrcVer=1.0727
 Win32Bin=https://dl.dropboxusercontent.com/u/860231/QtBitcoinTrader.exe
 Win32ChangeLog=Beta update<br>Stable engine.<br>Added Depth.<br>Added proxy settings to Settings.set file.<br>New Fastest socket engine on BTC-E and Mt.Gox.<br>Please test and feel free to email me bug reports.
-Win32Signature=VifVmlkfdsh4TPzkvzoYUnWCE0M54ULYCEQcA7g9oT6dMlDX8RLNgPDhxckS1kpQ+vcD3pQ60eyLp56Tl53YzcS4UHTAj0qNhmLqekYmHv8znm+LnjltGIsfDonw7QL4M+MWD2Lje/AzhEjVC4l41av1rUrHx4FvFhiFXdAws5VYur7b0mwxkTLUUUsN0fVKCIbrUXT2E9Qh5p8pOVt0MghTKwGn5WZcpM5U45Zp1zQXnuiKVntGIjGjD96NftI3svdzPdNdWeXSqhzHo57Hw2HY3B6e6DfhGyLx8itEvMupP2pnTPH+XSw6MPeullqn1/wCypwdcq49K/ndxp7W0A==
-Win32Ver=1.0738
+Win32Signature=Oc6jwHHc6XxLNLy5D6Imnj4dKs8ETaLDcinOLKWQN1Sb2CFt5jijv9QgqjPpRYrItR3JvcxqVIdCryRDmpniSNARXlIHa8bEKK009PADPtlwAkqXySrNJydpLI1cUNl8gKJGhLmJvoKwTPpnmZQkz2IO3flaGzGllig+71FYPx0Ut4DdhzZT4PTwSPD06VojjEvjqke8adOZ1T/TjMJzXoofsYR63SnlhNUqU+iVpMy4PGT552A3ilVJG5Ikxujz2NkmfrDIV85W10sfcfx5AClsDkD+nhhBaZMRUpf9VbN1A3aUnjiuiO/0qD8C+v9hUi53pBXsLjauUownVYz/OQ==
+Win32Ver=1.0739
