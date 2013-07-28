@@ -6,6 +6,7 @@ LANGUAGE        = C++
 TARGET 		= QtBitcoinTrader
 DEPENDPATH 	+= .
 INCLUDEPATH 	+= .
+INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 QT		+= network multimedia
 LIBS		+= -lcrypto
 CONFIG		+= qt warn_off release

@@ -401,14 +401,15 @@ void JulyHttp::sendData(int reqType, bool isVip, const QByteArray &method, int r
 	QPair<QByteArray*,int> reqPair;
 	reqPair.first=data;
 	reqPair.second=reqType;
+	if(isVip)retryCountMap[data]=4;
+	else retryCountMap[data]=0;
+	requestList<<reqPair;
+
 	//if(removeLowerReqTypes>100)
 	//{
 	//	for(int n=requestList.count()-1;n>=2;n--)
 	//		if(requestList.at(n).second<removeLowerReqTypes)takeRequestAt(n);
 	//}
-	if(isVip)retryCountMap[data]=4;
-	else retryCountMap[data]=0;
-	requestList<<reqPair;
 
 	reqTypePending[reqType]=reqTypePending.value(reqType,0)+1;
 	sendPendingData();
