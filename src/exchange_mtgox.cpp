@@ -243,7 +243,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 	case 101:
 		if(!success)break;
 		if(data.startsWith("{\"result\":\"success\",\"data\":{\"lag"))emit apiLagChanged(getMidData("lag_secs\":",",\"",&data).toDouble());//lag
-		else showDebug("Invalid lag data:"+data);
+		else if(isLogEnabled)logThread->writeLog("Invalid lag data:"+data);
 		break;
 	case 103: //ticker
 		if(!success)break;
@@ -273,7 +273,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					lastTickerVolume=newTickerVolume;
 				}
 			}
-			else showDebug("Invalid ticker data:"+data);
+			else if(isLogEnabled)logThread->writeLog("Invalid ticker data:"+data);
 		break;//ticker
 	case 104: //ticker fast
 		if(data.startsWith("{\"result\":\"success\",\"data\":{\"last_local"))
@@ -311,7 +311,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				isFirstTicker=false;
 			}
 		}
-		else showDebug("Invalid ticker fast data:"+data);
+		else if(isLogEnabled)logThread->writeLog("Invalid ticker fast data:"+data);
 			break; //ticker fast
 	case 109: //money/trades/fetch
 		if(success&&data.size()>32)
@@ -335,10 +335,10 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 							if(!nextFetchDate.isEmpty())lastFetchDate=nextFetchDate;
 						}
 					}
-					else showDebug("Invalid trades fetch data line:"+tradeData);
+					else if(isLogEnabled)logThread->writeLog("Invalid trades fetch data line:"+tradeData);
 				}
 			}
-			else showDebug("Invalid trades fetch data:"+data);
+			else if(isLogEnabled)logThread->writeLog("Invalid trades fetch data:"+data);
 		}
 		break;
 	case 111: //depth
@@ -388,7 +388,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				lastDepthBidsMap=currentBidsMap;
 			}
 		}
-		else showDebug("Invalid depth data:"+data);
+		else if(isLogEnabled)logThread->writeLog("Invalid depth data:"+data);
 		break;
 	case 202: //info
 		{
@@ -446,7 +446,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					}
 				}
 			}
-			else showDebug("Invalid Info data:"+data);
+			else if(isLogEnabled)logThread->writeLog("Invalid Info data:"+data);
 		}
 		break;//info
 	case 204://orders
@@ -470,14 +470,14 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				lastInfoReceived=false;
 			}
 		}
-		else showDebug("Invalid Orders data:"+data);
+		else if(isLogEnabled)logThread->writeLog("Invalid Orders data:"+data);
 		break;//orders
 	case 305: //order/cancel
 		{
 			if(!success)break;
 			QByteArray oid=getMidData("oid\":\"","\",\"",&data);
 			if(!oid.isEmpty())emit orderCanceled(oid);
-			else showDebug("Invalid Order/Cancel data:"+data);
+			else if(isLogEnabled)logThread->writeLog("Invalid Order/Cancel data:"+data);
 		}
 		break;//order/cancel
 	case 306: //order/buy
@@ -486,7 +486,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 			  {
 				 if(isLogEnabled)logThread->writeLog("Buy OK: "+data);
 			  }
-			  else showDebug("Invalid Order Buy Data:"+data);
+			  else if(isLogEnabled)logThread->writeLog("Invalid Order Buy Data:"+data);
 			  break;//order/buy
 	case 307: //order/sell
 			  if(!success)break;
@@ -494,7 +494,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 			  {
 				 if(isLogEnabled)logThread->writeLog("Sell OK: "+data);
 			  }
-			  else showDebug("Invalid Order Sell Data:"+data);
+			  else if(isLogEnabled)logThread->writeLog("Invalid Order Sell Data:"+data);
 			  break;//order/sell
 	case 208: //money/wallet/history 
 		if(!success)break;
@@ -568,7 +568,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				lastHistory=data;
 			}
 		}
-		else showDebug("Invalid History data:"+data.left(200));
+		else if(isLogEnabled)logThread->writeLog("Invalid History data:"+data.left(200));
 		break;//money/wallet/history
 	default: break;
 	}
