@@ -243,7 +243,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 	case 101:
 		if(!success)break;
 		if(data.startsWith("{\"result\":\"success\",\"data\":{\"lag"))emit apiLagChanged(getMidData("lag_secs\":",",\"",&data).toDouble());//lag
-		else if(isLogEnabled)logThread->writeLog("Invalid lag data:"+data);
+		else showDebug("Invalid lag data:"+data);
 		break;
 	case 103: //ticker
 		if(!success)break;
@@ -273,7 +273,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					lastTickerVolume=newTickerVolume;
 				}
 			}
-			else if(isLogEnabled)logThread->writeLog("Invalid ticker data:"+data);
+			else showDebug("Invalid ticker data:"+data);
 		break;//ticker
 	case 104: //ticker fast
 		if(data.startsWith("{\"result\":\"success\",\"data\":{\"last_local"))
@@ -311,7 +311,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				isFirstTicker=false;
 			}
 		}
-		else if(isLogEnabled)logThread->writeLog("Invalid ticker fast data:"+data);
+		else showDebug("Invalid ticker fast data:"+data);
 			break; //ticker fast
 	case 109: //money/trades/fetch
 		if(success&&data.size()>32)
@@ -335,10 +335,10 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 							if(!nextFetchDate.isEmpty())lastFetchDate=nextFetchDate;
 						}
 					}
-					else if(isLogEnabled)logThread->writeLog("Invalid trades fetch data line:"+tradeData);
+					else showDebug("Invalid trades fetch data line:"+tradeData);
 				}
 			}
-			else if(isLogEnabled)logThread->writeLog("Invalid trades fetch data:"+data);
+			else showDebug("Invalid trades fetch data:"+data);
 		}
 		break;
 	case 111: //depth
@@ -356,15 +356,15 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray currentRow=asksList.at(n).toAscii();
 					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
 					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
-					if(priceDouble>0.0&&amount>0.0&&lastDepthAsksMap.value(priceDouble,0.0)!=amount)
+					if(priceDouble>0.0&&amount>0.0)
 					{
 						currentAsksMap[priceDouble]=amount;
-						emit depthUpdateOrder(priceDouble,amount,true);
+						if(lastDepthAsksMap.value(priceDouble,0.0)!=amount)emit depthUpdateOrder(priceDouble,amount,true);
 					}
 				}
-				foreach(double price, lastDepthAsksMap)
-					if(currentAsksMap.value(price,0)==0)
-						emit depthUpdateOrder(price,0.0,true);
+				QList<double> currentAsksList=lastDepthAsksMap.keys();
+				for(int n=0;n<currentAsksList.count();n++)
+					if(currentAsksMap.value(currentAsksList.at(n),0)==0)emit depthUpdateOrder(currentAsksList.at(n),0.0,true);//Remove price
 				lastDepthAsksMap=currentAsksMap;
 
 				QMap<double,double> currentBidsMap;
@@ -375,19 +375,20 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray currentRow=bidsList.at(n).toAscii();
 					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
 					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
-					if(priceDouble>0.0&&amount>0.0&&lastDepthBidsMap.value(priceDouble,0.0)!=amount)
+					if(priceDouble>0.0&&amount>0.0)
 					{
 						currentBidsMap[priceDouble]=amount;
-						emit depthUpdateOrder(priceDouble,amount,false);
+						if(lastDepthBidsMap.value(priceDouble,0.0)!=amount)emit depthUpdateOrder(priceDouble,amount,false);
 					}
 					if(priceDouble>0.0&&amount>0.0)emit depthUpdateOrder(priceDouble,amount,false);
 				}
-				foreach(double price, lastDepthBidsMap)
-					if(currentBidsMap.value(price,0)==0)emit depthUpdateOrder(price,0.0,false);
+				QList<double> currentBidsList=lastDepthBidsMap.keys();
+				for(int n=0;n<currentBidsList.count();n++)
+					if(currentBidsMap.value(currentBidsList.at(n),0)==0)emit depthUpdateOrder(currentBidsList.at(n),0.0,false);//Remove price
 				lastDepthBidsMap=currentBidsMap;
 			}
 		}
-		else if(isLogEnabled)logThread->writeLog("Invalid depth data:"+data);
+		else showDebug("Invalid depth data:"+data);
 		break;
 	case 202: //info
 		{
@@ -445,7 +446,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					}
 				}
 			}
-			else if(isLogEnabled)logThread->writeLog("Invalid Info data:"+data);
+			else showDebug("Invalid Info data:"+data);
 		}
 		break;//info
 	case 204://orders
@@ -469,14 +470,14 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				lastInfoReceived=false;
 			}
 		}
-		else if(isLogEnabled)logThread->writeLog("Invalid Orders data:"+data);
+		else showDebug("Invalid Orders data:"+data);
 		break;//orders
 	case 305: //order/cancel
 		{
 			if(!success)break;
 			QByteArray oid=getMidData("oid\":\"","\",\"",&data);
 			if(!oid.isEmpty())emit orderCanceled(oid);
-			else if(isLogEnabled)logThread->writeLog("Invalid Order/Cancel data:"+data);
+			else showDebug("Invalid Order/Cancel data:"+data);
 		}
 		break;//order/cancel
 	case 306: //order/buy
@@ -485,7 +486,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 			  {
 				 if(isLogEnabled)logThread->writeLog("Buy OK: "+data);
 			  }
-			  else if(isLogEnabled)logThread->writeLog("Invalid Order Buy Data:"+data);
+			  else showDebug("Invalid Order Buy Data:"+data);
 			  break;//order/buy
 	case 307: //order/sell
 			  if(!success)break;
@@ -493,7 +494,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 			  {
 				 if(isLogEnabled)logThread->writeLog("Sell OK: "+data);
 			  }
-			  else if(isLogEnabled)logThread->writeLog("Invalid Order Sell Data:"+data);
+			  else showDebug("Invalid Order Sell Data:"+data);
 			  break;//order/sell
 	case 208: //money/wallet/history 
 		if(!success)break;
@@ -567,7 +568,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				lastHistory=data;
 			}
 		}
-		else if(isLogEnabled)logThread->writeLog("Invalid History data:"+data.left(200));
+		else showDebug("Invalid History data:"+data.left(200));
 		break;//money/wallet/history
 	default: break;
 	}

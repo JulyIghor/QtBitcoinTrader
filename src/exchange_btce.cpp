@@ -235,14 +235,15 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 					if(currentPair.count()!=2)continue;
 					double priceDouble=currentPair.first().toDouble();
 					double amount=currentPair.last().toDouble();
-					if(priceDouble>0.0&&amount>0.0&&lastDepthAsksMap.value(priceDouble,0.0)!=amount)
+					if(priceDouble>0.0&&amount>0.0)
 					{
 						currentAsksMap[priceDouble]=amount;
-						emit depthUpdateOrder(priceDouble,amount,true);
+						if(lastDepthAsksMap.value(priceDouble,0.0)!=amount)emit depthUpdateOrder(priceDouble,amount,true);
 					}
 				}
-				foreach(double price, lastDepthAsksMap)
-					if(currentAsksMap.value(price,0)==0)emit depthUpdateOrder(price,0.0,true);
+				QList<double> currentAsksList=lastDepthAsksMap.keys();
+				for(int n=0;n<currentAsksList.count();n++)
+					if(currentAsksMap.value(currentAsksList.at(n),0)==0)emit depthUpdateOrder(currentAsksList.at(n),0.0,true);
 				lastDepthAsksMap=currentAsksMap;
 
 				QMap<double,double> currentBidsMap;
@@ -254,15 +255,16 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 					if(currentPair.count()!=2)continue;
 					double priceDouble=currentPair.first().toDouble();
 					double amount=currentPair.last().toDouble();
-					if(priceDouble>0.0&&amount>0.0&&lastDepthBidsMap.value(priceDouble,0.0)!=amount)
+					if(priceDouble>0.0&&amount>0.0)
 					{
 						currentBidsMap[priceDouble]=amount;
-						emit depthUpdateOrder(priceDouble,amount,false);
+						if(lastDepthBidsMap.value(priceDouble,0.0)!=amount)emit depthUpdateOrder(priceDouble,amount,false);
 					}
 					if(priceDouble>0.0&&amount>0.0)emit depthUpdateOrder(priceDouble,amount,false);
 				}
-				foreach(double price, lastDepthBidsMap)
-					if(currentBidsMap.value(price,0)==0)emit depthUpdateOrder(price,0.0,false);
+				QList<double> currentBidsList=lastDepthBidsMap.keys();
+				for(int n=0;n<currentBidsList.count();n++)
+					if(currentBidsMap.value(currentBidsList.at(n),0)==0)emit depthUpdateOrder(currentBidsList.at(n),0.0,false);
 				lastDepthBidsMap=currentBidsMap;
 			}
 		}
