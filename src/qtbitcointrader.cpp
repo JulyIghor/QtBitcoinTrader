@@ -40,6 +40,13 @@
 QtBitcoinTrader::QtBitcoinTrader()
 	: QDialog()
 {
+	depthAsksLastScrollValue=0;
+	depthBidsLastScrollValue=0;
+	depthCurrentAsksSyncIndex=-1;
+	depthCurrentBidsSyncIndex=-1;
+	depthAsksIncVolume=0.0;
+	depthBidsIncVolume=0.0;
+
 	trayMenu=0;
 	isValidSoftLag=true;
 	upArrow=QByteArray::fromBase64("4oaR");
@@ -115,18 +122,18 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tableTrades->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
 	ui.tableTrades->horizontalHeaderItem(3)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 
-	ui.sellOrdersTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
 	//ui.sellOrdersTable->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-	ui.sellOrdersTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
-	ui.sellOrdersTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
-	ui.sellOrdersTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
 	//ui.sellOrdersTable->horizontalHeaderItem(2)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 
-	ui.buyOrdersTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
 	//ui.buyOrdersTable->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-	ui.buyOrdersTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
-	ui.buyOrdersTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
-	ui.buyOrdersTable->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
 	//ui.buyOrdersTable->horizontalHeaderItem(2)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 
 	iniSettings=new QSettings(iniFileName,QSettings::IniFormat,this);
@@ -163,7 +170,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
-	int defaultSectionSize=QFontMetrics(font()).boundingRect("0123456789").height()*1.6;
+	defaultSectionSize=QFontMetrics(font()).boundingRect("0123456789").height()*1.6;
 	foreach(QTableWidget* tables, findChildren<QTableWidget*>())
 	{
 		tables->setMinimumWidth(200);
@@ -223,12 +230,10 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	accountFeeChanged(ui.accountFee->value());
 
-	reloadLanguageList();
-
 	int indexCurrency=ui.currencyComboBox->findText(iniSettings->value("Currency","BTC/USD").toString());
 	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
 
-	constructorFinished=true;
+	reloadLanguageList();
 
 	checkValidRulesButtons();
 	currencyChanged(ui.currencyComboBox->currentIndex());
@@ -517,7 +522,7 @@ void QtBitcoinTrader::secondSlot()
 	static QTimer secondTimer(this);
 	if(secondTimer.interval()==0)
 	{
-		secondTimer.setInterval(200);
+		secondTimer.setInterval(100);
 		secondTimer.setSingleShot(true);
 		connect(&secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 	}
@@ -535,14 +540,80 @@ void QtBitcoinTrader::secondSlot()
 		ui.depthLag->setValue(depthLagTime.elapsed()/1000.0);
 	}
 
+
 	if(depthCountLimit)
 	{
-		if(ui.sellOrdersTable->rowCount()>depthCountLimit)ui.sellOrdersTable->removeRow(ui.sellOrdersTable->rowCount()-1);
-		if(ui.buyOrdersTable->rowCount()>depthCountLimit)ui.buyOrdersTable->removeRow(ui.buyOrdersTable->rowCount()-1);
+		if(ui.depthAsksTable->rowCount()>depthCountLimit)
+		{
+			depthAsksMap.remove(ui.depthAsksTable->item(ui.depthAsksTable->rowCount()-1,3)->data(Qt::UserRole).toDouble());
+			ui.depthAsksTable->removeRow(ui.depthAsksTable->rowCount()-1);
+		}
+		if(ui.depthBidsTable->rowCount()>depthCountLimit)
+		{
+			depthBidsMap.remove(ui.depthBidsTable->item(ui.depthBidsTable->rowCount()-1,1)->data(Qt::UserRole).toDouble());
+			ui.depthBidsTable->removeRow(ui.depthBidsTable->rowCount()-1);
+		}
 	}
 
+	int currentDepthAsksScrollValue=ui.depthAsksTable->verticalScrollBar()->value();
+	if(currentDepthAsksScrollValue>depthAsksLastScrollValue)depthCurrentAsksSyncIndex=0;
+	depthAsksLastScrollValue=currentDepthAsksScrollValue;
+
+	if(depthCurrentAsksSyncIndex>-1)
+		for(int n=0;n<5;n++)
+			if(depthCurrentAsksSyncIndex>-1)
+			{
+				if(depthCurrentAsksSyncIndex==0)depthAsksIncVolume=0.0;
+				if(depthCurrentAsksSyncIndex>=ui.depthAsksTable->rowCount())
+				{
+					depthCurrentAsksSyncIndex=-1;
+					break;
+				}
+				else
+				{
+					if(depthCurrentAsksSyncIndex>qMin((int)(ui.depthAsksTable->height()/defaultSectionSize+currentDepthAsksScrollValue/(double)defaultSectionSize+1),ui.depthAsksTable->rowCount()))
+					{
+						depthCurrentAsksSyncIndex=-1;
+						break;
+					}
+
+					depthAsksIncVolume+=ui.depthAsksTable->item(depthCurrentAsksSyncIndex,2)->data(Qt::UserRole).toDouble();
+					ui.depthAsksTable->item(depthCurrentAsksSyncIndex,1)->setText(currencyASign+" "+numFromDouble(depthAsksIncVolume));
+					depthCurrentAsksSyncIndex++;
+				}
+			}
+
+
+	int currentDepthBidsScrollValue=ui.depthBidsTable->verticalScrollBar()->value();
+	if(currentDepthBidsScrollValue>depthBidsLastScrollValue)depthCurrentBidsSyncIndex=0;
+	depthBidsLastScrollValue=currentDepthBidsScrollValue;
+
+	if(depthCurrentBidsSyncIndex>-1)
+		for(int n=0;n<5;n++)
+			if(depthCurrentBidsSyncIndex>-1)
+			{
+				if(depthCurrentBidsSyncIndex==0)depthBidsIncVolume=0.0;
+				if(depthCurrentBidsSyncIndex>=ui.depthBidsTable->rowCount())
+				{
+					depthCurrentBidsSyncIndex=-1;
+					break;
+				}
+				else
+				{
+					if(depthCurrentBidsSyncIndex>qMin((int)(ui.depthBidsTable->height()/defaultSectionSize+currentDepthBidsScrollValue/(double)defaultSectionSize+1),ui.depthBidsTable->rowCount()))
+					{
+						depthCurrentBidsSyncIndex=-1;
+						break;
+					}
+
+					depthBidsIncVolume+=ui.depthBidsTable->item(depthCurrentBidsSyncIndex,1)->data(Qt::UserRole).toDouble();
+					ui.depthBidsTable->item(depthCurrentBidsSyncIndex,2)->setText(currencyASign+" "+numFromDouble(depthBidsIncVolume));
+					depthCurrentBidsSyncIndex++;
+				}
+			}
+
 	if(++execCount>5)execCount=0;
-	secondTimer.start(200);
+	secondTimer.start(100);
 }
 
 void QtBitcoinTrader::tabTradesScrollUp()
@@ -650,6 +721,7 @@ void QtBitcoinTrader::reloadLanguageList(QString preferedLangFile)
 	}
 	if(selectedLangId>-1)ui.langComboBox->setCurrentIndex(selectedLangId);
 	julyTranslator->loadFromFile(preferedLangFile);
+	constructorFinished=true;
 	languageChanged();
 }
 
@@ -782,10 +854,10 @@ void QtBitcoinTrader::currencyChanged(int val)
 
 	depthAsksMap.clear();
 	depthBidsMap.clear();
-	ui.sellOrdersTable->clearContents();
-	ui.sellOrdersTable->setRowCount(0);
-	ui.buyOrdersTable->clearContents();
-	ui.buyOrdersTable->setRowCount(0);
+	ui.depthAsksTable->clearContents();
+	ui.depthAsksTable->setRowCount(0);
+	ui.depthBidsTable->clearContents();
+	ui.depthBidsTable->setRowCount(0);
 
 	static int firstLoad=0;
 	if(firstLoad++>1)
@@ -2123,8 +2195,8 @@ void QtBitcoinTrader::languageChanged()
 	tradesLabels<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_TYPE","Type")<<julyTr("ORDERS_PRICE","Price");
 	ui.tableTrades->setHorizontalHeaderLabels(tradesLabels);
 
-	ui.buyOrdersTable->setHorizontalHeaderLabels(QStringList()<<julyTr("ORDERS_PRICE","Price")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_TOTAL","Total")<<"");
-	ui.sellOrdersTable->setHorizontalHeaderLabels(QStringList()<<""<<julyTr("ORDERS_TOTAL","Total")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_PRICE","Price"));
+	ui.depthBidsTable->setHorizontalHeaderLabels(QStringList()<<julyTr("ORDERS_PRICE","Price")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_TOTAL","Total")<<"");
+	ui.depthAsksTable->setHorizontalHeaderLabels(QStringList()<<""<<julyTr("ORDERS_TOTAL","Total")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_PRICE","Price"));
 
 	ui.tabOrdersLog->setAccessibleName(julyTr("TAB_ORDERS_LOG","Orders Log"));
 	ui.tabOrdersLog->setWindowTitle(ui.tabOrdersLog->accessibleName()+" ["+profileName+"]");
@@ -2211,14 +2283,9 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 	ui.depthLag->setValue(0.0);
 
 	if(price==0.0)return;
-	QTableWidget *currentTable=ui.buyOrdersTable;
-	QMap<double,double> *depthMap=&depthBidsMap;
+	QTableWidget *currentTable=isAsk?ui.depthAsksTable:ui.depthBidsTable;
+	QMap<double,double> *depthMap=isAsk?&depthAsksMap:&depthBidsMap;
 
-	if(isAsk)
-	{
-		currentTable=ui.sellOrdersTable;
-		depthMap=&depthAsksMap;
-	}
 	if(volume==0)//Remove item
 	{
 		for(int n=0;n<currentTable->rowCount();n++)
@@ -2266,10 +2333,10 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 		priceItem->setData(Qt::UserRole,price);priceItem->setTextColor(Qt::darkGreen);
 
 		QTableWidgetItem *volumeItem=new QTableWidgetItem(currencyASign+" "+numFromDouble(volume));
-		volumeItem->setTextColor(btcColor);
+		volumeItem->setData(Qt::UserRole,volume);volumeItem->setTextColor(btcColor);
 
-		QTableWidgetItem *sizeItem=new QTableWidgetItem(currencyBSign+" "+numFromDouble(price*volume));
-		sizeItem->setTextColor(Qt::darkGreen);
+		QTableWidgetItem *sizeItem=new QTableWidgetItem();
+		sizeItem->setTextColor(btcColor);
 
 		if(isAsk)
 		{
@@ -2317,12 +2384,15 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 			if(currentPriceItem->data(Qt::UserRole).toDouble()==price)
 			{
 				currentVolumeItem->setText(currencyASign+" "+numFromDouble(volume));
+				currentVolumeItem->setData(Qt::UserRole,volume);
 				currentSizeItem->setText(currencyBSign+" "+numFromDouble(volume*price));
 				(*depthMap)[price]=volume;
 				break;
 			}
 		}
 	}
+	if(isAsk)depthCurrentAsksSyncIndex=0;
+	else depthCurrentBidsSyncIndex=0;
 }
 
 void QtBitcoinTrader::exitApp()

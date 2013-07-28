@@ -49,10 +49,19 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	int defaultSectionSize;
 	QTime softLagTime;
 	QTime depthLagTime;
 	QMap<double,double> depthAsksMap;
 	QMap<double,double> depthBidsMap;
+	int depthAsksLastScrollValue;
+	int depthBidsLastScrollValue;
+
+	int depthCurrentAsksSyncIndex;
+	int depthCurrentBidsSyncIndex;
+	double depthAsksIncVolume;
+	double depthBidsIncVolume;
+
 	QMenu *trayMenu;
 	QSettings *iniSettings;
 	QRect currentDesktopRect;
