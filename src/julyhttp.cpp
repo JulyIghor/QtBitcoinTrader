@@ -11,6 +11,7 @@
 #include <openssl/hmac.h>
 #include "main.h"
 #include <QTimer>
+#include <zlib.h>
 
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent)
 	: QObject(parent)
@@ -23,6 +24,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	waitingReplay=false;
 	isDisabled=false;
 	outGoingPacketsCount=0;
+	contentGzipped=false;
 
 	socket=new QSslSocket(this);
 	setupSocket(socket);
@@ -32,6 +34,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	httpHeader.append(" HTTP/1.1\r\n");
 	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+appVerStr+"\r\n");
 	httpHeader.append("Host: "+hostName+"\r\n");
+	httpHeader.append("Accept-Encoding: gzip\r\n");
 	httpHeader.append("Connection: keep-alive\r\n");
 	apiDownState=false;
 	apiDownCount=0;
@@ -109,6 +112,7 @@ void JulyHttp::readSocket()
 	{
 		connectionClose=false;
 		buffer.clear();
+		contentGzipped=false;
 		waitingReplay=true;
 		readingHeader=true;
 		contentLength=0;
@@ -139,6 +143,9 @@ void JulyHttp::readSocket()
 				else
 				if(currentLine.startsWith(QLatin1String("connection"))&&
 					currentLine.endsWith(QLatin1String("close\r\n")))connectionClose=true;
+				else
+				if(currentLine.startsWith(QLatin1String("content-encoding"))&&
+					currentLine.contains(QLatin1String("gzip")))contentGzipped=true;
 			}
 		}
 		if(!endFound)
@@ -250,6 +257,7 @@ void JulyHttp::readSocket()
 	{
 		if(!buffer.isEmpty()&&requestList.count())
 		{
+			if(contentGzipped)uncompress(&buffer);
 			bool apiMaybeDown=buffer[0]=='<';
 			setApiDown(apiMaybeDown);
 			if(!apiMaybeDown)emit dataReceived(buffer,requestList.first().second);
@@ -261,6 +269,51 @@ void JulyHttp::readSocket()
 		if(connectionClose)reConnect(true);
 		sendPendingData();
 	}
+}
+
+void JulyHttp::uncompress(QByteArray *data)
+{
+	if(data->size()<=4)
+	{
+		if(isLogEnabled)logThread->writeLog("GZIP: Input data is truncated");
+		return;
+	}
+
+	QByteArray result;
+
+	static const int CHUNK_SIZE=1024;
+	char out[CHUNK_SIZE];
+
+	z_stream strm;
+	strm.zalloc=Z_NULL;
+	strm.zfree=Z_NULL;
+	strm.opaque=Z_NULL;
+	strm.avail_in=data->size();
+	strm.next_in=(Bytef*)(data->data());
+
+	int ret=inflateInit2(&strm,47);
+	if(ret!=Z_OK)return;
+
+	do
+	{
+		strm.avail_out=CHUNK_SIZE;
+		strm.next_out=(Bytef*)(out);
+
+		ret=inflate(&strm,Z_NO_FLUSH);
+		Q_ASSERT(ret!=Z_STREAM_ERROR);
+		switch(ret)
+		{
+		case Z_NEED_DICT: ret=Z_DATA_ERROR;
+		case Z_DATA_ERROR:
+		case Z_MEM_ERROR: (void)inflateEnd(&strm);
+			return;
+		}
+		result.append(out, CHUNK_SIZE-strm.avail_out);
+	} 
+	while(strm.avail_out==0);
+
+	inflateEnd(&strm);
+	(*data)=result;
 }
 
 bool JulyHttp::isReqTypePending(int val)
@@ -348,12 +401,12 @@ void JulyHttp::sendData(int reqType, bool isVip, const QByteArray &method, int r
 	QPair<QByteArray*,int> reqPair;
 	reqPair.first=data;
 	reqPair.second=reqType;
-	//if(false&&removeLowerReqTypes>100)
+	//if(removeLowerReqTypes>100)
 	//{
-	//	for(int n=requestList.count()-1;n>=1;n--)
+	//	for(int n=requestList.count()-1;n>=2;n--)
 	//		if(requestList.at(n).second<removeLowerReqTypes)takeRequestAt(n);
 	//}
-	if(isVip)retryCountMap[data]=2;
+	if(isVip)retryCountMap[data]=4;
 	else retryCountMap[data]=0;
 	requestList<<reqPair;
 

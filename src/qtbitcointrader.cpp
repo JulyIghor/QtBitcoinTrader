@@ -577,7 +577,11 @@ void QtBitcoinTrader::secondSlot()
 						depthCurrentAsksSyncIndex=-1;
 						break;
 					}
-
+					if(ui.depthAsksTable->item(depthCurrentAsksSyncIndex,1)==0)
+					{
+						int a=0;
+						a++;
+					}
 					depthAsksIncVolume+=ui.depthAsksTable->item(depthCurrentAsksSyncIndex,2)->data(Qt::UserRole).toDouble();
 					ui.depthAsksTable->item(depthCurrentAsksSyncIndex,1)->setText(currencyASign+" "+numFromDouble(depthAsksIncVolume));
 					depthCurrentAsksSyncIndex++;
@@ -606,7 +610,11 @@ void QtBitcoinTrader::secondSlot()
 						depthCurrentBidsSyncIndex=-1;
 						break;
 					}
-
+					if(ui.depthBidsTable->item(depthCurrentBidsSyncIndex,2)==0)
+					{
+						int aaa=0;
+						aaa++;
+					}
 					depthBidsIncVolume+=ui.depthBidsTable->item(depthCurrentBidsSyncIndex,1)->data(Qt::UserRole).toDouble();
 					ui.depthBidsTable->item(depthCurrentBidsSyncIndex,2)->setText(currencyASign+" "+numFromDouble(depthBidsIncVolume));
 					depthCurrentBidsSyncIndex++;
@@ -2377,9 +2385,9 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 
 			if(isAsk)
 			{
-				currentPriceItem=currentTable->item(n,2);
-				currentVolumeItem=currentTable->item(n,1);
-				currentSizeItem=currentTable->item(n,0);
+				currentPriceItem=currentTable->item(n,3);
+				currentVolumeItem=currentTable->item(n,2);
+				currentSizeItem=currentTable->item(n,1);
 			}
 			else
 			{
@@ -2390,6 +2398,11 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 
 			if(currentPriceItem->data(Qt::UserRole).toDouble()==price)
 			{
+				if(currentVolumeItem==0||currentSizeItem==0)
+				{
+					int aaa=0;
+					aaa++;
+				}
 				currentVolumeItem->setText(currencyASign+" "+numFromDouble(volume));
 				currentVolumeItem->setData(Qt::UserRole,volume);
 				currentSizeItem->setText(currencyBSign+" "+numFromDouble(volume*price));

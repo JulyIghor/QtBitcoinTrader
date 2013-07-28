@@ -32,6 +32,8 @@ public:
 	~JulyHttp();
 
 private:
+	void uncompress(QByteArray *data);
+	bool contentGzipped;
 	QMap<QSslSocket *,QByteArray *>pendingRequestMap;
 	bool connectionClose;
 	qint64 bytesDone;

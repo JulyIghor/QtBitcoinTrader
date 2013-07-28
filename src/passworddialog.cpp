@@ -46,7 +46,11 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 			QFile::remove(appDataDir+settingsList.at(n));//I'll add ini backup function here
 			continue;
 		}
-		ui.profileComboBox->addItem(settIni.value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
+		int currentProfileExchangeId=settIni.value("ExchangeId",0).toInt();
+		QString itemIcon;
+		if(currentProfileExchangeId==0)itemIcon=":/Resources/Exchanges/Mt.Gox.png";
+		if(currentProfileExchangeId==1)itemIcon=":/Resources/Exchanges/BTC-e.png";
+		ui.profileComboBox->addItem(QIcon(itemIcon),settIni.value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
 
 		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;

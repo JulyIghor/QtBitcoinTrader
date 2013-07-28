@@ -1,6 +1,8 @@
 <RCC>
   <qresource prefix="/"> 
     <file>Resources/Thawte_Primary_Root_CA.cer</file>
+    <file>Resources/Exchanges/BTC-e.png</file>
+    <file>Resources/Exchanges/Mt.Gox.png</file>
     <file>Resources/exit.png</file>
     <file>Resources/Mute.png</file>
     <file>Resources/minus.png</file>
