@@ -144,7 +144,11 @@ void Exchange_MtGox::reloadOrders()
 void Exchange_MtGox::secondSlot()
 {
 	static int infoCounter=0;
-	if(!lastInfoReceived||infoCounter==0&&!isReplayPending(202))sendToApi(202,currencyRequestPair+"/money/info",true,httpSplitPackets);
+	if(userInfoTime.elapsed()>(lastInfoReceived?10000:1000)&&!isReplayPending(202))
+	{
+		userInfoTime.restart();
+		sendToApi(202,currencyRequestPair+"/money/info",true,httpSplitPackets);
+	}
 
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,currencyRequestPair+"/money/orders",true,httpSplitPackets);
 
@@ -207,6 +211,7 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 	{ 
 		julyHttp=new JulyHttp("data.mtgox.com","Rest-Key: "+privateRestKey+"\r\n",this);
 		connect(julyHttp,SIGNAL(anyDataReceived()),mainWindow_,SLOT(anyDataReceived()));
+		connect(julyHttp,SIGNAL(setDataPending(bool)),mainWindow_,SLOT(setDataPending(bool)));
 		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
 		connect(julyHttp,SIGNAL(errorSignal(QString)),mainWindow_,SLOT(showErrorMessage(QString)));
 		connect(julyHttp,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
@@ -585,7 +590,6 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		if(errorString=="Order not found")return;
 		errorString.append("<br>"+tokenString);
 		errorString.append("<br>"+QString::number(reqType));
-		if(!errorString.contains("nonce"))//temporary disabled
 		emit showErrorMessage("I:>"+errorString);
 	}
 	else errorCount=0;

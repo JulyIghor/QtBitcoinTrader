@@ -59,11 +59,11 @@ int *usdDecimals_;
 int *priceDecimals_;
 double *minTradePrice_;
 double *minTradeVolume_;
-qint32 *currentTimeStamp_;
 int *httpRequestInterval_;
 int *httpRequestTimeout_;
 bool *httpSplitPackets_;
 int *depthCountLimit_;
+int *uiUpdateInterval_;
 
 void pickDefaultLangFile()
 {
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0743");
+	appVerStr_=new QByteArray("1.0744");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -118,10 +118,10 @@ int main(int argc, char *argv[])
 	usdDecimals_=new int(5);
 	priceDecimals_=new int(5);
 	depthCountLimit_=new int(100);
+	uiUpdateInterval_=new int(100);
 
 	minTradePrice_=new double(0.01);
 	minTradeVolume_=new double(0.01);
-	currentTimeStamp_=new qint32(QDateTime::currentDateTime().toTime_t());
 	httpRequestInterval_=new int(400);
 	httpRequestTimeout_=new int(5);
 	httpSplitPackets_=new bool(true);

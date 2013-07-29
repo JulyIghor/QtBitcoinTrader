@@ -428,7 +428,6 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
 		if(errorString=="no orders")return;
-		if(!errorString.contains("nonce"))//temporary disabled
 		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 }
@@ -536,6 +535,7 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 		julyHttp=new JulyHttp("btc-e.com","Key: "+privateRestKey+"\r\n",this);
 		connect(julyHttp,SIGNAL(anyDataReceived()),mainWindow_,SLOT(anyDataReceived()));
 		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
+		connect(julyHttp,SIGNAL(setDataPending(bool)),mainWindow_,SLOT(setDataPending(bool)));
 		connect(julyHttp,SIGNAL(errorSignal(QString)),mainWindow_,SLOT(showErrorMessage(QString)));
 		connect(julyHttp,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 		connect(julyHttp,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceivedAuth(QByteArray,int)));

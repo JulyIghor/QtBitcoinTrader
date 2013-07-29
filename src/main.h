@@ -47,17 +47,17 @@
 #define priceDecimals (*priceDecimals_)
 #define minTradeVolume (*minTradeVolume_)
 #define minTradePrice (*minTradePrice_)
-#define currentTimeStamp (*currentTimeStamp_)
 #define httpRequestInterval (*httpRequestInterval_)
 #define httpRequestTimeout (*httpRequestTimeout_)
 #define httpSplitPackets (*httpSplitPackets_)
 #define depthCountLimit (*depthCountLimit_)
+#define uiUpdateInterval (*uiUpdateInterval_)
 
+extern int *uiUpdateInterval_;
 extern int *depthCountLimit_;
 extern bool *httpSplitPackets_;
 extern int *httpRequestInterval_;
 extern int *httpRequestTimeout_;
-extern qint32 *currentTimeStamp_;
 extern double *minTradeVolume_;
 extern double *minTradePrice_;
 extern int *btcDecimals_;

@@ -40,6 +40,7 @@
 QtBitcoinTrader::QtBitcoinTrader()
 	: QDialog()
 {
+	isDataPending=false;
 	depthAsksLastScrollValue=0;
 	depthBidsLastScrollValue=0;
 	depthCurrentAsksSyncIndex=-1;
@@ -168,21 +169,22 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
-	defaultSectionSize=QFontMetrics(font()).boundingRect("0123456789").height()*1.6;
-	foreach(QTableWidget* tables, findChildren<QTableWidget*>())
-	{
-		tables->setMinimumWidth(200);
-		tables->setMinimumHeight(200);
-		tables->verticalHeader()->setDefaultSectionSize(defaultSectionSize);
-	}
 	QSettings settingsMain(appDataDir+"/Settings.set",QSettings::IniFormat);
 	checkForUpdates=settingsMain.value("CheckForUpdates",true).toBool();
+
+	int defTextHeight=QFontMetrics(font()).boundingRect("0123456789").height();
+	defaultSectionSize=settingsMain.value("RowHeight",defTextHeight*1.6).toInt();
+	if(defaultSectionSize<defTextHeight)defaultSectionSize=defTextHeight;
+	settingsMain.setValue("RowHeight",defaultSectionSize);
 
 	depthCountLimit=settingsMain.value("DepthCountLimit",100).toInt();
 	settingsMain.setValue("DepthCountLimit",depthCountLimit);
 
 	httpRequestInterval=settingsMain.value("HttpRequestsInterval",500).toInt();
 	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",1500).toInt();
+
+	uiUpdateInterval=settingsMain.value("UiUpdateInterval",100).toInt();
+	if(uiUpdateInterval<1)uiUpdateInterval=100;
 
 	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
 
@@ -200,6 +202,14 @@ QtBitcoinTrader::QtBitcoinTrader()
 	settingsMain.setValue("HttpRequestsInterval",httpRequestInterval);
 	settingsMain.setValue("HttpRequestsTimeout",httpRequestTimeout);
 	settingsMain.setValue("HttpSplitPackets",httpSplitPackets);
+	settingsMain.setValue("UiUpdateInterval",uiUpdateInterval);
+
+	foreach(QTableWidget* tables, findChildren<QTableWidget*>())
+	{
+		tables->setMinimumWidth(200);
+		tables->setMinimumHeight(200);
+		tables->verticalHeader()->setDefaultSectionSize(defaultSectionSize);
+	}
 
 	int screenCount=QApplication::desktop()->screenCount();
 	QPoint cursorPos=QCursor::pos();
@@ -474,8 +484,8 @@ void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDou
 	newItem->setData(Qt::UserRole,dateT);
 	ui.tableTrades->setItem(0,0,newItem);
 
-	static QColor btcColor("#996515");
-	newItem=new QTableWidgetItem(btcValue);newItem->setTextColor(btcColor);postWorkAtTableItem(newItem,1);
+	//static QColor btcColor("#996515");
+	newItem=new QTableWidgetItem(btcValue);/*newItem->setTextColor(btcColor);*/postWorkAtTableItem(newItem,1);
 	newItem->setData(Qt::UserRole,btcDouble);
 	ui.tableTrades->setItem(0,1,newItem);
 
@@ -492,7 +502,7 @@ void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDou
 	postWorkAtTableItem(newItem,0);
 	ui.tableTrades->setItem(0,2,newItem);
 
-	newItem=new QTableWidgetItem(usdValue);newItem->setTextColor(Qt::darkGreen);postWorkAtTableItem(newItem,-1);
+	newItem=new QTableWidgetItem(usdValue);/*newItem->setTextColor(Qt::darkGreen);*/postWorkAtTableItem(newItem,-1);
 	ui.tableTrades->setItem(0,3,newItem);
 
 	
@@ -519,11 +529,9 @@ void QtBitcoinTrader::clearTimeOutedTrades()
 
 void QtBitcoinTrader::secondSlot()
 {
-	currentTimeStamp=QDateTime::currentDateTime().toTime_t();
 	static QTimer secondTimer(this);
 	if(secondTimer.interval()==0)
 	{
-		secondTimer.setInterval(100);
 		secondTimer.setSingleShot(true);
 		connect(&secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 	}
@@ -538,7 +546,7 @@ void QtBitcoinTrader::secondSlot()
 	if(execCount==1||execCount==3||execCount==5)
 	{
 		setSoftLagValue(softLagTime.elapsed());
-		ui.depthLag->setValue(depthLagTime.elapsed()/1000.0);
+		if(ui.tabDepth->isVisible())ui.depthLag->setValue(depthLagTime.elapsed()/1000.0);
 	}
 
 
@@ -556,6 +564,8 @@ void QtBitcoinTrader::secondSlot()
 		}
 	}
 
+	if(ui.tabDepth->isVisible())
+	{
 	int currentDepthAsksScrollValue=ui.depthAsksTable->verticalScrollBar()->value();
 	if(currentDepthAsksScrollValue>depthAsksLastScrollValue)depthCurrentAsksSyncIndex=0;
 	depthAsksLastScrollValue=currentDepthAsksScrollValue;
@@ -576,11 +586,6 @@ void QtBitcoinTrader::secondSlot()
 					{
 						depthCurrentAsksSyncIndex=-1;
 						break;
-					}
-					if(ui.depthAsksTable->item(depthCurrentAsksSyncIndex,1)==0)
-					{
-						int a=0;
-						a++;
 					}
 					depthAsksIncVolume+=ui.depthAsksTable->item(depthCurrentAsksSyncIndex,2)->data(Qt::UserRole).toDouble();
 					ui.depthAsksTable->item(depthCurrentAsksSyncIndex,1)->setText(currencyASign+" "+numFromDouble(depthAsksIncVolume));
@@ -610,19 +615,15 @@ void QtBitcoinTrader::secondSlot()
 						depthCurrentBidsSyncIndex=-1;
 						break;
 					}
-					if(ui.depthBidsTable->item(depthCurrentBidsSyncIndex,2)==0)
-					{
-						int aaa=0;
-						aaa++;
-					}
 					depthBidsIncVolume+=ui.depthBidsTable->item(depthCurrentBidsSyncIndex,1)->data(Qt::UserRole).toDouble();
 					ui.depthBidsTable->item(depthCurrentBidsSyncIndex,2)->setText(currencyASign+" "+numFromDouble(depthBidsIncVolume));
 					depthCurrentBidsSyncIndex++;
 				}
 			}
+	}
 
 	if(++execCount>5)execCount=0;
-	secondTimer.start(100);
+	secondTimer.start(uiUpdateInterval);
 }
 
 void QtBitcoinTrader::tabTradesScrollUp()
@@ -1390,31 +1391,37 @@ void QtBitcoinTrader::sellTotalBtcToSellHalfIn()
 	ui.sellTotalBtc->setValue(ui.accountBTC->value()/2.0);
 }
 
+void QtBitcoinTrader::setDataPending(bool on)
+{
+	isDataPending=on;
+}
+
 void QtBitcoinTrader::setSoftLagValue(int mseconds)
 {
+	if(!isDataPending)mseconds=0;
+
 	static int lastSoftLag=-1;
 	if(lastSoftLag==mseconds)return;
 
-	isValidSoftLag=mseconds<2000;
 
 	double newSoftLagValue=mseconds/1000.0;
 	ui.lastUpdate->setValue(newSoftLagValue);
 
-	static bool lastSoftLagValid=newSoftLagValue<2.0;
-	bool softLagValid=newSoftLagValue<2.0;
+	static bool lastSoftLagValid=newSoftLagValue<3.0;
+	isValidSoftLag=newSoftLagValue<3.0;
 
-	if(softLagValid!=lastSoftLagValid)
+	if(isValidSoftLag!=lastSoftLagValid)
 	{
-		lastSoftLagValid=softLagValid;
-		if(!softLagValid)ui.lastUpdate->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
+		lastSoftLagValid=isValidSoftLag;
+		if(!isValidSoftLag)ui.lastUpdate->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
 		else ui.lastUpdate->setStyleSheet("");
 		checkValidSellButtons();
 		checkValidBuyButtons();
-		ui.ordersControls->setEnabled(softLagValid);
-		ui.buyButtonBack->setEnabled(softLagValid);
-		ui.sellButtonBack->setEnabled(softLagValid);
+		ui.ordersControls->setEnabled(isValidSoftLag);
+		ui.buyButtonBack->setEnabled(isValidSoftLag);
+		ui.sellButtonBack->setEnabled(isValidSoftLag);
 		QString toolTip;
-		if(!softLagValid)toolTip=julyTr("TOOLTIP_API_LAG_TO_HIGH","API Lag is to High");
+		if(!isValidSoftLag)toolTip=julyTr("TOOLTIP_API_LAG_TO_HIGH","API Lag is to High");
 
 		ui.ordersControls->setToolTip(toolTip);
 		ui.buyButtonBack->setToolTip(toolTip);
@@ -2295,7 +2302,7 @@ void QtBitcoinTrader::setWindowStaysOnTop(bool on)
 void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 {
 	depthLagTime.restart();
-	ui.depthLag->setValue(0.0);
+	if(ui.tabDepth->isVisible())ui.depthLag->setValue(0.0);
 
 	if(price==0.0)return;
 	QTableWidget *currentTable=isAsk?ui.depthAsksTable:ui.depthBidsTable;
@@ -2342,16 +2349,19 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 		}
 
 		currentTable->insertRow(insertPos);
-		static QColor btcColor("#996515");
+		//static QColor btcColor("#996515");
 
 		QTableWidgetItem *priceItem=new QTableWidgetItem(currencyBSign+" "+numFromDouble(price));
-		priceItem->setData(Qt::UserRole,price);priceItem->setTextColor(Qt::darkGreen);
+		priceItem->setData(Qt::UserRole,price);//priceItem->setTextColor(Qt::darkGreen);
 
 		QTableWidgetItem *volumeItem=new QTableWidgetItem(currencyASign+" "+numFromDouble(volume));
-		volumeItem->setData(Qt::UserRole,volume);volumeItem->setTextColor(btcColor);
+		volumeItem->setData(Qt::UserRole,volume);
+		if(volume>999)volumeItem->setTextColor(Qt::red);
+		else if(volume>99)volumeItem->setTextColor(Qt::blue);
+		//volumeItem->setTextColor(btcColor);
 
 		QTableWidgetItem *sizeItem=new QTableWidgetItem();
-		sizeItem->setTextColor(btcColor);
+		//sizeItem->setTextColor(btcColor);
 
 		if(isAsk)
 		{
@@ -2398,12 +2408,11 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 
 			if(currentPriceItem->data(Qt::UserRole).toDouble()==price)
 			{
-				if(currentVolumeItem==0||currentSizeItem==0)
-				{
-					int aaa=0;
-					aaa++;
-				}
 				currentVolumeItem->setText(currencyASign+" "+numFromDouble(volume));
+				if(volume>999)currentVolumeItem->setTextColor(Qt::red);
+				else if(volume>99)currentVolumeItem->setTextColor(Qt::blue);
+				else currentVolumeItem->setTextColor(Qt::black);
+
 				currentVolumeItem->setData(Qt::UserRole,volume);
 				currentSizeItem->setText(currencyBSign+" "+numFromDouble(volume*price));
 				(*depthMap)[price]=volume;

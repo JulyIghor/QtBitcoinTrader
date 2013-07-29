@@ -49,6 +49,7 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	bool isDataPending;
 	int defaultSectionSize;
 	QTime softLagTime;
 	QTime depthLagTime;
@@ -155,6 +156,7 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void setDataPending(bool);
 	void anyDataReceived();
 	void depthUpdateOrder(double,double,bool);
 	void showErrorMessage(QString);

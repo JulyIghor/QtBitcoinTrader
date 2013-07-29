@@ -32,6 +32,7 @@ public:
 	~JulyHttp();
 
 private:
+	bool isDataPending;
 	void uncompress(QByteArray *data);
 	bool contentGzipped;
 	QMap<QSslSocket *,QByteArray *>pendingRequestMap;
@@ -76,18 +77,19 @@ private:
 	QByteArray restKeyLine;
 	QByteArray httpHeader;
 	QString hostName;
-	private slots:
-		void sslErrorsSlot(const QList<QSslError> &);
-		void errorSlot(QAbstractSocket::SocketError);
-		void sendPendingData();
-		void readSocket();
+private slots:
+	void sslErrorsSlot(const QList<QSslError> &);
+	void errorSlot(QAbstractSocket::SocketError);
+	void sendPendingData();
+	void readSocket();
 signals:
-		void dataProgress(double);
-		void anyDataReceived();
-		void errorSignal(QString);
-		void sslErrorSignal(const QList<QSslError> &);
-		void apiDown(bool);
-		void dataReceived(QByteArray,int);
+	void setDataPending(bool);
+	void dataProgress(double);
+	void anyDataReceived();
+	void errorSignal(QString);
+	void sslErrorSignal(const QList<QSslError> &);
+	void apiDown(bool);
+	void dataReceived(QByteArray,int);
 };
 
 #endif // JULYHTTP_H

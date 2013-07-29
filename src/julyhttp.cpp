@@ -16,6 +16,7 @@
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent)
 	: QObject(parent)
 {
+	isDataPending=false;
 	connectionClose=false;
 	bytesDone=0;
 	contentLength=0;
@@ -267,6 +268,7 @@ void JulyHttp::readSocket()
 		takeFirstRequest();
 		clearRequest();
 		if(connectionClose)reConnect(true);
+
 		sendPendingData();
 	}
 }
@@ -370,6 +372,11 @@ void JulyHttp::prepareDataSend()
 	}
 	for(int n=0;n<preparedList.count();n++)requestList<<preparedList.at(n);
 	preparedList.clear();
+	if(isDataPending!=true)
+	{
+		emit setDataPending(true);
+		isDataPending=true;
+	}
 }
 
 void JulyHttp::prepareDataClear()
@@ -388,7 +395,6 @@ void JulyHttp::prepareDataClear()
 void JulyHttp::sendData(int reqType, bool isVip, const QByteArray &method, int removeLowerReqTypes, QByteArray postData, const QByteArray &restSignLine)
 {
 	if(isDisabled)return;
-	Q_UNUSED(removeLowerReqTypes);
 	QByteArray *data=new QByteArray(method+httpHeader+cookie);
 	if(!restSignLine.isEmpty())data->append(restKeyLine+restSignLine);
 	if(!postData.isEmpty())
@@ -398,6 +404,11 @@ void JulyHttp::sendData(int reqType, bool isVip, const QByteArray &method, int r
 	}
 	else data->append("\r\n");
 
+	if(removeLowerReqTypes>100)
+		for(int n=requestList.count()-1;n>=1;n--)
+			if(requestList.at(n).second<removeLowerReqTypes&&skipOnceMap.value(requestList.at(n).first,false)!=true)
+				takeRequestAt(n);
+
 	QPair<QByteArray*,int> reqPair;
 	reqPair.first=data;
 	reqPair.second=reqType;
@@ -405,11 +416,11 @@ void JulyHttp::sendData(int reqType, bool isVip, const QByteArray &method, int r
 	else retryCountMap[data]=0;
 	requestList<<reqPair;
 
-	//if(removeLowerReqTypes>100)
-	//{
-	//	for(int n=requestList.count()-1;n>=2;n--)
-	//		if(requestList.at(n).second<removeLowerReqTypes)takeRequestAt(n);
-	//}
+	if(isDataPending!=true)
+	{
+		emit setDataPending(true);
+		isDataPending=true;
+	}
 
 	reqTypePending[reqType]=reqTypePending.value(reqType,0)+1;
 	sendPendingData();
@@ -429,6 +440,12 @@ void JulyHttp::takeRequestAt(int pos)
 	{
 		reqTypePending.clear();
 		retryCountMap.clear();
+
+		if(isDataPending!=false)
+		{
+			emit setDataPending(false);
+			isDataPending=false;
+		}
 	}
 }
 

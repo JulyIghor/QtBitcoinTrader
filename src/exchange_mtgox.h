@@ -26,6 +26,7 @@ public:
 	~Exchange_MtGox();
 
 private:
+	QTime userInfoTime;
 	QMap<double,double> lastDepthAsksMap;
 	QMap<double,double> lastDepthBidsMap;
 	void clearVariables();
