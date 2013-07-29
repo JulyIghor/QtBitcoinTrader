@@ -428,6 +428,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
 		if(errorString=="no orders")return;
+		if(!errorString.contains("nonce"))//Temporary disabled this
 		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 }

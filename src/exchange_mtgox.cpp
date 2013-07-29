@@ -590,7 +590,8 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		if(errorString=="Order not found")return;
 		errorString.append("<br>"+tokenString);
 		errorString.append("<br>"+QString::number(reqType));
-		emit showErrorMessage("I:>"+errorString);
+		if(!errorString.contains("nonce"))//Temporary disabled this
+		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 	else errorCount=0;
 }
