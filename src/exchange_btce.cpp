@@ -108,7 +108,7 @@ void Exchange_BTCe::clearValues()
 QByteArray Exchange_BTCe::getMidData(QString a, QString b,QByteArray *data)
 {
 	QByteArray rez;
-	if(b.isEmpty())b="\",";
+	if(b.isEmpty())b=QLatin1String("\",");
 	int startPos=data->indexOf(a,0);
 	if(startPos>-1)
 	{
@@ -309,7 +309,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	case 204://orders
 		{
 		if(data.size()<=30)break;
-		bool isEmptyOrders=!success&&errorString=="no orders";if(isEmptyOrders)success=true;
+		bool isEmptyOrders=!success&&errorString==QLatin1String("no orders");if(isEmptyOrders)success=true;
 		if(lastOrders!=data)
 		{
 			lastOrders=data;
@@ -366,7 +366,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	case 307: if(isLogEnabled)logThread->writeLog("Sell OK: "+data);break;//order/sell
 	case 208: ///history
 		{
-		bool isEmptyOrders=!success&&errorString=="no trades";if(isEmptyOrders)success=true;
+		bool isEmptyOrders=!success&&errorString==QLatin1String("no trades");if(isEmptyOrders)success=true;
 		if(lastHistory!=data)
 		{
 			lastHistory=data;
@@ -427,8 +427,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	{
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
-		if(errorString=="no orders")return;
-		if(!errorString.contains("nonce"))//Temporary disabled this
+		if(errorString==QLatin1String("no orders"))return;
 		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 }
@@ -547,9 +546,8 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 		QByteArray postData=commands+"nonce="+QByteArray::number(++privateNonce);
 		if(isLogEnabled)logThread->writeLog("/tapi"+method+"?"+postData);
 
-		bool isVipRequest=reqType>300;
 		if(sendNow)
-			julyHttp->sendData(reqType, isVipRequest, "POST /tapi/"+method, (isVipRequest?300:-1), postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
+			julyHttp->sendData(reqType, "POST /tapi/"+method, postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
 		else
 			julyHttp->prepareData(reqType, "POST /tapi/"+method, postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
 	}
@@ -558,16 +556,16 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 		if(commands.isEmpty())
 		{
 			if(sendNow)
-				julyHttp->sendData(reqType, false, "GET /api/2/"+method);
+				julyHttp->sendData(reqType, "GET /api/2/"+method);
 			else 
 				julyHttp->prepareData(reqType, "GET /api/2/"+method);
 		}
 		else
 		{
 			if(sendNow)
-				julyHttp->sendData(reqType, false, "POST /api/2/"+method, -1, commands);
+				julyHttp->sendData(reqType, "POST /api/2/"+method, commands);
 			else 
-				julyHttp->prepareData(reqType, "POST /api/2/"+method,commands);
+				julyHttp->prepareData(reqType, "POST /api/2/"+method, commands);
 		}
 	}
 }

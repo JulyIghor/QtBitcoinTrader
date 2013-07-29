@@ -223,9 +223,8 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 		QByteArray postData="nonce="+QByteArray::number(++privateNonce);
 		postData.append("000000");postData.append(commands);
 		QByteArray forHash=method+'\0'+postData;
-		bool isVipRequest=reqType>300;
 		if(sendNow)
-		julyHttp->sendData(reqType, isVipRequest, "POST /api/2/"+method, (isVipRequest?300:-1), postData, "Rest-Sign: "+hmacSha512(privateRestSign,forHash).toBase64()+"\r\n");
+		julyHttp->sendData(reqType, "POST /api/2/"+method,postData, "Rest-Sign: "+hmacSha512(privateRestSign,forHash).toBase64()+"\r\n");
 		else
 		julyHttp->prepareData(reqType, "POST /api/2/"+method, postData, "Rest-Sign: "+hmacSha512(privateRestSign,forHash).toBase64()+"\r\n");
 
@@ -233,7 +232,7 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 	else
 	{
 		if(sendNow)
-			julyHttp->sendData(reqType, false, "GET /api/2/"+method);
+			julyHttp->sendData(reqType, "GET /api/2/"+method);
 		else 
 			julyHttp->prepareData(reqType, "GET /api/2/"+method);
 	}
@@ -529,8 +528,8 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 									if(logType=="withdraw"){logTypeInt=5;logType.clear();logType="<font color=\"brown\">("+julyTr("LOG_WITHDRAW","Withdraw").toAscii()+")</font>";}
 									if(logTypeInt)
 									{
-										QByteArray currencyA="USD";
-										QByteArray currencyB="USD";
+										QByteArray currencyA("USD");
+										QByteArray currencyB("USD");
 										QByteArray logValue=getMidData("\"Value\":{\"value\":\"","\",\"",&curLog);
 										QByteArray logDate=getMidData("\"Date\":",",\"",&curLog);
 										QByteArray logText=getMidData(" at ","\",\"",&curLog);
@@ -587,10 +586,9 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		QString tokenString=getMidData("token\":\"","\"}",&data);
 		if(isLogEnabled)logThread->writeLog(errorString.toAscii()+" "+tokenString.toAscii());
 		if(errorString.isEmpty())return;
-		if(errorString=="Order not found")return;
+		if(errorString==QLatin1String("Order not found"))return;
 		errorString.append("<br>"+tokenString);
 		errorString.append("<br>"+QString::number(reqType));
-		if(!errorString.contains("nonce"))//Temporary disabled this
 		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 	else errorCount=0;

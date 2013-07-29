@@ -22,7 +22,7 @@ public:
 	void clearPendingData();
 	void reConnect(bool mastAbort=true);
 	bool isReqTypePending(int);
-	void sendData(int reqType, bool highPriority, const QByteArray &method, int removeLowerReqTypes=-1, QByteArray postData=0, const QByteArray &restSignLine=0);
+	void sendData(int reqType, const QByteArray &method, QByteArray postData=0, const QByteArray &restSignLine=0);
 
 	void prepareData(int reqType, const QByteArray &method, QByteArray postData=0, const QByteArray &restSignLine=0);
 	void prepareDataSend();
