@@ -12,7 +12,7 @@
 
 #include <QDialog>
 #include "ui_updaterdialog.h"
-#include <QHttp>
+#include "julyhttp.h"
 #include <QTimer>
 
 class UpdaterDialog : public QDialog
@@ -33,14 +33,15 @@ private:
 	QString updateLink;
 	
 	int stateUpdate;
-	QHttp *httpGet;
+	JulyHttp *httpGet;
 	Ui::UpdaterDialog ui;
 private slots:
+	void invalidData(bool);
+	void dataReceived(QByteArray,int);
 	void copyDonateButton();
 	void exitSlot();
-	void dataReadProgress(int done,int total);
+	void dataProgress(double);
 	void buttonUpdate();
-	void httpDone(bool);
 };
 
 #endif // UPDATERDIALOG_H

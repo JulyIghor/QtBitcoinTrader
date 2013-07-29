@@ -180,6 +180,10 @@ QtBitcoinTrader::QtBitcoinTrader()
 	depthCountLimit=settingsMain.value("DepthCountLimit",100).toInt();
 	settingsMain.setValue("DepthCountLimit",depthCountLimit);
 
+	apiDownCount=settingsMain.value("ApiDownCount",5).toInt();
+	if(apiDownCount<0)apiDownCount=5;
+	settingsMain.setValue("ApiDownCount",apiDownCount);
+
 	httpRequestInterval=settingsMain.value("HttpRequestsInterval",500).toInt();
 	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",1500).toInt();
 

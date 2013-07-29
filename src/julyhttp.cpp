@@ -13,9 +13,10 @@
 #include <QTimer>
 #include <zlib.h>
 
-JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent)
+JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive)
 	: QObject(parent)
 {
+	secureConnection=secure;
 	isDataPending=false;
 	connectionClose=false;
 	bytesDone=0;
@@ -36,9 +37,10 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+appVerStr+"\r\n");
 	httpHeader.append("Host: "+hostName+"\r\n");
 	httpHeader.append("Accept-Encoding: gzip\r\n");
-	httpHeader.append("Connection: keep-alive\r\n");
+	if(keepAlive)httpHeader.append("Connection: keep-alive\r\n");
+	else httpHeader.append("Connection: close\r\n");
 	apiDownState=false;
-	apiDownCount=0;
+	apiDownCounter=0;
 	restKeyLine=restLine;
 
 	QTimer *secondTimer=new QTimer(this);
@@ -87,14 +89,17 @@ void JulyHttp::reconnectSocket(QSslSocket *socket, bool mastAbort)
 	if(socket==0)return;
 	if(mastAbort)abortSocket();
 	if(socket->state()==QAbstractSocket::UnconnectedState||socket->state()==QAbstractSocket::UnconnectedState)
-		socket->connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
+	{
+		if(secureConnection)socket->connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
+		else socket->connectToHost(hostName,80,QIODevice::ReadWrite);
+	}
 }
 
 void JulyHttp::setApiDown(bool httpError)
 {
-	if(httpError)apiDownCount++;else apiDownCount=0;
+	if(httpError)apiDownCounter++;else apiDownCounter=0;
 
-	bool currentApiDownState=apiDownCount>5;
+	bool currentApiDownState=apiDownCounter>apiDownCount;
 	if(apiDownState!=currentApiDownState)
 	{
 		apiDownState=currentApiDownState;
@@ -111,6 +116,7 @@ void JulyHttp::readSocket()
 
 	if(!waitingReplay)
 	{
+		bytesDone=0;
 		connectionClose=false;
 		buffer.clear();
 		contentGzipped=false;
@@ -250,7 +256,10 @@ void JulyHttp::readSocket()
 				buffer.append(*dataArray);
 				if(dataArray){delete dataArray;dataArray=0;}
 				if(contentLength>0)
-					emit dataProgress((bytesDone+socket->bytesAvailable())/contentLength);
+				{
+					bytesDone+=readSize;
+					emit dataProgress((double)bytesDone/contentLength);
+				}
 		}
 		if(dataArray){delete dataArray;dataArray=0;}
 
@@ -458,7 +467,7 @@ void JulyHttp::takeFirstRequest()
 
 void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 {
-	setApiDown(true);
+	if(socketError!=QAbstractSocket::RemoteHostClosedError||socketError!=QAbstractSocket::UnfinishedSocketOperationError)setApiDown(true);
 
 	if(isLogEnabled)logThread->writeLog("SocketError: "+socket->errorString().toAscii());
 
@@ -497,7 +506,7 @@ void JulyHttp::sendPendingData()
 	if(requestList.count()==0)return;
 
 	QSslSocket *currentSocket=getStableSocket();
-	if(requestList.count()==0)return;
+
 	QByteArray *pendingRequest=pendingRequestMap.value(currentSocket,0);
 	if(pendingRequest==requestList.first().first)
 	{

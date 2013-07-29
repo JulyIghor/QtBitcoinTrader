@@ -28,13 +28,13 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	stateUpdate=0;
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
-	httpGet=new QHttp("raw.github.com",QHttp::ConnectionModeHttps,443,this);
+	httpGet=new JulyHttp("raw.github.com",0,this,true,false);
 	timeOutTimer=new QTimer(this);
 	connect(timeOutTimer,SIGNAL(timeout()),this,SLOT(exitSlot()));
-	connect(httpGet,SIGNAL(done(bool)),this,SLOT(httpDone(bool)));
+	connect(httpGet,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
 
-	if(appVerIsBeta)httpGet->get("/JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
-			else	httpGet->get("/JulyIGHOR/QtBitcoinTrader/master/versions.txt");
+	if(appVerIsBeta)httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
+			else	httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versions.txt");
 	timeOutTimer->start(30000);
 }
 
@@ -42,38 +42,13 @@ UpdaterDialog::~UpdaterDialog()
 {
 }
 
-void UpdaterDialog::copyDonateButton()
+void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 {
-	QApplication::clipboard()->setText(ui.bitcoinAddress->text());
-	QDesktopServices::openUrl(QUrl("bitcoin:"+ui.bitcoinAddress->text()));
-	QMessageBox::information(this,"Qt Bitcoin Trader",julyTr("COPY_DONATE_MESSAGE","Bitcoin address copied to clipboard.<br>Thank you for support!"));
-}
-
-void UpdaterDialog::exitSlot()
-{
-	QCoreApplication::quit();
-}
-
-void UpdaterDialog::httpDone(bool error)
-{
+	if(httpGet)httpGet->blockSignals(true);
 	timeOutTimer->stop();
-	if(error)
-	{
-		if(isVisible())
-		{
-			if(httpGet->errorString()=="Request aborted")return;
-			downloadError();
-			return;
-		}
-		if(feedbackMessage)
-			QMessageBox::information(0,"Qt Bitcoin Trader",julyTr("UPDATE_ERROR","Cannot check for update. Network error: %1").arg(httpGet->errorString()));
-		exitSlot();
-		return;
-	}
 
 	if(stateUpdate==0)
 	{
-		QByteArray dataReceived(httpGet->readAll().replace("\r",""));
 		if(dataReceived.size()>10245)exitSlot();
 		QMap<QString,QString>versionsMap;
 		QStringList dataList=QString(dataReceived).split("\n");
@@ -89,8 +64,8 @@ void UpdaterDialog::httpDone(bool error)
 			}
 		}
 
-QString os="Src";
-bool canAutoUpdate=false;
+		QString os="Src";
+		bool canAutoUpdate=false;
 #ifdef Q_OS_MAC
 		os="Mac";
 		canAutoUpdate=true;
@@ -128,56 +103,65 @@ bool canAutoUpdate=false;
 		show();
 	}
 	else
-	if(stateUpdate==1)
-	{
-		QByteArray binData=httpGet->readAll();
-		QByteArray fileSha1=QCryptographicHash::hash(binData,QCryptographicHash::Sha1);
-		QFile readPublicKey(":/Resources/Public.key");
-		if(!readPublicKey.open(QIODevice::ReadOnly)){QMessageBox::critical(this,windowTitle(),"Public.key is missing");return;}
-		QByteArray publicKey=readPublicKey.readAll();
-		QByteArray decrypted=JulyRSA::getSignature(updateSignature,publicKey);
-		if(decrypted==fileSha1)
+		if(stateUpdate==1)
 		{
-			QString curBin=QApplication::applicationFilePath();
-			QString updBin=curBin+".upd";
-			QString bkpBin=curBin+".bkp";
-			if(QFile::exists(updBin))QFile::remove(updBin);
-			if(QFile::exists(bkpBin))QFile::remove(bkpBin);
-			if(QFile::exists(updBin)||QFile::exists(bkpBin)){downloadError();return;}
+			QByteArray fileSha1=QCryptographicHash::hash(dataReceived,QCryptographicHash::Sha1);
+			QFile readPublicKey(":/Resources/Public.key");
+			if(!readPublicKey.open(QIODevice::ReadOnly)){QMessageBox::critical(this,windowTitle(),"Public.key is missing");return;}
+			QByteArray publicKey=readPublicKey.readAll();
+			QByteArray decrypted=JulyRSA::getSignature(updateSignature,publicKey);
+			if(decrypted==fileSha1)
 			{
-				QFile wrFile(updBin);
-				if(wrFile.open(QIODevice::WriteOnly|QIODevice::Truncate))
+				QString curBin=QApplication::applicationFilePath();
+				QString updBin=curBin+".upd";
+				QString bkpBin=curBin+".bkp";
+				if(QFile::exists(updBin))QFile::remove(updBin);
+				if(QFile::exists(bkpBin))QFile::remove(bkpBin);
+				if(QFile::exists(updBin)||QFile::exists(bkpBin)){downloadError();return;}
 				{
-					wrFile.write(binData);
-					wrFile.close();
-				}else {downloadError();return;}
-			}
-			QByteArray fileData;
-			{
-			QFile opFile(updBin);
-			if(opFile.open(QIODevice::ReadOnly))fileData=opFile.readAll();
-			opFile.close();
-			}
-			if(QCryptographicHash::hash(fileData,QCryptographicHash::Sha1)!=fileSha1){downloadError();return;}
-			QFile::rename(curBin,bkpBin);
-			if(!QFile::exists(bkpBin)){downloadError();return;}
-			QFile::rename(updBin,curBin);
-			if(!QFile::exists(curBin)){QMessageBox::critical(this,windowTitle(),"Critical error. Please reinstall application. Download it from http://sourceforge.net/projects/bitcointrader/<br>File not exists: "+curBin+"<br>"+updBin);downloadError();return;}
+					QFile wrFile(updBin);
+					if(wrFile.open(QIODevice::WriteOnly|QIODevice::Truncate))
+					{
+						wrFile.write(dataReceived);
+						wrFile.close();
+					}else {downloadError();return;}
+				}
+				QByteArray fileData;
+				{
+					QFile opFile(updBin);
+					if(opFile.open(QIODevice::ReadOnly))fileData=opFile.readAll();
+					opFile.close();
+				}
+				if(QCryptographicHash::hash(fileData,QCryptographicHash::Sha1)!=fileSha1){downloadError();return;}
+				QFile::rename(curBin,bkpBin);
+				if(!QFile::exists(bkpBin)){downloadError();return;}
+				QFile::rename(updBin,curBin);
+				if(!QFile::exists(curBin)){QMessageBox::critical(this,windowTitle(),"Critical error. Please reinstall application. Download it from http://sourceforge.net/projects/bitcointrader/<br>File not exists: "+curBin+"<br>"+updBin);downloadError();return;}
 #ifdef Q_OS_MAC
-            QFile(curBin).setPermissions(QFile(bkpBin).permissions());
+				QFile(curBin).setPermissions(QFile(bkpBin).permissions());
 #endif
-            QMessageBox::information(this,windowTitle(),julyTr("UPDATED_SUCCESSFULLY","Application updated successfully. Please restart application to apply changes."));
-			exitSlot();
+				QMessageBox::information(this,windowTitle(),julyTr("UPDATED_SUCCESSFULLY","Application updated successfully. Please restart application to apply changes."));
+				exitSlot();
+			}
 		}
-	}
+}
+
+void UpdaterDialog::copyDonateButton()
+{
+	QApplication::clipboard()->setText(ui.bitcoinAddress->text());
+	QDesktopServices::openUrl(QUrl("bitcoin:"+ui.bitcoinAddress->text()));
+	QMessageBox::information(this,"Qt Bitcoin Trader",julyTr("COPY_DONATE_MESSAGE","Bitcoin address copied to clipboard.<br>Thank you for support!"));
+}
+
+void UpdaterDialog::exitSlot()
+{
+	QCoreApplication::quit();
 }
 
 void UpdaterDialog::buttonUpdate()
 {
+	ui.buttonUpdate->setEnabled(false);
 	if(httpGet)delete httpGet;
-	httpGet=new QHttp;
-	connect(httpGet,SIGNAL(done(bool)),this,SLOT(httpDone(bool)));
-	connect(httpGet,SIGNAL(dataReadProgress(int,int)),this,SLOT(dataReadProgress(int,int)));
 	QStringList tempList=updateLink.split("//");
 	if(tempList.count()!=2){downloadError();return;}
 	QString protocol=tempList.first();
@@ -187,13 +171,18 @@ void UpdaterDialog::buttonUpdate()
 	int removeLength=domain.length()+protocol.length()+2;
 	if(updateLink.length()<=removeLength){downloadError();return;}
 	updateLink.remove(0,removeLength);
-	if(protocol.startsWith("https"))
-	{
-		httpGet->setSocket(new QSslSocket(httpGet));
-		httpGet->setHost(domain, QHttp::ConnectionModeHttps,443);
-	}
-	else httpGet->setHost(domain,80);
-	httpGet->get(updateLink);
+
+	httpGet=new JulyHttp(domain,0,this,protocol.startsWith("https"),false);
+	connect(httpGet,SIGNAL(apiDown(bool)),this,SLOT(invalidData(bool)));
+	connect(httpGet,SIGNAL(dataProgress(double)),this,SLOT(dataProgress(double)));
+	connect(httpGet,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
+
+	httpGet->sendData(320,"GET "+updateLink.toAscii());
+}
+
+void UpdaterDialog::invalidData(bool err)
+{
+	if(err)downloadError();
 }
 
 void UpdaterDialog::downloadError()
@@ -202,9 +191,8 @@ void UpdaterDialog::downloadError()
 	exitSlot();
 }
 
-void UpdaterDialog::dataReadProgress(int done,int total)
+void UpdaterDialog::dataProgress(double precent)
 {
-	ui.buttonUpdate->setEnabled(false);
-	if(total>15000000)downloadError();
-	ui.progressBar->setValue(done*100/total);
+	if(httpGet->getCurrentPacketContentLength()>15000000)downloadError();
+	ui.progressBar->setValue(precent*100);
 }

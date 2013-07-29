@@ -52,7 +52,9 @@
 #define httpSplitPackets (*httpSplitPackets_)
 #define depthCountLimit (*depthCountLimit_)
 #define uiUpdateInterval (*uiUpdateInterval_)
+#define apiDownCount (*apiDownCount_)
 
+extern int *apiDownCount_;
 extern int *uiUpdateInterval_;
 extern int *depthCountLimit_;
 extern bool *httpSplitPackets_;

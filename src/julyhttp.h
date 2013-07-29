@@ -19,6 +19,8 @@ class JulyHttp : public QObject
 	Q_OBJECT
 
 public:
+	uint getCurrentPacketContentLength(){return contentLength;}
+	QString errorString(){if(socket)return socket->errorString(); return QString();}
 	void clearPendingData();
 	void reConnect(bool mastAbort=true);
 	bool isReqTypePending(int);
@@ -28,10 +30,11 @@ public:
 	void prepareDataSend();
 	void prepareDataClear();
 
-	JulyHttp(const QString &hostName, const QByteArray &restKeyLine, QObject *parent);
+	JulyHttp(const QString &hostName, const QByteArray &restKeyLine, QObject *parent, const bool &secure=true, const bool &keepAlive=true);
 	~JulyHttp();
 
 private:
+	bool secureConnection;
 	bool isDataPending;
 	void uncompress(QByteArray *data);
 	bool contentGzipped;
@@ -55,7 +58,7 @@ private:
 	void reconnectSocket(QSslSocket *socket, bool mastAbort);
 	void setApiDown(bool);
 	bool apiDownState;
-	int apiDownCount;
+	int apiDownCounter;
 	int requestRetryCount;
 	bool packetIsChunked;
 	QByteArray buffer;
@@ -83,6 +86,7 @@ private slots:
 	void sendPendingData();
 	void readSocket();
 signals:
+	//void encrypted();
 	void setDataPending(bool);
 	void dataProgress(double);
 	void anyDataReceived();

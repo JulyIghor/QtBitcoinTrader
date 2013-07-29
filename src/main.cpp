@@ -64,6 +64,7 @@ int *httpRequestTimeout_;
 bool *httpSplitPackets_;
 int *depthCountLimit_;
 int *uiUpdateInterval_;
+int *apiDownCount_;
 
 void pickDefaultLangFile()
 {
@@ -92,7 +93,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0746");
+	appVerStr_=new QByteArray("1.0747");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -123,8 +124,10 @@ int main(int argc, char *argv[])
 	minTradePrice_=new double(0.01);
 	minTradeVolume_=new double(0.01);
 	httpRequestInterval_=new int(400);
-	httpRequestTimeout_=new int(5);
+	httpRequestTimeout_=new int(5000);
 	httpSplitPackets_=new bool(true);
+	logEnabled_=new bool(false);
+	apiDownCount_=new int(0);
 
 	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
 
@@ -224,8 +227,6 @@ int main(int argc, char *argv[])
 			}
 			QNetworkProxy::setApplicationProxy(proxy);
 		}
-
-	logEnabled_=new bool(false);
 
 	a.setStyleSheet(globalStyleSheet);
 
