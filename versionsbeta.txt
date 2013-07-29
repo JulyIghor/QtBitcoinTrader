@@ -4,6 +4,6 @@ MacVer=1.0701
 SrcChangeLog=Beta update<br>Pre-release<br>New Fastest socket engine on BTC-E and Mt.Gox.<br>Please test and feel free to email me bug reports.
 SrcVer=1.0727
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/Beta/QtBitcoinTrader.exe
-Win32ChangeLog=Beta update<br>Stable engine.<br>Now all http data gzipped.<br>Fixed critical depth bugs.<br>Fixed onTop dialogs.<br>Added Depth.<br>Added proxy settings to Settings.set file.<br>New Fastest socket engine on BTC-E and Mt.Gox.<br>Please test and feel free to email me bug reports.
-Win32Signature=pWk6qGi9A+mW6AUMrw3ZrAUxXIPRMwkYXgUWc1tSlcLLtZxnhuzHC5DZaZk91GiQNL7OammKVfslVxBiFM/pbB+WrQKNct7vS12zNHmLIlByAHVPrHoanItlyjMlYeXwd3QxJhiqBOCZz5AIaV8dGLKJG34d/Q4vjwehaC/uvt70hBGlTMCCF6Q/scYevamId9f23exaa+7pbuheVNc3oFIVu8ps/tgwVvk0AWnV6roC3J8f/Nx9bAiRxrBmXPLB46nY9sQcK+/VyxDuempgpvHKfgHJASXg3GwtmrpL6CjZ7zKMN2QTFEKcyGGOZxilBADcc99I2+EVkTOBbz0Pgw==
-Win32Ver=1.0743
+Win32ChangeLog=Beta update<br>Stable engine.<br>Added requests priority,<br>now transaction requests works faster.<br>Now all http data gzipped.<br>Fixed critical depth bugs.<br>Fixed onTop dialogs.<br>Added Depth.<br>Added proxy settings to Settings.set file.<br>New Fastest socket engine on BTC-E and Mt.Gox.<br>Please test and feel free to email me bug reports.
+Win32Signature=LRm4x/W1xIrYlLt2mvcO8FuuKs6l3/fd5dhWEpyUmzqC0kmprl2Y6E+FdPI21q0qmm3zQQ+cdUGP5QC8JhoxXFvLxCYNBNJQyRL16JhEtOm10uT+w/Y5JS6sU+lI+Zn1/lzvFVwz7/lKs0znVDARlKGG6u2CAKjcwG+a3tBGSTcM9BZwJHISnlnC1N1paF6wPspbzvecv6Z9fY83pnZfaSbhniXm4N3j50hSbrCE8m8bAI48ihG+RSKGAY3vBICm4r9pdWxMplmoG1uHGe8ydfOESlsbx0vm8g1FzmLMUw77blvAYlJARvjGLHBOG1ICpR+7B//NRycZzjyJYySE5g==
+Win32Ver=1.0744
