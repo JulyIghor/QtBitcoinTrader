@@ -258,7 +258,7 @@ void JulyHttp::readSocket()
 				if(contentLength>0)
 				{
 					bytesDone+=readSize;
-					emit dataProgress((double)bytesDone/contentLength);
+					emit dataProgress(100*bytesDone/contentLength);
 				}
 		}
 		if(dataArray){delete dataArray;dataArray=0;}

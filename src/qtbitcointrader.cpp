@@ -40,6 +40,10 @@
 QtBitcoinTrader::QtBitcoinTrader()
 	: QDialog()
 {
+	ruleTotalToBuyValue=0.0;
+	ruleAmountToReceiveValue=0.0;
+	ruleTotalToBuyBSValue=0.0;
+	ruleAmountToReceiveBSValue=0.0;
 	isDataPending=false;
 	depthAsksLastScrollValue=0;
 	depthBidsLastScrollValue=0;
@@ -1152,7 +1156,7 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 				for(int n=0;n<ui.ordersTable->rowCount();n++)
 					if(ui.ordersTable->item(n,0)->data(Qt::UserRole).toByteArray()==oid)
 					{
-						if(ui.ordersTable->item(n,2)->data(Qt::UserRole).toString()!="canceled")
+						if(ui.ordersTable->item(n,2)->data(Qt::UserRole).toString()!=QLatin1String("canceled"))
 						{
 							if(forcedReloadOrders)
 							{
@@ -1293,12 +1297,13 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(dataList.at(6)+" "+numFromDouble(dataList.at(3).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,3),0);
 	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+numFromDouble(dataList.at(4).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,4),0);
 	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(orderSign+" "+numFromDouble(dataList.at(3).toDouble()*dataList.at(4).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,5),0);
+	ui.ordersTable->setItem(curRow,6,new QTableWidgetItem(dataList.at(0)));
 
 	setOrdersTableRowStateByText(curRow,dataList.at(2).toAscii());
 	ordersSelectionChanged();
 	ui.ordersTableFrame->setVisible(true);
 	ui.noOpenedOrdersLabel->setVisible(false);
-	ui.ordersTable->sortItems(0,Qt::AscendingOrder);
+	ui.ordersTable->sortItems(6,Qt::AscendingOrder);
 }
 
 void QtBitcoinTrader::setOrdersTableRowStateByText(int row, QByteArray text)
@@ -1803,6 +1808,10 @@ void QtBitcoinTrader::addRuleByHolderInToTable(RuleHolder holder, int preferedRo
 	case 7: rulesOrdersLastSellPrice<<holder; break;
 	case 8: rulesBtcBalance<<holder; break;
 	case 9: rulesUsdBalance<<holder; break;
+	case 10: rulesTotalToBuy<<holder; break;
+	case 11: rulesAmountToReceive<<holder; break;
+	case 12: rulesTotalToBuyBS<<holder; break;
+	case 13: rulesAmountToReceiveBS<<holder; break;
 	default: break;
 	}
 	ui.rulesTable->selectRow(curRow);
@@ -1862,7 +1871,12 @@ RuleHolder QtBitcoinTrader::getRuleHolderByGuid(uint guid)
 	if(!fillHolderByFindedGuid(&rulesOrdersLastBuyPrice,&findedHolder,guid))
 	if(!fillHolderByFindedGuid(&rulesOrdersLastSellPrice,&findedHolder,guid))
 	if(!fillHolderByFindedGuid(&rulesBtcBalance,&findedHolder,guid))
-		fillHolderByFindedGuid(&rulesUsdBalance,&findedHolder,guid);
+	if(!fillHolderByFindedGuid(&rulesUsdBalance,&findedHolder,guid))
+	if(!fillHolderByFindedGuid(&rulesTotalToBuy,&findedHolder,guid))
+	if(!fillHolderByFindedGuid(&rulesAmountToReceive,&findedHolder,guid))
+	if(!fillHolderByFindedGuid(&rulesTotalToBuyBS,&findedHolder,guid))
+		fillHolderByFindedGuid(&rulesAmountToReceiveBS,&findedHolder,guid);
+
 	return findedHolder;
 }
 
@@ -1876,7 +1890,11 @@ void QtBitcoinTrader::removeRuleByGuid(uint guid)
 	if(removeRuleByGuidInRuleHolderList(guid,&rulesOrdersLastBuyPrice))return;
 	if(removeRuleByGuidInRuleHolderList(guid,&rulesOrdersLastSellPrice))return;
 	if(removeRuleByGuidInRuleHolderList(guid,&rulesBtcBalance))return;
-	removeRuleByGuidInRuleHolderList(guid,&rulesUsdBalance);
+	if(removeRuleByGuidInRuleHolderList(guid,&rulesUsdBalance))return;
+	if(removeRuleByGuidInRuleHolderList(guid,&rulesTotalToBuy))return;
+	if(removeRuleByGuidInRuleHolderList(guid,&rulesAmountToReceive))return;
+	if(removeRuleByGuidInRuleHolderList(guid,&rulesTotalToBuyBS))return;
+	if(removeRuleByGuidInRuleHolderList(guid,&rulesAmountToReceiveBS))return;
 }
 
 bool QtBitcoinTrader::removeRuleByGuidInRuleHolderList(uint guid, QList<RuleHolder> *ruleHolderList)
@@ -1930,14 +1948,62 @@ void QtBitcoinTrader::beep()
 #endif//ToDo: make this feature works on Mac OS X
 }
 
+void QtBitcoinTrader::ruleTotalToBuyValueChanged()
+{
+	if(ui.marketLast->value()==0.0)return;
+	double newValue=ui.accountUSD->value()/ui.marketLast->value()*floatFeeDec;
+	if(newValue!=ruleTotalToBuyValue)
+	{
+		ruleTotalToBuyValue=newValue;
+		checkAndExecuteRule(&rulesTotalToBuy,ruleTotalToBuyValue);
+	}
+}
+
+void QtBitcoinTrader::ruleAmountToReceiveValueChanged()
+{
+	if(ui.marketLast->value()==0.0)return;
+	double newValue=ui.accountBTC->value()*ui.marketLast->value()*floatFeeDec;
+	if(newValue!=ruleAmountToReceiveValue)
+	{
+		ruleAmountToReceiveValue=newValue;
+		checkAndExecuteRule(&rulesAmountToReceive,ruleAmountToReceiveValue);
+	}
+}
+
+void QtBitcoinTrader::ruleTotalToBuyBSValueChanged()
+{
+	if(ui.marketBuy->value()==0.0)return;
+	double newValue=ui.accountUSD->value()/ui.marketBuy->value()*floatFeeDec;
+	if(newValue!=ruleTotalToBuyValue)
+	{
+		ruleTotalToBuyBSValue=newValue;
+		checkAndExecuteRule(&rulesTotalToBuyBS,ruleTotalToBuyBSValue);
+	}
+}
+
+void QtBitcoinTrader::ruleAmountToReceiveBSValueChanged()
+{
+	if(ui.marketSell->value()==0.0)return;
+	double newValue=ui.accountBTC->value()*ui.marketSell->value()*floatFeeDec;
+	if(newValue!=ruleAmountToReceiveBSValue)
+	{
+		ruleAmountToReceiveBSValue=newValue;
+		checkAndExecuteRule(&rulesAmountToReceiveBS,ruleAmountToReceiveBSValue);
+	}
+}
+
 void QtBitcoinTrader::accountUSDChanged(double val)
 {
+	ruleTotalToBuyValueChanged();
+	ruleTotalToBuyBSValueChanged();
 	checkAndExecuteRule(&rulesUsdBalance,val);
 	if(ui.accountUSDBeep->isChecked())beep();
 }
 
 void QtBitcoinTrader::accountBTCChanged(double val)
 {
+	ruleAmountToReceiveValueChanged();
+	ruleAmountToReceiveBSValueChanged();
 	checkAndExecuteRule(&rulesBtcBalance,val);
 	if(ui.accountBTCBeep->isChecked())beep();
 }
@@ -1962,10 +2028,22 @@ void QtBitcoinTrader::marketHighChanged(double val)
 	}
 }
 
-void QtBitcoinTrader::marketBuyChanged(double val)			{checkAndExecuteRule(&rulesMarketBuyPrice,val);}
-void QtBitcoinTrader::marketSellChanged(double val)			{checkAndExecuteRule(&rulesMarketSellPrice,val);}
+void QtBitcoinTrader::marketBuyChanged(double val)
+{
+	checkAndExecuteRule(&rulesMarketBuyPrice,val);
+	ruleTotalToBuyBSValueChanged();
+}
+
+void QtBitcoinTrader::marketSellChanged(double val)
+{
+	checkAndExecuteRule(&rulesMarketSellPrice,val);
+	ruleAmountToReceiveBSValueChanged();
+}
+
 void QtBitcoinTrader::marketLastChanged(double val)
 {
+	ruleTotalToBuyValueChanged();
+	ruleAmountToReceiveValueChanged();
 	checkAndExecuteRule(&rulesLastPrice,val);
 	if(val>0.0)
 	{

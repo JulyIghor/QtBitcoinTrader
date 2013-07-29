@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>329</height>
+    <width>1054</width>
+    <height>387</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -186,6 +186,46 @@
            </property>
            <property name="text">
             <string>USD Balance</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkTotalToBuy">
+           <property name="accessibleName">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Total to Buy at last price</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkAmountToReceive">
+           <property name="accessibleName">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Amount to Receive at last price</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkTotalToBuyBS">
+           <property name="accessibleName">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Total to Buy at buy/sell price</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkAmountToReceiveBS">
+           <property name="accessibleName">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Amount to Receive at buy/sell price</string>
            </property>
           </widget>
          </item>
@@ -1064,8 +1104,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>588</x>
-     <y>322</y>
+     <x>616</x>
+     <y>368</y>
     </hint>
     <hint type="destinationlabel">
      <x>433</x>
@@ -1080,8 +1120,8 @@
    <slot>buttonAddRule()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>426</x>
-     <y>322</y>
+     <x>454</x>
+     <y>368</y>
     </hint>
     <hint type="destinationlabel">
      <x>304</x>
@@ -1096,8 +1136,8 @@
    <slot>amountChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>95</y>
+     <x>638</x>
+     <y>118</y>
     </hint>
     <hint type="destinationlabel">
      <x>580</x>
@@ -1112,8 +1152,8 @@
    <slot>amountChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>118</y>
+     <x>638</x>
+     <y>141</y>
     </hint>
     <hint type="destinationlabel">
      <x>551</x>
@@ -1128,8 +1168,8 @@
    <slot>amountChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>141</y>
+     <x>638</x>
+     <y>164</y>
     </hint>
     <hint type="destinationlabel">
      <x>552</x>
@@ -1144,8 +1184,8 @@
    <slot>amountChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>164</y>
+     <x>638</x>
+     <y>187</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -1160,8 +1200,8 @@
    <slot>amountChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>187</y>
+     <x>638</x>
+     <y>210</y>
     </hint>
     <hint type="destinationlabel">
      <x>646</x>
@@ -1176,8 +1216,8 @@
    <slot>amountChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>210</y>
+     <x>638</x>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>516</x>
@@ -1192,8 +1232,8 @@
    <slot>amountChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>233</y>
+     <x>638</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
      <x>634</x>
@@ -1208,12 +1248,12 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>913</x>
-     <y>240</y>
+     <x>1026</x>
+     <y>257</y>
     </hint>
     <hint type="destinationlabel">
-     <x>910</x>
-     <y>276</y>
+     <x>1023</x>
+     <y>293</y>
     </hint>
    </hints>
   </connection>
@@ -1224,12 +1264,12 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>913</x>
-     <y>240</y>
+     <x>1026</x>
+     <y>257</y>
     </hint>
     <hint type="destinationlabel">
-     <x>793</x>
-     <y>276</y>
+     <x>897</x>
+     <y>293</y>
     </hint>
    </hints>
   </connection>
@@ -1240,12 +1280,12 @@
    <slot>setOrdersBackInvisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>233</y>
+     <x>638</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
      <x>708</x>
-     <y>371</y>
+     <y>340</y>
     </hint>
    </hints>
   </connection>
@@ -1256,12 +1296,12 @@
    <slot>buttonAddRule()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>476</x>
-     <y>317</y>
+     <x>504</x>
+     <y>363</y>
     </hint>
     <hint type="destinationlabel">
      <x>474</x>
-     <y>374</y>
+     <y>340</y>
     </hint>
    </hints>
   </connection>
@@ -1272,12 +1312,12 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>103</x>
-     <y>59</y>
+     <x>144</x>
+     <y>55</y>
     </hint>
     <hint type="destinationlabel">
      <x>135</x>
-     <y>-21</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1288,12 +1328,12 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>143</x>
-     <y>87</y>
+     <x>172</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
      <x>155</x>
-     <y>-61</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1304,12 +1344,12 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>123</x>
-     <y>115</y>
+     <x>164</x>
+     <y>101</y>
     </hint>
     <hint type="destinationlabel">
      <x>182</x>
-     <y>-12</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1320,12 +1360,12 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>76</x>
-     <y>135</y>
+     <x>117</x>
+     <y>124</y>
     </hint>
     <hint type="destinationlabel">
      <x>93</x>
-     <y>-30</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1336,12 +1376,12 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>159</y>
+     <x>172</x>
+     <y>147</y>
     </hint>
     <hint type="destinationlabel">
      <x>45</x>
-     <y>-21</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1352,12 +1392,12 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>131</x>
-     <y>176</y>
+     <x>172</x>
+     <y>170</y>
     </hint>
     <hint type="destinationlabel">
      <x>262</x>
-     <y>-49</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1368,12 +1408,12 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>104</x>
-     <y>199</y>
+     <x>145</x>
+     <y>193</y>
     </hint>
     <hint type="destinationlabel">
      <x>235</x>
-     <y>-78</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1384,12 +1424,12 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>71</x>
-     <y>227</y>
+     <x>112</x>
+     <y>216</y>
     </hint>
     <hint type="destinationlabel">
      <x>246</x>
-     <y>-41</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1400,12 +1440,76 @@
    <slot>ifChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>89</x>
-     <y>250</y>
+     <x>130</x>
+     <y>239</y>
     </hint>
     <hint type="destinationlabel">
      <x>230</x>
-     <y>-30</y>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkTotalToBuy</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>78</x>
+     <y>255</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>126</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkAmountToReceive</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>93</x>
+     <y>273</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>339</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkTotalToBuyBS</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>299</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>329</x>
+     <y>-39</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkAmountToReceiveBS</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>ifChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>201</x>
+     <y>325</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>-59</y>
     </hint>
    </hints>
   </connection>

@@ -25,6 +25,10 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	double ruleTotalToBuyValue;
+	double ruleAmountToReceiveValue;
+	double ruleTotalToBuyBSValue;
+	double ruleAmountToReceiveBSValue;
 	QString numFromDouble(const double &value);
 
 	QString upArrow;
@@ -49,6 +53,10 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	void ruleTotalToBuyValueChanged();
+	void ruleAmountToReceiveValueChanged();
+	void ruleTotalToBuyBSValueChanged();
+	void ruleAmountToReceiveBSValueChanged();
 	bool isDataPending;
 	int defaultSectionSize;
 	QTime softLagTime;
@@ -85,6 +93,10 @@ private:
 	QList<RuleHolder> rulesOrdersLastSellPrice;
 	QList<RuleHolder> rulesBtcBalance;
 	QList<RuleHolder> rulesUsdBalance;
+	QList<RuleHolder> rulesTotalToBuy;
+	QList<RuleHolder> rulesAmountToReceive;
+	QList<RuleHolder> rulesTotalToBuyBS;
+	QList<RuleHolder> rulesAmountToReceiveBS;
 
 	void addRuleByHolderToTable(RuleHolder);
 	int lastLoadedCurrency;

@@ -40,7 +40,7 @@ private slots:
 	void dataReceived(QByteArray,int);
 	void copyDonateButton();
 	void exitSlot();
-	void dataProgress(double);
+	void dataProgress(int);
 	void buttonUpdate();
 };
 

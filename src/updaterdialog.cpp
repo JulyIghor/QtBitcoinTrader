@@ -174,7 +174,7 @@ void UpdaterDialog::buttonUpdate()
 
 	httpGet=new JulyHttp(domain,0,this,protocol.startsWith("https"),false);
 	connect(httpGet,SIGNAL(apiDown(bool)),this,SLOT(invalidData(bool)));
-	connect(httpGet,SIGNAL(dataProgress(double)),this,SLOT(dataProgress(double)));
+	connect(httpGet,SIGNAL(dataProgress(int)),this,SLOT(dataProgress(int)));
 	connect(httpGet,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
 
 	httpGet->sendData(320,"GET "+updateLink.toAscii());
@@ -191,8 +191,8 @@ void UpdaterDialog::downloadError()
 	exitSlot();
 }
 
-void UpdaterDialog::dataProgress(double precent)
+void UpdaterDialog::dataProgress(int precent)
 {
 	if(httpGet->getCurrentPacketContentLength()>15000000)downloadError();
-	ui.progressBar->setValue(precent*100);
+	ui.progressBar->setValue(precent);
 }

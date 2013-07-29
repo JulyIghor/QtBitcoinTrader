@@ -120,7 +120,7 @@ QByteArray Exchange_BTCe::getMidData(QString a, QString b,QByteArray *data)
 
 void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 {
-	bool success=data.startsWith("{\"success\":1");
+	bool success=!data.startsWith("{\"success\":0");
 	QString errorString;
 	if(!success)errorString=getMidData("error\":\"","\"",&data);
 
@@ -423,13 +423,17 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	default: break;
 	}
 
+	static int errorCount=0;
 	if(!success)
 	{
+		errorCount++;
+		if(errorCount<3)return;
 		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
 		if(errorString.isEmpty())return;
 		if(errorString==QLatin1String("no orders"))return;
 		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
+	else errorCount=0;
 }
 
 void Exchange_BTCe::run()

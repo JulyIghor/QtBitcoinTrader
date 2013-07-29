@@ -581,7 +581,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 	if(!success)
 	{
 		errorCount++;
-		if(reqType==202&&errorCount<3)return;
+		if(errorCount<3)return;
 		QString errorString=getMidData("error\":\"","\"",&data);
 		QString tokenString=getMidData("token\":\"","\"}",&data);
 		if(isLogEnabled)logThread->writeLog(errorString.toAscii()+" "+tokenString.toAscii());

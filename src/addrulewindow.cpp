@@ -84,6 +84,10 @@ bool AddRuleWindow::checkIsValidRule()
 	if(ui.checkOrdersLastSellPrice->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ordersLastSellPrice->value()))return false;
 	if(ui.checkBtcBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.accountBTC->value()))return false;
 	if(ui.checkUsdBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.accountUSD->value()))return false;
+	if(ui.checkTotalToBuy->isChecked()&&getRuleHolder().isAchieved(mainWindow.ruleTotalToBuyValue))return false;
+	if(ui.checkAmountToReceive->isChecked()&&getRuleHolder().isAchieved(mainWindow.ruleAmountToReceiveValue))return false;
+	if(ui.checkTotalToBuyBS->isChecked()&&getRuleHolder().isAchieved(mainWindow.ruleTotalToBuyBSValue))return false;
+	if(ui.checkAmountToReceiveBS->isChecked()&&getRuleHolder().isAchieved(mainWindow.ruleAmountToReceiveBSValue))return false;
 	return true;
 }
 
@@ -117,6 +121,10 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder holder)
 	case 7: ui.checkOrdersLastSellPrice->setChecked(true);break;
 	case 8: ui.checkBtcBalance->setChecked(true);break;
 	case 9: ui.checkUsdBalance->setChecked(true);break;
+	case 10: ui.checkTotalToBuy->setChecked(true);break;
+	case 11: ui.checkAmountToReceive->setChecked(true);break;
+	case 12: ui.checkTotalToBuyBS->setChecked(true);break;
+	case 13: ui.checkAmountToReceiveBS->setChecked(true);break;
 	default: break;
 	}
 
@@ -198,6 +206,10 @@ RuleHolder AddRuleWindow::getRuleHolder()
 	if(ui.checkOrdersLastSellPrice->isChecked())ruleSellType=7;
 	if(ui.checkBtcBalance->isChecked())ruleSellType=8;
 	if(ui.checkUsdBalance->isChecked())ruleSellType=9;
+	if(ui.checkTotalToBuy->isChecked())ruleSellType=10;
+	if(ui.checkAmountToReceive->isChecked())ruleSellType=11;
+	if(ui.checkTotalToBuyBS->isChecked())ruleSellType=12;
+	if(ui.checkAmountToReceiveBS->isChecked())ruleSellType=13;
 
 	static uint ruleGuid=1;
 	return RuleHolder(moreLessEqual, ui.thanValue->value(), btcValue, ++ruleGuid, isBuying, ruleSellPrice, ruleSellType);
@@ -212,19 +224,23 @@ void AddRuleWindow::ifChanged(bool on)
 {
 	if(!on)return;
 
-	if(ui.checkBtcBalance->isChecked())
+	if(ui.checkBtcBalance->isChecked()||ui.checkTotalToBuy->isChecked()||ui.checkTotalToBuyBS->isChecked())
 	{
 		ui.thanValue->setDecimals(btcDecimals);
-		ui.thanValue->setValue(mainWindow.ui.accountBTC->value());
+		if(ui.checkBtcBalance->isChecked())ui.thanValue->setValue(mainWindow.ui.accountBTC->value());
+		if(ui.checkTotalToBuy->isChecked())ui.thanValue->setValue(mainWindow.ruleTotalToBuyValue);
+		if(ui.checkTotalToBuyBS->isChecked())ui.thanValue->setValue(mainWindow.ruleTotalToBuyBSValue);
 
 		ui.priceBtcIcon->setVisible(true);
 		ui.priceUsdIcon->setVisible(false);
 	}
 	else
-	if(ui.checkUsdBalance->isChecked())
+	if(ui.checkUsdBalance->isChecked()||ui.checkAmountToReceive->isChecked()||ui.checkAmountToReceiveBS->isChecked())
 	{
 		ui.thanValue->setDecimals(usdDecimals);
-		ui.thanValue->setValue(mainWindow.ui.accountUSD->value());
+		if(ui.checkUsdBalance->isChecked())ui.thanValue->setValue(mainWindow.ui.accountUSD->value());
+		if(ui.checkAmountToReceive->isChecked())ui.thanValue->setValue(mainWindow.ruleAmountToReceiveValue);
+		if(ui.checkAmountToReceiveBS->isChecked())ui.thanValue->setValue(mainWindow.ruleAmountToReceiveBSValue);
 
 		ui.priceBtcIcon->setVisible(false);
 		ui.priceUsdIcon->setVisible(true);

@@ -88,7 +88,7 @@ private slots:
 signals:
 	//void encrypted();
 	void setDataPending(bool);
-	void dataProgress(double);
+	void dataProgress(int);
 	void anyDataReceived();
 	void errorSignal(QString);
 	void sslErrorSignal(const QList<QSslError> &);
