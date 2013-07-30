@@ -1,8 +1,8 @@
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTrader
 MacChangeLog=v1.07.01<br>Beta update
 MacVer=1.0701
-SrcChangeLog=Beta update<br>Pre-release<br>New Fastest socket engine on BTC-E and Mt.Gox.<br>Please test and feel free to email me bug reports.
-SrcVer=1.0727
+SrcChangeLog=Beta update<br>Stable engine.<br>Added total amount and volume of current pair opened orders.<br>Added portable mode switcher to windows version.<br>Orders table now can be sorted by clicking on columns.<br>Enhanced rules.<br>Engine optimization.<br>Added requests priority,<br>now transaction requests works faster.<br>Now all http data gzipped.<br>Fixed critical depth bugs.<br>Fixed onTop dialogs.<br>Added Depth.<br>Added proxy settings to Settings.set file.<br>New Fastest socket engine on BTC-E and Mt.Gox.<br>Please test and feel free to email me bug reports.
+SrcVer=1.0753
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/Beta/QtBitcoinTrader.exe
 Win32ChangeLog=Beta update<br>Stable engine.<br>Added total amount and volume of current pair opened orders.<br>Added portable mode switcher to windows version.<br>Orders table now can be sorted by clicking on columns.<br>Enhanced rules.<br>Engine optimization.<br>Added requests priority,<br>now transaction requests works faster.<br>Now all http data gzipped.<br>Fixed critical depth bugs.<br>Fixed onTop dialogs.<br>Added Depth.<br>Added proxy settings to Settings.set file.<br>New Fastest socket engine on BTC-E and Mt.Gox.<br>Please test and feel free to email me bug reports.
 Win32Signature=JGeo6QHYKUqgJ0t5onWBZbW/imeQQ+JkOSMX6LzES+tBo4YBEay8eN+kIYbRRylNwb19iGqUdForbYylRV+FHKMOHriavmQsX7Yt7fgYf60uBF2EiDWcD7N+ks8Zq/LSnjIV3ge3CWolGHbIGfUnBWcwLix91bRcrMdbbENheIT2YiWrM+gPlBvdf23Z9X/4wxT8lHYfdHKAcaRjiuDutXjhAtJe42n7f5L2q4jlfzl9h7XzyVXB5AofU11kUZveyNsGVbynQgE28djl0z4D9mDe8cU7bqXPEejYXZWFwManNJ8B7wkjB4HAmnAR8rV73N8V+vsXq0+4zAj19Pm0RQ==
