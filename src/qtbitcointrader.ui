@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1132</width>
-    <height>749</height>
+    <width>1100</width>
+    <height>660</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -4015,10 +4015,10 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="accessibleName">
-           <string>TR00037</string>
+           <string>AS_MARKET_PRICE</string>
           </property>
           <property name="text">
-           <string>As Buy Price</string>
+           <string>Market Price</string>
           </property>
          </widget>
         </item>
@@ -4043,10 +4043,10 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="accessibleName">
-           <string/>
+           <string>AS_LAST_PRICE</string>
           </property>
           <property name="text">
-           <string>As Last Price</string>
+           <string>Last Price</string>
           </property>
          </widget>
         </item>
@@ -4879,10 +4879,10 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="accessibleName">
-           <string>TR00037</string>
+           <string>AS_MARKET_PRICE</string>
           </property>
           <property name="text">
-           <string>As Buy Price</string>
+           <string>Market Price</string>
           </property>
          </widget>
         </item>
@@ -4907,10 +4907,10 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="accessibleName">
-           <string/>
+           <string>AS_LAST_PRICE</string>
           </property>
           <property name="text">
-           <string>As Last Price</string>
+           <string>Last Price</string>
           </property>
          </widget>
         </item>
@@ -5299,7 +5299,7 @@ p, li { white-space: pre-wrap; }
            <number>8</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_55">
+           <widget class="QLabel" name="bitcoinTalkUrl">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
               <horstretch>0</horstretch>

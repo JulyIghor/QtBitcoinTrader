@@ -40,6 +40,8 @@
 QtBitcoinTrader::QtBitcoinTrader()
 	: QDialog()
 {
+	softLagTime.restart();
+	softLagTime.restart();
 	ruleTotalToBuyValue=0.0;
 	ruleAmountToReceiveValue=0.0;
 	ruleTotalToBuyBSValue=0.0;
@@ -767,14 +769,14 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
 	foreach(QCheckBox* checkBoxes, par->findChildren<QCheckBox*>())
 		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),QFontMetrics(checkBoxes->font()).width(checkBoxes->text())+20));
 
+	foreach(QLabel* labels, par->findChildren<QLabel*>())
+		if(labels->text().length()&&labels->text().at(0)!='<')
+			labels->setMinimumWidth(qMin(labels->maximumWidth(),QFontMetrics(labels->font()).width(labels->text())));
+
 	foreach(QGroupBox* groupBox, par->findChildren<QGroupBox*>())
 		if(groupBox->maximumWidth()>1000)
 			groupBox->setMinimumWidth(qMax(groupBox->minimumSizeHint().width(),QFontMetrics(groupBox->font()).width(groupBox->title())+20));
 
-	foreach(QLabel* labels, par->findChildren<QLabel*>())
-		if(labels->text().length()&&labels->text().at(0)!='<')
-			labels->setMinimumWidth(qMin(labels->maximumWidth(),QFontMetrics(labels->font()).width(labels->text())));
-	
 	fixDecimals(this);
 
 	QSize minSizeHint=par->minimumSizeHint();
