@@ -34,7 +34,8 @@ HEADERS += aboutdialog.h \
            translationline.h \
            updaterdialog.h \
            audioplayer.h \
-           exchange_btce.h
+           exchange_btce.h \
+           datafolderchusedialog.h
 #
 # Forms
 #
@@ -45,7 +46,8 @@ FORMS += addrulewindow.ui \
          qtbitcointrader.ui \
          translationabout.ui \
          translationdialog.ui \
-         updaterdialog.ui
+         updaterdialog.ui \
+         datafolderchusedialog.ui
 #
 # Sources
 #
@@ -69,7 +71,8 @@ SOURCES += aboutdialog.cpp \
            translationline.cpp \
            updaterdialog.cpp \
            audioplayer.cpp \
-           exchange_btce.cpp
+           exchange_btce.cpp \
+           datafolderchusedialog.cpp
 #
 # Resources
 # 

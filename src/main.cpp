@@ -25,6 +25,7 @@
 #include "translationdialog.h"
 #include <QMessageBox>
 #include <QDateTime>
+#include "datafolderchusedialog.h"
 
 QByteArray *appDataDir_;
 QMap<QByteArray,QByteArray> *currencySignMap;
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0751");
+	appVerStr_=new QByteArray("1.0752");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -129,19 +130,28 @@ int main(int argc, char *argv[])
 	logEnabled_=new bool(false);
 	apiDownCount_=new int(0);
 
-	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
+	const QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
+
+	QApplication a(argc,argv);
 
 #ifdef Q_OS_WIN
-	if(QFile::exists("./QtBitcoinTrader"))
 	{
-		appDataDir="./QtBitcoinTrader/";
+	QString appLocalStorageDir=a.applicationDirPath()+QLatin1String("/QtBitcoinTrader/");
+	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/QtBitcoinTrader/";
+	if(!QFile::exists(appLocalStorageDir)&&!QFile::exists(appDataDir))
+	{
+		julyTranslator->loadFromFile(defaultLangFile);
+		DataFolderChuseDialog chuseStorageLocation(appDataDir,appLocalStorageDir);
+		if(chuseStorageLocation.exec()==QDialog::Rejected)return 0;
+		if(chuseStorageLocation.isPortable)QDir().mkdir(appLocalStorageDir);
+	}
+	if(QFile::exists(appLocalStorageDir))
+	{
+		appDataDir=appLocalStorageDir.toAscii();
 		QDir().mkpath(appDataDir+"Language");
 		if(!QFile::exists(appDataDir+"Language"))appDataDir.clear();
 	}
-	if(appDataDir.isEmpty())
-	{
-	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/QtBitcoinTrader/";
-	if(!QFile::exists(appDataDir))QDir().mkpath(appDataDir);
+	if(!QFile::exists(appDataDir+"Language"))QDir().mkpath(appDataDir+"Language");
 	}
 #else
 	appDataDir=QDesktopServices::storageLocation(QDesktopServices::HomeLocation).toAscii()+"/.config/QtBitcoinTrader/";
@@ -150,7 +160,6 @@ int main(int argc, char *argv[])
 	
     if(argc>1)
 	{
-		QApplication a(argc,argv);
         if(a.arguments().last().startsWith("/checkupdate"))
 		{
 			a.setStyleSheet(globalStyleSheet);
@@ -164,8 +173,6 @@ int main(int argc, char *argv[])
 			return a.exec();
 		}
 	}
-
-	QApplication a(argc,argv);
 
 #ifdef  Q_OS_WIN
 	if(QFile::exists(a.applicationFilePath()+".upd"))QFile::remove(a.applicationFilePath()+".upd");

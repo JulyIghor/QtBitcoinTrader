@@ -250,5 +250,11 @@ String_UP_TO_DATE=Diese Version von Qt Bitcoin Trader ist auf dem aktuellen Stan
 String_YES=Ja
 String_LANGUAGE_NAME=Deutsch
 String_LANGUAGE_AUTHOR=Diabolicus<br><a href="mailto:spirou666@gmx.de">spirou666@gmx.de</a><br>Donate Bitcoin:<br><a href="bitcoin:1Drv4D9FFmbyKsvg2zfqR5wq2b6akTvV8f">1Drv4D9FFmbyKsvg2zfqR5wq2b6akTvV8f</a>
-String_LANGUAGE_LOCALE=de_DE
+String_LANGUAGE_LOCALE=de
 String_EXIT=Exit
+String_USE_SYSTEM_FOLDER=Store your data and settings in system folder.
+String_USE_PORTABLE_MODE=Enable portable mode. Store your data and settings in same folder as executable file.
+CheckBox_RULE_TOTAL_TO_BUY_AT_LAST=Total to Buy at market Last price
+CheckBox_RULE_AMOUNT_TO_RECEIVE_AT_LAST=Amount to Receive at Last price
+CheckBox_RULE_TOTAL_TO_BUY_AT_BUY_PRICE=Total to Buy at market Buy price
+CheckBox_RULE_AMOUNT_TO_RECEIVE_AT_SELL_PRICE=Amount to Receive at Sell price

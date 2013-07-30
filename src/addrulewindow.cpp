@@ -224,6 +224,10 @@ void AddRuleWindow::ifChanged(bool on)
 {
 	if(!on)return;
 
+	bool equalEnabled=!ui.checkTotalToBuy->isChecked()&&!ui.checkTotalToBuyBS->isChecked()&&!ui.checkAmountToReceive->isChecked()&&!ui.checkAmountToReceiveBS->isChecked();
+	if(!equalEnabled&&ui.checkEqual->isChecked())ui.checkGoesAbove->setChecked(true);
+	ui.checkEqual->setEnabled(equalEnabled);
+
 	if(ui.checkBtcBalance->isChecked()||ui.checkTotalToBuy->isChecked()||ui.checkTotalToBuyBS->isChecked())
 	{
 		ui.thanValue->setDecimals(btcDecimals);

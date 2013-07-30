@@ -192,40 +192,40 @@
          <item>
           <widget class="QRadioButton" name="checkTotalToBuy">
            <property name="accessibleName">
-            <string/>
+            <string>RULE_TOTAL_TO_BUY_AT_LAST</string>
            </property>
            <property name="text">
-            <string>Total to Buy at last price</string>
+            <string>Total to Buy at market Last price</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QRadioButton" name="checkAmountToReceive">
            <property name="accessibleName">
-            <string/>
+            <string>RULE_AMOUNT_TO_RECEIVE_AT_LAST</string>
            </property>
            <property name="text">
-            <string>Amount to Receive at last price</string>
+            <string>Amount to Receive at Last price</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QRadioButton" name="checkTotalToBuyBS">
            <property name="accessibleName">
-            <string/>
+            <string>RULE_TOTAL_TO_BUY_AT_BUY_PRICE</string>
            </property>
            <property name="text">
-            <string>Total to Buy at buy/sell price</string>
+            <string>Total to Buy at market Buy price</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QRadioButton" name="checkAmountToReceiveBS">
            <property name="accessibleName">
-            <string/>
+            <string>RULE_AMOUNT_TO_RECEIVE_AT_SELL_PRICE</string>
            </property>
            <property name="text">
-            <string>Amount to Receive at buy/sell price</string>
+            <string>Amount to Receive at Sell price</string>
            </property>
           </widget>
          </item>
