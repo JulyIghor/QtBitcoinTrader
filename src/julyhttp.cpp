@@ -128,31 +128,36 @@ void JulyHttp::readSocket()
 	while(readingHeader)
 	{
 		bool endFound=false;
-		QString currentLine;
+		QByteArray currentLine;
 		while(!endFound&&socket->canReadLine())
 		{
-			currentLine=socket->readLine().toLower();
-			if(currentLine==QLatin1String("\r\n")||
-			   currentLine==QLatin1String("\n")||
+			currentLine=socket->readLine();
+			if(currentLine=="\r\n"||
+			   currentLine=="\n"||
 			   currentLine.isEmpty())endFound=true;
 			else
 			{
-				if(currentLine.startsWith("set-cookie"))cookie=currentLine.toAscii();
-				else
-				if(currentLine.startsWith("transfer-encoding")&&
-				   currentLine.endsWith("chunked\r\n"))chunkedSize=0;
-				else
-				if(currentLine.startsWith(QLatin1String("content-length")))
+				QString currentLineLow=currentLine.toLower();
+				if(currentLineLow.startsWith("set-cookie"))
 				{
-					QStringList pairList=currentLine.split(":");
+					cookie=currentLine;
+					cookie.remove(0,4);
+				}
+				else 
+				if(currentLineLow.startsWith("transfer-encoding")&&
+				   currentLineLow.endsWith("chunked\r\n"))chunkedSize=0;
+				else
+				if(currentLineLow.startsWith(QLatin1String("content-length")))
+				{
+					QStringList pairList=currentLineLow.split(":");
 					if(pairList.count()==2)contentLength=pairList.last().trimmed().toUInt();
 				}
 				else
-				if(currentLine.startsWith(QLatin1String("connection"))&&
-					currentLine.endsWith(QLatin1String("close\r\n")))connectionClose=true;
+				if(currentLineLow.startsWith(QLatin1String("connection"))&&
+					currentLineLow.endsWith(QLatin1String("close\r\n")))connectionClose=true;
 				else
-				if(currentLine.startsWith(QLatin1String("content-encoding"))&&
-					currentLine.contains(QLatin1String("gzip")))contentGzipped=true;
+				if(currentLineLow.startsWith(QLatin1String("content-encoding"))&&
+					currentLineLow.contains(QLatin1String("gzip")))contentGzipped=true;
 			}
 		}
 		if(!endFound)

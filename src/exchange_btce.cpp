@@ -325,7 +325,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(ordersList.count()==0)return;
 
 			for(int n=0;n<ordersList.count();n++)
-			{//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign
+			{//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign+";"+currencyPair
 				QByteArray currentOrder="{"+ordersList.at(n).toAscii()+"}";
 				QByteArray itemStatus;
 				int itemStatusInt=getMidData("status\":","}",&currentOrder).toInt();
@@ -340,7 +340,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				QByteArray tradeType=getMidData("type\":\"","\",\"",&currentOrder);
 				if(tradeType=="buy")tradeType="bid";
 				else if(tradeType=="sell")tradeType="ask";
-				QStringList currencyPair=QString(getMidData("pair\":\"","\",\"",&currentOrder)).toUpper().split("_");
+				QByteArray currencyPair_=getMidData("pair\":\"","\",\"",&currentOrder);
+				QStringList currencyPair=QString(currencyPair_).toUpper().split("_");
 				if(currencyPair.count()!=2)continue;
 				rezultData.append(getMidData("{","\":{",&currentOrder)+";");
 				rezultData.append(getMidData("timestamp_created\":",",\"",&currentOrder)+";");
@@ -349,7 +350,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				rezultData.append(getMidData("amount\":",",\"",&currentOrder)+";");
 				rezultData.append(getMidData("rate\":",",\"",&currentOrder)+";");
 				rezultData.append(currencySignMap->value(currencyPair.last().toAscii(),"$")+";");
-				rezultData.append(currencySignMap->value(currencyPair.first().toAscii(),"$")+"\n");
+				rezultData.append(currencySignMap->value(currencyPair.first().toAscii(),"$")+";");
+				rezultData.append(currencyPair_+"\n");
 			}
 			emit ordersChanged(rezultData);
 		}

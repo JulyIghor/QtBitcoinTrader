@@ -757,7 +757,12 @@ void QtBitcoinTrader::languageComboBoxChanged(int val)
 void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
 {
 	foreach(QPushButton* pushButtons, par->findChildren<QPushButton*>())
-		pushButtons->setMinimumWidth(qMin(pushButtons->maximumWidth(),QFontMetrics(pushButtons->font()).width(pushButtons->text())+10));
+		if(!pushButtons->text().isEmpty())
+			pushButtons->setMinimumWidth(qMin(pushButtons->maximumWidth(),QFontMetrics(pushButtons->font()).width(pushButtons->text())+10));
+
+	foreach(QToolButton* toolButtons, par->findChildren<QToolButton*>())
+		if(!toolButtons->text().isEmpty())
+			toolButtons->setMinimumWidth(qMin(toolButtons->maximumWidth(),QFontMetrics(toolButtons->font()).width(toolButtons->text())+10));
 
 	foreach(QCheckBox* checkBoxes, par->findChildren<QCheckBox*>())
 		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),QFontMetrics(checkBoxes->font()).width(checkBoxes->text())+20));
@@ -889,6 +894,8 @@ void QtBitcoinTrader::currencyChanged(int val)
 	fixDecimals(this);
 
 	iniSettings->sync();
+
+	calcOrdersTotalValues();
 }
 
 void QtBitcoinTrader::firstTicker()
@@ -1105,6 +1112,8 @@ void QtBitcoinTrader::ordersIsEmpty()
 		oidMap.clear();
 		ui.ordersTable->clearContents();
 		ui.ordersTable->setRowCount(0);
+		ui.ordersTotalBTC->setValue(0.0);
+		ui.ordersTotalUSD->setValue(0.0);
 		ui.ordersTableFrame->setVisible(false);
 		ui.noOpenedOrdersLabel->setVisible(true);
 		ui.noOpenedOrdersLabel->setVisible(true);
@@ -1141,10 +1150,10 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 	QMap<QByteArray,bool> activeOrders;
 	for(int n=0;n<ordersList.count();n++)
 	{
-		//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign+";"+priceSign
+		//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign+";"+priceSign+";"+currencyPair
 		QString oidData=ordersList.at(n);
 		QStringList oidDataList=oidData.split(";");
-		if(oidDataList.count()!=8)continue;
+		if(oidDataList.count()!=9)continue;
 		QByteArray oid=oidDataList.first().toAscii();
 		oidDataList.removeFirst();
 		oidData=oidDataList.join(";");
@@ -1165,10 +1174,16 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 								postWorkAtTableItem(ui.ordersTable->item(n,1));
 							}
 							ui.ordersTable->item(n,2)->setText(julyTr("ORDER_STATE_"+oidDataList.at(2).toUpper(),oidDataList.at(2)));postWorkAtTableItem(ui.ordersTable->item(n,2));
-							ui.ordersTable->item(n,3)->setText(oidDataList.at(6)+" "+numFromDouble(oidDataList.at(3).toDouble()));
-							ui.ordersTable->item(n,4)->setText(oidDataList.at(5)+" "+numFromDouble(oidDataList.at(4).toDouble()));
-							ui.ordersTable->item(n,5)->setText(oidDataList.at(5)+" "+numFromDouble(oidDataList.at(3).toDouble()*oidDataList.at(4).toDouble()));
-							setOrdersTableRowStateByText(n,oidDataList.at(2).toAscii());
+							double amountDouble=oidDataList.at(3).toDouble();
+							double priceDouble=oidDataList.at(4).toDouble();
+							double totalDouble=amountDouble*priceDouble;
+							ui.ordersTable->item(n,3)->setText(oidDataList.at(6)+" "+numFromDouble(amountDouble));
+							ui.ordersTable->item(n,3)->setData(Qt::UserRole,amountDouble);
+							ui.ordersTable->item(n,4)->setText(oidDataList.at(5)+" "+numFromDouble(priceDouble));
+							ui.ordersTable->item(n,4)->setData(Qt::UserRole,priceDouble);
+							ui.ordersTable->item(n,5)->setText(oidDataList.at(5)+" "+numFromDouble(totalDouble));
+							ui.ordersTable->item(n,5)->setData(Qt::UserRole,totalDouble);
+							setOrdersTableRowStateByText(n,oidDataList.at(2));
 							oidMap[oid]=oidData;
 						}
 						break;
@@ -1176,7 +1191,7 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 		}
 		else//Insert
 		{
-			insertIntoTable(oid,oidData);
+			insertIntoOrdersTable(oid,oidData);
 			oidMap[oid]=oidData;
 		}
 		activeOrders[oid]=1;
@@ -1196,6 +1211,7 @@ void QtBitcoinTrader::ordersChanged(QString ordersData)
 		}
 	}
 	forcedReloadOrders=false;
+	calcOrdersTotalValues();
 }
 
 void QtBitcoinTrader::showErrorMessage(QString message)
@@ -1282,26 +1298,39 @@ void QtBitcoinTrader::translateUnicodeStr(QString *str)
 	while((pos=rx.indexIn(*str,pos))!=-1)str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(0, 16)));
 }
 
-void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
+void QtBitcoinTrader::insertIntoOrdersTable(QByteArray oid, QString data)
 {
-	QStringList dataList=data.split(";");
-	if(dataList.count()!=7)return;
+	QStringList dataList=data.split(';');
+	if(dataList.count()!=8)return;
 	ui.ordersTable->setSortingEnabled(false);
 	int curRow=ui.ordersTable->rowCount();
-	QByteArray orderSign=dataList.at(5).toAscii();
+	QString orderSign=dataList.at(5);
 	ui.ordersTable->setRowCount(curRow+1);
 	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat)));postWorkAtTableItem(ui.ordersTable->item(curRow,0));ui.ordersTable->item(curRow,0)->setData(Qt::UserRole,oid);ui.ordersTable->item(curRow,0)->setToolTip(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat));
 	QString orderType=dataList.at(1).toUpper();
 	QTableWidgetItem *newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_"+orderType,dataList.at(1)));
 	if(orderType=="ASK")newItem->setTextColor(Qt::red); else newItem->setTextColor(Qt::blue);
-	ui.ordersTable->setItem(curRow,1,newItem);postWorkAtTableItem(ui.ordersTable->item(curRow,1));
-	ui.ordersTable->setItem(curRow,2,new QTableWidgetItem(julyTr("ORDER_STATE_"+dataList.at(2).toUpper(),dataList.at(2))));postWorkAtTableItem(ui.ordersTable->item(curRow,2));
-	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(dataList.at(6)+" "+numFromDouble(dataList.at(3).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,3),0);
-	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+numFromDouble(dataList.at(4).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,4),0);
-	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(orderSign+" "+numFromDouble(dataList.at(3).toDouble()*dataList.at(4).toDouble())));postWorkAtTableItem(ui.ordersTable->item(curRow,5),0);
-	ui.ordersTable->setItem(curRow,6,new QTableWidgetItem(dataList.at(0)));
 
-	setOrdersTableRowStateByText(curRow,dataList.at(2).toAscii());
+	double amountDouble=dataList.at(3).toDouble();
+	double priceDouble=dataList.at(4).toDouble();
+	double totalDouble=amountDouble*priceDouble;
+	ui.ordersTable->setItem(curRow,1,newItem);
+		postWorkAtTableItem(ui.ordersTable->item(curRow,1));
+	ui.ordersTable->setItem(curRow,2,new QTableWidgetItem(julyTr("ORDER_STATE_"+dataList.at(2).toUpper(),dataList.at(2))));
+		postWorkAtTableItem(ui.ordersTable->item(curRow,2));
+	ui.ordersTable->setItem(curRow,3,new QTableWidgetItem(dataList.at(6)+" "+numFromDouble(amountDouble)));
+		postWorkAtTableItem(ui.ordersTable->item(curRow,3),0);
+		ui.ordersTable->item(curRow,3)->setData(Qt::UserRole,amountDouble);
+	ui.ordersTable->setItem(curRow,4,new QTableWidgetItem(orderSign+" "+numFromDouble(priceDouble)));
+	postWorkAtTableItem(ui.ordersTable->item(curRow,4),0);
+	ui.ordersTable->item(curRow,4)->setData(Qt::UserRole,priceDouble);
+	ui.ordersTable->setItem(curRow,5,new QTableWidgetItem(orderSign+" "+numFromDouble(totalDouble)));
+	postWorkAtTableItem(ui.ordersTable->item(curRow,5),0);
+	ui.ordersTable->item(curRow,5)->setData(Qt::UserRole,totalDouble);
+	ui.ordersTable->setItem(curRow,6,new QTableWidgetItem(dataList.at(0)));
+	ui.ordersTable->item(curRow,6)->setData(Qt::UserRole,dataList.at(7));
+
+	setOrdersTableRowStateByText(curRow,dataList.at(2));
 	ordersSelectionChanged();
 	ui.ordersTableFrame->setVisible(true);
 	ui.noOpenedOrdersLabel->setVisible(false);
@@ -1309,13 +1338,27 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	ui.ordersTable->sortItems(6,Qt::AscendingOrder);
 }
 
-void QtBitcoinTrader::setOrdersTableRowStateByText(int row, QByteArray text)
+void QtBitcoinTrader::setOrdersTableRowStateByText(int row, QString text)
 {
-	if(text=="invalid")setOrdersTableRowState(row,4);
+	if(text==QLatin1String("invalid"))setOrdersTableRowState(row,4);
 	else 
-	if(text.contains("pending"))setOrdersTableRowState(row,1);
+	if(text.contains(QLatin1String("pending")))setOrdersTableRowState(row,1);
 	else
 	setOrdersTableRowState(row,2);
+}
+
+void QtBitcoinTrader::calcOrdersTotalValues()
+{
+	double volumeTotal=0.0;
+	double amountTotal=0.0;
+	for(int n=0;n<ui.ordersTable->rowCount();n++)
+		if(ui.ordersTable->item(n,6)->data(Qt::UserRole).toByteArray()==currencyRequestPair)
+		{
+			volumeTotal+=ui.ordersTable->item(n,3)->data(Qt::UserRole).toDouble();
+			amountTotal+=ui.ordersTable->item(n,5)->data(Qt::UserRole).toDouble();
+		}
+	ui.ordersTotalBTC->setValue(volumeTotal);
+	ui.ordersTotalUSD->setValue(amountTotal);
 }
 
 void QtBitcoinTrader::setOrdersTableRowState(int row, int state)
@@ -1656,8 +1699,7 @@ void QtBitcoinTrader::buyPricePerCoinAsMarketPrice()
 void QtBitcoinTrader::ordersSelectionChanged()
 {
 	ui.ordersCancelAllButton->setEnabled(ui.ordersTable->rowCount());
-	ui.ordersSelectNone->setEnabled(ui.ordersTable->selectedItems().count());
-	ui.ordersCancelSelected->setEnabled(ui.ordersSelectNone->isEnabled());
+	ui.ordersCancelSelected->setEnabled(ui.ordersTable->selectedItems().count());
 }
 
 void QtBitcoinTrader::closeEvent(QCloseEvent *event)

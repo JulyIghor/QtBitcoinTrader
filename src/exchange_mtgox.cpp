@@ -464,8 +464,27 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				QString rezultData;
 				QByteArray currentOrder=getMidData("oid","\"actions\":",&data);
 				while(currentOrder.size())
-				{
-					rezultData.append(getMidData("\":\"","\",\"",&currentOrder)+";"+getMidData(",\"date\":",",",&currentOrder)+";"+getMidData("\"type\":\"","\",\"",&currentOrder)+";"+getMidData("\"status\":\"","\",\"",&currentOrder)+";"+getMidData("\"amount\":{\"value\":\"","\",\"",&currentOrder)+";"+getMidData("\"price\":{\"value\":\"","\",\"",&currentOrder)+";"+currencySignMap->value(getMidData("\"currency\":\"","\",\"",&currentOrder),"$")+";"+currencySignMap->value(getMidData("\"item\":\"","\",\"",&currentOrder),"$")+"\n");
+				{//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign+";"+currencyPair
+					QByteArray pairA=getMidData("\"currency\":\"","\",\"",&currentOrder);
+					QByteArray pairB=getMidData("\"item\":\"","\",\"",&currentOrder);
+					rezultData.append(getMidData("\":\"","\",\"",&currentOrder));
+					rezultData.append(QLatin1String(";"));
+					rezultData.append(getMidData(",\"date\":",",",&currentOrder));
+					rezultData.append(QLatin1String(";"));
+					rezultData.append(getMidData("\"type\":\"","\",\"",&currentOrder));
+					rezultData.append(QLatin1String(";"));
+					rezultData.append(getMidData("\"status\":\"","\",\"",&currentOrder));
+					rezultData.append(QLatin1String(";"));
+					rezultData.append(getMidData("\"amount\":{\"value\":\"","\",\"",&currentOrder));
+					rezultData.append(QLatin1String(";"));
+					rezultData.append(getMidData("\"price\":{\"value\":\"","\",\"",&currentOrder));
+					rezultData.append(QLatin1String(";"));
+					rezultData.append(currencySignMap->value(pairA,"$"));
+					rezultData.append(QLatin1String(";"));
+					rezultData.append(currencySignMap->value(getMidData("\"item\":\"","\",\"",&currentOrder),"$"));
+					rezultData.append(QLatin1String(";"));
+					rezultData.append(pairB+pairA);
+					rezultData.append(QLatin1String("\n"));
 					if(data.size()>currentOrder.size())data.remove(0,currentOrder.size());
 					currentOrder=getMidData("oid","\"actions\"",&data);
 				}

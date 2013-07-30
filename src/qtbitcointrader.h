@@ -53,6 +53,7 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	void calcOrdersTotalValues();
 	void ruleTotalToBuyValueChanged();
 	void ruleAmountToReceiveValueChanged();
 	void ruleTotalToBuyBSValueChanged();
@@ -124,7 +125,7 @@ private:
 	void setRuleStateBuGuid(quint64 guid, int state);
 	void setRulesTableRowState(int row, int state);
 	void setOrdersTableRowState(int row, int state);
-	void setOrdersTableRowStateByText(int row, QByteArray text);
+	void setOrdersTableRowStateByText(int row, QString text);
 
 	double floatFee;
 	double floatFeeDec;
@@ -143,7 +144,7 @@ private:
 	bool buyLockTotalSpend;
 
 	QMap<QByteArray,QString> oidMap;
-	void insertIntoTable(QByteArray,QString);
+	void insertIntoOrdersTable(QByteArray,QString);
 	bool profitSellThanBuyUnlocked;
 	bool profitBuyThanSellUnlocked;
 	bool profitBuyThanSellChangedUnlocked;

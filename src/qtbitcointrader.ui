@@ -1519,55 +1519,16 @@
         <property name="spacing">
          <number>10</number>
         </property>
-        <item row="1" column="0" colspan="3">
-         <widget class="QLabel" name="noOpenedOrdersLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>20</pointsize>
-           </font>
-          </property>
-          <property name="accessibleName">
-           <string>TR00057</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">border: 1px solid gray; background: white; color: gray</string>
-          </property>
-          <property name="text">
-           <string>No Opened Orders</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-          <property name="margin">
-           <number>4</number>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0" colspan="3">
          <widget class="QWidget" name="ordersTableFrame" native="true">
           <layout class="QGridLayout" name="gridLayout_15">
-           <property name="verticalSpacing">
-            <number>4</number>
-           </property>
            <property name="margin">
             <number>4</number>
            </property>
-           <item row="0" column="0" colspan="3">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="0">
             <widget class="QTableWidget" name="ordersTable">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
@@ -1672,94 +1633,303 @@
              </column>
             </widget>
            </item>
-           <item row="1" column="0" colspan="3">
-            <widget class="QWidget" name="ordersControls" native="true">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>10</height>
-              </size>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_9">
-              <property name="margin">
-               <number>0</number>
-              </property>
-              <item row="0" column="2">
-               <widget class="QPushButton" name="ordersCancelSelected">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+           <item row="1" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout_22">
+             <item>
+              <widget class="QLabel" name="label_33">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="accessibleName">
+                <string>TOTAL</string>
+               </property>
+               <property name="text">
+                <string>Total:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="btcLabel3_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="accessibleDescription">
+                <string>BTC_ICON</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #996515</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="ordersTotalBTC">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>90</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="accessibleName">
+                <string>BTC</string>
+               </property>
+               <property name="accessibleDescription">
+                <string>CAN_BE_ZERO</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::NoButtons</enum>
+               </property>
+               <property name="specialValueText">
+                <string/>
+               </property>
+               <property name="prefix">
+                <string/>
+               </property>
+               <property name="decimals">
+                <number>8</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999999999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="usdLabel1_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="accessibleDescription">
+                <string>USD_ICON</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: darkgreen</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="ordersTotalUSD">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>90</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="accessibleName">
+                <string>USD</string>
+               </property>
+               <property name="accessibleDescription">
+                <string>CAN_BE_ZERO</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::NoButtons</enum>
+               </property>
+               <property name="prefix">
+                <string/>
+               </property>
+               <property name="decimals">
+                <number>5</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>999999999.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_31">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="accessibleName">
+                <string>REMOVE_ORDERS</string>
+               </property>
+               <property name="text">
+                <string>Cancel:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QWidget" name="ordersControls" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>10</height>
+                </size>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_9">
+                <property name="margin">
+                 <number>0</number>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>60</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="accessibleName">
-                 <string>TR00021</string>
-                </property>
-                <property name="text">
-                 <string>Cancel Selected</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QPushButton" name="ordersCancelAllButton">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>60</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="accessibleName">
-                 <string>TR00020</string>
-                </property>
-                <property name="text">
-                 <string>Cancel All</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QPushButton" name="ordersSelectNone">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>60</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="accessibleName">
-                 <string>TR00019</string>
-                </property>
-                <property name="text">
-                 <string>Select None</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="ordersCancelSelected">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>60</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="accessibleName">
+                   <string>CANCEL_SELECTED_ORDERS</string>
+                  </property>
+                  <property name="text">
+                   <string>Selected</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QPushButton" name="ordersCancelAllButton">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>60</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="accessibleName">
+                   <string>CANCEL_ALL_ORDERS</string>
+                  </property>
+                  <property name="text">
+                   <string>All</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
+         <widget class="QLabel" name="noOpenedOrdersLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>20</pointsize>
+           </font>
+          </property>
+          <property name="accessibleName">
+           <string>TR00057</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">border: 1px solid gray; background: white; color: gray</string>
+          </property>
+          <property name="text">
+           <string>No Opened Orders</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="margin">
+           <number>4</number>
+          </property>
          </widget>
         </item>
        </layout>
@@ -1774,7 +1944,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
@@ -2243,7 +2413,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QPushButton" name="ruleAddButton">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -2265,7 +2435,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QPushButton" name="ruleEditButton">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -2285,9 +2455,28 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label_32">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="accessibleName">
+              <string>REMOVE_ORDERS</string>
+             </property>
+             <property name="text">
+              <string>Cancel:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="ruleRemoveAll">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -2299,17 +2488,17 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="accessibleName">
-              <string>RULE_REMOVE_ALL</string>
+              <string>CANCEL_ALL_ORDERS</string>
              </property>
              <property name="text">
-              <string>Remove All</string>
+              <string>All</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="ruleRemove">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -2321,10 +2510,10 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="accessibleName">
-              <string>RULE_REMOVE_SELECTED</string>
+              <string>CANCEL_SELECTED_ORDERS</string>
              </property>
              <property name="text">
-              <string>Remove Selected</string>
+              <string>Selected</string>
              </property>
             </widget>
            </item>
@@ -5276,22 +5465,6 @@ p, li { white-space: pre-wrap; }
  </resources>
  <connections>
   <connection>
-   <sender>ordersCancelAllButton</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>ordersCancelAll()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>361</x>
-     <y>346</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1088</x>
-     <y>339</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>buyTotalBtc</sender>
    <signal>valueChanged(double)</signal>
    <receiver>QtBitcoinTraderClass</receiver>
@@ -5416,22 +5589,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>202</x>
      <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ordersCancelSelected</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>ordersCancelSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>533</x>
-     <y>346</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>0</x>
-     <y>549</y>
     </hint>
    </hints>
   </connection>
@@ -5618,8 +5775,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleAddButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>697</x>
-     <y>489</y>
+     <x>626</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5634,8 +5791,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemoveAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>970</x>
-     <y>489</y>
+     <x>900</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5650,8 +5807,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1107</x>
-     <y>489</y>
+     <x>1036</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6066,8 +6223,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleEditButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>834</x>
-     <y>489</y>
+     <x>763</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6082,8 +6239,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleUp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>617</x>
-     <y>152</y>
+     <x>600</x>
+     <y>131</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6098,8 +6255,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleDown()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>646</x>
-     <y>152</y>
+     <x>629</x>
+     <y>131</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6114,8 +6271,8 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>588</x>
-     <y>152</y>
+     <x>571</x>
+     <y>131</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6450,8 +6607,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachRules()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1108</x>
-     <y>153</y>
+     <x>1039</x>
+     <y>131</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6466,8 +6623,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachTrades()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1108</x>
-     <y>153</y>
+     <x>1041</x>
+     <y>133</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6483,7 +6640,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>1098</x>
-     <y>480</y>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6498,8 +6655,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachCharts()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1107</x>
-     <y>154</y>
+     <x>1066</x>
+     <y>132</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6578,8 +6735,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabRulesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1027</x>
-     <y>150</y>
+     <x>953</x>
+     <y>134</y>
     </hint>
     <hint type="destinationlabel">
      <x>1192</x>
@@ -6594,8 +6751,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabTradesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1027</x>
-     <y>150</y>
+     <x>955</x>
+     <y>136</y>
     </hint>
     <hint type="destinationlabel">
      <x>1233</x>
@@ -6610,28 +6767,12 @@ p, li { white-space: pre-wrap; }
    <slot>tabChartsOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1026</x>
-     <y>151</y>
+     <x>980</x>
+     <y>135</y>
     </hint>
     <hint type="destinationlabel">
      <x>1236</x>
      <y>170</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ordersSelectNone</sender>
-   <signal>clicked()</signal>
-   <receiver>ordersTable</receiver>
-   <slot>clearSelection()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>187</x>
-     <y>328</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>202</x>
-     <y>309</y>
     </hint>
    </hints>
   </connection>
@@ -6642,8 +6783,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabDepthOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>977</x>
-     <y>145</y>
+     <x>961</x>
+     <y>135</y>
     </hint>
     <hint type="destinationlabel">
      <x>1265</x>
@@ -6658,8 +6799,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachDepth()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1095</x>
-     <y>145</y>
+     <x>1041</x>
+     <y>132</y>
     </hint>
     <hint type="destinationlabel">
      <x>1199</x>
@@ -6680,6 +6821,38 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>1158</x>
      <y>562</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ordersCancelAllButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QtBitcoinTraderClass</receiver>
+   <slot>ordersCancelAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>346</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1088</x>
+     <y>339</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ordersCancelSelected</sender>
+   <signal>clicked()</signal>
+   <receiver>QtBitcoinTraderClass</receiver>
+   <slot>ordersCancelSelected()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>533</x>
+     <y>346</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>0</x>
+     <y>549</y>
     </hint>
    </hints>
   </connection>

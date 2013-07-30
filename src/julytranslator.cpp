@@ -110,6 +110,10 @@ void JulyTranslator::loadMapFromUi(QWidget *par)
 	foreach(QPushButton* curButton, par->findChildren<QPushButton*>())
 		if(!curButton->accessibleName().isEmpty())
 			buttonMap[curButton->accessibleName()]=curButton->text().replace("\n","<br>").replace("\r","");
+
+	foreach(QToolButton* curButton, par->findChildren<QToolButton*>())
+		if(!curButton->accessibleName().isEmpty())
+			buttonMap[curButton->accessibleName()]=curButton->text().replace("\n","<br>").replace("\r","");
 		
 	foreach(QCheckBox* curCheckBox, par->findChildren<QCheckBox*>())
 		if(!curCheckBox->accessibleName().isEmpty())
@@ -135,6 +139,10 @@ void JulyTranslator::loadMapFromUi(QWidget *par)
 void JulyTranslator::translateUi(QWidget *par)
 {
 	foreach(QPushButton* curButton, par->findChildren<QPushButton*>())
+		if(!curButton->accessibleName().isEmpty())
+			curButton->setText(translateButton(curButton->accessibleName(),curButton->text()));
+
+	foreach(QToolButton* curButton, par->findChildren<QToolButton*>())
 		if(!curButton->accessibleName().isEmpty())
 			curButton->setText(translateButton(curButton->accessibleName(),curButton->text()));
 
