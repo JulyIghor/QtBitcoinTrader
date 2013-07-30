@@ -279,14 +279,16 @@ public slots:
 	void buyPricePerCoinChanged(double);
 	void buyBtcToBuyAllIn();
 	void buyBtcToBuyHalfIn();
-	void buyPricePerCoinAsMarketPrice();
+	void on_buyPriceAsMarketPrice_clicked();
+	void on_buyPriceAsMarketLastPrice_clicked();
 	void buyBitcoinsButton();
 	void buyTotalToSpendInUsdChanged(double);
 
 	void sellBitcoinButton();
 	void sellAmountToReceiveChanged(double);
 	void sellPricePerCoinInUsdChanged(double);
-	void sellPricePerCoinAsMarketPrice();
+	void on_sellPricePerCoinAsMarketPrice_clicked();
+	void on_sellPricePerCoinAsMarketLastPrice_clicked();
 	void sellTotalBtcToSellAllIn();
 	void sellTotalBtcToSellHalfIn();
 	void sellTotalBtcToSellChanged(double);

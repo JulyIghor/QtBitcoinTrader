@@ -898,10 +898,24 @@ void QtBitcoinTrader::currencyChanged(int val)
 	calcOrdersTotalValues();
 }
 
+void QtBitcoinTrader::calcOrdersTotalValues()
+{
+	double volumeTotal=0.0;
+	double amountTotal=0.0;
+	for(int n=0;n<ui.ordersTable->rowCount();n++)
+	{
+		QString currentOrderPair=ui.ordersTable->item(n,6)->data(Qt::UserRole).toString();
+		if(currentOrderPair.startsWith(currencyAStr))volumeTotal+=ui.ordersTable->item(n,3)->data(Qt::UserRole).toDouble();
+		if(currentOrderPair.endsWith(currencyBStr))amountTotal+=ui.ordersTable->item(n,5)->data(Qt::UserRole).toDouble();
+	}
+	ui.ordersTotalBTC->setValue(volumeTotal);
+	ui.ordersTotalUSD->setValue(amountTotal);
+}
+
 void QtBitcoinTrader::firstTicker()
 {
-	sellPricePerCoinAsMarketPrice();
-	buyPricePerCoinAsMarketPrice();
+	on_sellPricePerCoinAsMarketPrice_clicked();
+	on_buyPriceAsMarketPrice_clicked();
 }
 
 void QtBitcoinTrader::firstAccInfo()
@@ -1347,20 +1361,6 @@ void QtBitcoinTrader::setOrdersTableRowStateByText(int row, QString text)
 	setOrdersTableRowState(row,2);
 }
 
-void QtBitcoinTrader::calcOrdersTotalValues()
-{
-	double volumeTotal=0.0;
-	double amountTotal=0.0;
-	for(int n=0;n<ui.ordersTable->rowCount();n++)
-		if(ui.ordersTable->item(n,6)->data(Qt::UserRole).toByteArray()==currencyRequestPair)
-		{
-			volumeTotal+=ui.ordersTable->item(n,3)->data(Qt::UserRole).toDouble();
-			amountTotal+=ui.ordersTable->item(n,5)->data(Qt::UserRole).toDouble();
-		}
-	ui.ordersTotalBTC->setValue(volumeTotal);
-	ui.ordersTotalUSD->setValue(amountTotal);
-}
-
 void QtBitcoinTrader::setOrdersTableRowState(int row, int state)
 {
 	QColor nColor(255,255,255);
@@ -1431,9 +1431,14 @@ void QtBitcoinTrader::checkValidSellButtons()
 	ui.sellBitcoinsButton->setEnabled(ui.sellTotalBtc->value()>=minTradeVolume&&ui.sellTotalBtc->value()<=ui.accountBTC->value()&&ui.sellTotalBtc->value()>0.0);
 }
 
-void QtBitcoinTrader::sellPricePerCoinAsMarketPrice()
+void QtBitcoinTrader::on_sellPricePerCoinAsMarketPrice_clicked()
 {
 	ui.sellPricePerCoin->setValue(ui.marketSell->value());
+}
+
+void QtBitcoinTrader::on_sellPricePerCoinAsMarketLastPrice_clicked()
+{
+	ui.sellPricePerCoin->setValue(ui.marketLast->value());
 }
 
 void QtBitcoinTrader::sellTotalBtcToSellAllIn()
@@ -1691,9 +1696,14 @@ void QtBitcoinTrader::buyBtcToBuyHalfIn()
 	ui.buyTotalSpend->setValue(ui.accountUSD->value()/2.0);
 }
 
-void QtBitcoinTrader::buyPricePerCoinAsMarketPrice()
+void QtBitcoinTrader::on_buyPriceAsMarketPrice_clicked()
 {
 	ui.buyPricePerCoin->setValue(ui.marketBuy->value());
+}
+
+void QtBitcoinTrader::on_buyPriceAsMarketLastPrice_clicked()
+{
+	ui.buyPricePerCoin->setValue(ui.marketLast->value());
 }
 
 void QtBitcoinTrader::ordersSelectionChanged()

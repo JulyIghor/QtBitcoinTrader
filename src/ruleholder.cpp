@@ -46,7 +46,7 @@ bool RuleHolder::isBuying()
 QString RuleHolder::getDescriptionString()
 {
 		QString priceStr=mainWindow.numFromDouble(ruleCheckPrice);
-		if(rulePriceType==8)priceStr.prepend(currencyASign+" ");
+		if(rulePriceType==8||rulePriceType==10||rulePriceType==12)priceStr.prepend(currencyASign+" ");
 		else priceStr.prepend(currencyBSign+" ");
 
 		if(ruleMoreLessEqual==1)
@@ -60,6 +60,10 @@ QString RuleHolder::getDescriptionString()
 			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_MORE","If orders last sell price goes more than %1").arg(priceStr);
 			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_MORE","If %1 balance goes more than %2").arg(QString(currencyAStr)).arg(priceStr);
 			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_MORE","If %1 balance goes more than %2").arg(QString(currencyBStr)).arg(priceStr);
+			if(rulePriceType==10)return julyTr("IF_TOTAL_TO_BUY_AT_LAST_MORE","If Total to Buy at Last price goes more than %1").arg(priceStr);
+			if(rulePriceType==11)return julyTr("IF_AMOUNT_TO_RECEIVE_AT_LAST_MORE","If Amount to Receive at Last price goes more than %1").arg(priceStr);
+			if(rulePriceType==12)return julyTr("IF_TOTAL_TO_BUY_AT_BUY_PRICE_MORE","If Total to Buy at Buy price goes more than %1").arg(priceStr);
+			if(rulePriceType==13)return julyTr("IF_AMOUNT_TO_RECEIVE_AT_SELL_PRICE_MORE","If Amount to Receive at Sell price goes more than %1").arg(priceStr);
 		}
 		if(ruleMoreLessEqual==-1)
 		{
@@ -72,6 +76,10 @@ QString RuleHolder::getDescriptionString()
 			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_LESS","If orders last sell price goes less than %1").arg(priceStr);
 			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_LESS","If %1 balance goes less than %2").arg(QString(currencyAStr)).arg(priceStr);
 			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_LESS","If %1 balance goes less than %2").arg(QString(currencyBStr)).arg(priceStr);
+			if(rulePriceType==10)return julyTr("IF_TOTAL_TO_BUY_AT_LAST_LESS","If Total to Buy at Last price goes less than %1").arg(priceStr);
+			if(rulePriceType==11)return julyTr("IF_AMOUNT_TO_RECEIVE_AT_LAST_LESS","If Amount to Receive at Last price goes less than %1").arg(priceStr);
+			if(rulePriceType==12)return julyTr("IF_TOTAL_TO_BUY_AT_BUY_PRICE_LESS","If Total to Buy at Buy price goes less than %1").arg(priceStr);
+			if(rulePriceType==13)return julyTr("IF_AMOUNT_TO_RECEIVE_AT_SELL_PRICE_LESS","If Amount to Receive at Sell price goes less than %1").arg(priceStr);
 		}
 		if(ruleMoreLessEqual==0)
 		{

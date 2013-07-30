@@ -3550,34 +3550,6 @@ p, li { white-space: pre-wrap; }
           </item>
          </layout>
         </item>
-        <item row="1" column="2" colspan="2">
-         <widget class="QPushButton" name="buyPriceAsMarketPrice">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="accessibleName">
-           <string>TR00037</string>
-          </property>
-          <property name="text">
-           <string>As Market Price</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label_12">
           <property name="sizePolicy">
@@ -4022,6 +3994,62 @@ p, li { white-space: pre-wrap; }
           </item>
          </layout>
         </item>
+        <item row="1" column="2">
+         <widget class="QPushButton" name="buyPriceAsMarketPrice">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="accessibleName">
+           <string>TR00037</string>
+          </property>
+          <property name="text">
+           <string>As Buy Price</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="buyPriceAsMarketLastPrice">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="accessibleName">
+           <string/>
+          </property>
+          <property name="text">
+           <string>As Last Price</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -4436,34 +4464,6 @@ p, li { white-space: pre-wrap; }
           </item>
          </layout>
         </item>
-        <item row="1" column="2" colspan="2">
-         <widget class="QPushButton" name="sellPricePerCoinAsMarketPrice">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="accessibleName">
-           <string>TR00037</string>
-          </property>
-          <property name="text">
-           <string>As Market Price</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <property name="spacing">
@@ -4856,6 +4856,62 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QPushButton" name="sellPricePerCoinAsMarketPrice">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="accessibleName">
+           <string>TR00037</string>
+          </property>
+          <property name="text">
+           <string>As Buy Price</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="sellPricePerCoinAsMarketLastPrice">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="accessibleName">
+           <string/>
+          </property>
+          <property name="text">
+           <string>As Last Price</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -5529,22 +5585,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>buyPriceAsMarketPrice</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>buyPricePerCoinAsMarketPrice()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>408</x>
-     <y>586</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>0</x>
-     <y>583</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>buyTotalSpend</sender>
    <signal>valueChanged(double)</signal>
    <receiver>QtBitcoinTraderClass</receiver>
@@ -5649,22 +5689,6 @@ p, li { white-space: pre-wrap; }
     <hint type="sourcelabel">
      <x>836</x>
      <y>666</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1088</x>
-     <y>583</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sellPricePerCoinAsMarketPrice</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>sellPricePerCoinAsMarketPrice()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>836</x>
-     <y>586</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -5791,8 +5815,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemoveAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>900</x>
-     <y>467</y>
+     <x>1026</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6223,8 +6247,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleEditButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>763</x>
-     <y>467</y>
+     <x>722</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6831,8 +6855,8 @@ p, li { white-space: pre-wrap; }
    <slot>ordersCancelAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>276</x>
-     <y>346</y>
+     <x>451</x>
+     <y>349</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6847,8 +6871,8 @@ p, li { white-space: pre-wrap; }
    <slot>ordersCancelSelected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>533</x>
-     <y>346</y>
+     <x>532</x>
+     <y>349</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>

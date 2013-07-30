@@ -340,8 +340,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				QByteArray tradeType=getMidData("type\":\"","\",\"",&currentOrder);
 				if(tradeType=="buy")tradeType="bid";
 				else if(tradeType=="sell")tradeType="ask";
-				QByteArray currencyPair_=getMidData("pair\":\"","\",\"",&currentOrder);
-				QStringList currencyPair=QString(currencyPair_).toUpper().split("_");
+				QStringList currencyPair=QString(getMidData("pair\":\"","\",\"",&currentOrder)).toUpper().split("_");
 				if(currencyPair.count()!=2)continue;
 				rezultData.append(getMidData("{","\":{",&currentOrder)+";");
 				rezultData.append(getMidData("timestamp_created\":",",\"",&currentOrder)+";");
@@ -351,7 +350,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				rezultData.append(getMidData("rate\":",",\"",&currentOrder)+";");
 				rezultData.append(currencySignMap->value(currencyPair.last().toAscii(),"$")+";");
 				rezultData.append(currencySignMap->value(currencyPair.first().toAscii(),"$")+";");
-				rezultData.append(currencyPair_+"\n");
+				rezultData.append(currencyPair.join(QLatin1String("")).toAscii()+"\n");
 			}
 			emit ordersChanged(rezultData);
 		}
