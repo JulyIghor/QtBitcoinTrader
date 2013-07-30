@@ -1578,8 +1578,11 @@
              <property name="editTriggers">
               <set>QAbstractItemView::NoEditTriggers</set>
              </property>
-             <property name="alternatingRowColors">
+             <property name="showDropIndicator" stdset="0">
               <bool>false</bool>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
              </property>
              <property name="selectionMode">
               <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -1596,13 +1599,31 @@
              <property name="horizontalScrollMode">
               <enum>QAbstractItemView::ScrollPerPixel</enum>
              </property>
+             <property name="showGrid">
+              <bool>true</bool>
+             </property>
              <property name="gridStyle">
               <enum>Qt::SolidLine</enum>
              </property>
-             <attribute name="horizontalHeaderCascadingSectionResizes">
+             <property name="sortingEnabled">
               <bool>true</bool>
+             </property>
+             <property name="cornerButtonEnabled">
+              <bool>false</bool>
+             </property>
+             <attribute name="horizontalHeaderCascadingSectionResizes">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="horizontalHeaderDefaultSectionSize">
+              <number>100</number>
+             </attribute>
+             <attribute name="horizontalHeaderHighlightSections">
+              <bool>false</bool>
              </attribute>
              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+              <bool>true</bool>
+             </attribute>
+             <attribute name="verticalHeaderVisible">
               <bool>false</bool>
              </attribute>
              <attribute name="verticalHeaderCascadingSectionResizes">
@@ -1610,6 +1631,9 @@
              </attribute>
              <attribute name="verticalHeaderDefaultSectionSize">
               <number>26</number>
+             </attribute>
+             <attribute name="verticalHeaderHighlightSections">
+              <bool>false</bool>
              </attribute>
              <column>
               <property name="text">
@@ -2139,8 +2163,14 @@ p, li { white-space: pre-wrap; }
            <property name="gridStyle">
             <enum>Qt::SolidLine</enum>
            </property>
+           <attribute name="horizontalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>26</number>
+           </attribute>
+           <attribute name="verticalHeaderHighlightSections">
+            <bool>false</bool>
            </attribute>
            <column>
             <property name="text">
@@ -2758,11 +2788,17 @@ p, li { white-space: pre-wrap; }
            <property name="wordWrap">
             <bool>false</bool>
            </property>
+           <attribute name="horizontalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>26</number>
+           </attribute>
+           <attribute name="verticalHeaderHighlightSections">
+            <bool>false</bool>
            </attribute>
            <column>
             <property name="text">
@@ -2815,11 +2851,17 @@ p, li { white-space: pre-wrap; }
            <property name="wordWrap">
             <bool>false</bool>
            </property>
+           <attribute name="horizontalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>26</number>
+           </attribute>
+           <attribute name="verticalHeaderHighlightSections">
+            <bool>false</bool>
            </attribute>
            <column>
             <property name="text">

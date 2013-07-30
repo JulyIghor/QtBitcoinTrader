@@ -110,6 +110,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.ordersTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
 	ui.ordersTable->horizontalHeader()->setResizeMode(4,QHeaderView::ResizeToContents);
 	ui.ordersTable->horizontalHeader()->setResizeMode(5,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->hideSection(6);
 
 	ui.rulesNoMessage->setVisible(true);
 	ui.rulesTable->setVisible(false);
@@ -1119,7 +1120,7 @@ void QtBitcoinTrader::orderCanceled(QByteArray oid)
 		{
 			ui.ordersTable->item(n,2)->setData(Qt::UserRole,"canceled");
 			ui.ordersTable->item(n,2)->setText(julyTr("ORDER_STATE_CANCELED","canceled"));postWorkAtTableItem(ui.ordersTable->item(n,2));
-			setOrdersTableRowState(n,0);
+			setOrdersTableRowState(n,3);
 			break;
 		}
 }
@@ -1285,6 +1286,7 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 {
 	QStringList dataList=data.split(";");
 	if(dataList.count()!=7)return;
+	ui.ordersTable->setSortingEnabled(false);
 	int curRow=ui.ordersTable->rowCount();
 	QByteArray orderSign=dataList.at(5).toAscii();
 	ui.ordersTable->setRowCount(curRow+1);
@@ -1303,6 +1305,7 @@ void QtBitcoinTrader::insertIntoTable(QByteArray oid, QString data)
 	ordersSelectionChanged();
 	ui.ordersTableFrame->setVisible(true);
 	ui.noOpenedOrdersLabel->setVisible(false);
+	ui.ordersTable->setSortingEnabled(true);
 	ui.ordersTable->sortItems(6,Qt::AscendingOrder);
 }
 
@@ -1322,7 +1325,7 @@ void QtBitcoinTrader::setOrdersTableRowState(int row, int state)
 	{
 		case 0: nColor=Qt::lightGray; break;
 		case 1: nColor.setRgb(255,255,200); break; //Yellow
-		case 2: nColor.setRgb(200,255,200); break; //Green
+		case 2: nColor=Qt::transparent; break; //Green
 		case 3: nColor.setRgb(255,200,200); break; //Red
 		case 4: nColor.setRgb(200,200,255); break; //Blue
 		default: break;
