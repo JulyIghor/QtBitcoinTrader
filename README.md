@@ -15,26 +15,20 @@ Next ToDo:
 ## Download links
 
 * https://sourceforge.net/projects/bitcointrader/
-
 * http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml
-
 * http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml
 
 ## Forums
 
-* https://bitcointalk.org/index.php?topic=201062
-
-* https://bitcointalk.org/index.php?topic=218044
-
+* https://bitcointalk.org/index.php?topic=201062 ENG
+* https://bitcointalk.org/index.php?topic=218044 RUS
 * https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/
 
 ## Social
 
 * http://www.facebook.com/QtBitcoinTrader
-
 * http://twitter.com/QtBitcoinTrader
-
-* http://vk.com/QtBitcoinTrader RU
+* http://vk.com/QtBitcoinTrader RUS
 
 ## Change Log
 
