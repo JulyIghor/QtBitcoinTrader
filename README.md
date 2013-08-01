@@ -14,21 +14,21 @@ Next ToDo:
 
 ## Download links
 
-* https://sourceforge.net/projects/bitcointrader/
-* http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml
-* http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml
+* https://sourceforge.net/projects/bitcointrader/  `Win32/Mac`
+* http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml `Win32`
+* http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml `Mac`
 
 ## Forums
 
-* https://bitcointalk.org/index.php?topic=201062 ENG
-* https://bitcointalk.org/index.php?topic=218044 RUS
+* https://bitcointalk.org/index.php?topic=201062 `ENG`
+* https://bitcointalk.org/index.php?topic=218044 `RUS`
 * https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/
 
 ## Social
 
 * http://www.facebook.com/QtBitcoinTrader
 * http://twitter.com/QtBitcoinTrader
-* http://vk.com/QtBitcoinTrader RUS
+* http://vk.com/QtBitcoinTrader `RUS`
 
 ## Change Log
 
