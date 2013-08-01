@@ -2141,17 +2141,40 @@ void QtBitcoinTrader::checkAndExecuteRule(QList<RuleHolder> *ruleHolder, double 
 				double ruleBtc=(*ruleHolder)[n].getRuleBtc();
 				bool isBuying=(*ruleHolder)[n].isBuying();
 				double priceToExec=(*ruleHolder)[n].getRulePrice();
-				ruleHolder->removeAt(n--);
 
-				setRuleStateBuGuid(ruleGuid,2);
 				if(ruleBtc<0)
 				{
 					if(ruleBtc==-1.0)ruleBtc=ui.accountBTC->value();
 					if(ruleBtc==-2.0)ruleBtc=ui.accountBTC->value()/2.0;
 					if(ruleBtc==-3.0)ruleBtc=ui.buyTotalSpend->value()/ui.buyPricePerCoin->value();
 					if(ruleBtc==-4.0)ruleBtc=ui.buyTotalSpend->value()/ui.buyPricePerCoin->value()/2.0;
-					if(ruleBtc==-5.0){ordersCancelAll();if(ui.ruleBeep->isChecked())beep();continue;}
+					if(ruleBtc==-5.0)
+					{
+						if(ui.ruleConcurrentMode->isChecked())
+						{
+							ordersCancelAll();if(ui.ruleBeep->isChecked())beep();continue;
+						}
+						else
+						{
+							if(ui.ordersTable->rowCount()==0)
+							{
+								if(ui.ruleBeep->isChecked())beep();
+								ruleHolder->removeAt(n--);
+								setRuleStateBuGuid(ruleGuid,2);
+								continue;
+							}
+							else
+							{
+								static QTime ordersCancelTime(1,0,0,0);
+								if(ordersCancelTime.elapsed()>5000)ordersCancelAll();
+								ordersCancelTime.restart();
+								continue;
+							}
+						}
+					}
 				}
+				ruleHolder->removeAt(n--);
+				setRuleStateBuGuid(ruleGuid,2);
 
 				if(priceToExec<0)
 				{
