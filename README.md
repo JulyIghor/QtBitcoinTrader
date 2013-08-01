@@ -1,4 +1,4 @@
-Description
+## Qt Bitcoin Trader
 
 This software helps you open and cancel Mt.Gox orders very fast. Real time data monitoring.
 
@@ -6,37 +6,36 @@ Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
 
 I want to develop this Trader App so that it can be configured for any rule and strategy.
  
-If you want to help me, than donate to 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
+If you want to help me, than donate to `1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc`
 
- Next ToDo:
- 1) Add realtime charts
- 2) Make rules more advanced
+Next ToDo:
+- Add realtime charts
+- Make rules more advanced
 
-Download links
+## Download binaries
 
-https://sourceforge.net/projects/bitcointrader/
+* https://sourceforge.net/projects/bitcointrader/  `Win32`,`Mac`
+* http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml `Win32`
+* http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml `Mac`
+* http://packages.gentoo.org/package/app-office/QtBitcoinTrader `Gentoo`
+* http://packages.altlinux.org/en/Sisyphus/srpms/QtBitcoinTrader `Alt Linux`
 
-http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml
+## Demos
+* http://www.youtube.com/watch?v=C--P258DQkk
 
-http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml
+## Forums
 
-Forums
+* https://bitcointalk.org/index.php?topic=201062 `ENG`
+* https://bitcointalk.org/index.php?topic=218044 `RUS`
+* https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/ `RUS`
 
-https://bitcointalk.org/index.php?topic=201062
+## Social
 
-https://bitcointalk.org/index.php?topic=218044
+* http://www.facebook.com/QtBitcoinTrader
+* http://twitter.com/QtBitcoinTrader
+* http://vk.com/QtBitcoinTrader `RUS`
 
-https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/
-
-Social
-
-http://www.facebook.com/QtBitcoinTrader
-
-http://twitter.com/QtBitcoinTrader
-
-http://vk.com/QtBitcoinTrader
-
-Change Log
+## Change Log
 
 v1.07.01
 - Hotfix. High CPU load fix. Nonce error fix
@@ -181,5 +180,5 @@ v0.8
 - First public release
 
 Created by July IGHOR
-Contact: julyighor@gmail.com
-Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
+Contact: `julyighor@gmail.com`
+Donate: `1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc`
