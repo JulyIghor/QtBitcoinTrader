@@ -17,6 +17,11 @@ Next ToDo:
 * https://sourceforge.net/projects/bitcointrader/  `Win32`,`Mac`
 * http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml `Win32`
 * http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml `Mac`
+* http://packages.gentoo.org/package/app-office/QtBitcoinTrader `Gentoo`
+* http://packages.altlinux.org/en/Sisyphus/srpms/QtBitcoinTrader `Alt Linux`
+
+## Demos
+* http://www.youtube.com/watch?v=C--P258DQkk
 
 ## Forums
 
