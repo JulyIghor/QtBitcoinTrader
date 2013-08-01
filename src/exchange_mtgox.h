@@ -91,7 +91,6 @@ signals:
 	void tickerBuyChanged(double);
 	void tickerVolumeChanged(double);
 
-	void firstAccInfo();
 	void accVolumeChanged(double);
 	void accFeeChanged(double);
 	void accBtcBalanceChanged(double);

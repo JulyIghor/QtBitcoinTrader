@@ -40,7 +40,7 @@
 QtBitcoinTrader::QtBitcoinTrader()
 	: QDialog()
 {
-	softLagTime.restart();
+	depthLagTime.restart();
 	softLagTime.restart();
 	isDataPending=false;
 	depthAsksLastScrollValue=0;
@@ -602,6 +602,7 @@ void QtBitcoinTrader::secondSlot()
 					}
 					depthAsksIncVolume+=ui.depthAsksTable->item(depthCurrentAsksSyncIndex,2)->data(Qt::UserRole).toDouble();
 					ui.depthAsksTable->item(depthCurrentAsksSyncIndex,1)->setText(currencyASign+" "+numFromDouble(depthAsksIncVolume));
+					ui.depthAsksTable->item(depthCurrentAsksSyncIndex,1)->setData(Qt::UserRole,depthAsksIncVolume);
 					depthCurrentAsksSyncIndex++;
 				}
 			}
@@ -630,6 +631,7 @@ void QtBitcoinTrader::secondSlot()
 					}
 					depthBidsIncVolume+=ui.depthBidsTable->item(depthCurrentBidsSyncIndex,1)->data(Qt::UserRole).toDouble();
 					ui.depthBidsTable->item(depthCurrentBidsSyncIndex,2)->setText(currencyASign+" "+numFromDouble(depthBidsIncVolume));
+					ui.depthBidsTable->item(depthCurrentBidsSyncIndex,2)->setData(Qt::UserRole,depthBidsIncVolume);
 					depthCurrentBidsSyncIndex++;
 				}
 			}
@@ -866,6 +868,10 @@ void QtBitcoinTrader::currencyChanged(int val)
 	ui.tableTrades->clearContents();
 	ui.tableTrades->setRowCount(0);
 	ui.tradesVolume5m->setValue(0.0);
+	ui.ruleAmountToReceiveValue->setValue(0.0);
+	ui.ruleTotalToBuyValue->setValue(0.0);
+	ui.ruleAmountToReceiveBSValue->setValue(0.0);
+	ui.ruleTotalToBuyBSValue->setValue(0.0);
 
 	QString curCurrencyName=currencyNamesMap->value(currencyAStr,"BITCOINS");
 
@@ -925,12 +931,6 @@ void QtBitcoinTrader::firstTicker()
 {
 	on_sellPricePerCoinAsMarketPrice_clicked();
 	on_buyPriceAsMarketPrice_clicked();
-}
-
-void QtBitcoinTrader::firstAccInfo()
-{
-	sellTotalBtcToSellAllIn();
-	buyBtcToBuyAllIn();
 }
 
 void QtBitcoinTrader::profitSellThanBuyCalc()
@@ -1511,6 +1511,9 @@ void QtBitcoinTrader::checkAllRules()
 
 void QtBitcoinTrader::sellTotalBtcToSellChanged(double val)
 {
+	if(val==0.0)ui.sellTotalBtc->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
+	else ui.sellTotalBtc->setStyleSheet("");
+
 	profitSellThanBuyCalc();
 	if(sellLockBtcToSell)return;
 	sellLockBtcToSell=true;
@@ -1578,6 +1581,9 @@ void QtBitcoinTrader::sellBitcoinButton()
 
 void QtBitcoinTrader::buyTotalToSpendInUsdChanged(double val)
 {
+	if(val==0.0)ui.buyTotalSpend->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
+	else ui.buyTotalSpend->setStyleSheet("");
+
 	profitBuyThanSellCalc();
 	profitSellThanBuyCalc();
 	if(buyLockTotalSpend)return;
@@ -2366,21 +2372,21 @@ void QtBitcoinTrader::attachCharts()
 	isDetachedCharts=false;
 }
 
-void QtBitcoinTrader::depthSelectSellOrder(int row,int)
+void QtBitcoinTrader::depthSelectSellOrder(int row,int col)
 {
 	if(row<0||ui.depthAsksTable->rowCount()<=row)return;
-
 	double itemPrice=ui.depthAsksTable->item(row,3)->data(Qt::UserRole).toDouble();
 	ui.buyPricePerCoin->setValue(itemPrice);
-	ui.buyTotalBtc->setValue(qMin(ui.accountUSD->value()/itemPrice,ui.depthAsksTable->item(row,2)->data(Qt::UserRole).toDouble()));
+	if(col!=1)col=2;
+	ui.buyTotalBtc->setValue(qMin(ui.accountUSD->value()/itemPrice,ui.depthAsksTable->item(row,col)->data(Qt::UserRole).toDouble()));
 }
 
-void QtBitcoinTrader::depthSelectBuyOrder(int row,int)
+void QtBitcoinTrader::depthSelectBuyOrder(int row,int col)
 {
 	if(row<0||ui.depthBidsTable->rowCount()<=row)return;
-
+	if(col!=2)col=1;
 	ui.sellPricePerCoin->setValue(ui.depthBidsTable->item(row,0)->data(Qt::UserRole).toDouble());
-	ui.sellTotalBtc->setValue(qMin(ui.accountBTC->value(),ui.depthBidsTable->item(row,1)->data(Qt::UserRole).toDouble()));
+	ui.sellTotalBtc->setValue(qMin(ui.accountBTC->value(),ui.depthBidsTable->item(row,col)->data(Qt::UserRole).toDouble()));
 }
 
 void QtBitcoinTrader::aboutTranslationButton()
@@ -2560,11 +2566,16 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 
 		QTableWidgetItem *volumeItem=new QTableWidgetItem(currencyASign+" "+numFromDouble(volume));
 		volumeItem->setData(Qt::UserRole,volume);
-		if(volume>999)volumeItem->setTextColor(Qt::red);
-		else if(volume>99)volumeItem->setTextColor(Qt::blue);
+
+		if(volume<1.0)volumeItem->setTextColor(QColor(0,0,0,155+volume*100.0));
+		else if(volume<100.0)volumeItem->setTextColor(Qt::black);
+		else if(volume<1000.0)volumeItem->setTextColor(Qt::blue);
+		else volumeItem->setTextColor(Qt::red);
+		
 		//volumeItem->setTextColor(btcColor);
 
-		QTableWidgetItem *sizeItem=new QTableWidgetItem();
+		QTableWidgetItem *sizeItem=new QTableWidgetItem(volumeItem->text());
+		sizeItem->setData(Qt::UserRole,volume);
 		//sizeItem->setTextColor(btcColor);
 
 		if(isAsk)
@@ -2613,12 +2624,16 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 			if(currentPriceItem->data(Qt::UserRole).toDouble()==price)
 			{
 				currentVolumeItem->setText(currencyASign+" "+numFromDouble(volume));
-				if(volume>999)currentVolumeItem->setTextColor(Qt::red);
-				else if(volume>99)currentVolumeItem->setTextColor(Qt::blue);
-				else currentVolumeItem->setTextColor(Qt::black);
+
+				if(volume<1.0)currentVolumeItem->setTextColor(QColor(0,0,0,155+volume*100.0));
+				else if(volume<100.0)currentVolumeItem->setTextColor(Qt::black);
+				else if(volume<1000.0)currentVolumeItem->setTextColor(Qt::blue);
+				else currentVolumeItem->setTextColor(Qt::red);
 
 				currentVolumeItem->setData(Qt::UserRole,volume);
-				currentSizeItem->setText(currencyBSign+" "+numFromDouble(volume*price));
+				double itemSize=volume*price;
+				currentSizeItem->setText(currencyBSign+" "+numFromDouble(itemSize));
+				currentSizeItem->setData(Qt::UserRole,itemSize);
 				(*depthMap)[price]=volume;
 				break;
 			}

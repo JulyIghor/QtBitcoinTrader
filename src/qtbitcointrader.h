@@ -217,7 +217,6 @@ public slots:
 	void orderCanceled(QByteArray);
 	void ordersIsEmpty();
 	void firstTicker();
-	void firstAccInfo();
 
 	void fixWindowMinimumSize();
 	void ruleUp();

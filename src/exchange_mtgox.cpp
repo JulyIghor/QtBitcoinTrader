@@ -53,7 +53,6 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 
 	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
 	connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));
-	connect(this,SIGNAL(firstAccInfo()),mainClass,SLOT(firstAccInfo()));
 	connect(this,SIGNAL(apiLagChanged(double)),mainClass->ui.lagValue,SLOT(setValue(double)));
 	connect(this,SIGNAL(accVolumeChanged(double)),mainClass->ui.accountVolume,SLOT(setValue(double)));
 	connect(this,SIGNAL(accFeeChanged(double)),mainClass->ui.accountFee,SLOT(setValue(double)));
@@ -445,7 +444,6 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					{
 						bool isRightsGood=rights.contains("get_info")&&rights.contains("trade");
 						if(!isRightsGood)emit showErrorMessage("I:>invalid_rights");
-						emit firstAccInfo();
 						isFirstAccInfo=false;
 					}
 				}
