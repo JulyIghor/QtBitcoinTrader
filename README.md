@@ -12,9 +12,9 @@ Next ToDo:
 - Add realtime charts
 - Make rules more advanced
 
-## Download links
+## Download binaries
 
-* https://sourceforge.net/projects/bitcointrader/  `Win32/Mac`
+* https://sourceforge.net/projects/bitcointrader/  `Win32`,`Mac`
 * http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml `Win32`
 * http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml `Mac`
 
@@ -175,5 +175,5 @@ v0.8
 - First public release
 
 Created by July IGHOR
-Contact: julyighor@gmail.com
-Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
+Contact: `julyighor@gmail.com`
+Donate: `1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc`
