@@ -42,10 +42,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 {
 	softLagTime.restart();
 	softLagTime.restart();
-	ruleTotalToBuyValue=0.0;
-	ruleAmountToReceiveValue=0.0;
-	ruleTotalToBuyBSValue=0.0;
-	ruleAmountToReceiveBSValue=0.0;
 	isDataPending=false;
 	depthAsksLastScrollValue=0;
 	depthBidsLastScrollValue=0;
@@ -174,12 +170,17 @@ QtBitcoinTrader::QtBitcoinTrader()
 	new JulyLightChanges(ui.ordersLastBuyPrice);
 	new JulyLightChanges(ui.tradesVolume5m);
 
+	new JulyLightChanges(ui.ruleTotalToBuyValue);
+	new JulyLightChanges(ui.ruleAmountToReceiveValue);
+	new JulyLightChanges(ui.ruleTotalToBuyBSValue);
+	new JulyLightChanges(ui.ruleAmountToReceiveBSValue);
+
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
 	QSettings settingsMain(appDataDir+"/Settings.set",QSettings::IniFormat);
 	checkForUpdates=settingsMain.value("CheckForUpdates",true).toBool();
 
-	int defTextHeight=QFontMetrics(font()).boundingRect("0123456789").height();
+	int defTextHeight=fontMetrics_->boundingRect("0123456789").height();
 	defaultSectionSize=settingsMain.value("RowHeight",defTextHeight*1.6).toInt();
 	if(defaultSectionSize<defTextHeight)defaultSectionSize=defTextHeight;
 	settingsMain.setValue("RowHeight",defaultSectionSize);
@@ -242,6 +243,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tabLastTrades->installEventFilter(this);
 	ui.tabCharts->installEventFilter(this);
 	ui.tabDepth->installEventFilter(this);
+	ui.balanceTotalWidget->installEventFilter(this);
 
 	exchangeId=iniSettings->value("ExchangeId",0).toInt();
 
@@ -760,24 +762,29 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
 {
 	foreach(QPushButton* pushButtons, par->findChildren<QPushButton*>())
 		if(!pushButtons->text().isEmpty())
-			pushButtons->setMinimumWidth(qMin(pushButtons->maximumWidth(),QFontMetrics(pushButtons->font()).width(pushButtons->text())+10));
+			pushButtons->setMinimumWidth(qMin(pushButtons->maximumWidth(),textWidth(pushButtons->text())+10));
 
 	foreach(QToolButton* toolButtons, par->findChildren<QToolButton*>())
 		if(!toolButtons->text().isEmpty())
-			toolButtons->setMinimumWidth(qMin(toolButtons->maximumWidth(),QFontMetrics(toolButtons->font()).width(toolButtons->text())+10));
+			toolButtons->setMinimumWidth(qMin(toolButtons->maximumWidth(),textWidth(toolButtons->text())+10));
 
 	foreach(QCheckBox* checkBoxes, par->findChildren<QCheckBox*>())
-		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),QFontMetrics(checkBoxes->font()).width(checkBoxes->text())+20));
+		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),textWidth(checkBoxes->text())+20));
 
 	foreach(QLabel* labels, par->findChildren<QLabel*>())
 		if(labels->text().length()&&labels->text().at(0)!='<')
-			labels->setMinimumWidth(qMin(labels->maximumWidth(),QFontMetrics(labels->font()).width(labels->text())));
+			labels->setMinimumWidth(qMin(labels->maximumWidth(),textWidth(labels->text())));
+
+	fixDecimals(this);
 
 	foreach(QGroupBox* groupBox, par->findChildren<QGroupBox*>())
 		if(groupBox->maximumWidth()>1000)
-			groupBox->setMinimumWidth(qMax(groupBox->minimumSizeHint().width(),QFontMetrics(groupBox->font()).width(groupBox->title())+20));
+		{
+			int minWidth=qMax(groupBox->minimumSizeHint().width(),textWidth(groupBox->title())+20);
+			if(groupBox->accessibleDescription()=="FIXED")groupBox->setFixedWidth(minWidth);
+			else groupBox->setMinimumWidth(minWidth);
+		}
 
-	fixDecimals(this);
 
 	QSize minSizeHint=par->minimumSizeHint();
 	if(isValidSize(&minSizeHint))
@@ -813,7 +820,7 @@ void QtBitcoinTrader::loginChanged(QString text)
 {
 	if(text==" ")text=profileName;
 	ui.accountLoginLabel->setText(text);
-	ui.accountLoginLabel->setMinimumWidth(QFontMetrics(ui.accountLoginLabel->font()).width(text)+20);
+	ui.accountLoginLabel->setMinimumWidth(textWidth(text)+20);
 	fixWindowMinimumSize();
 }
 
@@ -2009,10 +2016,10 @@ void QtBitcoinTrader::ruleTotalToBuyValueChanged()
 {
 	if(ui.marketLast->value()==0.0)return;
 	double newValue=ui.accountUSD->value()/ui.marketLast->value()*floatFeeDec;
-	if(newValue!=ruleTotalToBuyValue)
+	if(newValue!=ui.ruleTotalToBuyValue->value())
 	{
-		ruleTotalToBuyValue=newValue;
-		checkAndExecuteRule(&rulesTotalToBuy,ruleTotalToBuyValue);
+		ui.ruleTotalToBuyValue->setValue(newValue);
+		checkAndExecuteRule(&rulesTotalToBuy,ui.ruleTotalToBuyValue->value());
 	}
 }
 
@@ -2020,10 +2027,10 @@ void QtBitcoinTrader::ruleAmountToReceiveValueChanged()
 {
 	if(ui.marketLast->value()==0.0)return;
 	double newValue=ui.accountBTC->value()*ui.marketLast->value()*floatFeeDec;
-	if(newValue!=ruleAmountToReceiveValue)
+	if(newValue!=ui.ruleAmountToReceiveValue->value())
 	{
-		ruleAmountToReceiveValue=newValue;
-		checkAndExecuteRule(&rulesAmountToReceive,ruleAmountToReceiveValue);
+		ui.ruleAmountToReceiveValue->setValue(newValue);
+		checkAndExecuteRule(&rulesAmountToReceive,ui.ruleAmountToReceiveValue->value());
 	}
 }
 
@@ -2031,10 +2038,10 @@ void QtBitcoinTrader::ruleTotalToBuyBSValueChanged()
 {
 	if(ui.marketBuy->value()==0.0)return;
 	double newValue=ui.accountUSD->value()/ui.marketBuy->value()*floatFeeDec;
-	if(newValue!=ruleTotalToBuyValue)
+	if(newValue!=ui.ruleTotalToBuyValue->value())
 	{
-		ruleTotalToBuyBSValue=newValue;
-		checkAndExecuteRule(&rulesTotalToBuyBS,ruleTotalToBuyBSValue);
+		ui.ruleTotalToBuyBSValue->setValue(newValue);
+		checkAndExecuteRule(&rulesTotalToBuyBS,ui.ruleTotalToBuyBSValue->value());
 	}
 }
 
@@ -2042,10 +2049,10 @@ void QtBitcoinTrader::ruleAmountToReceiveBSValueChanged()
 {
 	if(ui.marketSell->value()==0.0)return;
 	double newValue=ui.accountBTC->value()*ui.marketSell->value()*floatFeeDec;
-	if(newValue!=ruleAmountToReceiveBSValue)
+	if(newValue!=ui.ruleAmountToReceiveBSValue->value())
 	{
-		ruleAmountToReceiveBSValue=newValue;
-		checkAndExecuteRule(&rulesAmountToReceiveBS,ruleAmountToReceiveBSValue);
+		ui.ruleAmountToReceiveBSValue->setValue(newValue);
+		checkAndExecuteRule(&rulesAmountToReceiveBS,ui.ruleAmountToReceiveBSValue->value());
 	}
 }
 
@@ -2300,37 +2307,39 @@ void QtBitcoinTrader::attachRules()
 	isDetachedRules=false;
 }
 
-void QtBitcoinTrader::attachTrades()
-{
-	saveDetachedWindowsSettings(true);
-	ui.tabTradesOnTop->setVisible(false);
-	ui.detachTrades->setVisible(true);
-
-	int newTabPos=2;
-	if(isDetachedLog&&isDetachedRules)newTabPos=0;
-	else if(isDetachedLog||isDetachedRules)newTabPos=1;
-
-	ui.tabWidget->insertTab(newTabPos,ui.tabLastTrades,ui.tabLastTrades->accessibleName());
-	checkIsTabWidgetVisible();
-	ui.tabWidget->setCurrentWidget(ui.tabLastTrades);
-	isDetachedTrades=false;
-}
-
 void QtBitcoinTrader::attachDepth()
 {
 	saveDetachedWindowsSettings(true);
 	ui.tabDepthOnTop->setVisible(false);
 	ui.detachDepth->setVisible(true);
-	int newTabPos=3;
-	if(isDetachedLog&&isDetachedRules&&isDetachedTrades)newTabPos=0;
-	else if(isDetachedLog&&isDetachedRules||isDetachedRules&&isDetachedTrades||isDetachedLog&&isDetachedTrades)newTabPos=1;
-	else if(isDetachedLog||isDetachedRules||isDetachedTrades)newTabPos=2;
+
+	int newTabPos=2;
+	if(isDetachedLog&&isDetachedRules)newTabPos=0;
+	else if(isDetachedLog||isDetachedRules)newTabPos=1;
+
 	ui.tabWidget->insertTab(newTabPos,ui.tabDepth,ui.tabDepth->accessibleName());
 	checkIsTabWidgetVisible();
 	ui.tabWidget->setCurrentWidget(ui.tabDepth);
 	isDetachedDepth=false;
 	depthAsksLastScrollValue=-1;
 	depthBidsLastScrollValue=-1;
+}
+
+void QtBitcoinTrader::attachTrades()
+{
+	saveDetachedWindowsSettings(true);
+	ui.tabTradesOnTop->setVisible(false);
+	ui.detachTrades->setVisible(true);
+
+	int newTabPos=3;
+	if(isDetachedLog&&isDetachedRules&&isDetachedDepth)newTabPos=0;
+	else if(isDetachedLog&&isDetachedRules||isDetachedRules&&isDetachedDepth||isDetachedLog&&isDetachedDepth)newTabPos=1;
+	else if(isDetachedLog||isDetachedRules||isDetachedDepth)newTabPos=2;
+
+	ui.tabWidget->insertTab(newTabPos,ui.tabLastTrades,ui.tabLastTrades->accessibleName());
+	checkIsTabWidgetVisible();
+	ui.tabWidget->setCurrentWidget(ui.tabLastTrades);
+	isDetachedTrades=false;
 }
 
 void QtBitcoinTrader::attachCharts()
@@ -2355,6 +2364,23 @@ void QtBitcoinTrader::attachCharts()
 	checkIsTabWidgetVisible();
 	ui.tabWidget->setCurrentWidget(ui.tabCharts);
 	isDetachedCharts=false;
+}
+
+void QtBitcoinTrader::depthSelectSellOrder(int row,int)
+{
+	if(row<0||ui.depthAsksTable->rowCount()<=row)return;
+
+	double itemPrice=ui.depthAsksTable->item(row,3)->data(Qt::UserRole).toDouble();
+	ui.buyPricePerCoin->setValue(itemPrice);
+	ui.buyTotalBtc->setValue(qMin(ui.accountUSD->value()/itemPrice,ui.depthAsksTable->item(row,2)->data(Qt::UserRole).toDouble()));
+}
+
+void QtBitcoinTrader::depthSelectBuyOrder(int row,int)
+{
+	if(row<0||ui.depthBidsTable->rowCount()<=row)return;
+
+	ui.sellPricePerCoin->setValue(ui.depthBidsTable->item(row,0)->data(Qt::UserRole).toDouble());
+	ui.sellTotalBtc->setValue(qMin(ui.accountBTC->value(),ui.depthBidsTable->item(row,1)->data(Qt::UserRole).toDouble()));
 }
 
 void QtBitcoinTrader::aboutTranslationButton()
@@ -2433,17 +2459,33 @@ void QtBitcoinTrader::buttonNewWindow()
 
 bool QtBitcoinTrader::eventFilter(QObject *obj, QEvent *event)
 {
-	if(obj!=this&&event->type()==QEvent::Close)
+	if(obj!=this)
 	{
-		if(obj==ui.tabOrdersLog)QTimer::singleShot(50,this,SLOT(attachLog()));
+		if(event->type()==QEvent::Close)
+		{
+			if(obj==ui.tabOrdersLog)QTimer::singleShot(50,this,SLOT(attachLog()));
+			else
+			if(obj==ui.tabRules)QTimer::singleShot(50,this,SLOT(attachRules()));
+			else
+			if(obj==ui.tabLastTrades)QTimer::singleShot(50,this,SLOT(attachTrades()));
+			else
+			if(obj==ui.tabDepth)QTimer::singleShot(50,this,SLOT(attachDepth()));
+			else
+			if(obj==ui.tabCharts)QTimer::singleShot(50,this,SLOT(attachCharts()));
+		}
 		else
-		if(obj==ui.tabRules)QTimer::singleShot(50,this,SLOT(attachRules()));
-		else
-		if(obj==ui.tabLastTrades)QTimer::singleShot(50,this,SLOT(attachTrades()));
-		else
-		if(obj==ui.tabDepth)QTimer::singleShot(50,this,SLOT(attachDepth()));
-		else
-		if(obj==ui.tabCharts)QTimer::singleShot(50,this,SLOT(attachCharts()));
+		if(event->type()==QEvent::Resize)
+		{
+			if(obj==ui.balanceTotalWidget)
+			{
+				int sizeParent=ui.balanceTotalWidget->width();
+				int sizeA=ui.totalAtBuySellGroupBox->minimumWidth();
+				int sizeB=ui.totalAtLastGroupBox->minimumWidth();
+
+				ui.totalAtBuySellGroupBox->setVisible(sizeParent>=sizeA);
+				ui.totalAtLastGroupBox->setVisible(sizeParent>=sizeA+sizeB+ui.balanceTotalWidget->layout()->spacing());
+			}
+		}
 	}
 	return QObject::eventFilter(obj, event);
 }

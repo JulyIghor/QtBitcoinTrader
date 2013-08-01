@@ -15,6 +15,7 @@
 #include "qtbitcointrader.h"
 #include "logthread.h"
 #include "julytranslator.h"
+#include <QFontMetrics>
 
 #define USE_QTMULTIMEDIA
 
@@ -53,7 +54,9 @@
 #define depthCountLimit (*depthCountLimit_)
 #define uiUpdateInterval (*uiUpdateInterval_)
 #define apiDownCount (*apiDownCount_)
+#define textWidth(text) fontMetrics_->width(text)
 
+extern QFontMetrics *fontMetrics_;
 extern int *apiDownCount_;
 extern int *uiUpdateInterval_;
 extern int *depthCountLimit_;

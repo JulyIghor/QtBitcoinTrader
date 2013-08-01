@@ -34,9 +34,8 @@ JulySpinBoxFix::~JulySpinBoxFix()
 
 void JulySpinBoxFix::valueChanged(QString text)
 {
-	static QFontMetrics spinBoxFontMetrics(parentSpinBox->font());
 	if(pMinimumWidth==0)
-		parentSpinBox->setMinimumWidth(spinBoxFontMetrics.width(text)+spinMargin);
+		parentSpinBox->setMinimumWidth(textWidth(text)+spinMargin);
 	else 
-		parentSpinBox->setMinimumWidth(qMax(spinBoxFontMetrics.width(text)+spinMargin,pMinimumWidth));
+		parentSpinBox->setMinimumWidth(qMax(textWidth(text)+spinMargin,pMinimumWidth));
 }

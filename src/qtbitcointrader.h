@@ -25,10 +25,6 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
-	double ruleTotalToBuyValue;
-	double ruleAmountToReceiveValue;
-	double ruleTotalToBuyBSValue;
-	double ruleAmountToReceiveBSValue;
 	QString numFromDouble(const double &value);
 
 	QString upArrow;
@@ -169,6 +165,8 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void depthSelectSellOrder(int,int);
+	void depthSelectBuyOrder(int,int);
 	void setDataPending(bool);
 	void anyDataReceived();
 	void depthUpdateOrder(double,double,bool);

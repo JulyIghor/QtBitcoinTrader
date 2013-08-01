@@ -39,9 +39,9 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 	new JulySpinBoxFix(ui.btcValue);
 	new JulySpinBoxFix(ui.exactPriceValue);
 
-	foreach(QPushButton* pushButtons, findChildren<QPushButton*>())pushButtons->setMinimumWidth(QFontMetrics(pushButtons->font()).width(pushButtons->text())+10);
+	foreach(QPushButton* pushButtons, findChildren<QPushButton*>())pushButtons->setMinimumWidth(textWidth(pushButtons->text())+10);
 
-	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())checkBoxes->setMinimumWidth(QFontMetrics(checkBoxes->font()).width(checkBoxes->text())+10);
+	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())checkBoxes->setMinimumWidth(textWidth(checkBoxes->text())+10);
 
 	ui.exactPriceValue->setVisible(false);
 	ui.label_53->setVisible(false);//sorry for that label name
@@ -84,10 +84,10 @@ bool AddRuleWindow::checkIsValidRule()
 	if(ui.checkOrdersLastSellPrice->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ordersLastSellPrice->value()))return false;
 	if(ui.checkBtcBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.accountBTC->value()))return false;
 	if(ui.checkUsdBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.accountUSD->value()))return false;
-	if(ui.checkTotalToBuy->isChecked()&&getRuleHolder().isAchieved(mainWindow.ruleTotalToBuyValue))return false;
-	if(ui.checkAmountToReceive->isChecked()&&getRuleHolder().isAchieved(mainWindow.ruleAmountToReceiveValue))return false;
-	if(ui.checkTotalToBuyBS->isChecked()&&getRuleHolder().isAchieved(mainWindow.ruleTotalToBuyBSValue))return false;
-	if(ui.checkAmountToReceiveBS->isChecked()&&getRuleHolder().isAchieved(mainWindow.ruleAmountToReceiveBSValue))return false;
+	if(ui.checkTotalToBuy->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ruleTotalToBuyValue->value()))return false;
+	if(ui.checkAmountToReceive->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ruleAmountToReceiveValue->value()))return false;
+	if(ui.checkTotalToBuyBS->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ruleTotalToBuyBSValue->value()))return false;
+	if(ui.checkAmountToReceiveBS->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ruleAmountToReceiveBSValue->value()))return false;
 	return true;
 }
 
@@ -232,8 +232,8 @@ void AddRuleWindow::ifChanged(bool on)
 	{
 		ui.thanValue->setDecimals(btcDecimals);
 		if(ui.checkBtcBalance->isChecked())ui.thanValue->setValue(mainWindow.ui.accountBTC->value());
-		if(ui.checkTotalToBuy->isChecked())ui.thanValue->setValue(mainWindow.ruleTotalToBuyValue);
-		if(ui.checkTotalToBuyBS->isChecked())ui.thanValue->setValue(mainWindow.ruleTotalToBuyBSValue);
+		if(ui.checkTotalToBuy->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleTotalToBuyValue->value());
+		if(ui.checkTotalToBuyBS->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleTotalToBuyBSValue->value());
 
 		ui.priceBtcIcon->setVisible(true);
 		ui.priceUsdIcon->setVisible(false);
@@ -243,8 +243,8 @@ void AddRuleWindow::ifChanged(bool on)
 	{
 		ui.thanValue->setDecimals(usdDecimals);
 		if(ui.checkUsdBalance->isChecked())ui.thanValue->setValue(mainWindow.ui.accountUSD->value());
-		if(ui.checkAmountToReceive->isChecked())ui.thanValue->setValue(mainWindow.ruleAmountToReceiveValue);
-		if(ui.checkAmountToReceiveBS->isChecked())ui.thanValue->setValue(mainWindow.ruleAmountToReceiveBSValue);
+		if(ui.checkAmountToReceive->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleAmountToReceiveValue->value());
+		if(ui.checkAmountToReceiveBS->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleAmountToReceiveBSValue->value());
 
 		ui.priceBtcIcon->setVisible(false);
 		ui.priceUsdIcon->setVisible(true);

@@ -63,7 +63,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	julyTranslator->translateUi(this);
 
 	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())
-		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),QFontMetrics(checkBoxes->font()).width(checkBoxes->text())+20));
+		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),textWidth(checkBoxes->text())+20));
 	QSize minSizeHint=minimumSizeHint();
 	if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
 }
