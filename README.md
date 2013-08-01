@@ -1,4 +1,4 @@
-## Description
+## Qt Bitcoin Trader
 
 This software helps you open and cancel Mt.Gox orders very fast. Real time data monitoring.
 
