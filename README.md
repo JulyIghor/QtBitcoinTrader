@@ -1,4 +1,4 @@
-Description
+## Description
 
 This software helps you open and cancel Mt.Gox orders very fast. Real time data monitoring.
 
@@ -12,31 +12,31 @@ If you want to help me, than donate to 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
  1) Add realtime charts
  2) Make rules more advanced
 
-Download links
+## Download links
 
-https://sourceforge.net/projects/bitcointrader/
+* https://sourceforge.net/projects/bitcointrader/
 
-http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml
+* http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml
 
-http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml
+* http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml
 
-Forums
+## Forums
 
-https://bitcointalk.org/index.php?topic=201062
+* https://bitcointalk.org/index.php?topic=201062
 
-https://bitcointalk.org/index.php?topic=218044
+* https://bitcointalk.org/index.php?topic=218044
 
-https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/
+* https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/
 
-Social
+## Social
 
-http://www.facebook.com/QtBitcoinTrader
+* http://www.facebook.com/QtBitcoinTrader
 
-http://twitter.com/QtBitcoinTrader
+* http://twitter.com/QtBitcoinTrader
 
-http://vk.com/QtBitcoinTrader
+* http://vk.com/QtBitcoinTrader RU
 
-Change Log
+## Change Log
 
 v1.07.01
 - Hotfix. High CPU load fix. Nonce error fix
