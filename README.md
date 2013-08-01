@@ -27,7 +27,7 @@ Next ToDo:
 
 * https://bitcointalk.org/index.php?topic=201062 `ENG`
 * https://bitcointalk.org/index.php?topic=218044 `RUS`
-* https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/
+* https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/ `RUS`
 
 ## Social
 
