@@ -265,4 +265,6 @@ String_USE_SYSTEM_FOLDER=Daten und Einstellungen im Systemordner ablegen.
 String_YES=Ja
 String_LANGUAGE_NAME=Deutsch
 String_LANGUAGE_AUTHOR=Diabolicus<br><a href="mailto:spirou666@gmx.de">spirou666@gmx.de</a><br>Donate Bitcoin:<br><a href="bitcoin:1Drv4D9FFmbyKsvg2zfqR5wq2b6akTvV8f">1Drv4D9FFmbyKsvg2zfqR5wq2b6akTvV8f</a>
-String_LANGUAGE_LOCALE=de_DE
+String_LANGUAGE_LOCALE=de
+GroupBox_BALANCE_TOTAL_AT_BUYSELL=Total at Buy/Sell Price
+GroupBox_BALANCE_TOTAL_AT_LAST=Total at Last Price

@@ -266,3 +266,5 @@ String_IF_TOTAL_TO_BUY_AT_LAST_LESS=Объем возможной покупки
 String_IF_AMOUNT_TO_RECEIVE_AT_LAST_LESS=Сумма возможна для получения по последней цене меньше за %1
 String_IF_TOTAL_TO_BUY_AT_BUY_PRICE_LESS=Объем возможной покупки по цене покупки меньше за %1
 String_IF_AMOUNT_TO_RECEIVE_AT_SELL_PRICE_LESS=Сумма возможна для получения по цене продажи меньше за %1
+GroupBox_BALANCE_TOTAL_AT_BUYSELL=По цене продажи/покупки
+GroupBox_BALANCE_TOTAL_AT_LAST=По последней цене

@@ -105,7 +105,6 @@ private slots:
 	void secondSlot();
 public slots:
 	void clearValues();
-	void reloadOrders();
 	void getHistory(bool);
 	void buy(double, double);
 	void sell(double, double);

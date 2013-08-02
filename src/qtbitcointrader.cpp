@@ -497,8 +497,7 @@ void QtBitcoinTrader::addLastTrade(double btcDouble, qint64 dateT, double usdDou
 	newItem->setData(Qt::UserRole,dateT);
 	ui.tableTrades->setItem(0,0,newItem);
 
-	//static QColor btcColor("#996515");
-	newItem=new QTableWidgetItem(btcValue);/*newItem->setTextColor(btcColor);*/postWorkAtTableItem(newItem,1);
+	newItem=new QTableWidgetItem(btcValue);postWorkAtTableItem(newItem,1);
 	newItem->setData(Qt::UserRole,btcDouble);
 	ui.tableTrades->setItem(0,1,newItem);
 
@@ -561,7 +560,6 @@ void QtBitcoinTrader::secondSlot()
 		setSoftLagValue(softLagTime.elapsed());
 		if(ui.tabDepth->isVisible())ui.depthLag->setValue(depthLagTime.elapsed()/1000.0);
 	}
-
 
 	if(depthCountLimit)
 	{
@@ -786,7 +784,6 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
 			if(groupBox->accessibleDescription()=="FIXED")groupBox->setFixedWidth(minWidth);
 			else groupBox->setMinimumWidth(minWidth);
 		}
-
 
 	QSize minSizeHint=par->minimumSizeHint();
 	if(isValidSize(&minSizeHint))
@@ -1098,6 +1095,12 @@ void QtBitcoinTrader::fixWindowMinimumSize()
 {
 	static QTime lastFixedTime;
 	if(lastFixedTime.elapsed()<500)return;
+
+	ui.depthAsksTable->setMinimumWidth(ui.depthAsksTable->columnWidth(1)+ui.depthAsksTable->columnWidth(2)+ui.depthAsksTable->columnWidth(3)+20);
+	ui.depthAsksTable->horizontalScrollBar()->setValue(ui.depthAsksTable->horizontalScrollBar()->maximum());
+	ui.depthBidsTable->setMinimumWidth(ui.depthBidsTable->columnWidth(0)+ui.depthBidsTable->columnWidth(1)+ui.depthBidsTable->columnWidth(2)+20);
+	ui.depthBidsTable->horizontalScrollBar()->setValue(0);
+
 	ui.marketGroupBox->setMinimumWidth(ui.marketGroupBox->minimumSizeHint().width());
 	ui.buyThenSellGroupBox->setMinimumWidth(ui.buyThenSellGroupBox->minimumSizeHint().width());
 	ui.sellThenBuyGroupBox->setMinimumWidth(ui.sellThenBuyGroupBox->minimumSizeHint().width());
@@ -2455,7 +2458,6 @@ void QtBitcoinTrader::languageChanged()
 	forcedReloadOrders=true;
 	emit clearValues();
 	emit getHistory(true);
-	//emit reloadOrders();
 }
 
 void QtBitcoinTrader::buttonNewWindow()
@@ -2559,10 +2561,9 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 		}
 
 		currentTable->insertRow(insertPos);
-		//static QColor btcColor("#996515");
 
 		QTableWidgetItem *priceItem=new QTableWidgetItem(currencyBSign+" "+numFromDouble(price));
-		priceItem->setData(Qt::UserRole,price);//priceItem->setTextColor(Qt::darkGreen);
+		priceItem->setData(Qt::UserRole,price);
 
 		QTableWidgetItem *volumeItem=new QTableWidgetItem(currencyASign+" "+numFromDouble(volume));
 		volumeItem->setData(Qt::UserRole,volume);
@@ -2571,12 +2572,9 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 		else if(volume<100.0)volumeItem->setTextColor(Qt::black);
 		else if(volume<1000.0)volumeItem->setTextColor(Qt::blue);
 		else volumeItem->setTextColor(Qt::red);
-		
-		//volumeItem->setTextColor(btcColor);
 
 		QTableWidgetItem *sizeItem=new QTableWidgetItem(volumeItem->text());
 		sizeItem->setData(Qt::UserRole,volume);
-		//sizeItem->setTextColor(btcColor);
 
 		if(isAsk)
 		{

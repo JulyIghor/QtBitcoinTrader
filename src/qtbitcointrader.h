@@ -290,7 +290,6 @@ public slots:
 	void sellTotalBtcToSellHalfIn();
 	void sellTotalBtcToSellChanged(double);
 signals:
-	void reloadOrders();
 	void cancelOrderByOid(QByteArray);
 	void apiSell(double btc, double price);
 	void apiBuy(double btc, double price);

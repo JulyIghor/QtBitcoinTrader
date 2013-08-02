@@ -37,7 +37,6 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	tickerOnly=tickOnly;
 	if(!tickerOnly)
 	{
-		connect(mainClass,SIGNAL(reloadOrders()),this,SLOT(reloadOrders()));
 		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
 		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
@@ -452,11 +451,6 @@ bool Exchange_BTCe::isReplayPending(int reqType)
 {
 	if(julyHttp==0)return false;
 	return julyHttp->isReqTypePending(reqType);
-}
-
-void Exchange_BTCe::reloadOrders()
-{
-	lastOrders.clear();
 }
 
 void Exchange_BTCe::secondSlot()

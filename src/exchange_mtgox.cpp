@@ -34,7 +34,6 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	tickerOnly=tickOnly;
 	if(!tickerOnly)
 	{
-		connect(mainClass,SIGNAL(reloadOrders()),this,SLOT(reloadOrders()));
 		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
 		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
@@ -133,11 +132,6 @@ void Exchange_MtGox::run()
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 	secondSlot();
 	exec();
-}
-
-void Exchange_MtGox::reloadOrders()
-{
-	lastOrders.clear();
 }
 
 void Exchange_MtGox::secondSlot()
