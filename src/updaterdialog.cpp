@@ -20,6 +20,7 @@
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QFile>
 
 UpdaterDialog::UpdaterDialog(bool fbMess)
 	: QDialog()
