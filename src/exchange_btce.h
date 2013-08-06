@@ -26,6 +26,8 @@ public:
 	~Exchange_BTCe();
 
 private:
+	bool forceDepthLoad;
+	void depthSubmitOrder(QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
 	QMap<double,double> lastDepthAsksMap;
 	QMap<double,double> lastDepthBidsMap;
 	QByteArray lastDepthData;
@@ -69,6 +71,7 @@ private:
 	int lastOpenedOrders;
 	void run();
 signals:
+	void depthFirstOrder(double,double,bool);
 	void depthUpdateOrder(double,double,bool);
 	void showErrorMessage(QString);
 	void addLastTrade(double,qint64,double,QByteArray,bool);
@@ -99,6 +102,7 @@ signals:
 	void apiLagChanged(double);
 	void softLagChanged(int);
 private slots:
+	void reloadDepth();
 	void sslErrors(const QList<QSslError> &);
 	void dataReceivedAuth(QByteArray,int);
 	void secondSlot();

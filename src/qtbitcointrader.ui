@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1449</width>
-    <height>612</height>
+    <width>1090</width>
+    <height>641</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1433,6 +1433,9 @@
               <width>0</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="maxVisibleItems">
+             <number>30</number>
             </property>
            </widget>
           </item>
@@ -3012,7 +3015,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QDoubleSpinBox" name="depthLag">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -3280,6 +3283,235 @@ p, li { white-space: pre-wrap; }
             </property>
            </column>
           </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <layout class="QGridLayout" name="gridLayout_31">
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <item row="0" column="1">
+            <widget class="QLabel" name="usdLabel2_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <weight>50</weight>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="accessibleDescription">
+              <string>USD_ICON</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: darkgreen</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="labelDepthLimit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="accessibleName">
+              <string>ROWS_TO_DISPLAY</string>
+             </property>
+             <property name="text">
+              <string>Rows to Display:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QComboBox" name="comboBoxGroupByPrice">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maxVisibleItems">
+              <number>30</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>Don't group</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.005</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.010</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.025</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.050</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1.000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2.500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>5.000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10.000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>25.000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50.000</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelGroupByPrice">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="accessibleName">
+              <string>GROUP_BY_PRICE</string>
+             </property>
+             <property name="text">
+              <string>Group by Price:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QComboBox" name="depthComboBoxLimitRows">
+             <property name="maxVisibleItems">
+              <number>30</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>No Limit</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1000</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>25</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_7">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>

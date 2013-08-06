@@ -16,7 +16,7 @@ Label_TR00010=Höchstpreis:
 Label_TR00011=Tiefstpreis:
 Label_TR00012=Letzter Preis:
 Label_TR00013=Tagesumsatz:
-Label_TR00016=API:
+Label_TR00016=API lag:
 Label_TR00017=API außer Betrieb
 Label_TR00023=Letzter Kaufpreis:
 Label_TR00024=Letzter Verkaufspreis:
@@ -268,3 +268,7 @@ String_LANGUAGE_AUTHOR=Diabolicus<br><a href="mailto:spirou666@gmx.de">spirou666
 String_LANGUAGE_LOCALE=de
 GroupBox_BALANCE_TOTAL_AT_BUYSELL=Total at Buy/Sell Price
 GroupBox_BALANCE_TOTAL_AT_LAST=Total at Last Price
+Label_ROWS_TO_DISPLAY=Rows to Display:
+Label_GROUP_BY_PRICE=Group by Price:
+String_DONT_GROUP=Don't group
+String_NO_LIMIT=No Limit

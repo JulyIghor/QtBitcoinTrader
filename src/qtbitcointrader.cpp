@@ -185,20 +185,42 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(defaultSectionSize<defTextHeight)defaultSectionSize=defTextHeight;
 	settingsMain.setValue("RowHeight",defaultSectionSize);
 
-	depthCountLimit=settingsMain.value("DepthCountLimit",100).toInt();
-	settingsMain.setValue("DepthCountLimit",depthCountLimit);
+	depthCountLimit=iniSettings->value("DepthCountLimit",100).toInt();
+	if(depthCountLimit<0)depthCountLimit=0;
+	int currentDepthComboBoxLimitIndex=0;
+	for(int n=0;n<ui.depthComboBoxLimitRows->count();n++)
+	{
+		int currentValueDouble=ui.depthComboBoxLimitRows->itemText(n).toInt();
+		if(currentValueDouble==depthCountLimit)currentDepthComboBoxLimitIndex=n;
+		ui.depthComboBoxLimitRows->setItemData(n,currentValueDouble,Qt::UserRole);
+	}
+	ui.depthComboBoxLimitRows->setCurrentIndex(currentDepthComboBoxLimitIndex);
 
 	apiDownCount=settingsMain.value("ApiDownCount",5).toInt();
 	if(apiDownCount<0)apiDownCount=5;
 	settingsMain.setValue("ApiDownCount",apiDownCount);
 
-	httpRequestInterval=settingsMain.value("HttpRequestsInterval",500).toInt();
-	httpRequestTimeout=settingsMain.value("HttpRequestsTimeout",1500).toInt();
+	httpRequestInterval=iniSettings->value("HttpRequestsInterval",500).toInt();
+	httpRequestTimeout=iniSettings->value("HttpRequestsTimeout",1500).toInt();
 
-	uiUpdateInterval=settingsMain.value("UiUpdateInterval",100).toInt();
+	uiUpdateInterval=iniSettings->value("UiUpdateInterval",100).toInt();
 	if(uiUpdateInterval<1)uiUpdateInterval=100;
 
-	httpSplitPackets=settingsMain.value("HttpSplitPackets",false).toBool();
+	httpSplitPackets=iniSettings->value("HttpSplitPackets",false).toBool();
+
+	groupPriceValue=iniSettings->value("DepthGroupByPrice",0.0).toDouble();
+	if(groupPriceValue<0.0)groupPriceValue=0.0;
+	iniSettings->setValue("DepthGroupByPrice",groupPriceValue);
+
+	int currentDepthComboBoxIndex=0;
+	for(int n=0;n<ui.comboBoxGroupByPrice->count();n++)
+	{
+		double currentValueDouble=ui.comboBoxGroupByPrice->itemText(n).toDouble();
+		if(currentValueDouble==groupPriceValue)currentDepthComboBoxIndex=n;
+		ui.comboBoxGroupByPrice->setItemData(n,currentValueDouble,Qt::UserRole);
+	}
+	ui.comboBoxGroupByPrice->setCurrentIndex(currentDepthComboBoxIndex);
+
 
 	if(appVerLastReal<1.0733)
 	{
@@ -211,10 +233,10 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(httpRequestInterval<50)httpRequestInterval=500;
 	if(httpRequestTimeout<100)httpRequestTimeout=1500;
 
-	settingsMain.setValue("HttpRequestsInterval",httpRequestInterval);
-	settingsMain.setValue("HttpRequestsTimeout",httpRequestTimeout);
-	settingsMain.setValue("HttpSplitPackets",httpSplitPackets);
-	settingsMain.setValue("UiUpdateInterval",uiUpdateInterval);
+	iniSettings->setValue("HttpRequestsInterval",httpRequestInterval);
+	iniSettings->setValue("HttpRequestsTimeout",httpRequestTimeout);
+	iniSettings->setValue("HttpSplitPackets",httpSplitPackets);
+	iniSettings->setValue("UiUpdateInterval",uiUpdateInterval);
 
 	foreach(QTableWidget* tables, findChildren<QTableWidget*>())
 	{
@@ -561,14 +583,17 @@ void QtBitcoinTrader::secondSlot()
 		if(ui.tabDepth->isVisible())ui.depthLag->setValue(depthLagTime.elapsed()/1000.0);
 	}
 
+	int zeroRow=0;
+	if(ui.comboBoxGroupByPrice->currentIndex()>0)zeroRow=2;
+
 	if(depthCountLimit)
 	{
-		if(ui.depthAsksTable->rowCount()>depthCountLimit)
+		if(ui.depthAsksTable->rowCount()>depthCountLimit+zeroRow)
 		{
 			depthAsksMap.remove(ui.depthAsksTable->item(ui.depthAsksTable->rowCount()-1,3)->data(Qt::UserRole).toDouble());
 			ui.depthAsksTable->removeRow(ui.depthAsksTable->rowCount()-1);
 		}
-		if(ui.depthBidsTable->rowCount()>depthCountLimit)
+		if(ui.depthBidsTable->rowCount()>depthCountLimit+zeroRow)
 		{
 			depthBidsMap.remove(ui.depthBidsTable->item(ui.depthBidsTable->rowCount()-1,1)->data(Qt::UserRole).toDouble());
 			ui.depthBidsTable->removeRow(ui.depthBidsTable->rowCount()-1);
@@ -583,7 +608,7 @@ void QtBitcoinTrader::secondSlot()
 
 	if(depthCurrentAsksSyncIndex>-1)
 		for(int n=0;n<5;n++)
-			if(depthCurrentAsksSyncIndex>-1)
+			if(depthCurrentAsksSyncIndex>-1+zeroRow)
 			{
 				if(depthCurrentAsksSyncIndex==0)depthAsksIncVolume=0.0;
 				if(depthCurrentAsksSyncIndex>=ui.depthAsksTable->rowCount())
@@ -610,7 +635,7 @@ void QtBitcoinTrader::secondSlot()
 	if(currentDepthBidsScrollValue>depthBidsLastScrollValue)depthCurrentBidsSyncIndex=0;
 	depthBidsLastScrollValue=currentDepthBidsScrollValue;
 
-	if(depthCurrentBidsSyncIndex>-1)
+	if(depthCurrentBidsSyncIndex>-1+zeroRow)
 		for(int n=0;n<5;n++)
 			if(depthCurrentBidsSyncIndex>-1)
 			{
@@ -888,12 +913,6 @@ void QtBitcoinTrader::currencyChanged(int val)
 
 	ui.sellGroupBox->setTitle(sellGroupboxText);
 
-	depthAsksMap.clear();
-	depthBidsMap.clear();
-	ui.depthAsksTable->clearContents();
-	ui.depthAsksTable->setRowCount(0);
-	ui.depthBidsTable->clearContents();
-	ui.depthBidsTable->setRowCount(0);
 
 	static int firstLoad=0;
 	if(firstLoad++>1)
@@ -901,6 +920,8 @@ void QtBitcoinTrader::currencyChanged(int val)
 		firstLoad=3;
 		emit clearValues();
 	}
+	clearDepth();
+
 	marketPricesNotLoaded=true;
 	balanceNotLoaded=true;
 	fixDecimals(this);
@@ -908,6 +929,19 @@ void QtBitcoinTrader::currencyChanged(int val)
 	iniSettings->sync();
 
 	calcOrdersTotalValues();
+}
+
+void QtBitcoinTrader::clearDepth()
+{
+	depthAsksMap.clear();
+	ui.depthAsksTable->clearContents();
+	ui.depthAsksTable->setRowCount(0);
+
+	depthBidsMap.clear();
+	ui.depthBidsTable->clearContents();
+	ui.depthBidsTable->setRowCount(0);
+
+	emit reloadDepth();
 }
 
 void QtBitcoinTrader::calcOrdersTotalValues()
@@ -2450,6 +2484,13 @@ void QtBitcoinTrader::languageChanged()
 		if(toolButton->accessibleDescription()=="TOGGLE_SOUND")
 			toolButton->setToolTip(julyTr("TOGGLE_SOUND","Toggle sound notification on value change"));
 
+	ui.comboBoxGroupByPrice->setItemText(0,julyTr("DONT_GROUP","None"));
+	ui.comboBoxGroupByPrice->setMinimumWidth(qMax(textWidth(ui.comboBoxGroupByPrice->itemText(0))+ui.comboBoxGroupByPrice->height(),textWidth("50.000")));
+	ui.depthComboBoxLimitRows->setItemText(0,julyTr("NO_LIMIT","No Limit"));
+	ui.depthComboBoxLimitRows->setMinimumWidth(qMax(textWidth(ui.depthComboBoxLimitRows->itemText(0))+ui.depthComboBoxLimitRows->height(),textWidth("1000")));
+
+
+
 	ui.tableTrades->clearContents();
 	ui.tableTrades->setRowCount(0);
 	ui.tradesVolume5m->setValue(0.0);
@@ -2511,6 +2552,75 @@ void QtBitcoinTrader::setWindowStaysOnTop(bool on)
 	show();
 }
 
+void QtBitcoinTrader::depthFirstOrder(double price, double volume, bool isAsk)
+{
+	depthLagTime.restart();
+	if(ui.tabDepth->isVisible())ui.depthLag->setValue(0.0);
+
+	if(price==0.0||ui.comboBoxGroupByPrice->currentIndex()==0)return;
+
+	QTableWidget *currentTable=isAsk?ui.depthAsksTable:ui.depthBidsTable;
+
+	if(currentTable->rowCount()==0)
+	{
+		currentTable->insertRow(0);
+
+		QTableWidgetItem *priceItem=new QTableWidgetItem(currencyBSign+" "+numFromDouble(price));
+		priceItem->setData(Qt::UserRole,0.0);
+
+		QTableWidgetItem *volumeItem=new QTableWidgetItem(currencyASign+" "+numFromDouble(volume));
+		volumeItem->setData(Qt::UserRole,0.0);
+
+		QTableWidgetItem *sizeItem=new QTableWidgetItem("");
+		sizeItem->setData(Qt::UserRole,0.0);
+
+		if(isAsk)
+		{
+			postWorkAtTableItem(priceItem,-1);
+			postWorkAtTableItem(volumeItem,-1);
+			currentTable->setItem(0,3,priceItem);
+			currentTable->setItem(0,2,volumeItem);
+			currentTable->setItem(0,1,sizeItem);
+		}
+		else
+		{
+			postWorkAtTableItem(priceItem,-1);
+			postWorkAtTableItem(volumeItem,-1);
+			currentTable->setItem(0,0,priceItem);
+			currentTable->setItem(0,1,volumeItem);
+			currentTable->setItem(0,2,sizeItem);
+		}
+		currentTable->insertRow(1);
+		currentTable->setRowHeight(1,10);
+		for(int n=0;n<currentTable->columnCount();n++)
+		{
+			QTableWidgetItem *newEmptyItem=new QTableWidgetItem;
+			newEmptyItem->setFlags(Qt::NoItemFlags);
+			currentTable->setItem(1,n,newEmptyItem);
+		}
+	}
+	else
+	{
+		QTableWidgetItem *currentPriceItem=0;
+		QTableWidgetItem *currentVolumeItem=0;
+		QTableWidgetItem *currentSizeItem=0;
+		if(isAsk)
+		{
+			currentPriceItem=currentTable->item(0,3);
+			currentVolumeItem=currentTable->item(0,2);
+			currentSizeItem=currentTable->item(0,1);
+		}
+		else
+		{
+			currentPriceItem=currentTable->item(0,0);
+			currentVolumeItem=currentTable->item(0,1);
+			currentSizeItem=currentTable->item(0,2);
+		}
+		currentPriceItem->setText(currencyBSign+" "+numFromDouble(price));
+		currentVolumeItem->setText(currencyASign+" "+numFromDouble(volume));
+	}
+}
+
 void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 {
 	depthLagTime.restart();
@@ -2520,9 +2630,12 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 	QTableWidget *currentTable=isAsk?ui.depthAsksTable:ui.depthBidsTable;
 	QMap<double,double> *depthMap=isAsk?&depthAsksMap:&depthBidsMap;
 
+	int zeroRow=0;
+	if(ui.comboBoxGroupByPrice->currentIndex()>0)zeroRow=2;
+
 	if(volume==0)//Remove item
 	{
-		for(int n=0;n<currentTable->rowCount();n++)
+		for(int n=zeroRow;n<currentTable->rowCount();n++)
 		{
 			QTableWidgetItem *currentPriceTableItem=0;
 			if(isAsk)currentPriceTableItem=currentTable->item(n,3);
@@ -2539,7 +2652,7 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 	if(depthMap->value(price,0)==0)//Insert item
 	{
 		int insertPos=currentTable->rowCount();
-		for(int n=0;n<currentTable->rowCount();n++)
+		for(int n=zeroRow;n<currentTable->rowCount();n++)
 		{
 			QTableWidgetItem *currentPriceTableItem=0;
 			bool matchPrice=false;
@@ -2600,7 +2713,7 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 	else//Update item
 	if(depthMap->value(price)!=volume)
 	{
-		for(int n=0;n<currentTable->rowCount();n++)
+		for(int n=zeroRow;n<currentTable->rowCount();n++)
 		{
 			QTableWidgetItem *currentPriceItem=0;
 			QTableWidgetItem *currentVolumeItem=0;
@@ -2655,4 +2768,20 @@ void QtBitcoinTrader::exitApp()
 	iniSettings->sync();
 
 	emit quit();
+}
+
+void QtBitcoinTrader::on_depthComboBoxLimitRows_currentIndexChanged(int val)
+{
+	depthCountLimit=ui.depthComboBoxLimitRows->itemData(val,Qt::UserRole).toInt();
+	iniSettings->setValue("DepthCountLimit",depthCountLimit);
+	iniSettings->sync();
+	clearDepth();
+}
+
+void QtBitcoinTrader::on_comboBoxGroupByPrice_currentIndexChanged(int val)
+{
+	groupPriceValue=ui.comboBoxGroupByPrice->itemData(val,Qt::UserRole).toDouble();
+	iniSettings->setValue("DepthGroupByPrice",groupPriceValue);
+	iniSettings->sync();
+	clearDepth();
 }

@@ -15,6 +15,7 @@
 Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()
 {
+	forceDepthLoad=false;
 	julyHttp=0;
 	tickerOnly=false;
 	privateRestSign=pRestSign;
@@ -45,12 +46,14 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
 
+	connect(this,SIGNAL(depthFirstOrder(double,double,bool)),mainClass,SLOT(depthFirstOrder(double,double,bool)));
 	connect(this,SIGNAL(depthUpdateOrder(double,double,bool)),mainClass,SLOT(depthUpdateOrder(double,double,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
 	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
 	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
 
 	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
+	connect(mainClass,SIGNAL(reloadDepth()),this,SLOT(reloadDepth()));
 	connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));
 	connect(this,SIGNAL(apiLagChanged(double)),mainClass->ui.lagValue,SLOT(setValue(double)));
 	connect(this,SIGNAL(accVolumeChanged(double)),mainClass->ui.accountVolume,SLOT(setValue(double)));
@@ -89,9 +92,7 @@ void Exchange_MtGox::clearVariables()
 	apiDownCounter=0;
 	lastHistory.clear();
 	lastOrders.clear();
-	lastDepthBidsMap.clear();
-	lastDepthAsksMap.clear();
-	lastDepthData.clear();
+	reloadDepth();
 	lastInfoReceived=false;
 	lastFetchDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-600).toTime_t())+"000000";
 }
@@ -145,7 +146,11 @@ void Exchange_MtGox::secondSlot()
 
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,currencyRequestPair+"/money/orders",true,httpSplitPackets);
 
-	if(infoCounter==3&&!isReplayPending(111))sendToApi(111,currencyRequestPair+"/money/depth/fetch",false,httpSplitPackets);
+	if(forceDepthLoad||infoCounter==3&&!isReplayPending(111))
+	{
+		sendToApi(111,currencyRequestPair+"/money/depth/fetch",false,httpSplitPackets);
+		forceDepthLoad=false;
+	}
 
 	if(!isReplayPending(101))sendToApi(101,currencyRequestPair+"/money/order/lag",false,httpSplitPackets);
 	if((infoCounter==0)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
@@ -229,6 +234,32 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 		else 
 			julyHttp->prepareData(reqType, "GET /api/2/"+method);
 	}
+}
+
+void Exchange_MtGox::depthSubmitOrder(QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk)
+{
+	if(priceDouble==0.0||amount==0.0)return;
+
+	if(isAsk)
+	{
+		(*currentMap)[priceDouble]=amount;
+		if(lastDepthAsksMap.value(priceDouble,0.0)!=amount)
+			emit depthUpdateOrder(priceDouble,amount,true);
+	}
+	else
+	{
+		(*currentMap)[priceDouble]=amount;
+		if(lastDepthBidsMap.value(priceDouble,0.0)!=amount)
+			emit depthUpdateOrder(priceDouble,amount,false);
+	}
+}
+
+void Exchange_MtGox::reloadDepth()
+{
+	lastDepthBidsMap.clear();
+	lastDepthAsksMap.clear();
+	lastDepthData.clear();
+	forceDepthLoad=true;
 }
 
 void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
@@ -347,16 +378,43 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				lastDepthData=data;
 				QMap<double,double> currentAsksMap;
 				QStringList asksList=QString(getMidData("\"asks\":[{","}]",&data)).split("},{");
-				if(depthCountLimit)while(asksList.count()>depthCountLimit)asksList.removeLast();
+				double groupedPrice=0.0;
+				double groupedVolume=0.0;
+				int rowCounter=0;
 				for(int n=0;n<asksList.count();n++)
 				{
+					if(depthCountLimit&&rowCounter>depthCountLimit)break;
 					QByteArray currentRow=asksList.at(n).toAscii();
 					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
 					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
-					if(priceDouble>0.0&&amount>0.0)
+
+					if(groupPriceValue>0.0)
 					{
-						currentAsksMap[priceDouble]=amount;
-						if(lastDepthAsksMap.value(priceDouble,0.0)!=amount)emit depthUpdateOrder(priceDouble,amount,true);
+						if(n==0)
+						{
+							emit depthFirstOrder(priceDouble,amount,true);
+							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
+							groupedVolume=amount;
+							depthSubmitOrder(&currentAsksMap,groupedPrice,groupedVolume,true);
+							rowCounter++;
+						}
+						else
+						{
+							bool matchCurrentGroup=priceDouble<groupedPrice+groupPriceValue;
+							if(matchCurrentGroup)groupedVolume+=amount;
+							if(!matchCurrentGroup||n==asksList.count()-1)
+							{
+								depthSubmitOrder(&currentAsksMap,groupedPrice,groupedVolume,true);
+								rowCounter++;
+								groupedVolume=amount;
+								groupedPrice+=groupPriceValue;
+							}
+						}
+					}
+					else
+					{
+					depthSubmitOrder(&currentAsksMap,priceDouble,amount,true);
+					rowCounter++;
 					}
 				}
 				QList<double> currentAsksList=lastDepthAsksMap.keys();
@@ -366,18 +424,44 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 
 				QMap<double,double> currentBidsMap;
 				QStringList bidsList=QString(getMidData("\"bids\":[{","}]",&data)).split("},{");
-				if(depthCountLimit)while(bidsList.count()>depthCountLimit)bidsList.removeFirst();
-				for(int n=0;n<bidsList.count();n++)
+				groupedPrice=0.0;
+				groupedVolume=0.0;
+				rowCounter=0;
+				for(int n=bidsList.count()-1;n>=0;n--)
 				{
+					if(depthCountLimit&&rowCounter>depthCountLimit)break;
 					QByteArray currentRow=bidsList.at(n).toAscii();
 					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
 					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
-					if(priceDouble>0.0&&amount>0.0)
+
+					if(groupPriceValue>0.0)
 					{
-						currentBidsMap[priceDouble]=amount;
-						if(lastDepthBidsMap.value(priceDouble,0.0)!=amount)emit depthUpdateOrder(priceDouble,amount,false);
+						if(n==bidsList.count()-1)
+						{
+							emit depthFirstOrder(priceDouble,amount,false);
+							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
+							groupedVolume=amount;
+							depthSubmitOrder(&currentBidsMap,groupedPrice,groupedVolume,false);
+							rowCounter++;
+						}
+						else
+						{
+							bool matchCurrentGroup=priceDouble>groupedPrice+groupPriceValue;
+							if(matchCurrentGroup)groupedVolume+=amount;
+							if(!matchCurrentGroup||n==bidsList.count()-1)
+							{
+								depthSubmitOrder(&currentBidsMap,groupedPrice,groupedVolume,false);
+								rowCounter++;
+								groupedVolume=amount;
+								groupedPrice-=groupPriceValue;
+							}
+						}
 					}
-					if(priceDouble>0.0&&amount>0.0)emit depthUpdateOrder(priceDouble,amount,false);
+					else
+					{
+						depthSubmitOrder(&currentBidsMap,priceDouble,amount,false);
+						rowCounter++;
+					}
 				}
 				QList<double> currentBidsList=lastDepthBidsMap.keys();
 				for(int n=0;n<currentBidsList.count();n++)

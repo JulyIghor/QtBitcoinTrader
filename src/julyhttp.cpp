@@ -37,6 +37,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+appVerStr+"\r\n");
 	httpHeader.append("Host: "+hostName+"\r\n");
 	httpHeader.append("Accept-Encoding: gzip\r\n");
+	httpHeader.append("Content-Type: application/x-www-form-urlencoded\r\n");
 	if(keepAlive)httpHeader.append("Connection: keep-alive\r\n");
 	else httpHeader.append("Connection: close\r\n");
 	apiDownState=false;
@@ -361,7 +362,7 @@ void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray pos
 	if(!restSignLine.isEmpty())data->append(restKeyLine+restSignLine);
 	if(!postData.isEmpty())
 	{
-		data->append("Content-Type: application/x-www-form-urlencoded\r\nContent-Length: "+QByteArray::number(postData.size())+"\r\n\r\n");
+		data->append("Content-Length: "+QByteArray::number(postData.size())+"\r\n\r\n");
 		data->append(postData);
 	}
 	else data->append("\r\n");
@@ -414,7 +415,7 @@ void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postDa
 	if(!restSignLine.isEmpty())data->append(restKeyLine+restSignLine);
 	if(!postData.isEmpty())
 	{
-		data->append("Content-Type: application/x-www-form-urlencoded\r\nContent-Length: "+QByteArray::number(postData.size())+"\r\n\r\n");
+		data->append("Content-Length: "+QByteArray::number(postData.size())+"\r\n\r\n");
 		data->append(postData);
 	}
 	else data->append("\r\n");
@@ -498,6 +499,8 @@ QSslSocket *JulyHttp::getStableSocket()
 	if(socket->state()!=QAbstractSocket::UnconnectedState)socket->waitForConnected(5000);
 	if(socket->state()!=QAbstractSocket::ConnectedState)
 	{
+		setApiDown(true);
+		if(isLogEnabled)logThread->writeLog("Socket error: "+socket->errorString().toAscii());
 		reconnectSocket(socket,false);
 		socket->waitForConnected(5000);
 	}

@@ -55,7 +55,9 @@
 #define uiUpdateInterval (*uiUpdateInterval_)
 #define apiDownCount (*apiDownCount_)
 #define textWidth(text) fontMetrics_->width(text)
+#define groupPriceValue (*groupPriceValue_)
 
+extern double *groupPriceValue_;
 extern QFontMetrics *fontMetrics_;
 extern int *apiDownCount_;
 extern int *uiUpdateInterval_;

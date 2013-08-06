@@ -268,3 +268,7 @@ String_IF_TOTAL_TO_BUY_AT_BUY_PRICE_LESS=Объем возможной поку�
 String_IF_AMOUNT_TO_RECEIVE_AT_SELL_PRICE_LESS=Сумма возможна для получения по цене продажи меньше за %1
 GroupBox_BALANCE_TOTAL_AT_BUYSELL=По цене продажи/покупки
 GroupBox_BALANCE_TOTAL_AT_LAST=По последней цене
+Label_ROWS_TO_DISPLAY=Лимит строк:
+Label_GROUP_BY_PRICE=Шаг группировки:
+String_DONT_GROUP=Нет
+String_NO_LIMIT=Нет

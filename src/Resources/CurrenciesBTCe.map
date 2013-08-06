@@ -4,8 +4,11 @@ BTC/EUR=btc_eur=5=0.1=0.1
 LTC/BTC=ltc_btc=5=0.1=0.0001
 LTC/USD=ltc_usd=6=0.1=0.0001
 LTC/RUR=ltc_rur=5=0.1=0.1
+LTC/EUR=ltc_eur=3=0.1=0.0001
 NMC/BTC=nmc_btc=5=0.1=0.0001
+NMC/USD=nmc_usd=3=0.1=0.001
 NVC/BTC=nvc_btc=5=0.1=0.0001
+NVC/USD=nvc_usd=3=0.1=0.001
 USD/RUR=usd_rur=5=0.1=25
 EUR/USD=eur_usd=5=0.1=1
 TRC/BTC=trc_btc=5=0.1=0.0001

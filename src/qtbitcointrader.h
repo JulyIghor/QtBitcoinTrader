@@ -49,6 +49,7 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	void clearDepth();
 	void calcOrdersTotalValues();
 	void ruleTotalToBuyValueChanged();
 	void ruleAmountToReceiveValueChanged();
@@ -165,10 +166,13 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void on_depthComboBoxLimitRows_currentIndexChanged(int);
+	void on_comboBoxGroupByPrice_currentIndexChanged(int);
 	void depthSelectSellOrder(int,int);
 	void depthSelectBuyOrder(int,int);
 	void setDataPending(bool);
 	void anyDataReceived();
+	void depthFirstOrder(double,double,bool);
 	void depthUpdateOrder(double,double,bool);
 	void showErrorMessage(QString);
 	void exitApp();
@@ -290,6 +294,7 @@ public slots:
 	void sellTotalBtcToSellHalfIn();
 	void sellTotalBtcToSellChanged(double);
 signals:
+	void reloadDepth();
 	void cancelOrderByOid(QByteArray);
 	void apiSell(double btc, double price);
 	void apiBuy(double btc, double price);

@@ -26,6 +26,8 @@ public:
 	~Exchange_MtGox();
 
 private:
+	bool forceDepthLoad;
+	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
 	QTime userInfoTime;
 	QMap<double,double> lastDepthAsksMap;
 	QMap<double,double> lastDepthBidsMap;
@@ -68,6 +70,7 @@ private:
 	QTimer *secondTimer;
 	void run();
 signals:
+	void depthFirstOrder(double,double,bool);
 	void depthUpdateOrder(double,double,bool);
 
 	void addLastTrade(double,qint64,double,QByteArray,bool);
@@ -100,6 +103,7 @@ signals:
 	void apiLagChanged(double);
 	void softLagChanged(int);
 private slots:
+	void reloadDepth();
 	void sslErrors(const QList<QSslError> &);
 	void dataReceivedAuth(QByteArray,int);
 	void secondSlot();
