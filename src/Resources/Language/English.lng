@@ -271,4 +271,3 @@ GroupBox_BALANCE_TOTAL_AT_LAST=Total at Last Price
 Label_ROWS_TO_DISPLAY=Rows to Display:
 Label_GROUP_BY_PRICE=Group by Price:
 String_DONT_GROUP=Don't group
-String_NO_LIMIT=No Limit

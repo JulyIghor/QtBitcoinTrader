@@ -3458,7 +3458,7 @@ p, li { white-space: pre-wrap; }
              </property>
              <item>
               <property name="text">
-               <string>No Limit</string>
+               <string>2000</string>
               </property>
              </item>
              <item>
@@ -3489,6 +3489,16 @@ p, li { white-space: pre-wrap; }
              <item>
               <property name="text">
                <string>25</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>20</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>15</string>
               </property>
              </item>
              <item>

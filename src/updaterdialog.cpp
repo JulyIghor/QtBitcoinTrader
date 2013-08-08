@@ -12,9 +12,6 @@
 #include <QMessageBox>
 #include "main.h"
 #include "julyrsa.h"
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include <QCryptographicHash>
 #include <QMessageBox>
 #include <QClipboard>
@@ -91,11 +88,6 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 		ui.autoUpdateGroupBox->setVisible(canAutoUpdate);
 		ui.changeLogText->setHtml(updateChangeLog);
 		ui.versionLabel->setText("v"+updateVersion);
-
-#ifdef Q_OS_WIN
-		if(QtWin::isCompositionEnabled())
-			QtWin::extendFrameIntoClientArea(this);
-#endif
 
 		julyTranslator->translateUi(this);
 		ui.iconLabel->setPixmap(QPixmap(":/Resources/QtBitcoinTrader.png"));

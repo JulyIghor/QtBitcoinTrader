@@ -271,4 +271,3 @@ GroupBox_BALANCE_TOTAL_AT_LAST=За останньою ціною
 Label_ROWS_TO_DISPLAY=Ліміт рядків:
 Label_GROUP_BY_PRICE=Крок групування:
 String_DONT_GROUP=Нема
-String_NO_LIMIT=Нема

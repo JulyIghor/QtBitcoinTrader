@@ -241,7 +241,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 
 				for(int n=0;n<asksList.count();n++)
 				{
-					if(depthCountLimit&&rowCounter>depthCountLimit)break;
+					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
 					QStringList currentPair=asksList.at(n).split(",");
 					if(currentPair.count()!=2)continue;
 					double priceDouble=currentPair.first().toDouble();
@@ -255,7 +255,6 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
 							groupedVolume=amount;
 							depthSubmitOrder(&currentAsksMap,groupedPrice,groupedVolume,true);
-							rowCounter++;
 						}
 						else
 						{
@@ -289,7 +288,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 
 				for(int n=0;n<bidsList.count();n++)
 				{
-					if(depthCountLimit&&rowCounter>depthCountLimit)break;
+					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
 					QStringList currentPair=bidsList.at(n).split(",");
 					if(currentPair.count()!=2)continue;
 					double priceDouble=currentPair.first().toDouble();
@@ -302,7 +301,6 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
 							groupedVolume=amount;
 							depthSubmitOrder(&currentBidsMap,groupedPrice,groupedVolume,false);
-							rowCounter++;
 						}
 						else
 						{

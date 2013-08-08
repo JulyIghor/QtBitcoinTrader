@@ -9,9 +9,6 @@
 
 #include "newpassworddialog.h"
 #include "main.h"
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include <QDesktopServices>
 #include <QUrl>
 #include <QFile>
@@ -27,10 +24,6 @@ NewPasswordDialog::NewPasswordDialog()
 	QSize minSizeHint=minimumSizeHint();
 	if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
 	setWindowFlags(Qt::WindowCloseButtonHint);
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())
-		QtWin::extendFrameIntoClientArea(this);
-#endif
 
 	julyTranslator->translateUi(this);
 

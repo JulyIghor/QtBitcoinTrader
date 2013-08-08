@@ -9,9 +9,6 @@
 
 #include "translationdialog.h"
 #include "main.h"
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDesktopServices>
@@ -25,10 +22,6 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 	setWindowFlags(Qt::Window);
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	//setFixedSize(size());
-
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
-#endif
 
 	julyTranslator->translateUi(this);
 

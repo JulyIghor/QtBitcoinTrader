@@ -216,7 +216,6 @@
     <ClCompile Include="newpassworddialog.cpp" />
     <ClCompile Include="passworddialog.cpp" />
     <ClCompile Include="qtbitcointrader.cpp" />
-    <ClCompile Include="qtwin.cpp" />
     <ClCompile Include="Release\moc_aboutdialog.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -451,7 +450,6 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qtbitcointrader.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
-    <ClInclude Include="qtwin.h" />
     <ClInclude Include="ruleholder.h" />
     <CustomBuild Include="translationdialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);%(AdditionalInputs)</AdditionalInputs>

@@ -11,10 +11,6 @@
 #include "main.h"
 #include "julyspinboxfix.h"
 
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
-
 FeeCalculator::FeeCalculator()
 	: QDialog()
 {
@@ -24,9 +20,7 @@ FeeCalculator::FeeCalculator()
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
-#endif
+
 	ui.feeValue->setValue(mainWindow.ui.accountFee->value());
 
 	ui.buyPrice->setValue(mainWindow.ui.marketBuy->value());
@@ -63,9 +57,6 @@ void FeeCalculator::setStaysOnTop(bool on)
 	if(on)setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
 	else  setWindowFlags(Qt::WindowCloseButtonHint);
 	show();
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
-#endif
 }
 
 void FeeCalculator::languageChanged()

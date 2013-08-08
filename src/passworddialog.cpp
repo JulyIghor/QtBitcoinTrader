@@ -9,10 +9,6 @@
 
 #include "passworddialog.h"
 #include "main.h"
-
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include <QDir>
 #include <QSettings>
 #include <QMessageBox>
@@ -29,9 +25,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	ui.updateCheckBox->setStyleSheet("QCheckBox {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent)}");
 	ui.okButton->setEnabled(false);
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
-#endif
+
 	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
 	ui.updateCheckBox->setChecked(settings.value("CheckForUpdates",true).toBool());
 	QString lastProfile=settings.value("LastProfile","").toString();

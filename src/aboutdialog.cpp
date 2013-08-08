@@ -9,9 +9,6 @@
 
 #include "aboutdialog.h"
 #include "main.h"
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include "translationdialog.h"
 
 TranslationAbout::TranslationAbout(QWidget *par)
@@ -22,11 +19,6 @@ TranslationAbout::TranslationAbout(QWidget *par)
 	setWindowModality(Qt::ApplicationModal);
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	//setFixedSize(size());
-
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())
-		QtWin::extendFrameIntoClientArea(this);
-#endif
 
 	julyTranslator->translateUi(this);
 	ui.languageField->setText(julyTr("LANGUAGE_NAME","Invalid Language"));

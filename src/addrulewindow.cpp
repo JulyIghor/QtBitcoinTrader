@@ -10,9 +10,6 @@
 #include "addrulewindow.h"
 #include "main.h"
 #include "julyspinboxfix.h"
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include <QMessageBox>
 
 AddRuleWindow::AddRuleWindow(QWidget *parent)
@@ -26,10 +23,6 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	amountChanged();
-
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
-#endif
 
 	mainWindow.fillAllUsdLabels(this,currencyBStr);
 

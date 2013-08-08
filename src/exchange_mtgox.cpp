@@ -383,7 +383,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				int rowCounter=0;
 				for(int n=0;n<asksList.count();n++)
 				{
-					if(depthCountLimit&&rowCounter>depthCountLimit)break;
+					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
 					QByteArray currentRow=asksList.at(n).toAscii();
 					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
 					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
@@ -396,7 +396,6 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
 							groupedVolume=amount;
 							depthSubmitOrder(&currentAsksMap,groupedPrice,groupedVolume,true);
-							rowCounter++;
 						}
 						else
 						{
@@ -429,7 +428,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				rowCounter=0;
 				for(int n=bidsList.count()-1;n>=0;n--)
 				{
-					if(depthCountLimit&&rowCounter>depthCountLimit)break;
+					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
 					QByteArray currentRow=bidsList.at(n).toAscii();
 					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
 					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
@@ -442,7 +441,6 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
 							groupedVolume=amount;
 							depthSubmitOrder(&currentBidsMap,groupedPrice,groupedVolume,false);
-							rowCounter++;
 						}
 						else
 						{

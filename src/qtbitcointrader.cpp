@@ -33,7 +33,6 @@
 #include <QSystemTrayIcon>
 
 #ifdef Q_OS_WIN
-#include "qtwin.h"
 #include "windows.h"
 #endif
 
@@ -586,19 +585,19 @@ void QtBitcoinTrader::secondSlot()
 	int zeroRow=0;
 	if(ui.comboBoxGroupByPrice->currentIndex()>0)zeroRow=2;
 
-	if(depthCountLimit)
-	{
-		if(ui.depthAsksTable->rowCount()>depthCountLimit+zeroRow)
-		{
-			depthAsksMap.remove(ui.depthAsksTable->item(ui.depthAsksTable->rowCount()-1,3)->data(Qt::UserRole).toDouble());
-			ui.depthAsksTable->removeRow(ui.depthAsksTable->rowCount()-1);
-		}
-		if(ui.depthBidsTable->rowCount()>depthCountLimit+zeroRow)
-		{
-			depthBidsMap.remove(ui.depthBidsTable->item(ui.depthBidsTable->rowCount()-1,1)->data(Qt::UserRole).toDouble());
-			ui.depthBidsTable->removeRow(ui.depthBidsTable->rowCount()-1);
-		}
-	}
+	//if(depthCountLimit)
+	//{
+	//	if(ui.depthAsksTable->rowCount()>depthCountLimit+zeroRow)
+	//	{
+	//		depthAsksMap.remove(ui.depthAsksTable->item(ui.depthAsksTable->rowCount()-1,3)->data(Qt::UserRole).toDouble());
+	//		ui.depthAsksTable->removeRow(ui.depthAsksTable->rowCount()-1);
+	//	}
+	//	if(ui.depthBidsTable->rowCount()>depthCountLimit+zeroRow)
+	//	{
+	//		depthBidsMap.remove(ui.depthBidsTable->item(ui.depthBidsTable->rowCount()-1,1)->data(Qt::UserRole).toDouble());
+	//		ui.depthBidsTable->removeRow(ui.depthBidsTable->rowCount()-1);
+	//	}
+	//}
 
 	if(ui.tabDepth->isVisible())
 	{
@@ -2486,10 +2485,6 @@ void QtBitcoinTrader::languageChanged()
 
 	ui.comboBoxGroupByPrice->setItemText(0,julyTr("DONT_GROUP","None"));
 	ui.comboBoxGroupByPrice->setMinimumWidth(qMax(textWidth(ui.comboBoxGroupByPrice->itemText(0))+ui.comboBoxGroupByPrice->height(),textWidth("50.000")));
-	ui.depthComboBoxLimitRows->setItemText(0,julyTr("NO_LIMIT","No Limit"));
-	ui.depthComboBoxLimitRows->setMinimumWidth(qMax(textWidth(ui.depthComboBoxLimitRows->itemText(0))+ui.depthComboBoxLimitRows->height(),textWidth("1000")));
-
-
 
 	ui.tableTrades->clearContents();
 	ui.tableTrades->setRowCount(0);
@@ -2545,10 +2540,6 @@ void QtBitcoinTrader::setWindowStaysOnTop(bool on)
 	if(on)setWindowFlags(Qt::Window|Qt::WindowStaysOnTopHint);
 	else  setWindowFlags(Qt::Window);
 
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())
-		QtWin::extendFrameIntoClientArea(this);
-#endif
 	show();
 }
 
@@ -2566,13 +2557,13 @@ void QtBitcoinTrader::depthFirstOrder(double price, double volume, bool isAsk)
 		currentTable->insertRow(0);
 
 		QTableWidgetItem *priceItem=new QTableWidgetItem(currencyBSign+" "+numFromDouble(price));
-		priceItem->setData(Qt::UserRole,0.0);
+		priceItem->setData(Qt::UserRole,price);
 
 		QTableWidgetItem *volumeItem=new QTableWidgetItem(currencyASign+" "+numFromDouble(volume));
-		volumeItem->setData(Qt::UserRole,0.0);
+		volumeItem->setData(Qt::UserRole,volume);
 
 		QTableWidgetItem *sizeItem=new QTableWidgetItem("");
-		sizeItem->setData(Qt::UserRole,0.0);
+		sizeItem->setData(Qt::UserRole,volume);
 
 		if(isAsk)
 		{
