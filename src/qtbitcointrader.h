@@ -166,6 +166,7 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void on_depthAutoResize_toggled(bool);
 	void on_depthComboBoxLimitRows_currentIndexChanged(int);
 	void on_comboBoxGroupByPrice_currentIndexChanged(int);
 	void depthSelectSellOrder(int,int);

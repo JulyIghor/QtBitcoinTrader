@@ -200,6 +200,19 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	httpSplitPackets=iniSettings->value("Network/HttpSplitPackets",false).toBool();
 
+	ui.depthAutoResize->setChecked(iniSettings->value("UI/DepthAutoResizeColumns",true).toBool());
+
+	if(!ui.depthAutoResize->isChecked())
+	{
+		ui.depthAsksTable->setColumnWidth(1,iniSettings->value("UI/DepthColumnAsksSizeWidth",ui.depthAsksTable->columnWidth(1)).toInt());
+		ui.depthAsksTable->setColumnWidth(2,iniSettings->value("UI/DepthColumnAsksVolumeWidth",ui.depthAsksTable->columnWidth(2)).toInt());
+		ui.depthAsksTable->setColumnWidth(3,iniSettings->value("UI/DepthColumnAsksPriceWidth",ui.depthAsksTable->columnWidth(3)).toInt());
+
+		ui.depthBidsTable->setColumnWidth(0,iniSettings->value("UI/DepthColumnBidsPriceWidth",ui.depthBidsTable->columnWidth(0)).toInt());
+		ui.depthBidsTable->setColumnWidth(1,iniSettings->value("UI/DepthColumnBidsVolumeWidth",ui.depthBidsTable->columnWidth(1)).toInt());
+		ui.depthBidsTable->setColumnWidth(2,iniSettings->value("UI/DepthColumnBidsSizeWidth",ui.depthBidsTable->columnWidth(2)).toInt());
+	}
+
 	groupPriceValue=iniSettings->value("UI/DepthGroupByPrice",0.0).toDouble();
 	if(groupPriceValue<0.0)groupPriceValue=0.0;
 	iniSettings->setValue("UI/DepthGroupByPrice",groupPriceValue);
@@ -241,6 +254,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	iniSettings->setValue("Network/HttpRequestsTimeout",httpRequestTimeout);
 	iniSettings->setValue("Network/HttpSplitPackets",httpSplitPackets);
 	iniSettings->setValue("UI/UiUpdateInterval",uiUpdateInterval);
+	iniSettings->setValue("UI/DepthAutoResizeColumns",ui.depthAutoResize->isChecked());
 
 
 	profileName=iniSettings->value("Profile/Name","Default Profile").toString();
@@ -2488,7 +2502,7 @@ void QtBitcoinTrader::languageChanged()
 			toolButton->setToolTip(julyTr("TOGGLE_SOUND","Toggle sound notification on value change"));
 
 	ui.comboBoxGroupByPrice->setItemText(0,julyTr("DONT_GROUP","None"));
-	ui.comboBoxGroupByPrice->setMinimumWidth(qMax(textWidth(ui.comboBoxGroupByPrice->itemText(0))+ui.comboBoxGroupByPrice->height(),textWidth("50.000")));
+	ui.comboBoxGroupByPrice->setMinimumWidth(qMax(textWidth(ui.comboBoxGroupByPrice->itemText(0))+(int)(ui.comboBoxGroupByPrice->height()*1.1),textWidth("50.000")));
 
 	ui.tableTrades->clearContents();
 	ui.tableTrades->setRowCount(0);
@@ -2767,6 +2781,18 @@ void QtBitcoinTrader::exitApp()
 
 	iniSettings->setValue("UI/WindowOnTop",ui.widgetStaysOnTop->isChecked());
 
+	iniSettings->setValue("UI/DepthAutoResizeColumns",ui.depthAutoResize->isChecked());
+	if(!ui.depthAutoResize->isChecked())
+	{
+		iniSettings->setValue("UI/DepthColumnAsksSizeWidth",ui.depthAsksTable->columnWidth(1));
+		iniSettings->setValue("UI/DepthColumnAsksVolumeWidth",ui.depthAsksTable->columnWidth(2));
+		iniSettings->setValue("UI/DepthColumnAsksPriceWidth",ui.depthAsksTable->columnWidth(3));
+
+		iniSettings->setValue("UI/DepthColumnBidsPriceWidth",ui.depthBidsTable->columnWidth(0));
+		iniSettings->setValue("UI/DepthColumnBidsVolumeWidth",ui.depthBidsTable->columnWidth(1));
+		iniSettings->setValue("UI/DepthColumnBidsSizeWidth",ui.depthBidsTable->columnWidth(2));
+	}
+
 	saveWindowState(this,"Window");
 	iniSettings->sync();
 
@@ -2787,4 +2813,32 @@ void QtBitcoinTrader::on_comboBoxGroupByPrice_currentIndexChanged(int val)
 	iniSettings->setValue("UI/DepthGroupByPrice",groupPriceValue);
 	iniSettings->sync();
 	clearDepth();
+}
+
+
+
+void QtBitcoinTrader::on_depthAutoResize_toggled(bool on)
+{
+	if(on)
+	{
+	ui.depthAsksTable->horizontalHeader()->showSection(0);
+	ui.depthBidsTable->horizontalHeader()->showSection(3);
+
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
+
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
+	}
+	else
+	{
+	ui.depthAsksTable->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+	ui.depthBidsTable->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+	ui.depthAsksTable->horizontalHeader()->hideSection(0);
+	ui.depthBidsTable->horizontalHeader()->hideSection(3);
+	}
 }
