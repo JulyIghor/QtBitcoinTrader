@@ -56,7 +56,9 @@
 #define apiDownCount (*apiDownCount_)
 #define textWidth(text) fontMetrics_->width(text)
 #define groupPriceValue (*groupPriceValue_)
+#define depthRefreshBlocked (*depthRefreshBlocked_)
 
+extern bool *depthRefreshBlocked_;
 extern double *groupPriceValue_;
 extern QFontMetrics *fontMetrics_;
 extern int *apiDownCount_;

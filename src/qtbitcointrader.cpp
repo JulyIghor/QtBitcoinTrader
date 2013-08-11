@@ -139,20 +139,13 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	iniSettings=new QSettings(iniFileName,QSettings::IniFormat,this);
 
-	profileName=iniSettings->value("ProfileName","Default Profile").toString();
-	windowTitleP=profileName+" - "+windowTitle()+" v"+appVerStr;
-	if(isLogEnabled)windowTitleP.append(" [DEBUG MODE]");
-	else if(appVerIsBeta)windowTitleP.append(" [BETA]");
+	ui.accountBTCBeep->setChecked(iniSettings->value("Sounds/AccountBTCBeep",false).toBool());
+	ui.accountUSDBeep->setChecked(iniSettings->value("Sounds/AccountUSDBeep",false).toBool());
+	ui.marketHighBeep->setChecked(iniSettings->value("Sounds/MarketHighBeep",false).toBool());
+	ui.marketLowBeep->setChecked(iniSettings->value("Sounds/MarketLowBeep",false).toBool());
+	ui.ruleBeep->setChecked(iniSettings->value("Sounds/RuleExecutedBeep",false).toBool());
 
-	setWindowTitle(windowTitleP);
-
-	ui.accountBTCBeep->setChecked(iniSettings->value("AccountBTCBeep",false).toBool());
-	ui.accountUSDBeep->setChecked(iniSettings->value("AccountUSDBeep",false).toBool());
-	ui.marketHighBeep->setChecked(iniSettings->value("MarketHighBeep",false).toBool());
-	ui.marketLowBeep->setChecked(iniSettings->value("MarketLowBeep",false).toBool());
-	ui.ruleBeep->setChecked(iniSettings->value("RuleExecutedBeep",false).toBool());
-
-	ui.minimizeOnCloseCheckBox->setChecked(iniSettings->value("CloseToTray",false).toBool());
+	ui.minimizeOnCloseCheckBox->setChecked(iniSettings->value("UI/CloseToTray",false).toBool());
 
 	ordersSelectionChanged();
 
@@ -176,7 +169,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
-	QSettings settingsMain(appDataDir+"/Settings.set",QSettings::IniFormat);
+	QSettings settingsMain(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	checkForUpdates=settingsMain.value("CheckForUpdates",true).toBool();
 
 	int defTextHeight=fontMetrics_->boundingRect("0123456789").height();
@@ -184,8 +177,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(defaultSectionSize<defTextHeight)defaultSectionSize=defTextHeight;
 	settingsMain.setValue("RowHeight",defaultSectionSize);
 
-	depthCountLimit=iniSettings->value("DepthCountLimit",100).toInt();
-	if(depthCountLimit<0)depthCountLimit=0;
+	depthCountLimit=iniSettings->value("UI/DepthCountLimit",100).toInt();
+	if(depthCountLimit<0)depthCountLimit=100;
 	int currentDepthComboBoxLimitIndex=0;
 	for(int n=0;n<ui.depthComboBoxLimitRows->count();n++)
 	{
@@ -195,21 +188,21 @@ QtBitcoinTrader::QtBitcoinTrader()
 	}
 	ui.depthComboBoxLimitRows->setCurrentIndex(currentDepthComboBoxLimitIndex);
 
-	apiDownCount=settingsMain.value("ApiDownCount",5).toInt();
+	apiDownCount=iniSettings->value("Network/ApiDownCounterMax",5).toInt();
 	if(apiDownCount<0)apiDownCount=5;
-	settingsMain.setValue("ApiDownCount",apiDownCount);
+	iniSettings->setValue("Network/ApiDownCounterMax",apiDownCount);
 
-	httpRequestInterval=iniSettings->value("HttpRequestsInterval",500).toInt();
-	httpRequestTimeout=iniSettings->value("HttpRequestsTimeout",1500).toInt();
+	httpRequestInterval=iniSettings->value("Network/HttpRequestsInterval",500).toInt();
+	httpRequestTimeout=iniSettings->value("Network/HttpRequestsTimeout",3000).toInt();
 
-	uiUpdateInterval=iniSettings->value("UiUpdateInterval",100).toInt();
+	uiUpdateInterval=iniSettings->value("UI/UiUpdateInterval",100).toInt();
 	if(uiUpdateInterval<1)uiUpdateInterval=100;
 
-	httpSplitPackets=iniSettings->value("HttpSplitPackets",false).toBool();
+	httpSplitPackets=iniSettings->value("Network/HttpSplitPackets",false).toBool();
 
-	groupPriceValue=iniSettings->value("DepthGroupByPrice",0.0).toDouble();
+	groupPriceValue=iniSettings->value("UI/DepthGroupByPrice",0.0).toDouble();
 	if(groupPriceValue<0.0)groupPriceValue=0.0;
-	iniSettings->setValue("DepthGroupByPrice",groupPriceValue);
+	iniSettings->setValue("UI/DepthGroupByPrice",groupPriceValue);
 
 	int currentDepthComboBoxIndex=0;
 	for(int n=0;n<ui.comboBoxGroupByPrice->count();n++)
@@ -221,21 +214,41 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.comboBoxGroupByPrice->setCurrentIndex(currentDepthComboBoxIndex);
 
 
-	if(appVerLastReal<1.0733)
+	if(appVerLastReal<1.0763)
 	{
 		httpRequestInterval=500;
-		httpRequestTimeout=1500;
+		httpRequestTimeout=3000;
 		httpSplitPackets=false;
 		settingsMain.remove("HttpConnectionsCount");
 		settingsMain.remove("HttpSwapSocketAfterPacketsCount");
+		settingsMain.remove("HttpRequestsInterval");
+		settingsMain.remove("HttpRequestsTimeout");
+		settingsMain.remove("DepthCountLimit");
+		settingsMain.remove("UiUpdateInterval");
+		settingsMain.remove("LogEnabled");
+		settingsMain.remove("RowHeight");
+		settingsMain.remove("ApiDownCount");
+		settingsMain.remove("Network/HttpSplitPackets");
+		QStringList oldKeys=iniSettings->childKeys();
+		for(int n=0;n<oldKeys.count();n++)iniSettings->remove(oldKeys.at(n));
+
+		iniSettings->sync();
 	}
 	if(httpRequestInterval<50)httpRequestInterval=500;
-	if(httpRequestTimeout<100)httpRequestTimeout=1500;
+	if(httpRequestTimeout<100)httpRequestTimeout=3000;
 
-	iniSettings->setValue("HttpRequestsInterval",httpRequestInterval);
-	iniSettings->setValue("HttpRequestsTimeout",httpRequestTimeout);
-	iniSettings->setValue("HttpSplitPackets",httpSplitPackets);
-	iniSettings->setValue("UiUpdateInterval",uiUpdateInterval);
+	iniSettings->setValue("Network/HttpRequestsInterval",httpRequestInterval);
+	iniSettings->setValue("Network/HttpRequestsTimeout",httpRequestTimeout);
+	iniSettings->setValue("Network/HttpSplitPackets",httpSplitPackets);
+	iniSettings->setValue("UI/UiUpdateInterval",uiUpdateInterval);
+
+
+	profileName=iniSettings->value("Profile/Name","Default Profile").toString();
+	windowTitleP=profileName+" - "+windowTitle()+" v"+appVerStr;
+	if(isLogEnabled)windowTitleP.append(" [DEBUG MODE]");
+	else if(appVerIsBeta)windowTitleP.append(" [BETA]");
+
+	setWindowTitle(windowTitleP);
 
 	foreach(QTableWidget* tables, findChildren<QTableWidget*>())
 	{
@@ -266,19 +279,15 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tabDepth->installEventFilter(this);
 	ui.balanceTotalWidget->installEventFilter(this);
 
-	exchangeId=iniSettings->value("ExchangeId",0).toInt();
+	exchangeId=iniSettings->value("Profile/ExchangeId",0).toInt();
 
 	setApiDown(false);
 
 	accountFeeChanged(ui.accountFee->value());
 
-	int indexCurrency=ui.currencyComboBox->findText(iniSettings->value("Currency","BTC/USD").toString());
-	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
-
 	reloadLanguageList();
 
 	checkValidRulesButtons();
-	currencyChanged(ui.currencyComboBox->currentIndex());
 	connect(julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
 
 	if(checkForUpdates)QProcess::startDetached(QApplication::applicationFilePath(),QStringList("/checkupdate"));
@@ -407,6 +416,8 @@ bool QtBitcoinTrader::isValidGeometry(QRect *geo, int yMargin)
 
 void QtBitcoinTrader::loadUiSettings()
 {
+	QString savedCurrency=iniSettings->value("Profile/Currency","BTC/USD").toString();
+	int indexCurrency=-1;
 	switch(exchangeId)
 	{
 	case 1:
@@ -431,6 +442,7 @@ void QtBitcoinTrader::loadUiSettings()
 				if(curDataList.count()!=5)continue;
 				QString curName=curDataList.first();
 				curDataList.removeFirst();
+				if(curName==savedCurrency)indexCurrency=ui.currencyComboBox->count();
 				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
 			}
 
@@ -451,27 +463,30 @@ void QtBitcoinTrader::loadUiSettings()
 				if(curDataList.count()!=5)continue;
 				QString curName=curDataList.first();
 				curDataList.removeFirst();
+				if(curName==savedCurrency)indexCurrency=ui.currencyComboBox->count();
 				ui.currencyComboBox->insertItem(ui.currencyComboBox->count(),curName,curDataList);
 			}
 
 			exchangeName="Mt.Gox"; (new Exchange_MtGox(restSign,restKey))->setupApi(this,false);
 		}
 	}
+	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
+	currencyChanged(ui.currencyComboBox->currentIndex());
 
-	if(iniSettings->value("DetachedLog",isDetachedLog).toBool())detachLog();
+	if(iniSettings->value("UI/DetachedLog",isDetachedLog).toBool())detachLog();
 
-	if(iniSettings->value("DetachedRules",isDetachedRules).toBool())detachRules();
+	if(iniSettings->value("UI/DetachedRules",isDetachedRules).toBool())detachRules();
 	
-	if(iniSettings->value("DetachedTrades",isDetachedRules).toBool())detachTrades();
+	if(iniSettings->value("UI/DetachedTrades",isDetachedRules).toBool())detachTrades();
 
-	if(iniSettings->value("DetachedDepth",isDetachedDepth).toBool())detachDepth();
+	if(iniSettings->value("UI/DetachedDepth",isDetachedDepth).toBool())detachDepth();
 
-	if(iniSettings->value("DetachedCharts",isDetachedRules).toBool())detachCharts();
+	if(iniSettings->value("UI/DetachedCharts",isDetachedRules).toBool())detachCharts();
 	
-	int savedTab=iniSettings->value("TradesCurrentTab",0).toInt();
+	int savedTab=iniSettings->value("UI/TradesCurrentTab",0).toInt();
 	if(savedTab<ui.tabWidget->count())ui.tabWidget->setCurrentIndex(savedTab);
 
-	ui.widgetStaysOnTop->setChecked(iniSettings->value("WindowOnTop",false).toBool());
+	ui.widgetStaysOnTop->setChecked(iniSettings->value("UI/WindowOnTop",false).toBool());
 
 	loadWindowState(this,"Window");
 	iniSettings->sync();
@@ -578,48 +593,37 @@ void QtBitcoinTrader::secondSlot()
 	else
 	if(execCount==1||execCount==3||execCount==5)
 	{
-		setSoftLagValue(softLagTime.elapsed());
-		if(ui.tabDepth->isVisible())ui.depthLag->setValue(depthLagTime.elapsed()/1000.0);
+		int currentElapsed=softLagTime.elapsed();
+		setSoftLagValue(currentElapsed);
+		depthRefreshBlocked=currentElapsed<=400;
+		if(ui.tabDepth->isVisible())ui.depthLag->setValue(currentElapsed/1000.0);
 	}
 
-	int zeroRow=0;
-	if(ui.comboBoxGroupByPrice->currentIndex()>0)zeroRow=2;
-
-	//if(depthCountLimit)
-	//{
-	//	if(ui.depthAsksTable->rowCount()>depthCountLimit+zeroRow)
-	//	{
-	//		depthAsksMap.remove(ui.depthAsksTable->item(ui.depthAsksTable->rowCount()-1,3)->data(Qt::UserRole).toDouble());
-	//		ui.depthAsksTable->removeRow(ui.depthAsksTable->rowCount()-1);
-	//	}
-	//	if(ui.depthBidsTable->rowCount()>depthCountLimit+zeroRow)
-	//	{
-	//		depthBidsMap.remove(ui.depthBidsTable->item(ui.depthBidsTable->rowCount()-1,1)->data(Qt::UserRole).toDouble());
-	//		ui.depthBidsTable->removeRow(ui.depthBidsTable->rowCount()-1);
-	//	}
-	//}
+	if(depthLagTime.elapsed()>500)
+	{
+	int zeroRow=ui.comboBoxGroupByPrice->currentIndex()>0?2:0;
 
 	if(ui.tabDepth->isVisible())
 	{
 	int currentDepthAsksScrollValue=ui.depthAsksTable->verticalScrollBar()->value();
-	if(currentDepthAsksScrollValue>depthAsksLastScrollValue)depthCurrentAsksSyncIndex=0;
+	if(currentDepthAsksScrollValue>depthAsksLastScrollValue)depthCurrentAsksSyncIndex=zeroRow;
 	depthAsksLastScrollValue=currentDepthAsksScrollValue;
 
-	if(depthCurrentAsksSyncIndex>-1)
+	if(depthCurrentAsksSyncIndex>zeroRow-1)
 		for(int n=0;n<5;n++)
-			if(depthCurrentAsksSyncIndex>-1+zeroRow)
+			if(depthCurrentAsksSyncIndex>zeroRow-1)
 			{
-				if(depthCurrentAsksSyncIndex==0)depthAsksIncVolume=0.0;
+				if(depthCurrentAsksSyncIndex<=zeroRow)depthAsksIncVolume=0.0;
 				if(depthCurrentAsksSyncIndex>=ui.depthAsksTable->rowCount())
 				{
-					depthCurrentAsksSyncIndex=-1;
+					depthCurrentAsksSyncIndex=zeroRow-1;
 					break;
 				}
 				else
 				{
 					if(depthCurrentAsksSyncIndex>qMin((int)(ui.depthAsksTable->height()/defaultSectionSize+currentDepthAsksScrollValue/(double)defaultSectionSize+1),ui.depthAsksTable->rowCount()))
 					{
-						depthCurrentAsksSyncIndex=-1;
+						depthCurrentAsksSyncIndex=zeroRow-1;
 						break;
 					}
 					depthAsksIncVolume+=ui.depthAsksTable->item(depthCurrentAsksSyncIndex,2)->data(Qt::UserRole).toDouble();
@@ -629,26 +633,25 @@ void QtBitcoinTrader::secondSlot()
 				}
 			}
 
-
 	int currentDepthBidsScrollValue=ui.depthBidsTable->verticalScrollBar()->value();
-	if(currentDepthBidsScrollValue>depthBidsLastScrollValue)depthCurrentBidsSyncIndex=0;
+	if(currentDepthBidsScrollValue>depthBidsLastScrollValue)depthCurrentBidsSyncIndex=zeroRow;
 	depthBidsLastScrollValue=currentDepthBidsScrollValue;
 
 	if(depthCurrentBidsSyncIndex>-1+zeroRow)
 		for(int n=0;n<5;n++)
-			if(depthCurrentBidsSyncIndex>-1)
+			if(depthCurrentBidsSyncIndex>zeroRow-1)
 			{
-				if(depthCurrentBidsSyncIndex==0)depthBidsIncVolume=0.0;
+				if(depthCurrentBidsSyncIndex<=zeroRow)depthBidsIncVolume=0.0;
 				if(depthCurrentBidsSyncIndex>=ui.depthBidsTable->rowCount())
 				{
-					depthCurrentBidsSyncIndex=-1;
+					depthCurrentBidsSyncIndex=zeroRow-1;
 					break;
 				}
 				else
 				{
 					if(depthCurrentBidsSyncIndex>qMin((int)(ui.depthBidsTable->height()/defaultSectionSize+currentDepthBidsScrollValue/(double)defaultSectionSize+1),ui.depthBidsTable->rowCount()))
 					{
-						depthCurrentBidsSyncIndex=-1;
+						depthCurrentBidsSyncIndex=zeroRow-1;
 						break;
 					}
 					depthBidsIncVolume+=ui.depthBidsTable->item(depthCurrentBidsSyncIndex,1)->data(Qt::UserRole).toDouble();
@@ -657,6 +660,7 @@ void QtBitcoinTrader::secondSlot()
 					depthCurrentBidsSyncIndex++;
 				}
 			}
+	}
 	}
 
 	if(++execCount>5)execCount=0;
@@ -778,7 +782,7 @@ void QtBitcoinTrader::languageComboBoxChanged(int val)
 	QString loadFromFile=ui.langComboBox->itemData(val,Qt::UserRole).toString();
 	if(loadFromFile.isEmpty())return;
 	julyTranslator->loadFromFile(loadFromFile);
-	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	settings.setValue("LanguageFile",loadFromFile);
 }
 
@@ -873,7 +877,7 @@ void QtBitcoinTrader::currencyChanged(int val)
 	minTradeVolume=curDataList.at(2).toDouble();
 	minTradePrice=curDataList.at(3).toDouble();
 
-	iniSettings->setValue("Currency",ui.currencyComboBox->currentText());
+	iniSettings->setValue("Profile/Currency",ui.currencyComboBox->currentText());
 	if(currencyAChanged)ui.accountBTC->setValue(0.0);
 	if(currencyBChanged)ui.accountUSD->setValue(0.0);
 	ui.marketBuy->setValue(0.0);
@@ -1096,11 +1100,11 @@ QString QtBitcoinTrader::clearData(QString data)
 void QtBitcoinTrader::saveSoundToggles()
 {
 	if(!constructorFinished)return;
-	iniSettings->setValue("AccountBTCBeep",ui.accountBTCBeep->isChecked());
-	iniSettings->setValue("AccountUSDBeep",ui.accountUSDBeep->isChecked());
-	iniSettings->setValue("MarketHighBeep",ui.marketHighBeep->isChecked());
-	iniSettings->setValue("MarketLowBeep",ui.marketLowBeep->isChecked());
-	iniSettings->setValue("RuleExecutedBeep",ui.ruleBeep->isChecked());
+	iniSettings->setValue("Sounds/AccountBTCBeep",ui.accountBTCBeep->isChecked());
+	iniSettings->setValue("Sounds/AccountUSDBeep",ui.accountUSDBeep->isChecked());
+	iniSettings->setValue("Sounds/MarketHighBeep",ui.marketHighBeep->isChecked());
+	iniSettings->setValue("Sounds/MarketLowBeep",ui.marketLowBeep->isChecked());
+	iniSettings->setValue("Sounds/RuleExecutedBeep",ui.ruleBeep->isChecked());
 	iniSettings->sync();
 }
 
@@ -1792,31 +1796,31 @@ void QtBitcoinTrader::closeEvent(QCloseEvent *event)
 void QtBitcoinTrader::saveWindowState(QWidget *par, QString name)
 {
 	bool windowMaximized=par->windowState()==Qt::WindowMaximized;
-	iniSettings->setValue(name+"Maximized",windowMaximized);
-	if(windowMaximized)iniSettings->setValue(name+"Geometry",rectInRect(par->geometry(),par->minimumSizeHint()));
-	else	   iniSettings->setValue(name+"Geometry",QRect(par->x(),par->y(),par->width(),par->height()));
+	iniSettings->setValue("UI/"+name+"Maximized",windowMaximized);
+	if(windowMaximized)iniSettings->setValue("UI/"+name+"Geometry",rectInRect(par->geometry(),par->minimumSizeHint()));
+	else	   iniSettings->setValue("UI/"+name+"Geometry",QRect(par->x(),par->y(),par->width(),par->height()));
 }
 
 void QtBitcoinTrader::loadWindowState(QWidget *par, QString name)
 {
-	QRect savedGeometry=iniSettings->value(name+"Geometry",par->geometry()).toRect();
+	QRect savedGeometry=iniSettings->value("UI/"+name+"Geometry",par->geometry()).toRect();
 	if(isValidGeometry(&savedGeometry,0))
 	{
 		par->resize(savedGeometry.size());
 		par->move(savedGeometry.topLeft());
 	}
-	if(iniSettings->value(name+"Maximized",false).toBool())par->setWindowState(Qt::WindowMaximized);
+	if(iniSettings->value("UI/"+name+"Maximized",false).toBool())par->setWindowState(Qt::WindowMaximized);
 }
 
 void QtBitcoinTrader::saveDetachedWindowsSettings(bool force)
 {
 	if(!force)
 	{
-	iniSettings->setValue("DetachedLog",isDetachedLog);
-	iniSettings->setValue("DetachedRules",isDetachedRules);
-	iniSettings->setValue("DetachedTrades",isDetachedTrades);
-	iniSettings->setValue("DetachedDepth",isDetachedDepth);
-	iniSettings->setValue("DetachedCharts",isDetachedCharts);
+	iniSettings->setValue("UI/DetachedLog",isDetachedLog);
+	iniSettings->setValue("UI/DetachedRules",isDetachedRules);
+	iniSettings->setValue("UI/DetachedTrades",isDetachedTrades);
+	iniSettings->setValue("UI/DetachedDepth",isDetachedDepth);
+	iniSettings->setValue("UI/DetachedCharts",isDetachedCharts);
 	}
 	if(isDetachedLog)saveWindowState(ui.tabOrdersLog,"DetachedLog");
 	if(isDetachedRules)saveWindowState(ui.tabRules,"DetachedRules");
@@ -1824,11 +1828,11 @@ void QtBitcoinTrader::saveDetachedWindowsSettings(bool force)
 	if(isDetachedDepth)saveWindowState(ui.tabDepth,"DetachedDepth");
 	if(isDetachedCharts)saveWindowState(ui.tabCharts,"DetachedCharts");
 
-	iniSettings->setValue("TabLogOrdersOnTop",ui.tabOrdersLogOnTop->isChecked());
-	iniSettings->setValue("TabRulesOnTop",ui.tabRulesOnTop->isChecked());
-	iniSettings->setValue("TabTradesOnTop",ui.tabTradesOnTop->isChecked());
-	iniSettings->setValue("TabDepthOnTop",ui.tabDepthOnTop->isChecked());
-	iniSettings->setValue("TabChartsOnTop",ui.tabChartsOnTop->isChecked());
+	iniSettings->setValue("UI/TabLogOrdersOnTop",ui.tabOrdersLogOnTop->isChecked());
+	iniSettings->setValue("UI/TabRulesOnTop",ui.tabRulesOnTop->isChecked());
+	iniSettings->setValue("UI/TabTradesOnTop",ui.tabTradesOnTop->isChecked());
+	iniSettings->setValue("UI/TabDepthOnTop",ui.tabDepthOnTop->isChecked());
+	iniSettings->setValue("UI/TabChartsOnTop",ui.tabChartsOnTop->isChecked());
 
 	iniSettings->sync();
 }
@@ -2266,8 +2270,8 @@ void QtBitcoinTrader::detachLog()
 	ui.tabOrdersLog->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachOrdersLog->setVisible(false);
 	ui.tabOrdersLogOnTop->setVisible(true);
-	loadWindowState(ui.tabOrdersLog,"DetachedLog");
-	ui.tabOrdersLogOnTop->setChecked(iniSettings->value("TabLogOrdersOnTop",false).toBool());
+	loadWindowState(ui.tabOrdersLog,"UI/DetachedLog");
+	ui.tabOrdersLogOnTop->setChecked(iniSettings->value("UI/TabLogOrdersOnTop",false).toBool());
 	isDetachedLog=true;
 	tabLogOrdersOnTop(ui.tabOrdersLogOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -2279,8 +2283,8 @@ void QtBitcoinTrader::detachRules()
 	ui.tabRules->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachRules->setVisible(false);
 	ui.tabRulesOnTop->setVisible(true);
-	loadWindowState(ui.tabRules,"DetachedRules");
-	ui.tabRulesOnTop->setChecked(iniSettings->value("TabRulesOnTop",false).toBool());
+	loadWindowState(ui.tabRules,"UI/DetachedRules");
+	ui.tabRulesOnTop->setChecked(iniSettings->value("UI/TabRulesOnTop",false).toBool());
 	isDetachedRules=true;
 	tabRulesOnTop(ui.tabRulesOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -2292,8 +2296,8 @@ void QtBitcoinTrader::detachTrades()
 	ui.tabLastTrades->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachTrades->setVisible(false);
 	ui.tabTradesOnTop->setVisible(true);
-	loadWindowState(ui.tabLastTrades,"DetachedTrades");
-	ui.tabTradesOnTop->setChecked(iniSettings->value("TabTradesOnTop",false).toBool());
+	loadWindowState(ui.tabLastTrades,"UI/DetachedTrades");
+	ui.tabTradesOnTop->setChecked(iniSettings->value("UI/TabTradesOnTop",false).toBool());
 	isDetachedTrades=true;
 	tabTradesOnTop(ui.tabTradesOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -2305,8 +2309,8 @@ void QtBitcoinTrader::detachDepth()
 	ui.tabDepth->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachDepth->setVisible(false);
 	ui.tabDepthOnTop->setVisible(true);
-	loadWindowState(ui.tabDepth,"DetachedDepth");
-	ui.tabDepthOnTop->setChecked(iniSettings->value("TabDepthOnTop",false).toBool());
+	loadWindowState(ui.tabDepth,"UI/DetachedDepth");
+	ui.tabDepthOnTop->setChecked(iniSettings->value("UI/TabDepthOnTop",false).toBool());
 	isDetachedDepth=true;
 	tabDepthOnTop(ui.tabDepthOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -2320,8 +2324,8 @@ void QtBitcoinTrader::detachCharts()
 	ui.tabCharts->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachCharts->setVisible(false);
 	ui.tabChartsOnTop->setVisible(true);
-	loadWindowState(ui.tabCharts,"DetachedCharts");
-	ui.tabChartsOnTop->setChecked(iniSettings->value("TabChartsOnTop",false).toBool());
+	loadWindowState(ui.tabCharts,"UI/DetachedCharts");
+	ui.tabChartsOnTop->setChecked(iniSettings->value("UI/TabChartsOnTop",false).toBool());
 	isDetachedCharts=true;
 	tabChartsOnTop(ui.tabChartsOnTop->isChecked());
 	checkIsTabWidgetVisible();
@@ -2677,7 +2681,7 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 		else if(volume<1000.0)volumeItem->setTextColor(Qt::blue);
 		else volumeItem->setTextColor(Qt::red);
 
-		QTableWidgetItem *sizeItem=new QTableWidgetItem(volumeItem->text());
+		QTableWidgetItem *sizeItem=new QTableWidgetItem("");
 		sizeItem->setData(Qt::UserRole,volume);
 
 		if(isAsk)
@@ -2741,8 +2745,16 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 			}
 		}
 	}
-	if(isAsk)depthCurrentAsksSyncIndex=0;
-	else depthCurrentBidsSyncIndex=0;
+	if(isAsk)
+	{
+		depthAsksIncVolume=0.0;
+		depthCurrentAsksSyncIndex=zeroRow;
+	}
+	else
+	{
+		depthBidsIncVolume=0.0;
+		depthCurrentBidsSyncIndex=zeroRow;
+	}
 }
 
 void QtBitcoinTrader::exitApp()
@@ -2750,10 +2762,10 @@ void QtBitcoinTrader::exitApp()
 	if(trayIcon)trayIcon->hide();
 
 	saveDetachedWindowsSettings();
-	iniSettings->setValue("TradesCurrentTab",ui.tabWidget->currentIndex());
-	iniSettings->setValue("CloseToTray",ui.minimizeOnCloseCheckBox->isChecked());
+	iniSettings->setValue("UI/TradesCurrentTab",ui.tabWidget->currentIndex());
+	iniSettings->setValue("UI/CloseToTray",ui.minimizeOnCloseCheckBox->isChecked());
 
-	iniSettings->setValue("WindowOnTop",ui.widgetStaysOnTop->isChecked());
+	iniSettings->setValue("UI/WindowOnTop",ui.widgetStaysOnTop->isChecked());
 
 	saveWindowState(this,"Window");
 	iniSettings->sync();
@@ -2764,7 +2776,7 @@ void QtBitcoinTrader::exitApp()
 void QtBitcoinTrader::on_depthComboBoxLimitRows_currentIndexChanged(int val)
 {
 	depthCountLimit=ui.depthComboBoxLimitRows->itemData(val,Qt::UserRole).toInt();
-	iniSettings->setValue("DepthCountLimit",depthCountLimit);
+	iniSettings->setValue("UI/DepthCountLimit",depthCountLimit);
 	iniSettings->sync();
 	clearDepth();
 }
@@ -2772,7 +2784,7 @@ void QtBitcoinTrader::on_depthComboBoxLimitRows_currentIndexChanged(int val)
 void QtBitcoinTrader::on_comboBoxGroupByPrice_currentIndexChanged(int val)
 {
 	groupPriceValue=ui.comboBoxGroupByPrice->itemData(val,Qt::UserRole).toDouble();
-	iniSettings->setValue("DepthGroupByPrice",groupPriceValue);
+	iniSettings->setValue("UI/DepthGroupByPrice",groupPriceValue);
 	iniSettings->sync();
 	clearDepth();
 }

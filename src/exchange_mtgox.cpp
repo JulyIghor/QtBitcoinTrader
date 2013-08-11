@@ -146,7 +146,7 @@ void Exchange_MtGox::secondSlot()
 
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,currencyRequestPair+"/money/orders",true,httpSplitPackets);
 
-	if(forceDepthLoad||infoCounter==3&&!isReplayPending(111))
+	if(!depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
 	{
 		sendToApi(111,currencyRequestPair+"/money/depth/fetch",false,httpSplitPackets);
 		forceDepthLoad=false;

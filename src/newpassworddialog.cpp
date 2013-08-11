@@ -134,7 +134,7 @@ void NewPasswordDialog::updateIniFileName()
 	else
 	iniFileName=appDataDir+ui.profileNameEdit->text().toAscii()+".ini";
 
-	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	settings.setValue("LastProfile",iniFileName);
 }
 

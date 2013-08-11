@@ -68,6 +68,7 @@ int *uiUpdateInterval_;
 int *apiDownCount_;
 QFontMetrics *fontMetrics_;
 double *groupPriceValue_;
+bool *depthRefreshBlocked_;
 
 void pickDefaultLangFile()
 {
@@ -96,7 +97,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0762");
+	appVerStr_=new QByteArray("1.0763");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -123,6 +124,7 @@ int main(int argc, char *argv[])
 	priceDecimals_=new int(5);
 	depthCountLimit_=new int(100);
 	uiUpdateInterval_=new int(100);
+	depthRefreshBlocked_=new bool(false);
 
 	minTradePrice_=new double(0.01);
 	minTradeVolume_=new double(0.01);
@@ -161,6 +163,12 @@ int main(int argc, char *argv[])
 	appDataDir=QDesktopServices::storageLocation(QDesktopServices::HomeLocation).toAscii()+"/.config/QtBitcoinTrader/";
 	if(!QFile::exists(appDataDir))QDir().mkpath(appDataDir);
 #endif
+
+	if(appVerLastReal<1.0763)
+	{
+		QFile::rename(appDataDir+"/Settings.set",appDataDir+"/QtBitcoinTrader.cfg");
+	}
+
 	
     if(argc>1)
 	{
@@ -168,7 +176,7 @@ int main(int argc, char *argv[])
 		{
 			a.setStyleSheet(globalStyleSheet);
 
-			QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+			QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 			QString langFile=settings.value("LanguageFile","").toString();
 			if(langFile.isEmpty()||!langFile.isEmpty()&&!QFile::exists(langFile))langFile=defaultLangFile;
 			julyTranslator->loadFromFile(langFile);
@@ -193,34 +201,33 @@ int main(int argc, char *argv[])
 
 	{
 		QNetworkProxy proxy;
-		QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+		QSettings settingsMain(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 
 		bool plastiqueStyle=false;
 #ifndef Q_OS_WIN
 		plastiqueStyle=true;
 #endif
-		plastiqueStyle=settings.value("PlastiqueStyle",plastiqueStyle).toBool();
-		settings.setValue("PlastiqueStyle",plastiqueStyle);
+		plastiqueStyle=settingsMain.value("PlastiqueStyle",plastiqueStyle).toBool();
+		settingsMain.setValue("PlastiqueStyle",plastiqueStyle);
 		if(plastiqueStyle)a.setStyle(new QPlastiqueStyle);
 
-		settings.beginGroup("Proxy");
+		settingsMain.beginGroup("Proxy");
 
-		bool proxyEnabled=settings.value("Enabled",true).toBool();
-		bool proxyAuto=settings.value("Auto",true).toBool();
-		QString proxyHost=settings.value("Host","127.0.0.1").toString();
-		quint16 proxyPort=settings.value("Port",1234).toInt();
-		QString proxyUser=settings.value("User","username").toString();
-		QString proxyPassword=settings.value("Password","password").toString();
+		bool proxyEnabled=settingsMain.value("Enabled",true).toBool();
+		bool proxyAuto=settingsMain.value("Auto",true).toBool();
+		QString proxyHost=settingsMain.value("Host","127.0.0.1").toString();
+		quint16 proxyPort=settingsMain.value("Port",1234).toInt();
+		QString proxyUser=settingsMain.value("User","username").toString();
+		QString proxyPassword=settingsMain.value("Password","password").toString();
 
+		settingsMain.setValue("Enabled",proxyEnabled);
+		settingsMain.setValue("Auto",proxyAuto);
+		settingsMain.setValue("Host",proxyHost);
+		settingsMain.setValue("Port",proxyPort);
+		settingsMain.setValue("User",proxyUser);
+		settingsMain.setValue("Password",proxyPassword);
 
-		settings.setValue("Enabled",proxyEnabled);
-		settings.setValue("Auto",proxyAuto);
-		settings.setValue("Host",proxyHost);
-		settings.setValue("Port",proxyPort);
-		settings.setValue("User",proxyUser);
-		settings.setValue("Password",proxyPassword);
-
-		settings.endGroup();
+		settingsMain.endGroup();
 		if(proxyEnabled)
 		{
 			if(proxyAuto)
@@ -259,10 +266,9 @@ int main(int argc, char *argv[])
 			currencySignMap->insert(currencyName.at(0).toAscii(),currencyName.at(2).toAscii());
 		}
 		if(!QFile::exists(appDataDir+"Language"))QDir().mkpath(appDataDir+"Language");
-		QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
-		QString langFile=settings.value("LanguageFile","").toString();
-		appVerLastReal=settings.value("Version",1.0).toDouble();
-		settings.setValue("Version",appVerReal);
+		QString langFile=settingsMain.value("LanguageFile","").toString();
+		appVerLastReal=settingsMain.value("Version",1.0).toDouble();
+		settingsMain.setValue("Version",appVerReal);
 		if(langFile.isEmpty()||!langFile.isEmpty()&&!QFile::exists(langFile))langFile=defaultLangFile;
 			julyTranslator->loadFromFile(langFile);
 	}
@@ -297,10 +303,8 @@ int main(int argc, char *argv[])
 				restSign=newPassword.getRestSign().toAscii();
 				cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
 			}
-			settings.setValue("CryptedData",QString(cryptedData.toBase64()));
-			settings.setValue("ProfileName",newPassword.selectedProfileName());
-			settings.remove("RestSign");
-			settings.remove("RestKey");
+			settings.setValue("EncryptedData/ApiKeySign",QString(cryptedData.toBase64()));
+			settings.setValue("Profile/Name",newPassword.selectedProfileName());
 			settings.sync();
 
 			showNewPasswordDialog=false;
@@ -339,10 +343,12 @@ int main(int argc, char *argv[])
 #endif
 				if(profileLocked)tryPassword.clear();
 			}
+
 			if(!profileLocked)
 			{
 				QSettings settings(iniFileName,QSettings::IniFormat);
-				QStringList decryptedList=QString(JulyAES256::decrypt(QByteArray::fromBase64(settings.value("CryptedData","").toString().toAscii()),tryPassword.toAscii())).split("\r\n");
+
+				QStringList decryptedList=QString(JulyAES256::decrypt(QByteArray::fromBase64(settings.value("EncryptedData/ApiKeySign","").toString().toAscii()),tryPassword.toAscii())).split("\r\n");
 
 				if(decryptedList.count()==3&&decryptedList.first()=="Qt Bitcoin Trader")
 				{
@@ -357,10 +363,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	isLogEnabled=settings.value("LogEnabled",false).toBool();
-	settings.setValue("LogEnabled",isLogEnabled);
+	QSettings iniSettings(iniFileName,QSettings::IniFormat);
+	isLogEnabled=iniSettings.value("Debug/LogEnabled",false).toBool();
+	iniSettings.setValue("Debug/LogEnabled",isLogEnabled);
 	currencyASign=currencySignMap->value("BTC","BTC");
-	currencyBStr=settings.value("Currency","USD").toString().toAscii();
+	currencyBStr=iniSettings.value("Profile/Currency","USD").toString().toAscii();
 	currencyBSign=currencySignMap->value(currencyBStr,"$");
 
 	if(isLogEnabled)

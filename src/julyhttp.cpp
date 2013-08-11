@@ -276,14 +276,18 @@ void JulyHttp::readSocket()
 			if(contentGzipped)uncompress(&buffer);
 			bool apiMaybeDown=buffer[0]=='<';
 			setApiDown(apiMaybeDown);
+			if(isLogEnabled)logThread->writeLog("RCV: "+buffer);
 			if(!apiMaybeDown)emit dataReceived(buffer,requestList.first().second);
 		}
 		waitingReplay=false;
 		readingHeader=true;
 		takeFirstRequest();
 		clearRequest();
-		if(connectionClose)reConnect(true);
-
+		if(connectionClose)
+		{
+			if(isLogEnabled)logThread->writeLog("HTTP: connection closed");
+			reConnect(true);
+		}
 		sendPendingData();
 	}
 }

@@ -26,7 +26,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	ui.updateCheckBox->setStyleSheet("QCheckBox {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent)}");
 	ui.okButton->setEnabled(false);
 
-	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	ui.updateCheckBox->setChecked(settings.value("CheckForUpdates",true).toBool());
 	QString lastProfile=settings.value("LastProfile","").toString();
 	int lastProfileIndex=-1;
@@ -35,16 +35,38 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	for(int n=0;n<settingsList.count();n++)
 	{
 		QSettings settIni(appDataDir+settingsList.at(n),QSettings::IniFormat);
-		if(settIni.value("CryptedData","").toByteArray().isEmpty())
+
+
+		if(appVerLastReal<1.0763)
+		{
+			QString cryptedData=settIni.value("CryptedData","").toString();
+			if(!cryptedData.isEmpty())settIni.setValue("EncryptedData/ApiKeySign",cryptedData);
+
+			QString profileNameOld=settIni.value("ProfileName","").toString();
+			if(!profileNameOld.isEmpty())
+			{
+				settIni.remove("ProfileName");
+				settIni.setValue("Profile/Name",profileNameOld);
+			}
+			QString profileExchangeIdOld=settIni.value("ExchangeId","").toString();
+			if(!profileExchangeIdOld.isEmpty())
+			{
+				settIni.remove("ExchangeId");
+				settIni.setValue("Profile/ExchangeId",profileExchangeIdOld);
+			}
+			settIni.sync();
+		}
+
+		if(settIni.value("EncryptedData/ApiKeySign","").toString().isEmpty())
 		{
 			QFile::remove(appDataDir+settingsList.at(n));//I'll add ini backup function here
 			continue;
 		}
-		int currentProfileExchangeId=settIni.value("ExchangeId",0).toInt();
+		int currentProfileExchangeId=settIni.value("Profile/ExchangeId",0).toInt();
 		QString itemIcon;
 		if(currentProfileExchangeId==0)itemIcon=":/Resources/Exchanges/Mt.Gox.png";
 		if(currentProfileExchangeId==1)itemIcon=":/Resources/Exchanges/BTC-e.png";
-		ui.profileComboBox->addItem(QIcon(itemIcon),settIni.value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
+		ui.profileComboBox->addItem(QIcon(itemIcon),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
 
 		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;
@@ -64,7 +86,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 
 PasswordDialog::~PasswordDialog()
 {
-	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	settings.setValue("CheckForUpdates",ui.updateCheckBox->isChecked());
 }
 
@@ -85,7 +107,7 @@ bool PasswordDialog::isProfileLocked(QString name)
 
 void PasswordDialog::accept()
 {
-	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	int currIndex=ui.profileComboBox->currentIndex();
 	if(currIndex>-1)settings.setValue("LastProfile",ui.profileComboBox->itemData(currIndex).toString());
 	QDialog::accept();

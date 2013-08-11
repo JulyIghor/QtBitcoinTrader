@@ -543,7 +543,7 @@ void Exchange_BTCe::secondSlot()
 	
 	if(!isReplayPending(103))sendToApi(103,currencyRequestPair+"/ticker",false,httpSplitPackets);
 	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/trades",false,httpSplitPackets);
-	if(forceDepthLoad||infoCounter==3&&!isReplayPending(111))
+	if(!depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
 	{
 		sendToApi(111,currencyRequestPair+"/depth",false,httpSplitPackets);
 		forceDepthLoad=false;
