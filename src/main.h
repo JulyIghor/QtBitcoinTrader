@@ -57,7 +57,9 @@
 #define textWidth(text) fontMetrics_->width(text)
 #define groupPriceValue (*groupPriceValue_)
 #define depthRefreshBlocked (*depthRefreshBlocked_)
+#define defaultSectionSize (*defaultSectionSize_)
 
+extern int *defaultSectionSize_;
 extern bool *depthRefreshBlocked_;
 extern double *groupPriceValue_;
 extern QFontMetrics *fontMetrics_;

@@ -12,6 +12,7 @@
 
 #include <QtGui/QDialog>
 #include "ui_qtbitcointrader.h"
+#include "depthmodel.h"
 #include <QHttp>
 #include <QCloseEvent>
 #include "ruleholder.h"
@@ -19,6 +20,7 @@
 #include <QSettings>
 #include <QMenu>
 #include <QTime>
+#include "tradesmodel.h"
 
 class QtBitcoinTrader : public QDialog
 {
@@ -49,6 +51,9 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	DepthModel *depthAsksModel;
+	DepthModel *depthBidsModel;
+	TradesModel *tradesModel;
 	void clearDepth();
 	void calcOrdersTotalValues();
 	void ruleTotalToBuyValueChanged();
@@ -56,19 +61,12 @@ private:
 	void ruleTotalToBuyBSValueChanged();
 	void ruleAmountToReceiveBSValueChanged();
 	bool isDataPending;
-	int defaultSectionSize;
 	QTime softLagTime;
 	QTime depthLagTime;
-	QMap<double,double> depthAsksMap;
-	QMap<double,double> depthBidsMap;
 	int depthAsksLastScrollValue;
 	int depthBidsLastScrollValue;
 
-	int depthCurrentAsksSyncIndex;
-	int depthCurrentBidsSyncIndex;
-	double depthAsksIncVolume;
-	double depthBidsIncVolume;
-
+	QMenu *rulesEnableDisableMenu;
 	QMenu *trayMenu;
 	QSettings *iniSettings;
 	QRect currentDesktopRect;
@@ -119,7 +117,7 @@ private:
 	bool showingMessage;
 	void beep();
 
-	void setRuleStateBuGuid(quint64 guid, int state);
+	void setRuleStateByGuid(quint64 guid, int state);
 	void setRulesTableRowState(int row, int state);
 	void setOrdersTableRowState(int row, int state);
 	void setOrdersTableRowStateByText(int row, QString text);
@@ -166,11 +164,16 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void ruleEnableSelected();
+	void ruleDisableSelected();
+	void ruleEnableAll();
+	void ruleDisableAll();
 	void on_depthAutoResize_toggled(bool);
 	void on_depthComboBoxLimitRows_currentIndexChanged(int);
 	void on_comboBoxGroupByPrice_currentIndexChanged(int);
-	void depthSelectSellOrder(int,int);
-	void depthSelectBuyOrder(int,int);
+	void depthSelectSellOrder(QModelIndex);
+	void depthSelectBuyOrder(QModelIndex);
+	void tradesDoubleClicked(QModelIndex);
 	void setDataPending(bool);
 	void anyDataReceived();
 	void depthFirstOrder(double,double,bool);

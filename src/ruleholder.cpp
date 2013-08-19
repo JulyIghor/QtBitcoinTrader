@@ -12,6 +12,7 @@
 
 RuleHolder::RuleHolder(int moreLessEqual, double price, double bitcoins, uint guid, bool isBuy, double sellPrice, int rulePriceTp)
 {
+	enabled=true;
 	invalidHolder=false;
 	rulePriceType=rulePriceTp;
 	rulePrice=sellPrice;
@@ -25,6 +26,7 @@ RuleHolder::RuleHolder(int moreLessEqual, double price, double bitcoins, uint gu
 
 bool RuleHolder::isAchieved(double price)
 {
+	if(!enabled)return false;
 	if(rulePriceType!=8&&rulePriceType!=9&&price<minTradePrice)return false;
 	if(waitingGoodLag)return true;
 	if(ruleMoreLessEqual==-1&&ruleCheckPrice>price)return true;

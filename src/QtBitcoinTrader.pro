@@ -35,7 +35,9 @@ HEADERS += aboutdialog.h \
            updaterdialog.h \
            audioplayer.h \
            exchange_btce.h \
-           datafolderchusedialog.h
+           datafolderchusedialog.h \
+           tradesmodel.h \
+           depthmodel.h
 #
 # Forms
 #
@@ -72,7 +74,9 @@ SOURCES += aboutdialog.cpp \
            updaterdialog.cpp \
            audioplayer.cpp \
            exchange_btce.cpp \
-           datafolderchusedialog.cpp
+           datafolderchusedialog.cpp \
+           tradesmodel.cpp \
+           depthmodel.cpp
 #
 # Resources
 # 

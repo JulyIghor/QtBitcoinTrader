@@ -15,8 +15,10 @@
 class RuleHolder
 {
 public:
+	void setEnabled(bool on){enabled=on;}
+	bool isEnabled(){return enabled;}
 	bool invalidHolder;
-	RuleHolder(){invalidHolder=true;}
+	RuleHolder(){invalidHolder=true;enabled=true;}
 	RuleHolder(int moreLessEqual, double price, double bitcoins, uint guid, bool isBuy, double sellPrice, int rulePriceType);
 	bool isAchieved(double price);
 	bool isBuying();
@@ -32,6 +34,7 @@ public:
 	QString getBitcoinsString();
 	QString getPriceText();
 private:
+	bool enabled;
 	int rulePriceType;
 	bool waitingGoodLag;
 	bool buying;

@@ -2361,7 +2361,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
@@ -2872,6 +2872,28 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item>
+            <widget class="QToolButton" name="ruleEnableDisable">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Enable / Disable</string>
+             </property>
+             <property name="popupMode">
+              <enum>QToolButton::InstantPopup</enum>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextOnly</enum>
+             </property>
+             <property name="arrowType">
+              <enum>Qt::NoArrow</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QLabel" name="label_32">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -3152,138 +3174,6 @@ p, li { white-space: pre-wrap; }
            </item>
           </layout>
          </item>
-         <item row="1" column="0">
-          <widget class="QTableWidget" name="depthAsksTable">
-           <property name="horizontalScrollBarPolicy">
-            <enum>Qt::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="showDropIndicator" stdset="0">
-            <bool>false</bool>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-           <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
-           </property>
-           <property name="textElideMode">
-            <enum>Qt::ElideNone</enum>
-           </property>
-           <property name="verticalScrollMode">
-            <enum>QAbstractItemView::ScrollPerPixel</enum>
-           </property>
-           <property name="horizontalScrollMode">
-            <enum>QAbstractItemView::ScrollPerPixel</enum>
-           </property>
-           <property name="showGrid">
-            <bool>false</bool>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <attribute name="horizontalHeaderHighlightSections">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderDefaultSectionSize">
-            <number>26</number>
-           </attribute>
-           <attribute name="verticalHeaderHighlightSections">
-            <bool>false</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string/>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Size</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Volume</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Price</string>
-            </property>
-           </column>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QTableWidget" name="depthBidsTable">
-           <property name="horizontalScrollBarPolicy">
-            <enum>Qt::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="showDropIndicator" stdset="0">
-            <bool>false</bool>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-           <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
-           </property>
-           <property name="textElideMode">
-            <enum>Qt::ElideNone</enum>
-           </property>
-           <property name="verticalScrollMode">
-            <enum>QAbstractItemView::ScrollPerPixel</enum>
-           </property>
-           <property name="horizontalScrollMode">
-            <enum>QAbstractItemView::ScrollPerPixel</enum>
-           </property>
-           <property name="showGrid">
-            <bool>false</bool>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <attribute name="horizontalHeaderHighlightSections">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderDefaultSectionSize">
-            <number>26</number>
-           </attribute>
-           <attribute name="verticalHeaderHighlightSections">
-            <bool>false</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string>Price</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Volume</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Size</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string/>
-            </property>
-           </column>
-          </widget>
-         </item>
          <item row="2" column="0" colspan="2">
           <layout class="QGridLayout" name="gridLayout_31">
            <property name="topMargin">
@@ -3476,6 +3366,11 @@ p, li { white-space: pre-wrap; }
                <string>10</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>5</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item row="0" column="4">
@@ -3531,23 +3426,19 @@ p, li { white-space: pre-wrap; }
            </item>
           </layout>
          </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tabLastTrades">
-        <attribute name="title">
-         <string>Trades</string>
-        </attribute>
-        <layout class="QGridLayout" name="gridLayout_23">
-         <item row="1" column="0" colspan="7">
-          <widget class="QTableWidget" name="tableTrades">
+         <item row="1" column="0">
+          <widget class="QTableView" name="depthAsksTable">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
            <property name="editTriggers">
             <set>QAbstractItemView::NoEditTriggers</set>
            </property>
+           <property name="showDropIndicator" stdset="0">
+            <bool>false</bool>
+           </property>
            <property name="alternatingRowColors">
             <bool>true</bool>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectRows</enum>
@@ -3573,32 +3464,107 @@ p, li { white-space: pre-wrap; }
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
-           <attribute name="verticalHeaderDefaultSectionSize">
-            <number>26</number>
+           <attribute name="verticalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QTableView" name="depthBidsTable">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="showDropIndicator" stdset="0">
+            <bool>false</bool>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="textElideMode">
+            <enum>Qt::ElideNone</enum>
+           </property>
+           <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid">
+            <bool>false</bool>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <attribute name="horizontalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
            </attribute>
            <attribute name="verticalHeaderHighlightSections">
             <bool>false</bool>
            </attribute>
-           <column>
-            <property name="text">
-             <string>Volume</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Time</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Price</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string/>
-            </property>
-           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabLastTrades">
+        <attribute name="title">
+         <string>Trades</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_23">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_27">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="accessibleName">
+            <string>XMIN_VOLUME</string>
+           </property>
+           <property name="text">
+            <string>10 min. Volume:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLabel" name="btcLabel3_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="accessibleDescription">
+            <string>BTC_ICON</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: #996515</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
           </widget>
          </item>
          <item row="0" column="2">
@@ -3650,51 +3616,16 @@ p, li { white-space: pre-wrap; }
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_27">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
+         <item row="0" column="3">
+          <widget class="QCheckBox" name="tradesAutoScrollCheck">
            <property name="accessibleName">
-            <string>XMIN_VOLUME</string>
+            <string>AUTO_SCROLL</string>
            </property>
            <property name="text">
-            <string>10 min. Volume:</string>
+            <string>Auto Scroll</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="btcLabel3_3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="accessibleDescription">
-            <string>BTC_ICON</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: #996515</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -3710,6 +3641,16 @@ p, li { white-space: pre-wrap; }
             </size>
            </property>
           </spacer>
+         </item>
+         <item row="0" column="5">
+          <widget class="QCheckBox" name="tabTradesOnTop">
+           <property name="accessibleName">
+            <string>STAYS_ON_TOP</string>
+           </property>
+           <property name="text">
+            <string>Stay on Top</string>
+           </property>
+          </widget>
          </item>
          <item row="0" column="6">
           <widget class="QPushButton" name="detachTrades">
@@ -3727,27 +3668,47 @@ p, li { white-space: pre-wrap; }
            </property>
           </widget>
          </item>
-         <item row="0" column="3">
-          <widget class="QCheckBox" name="tradesAutoScrollCheck">
-           <property name="accessibleName">
-            <string>AUTO_SCROLL</string>
+         <item row="1" column="0" colspan="7">
+          <widget class="QTableView" name="tableTrades">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
-           <property name="text">
-            <string>Auto Scroll</string>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
            </property>
-           <property name="checked">
+           <property name="showDropIndicator" stdset="0">
+            <bool>false</bool>
+           </property>
+           <property name="alternatingRowColors">
             <bool>true</bool>
            </property>
-          </widget>
-         </item>
-         <item row="0" column="5">
-          <widget class="QCheckBox" name="tabTradesOnTop">
-           <property name="accessibleName">
-            <string>STAYS_ON_TOP</string>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
            </property>
-           <property name="text">
-            <string>Stay on Top</string>
+           <property name="textElideMode">
+            <enum>Qt::ElideNone</enum>
            </property>
+           <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid">
+            <bool>false</bool>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <attribute name="horizontalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
           </widget>
          </item>
         </layout>
@@ -6211,8 +6172,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyBtcToBuyChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
-     <y>568</y>
+     <x>242</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -6227,8 +6188,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyBtcToBuyAllIn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>334</x>
-     <y>512</y>
+     <x>324</x>
+     <y>449</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -6243,8 +6204,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyBtcToBuyHalfIn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>424</x>
-     <y>512</y>
+     <x>405</x>
+     <y>449</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -6259,8 +6220,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyPricePerCoinChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
-     <y>539</y>
+     <x>242</x>
+     <y>476</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -6275,8 +6236,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyTotalToSpendInUsdChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
-     <y>510</y>
+     <x>242</x>
+     <y>447</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -6291,8 +6252,8 @@ p, li { white-space: pre-wrap; }
    <slot>buyBitcoinsButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>424</x>
-     <y>621</y>
+     <x>405</x>
+     <y>558</y>
     </hint>
     <hint type="destinationlabel">
      <x>1</x>
@@ -6323,8 +6284,8 @@ p, li { white-space: pre-wrap; }
    <slot>ordersSelectionChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>301</y>
+     <x>153</x>
+     <y>242</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -6339,7 +6300,7 @@ p, li { white-space: pre-wrap; }
    <slot>mtgoxLagChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1475</x>
+     <x>1022</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -6355,8 +6316,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellTotalBtcToSellAllIn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>777</x>
-     <y>512</y>
+     <x>745</x>
+     <y>449</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6371,8 +6332,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellBitcoinButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>868</x>
-     <y>621</y>
+     <x>827</x>
+     <y>558</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6387,8 +6348,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellTotalBtcToSellChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>684</x>
-     <y>510</y>
+     <x>662</x>
+     <y>447</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6403,8 +6364,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellAmountToReceiveChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>684</x>
-     <y>568</y>
+     <x>662</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6419,8 +6380,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellPricePerCoinInUsdChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>684</x>
-     <y>539</y>
+     <x>662</x>
+     <y>476</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6435,8 +6396,8 @@ p, li { white-space: pre-wrap; }
    <slot>sellTotalBtcToSellHalfIn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>868</x>
-     <y>512</y>
+     <x>827</x>
+     <y>449</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6483,8 +6444,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleAddButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>702</x>
-     <y>444</y>
+     <x>601</x>
+     <y>381</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6499,8 +6460,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemoveAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1437</x>
-     <y>444</y>
+     <x>984</x>
+     <y>381</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6515,8 +6476,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1518</x>
-     <y>444</y>
+     <x>1065</x>
+     <y>381</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6531,8 +6492,8 @@ p, li { white-space: pre-wrap; }
    <slot>copyDonateButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1522</x>
-     <y>683</y>
+     <x>1069</x>
+     <y>620</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6579,7 +6540,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketHighChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1128</x>
+     <x>698</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -6595,7 +6556,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketLowChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1128</x>
+     <x>698</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -6643,7 +6604,7 @@ p, li { white-space: pre-wrap; }
    <slot>ordersLastSellPriceChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>924</x>
+     <x>893</x>
      <y>150</y>
     </hint>
     <hint type="destinationlabel">
@@ -6659,7 +6620,7 @@ p, li { white-space: pre-wrap; }
    <slot>ordersLastBuyPriceChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>737</x>
+     <x>707</x>
      <y>150</y>
     </hint>
     <hint type="destinationlabel">
@@ -6675,7 +6636,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketLastChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1317</x>
+     <x>864</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -6691,7 +6652,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketBuyChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>991</x>
+     <x>584</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -6707,7 +6668,7 @@ p, li { white-space: pre-wrap; }
    <slot>marketSellChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>991</x>
+     <x>584</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -6723,8 +6684,8 @@ p, li { white-space: pre-wrap; }
    <slot>aboutTranslationButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1521</x>
-     <y>579</y>
+     <x>1068</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6755,8 +6716,8 @@ p, li { white-space: pre-wrap; }
    <slot>buttonNewWindow()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1370</x>
-     <y>579</y>
+     <x>958</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6771,7 +6732,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>483</x>
+     <x>447</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -6787,7 +6748,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>483</x>
+     <x>447</x>
      <y>81</y>
     </hint>
     <hint type="destinationlabel">
@@ -6803,7 +6764,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1155</x>
+     <x>725</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -6819,7 +6780,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1155</x>
+     <x>725</x>
      <y>83</y>
     </hint>
     <hint type="destinationlabel">
@@ -6835,8 +6796,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitBuyThanSellChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>681</y>
+     <x>173</x>
+     <y>618</y>
     </hint>
     <hint type="destinationlabel">
      <x>798</x>
@@ -6851,8 +6812,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitBuyThanSell()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>424</x>
-     <y>683</y>
+     <x>405</x>
+     <y>620</y>
     </hint>
     <hint type="destinationlabel">
      <x>585</x>
@@ -6867,8 +6828,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitSellThanBuy()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>868</x>
-     <y>683</y>
+     <x>827</x>
+     <y>620</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -6883,8 +6844,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitSellThanBuyChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>625</x>
-     <y>681</y>
+     <x>595</x>
+     <y>618</y>
     </hint>
     <hint type="destinationlabel">
      <x>506</x>
@@ -6899,8 +6860,8 @@ p, li { white-space: pre-wrap; }
    <slot>zeroBuyThanSellProfit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
-     <y>683</y>
+     <x>198</x>
+     <y>620</y>
     </hint>
     <hint type="destinationlabel">
      <x>544</x>
@@ -6915,8 +6876,8 @@ p, li { white-space: pre-wrap; }
    <slot>zeroSellThanBuyProfit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>650</x>
-     <y>683</y>
+     <x>620</x>
+     <y>620</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -6931,8 +6892,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleEditButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>783</x>
-     <y>444</y>
+     <x>682</x>
+     <y>381</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6947,7 +6908,7 @@ p, li { white-space: pre-wrap; }
    <slot>ruleUp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>678</x>
+     <x>577</x>
      <y>151</y>
     </hint>
     <hint type="destinationlabel">
@@ -6963,7 +6924,7 @@ p, li { white-space: pre-wrap; }
    <slot>ruleDown()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>707</x>
+     <x>606</x>
      <y>151</y>
     </hint>
     <hint type="destinationlabel">
@@ -6979,7 +6940,7 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>649</x>
+     <x>548</x>
      <y>151</y>
     </hint>
     <hint type="destinationlabel">
@@ -6995,8 +6956,8 @@ p, li { white-space: pre-wrap; }
    <slot>languageComboBoxChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1522</x>
-     <y>509</y>
+     <x>1069</x>
+     <y>446</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -7091,7 +7052,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>991</x>
+     <x>584</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -7107,7 +7068,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>991</x>
+     <x>584</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -7123,7 +7084,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1128</x>
+     <x>698</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -7139,7 +7100,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1128</x>
+     <x>698</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -7155,7 +7116,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1317</x>
+     <x>864</x>
      <y>54</y>
     </hint>
     <hint type="destinationlabel">
@@ -7171,7 +7132,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1317</x>
+     <x>864</x>
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
@@ -7187,7 +7148,7 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1475</x>
+     <x>1022</x>
      <y>55</y>
     </hint>
     <hint type="destinationlabel">
@@ -7203,8 +7164,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
-     <y>510</y>
+     <x>242</x>
+     <y>447</y>
     </hint>
     <hint type="destinationlabel">
      <x>622</x>
@@ -7219,8 +7180,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
-     <y>568</y>
+     <x>242</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -7235,8 +7196,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>681</y>
+     <x>173</x>
+     <y>618</y>
     </hint>
     <hint type="destinationlabel">
      <x>334</x>
@@ -7251,8 +7212,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>625</x>
-     <y>681</y>
+     <x>595</x>
+     <y>618</y>
     </hint>
     <hint type="destinationlabel">
      <x>301</x>
@@ -7267,8 +7228,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>684</x>
-     <y>510</y>
+     <x>662</x>
+     <y>447</y>
     </hint>
     <hint type="destinationlabel">
      <x>698</x>
@@ -7283,8 +7244,8 @@ p, li { white-space: pre-wrap; }
    <slot>fixWindowMinimumSize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>684</x>
-     <y>568</y>
+     <x>662</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>681</x>
@@ -7299,7 +7260,7 @@ p, li { white-space: pre-wrap; }
    <slot>detachLog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1519</x>
+     <x>1066</x>
      <y>152</y>
     </hint>
     <hint type="destinationlabel">
@@ -7315,7 +7276,7 @@ p, li { white-space: pre-wrap; }
    <slot>detachRules()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1519</x>
+     <x>1066</x>
      <y>152</y>
     </hint>
     <hint type="destinationlabel">
@@ -7331,7 +7292,7 @@ p, li { white-space: pre-wrap; }
    <slot>detachTrades()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1519</x>
+     <x>1066</x>
      <y>152</y>
     </hint>
     <hint type="destinationlabel">
@@ -7347,8 +7308,8 @@ p, li { white-space: pre-wrap; }
    <slot>copyDonateButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1509</x>
-     <y>435</y>
+     <x>1056</x>
+     <y>372</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -7363,7 +7324,7 @@ p, li { white-space: pre-wrap; }
    <slot>detachCharts()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1518</x>
+     <x>1065</x>
      <y>153</y>
     </hint>
     <hint type="destinationlabel">
@@ -7379,8 +7340,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitBuyThanSellPrecChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>681</y>
+     <x>331</x>
+     <y>618</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -7395,8 +7356,8 @@ p, li { white-space: pre-wrap; }
    <slot>profitSellThanBuyPrecChanged(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>787</x>
-     <y>681</y>
+     <x>753</x>
+     <y>618</y>
     </hint>
     <hint type="destinationlabel">
      <x>690</x>
@@ -7427,7 +7388,7 @@ p, li { white-space: pre-wrap; }
    <slot>tabLogOrdersOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1438</x>
+     <x>985</x>
      <y>149</y>
     </hint>
     <hint type="destinationlabel">
@@ -7443,7 +7404,7 @@ p, li { white-space: pre-wrap; }
    <slot>tabRulesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1438</x>
+     <x>985</x>
      <y>149</y>
     </hint>
     <hint type="destinationlabel">
@@ -7459,7 +7420,7 @@ p, li { white-space: pre-wrap; }
    <slot>tabTradesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1438</x>
+     <x>985</x>
      <y>149</y>
     </hint>
     <hint type="destinationlabel">
@@ -7475,7 +7436,7 @@ p, li { white-space: pre-wrap; }
    <slot>tabChartsOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1437</x>
+     <x>984</x>
      <y>150</y>
     </hint>
     <hint type="destinationlabel">
@@ -7491,7 +7452,7 @@ p, li { white-space: pre-wrap; }
    <slot>tabDepthOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1443</x>
+     <x>990</x>
      <y>150</y>
     </hint>
     <hint type="destinationlabel">
@@ -7507,7 +7468,7 @@ p, li { white-space: pre-wrap; }
    <slot>detachDepth()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1518</x>
+     <x>1065</x>
      <y>153</y>
     </hint>
     <hint type="destinationlabel">
@@ -7523,8 +7484,8 @@ p, li { white-space: pre-wrap; }
    <slot>setWindowStaysOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1370</x>
-     <y>539</y>
+     <x>958</x>
+     <y>476</y>
     </hint>
     <hint type="destinationlabel">
      <x>1158</x>
@@ -7539,8 +7500,8 @@ p, li { white-space: pre-wrap; }
    <slot>ordersCancelAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>512</x>
-     <y>332</y>
+     <x>411</x>
+     <y>269</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -7555,8 +7516,8 @@ p, li { white-space: pre-wrap; }
    <slot>ordersCancelSelected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>593</x>
-     <y>332</y>
+     <x>492</x>
+     <y>269</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -7566,33 +7527,49 @@ p, li { white-space: pre-wrap; }
   </connection>
   <connection>
    <sender>depthAsksTable</sender>
-   <signal>cellDoubleClicked(int,int)</signal>
+   <signal>doubleClicked(QModelIndex)</signal>
    <receiver>QtBitcoinTraderClass</receiver>
-   <slot>depthSelectSellOrder(int,int)</slot>
+   <slot>depthSelectSellOrder(QModelIndex)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>868</x>
-     <y>216</y>
+     <x>747</x>
+     <y>234</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1573</x>
-     <y>175</y>
+     <x>1171</x>
+     <y>402</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>depthBidsTable</sender>
-   <signal>cellDoubleClicked(int,int)</signal>
+   <signal>doubleClicked(QModelIndex)</signal>
    <receiver>QtBitcoinTraderClass</receiver>
-   <slot>depthSelectBuyOrder(int,int)</slot>
+   <slot>depthSelectBuyOrder(QModelIndex)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1248</x>
-     <y>402</y>
+     <x>953</x>
+     <y>289</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1641</x>
-     <y>365</y>
+     <x>1566</x>
+     <y>306</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tableTrades</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>QtBitcoinTraderClass</receiver>
+   <slot>tradesDoubleClicked(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>980</x>
+     <y>241</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1252</x>
+     <y>411</y>
     </hint>
    </hints>
   </connection>
@@ -7680,7 +7657,8 @@ p, li { white-space: pre-wrap; }
   <slot>tabDepthOnTop(bool)</slot>
   <slot>detachDepth()</slot>
   <slot>setWindowStaysOnTop(bool)</slot>
-  <slot>depthSelectSellOrder(int,int)</slot>
-  <slot>depthSelectBuyOrder(int,int)</slot>
+  <slot>depthSelectSellOrder(QModelIndex)</slot>
+  <slot>depthSelectBuyOrder(QModelIndex)</slot>
+  <slot>tradesDoubleClicked(QModelIndex)</slot>
  </slots>
 </ui>

@@ -86,7 +86,6 @@ private slots:
 	void sendPendingData();
 	void readSocket();
 signals:
-	//void encrypted();
 	void setDataPending(bool);
 	void dataProgress(int);
 	void anyDataReceived();

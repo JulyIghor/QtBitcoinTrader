@@ -395,7 +395,6 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 							emit depthFirstOrder(priceDouble,amount,true);
 							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
 							groupedVolume=amount;
-							depthSubmitOrder(&currentAsksMap,groupedPrice,groupedVolume,true);
 						}
 						else
 						{
@@ -440,7 +439,6 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 							emit depthFirstOrder(priceDouble,amount,false);
 							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
 							groupedVolume=amount;
-							depthSubmitOrder(&currentBidsMap,groupedPrice,groupedVolume,false);
 						}
 						else
 						{
