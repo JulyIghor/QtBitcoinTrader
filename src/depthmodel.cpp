@@ -43,7 +43,6 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 {
 	if(!index.isValid())return QVariant();
 	int currentRow=index.row();
-	if(currentRow<0||currentRow>=priceList.count())return QVariant();
 
 	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole)return QVariant();
 
@@ -65,8 +64,8 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 	}
 
 	if(grouped)currentRow-=grouped;
+	if(currentRow<0||currentRow>=priceList.count())return QVariant();
 
-	if(currentRow>=priceList.count())return QVariant();
 	if(!isAsk)currentRow=priceList.count()-currentRow-1;
 
 	if(role==Qt::ForegroundRole)
