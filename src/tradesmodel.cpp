@@ -252,3 +252,4 @@ bool TradesModel::getRowType(int row)
 	if(row<0||row>=typesList.count())return 0.0;
 	return typesList.at(row);
 }
+

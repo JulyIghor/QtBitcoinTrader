@@ -36,6 +36,7 @@ FeeCalculator::FeeCalculator()
 
 	mainWindow.fillAllBtcLabels(this,currencyAStr);
 	mainWindow.fillAllUsdLabels(this,currencyBStr);
+	mainWindow.fixDecimals(this);
 
 	julyTranslator->translateUi(this);
 
