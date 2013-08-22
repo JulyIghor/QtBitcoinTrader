@@ -2267,7 +2267,7 @@ void QtBitcoinTrader::detachLog()
 	ui.tabOrdersLog->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachOrdersLog->setVisible(false);
 	ui.tabOrdersLogOnTop->setVisible(true);
-	loadWindowState(ui.tabOrdersLog,"UI/DetachedLog");
+	loadWindowState(ui.tabOrdersLog,"DetachedLog");
 	ui.tabOrdersLogOnTop->setChecked(iniSettings->value("UI/TabLogOrdersOnTop",false).toBool());
 	isDetachedLog=true;
 	tabLogOrdersOnTop(ui.tabOrdersLogOnTop->isChecked());
@@ -2280,7 +2280,7 @@ void QtBitcoinTrader::detachRules()
 	ui.tabRules->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachRules->setVisible(false);
 	ui.tabRulesOnTop->setVisible(true);
-	loadWindowState(ui.tabRules,"UI/DetachedRules");
+	loadWindowState(ui.tabRules,"DetachedRules");
 	ui.tabRulesOnTop->setChecked(iniSettings->value("UI/TabRulesOnTop",false).toBool());
 	isDetachedRules=true;
 	tabRulesOnTop(ui.tabRulesOnTop->isChecked());
@@ -2293,7 +2293,7 @@ void QtBitcoinTrader::detachTrades()
 	ui.tabLastTrades->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachTrades->setVisible(false);
 	ui.tabTradesOnTop->setVisible(true);
-	loadWindowState(ui.tabLastTrades,"UI/DetachedTrades");
+	loadWindowState(ui.tabLastTrades,"DetachedTrades");
 	ui.tabTradesOnTop->setChecked(iniSettings->value("UI/TabTradesOnTop",false).toBool());
 	isDetachedTrades=true;
 	tabTradesOnTop(ui.tabTradesOnTop->isChecked());
@@ -2306,7 +2306,7 @@ void QtBitcoinTrader::detachDepth()
 	ui.tabDepth->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachDepth->setVisible(false);
 	ui.tabDepthOnTop->setVisible(true);
-	loadWindowState(ui.tabDepth,"UI/DetachedDepth");
+	loadWindowState(ui.tabDepth,"DetachedDepth");
 	ui.tabDepthOnTop->setChecked(iniSettings->value("UI/TabDepthOnTop",false).toBool());
 	isDetachedDepth=true;
 	tabDepthOnTop(ui.tabDepthOnTop->isChecked());
@@ -2321,7 +2321,7 @@ void QtBitcoinTrader::detachCharts()
 	ui.tabCharts->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
 	ui.detachCharts->setVisible(false);
 	ui.tabChartsOnTop->setVisible(true);
-	loadWindowState(ui.tabCharts,"UI/DetachedCharts");
+	loadWindowState(ui.tabCharts,"DetachedCharts");
 	ui.tabChartsOnTop->setChecked(iniSettings->value("UI/TabChartsOnTop",false).toBool());
 	isDetachedCharts=true;
 	tabChartsOnTop(ui.tabChartsOnTop->isChecked());
@@ -2578,68 +2578,6 @@ void QtBitcoinTrader::depthFirstOrder(double price, double volume, bool isAsk)
 		depthAsksModel->depthFirstOrder(price,volume);
 	else
 		depthBidsModel->depthFirstOrder(price,volume);
-
-	//isAsk=false;
-	//QTableWidget *currentTable=/*isAsk?ui.depthAsksTable:*/ui.depthBidsTable;
-
-	//if(currentTable->rowCount()==0)
-	//{
-	//	currentTable->insertRow(0);
-
-	//	QTableWidgetItem *priceItem=new QTableWidgetItem(currencyBSign+" "+numFromDouble(price));
-	//	priceItem->setData(Qt::UserRole,price);
-
-	//	QTableWidgetItem *volumeItem=new QTableWidgetItem(currencyASign+" "+numFromDouble(volume));
-	//	volumeItem->setData(Qt::UserRole,volume);
-
-	//	QTableWidgetItem *sizeItem=new QTableWidgetItem("");
-	//	sizeItem->setData(Qt::UserRole,volume);
-
-	//	if(isAsk)
-	//	{
-	//		postWorkAtTableItem(priceItem,-1);
-	//		postWorkAtTableItem(volumeItem,-1);
-	//		currentTable->setItem(0,3,priceItem);
-	//		currentTable->setItem(0,2,volumeItem);
-	//		currentTable->setItem(0,1,sizeItem);
-	//	}
-	//	else
-	//	{
-	//		postWorkAtTableItem(priceItem,-1);
-	//		postWorkAtTableItem(volumeItem,-1);
-	//		currentTable->setItem(0,0,priceItem);
-	//		currentTable->setItem(0,1,volumeItem);
-	//		currentTable->setItem(0,2,sizeItem);
-	//	}
-	//	currentTable->insertRow(1);
-	//	currentTable->setRowHeight(1,10);
-	//	for(int n=0;n<currentTable->columnCount();n++)
-	//	{
-	//		QTableWidgetItem *newEmptyItem=new QTableWidgetItem;
-	//		newEmptyItem->setFlags(Qt::NoItemFlags);
-	//		currentTable->setItem(1,n,newEmptyItem);
-	//	}
-	//}
-	//else
-	//{
-	//	QTableWidgetItem *currentPriceItem=0;
-	//	QTableWidgetItem *currentVolumeItem=0;
-	//	QTableWidgetItem *currentSizeItem=0;
-	//	if(isAsk)
-	//	{
-	//		currentPriceItem=currentTable->item(0,3);
-	//		currentVolumeItem=currentTable->item(0,2);
-	//		currentSizeItem=currentTable->item(0,1);
-	//	}
-	//	else
-	//	{
-	//		currentPriceItem=currentTable->item(0,0);
-	//		currentVolumeItem=currentTable->item(0,1);
-	//		currentSizeItem=currentTable->item(0,2);
-	//	}
-	//	currentPriceItem->setText(currencyBSign+" "+numFromDouble(price));
-	//	currentVolumeItem->setText(currencyASign+" "+numFromDouble(volume));
-	//}
 }
 
 void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
@@ -2652,144 +2590,6 @@ void QtBitcoinTrader::depthUpdateOrder(double price, double volume, bool isAsk)
 		depthAsksModel->depthUpdateOrder(price,volume);
 	else
 		depthBidsModel->depthUpdateOrder(price,volume);
-
-	//QTableWidget *currentTable=ui.depthBidsTable;
-	//if(isAsk)
-	//{
-	//	return;
-	//}
-	//QMap<double,double> *depthMap=isAsk?&depthAsksMap:&depthBidsMap;
-
-	//int zeroRow=0;
-	//if(ui.comboBoxGroupByPrice->currentIndex()>0)zeroRow=2;
-
-	//if(volume==0)//Remove item
-	//{
-	//	for(int n=zeroRow;n<currentTable->rowCount();n++)
-	//	{
-	//		QTableWidgetItem *currentPriceTableItem=0;
-	//		if(isAsk)currentPriceTableItem=currentTable->item(n,3);
-	//		else currentPriceTableItem=currentTable->item(n,0);
-	//		if(currentPriceTableItem->data(Qt::UserRole).toDouble()==price)
-	//		{
-	//			currentTable->removeRow(n);
-	//			break;
-	//		}
-	//	}
-	//	depthMap->remove(price);
-	//	return;
-	//}
-	//if(depthMap->value(price,0)==0)//Insert item
-	//{
-	//	int insertPos=currentTable->rowCount();
-	//	for(int n=zeroRow;n<currentTable->rowCount();n++)
-	//	{
-	//		QTableWidgetItem *currentPriceTableItem=0;
-	//		bool matchPrice=false;
-	//		if(isAsk)
-	//		{
-	//			currentPriceTableItem=currentTable->item(n,3);
-	//			matchPrice=currentPriceTableItem->data(Qt::UserRole).toDouble()>price;
-	//		}
-	//		else
-	//		{
-	//			currentPriceTableItem=currentTable->item(n,0);
-	//			matchPrice=currentPriceTableItem->data(Qt::UserRole).toDouble()<price;
-	//		}
-	//		if(matchPrice)
-	//		{
-	//			insertPos=n;
-	//			break;
-	//		}
-	//	}
-
-	//	currentTable->insertRow(insertPos);
-
-	//	QTableWidgetItem *priceItem=new QTableWidgetItem(currencyBSign+" "+numFromDouble(price));
-	//	priceItem->setData(Qt::UserRole,price);
-
-	//	QTableWidgetItem *volumeItem=new QTableWidgetItem(currencyASign+" "+numFromDouble(volume));
-	//	volumeItem->setData(Qt::UserRole,volume);
-
-	//	if(volume<1.0)volumeItem->setTextColor(QColor(0,0,0,155+volume*100.0));
-	//	else if(volume<100.0)volumeItem->setTextColor(Qt::black);
-	//	else if(volume<1000.0)volumeItem->setTextColor(Qt::blue);
-	//	else volumeItem->setTextColor(Qt::red);
-
-	//	QTableWidgetItem *sizeItem=new QTableWidgetItem("");
-	//	sizeItem->setData(Qt::UserRole,volume);
-
-	//	if(isAsk)
-	//	{
-	//		postWorkAtTableItem(priceItem,-1);
-	//		postWorkAtTableItem(volumeItem,-1);
-	//		postWorkAtTableItem(sizeItem,-1);
-	//		currentTable->setItem(insertPos,3,priceItem);
-	//		currentTable->setItem(insertPos,2,volumeItem);
-	//		currentTable->setItem(insertPos,1,sizeItem);
-	//	}
-	//	else
-	//	{
-	//		postWorkAtTableItem(priceItem,-1);
-	//		postWorkAtTableItem(volumeItem,-1);
-	//		postWorkAtTableItem(sizeItem,-1);
-	//		currentTable->setItem(insertPos,0,priceItem);
-	//		currentTable->setItem(insertPos,1,volumeItem);
-	//		currentTable->setItem(insertPos,2,sizeItem);
-	//	}
-
-	//	depthMap->insert(price,volume);
-	//}
-	//else//Update item
-	//if(depthMap->value(price)!=volume)
-	//{
-	//	for(int n=zeroRow;n<currentTable->rowCount();n++)
-	//	{
-	//		QTableWidgetItem *currentPriceItem=0;
-	//		QTableWidgetItem *currentVolumeItem=0;
-	//		QTableWidgetItem *currentSizeItem=0;
-
-	//		if(isAsk)
-	//		{
-	//			currentPriceItem=currentTable->item(n,3);
-	//			currentVolumeItem=currentTable->item(n,2);
-	//			currentSizeItem=currentTable->item(n,1);
-	//		}
-	//		else
-	//		{
-	//			currentPriceItem=currentTable->item(n,0);
-	//			currentVolumeItem=currentTable->item(n,1);
-	//			currentSizeItem=currentTable->item(n,2);
-	//		}
-
-	//		if(currentPriceItem->data(Qt::UserRole).toDouble()==price)
-	//		{
-	//			currentVolumeItem->setText(currencyASign+" "+numFromDouble(volume));
-
-	//			if(volume<1.0)currentVolumeItem->setTextColor(QColor(0,0,0,155+volume*100.0));
-	//			else if(volume<100.0)currentVolumeItem->setTextColor(Qt::black);
-	//			else if(volume<1000.0)currentVolumeItem->setTextColor(Qt::blue);
-	//			else currentVolumeItem->setTextColor(Qt::red);
-
-	//			currentVolumeItem->setData(Qt::UserRole,volume);
-	//			double itemSize=volume*price;
-	//			currentSizeItem->setText(currencyBSign+" "+numFromDouble(itemSize));
-	//			currentSizeItem->setData(Qt::UserRole,itemSize);
-	//			(*depthMap)[price]=volume;
-	//			break;
-	//		}
-	//	}
-	//}
-	//if(isAsk)
-	//{
-	//	depthAsksIncVolume=0.0;
-	//	depthCurrentAsksSyncIndex=zeroRow;
-	//}
-	//else
-	//{
-	//	depthBidsIncVolume=0.0;
-	//	depthCurrentBidsSyncIndex=zeroRow;
-	//}
 }
 
 void QtBitcoinTrader::exitApp()
