@@ -271,18 +271,35 @@ void DepthModel::depthUpdateOrder(double price, double volume)
 
 double DepthModel::rowPrice(int row)
 {
+	if(grouped&&row<2)
+	{
+		if(row==0)return groupedPrice;
+		return 0.0;
+	}
+	row-=grouped;
+	if(!isAsk)row=priceList.count()-row-1;
 	if(row<0||row>=priceList.count())return 0.0;
 	return priceList.at(row);
 }
 
 double DepthModel::rowVolume(int row)
 {
+	if(grouped&&row<2)
+	{
+		if(row==0)return groupedVolume;
+		return 0.0;
+	}
+	row-=grouped;
+	if(!isAsk)row=priceList.count()-row-1;
 	if(row<0||row>=priceList.count())return 0.0;
 	return volumeList.at(row);
 }
 
 double DepthModel::rowSize(int row)
 {
+	if(grouped&&row<2)return 0.0;
+	row-=grouped;
+	if(!isAsk)row=priceList.count()-row-1;
 	if(row<0||row>=priceList.count())return 0.0;
 	return sizeList.at(row);
 }

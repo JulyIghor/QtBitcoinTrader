@@ -261,7 +261,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==asksList.count()-1)
 							{
-								depthSubmitOrder(&currentAsksMap,groupedPrice,groupedVolume,true);
+								depthSubmitOrder(&currentAsksMap,groupedPrice+groupPriceValue,groupedVolume,true);
 								rowCounter++;
 								groupedVolume=amount;
 								groupedPrice+=groupPriceValue;
@@ -306,7 +306,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==bidsList.count()-1)
 							{
-								depthSubmitOrder(&currentBidsMap,groupedPrice,groupedVolume,false);
+								depthSubmitOrder(&currentBidsMap,groupedPrice-groupPriceValue,groupedVolume,false);
 								rowCounter++;
 								groupedVolume=amount;
 								groupedPrice-=groupPriceValue;
