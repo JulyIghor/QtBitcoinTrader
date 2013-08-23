@@ -401,7 +401,7 @@
            <number>5</number>
           </property>
           <property name="minimum">
-           <double>0.010000000000000</double>
+           <double>0.000000000000000</double>
           </property>
           <property name="maximum">
            <double>999999999.000000000000000</double>
@@ -504,6 +504,9 @@
           </property>
           <property name="accessibleName">
            <string>BTC</string>
+          </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -778,6 +781,9 @@
           <property name="accessibleName">
            <string>BTC</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -934,7 +940,7 @@
            <number>5</number>
           </property>
           <property name="minimum">
-           <double>0.010000000000000</double>
+           <double>0.000010000000000</double>
           </property>
           <property name="maximum">
            <double>999999999.000000000000000</double>
@@ -1006,6 +1012,9 @@
           <property name="accessibleName">
            <string>USD</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -1019,7 +1028,7 @@
            <number>5</number>
           </property>
           <property name="minimum">
-           <double>0.010000000000000</double>
+           <double>0.000000000000000</double>
           </property>
           <property name="maximum">
            <double>999999999.000000000000000</double>
@@ -1123,6 +1132,9 @@
           <property name="accessibleName">
            <string>USD</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -1136,7 +1148,7 @@
            <number>5</number>
           </property>
           <property name="minimum">
-           <double>0.010000000000000</double>
+           <double>0.000000000000000</double>
           </property>
           <property name="maximum">
            <double>999999999.000000000000000</double>
@@ -1237,6 +1249,9 @@
           <property name="accessibleName">
            <string>USD</string>
           </property>
+          <property name="accessibleDescription">
+           <string>CAN_BE_ZERO</string>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -1250,7 +1265,7 @@
            <number>5</number>
           </property>
           <property name="minimum">
-           <double>0.010000000000000</double>
+           <double>0.000000000000000</double>
           </property>
           <property name="maximum">
            <double>999999999.000000000000000</double>

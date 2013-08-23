@@ -4449,7 +4449,7 @@ p, li { white-space: pre-wrap; }
              </size>
             </property>
             <property name="accessibleName">
-             <string>USD</string>
+             <string>PRICE</string>
             </property>
             <property name="styleSheet">
              <string notr="true">QDoubleSpinBox {border: 0px; background: transparent;}</string>
@@ -4601,7 +4601,7 @@ p, li { white-space: pre-wrap; }
              </size>
             </property>
             <property name="accessibleName">
-             <string>USD</string>
+             <string>PRICE</string>
             </property>
             <property name="styleSheet">
              <string notr="true">QDoubleSpinBox {border: 0px; background: transparent;}</string>
@@ -4652,10 +4652,10 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="accessibleName">
-           <string>AS_MARKET_PRICE</string>
+           <string>AS_MARKET_BUY</string>
           </property>
           <property name="text">
-           <string>Market Price</string>
+           <string>Buy Price</string>
           </property>
          </widget>
         </item>
@@ -4991,7 +4991,7 @@ p, li { white-space: pre-wrap; }
              </size>
             </property>
             <property name="accessibleName">
-             <string>USD</string>
+             <string>PRICE</string>
             </property>
             <property name="styleSheet">
              <string notr="true">QDoubleSpinBox {border: 0px; background: transparent;}</string>
@@ -5070,7 +5070,7 @@ p, li { white-space: pre-wrap; }
              </size>
             </property>
             <property name="accessibleName">
-             <string>USD</string>
+             <string>PRICE</string>
             </property>
             <property name="styleSheet">
              <string notr="true">QDoubleSpinBox {border: 0px; background: transparent;}</string>
@@ -5515,10 +5515,10 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="accessibleName">
-           <string>AS_MARKET_PRICE</string>
+           <string>AS_MARKET_SELL</string>
           </property>
           <property name="text">
-           <string>Market Price</string>
+           <string>Sell Price</string>
           </property>
          </widget>
         </item>

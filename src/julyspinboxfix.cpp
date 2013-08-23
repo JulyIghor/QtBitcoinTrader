@@ -13,6 +13,7 @@
 JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox *parentSB, int minWid)
 	: QObject()
 {
+	parentSB->setLocale(QLocale::English);
 	parentSB->setMaximumWidth(110);
 	pMinimumWidth=minWid;
 	spinMargin=30;

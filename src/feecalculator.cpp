@@ -21,6 +21,10 @@ FeeCalculator::FeeCalculator()
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
+	mainWindow.fillAllBtcLabels(this,currencyAStr);
+	mainWindow.fillAllUsdLabels(this,currencyBStr);
+	mainWindow.fixDecimals(this);
+
 	ui.feeValue->setValue(mainWindow.ui.accountFee->value());
 
 	ui.buyPrice->setValue(mainWindow.ui.marketBuy->value());
@@ -33,10 +37,6 @@ FeeCalculator::FeeCalculator()
 	setZeroProfitPrice();
 	buyBtcChanged(ui.buyTotalBtc->value());//I'll remove this soon
 	setZeroProfitPrice();//and this too
-
-	mainWindow.fillAllBtcLabels(this,currencyAStr);
-	mainWindow.fillAllUsdLabels(this,currencyBStr);
-	mainWindow.fixDecimals(this);
 
 	julyTranslator->translateUi(this);
 
@@ -72,7 +72,7 @@ void FeeCalculator::languageChanged()
 
 void FeeCalculator::setZeroProfitPrice()
 {
-	ui.sellPrice->setValue(ui.buyPrice->value()*(1+ui.feeValue->value()/100)*(1+ui.feeValue->value()/100)+0.01);
+	ui.sellPrice->setValue(ui.buyPrice->value()*mainWindow.floatFeeInc*mainWindow.floatFeeInc+priceMinimumValue);
 }
 
 void FeeCalculator::profitLossChanged(double val)

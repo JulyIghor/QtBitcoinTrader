@@ -46,6 +46,7 @@
 #define btcDecimals (*btcDecimals_)
 #define usdDecimals (*usdDecimals_)
 #define priceDecimals (*priceDecimals_)
+#define priceMinimumValue (*priceMinimumValue_)
 #define minTradeVolume (*minTradeVolume_)
 #define minTradePrice (*minTradePrice_)
 #define httpRequestInterval (*httpRequestInterval_)
@@ -59,6 +60,7 @@
 #define depthRefreshBlocked (*depthRefreshBlocked_)
 #define defaultSectionSize (*defaultSectionSize_)
 
+extern double *priceMinimumValue_;
 extern int *defaultSectionSize_;
 extern bool *depthRefreshBlocked_;
 extern double *groupPriceValue_;

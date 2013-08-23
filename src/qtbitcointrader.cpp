@@ -505,6 +505,7 @@ void QtBitcoinTrader::loadUiSettings()
 			exchangeName="Mt.Gox"; (new Exchange_MtGox(restSign,restKey))->setupApi(this,false);
 		}
 	}
+	priceMinimumValue=pow(0.1,priceDecimals);
 	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
 	currencyChanged(ui.currencyComboBox->currentIndex());
 
@@ -876,6 +877,7 @@ void QtBitcoinTrader::currencyChanged(int val)
 
 	currencyRequestPair=curDataList.first().toAscii();
 	priceDecimals=curDataList.at(1).toInt();
+	priceMinimumValue=pow(0.1,priceDecimals);
 	minTradeVolume=curDataList.at(2).toDouble();
 	minTradePrice=curDataList.at(3).toDouble();
 
@@ -1011,6 +1013,8 @@ void QtBitcoinTrader::profitBuyThanSellChanged(double val)
 
 	ui.profitLossSpinBox->setStyleSheet(styleChanged);
 	ui.profitLossSpinBoxPrec->setStyleSheet(styleChanged);
+
+	ui.buttonBuyThenSellApply->setEnabled(true);
 }
 
 void QtBitcoinTrader::profitSellThanBuyPrecChanged(double val)
@@ -1039,6 +1043,8 @@ void QtBitcoinTrader::profitSellThanBuyChanged(double val)
 
 	ui.sellThanBuySpinBox->setStyleSheet(styleChanged);
 	ui.sellThanBuySpinBoxPrec->setStyleSheet(styleChanged);
+
+	ui.buttonSellThenBuyApply->setEnabled(true);
 }
 
 void QtBitcoinTrader::zeroSellThanBuyProfit()
@@ -1055,20 +1061,22 @@ void QtBitcoinTrader::profitSellThanBuy()
 {
 	profitSellThanBuyUnlocked=false;
 	ui.buyTotalSpend->setValue(ui.sellAmountToReceive->value());
-	ui.buyPricePerCoin->setValue(ui.buyTotalSpend->value()/((ui.sellTotalBtc->value()+ui.sellThanBuySpinBox->value())/floatFeeDec));
+	ui.buyPricePerCoin->setValue(ui.buyTotalSpend->value()/((ui.sellTotalBtc->value()+ui.sellThanBuySpinBox->value())/floatFeeDec)-priceMinimumValue);
 	profitSellThanBuyUnlocked=true;
 	profitBuyThanSellCalc();
 	profitSellThanBuyCalc();
+	ui.buttonSellThenBuyApply->setEnabled(false);
 }
 
 void QtBitcoinTrader::profitBuyThanSell()
 {
 	profitBuyThanSellUnlocked=false;
 	ui.sellTotalBtc->setValue(ui.buyTotalBtcResult->value());
-	ui.sellPricePerCoin->setValue((ui.buyTotalSpend->value()+ui.profitLossSpinBox->value())/(ui.sellTotalBtc->value()*floatFeeDec));
+	ui.sellPricePerCoin->setValue((ui.buyTotalSpend->value()+ui.profitLossSpinBox->value())/(ui.sellTotalBtc->value()*floatFeeDec)+priceMinimumValue);
 	profitBuyThanSellUnlocked=true;
 	profitBuyThanSellCalc();
 	profitSellThanBuyCalc();
+	ui.buttonBuyThenSellApply->setEnabled(false);
 }
 
 void QtBitcoinTrader::setApiDown(bool on)
@@ -1473,7 +1481,8 @@ void QtBitcoinTrader::calcButtonClicked()
 
 void QtBitcoinTrader::checkValidSellButtons()
 {
-	ui.sellBitcoinsButton->setEnabled(ui.sellTotalBtc->value()>=minTradeVolume&&ui.sellTotalBtc->value()<=ui.accountBTC->value()&&ui.sellTotalBtc->value()>0.0);
+	ui.sellThenBuyGroupBox->setEnabled(ui.sellTotalBtc->value()>=minTradeVolume);
+	ui.sellBitcoinsButton->setEnabled(ui.sellThenBuyGroupBox->isEnabled()&&ui.sellTotalBtc->value()<=ui.accountBTC->value()&&ui.sellTotalBtc->value()>0.0);
 }
 
 void QtBitcoinTrader::on_sellPricePerCoinAsMarketPrice_clicked()
@@ -1555,7 +1564,6 @@ void QtBitcoinTrader::sellTotalBtcToSellChanged(double val)
 	sellLockAmountToReceive=true;
 	ui.sellAmountToReceive->setValue(ui.sellPricePerCoin->value()*val*floatFeeDec);
 
-	ui.sellThenBuyGroupBox->setEnabled(val>0.0);
 	sellLockAmountToReceive=false;
 
 	checkValidSellButtons();
@@ -1571,7 +1579,7 @@ void QtBitcoinTrader::sellPricePerCoinInUsdChanged(double)
 	sellTotalBtcToSellChanged(ui.sellTotalBtc->value());
 	sellLockPricePerCoin=false;
 	}
-	ui.sellNextMaxBuyPrice->setValue(ui.sellPricePerCoin->value()*floatFeeDec*floatFeeDec);
+	ui.sellNextMaxBuyPrice->setValue(ui.sellPricePerCoin->value()*floatFeeDec*floatFeeDec-priceMinimumValue);
 	ui.sellNextMaxBuyStep->setValue(ui.sellPricePerCoin->value()-ui.sellNextMaxBuyPrice->value());
 	checkValidSellButtons();
 }
@@ -1627,8 +1635,6 @@ void QtBitcoinTrader::buyTotalToSpendInUsdChanged(double val)
 	ui.buyTotalBtc->setValue(val/ui.buyPricePerCoin->value());
 	buyLockTotalBtc=false;
 
-	ui.buyThenSellGroupBox->setEnabled(val>0.0);
-
 	buyLockTotalSpend=false;
 	checkValidBuyButtons();
 }
@@ -1663,14 +1669,15 @@ void QtBitcoinTrader::buyPricePerCoinChanged(double)
 	buyTotalToSpendInUsdChanged(ui.buyTotalSpend->value());
 	buyLockPricePerCoin=false;
 	}
-	ui.buyNextInSellPrice->setValue(ui.buyPricePerCoin->value()*floatFeeInc*floatFeeInc);
+	ui.buyNextInSellPrice->setValue(ui.buyPricePerCoin->value()*floatFeeInc*floatFeeInc+priceMinimumValue);
 	ui.buyNextMinBuyStep->setValue(ui.buyNextInSellPrice->value()-ui.buyPricePerCoin->value());
 	checkValidBuyButtons();
 }
 
 void QtBitcoinTrader::checkValidBuyButtons()
 {
-	ui.buyBitcoinsButton->setEnabled(ui.buyTotalBtc->value()>=minTradeVolume&&ui.buyTotalSpend->value()<=ui.accountUSD->value()&&ui.buyTotalSpend->value()>0.0);
+	ui.buyThenSellGroupBox->setEnabled(ui.buyTotalBtc->value()>=minTradeVolume);
+	ui.buyBitcoinsButton->setEnabled(ui.buyThenSellGroupBox->isEnabled()&&ui.buyTotalSpend->value()<=ui.accountUSD->value()&&ui.buyTotalSpend->value()>0.0);
 }
 
 void QtBitcoinTrader::cacheFirstRowGuid()

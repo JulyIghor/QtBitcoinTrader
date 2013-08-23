@@ -27,6 +27,10 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	double floatFee;
+	double floatFeeDec;
+	double floatFeeInc;
+
 	QString numFromDouble(const double &value);
 
 	QString upArrow;
@@ -121,10 +125,6 @@ private:
 	void setRulesTableRowState(int row, int state);
 	void setOrdersTableRowState(int row, int state);
 	void setOrdersTableRowStateByText(int row, QString text);
-
-	double floatFee;
-	double floatFeeDec;
-	double floatFeeInc;
 
 	bool balanceNotLoaded;
 	bool marketPricesNotLoaded;

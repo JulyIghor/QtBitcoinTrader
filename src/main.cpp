@@ -58,6 +58,7 @@ QByteArray *currencyRequest_;
 int *btcDecimals_;
 int *usdDecimals_;
 int *priceDecimals_;
+double *priceMinimumValue_;
 double *minTradePrice_;
 double *minTradeVolume_;
 int *httpRequestInterval_;
@@ -98,7 +99,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0769");
+	appVerStr_=new QByteArray("1.0771");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -123,6 +124,7 @@ int main(int argc, char *argv[])
 	btcDecimals_=new int(8);
 	usdDecimals_=new int(5);
 	priceDecimals_=new int(5);
+	priceMinimumValue_=new double(0.00001);
 	depthCountLimit_=new int(100);
 	uiUpdateInterval_=new int(100);
 	depthRefreshBlocked_=new bool(false);
@@ -356,6 +358,7 @@ int main(int argc, char *argv[])
 				{
 					restKey=decryptedList.at(1).toAscii();
 					restSign=QByteArray::fromBase64(decryptedList.last().toAscii());
+
                     tryDecrypt=false;
 					lockFile=new QFile(enterPassword.lockFilePath(iniFileName));
                     lockFile->open(QIODevice::WriteOnly|QIODevice::Truncate);
