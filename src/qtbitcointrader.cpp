@@ -31,6 +31,7 @@
 #include "exchange_mtgox.h"
 #include "exchange_btce.h"
 #include <QSystemTrayIcon>
+#include <QtCore/qmath.h>
 
 #ifdef Q_OS_WIN
 #include "windows.h"
@@ -505,7 +506,7 @@ void QtBitcoinTrader::loadUiSettings()
 			exchangeName="Mt.Gox"; (new Exchange_MtGox(restSign,restKey))->setupApi(this,false);
 		}
 	}
-	priceMinimumValue=pow(0.1,priceDecimals);
+	priceMinimumValue=qPow(0.1,priceDecimals);
 	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);
 	currencyChanged(ui.currencyComboBox->currentIndex());
 
@@ -877,7 +878,7 @@ void QtBitcoinTrader::currencyChanged(int val)
 
 	currencyRequestPair=curDataList.first().toAscii();
 	priceDecimals=curDataList.at(1).toInt();
-	priceMinimumValue=pow(0.1,priceDecimals);
+	priceMinimumValue=qPow(0.1,priceDecimals);
 	minTradeVolume=curDataList.at(2).toDouble();
 	minTradePrice=curDataList.at(3).toDouble();
 
