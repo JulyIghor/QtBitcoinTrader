@@ -28,8 +28,8 @@ FeeCalculator::FeeCalculator()
 	ui.feeValue->setValue(mainWindow.ui.accountFee->value());
 
 	ui.buyPrice->setValue(mainWindow.ui.marketBuy->value());
-	double btcVal=mainWindow.ui.accountUSD->value()/ui.buyPrice->value();
-	if(btcVal<0.01)btcVal=1.0;
+	double btcVal=mainWindow.getAvailableUSD()/ui.buyPrice->value();
+	if(btcVal<minTradeVolume)btcVal=minTradeVolume;
 	ui.buyTotalBtc->setValue(btcVal);
 
 	buyBtcLocked=false;

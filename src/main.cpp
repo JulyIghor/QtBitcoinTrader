@@ -64,6 +64,7 @@ double *minTradeVolume_;
 int *httpRequestInterval_;
 int *httpRequestTimeout_;
 bool *httpSplitPackets_;
+int *httpRetryCount_;
 int *depthCountLimit_;
 int *uiUpdateInterval_;
 int *apiDownCount_;
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0771");
+	appVerStr_=new QByteArray("1.0772");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -134,6 +135,7 @@ int main(int argc, char *argv[])
 	httpRequestInterval_=new int(400);
 	httpRequestTimeout_=new int(5000);
 	httpSplitPackets_=new bool(true);
+	httpRetryCount_=new int(5);
 	logEnabled_=new bool(false);
 	apiDownCount_=new int(0);
 	groupPriceValue_=new double(0.0);
@@ -294,20 +296,27 @@ int main(int argc, char *argv[])
 			newPassword.updateIniFileName();
 			restKey=newPassword.getRestKey().toAscii();
 			QSettings settings(iniFileName,QSettings::IniFormat);
-			settings.setValue("ExchangeId",newPassword.getExchangeId());
-			QByteArray cryptedData;
-			if(newPassword.getExchangeId()==0)
+			settings.setValue("Profile/ExchangeId",newPassword.getExchangeId());
+			QByteArray encryptedData;
+			switch(newPassword.getExchangeId())
 			{
-			restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
-			cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
-			}
-			else
-			if(newPassword.getExchangeId()==1)
-			{
+			case 0:
+				{
+				restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+				break;
+				}
+			case 1:
+				{
 				restSign=newPassword.getRestSign().toAscii();
-				cryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+				}
+			case 2:
+				restSign=newPassword.getRestSign().toAscii();
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+			default: break;
 			}
-			settings.setValue("EncryptedData/ApiKeySign",QString(cryptedData.toBase64()));
+			settings.setValue("EncryptedData/ApiKeySign",QString(encryptedData.toBase64()));
 			settings.setValue("Profile/Name",newPassword.selectedProfileName());
 			settings.sync();
 

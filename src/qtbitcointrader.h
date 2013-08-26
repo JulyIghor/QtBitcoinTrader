@@ -27,6 +27,9 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	double getAvailableBTC();
+	double getAvailableUSD();
+
 	double floatFee;
 	double floatFeeDec;
 	double floatFeeInc;

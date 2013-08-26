@@ -1,8 +1,9 @@
 <RCC>
-  <qresource prefix="/"> 
+  <qresource prefix="/">
     <file>Resources/Thawte_Primary_Root_CA.cer</file>
     <file>Resources/Exchanges/BTC-e.png</file>
     <file>Resources/Exchanges/Mt.Gox.png</file>
+    <file>Resources/Exchanges/Bitstamp.png</file>
     <file>Resources/exit.png</file>
     <file>Resources/Mute.png</file>
     <file>Resources/minus.png</file>
@@ -12,6 +13,7 @@
     <file>Resources/Currencies.map</file>
     <file>Resources/CurrenciesMtGox.map</file>
     <file>Resources/CurrenciesBTCe.map</file>
+    <file>Resources/CurrenciesBitstamp.map</file>
     <file>Resources/CurrencySign/AUD.png</file>
     <file>Resources/CurrencySign/BTC.png</file>
     <file>Resources/CurrencySign/LTC.png</file>

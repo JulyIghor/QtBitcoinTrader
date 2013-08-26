@@ -19,7 +19,7 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 	ui.buttonSaveRule->setVisible(false);
 	ui.thanValue->setValue(mainWindow.ui.marketLast->value());
 	ui.exactPriceValue->setValue(mainWindow.ui.marketLast->value());
-	ui.btcValue->setValue(mainWindow.ui.accountBTC->value());
+	ui.btcValue->setValue(mainWindow.getAvailableBTC());
 
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	amountChanged();
@@ -75,8 +75,8 @@ bool AddRuleWindow::checkIsValidRule()
 	if(ui.checkMarketLow->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.marketLow->value()))return false;
 	if(ui.checkOrdersLastBuyPrice->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ordersLastBuyPrice->value()))return false;
 	if(ui.checkOrdersLastSellPrice->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ordersLastSellPrice->value()))return false;
-	if(ui.checkBtcBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.accountBTC->value()))return false;
-	if(ui.checkUsdBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.accountUSD->value()))return false;
+	if(ui.checkBtcBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.getAvailableBTC()))return false;
+	if(ui.checkUsdBalance->isChecked()&&getRuleHolder().isAchieved(mainWindow.getAvailableUSD()))return false;
 	if(ui.checkTotalToBuy->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ruleTotalToBuyValue->value()))return false;
 	if(ui.checkAmountToReceive->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ruleAmountToReceiveValue->value()))return false;
 	if(ui.checkTotalToBuyBS->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.ruleTotalToBuyBSValue->value()))return false;
@@ -224,7 +224,7 @@ void AddRuleWindow::ifChanged(bool on)
 	if(ui.checkBtcBalance->isChecked()||ui.checkTotalToBuy->isChecked()||ui.checkTotalToBuyBS->isChecked())
 	{
 		ui.thanValue->setDecimals(btcDecimals);
-		if(ui.checkBtcBalance->isChecked())ui.thanValue->setValue(mainWindow.ui.accountBTC->value());
+		if(ui.checkBtcBalance->isChecked())ui.thanValue->setValue(mainWindow.getAvailableBTC());
 		if(ui.checkTotalToBuy->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleTotalToBuyValue->value());
 		if(ui.checkTotalToBuyBS->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleTotalToBuyBSValue->value());
 
@@ -235,7 +235,7 @@ void AddRuleWindow::ifChanged(bool on)
 	if(ui.checkUsdBalance->isChecked()||ui.checkAmountToReceive->isChecked()||ui.checkAmountToReceiveBS->isChecked())
 	{
 		ui.thanValue->setDecimals(usdDecimals);
-		if(ui.checkUsdBalance->isChecked())ui.thanValue->setValue(mainWindow.ui.accountUSD->value());
+		if(ui.checkUsdBalance->isChecked())ui.thanValue->setValue(mainWindow.getAvailableUSD());
 		if(ui.checkAmountToReceive->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleAmountToReceiveValue->value());
 		if(ui.checkAmountToReceiveBS->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleAmountToReceiveBSValue->value());
 

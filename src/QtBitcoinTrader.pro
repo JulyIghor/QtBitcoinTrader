@@ -37,7 +37,8 @@ HEADERS += aboutdialog.h \
            exchange_btce.h \
            datafolderchusedialog.h \
            tradesmodel.h \
-           depthmodel.h
+           depthmodel.h \
+           exchange_bitstamp.h
 #
 # Forms
 #
@@ -76,7 +77,8 @@ SOURCES += aboutdialog.cpp \
            exchange_btce.cpp \
            datafolderchusedialog.cpp \
            tradesmodel.cpp \
-           depthmodel.cpp
+           depthmodel.cpp \
+           exchange_bitstamp.cpp
 #
 # Resources
 # 

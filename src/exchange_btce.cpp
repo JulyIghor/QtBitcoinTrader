@@ -304,7 +304,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 						{
 							bool matchCurrentGroup=priceDouble>groupedPrice-groupPriceValue;
 							if(matchCurrentGroup)groupedVolume+=amount;
-							if(!matchCurrentGroup||n==bidsList.count()-1)
+							if(!matchCurrentGroup||n==0)
 							{
 								depthSubmitOrder(&currentBidsMap,groupedPrice-groupPriceValue,groupedVolume,false);
 								rowCounter++;

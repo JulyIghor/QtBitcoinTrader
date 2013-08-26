@@ -61,6 +61,7 @@ void NewPasswordDialog::getApiKeySecretButton()
 	{
 	case 0:	QDesktopServices::openUrl(QUrl("https://www.mtgox.com/security")); break;
 	case 1: QDesktopServices::openUrl(QUrl("https://btc-e.com/profile#api_keys")); break;
+	case 2: QDesktopServices::openUrl(QUrl("https://www.bitstamp.net")); break;
 	default: break;
 	}
 }
@@ -132,7 +133,7 @@ void NewPasswordDialog::updateIniFileName()
 	if(ui.profileNameEdit->text().isEmpty())
 	iniFileName=appDataDir+"QtBitcoinTrader.ini";
 	else
-	iniFileName=appDataDir+ui.profileNameEdit->text().toAscii()+".ini";
+	iniFileName=appDataDir+ui.exchangeComboBox->currentText()+"_"+ui.profileNameEdit->text().toAscii()+".ini";
 
 	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	settings.setValue("LastProfile",iniFileName);

@@ -37,7 +37,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 		QSettings settIni(appDataDir+settingsList.at(n),QSettings::IniFormat);
 
 
-		if(appVerLastReal<1.0763)
+		if(appVerLastReal<1.0772)
 		{
 			QString cryptedData=settIni.value("CryptedData","").toString();
 			if(!cryptedData.isEmpty())settIni.setValue("EncryptedData/ApiKeySign",cryptedData);
@@ -66,6 +66,8 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 		QString itemIcon;
 		if(currentProfileExchangeId==0)itemIcon=":/Resources/Exchanges/Mt.Gox.png";
 		if(currentProfileExchangeId==1)itemIcon=":/Resources/Exchanges/BTC-e.png";
+		if(currentProfileExchangeId==2)itemIcon=":/Resources/Exchanges/Bitstamp.png";
+
 		ui.profileComboBox->addItem(QIcon(itemIcon),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
 

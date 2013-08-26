@@ -18,6 +18,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 {
 	secureConnection=secure;
 	isDataPending=false;
+	httpState=999;
 	connectionClose=false;
 	bytesDone=0;
 	contentLength=0;
@@ -112,11 +113,11 @@ void JulyHttp::readSocket()
 {
 	if(isDisabled)return;
 
-	emit anyDataReceived();
 	requestTimeOut.restart();
 
 	if(!waitingReplay)
 	{
+		httpState=999;
 		bytesDone=0;
 		connectionClose=false;
 		buffer.clear();
@@ -139,6 +140,11 @@ void JulyHttp::readSocket()
 			else
 			{
 				QString currentLineLow=currentLine.toLower();
+				if(currentLineLow.startsWith("http/1.1 "))
+				{
+					if(currentLineLow.length()>12)httpState=currentLineLow.mid(9,3).toInt();
+				}
+				else
 				if(currentLineLow.startsWith("set-cookie"))
 				{
 					cookie=currentLine;
@@ -168,10 +174,12 @@ void JulyHttp::readSocket()
 		}
 		readingHeader=false;
 	}
+	if(httpState<400)emit anyDataReceived();
 
 	bool allDataReaded=false;
 
 		qint64 readSize=socket->bytesAvailable();
+
 		QByteArray *dataArray=0;
 		if(chunkedSize!=-1)
 		{
@@ -258,8 +266,8 @@ void JulyHttp::readSocket()
 
 		if(dataArray)
 		{
-			readSize=dataArray->size();
-				buffer.append(*dataArray);
+				readSize=dataArray->size();
+				if(readSize>0)buffer.append(*dataArray);
 				if(dataArray){delete dataArray;dataArray=0;}
 				if(contentLength>0)
 				{
@@ -359,7 +367,7 @@ void JulyHttp::clearRequest()
 	endOfPacket=false;
 }
 
-void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray postData, const QByteArray &restSignLine)
+void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray postData, const QByteArray &restSignLine, const int &forceRetryCount)
 {
 	if(isDisabled)return;
 	QByteArray *data=new QByteArray(method+httpHeader+cookie);
@@ -375,8 +383,12 @@ void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray pos
 	reqPair.first=data;
 	reqPair.second=reqType;
 	preparedList<<reqPair;
-	if(reqType>300)retryCountMap[data]=4;
+	if(forceRetryCount==-1)
+	{
+	if(reqType>300)retryCountMap[data]=httpRetryCount-1;
 	else retryCountMap[data]=0;
+	}
+	else retryCountMap[data]=forceRetryCount;
 	reqTypePending[reqType]=reqTypePending.value(reqType,0)+1;
 }
 
@@ -412,7 +424,7 @@ void JulyHttp::prepareDataClear()
 	preparedList.clear();
 }
 
-void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postData, const QByteArray &restSignLine)
+void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postData, const QByteArray &restSignLine, const int &forceRetryCount)
 {
 	if(isDisabled)return;
 	QByteArray *data=new QByteArray(method+httpHeader+cookie);
@@ -432,8 +444,12 @@ void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postDa
 	QPair<QByteArray*,int> reqPair;
 	reqPair.first=data;
 	reqPair.second=reqType;
-	if(reqType>300)retryCountMap[data]=4;
+	if(forceRetryCount==-1)
+	{
+	if(reqType>300)retryCountMap[data]=httpRetryCount-1;
 	else retryCountMap[data]=0;
+	}
+	else retryCountMap[data]=forceRetryCount;
 	requestList<<reqPair;
 
 	if(isDataPending!=true)
@@ -539,7 +555,7 @@ void JulyHttp::sendPendingData()
 	requestRetryCount=retryCountMap.value(pendingRequest,0);
 	if(requestRetryCount<0||requestRetryCount>100)requestRetryCount=0;
 	requestTimeOut.restart();
-	if(isLogEnabled)logThread->writeLog("SND: "+*pendingRequest);
+	if(isLogEnabled)logThread->writeLog("SND: "+QByteArray(*pendingRequest).replace(restKey,"REST_KEY").replace(restSign,"REST_SIGN"));
 
 	if(pendingRequest)
 	{

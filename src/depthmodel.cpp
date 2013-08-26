@@ -16,9 +16,9 @@ DepthModel::DepthModel(bool isAskData)
 {
 	groupedPrice=0.0;
 	groupedVolume=0.0;
-	widthPrice=100;
-	widthVolume=100;
-	widthSize=100;
+	widthPrice=50;
+	widthVolume=50;
+	widthSize=50;
 	somethingChanged=true;
 	isAsk=isAskData;
 	columnsCount=4;

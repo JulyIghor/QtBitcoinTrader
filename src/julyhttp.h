@@ -24,9 +24,9 @@ public:
 	void clearPendingData();
 	void reConnect(bool mastAbort=true);
 	bool isReqTypePending(int);
-	void sendData(int reqType, const QByteArray &method, QByteArray postData=0, const QByteArray &restSignLine=0);
+	void sendData(int reqType, const QByteArray &method, QByteArray postData=0, const QByteArray &restSignLine=0, const int &forceRetryCount=-1);
 
-	void prepareData(int reqType, const QByteArray &method, QByteArray postData=0, const QByteArray &restSignLine=0);
+	void prepareData(int reqType, const QByteArray &method, QByteArray postData=0, const QByteArray &restSignLine=0, const int &forceRetryCount=-1);
 	void prepareDataSend();
 	void prepareDataClear();
 
@@ -40,6 +40,7 @@ private:
 	bool contentGzipped;
 	QMap<QSslSocket *,QByteArray *>pendingRequestMap;
 	bool connectionClose;
+	int httpState;
 	qint64 bytesDone;
 	uint contentLength;
 	bool waitingReplay;

@@ -11,6 +11,7 @@
 #include <openssl/hmac.h>
 #include "main.h"
 #include <QDateTime>
+#include <QtCore/qmath.h>
 
 Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	: QThread()
@@ -153,7 +154,7 @@ void Exchange_MtGox::secondSlot()
 	}
 
 	if(!isReplayPending(101))sendToApi(101,currencyRequestPair+"/money/order/lag",false,httpSplitPackets);
-	if((infoCounter==0)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
+	if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
 	if(!isReplayPending(104))sendToApi(104,currencyRequestPair+"/money/ticker_fast",false,httpSplitPackets);
 
 	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/money/trades/fetch?since="+lastFetchDate,false,httpSplitPackets);
@@ -186,14 +187,14 @@ void Exchange_MtGox::getHistory(bool force)
 void Exchange_MtGox::buy(double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	QByteArray params="&type=bid&amount_int="+QByteArray::number(apiBtcToBuy*100000000,'f',0)+"&price_int="+QByteArray::number(apiPriceToBuy*100000,'f',0);
+	QByteArray params="&type=bid&amount_int="+QByteArray::number(apiBtcToBuy*qPow(10,btcDecimals),'f',0)+"&price_int="+QByteArray::number(apiPriceToBuy*qPow(10,priceDecimals),'f',0);
 	sendToApi(306,currencyRequestPair+"/money/order/add",true,true,params);
 }
 
 void Exchange_MtGox::sell(double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
-	QByteArray params="&type=ask&amount_int="+QByteArray::number(apiBtcToSell*100000000,'f',0)+"&price_int="+QByteArray::number(apiPriceToSell*100000,'f',0);
+	QByteArray params="&type=ask&amount_int="+QByteArray::number(apiBtcToSell*qPow(10,btcDecimals),'f',0)+"&price_int="+QByteArray::number(apiPriceToSell*qPow(10,priceDecimals),'f',0);
 	sendToApi(307,currencyRequestPair+"/money/order/add",true,true,params);
 }
 
@@ -444,7 +445,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 						{
 							bool matchCurrentGroup=priceDouble>groupedPrice+groupPriceValue;
 							if(matchCurrentGroup)groupedVolume+=amount;
-							if(!matchCurrentGroup||n==bidsList.count()-1)
+							if(!matchCurrentGroup||n==0)
 							{
 								depthSubmitOrder(&currentBidsMap,groupedPrice-groupPriceValue,groupedVolume,false);
 								rowCounter++;

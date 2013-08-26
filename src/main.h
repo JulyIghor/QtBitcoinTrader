@@ -52,6 +52,7 @@
 #define httpRequestInterval (*httpRequestInterval_)
 #define httpRequestTimeout (*httpRequestTimeout_)
 #define httpSplitPackets (*httpSplitPackets_)
+#define httpRetryCount (*httpRetryCount_)
 #define depthCountLimit (*depthCountLimit_)
 #define uiUpdateInterval (*uiUpdateInterval_)
 #define apiDownCount (*apiDownCount_)
@@ -68,6 +69,7 @@ extern QFontMetrics *fontMetrics_;
 extern int *apiDownCount_;
 extern int *uiUpdateInterval_;
 extern int *depthCountLimit_;
+extern int *httpRetryCount_ ;
 extern bool *httpSplitPackets_;
 extern int *httpRequestInterval_;
 extern int *httpRequestTimeout_;
