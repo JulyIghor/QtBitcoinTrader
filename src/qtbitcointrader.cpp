@@ -261,6 +261,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(exchangeId==2)//Bitstamp exception
 	{
 		if(httpRequestInterval<1000)httpRequestInterval=1000;
+		ui.ordersLogInfoPanel->setVisible(false);
 	}
 
 	iniSettings->setValue("Network/HttpRequestsInterval",httpRequestInterval);
@@ -2189,8 +2190,13 @@ void QtBitcoinTrader::checkAndExecuteRule(QList<RuleHolder> *ruleHolder, double 
 
 				if(ruleBtc<0)
 				{
-					if(ruleBtc==-1.0)ruleBtc=getAvailableBTC();
-					if(ruleBtc==-2.0)ruleBtc=getAvailableBTC()/2.0;
+					double avBTC=getAvailableBTC();
+					if(exchangeId==2)//Bitstamp exception
+					{
+						avBTC=avBTC*floatFeeDec*floatFeeDec;
+					}
+					if(ruleBtc==-1.0)ruleBtc=avBTC;
+					if(ruleBtc==-2.0)ruleBtc=avBTC/2.0;
 					if(ruleBtc==-3.0)ruleBtc=ui.buyTotalSpend->value()/ui.buyPricePerCoin->value();
 					if(ruleBtc==-4.0)ruleBtc=ui.buyTotalSpend->value()/ui.buyPricePerCoin->value()/2.0;
 					if(ruleBtc==-5.0)

@@ -48,8 +48,6 @@ void Exchange_Bitstamp::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	connect(this,SIGNAL(depthFirstOrder(double,double,bool)),mainClass,SLOT(depthFirstOrder(double,double,bool)));
 	connect(this,SIGNAL(depthUpdateOrder(double,double,bool)),mainClass,SLOT(depthUpdateOrder(double,double,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
-	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
-	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
 
 	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
 	connect(mainClass,SIGNAL(reloadDepth()),this,SLOT(reloadDepth()));
@@ -323,7 +321,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=tradeList.count()-1;n>=0;n--)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
-					QByteArray tradeDate=getMidData("\"date\": \"","\",",&tradeData);
+					QByteArray tradeDate=getMidData("\"date\": \"","\"",&tradeData);
 					QByteArray nextFetchDate=tradeDate+getMidData("\"tid\": ",",",&tradeData);
 					if(nextFetchDate<=lastFetchDate)continue;
 					double doubleAmount=getMidData("\"amount\": \"","\"",&tradeData).toDouble();
@@ -359,7 +357,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				{
 					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
 					QByteArray currentRow=asksList.at(n).toAscii();
-					double priceDouble=getMidData("\"","\",",&currentRow).toDouble();
+					double priceDouble=getMidData("\"","\"",&currentRow).toDouble();
 					double amount=getMidData(", \"","\"",&currentRow).toDouble();
 
 					if(n==0&&updateTicker)emit tickerBuyChanged(priceDouble);
@@ -405,7 +403,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				{
 					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
 					QByteArray currentRow=bidsList.at(n).toAscii();
-					double priceDouble=getMidData("\"","\",",&currentRow).toDouble();
+					double priceDouble=getMidData("\"","\"",&currentRow).toDouble();
 					double amount=getMidData(", \"","\"",&currentRow).toDouble();
 
 					if(n==0&&updateTicker)emit tickerSellChanged(priceDouble);
@@ -453,7 +451,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				lastInfoReceived=true;
 				if(isLogEnabled)logThread->writeLog("Info: "+data);
 
-				double accFee=getMidData("\"fee\": \"","\",",&data).toDouble();
+				double accFee=getMidData("\"fee\": \"","\"",&data).toDouble();
 				if(accFee>0.0)emit accFeeChanged(accFee);
 
 				QByteArray btcBalance=getMidData("\"btc_balance\": \"","\"",&data);
@@ -551,8 +549,6 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				lastHistory=data;
 				if(data=="[]"){emit ordersLogChanged("");break;}
 
-				double lastBuyPrice=0.0;
-				double lastSellPrice=0.0;
 				QString newLog(data);
 				QStringList dataList=newLog.split("}, {");
 				newLog.clear();
@@ -560,13 +556,12 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				{
 					QByteArray curLog(dataList.at(n).toAscii());
 					int logTypeInt=getMidData("\"type\": ",",",&curLog).toInt();
-					QByteArray usdPrice=getMidData("\"usd\": \"","\",",&curLog);
-					QByteArray btcAmount=getMidData("\"btc\": \"","\",",&curLog);
+					QByteArray usdPrice=getMidData("\"usd\": \"","\"",&curLog);
+					QByteArray btcAmount=getMidData("\"btc\": \"","\"",&curLog);
 					QByteArray feeAmount=getMidData("\"fee\": \"","\"",&curLog);
 					bool negativeAmount=btcAmount.startsWith("-");
 					if(negativeAmount)btcAmount.remove(0,1);
-
-					QDateTime orderDateTime=QDateTime::fromString(getMidData("\"datetime\": \"","\",",&curLog),"yyyy-MM-dd HH:mm:ss");
+					QDateTime orderDateTime=QDateTime::fromString(getMidData("\"datetime\": \"","\"",&curLog),"yyyy-MM-dd HH:mm:ss");
 					orderDateTime.setTimeSpec(Qt::UTC);
 
 					QByteArray logType;
@@ -586,20 +581,10 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 						if(negativeAmount)
 						{//Sell
 							logType="<font color=\"red\">("+julyTr("LOG_SOLD","Sold").toAscii()+")</font>";
-							if(lastSellPrice==0.0)
-							{
-								lastSellPrice=usdPrice.toDouble();
-								emit accLastSellChanged("BTC",lastSellPrice);
-							}
 						}
 						else
 						{//Buy
 							logType="<font color=\"blue\">("+julyTr("LOG_BOUGHT","Bought").toAscii()+")</font>";
-							if(lastBuyPrice==0.0)
-							{
-							lastBuyPrice=usdPrice.toDouble();
-							emit accLastBuyChanged("BTC",lastBuyPrice);
-							}
 						}
 					}
 					newLog.append(" <font color=\"gray\">"+orderDateTime.toLocalTime().toString(localDateTimeFormat)+"</font>&nbsp;<font color=\"#996515\">"+currencySignMap->value("BTC","$")+btcAmount+"</font> "+logType+"<br>");

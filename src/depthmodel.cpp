@@ -303,4 +303,3 @@ double DepthModel::rowSize(int row)
 	if(row<0||row>=priceList.count())return 0.0;
 	return sizeList.at(row);
 }
-

@@ -2373,132 +2373,225 @@
         <attribute name="title">
          <string>Orders Log</string>
         </attribute>
-        <layout class="QGridLayout" name="gridLayout_14">
-         <item row="0" column="5">
-          <widget class="QDoubleSpinBox" name="ordersLastSellPrice">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+        <layout class="QGridLayout" name="gridLayout_32">
+         <item row="0" column="0">
+          <widget class="QWidget" name="ordersLogInfoPanel" native="true">
+           <layout class="QGridLayout" name="gridLayout_14">
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelOrdersLastBuyPrice">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="accessibleName">
+               <string>TR00023</string>
+              </property>
+              <property name="text">
+               <string>Last Buy Price:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="usdLabelLastBuy">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="accessibleDescription">
+               <string/>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: darkgreen</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QDoubleSpinBox" name="ordersLastBuyPrice">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="accessibleName">
+               <string>PRICE</string>
+              </property>
+              <property name="accessibleDescription">
+               <string>CAN_BE_ZERO</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+              <property name="buttonSymbols">
+               <enum>QAbstractSpinBox::NoButtons</enum>
+              </property>
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="decimals">
+               <number>5</number>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>999999999.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="labelOrdersLastSellPrice">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="accessibleName">
+               <string>TR00024</string>
+              </property>
+              <property name="text">
+               <string>Last Sell Price:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLabel" name="usdLabelLastSell">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="accessibleDescription">
+               <string/>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: darkgreen</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QDoubleSpinBox" name="ordersLastSellPrice">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="accessibleName">
+               <string>PRICE</string>
+              </property>
+              <property name="accessibleDescription">
+               <string>CAN_BE_ZERO</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+              <property name="buttonSymbols">
+               <enum>QAbstractSpinBox::NoButtons</enum>
+              </property>
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="decimals">
+               <number>5</number>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>999999999.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-           <property name="minimumSize">
+           <property name="sizeHint" stdset="0">
             <size>
-             <width>70</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>
+          </spacer>
+         </item>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="tabOrdersLogOnTop">
            <property name="accessibleName">
-            <string>PRICE</string>
+            <string>STAYS_ON_TOP</string>
            </property>
-           <property name="accessibleDescription">
-            <string>CAN_BE_ZERO</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="buttonSymbols">
-            <enum>QAbstractSpinBox::NoButtons</enum>
-           </property>
-           <property name="prefix">
-            <string/>
-           </property>
-           <property name="decimals">
-            <number>5</number>
-           </property>
-           <property name="minimum">
-            <double>0.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>999999999.000000000000000</double>
+           <property name="text">
+            <string>Stay on Top</string>
            </property>
           </widget>
          </item>
          <item row="0" column="3">
-          <widget class="QLabel" name="labelOrdersLastSellPrice">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="accessibleName">
-            <string>TR00024</string>
-           </property>
-           <property name="text">
-            <string>Last Sell Price:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QDoubleSpinBox" name="ordersLastBuyPrice">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="accessibleName">
-            <string>PRICE</string>
-           </property>
-           <property name="accessibleDescription">
-            <string>CAN_BE_ZERO</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="buttonSymbols">
-            <enum>QAbstractSpinBox::NoButtons</enum>
-           </property>
-           <property name="prefix">
-            <string/>
-           </property>
-           <property name="decimals">
-            <number>5</number>
-           </property>
-           <property name="minimum">
-            <double>0.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>999999999.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="labelOrdersLastBuyPrice">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="accessibleName">
-            <string>TR00023</string>
-           </property>
-           <property name="text">
-            <string>Last Buy Price:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="8">
           <widget class="QPushButton" name="detachOrdersLog">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -2514,20 +2607,7 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="6">
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="1" column="0" colspan="9">
+         <item row="1" column="0" colspan="4">
           <widget class="QTextEdit" name="logTextEdit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -2562,84 +2642,11 @@ p, li { white-space: pre-wrap; }
            </property>
           </widget>
          </item>
-         <item row="0" column="4">
-          <widget class="QLabel" name="usdLabelLastSell">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="accessibleDescription">
-            <string/>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: darkgreen</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="usdLabelLastBuy">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="accessibleDescription">
-            <string/>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: darkgreen</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="7">
-          <widget class="QCheckBox" name="tabOrdersLogOnTop">
-           <property name="accessibleName">
-            <string>STAYS_ON_TOP</string>
-           </property>
-           <property name="text">
-            <string>Stay on Top</string>
-           </property>
-          </widget>
-         </item>
         </layout>
-        <zorder>labelOrdersLastBuyPrice</zorder>
         <zorder>logTextEdit</zorder>
-        <zorder>ordersLastBuyPrice</zorder>
-        <zorder>labelOrdersLastSellPrice</zorder>
-        <zorder>ordersLastSellPrice</zorder>
-        <zorder>usdLabelLastBuy</zorder>
-        <zorder>usdLabelLastSell</zorder>
         <zorder>detachOrdersLog</zorder>
         <zorder>tabOrdersLogOnTop</zorder>
+        <zorder>ordersLogInfoPanel</zorder>
        </widget>
        <widget class="QWidget" name="tabRules">
         <attribute name="title">

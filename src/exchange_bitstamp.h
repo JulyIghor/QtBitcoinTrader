@@ -78,9 +78,6 @@ signals:
 
 	void ordersLogChanged(QString);
 
-	void accLastSellChanged(QByteArray,double);
-	void accLastBuyChanged(QByteArray,double);
-
 	void ordersIsEmpty();
 	void orderCanceled(QByteArray);
 

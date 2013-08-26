@@ -27,6 +27,7 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	int exchangeId;
 	double getAvailableBTC();
 	double getAvailableUSD();
 
@@ -81,7 +82,6 @@ private:
 	void saveDetachedWindowsSettings(bool force=false);
 	QString windowTitleP;
 	QSystemTrayIcon *trayIcon;
-	int exchangeId;
 	QString profileName;
 	void resizeEvent(QResizeEvent *);
 	void makeRitchValue(QString *text);
