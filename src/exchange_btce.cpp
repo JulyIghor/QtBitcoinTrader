@@ -330,7 +330,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	case 202: //info
 		{
 			if(!success)break;
-			QByteArray btcBalance=getMidData(currencyAStrLow+"\":",",\"",&data);
+			QByteArray fundsData=getMidData("funds\":{","}",&data)+",";
+			QByteArray btcBalance=getMidData(currencyAStrLow+"\":",",",&fundsData);
 			if(!btcBalance.isEmpty())
 			{
 				double newBtcBalance=btcBalance.toDouble();
@@ -338,7 +339,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				lastBtcBalance=newBtcBalance;
 			}
 
-			QByteArray usdBalance=getMidData("\""+currencyBStrLow+"\":",",\"",&data);
+			QByteArray usdBalance=getMidData("\""+currencyBStrLow+"\":",",",&fundsData);
 			if(!usdBalance.isEmpty())
 			{
 				double newUsdBalance=usdBalance.toDouble();
@@ -450,7 +451,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 						QByteArray logDate=getMidData("timestamp\":","}",&curLog);
 						QByteArray priceValue=getMidData("rate\":",",\"",&curLog);
 						QStringList currencyPair;
-						if((logTypeInt==1||logTypeInt==2)&&(lastSellPrice==0.0||lastBuyPrice==0.0))
+						if(logTypeInt==1||logTypeInt==2)
 						{
 							currencyPair=QString(getMidData("pair\":\"","\",\"",&curLog)).toUpper().split("_");
 							if(currencyPair.count()!=2||currencyPair.first().isEmpty()||currencyPair.last().isEmpty())continue;
