@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2013 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
 // For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
