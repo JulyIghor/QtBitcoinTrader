@@ -27,7 +27,7 @@ NewPasswordDialog::NewPasswordDialog()
 
 	julyTranslator->translateUi(this);
 
-	ui.groupBoxApiKeyAndSecret->setTitle(julyTr("API_KEY_AND_SECRET","%1 API key and Secret").arg(ui.exchangeComboBox->currentText()));
+	exchangeChanged(ui.exchangeComboBox->currentText());
 }
 
 NewPasswordDialog::~NewPasswordDialog()
@@ -38,6 +38,19 @@ NewPasswordDialog::~NewPasswordDialog()
 void NewPasswordDialog::exchangeChanged(QString name)
 {
 	ui.groupBoxApiKeyAndSecret->setTitle(julyTr("API_KEY_AND_SECRET","%1 API key and Secret").arg(name));
+	switch(ui.exchangeComboBox->currentIndex())
+	{
+	case 2:
+		ui.labelClientID->setVisible(true);
+		ui.clientIdLine->setVisible(true);
+		ui.clearClientIdLine->setVisible(true);
+		break;
+	default:
+		ui.labelClientID->setVisible(false);
+		ui.clientIdLine->setVisible(false);
+		ui.clearClientIdLine->setVisible(false);
+		break;
+	}
 }
 
 QString NewPasswordDialog::getPassword()
@@ -52,6 +65,7 @@ QString NewPasswordDialog::getRestSign()
 
 QString NewPasswordDialog::getRestKey()
 {
+	if(ui.exchangeComboBox->currentIndex()==2)return ui.clientIdLine->text()+":"+ui.restKeyLine->text();//Bitstamp
 	return ui.restKeyLine->text();
 }
 
@@ -61,7 +75,7 @@ void NewPasswordDialog::getApiKeySecretButton()
 	{
 	case 0:	QDesktopServices::openUrl(QUrl("https://www.mtgox.com/security")); break;
 	case 1: QDesktopServices::openUrl(QUrl("https://btc-e.com/profile#api_keys")); break;
-	case 2: QDesktopServices::openUrl(QUrl("https://www.bitstamp.net")); break;
+	case 2: QDesktopServices::openUrl(QUrl("https://www.bitstamp.net/account/security/api/")); break;
 	default: break;
 	}
 }
@@ -93,7 +107,8 @@ void NewPasswordDialog::checkToEnableButton()
 		return;
 	}
 
-	if(ui.restSignLine->text().isEmpty()||ui.restKeyLine->text().isEmpty()){ui.okButton->setEnabled(false);return;}
+	if(ui.restSignLine->text().isEmpty()||ui.restKeyLine->text().isEmpty()||ui.clientIdLine->isVisible()&&ui.clientIdLine->text().isEmpty())
+		{ui.okButton->setEnabled(false);return;}
 
 	ui.okButton->setEnabled(true);
 }

@@ -31,6 +31,10 @@ public:
 	double getAvailableBTC();
 	double getAvailableUSD();
 
+	double getFeeForUSDDec(double usd);
+	double getFeeForUSDInc(double usd);
+	double getValidDoubleForPercision(const double &val, const double &percision, bool roundUp=true);
+
 	double floatFee;
 	double floatFeeDec;
 	double floatFeeInc;

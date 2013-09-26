@@ -61,6 +61,8 @@ private:
 	int secondPart;
 	QByteArray privateRestSign;
 	QByteArray privateRestKey;
+	QByteArray privateClientId;
+	quint32 privateNonce;
 
 	bool isReplayPending(int);
 

@@ -8,7 +8,6 @@
 // GNU General Public License version 3
 
 #include "julyhttp.h"
-#include <openssl/hmac.h>
 #include "main.h"
 #include <QTimer>
 #include <zlib.h>
@@ -516,13 +515,16 @@ QSslSocket *JulyHttp::getStableSocket()
 	if(isSocketConnected(socket))return socket;
 	else reconnectSocket(socket,false);
 
-	if(socket->state()!=QAbstractSocket::UnconnectedState)socket->waitForConnected(5000);
+	if(socket->state()!=QAbstractSocket::UnconnectedState)
+	{
+		if(socket->state()==QAbstractSocket::ConnectingState)socket->waitForConnected(5000);
+	}
 	if(socket->state()!=QAbstractSocket::ConnectedState)
 	{
 		setApiDown(true);
 		if(isLogEnabled)logThread->writeLog("Socket error: "+socket->errorString().toAscii());
 		reconnectSocket(socket,false);
-		socket->waitForConnected(5000);
+		if(socket->state()==QAbstractSocket::ConnectingState)socket->waitForConnected(5000);
 	}
 	else reconnectSocket(socket,false);
 	return socket;
@@ -534,6 +536,8 @@ void JulyHttp::sendPendingData()
 	if(requestList.count()==0)return;
 
 	QSslSocket *currentSocket=getStableSocket();
+
+	if(currentSocket->state()!=QAbstractSocket::ConnectedState)return;
 
 	QByteArray *pendingRequest=pendingRequestMap.value(currentSocket,0);
 	if(pendingRequest==requestList.first().first)

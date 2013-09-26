@@ -19,9 +19,11 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	julyHttp=0;
 	tickerOnly=false;
 	privateRestSign=pRestSign;
-	privateRestKey=pRestKey;
+	privateRestKey=pRestKey.split(':').last();
+	privateClientId=pRestKey.split(':').first();
 	moveToThread(this);
 	authRequestTime.restart();
+	privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 }
 
 Exchange_Bitstamp::~Exchange_Bitstamp()
@@ -131,8 +133,8 @@ void Exchange_Bitstamp::secondSlot()
 	static int infoCounter=0;
 	switch(infoCounter)
 	{
-	case 0: if(!isReplayPending(202))sendToApi(202,"balance/",true,true); break;
-	case 1: if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"open_orders/",true,true); break;
+	case 0: if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"open_orders/",true,true); break;
+	case 1: if(!isReplayPending(202))sendToApi(202,"balance/",true,true); break;
 	case 2: if(!isReplayPending(103))sendToApi(103,"ticker/",false,true); break;
 	case 3: if(!isReplayPending(109))sendToApi(109,"transactions/",false,true); break;
 	case 4: if(lastHistory.isEmpty()&&!isReplayPending(208))sendToApi(208,"user_transactions/",true,true); break;
@@ -145,7 +147,12 @@ void Exchange_Bitstamp::secondSlot()
 		forceDepthLoad=false;
 	}
 
-	if(++infoCounter>5)infoCounter=0;
+	if(++infoCounter>5)
+	{
+		infoCounter=0;
+		quint32 syncNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
+		if(privateNonce<syncNonce)privateNonce=syncNonce;
+	}
 
 	secondTimer->start(httpRequestInterval);
 }
@@ -199,12 +206,13 @@ void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, boo
 
 	if(auth)
 	{
-		QByteArray postData="user="+privateRestKey+"&password="+privateRestSign;
+		QByteArray postData=QByteArray::number(++privateNonce);
+		postData="key="+privateRestKey+"&signature="+hmacSha256(privateRestSign,QByteArray(postData+privateClientId+privateRestKey)).toHex().toUpper()+"&nonce="+postData;
 		if(!commands.isEmpty())postData.append("&"+commands);
 		if(sendNow)
-		julyHttp->sendData(reqType, "POST /api/"+method,postData,0,(reqType==306||reqType==307)?0:-1);
+		julyHttp->sendData(reqType, "POST /api/"+method,postData);
 		else
-		julyHttp->prepareData(reqType, "POST /api/"+method, postData,0,(reqType==306||reqType==307)?0:-1);
+		julyHttp->prepareData(reqType, "POST /api/"+method, postData);
 
 	}
 	else
@@ -245,7 +253,6 @@ void Exchange_Bitstamp::reloadDepth()
 void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 {
 	bool success=!data.startsWith("{\"error\"")&&(data.startsWith("{")||data.startsWith("["))||data=="true"||data=="false";
-
 	switch(reqType)
 	{
 	case 103: //ticker
@@ -598,7 +605,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 	}
 
 	static int errorCount=0;
-	if(!success)
+	if(!success&&reqType!=305)
 	{
 		errorCount++;
 		QString errorString;
@@ -617,8 +624,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 		if(errorCount<3&&reqType<300&&errorString!="Invalid username and/or password")return;
 		if(errorString.isEmpty())return;
 		errorString.append("<br>"+QString::number(reqType));
-		if(invalidMessage||reqType>300)emit showErrorMessage(errorString);
-		else emit showErrorMessage("I:>"+errorString);
+		if(invalidMessage||reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 	else errorCount=0;
 }

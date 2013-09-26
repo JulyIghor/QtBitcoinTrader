@@ -57,12 +57,29 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 			settIni.sync();
 		}
 
+
 		if(settIni.value("EncryptedData/ApiKeySign","").toString().isEmpty())
 		{
-			QFile::remove(appDataDir+settingsList.at(n));//I'll add ini backup function here
+			QFile::remove(appDataDir+settingsList.at(n));
 			continue;
 		}
 		int currentProfileExchangeId=settIni.value("Profile/ExchangeId",0).toInt();
+
+		if(appVerLastReal<1.0775)
+		{
+			if(currentProfileExchangeId==2)
+			{
+				QFile::remove(appDataDir+settingsList.at(n));
+				static bool haveBitstampProfile=false;
+				if(!haveBitstampProfile)
+				{
+					haveBitstampProfile=true;
+					QMessageBox::warning(0,windowTitle(),"From now Bitstamp support API keys with permissions. To ensure the security of your Bitstamp account you must create new API keys and add a new profile of Bitstamp to the Qt Bitcoin Trader.");
+				}
+				continue;
+			}
+		}
+
 		QString itemIcon;
 		if(currentProfileExchangeId==0)itemIcon=":/Resources/Exchanges/Mt.Gox.png";
 		if(currentProfileExchangeId==1)itemIcon=":/Resources/Exchanges/BTC-e.png";

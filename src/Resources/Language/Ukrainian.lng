@@ -274,3 +274,4 @@ Label_ROWS_TO_DISPLAY=Ліміт рядків:
 Label_GROUP_BY_PRICE=Крок групування:
 String_DONT_GROUP=Нема
 CheckBox_AUTO_RESIZE_COLUMNS=Ширина стовбців авто.
+Label_CLIENT_ID=ID Клієнта:

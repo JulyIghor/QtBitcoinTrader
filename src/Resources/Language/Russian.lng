@@ -274,3 +274,4 @@ String_LANGUAGE_NAME=Русский
 String_LANGUAGE_AUTHOR=xalex<br><a href="mailto:alexiv@i.ua">alexiv@i.ua</a><br>Donate:<br><a href="btc: 1AvMJ7xkdSnRByugy6y9Nw8ur92MsaYSpT">1AvMJ7xkdSnRByugy6y9Nw8ur92MsaYSpT</a>
 String_LANGUAGE_LOCALE=ru
 CheckBox_AUTO_RESIZE_COLUMNS=Ширина столбцов авто.
+Label_CLIENT_ID=ID Клиента:

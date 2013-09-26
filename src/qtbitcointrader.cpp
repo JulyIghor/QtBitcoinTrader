@@ -355,6 +355,30 @@ void QtBitcoinTrader::anyDataReceived()
 	setSoftLagValue(0);
 }
 
+double QtBitcoinTrader::getFeeForUSDDec(double usd)
+{
+	usd=getValidDoubleForPercision(usd,usdDecimals);
+	double calcFee=getValidDoubleForPercision(usd,priceDecimals,true)*floatFee;
+	calcFee=getValidDoubleForPercision(calcFee,priceDecimals,true);
+	usd=usd-calcFee;
+	return usd;
+}
+
+double QtBitcoinTrader::getFeeForUSDInc(double usd)
+{
+	usd=getValidDoubleForPercision(usd,usdDecimals);
+	usd=usd+getValidDoubleForPercision(usd*floatFee,usdDecimals,true);
+	return usd;
+}
+
+double QtBitcoinTrader::getValidDoubleForPercision(const double &val, const double &percision, bool roundUp)
+{
+	double incVal=1.0;
+	if(!roundUp)incVal=0.0;
+	double percisionValue=qPow(10,percision);
+	return static_cast<double>(static_cast<int>(val*percisionValue+incVal))/percisionValue;
+}
+
 void QtBitcoinTrader::addPopupDialog(int val)
 {
 	static int currentPopupDialogs=0;
@@ -1189,7 +1213,7 @@ void QtBitcoinTrader::orderCanceled(QByteArray oid)
 
 QString QtBitcoinTrader::numFromDouble(const double &val)
 {
-	QString numberText=QString::number(val,'f',8);
+	QString numberText=QString::number(val,'f',10);
 	int curPos=numberText.size()-1;
 	while(curPos>0&&numberText.at(curPos)=='0')numberText.remove(curPos--,1);
 	if(numberText.size()&&numberText.at(numberText.size()-1)=='.')numberText.append("0");
@@ -1468,7 +1492,7 @@ void QtBitcoinTrader::calcButtonClicked()
 void QtBitcoinTrader::checkValidSellButtons()
 {
 	ui.sellThenBuyGroupBox->setEnabled(ui.sellTotalBtc->value()>=minTradeVolume);
-	ui.sellBitcoinsButton->setEnabled(ui.sellThenBuyGroupBox->isEnabled()&&ui.sellTotalBtc->value()<=getAvailableBTC()&&ui.sellTotalBtc->value()>0.0);
+	ui.sellBitcoinsButton->setEnabled(ui.sellThenBuyGroupBox->isEnabled()&&/*ui.sellTotalBtc->value()<=getAvailableBTC()&&*/ui.sellTotalBtc->value()>0.0);
 }
 
 void QtBitcoinTrader::on_sellPricePerCoinAsMarketPrice_clicked()
@@ -1614,6 +1638,9 @@ void QtBitcoinTrader::buyTotalToSpendInUsdChanged(double val)
 
 	profitBuyThanSellCalc();
 	profitSellThanBuyCalc();
+
+	ui.buyTotalBtcResult->setValue(getFeeForUSDDec(val)/ui.buyPricePerCoin->value());
+
 	if(buyLockTotalSpend)return;
 	buyLockTotalSpend=true;
 
@@ -1626,9 +1653,8 @@ void QtBitcoinTrader::buyTotalToSpendInUsdChanged(double val)
 }
 
 
-void QtBitcoinTrader::buyBtcToBuyChanged(double val)
+void QtBitcoinTrader::buyBtcToBuyChanged(double)
 {
-	ui.buyTotalBtcResult->setValue(val*floatFeeDec);
 	if(buyLockTotalBtc)
 	{
 		profitSellThanBuyCalc();
@@ -1663,7 +1689,7 @@ void QtBitcoinTrader::buyPricePerCoinChanged(double)
 void QtBitcoinTrader::checkValidBuyButtons()
 {
 	ui.buyThenSellGroupBox->setEnabled(ui.buyTotalBtc->value()>=minTradeVolume);
-	ui.buyBitcoinsButton->setEnabled(ui.buyThenSellGroupBox->isEnabled()&&ui.buyTotalSpend->value()<=getAvailableUSD()&&ui.buyTotalSpend->value()>0.0);
+	ui.buyBitcoinsButton->setEnabled(ui.buyThenSellGroupBox->isEnabled()&&/*ui.buyTotalSpend->value()<=getAvailableUSD()&&*/ui.buyTotalSpend->value()>0.0);
 }
 
 void QtBitcoinTrader::cacheFirstRowGuid()
@@ -2191,15 +2217,12 @@ void QtBitcoinTrader::checkAndExecuteRule(QList<RuleHolder> *ruleHolder, double 
 				if(ruleBtc<0)
 				{
 					double avBTC=getAvailableBTC();
-					if(exchangeId==2)//Bitstamp exception
-					{
-						avBTC=avBTC*floatFeeDec*floatFeeDec;
-					}
-					if(ruleBtc==-1.0)ruleBtc=avBTC;
-					if(ruleBtc==-2.0)ruleBtc=avBTC/2.0;
-					if(ruleBtc==-3.0)ruleBtc=ui.buyTotalSpend->value()/ui.buyPricePerCoin->value();
-					if(ruleBtc==-4.0)ruleBtc=ui.buyTotalSpend->value()/ui.buyPricePerCoin->value()/2.0;
-					if(ruleBtc==-5.0)
+					double avUSD=getAvailableUSD();
+					if(ruleBtc==-1.0)ruleBtc=avBTC;else//"Sell All my BTC"
+					if(ruleBtc==-2.0)ruleBtc=avBTC/2.0;else//"Sell Half my BTC"
+					if(ruleBtc==-3.0)ruleBtc=getFeeForUSDDec(avUSD)/priceToExec;else//"Spend All my Funds"
+					if(ruleBtc==-4.0)ruleBtc=getFeeForUSDDec(avUSD)/priceToExec/2.0;else//"Spend Half my Funds"
+					if(ruleBtc==-5.0)//"Cancel All Orders"
 					{
 						if(ui.ruleConcurrentMode->isChecked())
 						{
@@ -2418,7 +2441,16 @@ void QtBitcoinTrader::tradesDoubleClicked(QModelIndex index)
 	if(!tradesModel->getRowType(index.row()))
 	{
 		ui.buyPricePerCoin->setValue(itemPrice);
-		ui.buyTotalBtc->setValue(qMin(getAvailableUSD()/itemPrice,itemVolume));
+		double avUSD=getAvailableUSD();
+		double totalBtcValue=avUSD/itemPrice;
+		if(totalBtcValue>itemVolume)
+		{
+			totalBtcValue=itemVolume;
+			ui.buyTotalBtcResult->setValue(getFeeForUSDDec(itemVolume*itemPrice)/itemPrice);
+		}
+		else ui.buyTotalBtcResult->setValue(getFeeForUSDDec(avUSD)/itemPrice);
+
+		ui.buyTotalBtc->setValue(totalBtcValue);
 	}
 	else
 	{
@@ -2436,7 +2468,18 @@ void QtBitcoinTrader::depthSelectSellOrder(QModelIndex index)
 	double itemVolume=0.0;
 	if(index.column()==1)itemVolume=depthAsksModel->rowSize(row);
 	else itemVolume=depthAsksModel->rowVolume(row);
-	ui.buyTotalBtc->setValue(qMin(getAvailableUSD()/itemPrice,itemVolume));
+
+
+	double avUSD=getAvailableUSD();
+	double totalBtcValue=avUSD/itemPrice;
+	if(totalBtcValue>itemVolume)
+	{
+		totalBtcValue=itemVolume;
+		ui.buyTotalBtcResult->setValue(getFeeForUSDDec(itemVolume*itemPrice)/itemPrice);
+	}
+	else ui.buyTotalBtcResult->setValue(getFeeForUSDDec(avUSD)/itemPrice);
+
+	ui.buyTotalBtc->setValue(totalBtcValue);
 }
 
 void QtBitcoinTrader::depthSelectBuyOrder(QModelIndex index)
