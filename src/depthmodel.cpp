@@ -114,9 +114,9 @@ void DepthModel::calculateSize()
 	if(!somethingChanged)return;
 	somethingChanged=true;
 
-	uint currentPriceWidth=9;
-	uint currentVolumeWidth=9;
-	uint currentSizeWidth=9;
+	quint32 currentPriceWidth=9;
+	quint32 currentVolumeWidth=9;
+	quint32 currentSizeWidth=9;
 
 	double totalSize=0.0;
 	if(isAsk)
@@ -194,6 +194,7 @@ QVariant DepthModel::headerData(int section, Qt::Orientation orientation, int ro
 	int indexColumn=section;
 	if(isAsk)indexColumn=columnsCount-indexColumn-1;
 
+	if(orientation!=Qt::Horizontal)return QVariant();
 	if(role==Qt::SizeHintRole)
 	{
 		switch(indexColumn)
@@ -206,7 +207,6 @@ QVariant DepthModel::headerData(int section, Qt::Orientation orientation, int ro
 	}
 
 	if(role!=Qt::DisplayRole)return QVariant();
-	if(orientation!=Qt::Horizontal)return QVariant();
 	if(headerLabels.count()!=columnsCount)return QVariant();
 
 	return headerLabels.at(indexColumn);

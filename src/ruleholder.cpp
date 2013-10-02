@@ -10,23 +10,62 @@
 #include "ruleholder.h"
 #include "main.h"
 
-RuleHolder::RuleHolder(int moreLessEqual, double price, double bitcoins, uint guid, bool isBuy, double sellPrice, int rulePriceTp)
+RuleHolder::RuleHolder(int moreLessEqual, double price, double bitcoins, bool isBuy, double sellPrice, int rulePriceTp,  bool enabled)
 {
-	enabled=true;
+	ruleState=enabled?1:0;
+	waitingGoodLag=false;
 	invalidHolder=false;
 	rulePriceType=rulePriceTp;
 	rulePrice=sellPrice;
 	ruleCheckPrice=price;
-	ruleGuid=guid;
 	ruleMoreLessEqual=moreLessEqual;
 	ruleBtc=bitcoins;
 	buying=isBuy;
+}
+
+RuleHolder::RuleHolder(QString strData)
+{
+	ruleState=0;
+	invalidHolder=true;
 	waitingGoodLag=false;
+	QStringList restorableList=strData.split('|');
+	if(restorableList.count()!=7)return;
+	rulePriceType=restorableList.at(0).toInt();
+	waitingGoodLag=restorableList.at(1).toInt();
+	buying=restorableList.at(2).toInt();
+	ruleBtc=restorableList.at(3).toDouble();
+	ruleMoreLessEqual=restorableList.at(4).toInt();
+	rulePrice=restorableList.at(5).toDouble();
+	ruleCheckPrice=restorableList.at(6).toDouble();
+	invalidHolder=false;
+}
+
+QString RuleHolder::generateSavableData()
+{
+	QStringList savableList;
+	savableList<<QString::number(rulePriceType);
+	savableList<<QString::number(waitingGoodLag);
+	savableList<<QString::number(buying);
+	savableList<<mainWindow.numFromDouble(ruleBtc);
+	savableList<<QString::number(ruleMoreLessEqual);
+	savableList<<mainWindow.numFromDouble(rulePrice);
+	savableList<<mainWindow.numFromDouble(ruleCheckPrice);
+	return savableList.join("|");
+}
+
+int RuleHolder::getRuleState()
+{
+	return ruleState;
+}
+
+void RuleHolder::setRuleState(int newState)
+{
+	ruleState=newState;
 }
 
 bool RuleHolder::isAchieved(double price)
 {
-	if(!enabled)return false;
+	if(ruleState!=1)return false;
 	if(rulePriceType!=8&&rulePriceType!=9&&price<minTradePrice)return false;
 	if(waitingGoodLag)return true;
 	if(ruleMoreLessEqual==-1&&ruleCheckPrice>price)return true;

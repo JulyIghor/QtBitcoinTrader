@@ -38,7 +38,8 @@ HEADERS += aboutdialog.h \
            datafolderchusedialog.h \
            tradesmodel.h \
            depthmodel.h \
-           exchange_bitstamp.h
+           exchange_bitstamp.h \
+           rulesmodel.h
 #
 # Forms
 #
@@ -78,7 +79,8 @@ SOURCES += aboutdialog.cpp \
            datafolderchusedialog.cpp \
            tradesmodel.cpp \
            depthmodel.cpp \
-           exchange_bitstamp.cpp
+           exchange_bitstamp.cpp \
+           rulesmodel.cpp
 #
 # Resources
 # 

@@ -90,8 +90,6 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 
 	int indexColumn=index.column();
 
-	if(currentRow>=priceList.count())return QVariant();
-
 	if(role==Qt::TextAlignmentRole)
 	{
 		if(indexColumn==1)return 0x0082;
@@ -163,6 +161,7 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 
 QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+	if(orientation!=Qt::Horizontal)return QVariant();
 	if(role==Qt::TextAlignmentRole)
 	{
 		if(section==1)return 0x0082;
@@ -181,10 +180,17 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
 	}
 
 	if(role!=Qt::DisplayRole)return QVariant();
-	if(orientation!=Qt::Horizontal)return QVariant();
 	if(headerLabels.count()!=columnsCount)return QVariant();
 
 	return headerLabels.at(section);
+}
+
+double TradesModel::getTotalBTC()
+{
+	double summ=0.0;
+	foreach(double vol, volumeList)
+		summ+=vol;
+	return summ;
 }
 
 Qt::ItemFlags TradesModel::flags(const QModelIndex &) const

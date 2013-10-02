@@ -7,26 +7,40 @@
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
 // GNU General Public License version 3
 
-#ifndef TRADESMODEL_H
-#define TRADESMODEL_H
+#ifndef RULESMODEL_H
+#define RULESMODEL_H
 
 #include <QAbstractItemModel>
+#include "ruleholder.h"
 #include <QStringList>
 
-class TradesModel : public QAbstractItemModel
+class RulesModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	TradesModel();
-	~TradesModel();
-	double getTotalBTC();
-	double getRowPrice(int);
-	double getRowVolume(int);
-	bool getRowType(int);
+	QString saveRulesToString();
+	void restoreRulesFromString(QString);
+	bool haveWorkingRule();
+	bool allDisabled;
+	bool isConcurrentMode;
+	RulesModel();
+	~RulesModel();
+
+	void disableAll();
+	void enableAll();
+
+	QList<RuleHolder *> getAchievedRules(int type, double value);
+	RuleHolder *getRuleHolderByRow(int row);
+	void updateHolderByRow(int row, RuleHolder *holder);
+	void moveRowUp(int row);
+	void moveRowDown(int row);
+
+	void setRuleStateByHolder(RuleHolder *holder, int state);
+	void setRuleStateByRow(int row, int state);
 	void clear();
-	void removeDataOlderThen(qint64);
-	void addNewTrade(qint64 dateT, double volumeT, double priceT, QByteArray curRency, bool isSell);
+	void addRule(RuleHolder *holder);
+	void removeRuleByRow(int row);
 
 	void setHorizontalHeaderLabels(QStringList list);
 
@@ -39,28 +53,13 @@ public:
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
-
 private:
-	void removeFirst();
-	QString textBid;
-	QString textAsk;
-
-	QString upArrow;
-	QString downArrow;
-
-	double lastPrice;
-	int columnsCount;
-	int dateWidth;
-	int typeWidth;
-
+	int stateWidth;
+	RuleHolder *firstQueringHolder;
+	RuleHolder *lastQueringHolder;
 	QStringList headerLabels;
-
-	QList<qint64> dateList;
-	QList<double> volumeList;
-	QList<double> priceList;
-	QList<QByteArray> curencyList;
-	QList<bool> typesList;
-	QList<int> directionList;
+	int columnsCount;
+	QList<RuleHolder*> holderList;
 };
 
-#endif // TRADESMODEL_H
+#endif // RULESMODEL_H

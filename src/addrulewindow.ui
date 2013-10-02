@@ -36,6 +36,16 @@
      </property>
     </widget>
    </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="buttonAddRule">
+     <property name="accessibleName">
+      <string>ADD_RULE</string>
+     </property>
+     <property name="text">
+      <string>Add Rule</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="4">
     <spacer name="horizontalSpacer_2">
      <property name="orientation">
@@ -48,16 +58,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="buttonAddRule">
-     <property name="accessibleName">
-      <string>ADD_RULE</string>
-     </property>
-     <property name="text">
-      <string>Add Rule</string>
-     </property>
-    </widget>
    </item>
    <item row="1" column="0">
     <spacer name="horizontalSpacer">
@@ -72,7 +72,30 @@
      </property>
     </spacer>
    </item>
-   <item row="0" column="0" colspan="5">
+   <item row="1" column="2">
+    <widget class="QPushButton" name="buttonSaveRule">
+     <property name="accessibleName">
+      <string>SAVE_RULE</string>
+     </property>
+     <property name="text">
+      <string>Save Rule</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="5">
+    <widget class="QCheckBox" name="ruleIsEnabled">
+     <property name="accessibleName">
+      <string>RULE_IS_ENABLED</string>
+     </property>
+     <property name="text">
+      <string>Rule is Enabled</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="6">
     <widget class="QGroupBox" name="addNewRuleGroupbox">
      <property name="accessibleName">
       <string>ADD_NEW_RULE</string>
@@ -1018,16 +1041,6 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="2">
-    <widget class="QPushButton" name="buttonSaveRule">
-     <property name="accessibleName">
-      <string>SAVE_RULE</string>
-     </property>
-     <property name="text">
-      <string>Save Rule</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -1210,7 +1223,7 @@
      <y>257</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1023</x>
+     <x>1021</x>
      <y>293</y>
     </hint>
    </hints>
@@ -1226,7 +1239,7 @@
      <y>257</y>
     </hint>
     <hint type="destinationlabel">
-     <x>897</x>
+     <x>895</x>
      <y>293</y>
     </hint>
    </hints>
@@ -1471,11 +1484,76 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btcValue</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>checkToEnableButtons()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>788</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1190</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exactPriceValue</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>checkToEnableButtons()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>945</x>
+     <y>281</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1177</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>thanValue</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>checkToEnableButtons()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>504</x>
+     <y>192</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>639</x>
+     <y>-64</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exactPrice</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>checkToEnableButtons()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>954</x>
+     <y>247</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1098</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>buttonAddRule()</slot>
   <slot>amountChanged()</slot>
   <slot>setOrdersBackInvisible(bool)</slot>
   <slot>ifChanged(bool)</slot>
+  <slot>checkToEnableButtons()</slot>
  </slots>
 </ui>

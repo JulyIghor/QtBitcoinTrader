@@ -224,7 +224,7 @@ void JulyHttp::readSocket()
 
 				qint64 bytesToRead=chunkedSize<0?readSize:qMin(readSize,chunkedSize);
 				if(!dataArray)dataArray=new QByteArray;
-				uint oldDataSize=dataArray->size();
+				quint32 oldDataSize=dataArray->size();
 				dataArray->resize(oldDataSize+bytesToRead);
 				qint64 read=socket->read(dataArray->data()+oldDataSize,bytesToRead);
 				dataArray->resize(oldDataSize+read);

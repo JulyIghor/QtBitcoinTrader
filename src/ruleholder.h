@@ -15,31 +15,33 @@
 class RuleHolder
 {
 public:
-	void setEnabled(bool on){enabled=on;}
-	bool isEnabled(){return enabled;}
 	bool invalidHolder;
-	RuleHolder(){invalidHolder=true;enabled=true;}
-	RuleHolder(int moreLessEqual, double price, double bitcoins, uint guid, bool isBuy, double sellPrice, int rulePriceType);
+	RuleHolder(){invalidHolder=true;ruleState=0;waitingGoodLag=false;}
+	RuleHolder(int moreLessEqual, double price, double bitcoins, bool isBuy, double sellPrice, int rulePriceType, bool enabled=true);
+	RuleHolder(QString strData);
 	bool isAchieved(double price);
 	bool isBuying();
 	int getRuleMoreLessEqual(){return ruleMoreLessEqual;}
 	double getRuleBtc(){return ruleBtc;}
 	double getRulePrice(){return rulePrice;}
 	double getRuleCheckPrice(){return ruleCheckPrice;}
-	uint getRuleGuid(){return ruleGuid;}
 	void startWaitingLowLag();
 	QString getDescriptionString();
 	int getRulePriceType(){return rulePriceType;}
 	QString getSellOrBuyString();
 	QString getBitcoinsString();
 	QString getPriceText();
+	int getRuleState();
+	void setRuleState(int);
+
+	QString generateSavableData();
+	
 private:
-	bool enabled;
+	int ruleState;
 	int rulePriceType;
 	bool waitingGoodLag;
 	bool buying;
 	double ruleBtc;
-	uint ruleGuid;
 	int ruleMoreLessEqual;
 	double rulePrice;
 	double ruleCheckPrice;

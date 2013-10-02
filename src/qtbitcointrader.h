@@ -21,12 +21,14 @@
 #include <QMenu>
 #include <QTime>
 #include "tradesmodel.h"
+#include "rulesmodel.h"
 
 class QtBitcoinTrader : public QDialog
 {
 	Q_OBJECT
 
 public:
+	RulesModel *rulesModel;
 	int exchangeId;
 	double getAvailableBTC();
 	double getAvailableUSD();
@@ -54,7 +56,7 @@ public:
 	void fillAllBtcLabels(QWidget *par, QString curName);
 	void fillAllUsdLabels(QWidget *par, QString curName);
 
-	void checkAndExecuteRule(QList<RuleHolder> *ruleHolder, double price);
+	void checkAndExecuteRule(int ruleType, double price);
 
 	Ui::QtBitcoinTraderClass ui;
 	
@@ -91,30 +93,11 @@ private:
 	void makeRitchValue(QString *text);
 	bool forcedReloadOrders;
 	bool checkForUpdates;
-	QList<RuleHolder> rulesLastPrice;
-	QList<RuleHolder> rulesMarketBuyPrice;
-	QList<RuleHolder> rulesMarketSellPrice;
-	QList<RuleHolder> rulesMarketHighPrice;
-	QList<RuleHolder> rulesMarketLowPrice;
-	QList<RuleHolder> rulesOrdersLastBuyPrice;
-	QList<RuleHolder> rulesOrdersLastSellPrice;
-	QList<RuleHolder> rulesBtcBalance;
-	QList<RuleHolder> rulesUsdBalance;
-	QList<RuleHolder> rulesTotalToBuy;
-	QList<RuleHolder> rulesAmountToReceive;
-	QList<RuleHolder> rulesTotalToBuyBS;
-	QList<RuleHolder> rulesAmountToReceiveBS;
 
 	void addRuleByHolderToTable(RuleHolder);
 	int lastLoadedCurrency;
 	void postWorkAtTableItem(QTableWidgetItem *, int align=0);
 	void checkAllRules();
-
-	void removeRuleByGuid(uint guid);
-	bool removeRuleByGuidInRuleHolderList(uint guid, QList<RuleHolder> *ruleHolderList);
-	RuleHolder getRuleHolderByGuid(uint guid);
-	bool fillHolderByFindedGuid(QList<RuleHolder>*holdersList,RuleHolder *holder, uint guid);
-	void addRuleByHolderInToTable(RuleHolder holder, int preferedRow=-1);
 
 	double lastMarketLowPrice;
 	double lastMarketHighPrice;
@@ -128,8 +111,6 @@ private:
 	bool showingMessage;
 	void beep();
 
-	void setRuleStateByGuid(quint64 guid, int state);
-	void setRulesTableRowState(int row, int state);
 	void setOrdersTableRowState(int row, int state);
 	void setOrdersTableRowStateByText(int row, QString text);
 
@@ -153,8 +134,6 @@ private:
 	bool profitSellThanBuyChangedUnlocked;
 
 	void translateUnicodeStr(QString *str);
-	void cacheFirstRowGuid();
-	uint firstRowGuid;
 
 	bool eventFilter(QObject *obj, QEvent *event);
 
@@ -171,7 +150,10 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
-	void on_ruleEnableDisable_clicked();
+	void rulesMenuRequested(const QPoint&);
+	void saveRulesData();
+	void ruleDisableEnableMenuFix();
+	void on_ruleConcurrentMode_toggled(bool);
 	void ruleEnableSelected();
 	void ruleDisableSelected();
 	void ruleEnableAll();

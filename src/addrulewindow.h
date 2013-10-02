@@ -23,8 +23,9 @@ public:
 	AddRuleWindow(QWidget *parent = 0);
 	~AddRuleWindow();
 	RuleHolder getRuleHolder();
-	void fillByRuleHolder(RuleHolder holder);
+	void fillByRuleHolder(RuleHolder *holder);
 private:
+	int thanType();
 	bool checkIsValidRule();
 public slots:
 	void languageChanged();
@@ -33,6 +34,7 @@ public slots:
 	void setOrdersBackInvisible(bool);
 	void amountChanged();
 	void buttonAddRule();
+	void checkToEnableButtons();
 };
 
 #endif // ADDRULEWINDOW_H

@@ -11,6 +11,7 @@
 #include "main.h"
 #include "julyspinboxfix.h"
 #include <QMessageBox>
+#include <QTimer>
 
 AddRuleWindow::AddRuleWindow(QWidget *parent)
 	: QDialog(parent)
@@ -53,11 +54,22 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 	setMaximumSize(width()+100,height());
 
 	connect(julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
+	QTimer::singleShot(100,this,SLOT(checkToEnableButtons()));
 }
 
 AddRuleWindow::~AddRuleWindow()
 {
 
+}
+
+void AddRuleWindow::checkToEnableButtons()
+{
+	int currentThanType=thanType();
+	double thanValue=ui.thanValue->value();
+
+	bool canBeEnabled=(ui.btcValue->isVisible()&&ui.btcValue->value()>=minTradeVolume||!ui.btcValue->isVisible())&&(currentThanType!=0||currentThanType==0&&thanValue>=minTradePrice)&&(!ui.exactPriceValue->isVisible()||ui.exactPriceValue->isVisible()&&ui.exactPriceValue->value()>minTradePrice);
+	ui.buttonAddRule->setEnabled(canBeEnabled);
+	ui.buttonSaveRule->setEnabled(canBeEnabled);
 }
 
 void AddRuleWindow::languageChanged()
@@ -71,12 +83,13 @@ void AddRuleWindow::languageChanged()
 
 void AddRuleWindow::buttonAddRule()
 {
-	if(mainWindow.ui.ruleSequencialMode->isChecked()&&mainWindow.ui.rulesTable->rowCount()>0||checkIsValidRule())accept();
+	if(!ui.ruleIsEnabled->isChecked()||mainWindow.ui.ruleSequencialMode->isChecked()&&mainWindow.rulesModel->rowCount()>0||checkIsValidRule())accept();
 	else QMessageBox::warning(this,windowTitle(),julyTr("INVALID_RULE_CHECK","This rule will be executed instantly.<br>This means that you make a mistake.<br>Please check values you entered."));
 }
 
 bool AddRuleWindow::checkIsValidRule()
 {
+	checkToEnableButtons();
 	if(ui.checkLastPrice->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.marketLast->value()))return false;
 	if(ui.checkMarketBuy->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.marketBuy->value()))return false;
 	if(ui.checkMarketSell->isChecked()&&getRuleHolder().isAchieved(mainWindow.ui.marketSell->value()))return false;
@@ -103,16 +116,17 @@ void AddRuleWindow::amountChanged()
 	ui.labelSpendAll->setVisible(ui.checkBuyAllIn->isChecked());
 	ui.labelSpendHalf->setVisible(ui.checkBuyHalfIn->isChecked());
 	ui.labelCancelAllOrders->setVisible(ui.checkCancelAllOrders->isChecked());
+	checkToEnableButtons();
 }
 
-void AddRuleWindow::fillByRuleHolder(RuleHolder holder)
+void AddRuleWindow::fillByRuleHolder(RuleHolder *holder)
 {
 	ui.addNewRuleGroupbox->setTitle(julyTr("EDIT_RULE","Edit rule"));
 
 	ui.buttonAddRule->setVisible(false);
 	ui.buttonSaveRule->setVisible(true);
 
-	switch(holder.getRulePriceType())
+	switch(holder->getRulePriceType())
 	{
 	case 1: ui.checkLastPrice->setChecked(true);break;
 	case 2: ui.checkMarketBuy->setChecked(true);break;
@@ -130,7 +144,7 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder holder)
 	default: break;
 	}
 
-	switch(holder.getRuleMoreLessEqual())
+	switch(holder->getRuleMoreLessEqual())
 	{
 	case 1: ui.checkGoesAbove->setChecked(true); break;
 	case 0: ui.checkEqual->setChecked(true); break;
@@ -138,13 +152,13 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder holder)
 	default: break;
 	}
 
-	ui.thanValue->setValue(holder.getRuleCheckPrice());
+	ui.thanValue->setValue(holder->getRuleCheckPrice());
 
-	double fillRuleBtc=holder.getRuleBtc();
+	double fillRuleBtc=holder->getRuleBtc();
 	if(fillRuleBtc>-1.0)
 	{
 		ui.btcValue->setValue(fillRuleBtc);
-		if(holder.isBuying())ui.checkBuyAmount->setChecked(true);
+		if(holder->isBuying())ui.checkBuyAmount->setChecked(true);
 		else ui.checkSellAmount->setChecked(true);
 	}
 	else
@@ -156,7 +170,7 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder holder)
 	if(fillRuleBtc==-5.0)ui.checkCancelAllOrders->setChecked(true);
 	}
 
-	double fillRulePrice=holder.getRulePrice();
+	double fillRulePrice=holder->getRulePrice();
 	if(fillRulePrice>-1.0)
 	{
 		ui.exactPrice->setChecked(true);
@@ -172,6 +186,9 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder holder)
 	if(fillRulePrice==-6.0)ui.checkOrdersLastBuyPrice_2->setChecked(true);
 	if(fillRulePrice==-7.0)ui.checkOrdersLastSellPrice_2->setChecked(true);
 	}
+
+	ui.ruleIsEnabled->setChecked(holder->getRuleState()==1);
+	checkToEnableButtons();
 }
 
 RuleHolder AddRuleWindow::getRuleHolder()
@@ -213,13 +230,19 @@ RuleHolder AddRuleWindow::getRuleHolder()
 	if(ui.checkTotalToBuyBS->isChecked())ruleSellType=12;
 	if(ui.checkAmountToReceiveBS->isChecked())ruleSellType=13;
 
-	static uint ruleGuid=1;
-	return RuleHolder(moreLessEqual, ui.thanValue->value(), btcValue, ++ruleGuid, isBuying, ruleSellPrice, ruleSellType);
+	return RuleHolder(moreLessEqual, ui.thanValue->value(), btcValue, isBuying, ruleSellPrice, ruleSellType, ui.ruleIsEnabled->isChecked());
 }
 
 void AddRuleWindow::setOrdersBackInvisible(bool on)
 {
 	ui.sellBack->setEnabled(!on);
+}
+
+int AddRuleWindow::thanType()
+{
+	if(ui.checkBtcBalance->isChecked()||ui.checkTotalToBuy->isChecked()||ui.checkTotalToBuyBS->isChecked())return 1;//BTC Volume
+	if(ui.checkUsdBalance->isChecked()||ui.checkAmountToReceive->isChecked()||ui.checkAmountToReceiveBS->isChecked())return 2;//USD Volume
+	return 0; //Price
 }
 
 void AddRuleWindow::ifChanged(bool on)
@@ -230,8 +253,10 @@ void AddRuleWindow::ifChanged(bool on)
 	if(!equalEnabled&&ui.checkEqual->isChecked())ui.checkGoesAbove->setChecked(true);
 	ui.checkEqual->setEnabled(equalEnabled);
 
-	if(ui.checkBtcBalance->isChecked()||ui.checkTotalToBuy->isChecked()||ui.checkTotalToBuyBS->isChecked())
+	switch(thanType())
 	{
+	case 1:
+		{
 		ui.thanValue->setDecimals(btcDecimals);
 		if(ui.checkBtcBalance->isChecked())ui.thanValue->setValue(mainWindow.getAvailableBTC());
 		if(ui.checkTotalToBuy->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleTotalToBuyValue->value());
@@ -239,10 +264,10 @@ void AddRuleWindow::ifChanged(bool on)
 
 		ui.priceBtcIcon->setVisible(true);
 		ui.priceUsdIcon->setVisible(false);
-	}
-	else
-	if(ui.checkUsdBalance->isChecked()||ui.checkAmountToReceive->isChecked()||ui.checkAmountToReceiveBS->isChecked())
-	{
+		}
+		break;
+		case 2:
+		{
 		ui.thanValue->setDecimals(usdDecimals);
 		if(ui.checkUsdBalance->isChecked())ui.thanValue->setValue(mainWindow.getAvailableUSD());
 		if(ui.checkAmountToReceive->isChecked())ui.thanValue->setValue(mainWindow.ui.ruleAmountToReceiveValue->value());
@@ -250,17 +275,21 @@ void AddRuleWindow::ifChanged(bool on)
 
 		ui.priceBtcIcon->setVisible(false);
 		ui.priceUsdIcon->setVisible(true);
-	}
-	else
-	{
-		ui.thanValue->setDecimals(priceDecimals);
-		ui.thanValue->setValue(mainWindow.ui.marketLast->value());
+		}
+		break;
+		default:
+		{
+			ui.thanValue->setDecimals(priceDecimals);
+			ui.thanValue->setValue(mainWindow.ui.marketLast->value());
 
-		ui.priceBtcIcon->setVisible(false);
-		ui.priceUsdIcon->setVisible(true);
+			ui.priceBtcIcon->setVisible(false);
+			ui.priceUsdIcon->setVisible(true);
+		}
+		break;
 	}
 	double oldValue=ui.thanValue->value();
-	ui.thanValue->setValue(0.123456789);
+	ui.thanValue->setValue(0.123456789);//Layout Fix
 	ui.thanValue->setValue(oldValue);
 	setMinimumSize(minimumSizeHint());
+	checkToEnableButtons();
 }
