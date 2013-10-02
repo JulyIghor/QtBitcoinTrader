@@ -2361,7 +2361,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
@@ -6106,7 +6106,7 @@ p, li { white-space: pre-wrap; }
            <bool>false</bool>
           </property>
           <property name="default">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>

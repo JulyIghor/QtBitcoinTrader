@@ -171,6 +171,7 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void on_ruleEnableDisable_clicked();
 	void ruleEnableSelected();
 	void ruleDisableSelected();
 	void ruleEnableAll();

@@ -952,8 +952,9 @@ void QtBitcoinTrader::calcOrdersTotalValues()
 	for(int n=0;n<ui.ordersTable->rowCount();n++)
 	{
 		QString currentOrderPair=ui.ordersTable->item(n,6)->data(Qt::UserRole).toString();
-		if(currentOrderPair.startsWith(currencyAStr))volumeTotal+=ui.ordersTable->item(n,3)->data(Qt::UserRole).toDouble();
-		if(currentOrderPair.endsWith(currencyBStr))amountTotal+=ui.ordersTable->item(n,5)->data(Qt::UserRole).toDouble();
+		bool isAsk=ui.ordersTable->item(n,1)->data(Qt::UserRole).toBool();
+		if(currentOrderPair.startsWith(currencyAStr)&&isAsk)volumeTotal+=ui.ordersTable->item(n,3)->data(Qt::UserRole).toDouble();
+		if(currentOrderPair.endsWith(currencyBStr)&&!isAsk)amountTotal+=ui.ordersTable->item(n,5)->data(Qt::UserRole).toDouble();
 	}
 	ui.ordersTotalBTC->setValue(volumeTotal);
 	ui.ordersTotalUSD->setValue(amountTotal);
@@ -1386,7 +1387,9 @@ void QtBitcoinTrader::insertIntoOrdersTable(QByteArray oid, QString data)
 	ui.ordersTable->setItem(curRow,0,new QTableWidgetItem(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat)));postWorkAtTableItem(ui.ordersTable->item(curRow,0));ui.ordersTable->item(curRow,0)->setData(Qt::UserRole,oid);ui.ordersTable->item(curRow,0)->setToolTip(QDateTime::fromTime_t(dataList.at(0).toUInt()).toString(localDateTimeFormat));
 	QString orderType=dataList.at(1).toUpper();
 	QTableWidgetItem *newItem=new QTableWidgetItem(julyTr("ORDER_TYPE_"+orderType,dataList.at(1)));
-	if(orderType=="ASK")newItem->setTextColor(Qt::red); else newItem->setTextColor(Qt::blue);
+	bool isAsk=orderType=="ASK";
+	if(isAsk)newItem->setTextColor(Qt::red); else newItem->setTextColor(Qt::blue);
+	newItem->setData(Qt::UserRole,isAsk);
 
 	double amountDouble=dataList.at(3).toDouble();
 	double priceDouble=dataList.at(4).toDouble();
@@ -1453,18 +1456,18 @@ void QtBitcoinTrader::setRulesTableRowState(int row, int state)
 {
 	QColor nColor(255,255,255);
 	QString nText;
-	bool pending=false;
+	int ruleState=0;
 	switch(state)
 	{
 	case 0: nColor=Qt::lightGray; break;
-	case 1: nColor.setRgb(255,255,200); pending=true; nText=julyTr("RULE_STATE_PENDING","pending"); break; //Yellow
-	case 2: nColor.setRgb(200,255,200); nText=julyTr("RULE_STATE_DONE","done"); break; //Green
+	case 1: nColor.setRgb(255,255,200); ruleState=1; nText=julyTr("RULE_STATE_PENDING","pending"); break; //Yellow
+	case 2: nColor.setRgb(200,255,200); ruleState=2; nText=julyTr("RULE_STATE_DONE","done"); break; //Green
 	case 3: nColor.setRgb(255,200,200); nText=julyTr("RULE_STATE_DISABLED","disabled");break; //Red
 	case 4: nColor.setRgb(200,200,255); break; //Blue
 	default: break;
 	}
 	ui.rulesTable->item(row,0)->setText(nText);
-	ui.rulesTable->item(row,1)->setData(Qt::UserRole,pending);
+	ui.rulesTable->item(row,1)->setData(Qt::UserRole,ruleState);
 	for(int n=0;n<ui.rulesTable->columnCount();n++)ui.rulesTable->item(row,n)->setBackgroundColor(nColor);
 	
 	cacheFirstRowGuid();
@@ -1696,13 +1699,18 @@ void QtBitcoinTrader::cacheFirstRowGuid()
 {
 	for(int n=0;n<ui.rulesTable->rowCount();n++)
 	{
-		if(ui.rulesTable->item(n,1)->data(Qt::UserRole).toBool())
+		if(ui.rulesTable->item(n,1)->data(Qt::UserRole).toInt()==1)//Pending
 		{
 			firstRowGuid=ui.rulesTable->item(n,0)->data(Qt::UserRole).toUInt();
 			return;
 		}
 	}
 	firstRowGuid=-1;
+}
+
+void QtBitcoinTrader::on_ruleEnableDisable_clicked()
+{
+
 }
 
 void QtBitcoinTrader::checkValidRulesButtons()
