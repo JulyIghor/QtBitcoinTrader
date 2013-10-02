@@ -517,7 +517,7 @@ QSslSocket *JulyHttp::getStableSocket()
 
 	if(socket->state()!=QAbstractSocket::UnconnectedState)
 	{
-		if(socket->state()==QAbstractSocket::ConnectingState)socket->waitForConnected(5000);
+		if(socket->state()==QAbstractSocket::ConnectingState||socket->state()==QAbstractSocket::HostLookupState)socket->waitForConnected(5000);
 	}
 	if(socket->state()!=QAbstractSocket::ConnectedState)
 	{
