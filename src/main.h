@@ -33,6 +33,7 @@
 #define appVerIsBeta (*appVerIsBeta_)
 #define appVerStr (*appVerStr_)
 #define currencyRequestPair (*currencyRequest_)
+#define currencySymbol (*currencySymbol_)
 #define currencyAStr (*currencyAStr_)
 #define currencyBStr (*currencyBStr_)
 #define currencyAStrLow (*currencyAStrLow_)
@@ -62,6 +63,7 @@
 #define depthRefreshBlocked (*depthRefreshBlocked_)
 #define defaultSectionSize (*defaultSectionSize_)
 
+extern QByteArray *currencySymbol_;
 extern double *priceMinimumValue_;
 extern int *defaultSectionSize_;
 extern bool *depthRefreshBlocked_;

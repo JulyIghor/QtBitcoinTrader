@@ -923,6 +923,9 @@ void QtBitcoinTrader::currencyChanged(int val)
 	currencyBStr=curPair.last().toAscii();
 	currencyBStrLow=currencyBStr.toLower();
 	currencyBSign=currencySignMap->value(currencyBStr,"$");
+
+	currencySymbol=currencyAStr+currencyBStr;
+
 	fillAllUsdLabels(this,currencyBStr);
 	fillAllBtcLabels(this,currencyAStr);
 

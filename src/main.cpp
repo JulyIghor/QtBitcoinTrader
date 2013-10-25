@@ -72,6 +72,7 @@ QFontMetrics *fontMetrics_;
 double *groupPriceValue_;
 bool *depthRefreshBlocked_;
 int *defaultSectionSize_;
+QByteArray *currencySymbol_;
 
 void pickDefaultLangFile()
 {
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0785");
+	appVerStr_=new QByteArray("1.0786");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -118,6 +119,7 @@ int main(int argc, char *argv[])
 	currencyAStr_=new QByteArray("BTC");
 	currencyAStrLow_=new QByteArray("btc");
 	currencyRequest_=new QByteArray("BTCUSD");
+	currencySymbol_=new QByteArray("BTCUSD");
 	defaultLangFile_=new QString();pickDefaultLangFile();
 	currencySignMap=new QMap<QByteArray,QByteArray>;
 	currencyNamesMap=new QMap<QByteArray,QByteArray>;

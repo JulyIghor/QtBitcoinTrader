@@ -226,7 +226,7 @@ QModelIndex TradesModel::parent(const QModelIndex &) const
 
 void TradesModel::addNewTrade(qint64 dateT, double volumeT, double priceT, QByteArray symbol, bool isSell)
 {
-	if(symbol!=currencyRequestPair||dateT<=lastRemoveDate)return;
+	if(symbol!=currencySymbol||dateT<=lastRemoveDate)return;
 	beginInsertRows(QModelIndex(),0,0);
 	dateList<<dateT;
 	volumeList<<volumeT;
