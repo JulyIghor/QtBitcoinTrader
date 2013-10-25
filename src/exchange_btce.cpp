@@ -41,7 +41,7 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
 		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
-		connect(this,SIGNAL(ordersChanged(QString)),mainClass,SLOT(ordersChanged(QString)));
+		connect(this,SIGNAL(ordersChanged(QList<OrderItem> *)),mainClass,SLOT(ordersChanged(QList<OrderItem> *)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
 		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
 		connect(this,SIGNAL(ordersLogChanged(QString)),mainClass,SLOT(ordersLogChanged(QString)));
@@ -211,7 +211,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				if(currentTid<1000||lastFetchTid>=currentTid)continue;
 				lastFetchTid=currentTid;
 				if(tradeDate>lastPriceDate)lastPriceDate=tradeDate;
-				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),tradeDate,getMidData("\"price\":",",\"",&tradeData).toDouble(),getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
+				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),tradeDate,getMidData("\"price\":",",\"",&tradeData).toDouble(),getMidData("\"item\":\"","\",\"",&tradeData)+getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
 			}
 		}
 		break;//trades
@@ -381,35 +381,22 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(ordersList.count())ordersList.removeFirst();
 			if(ordersList.count()==0)return;
 
+			QList<OrderItem> *orders=new QList<OrderItem>;
 			for(int n=0;n<ordersList.count();n++)
-			{//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign+";"+currencyPair
-				QByteArray currentOrder="{"+ordersList.at(n).toAscii()+"}";
-				QByteArray itemStatus;
-				int itemStatusInt=getMidData("status\":","}",&currentOrder).toInt();
-				switch(itemStatusInt)
-				{
-				case 0: itemStatus="open"; break;
-				case 1: itemStatus="PENDING1"; break;
-				case 2: itemStatus="INVALID2"; break;
-				case 3: itemStatus="CANCELED3"; break;
-				default: itemStatus="INVALID4";
-				}
-				QByteArray tradeType=getMidData("type\":\"","\",\"",&currentOrder);
-				if(tradeType=="buy")tradeType="bid";
-				else if(tradeType=="sell")tradeType="ask";
-				QStringList currencyPair=QString(getMidData("pair\":\"","\",\"",&currentOrder)).toUpper().split("_");
-				if(currencyPair.count()!=2)continue;
-				rezultData.append(getMidData("{","\":{",&currentOrder)+";");
-				rezultData.append(getMidData("timestamp_created\":",",\"",&currentOrder)+";");
-				rezultData.append(tradeType+";");
-				rezultData.append(itemStatus+";");
-				rezultData.append(getMidData("amount\":",",\"",&currentOrder)+";");
-				rezultData.append(getMidData("rate\":",",\"",&currentOrder)+";");
-				rezultData.append(currencySignMap->value(currencyPair.last().toAscii(),"$")+";");
-				rezultData.append(currencySignMap->value(currencyPair.first().toAscii(),"$")+";");
-				rezultData.append(currencyPair.join(QLatin1String("")).toAscii()+"\n");
+			{
+				OrderItem currentOrder;
+				QByteArray currentOrderData="{"+ordersList.at(n).toAscii()+"}";
+
+				currentOrder.oid=getMidData("{","\":{",&currentOrderData);
+				currentOrder.date=getMidData("timestamp_created\":",",\"",&currentOrderData).toUInt();
+				currentOrder.type=getMidData("type\":\"","\",\"",&currentOrderData)=="sell";
+				currentOrder.status=getMidData("status\":","}",&currentOrderData).toInt()+1;
+				currentOrder.amount=getMidData("amount\":",",\"",&currentOrderData).toDouble();
+				currentOrder.price=getMidData("rate\":",",\"",&currentOrderData).toDouble();
+				currentOrder.symbol=getMidData("pair\":\"","\",\"",&currentOrderData).toUpper().replace("_","");
+				if(currentOrder.isValid())(*orders)<<currentOrder;
 			}
-			emit ordersChanged(rezultData);
+			emit ordersChanged(orders);
 		}
 		break;//orders
 		}

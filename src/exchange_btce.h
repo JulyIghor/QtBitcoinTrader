@@ -76,7 +76,7 @@ signals:
 	void showErrorMessage(QString);
 	void addLastTrade(double,qint64,double,QByteArray,bool);
 
-	void ordersChanged(QString);
+	void ordersChanged(QList<OrderItem> *);
 	void identificationRequired(QString);
 
 	void ordersLogChanged(QString);

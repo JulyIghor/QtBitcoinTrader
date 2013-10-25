@@ -15,6 +15,7 @@
 #include "depthmodel.h"
 #include <QHttp>
 #include <QCloseEvent>
+#include <QSortFilterProxyModel>
 #include "ruleholder.h"
 #include <QSystemTrayIcon>
 #include <QSettings>
@@ -22,6 +23,8 @@
 #include <QTime>
 #include "tradesmodel.h"
 #include "rulesmodel.h"
+#include "ordersmodel.h"
+#include "orderitem.h"
 
 class QtBitcoinTrader : public QDialog
 {
@@ -41,7 +44,7 @@ public:
 	double floatFeeDec;
 	double floatFeeInc;
 
-	QString numFromDouble(const double &value);
+	QString numFromDouble(const double &value, int maxDecimals=10);
 
 	QString upArrow;
 	QString downArrow;
@@ -68,6 +71,8 @@ private:
 	DepthModel *depthAsksModel;
 	DepthModel *depthBidsModel;
 	TradesModel *tradesModel;
+	OrdersModel *ordersModel;
+	QSortFilterProxyModel *ordersSortModel;
 	void clearDepth();
 	void calcOrdersTotalValues();
 	void ruleTotalToBuyValueChanged();
@@ -91,12 +96,10 @@ private:
 	QString profileName;
 	void resizeEvent(QResizeEvent *);
 	void makeRitchValue(QString *text);
-	bool forcedReloadOrders;
 	bool checkForUpdates;
 
 	void addRuleByHolderToTable(RuleHolder);
 	int lastLoadedCurrency;
-	void postWorkAtTableItem(QTableWidgetItem *, int align=0);
 	void checkAllRules();
 
 	double lastMarketLowPrice;
@@ -111,9 +114,6 @@ private:
 	bool showingMessage;
 	void beep();
 
-	void setOrdersTableRowState(int row, int state);
-	void setOrdersTableRowStateByText(int row, QString text);
-
 	bool balanceNotLoaded;
 	bool marketPricesNotLoaded;
 	void checkValidSellButtons();
@@ -126,8 +126,6 @@ private:
 	bool buyLockPricePerCoin;
 	bool buyLockTotalSpend;
 
-	QMap<QByteArray,QString> oidMap;
-	void insertIntoOrdersTable(QByteArray,QString);
 	bool profitSellThanBuyUnlocked;
 	bool profitBuyThanSellUnlocked;
 	bool profitBuyThanSellChangedUnlocked;
@@ -150,6 +148,10 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 public slots:
+	void checkValidOrdersButtons();
+	void cancelOrder(QByteArray);
+	void volumeAmountChanged(double,double);
+	void setLastTrades10MinVolume(double);
 	void rulesMenuRequested(const QPoint&);
 	void saveRulesData();
 	void ruleDisableEnableMenuFix();
@@ -200,7 +202,7 @@ public slots:
 
 	void loginChanged(QString);
 
-	void ordersChanged(QString);
+	void ordersChanged(QList<OrderItem> *orders);
 
 	void setApiDown(bool);
 
@@ -213,6 +215,7 @@ public slots:
 	void accLastBuyChanged(QByteArray,double);
 
 	void orderCanceled(QByteArray);
+	void ordersIsAvailable();
 	void ordersIsEmpty();
 	void firstTicker();
 
@@ -263,7 +266,6 @@ public slots:
 	void ordersLastSellPriceChanged(double);
 
 	void balanceChanged(double);
-	void ordersSelectionChanged();
 	void mtgoxLagChanged(double);
 	void ordersCancelSelected();
 

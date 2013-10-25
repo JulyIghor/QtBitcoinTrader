@@ -13,6 +13,7 @@
 TradesModel::TradesModel()
 	: QAbstractItemModel()
 {
+	lastRemoveDate=0;
 	lastPrice=0.0;
 	columnsCount=4;
 	dateWidth=100;
@@ -29,14 +30,14 @@ TradesModel::~TradesModel()
 void TradesModel::clear()
 {
 	if(priceList.isEmpty())return;
+	beginResetModel();
 	lastPrice=0.0;
 	dateList.clear();
 	volumeList.clear();
 	priceList.clear();
-	curencyList.clear();
 	directionList.clear();
 	directionList.clear();
-	reset();
+	endResetModel();
 }
 
 int TradesModel::rowCount(const QModelIndex &) const
@@ -55,14 +56,14 @@ void TradesModel::removeFirst()
 	dateList.removeFirst();
 	volumeList.removeFirst();
 	priceList.removeFirst();
-	curencyList.removeFirst();
 	typesList.removeFirst();
 	directionList.removeFirst();
 }
 
 void TradesModel::removeDataOlderThen(qint64 date)
 {
-	if(priceList.count()==0)return;
+	lastRemoveDate=date;
+	if(priceList.count()==0){updateTotalBTC();return;}
 	int lowerIndex=qLowerBound(dateList.begin(),dateList.end(),date)-dateList.begin();
 	if(lowerIndex==0)
 	{
@@ -71,13 +72,15 @@ void TradesModel::removeDataOlderThen(qint64 date)
 			beginRemoveRows(QModelIndex(),0,0);
 			removeFirst();
 			endRemoveRows();
+			updateTotalBTC();
 		}
 		return;
 	}
-	beginRemoveRows(QModelIndex(), 0, lowerIndex);
+	beginRemoveRows(QModelIndex(), lowerIndex, priceList.count());
 	for(int n=0;n<lowerIndex;n++)removeFirst();
 	endRemoveRows();
 	if(priceList.count()==0)clear();
+	updateTotalBTC();
 }
 
 QVariant TradesModel::data(const QModelIndex &index, int role) const
@@ -144,7 +147,7 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 		{//Price
 			double requestedPrice=priceList.at(currentRow);
 			if(requestedPrice<=0.0)return QVariant();
-			QString returnPrice=currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(requestedPrice);
+			QString returnPrice=currencyBSign+QLatin1String(" ")+mainWindow.numFromDouble(requestedPrice);
 			if(directionList.at(currentRow))
 			{
 				if(directionList.at(currentRow)==1)
@@ -185,12 +188,11 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
 	return headerLabels.at(section);
 }
 
-double TradesModel::getTotalBTC()
+void TradesModel::updateTotalBTC()
 {
 	double summ=0.0;
-	foreach(double vol, volumeList)
-		summ+=vol;
-	return summ;
+	foreach(double vol, volumeList)summ+=vol;
+	emit trades10MinVolumeChanged(summ);
 }
 
 Qt::ItemFlags TradesModel::flags(const QModelIndex &) const
@@ -208,7 +210,7 @@ void TradesModel::setHorizontalHeaderLabels(QStringList list)
 	typeWidth=qMax(qMax(textWidth(textAsk),textWidth(textBid)),textWidth(list.at(2)))+10;
 
 	headerLabels=list;
-	emit headerDataChanged(Qt::Horizontal, 0, columnsCount);
+	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 }
 
 QModelIndex TradesModel::index(int row, int column, const QModelIndex &parent) const
@@ -222,13 +224,13 @@ QModelIndex TradesModel::parent(const QModelIndex &) const
 	return QModelIndex();
 }
 
-void TradesModel::addNewTrade(qint64 dateT, double volumeT, double priceT, QByteArray curRency, bool isSell)
+void TradesModel::addNewTrade(qint64 dateT, double volumeT, double priceT, QByteArray symbol, bool isSell)
 {
+	if(symbol!=currencyRequestPair||dateT<=lastRemoveDate)return;
 	beginInsertRows(QModelIndex(),0,0);
 	dateList<<dateT;
 	volumeList<<volumeT;
 	priceList<<priceT;
-	curencyList<<curRency;
 	typesList<<isSell;
 	int currentDirection=0;
 	if(lastPrice>priceT)currentDirection=-1;

@@ -69,7 +69,7 @@ QList<RuleHolder *> RulesModel::getAchievedRules(int type, double val)
 				if(lastQueringHolder!=firstQueringHolder)
 				{
 					lastQueringHolder=firstQueringHolder;
-					emit dataChanged(index(0,0),index(0,columnsCount));
+					emit dataChanged(index(0,0),index(0,columnsCount-1));
 				}
 				return achievedRules;
 			}
@@ -79,7 +79,7 @@ QList<RuleHolder *> RulesModel::getAchievedRules(int type, double val)
 				if(lastQueringHolder!=firstQueringHolder)
 				{
 					lastQueringHolder=firstQueringHolder;
-					emit dataChanged(index(0,0),index(0,columnsCount));
+					emit dataChanged(index(0,0),index(0,columnsCount-1));
 				}
 			}
 		}
@@ -92,7 +92,7 @@ void RulesModel::updateHolderByRow(int row, RuleHolder *holder)
 	if(row<0||row>=holderList.count())return;
 	delete holderList[row];
 	holderList[row]=new RuleHolder(*holder);
-	emit dataChanged(index(row,0),index(row,columnsCount));
+	emit dataChanged(index(row,0),index(row,columnsCount-1));
 }
 
 RuleHolder *RulesModel::getRuleHolderByRow(int row)
@@ -105,14 +105,14 @@ void RulesModel::moveRowUp(int row)
 {
 	if(row<1||row>=holderList.count())return;
 	holderList.swap(row,row-1);
-	emit dataChanged(index(row-1,0),index(row,columnsCount));
+	emit dataChanged(index(row-1,0),index(row,columnsCount-1));
 }
 
 void RulesModel::moveRowDown(int row)
 {
 	if(row<0||row>=holderList.count()-1)return;
 	holderList.swap(row,row+1);
-	emit dataChanged(index(row,0),index(row+1,columnsCount));
+	emit dataChanged(index(row,0),index(row+1,columnsCount-1));
 }
 
 void RulesModel::setRuleStateByRow(int curRow, int state)
@@ -120,7 +120,7 @@ void RulesModel::setRuleStateByRow(int curRow, int state)
 	if(curRow<0||curRow>=holderList.count())return;
 	holderList.at(curRow)->setRuleState(state);
 	if(state!=0)allDisabled=false;
-	emit dataChanged(index(curRow,0),index(curRow,columnsCount));
+	emit dataChanged(index(curRow,0),index(curRow,columnsCount-1));
 }
 
 void RulesModel::setRuleStateByHolder(RuleHolder *holder, int state)
@@ -135,9 +135,10 @@ void RulesModel::setRuleStateByHolder(RuleHolder *holder, int state)
 
 void RulesModel::clear()
 {
+	beginResetModel();
 	qDeleteAll(holderList.begin(), holderList.end());
 	holderList.clear();
-	reset();
+	endResetModel();
 }
 
 int RulesModel::rowCount(const QModelIndex &) const
@@ -276,7 +277,7 @@ void RulesModel::setHorizontalHeaderLabels(QStringList list)
 	stateWidth=qMax(stateWidth,textWidth(julyTr("RULE_STATE_DONE","done")));
 	stateWidth=qMax(stateWidth,textWidth(julyTr("RULE_STATE_DISABLED","disabled")));
 	stateWidth+=12;
-	emit headerDataChanged(Qt::Horizontal, 0, columnsCount);
+	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 }
 
 QModelIndex RulesModel::index(int row, int column, const QModelIndex &parent) const

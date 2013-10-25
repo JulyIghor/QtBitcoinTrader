@@ -170,12 +170,13 @@ QModelIndex DepthModel::parent(const QModelIndex &) const
 void DepthModel::clear()
 {
 	if(priceList.isEmpty())return;
+	beginResetModel();
 	groupedPrice=0.0;
 	groupedVolume=0.0;
 	priceList.clear();
 	volumeList.clear();
 	sizeList.clear();
-	reset();
+	endResetModel();
 	somethingChanged=false;
 }
 
@@ -216,7 +217,7 @@ void DepthModel::setHorizontalHeaderLabels(QStringList list)
 {
 	if(list.count()!=columnsCount)return;
 	headerLabels=list;
-	emit headerDataChanged(Qt::Horizontal, 0, columnsCount);
+	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 }
 
 void DepthModel::depthFirstOrder(double price, double volume)
@@ -256,7 +257,7 @@ void DepthModel::depthUpdateOrder(double price, double volume)
 		volumeList[currentIndex]=volume;
 		sizeList[currentIndex]=0.0;
 		somethingChanged=true;
-		emit dataChanged(index(currentIndex+grouped,0),index(currentIndex+grouped,columnsCount));
+		emit dataChanged(index(currentIndex+grouped,0),index(currentIndex+grouped,columnsCount-1));
 	}
 	else
 	{//Insert

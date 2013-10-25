@@ -15,6 +15,7 @@
 #include <QTime>
 #include "qtbitcointrader.h"
 #include "julyhttp.h"
+#include "orderitem.h"
 
 class Exchange_MtGox : public QThread
 {
@@ -75,7 +76,7 @@ signals:
 
 	void addLastTrade(double,qint64,double,QByteArray,bool);
 
-	void ordersChanged(QString);
+	void ordersChanged(QList<OrderItem> *orders);
 	void showErrorMessage(QString);
 
 	void ordersLogChanged(QString);

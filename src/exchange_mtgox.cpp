@@ -39,8 +39,7 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
 		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
-		connect(this,SIGNAL(ordersChanged(QString)),mainClass,SLOT(ordersChanged(QString)));
-		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
+		connect(this,SIGNAL(ordersChanged(QList<OrderItem> *)),mainClass,SLOT(ordersChanged(QList<OrderItem> *)));
 		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
 		connect(this,SIGNAL(ordersLogChanged(QString)),mainClass,SLOT(ordersLogChanged(QString)));
 		connect(this,SIGNAL(orderCanceled(QByteArray)),mainClass,SLOT(orderCanceled(QByteArray)));
@@ -353,11 +352,11 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray tradeData=tradeList.at(n).toAscii();
 					double doubleAmount=getMidData("\"amount\":\"","\",",&tradeData).toDouble();
 					double doublePrice=getMidData("\"price\":\"","\",",&tradeData).toDouble();
-					QByteArray priceCurrency=getMidData("\"price_currency\":\"","\",\"",&tradeData);
+					QByteArray symbol=getMidData("\"item\":\"","\",\"",&tradeData)+getMidData("\"price_currency\":\"","\",\"",&tradeData);
 					QByteArray tradeType=getMidData("\"trade_type\":\"","\"",&tradeData);
-					if(doubleAmount>0.0&&doublePrice>0.0&&!priceCurrency.isEmpty()&&!tradeType.isEmpty())
+					if(doubleAmount>0.0&&doublePrice>0.0&&!symbol.isEmpty()&&!tradeType.isEmpty())
 					{
-						emit addLastTrade(doubleAmount,getMidData("date\":",",\"",&tradeData).toLongLong(),doublePrice,priceCurrency,tradeType=="ask");
+						emit addLastTrade(doubleAmount,getMidData("date\":",",\"",&tradeData).toLongLong(),doublePrice,symbol,tradeType=="ask");
 						if(n==tradeList.count()-1)
 						{
 							QByteArray nextFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
@@ -534,34 +533,33 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 			if(lastOrders!=data)
 			{
 				lastOrders=data;
-				QString rezultData;
-				QByteArray currentOrder=getMidData("oid","\"actions\":",&data);
-				while(currentOrder.size())
-				{//itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign+";"+currencyPair
-					QByteArray pairA=getMidData("\"currency\":\"","\",\"",&currentOrder);
-					QByteArray pairB=getMidData("\"item\":\"","\",\"",&currentOrder);
-					rezultData.append(getMidData("\":\"","\",\"",&currentOrder));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(getMidData(",\"date\":",",",&currentOrder));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(getMidData("\"type\":\"","\",\"",&currentOrder));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(getMidData("\"status\":\"","\",\"",&currentOrder));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(getMidData("\"amount\":{\"value\":\"","\",\"",&currentOrder));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(getMidData("\"price\":{\"value\":\"","\",\"",&currentOrder));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(currencySignMap->value(pairA,"$"));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(currencySignMap->value(getMidData("\"item\":\"","\",\"",&currentOrder),"$"));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(pairB+pairA);
-					rezultData.append(QLatin1String("\n"));
-					if(data.size()>currentOrder.size())data.remove(0,currentOrder.size());
-					currentOrder=getMidData("oid","\"actions\"",&data);
+				QByteArray currentOrderData=getMidData("oid","\"actions\":",&data);
+				QList<OrderItem> *orders=new QList<OrderItem>;
+				while(currentOrderData.size())
+				{
+					OrderItem currentOrder;
+					currentOrder.oid=getMidData("\":\"","\",\"",&currentOrderData);
+					currentOrder.date=getMidData(",\"date\":",",",&currentOrderData).toUInt();
+					currentOrder.type=getMidData("\"type\":\"","\",\"",&currentOrderData).toLower()=="ask";
+
+					QByteArray statusBytes=getMidData("\"status\":\"","\",\"",&currentOrderData).toLower();
+					//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
+					if(statusBytes=="canceled")currentOrder.status=0;
+					else
+					if(statusBytes=="open")currentOrder.status=1;
+					else
+					if(statusBytes=="pending")currentOrder.status=2;
+					else
+					if(statusBytes=="post-pending")currentOrder.status=3;
+
+					currentOrder.amount=getMidData("\"amount\":{\"value\":\"","\",\"",&currentOrderData).toDouble();
+					currentOrder.price=getMidData("\"price\":{\"value\":\"","\",\"",&currentOrderData).toDouble();
+					currentOrder.symbol=getMidData("\"item\":\"","\",\"",&currentOrderData)+getMidData("\"currency\":\"","\",\"",&currentOrderData);
+					if(currentOrder.isValid())(*orders)<<currentOrder;
+					if(data.size()>currentOrderData.size())data.remove(0,currentOrderData.size());
+					currentOrderData=getMidData("oid","\"actions\"",&data);
 				}
-				emit ordersChanged(rezultData);
+				emit ordersChanged(orders);
 
 				lastInfoReceived=false;
 			}

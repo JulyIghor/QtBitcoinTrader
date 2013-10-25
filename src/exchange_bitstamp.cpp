@@ -39,7 +39,7 @@ void Exchange_Bitstamp::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
 		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
-		connect(this,SIGNAL(ordersChanged(QString)),mainClass,SLOT(ordersChanged(QString)));
+		connect(this,SIGNAL(ordersChanged(QList<OrderItem> *)),mainClass,SLOT(ordersChanged(QList<OrderItem> *)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
 		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
 		connect(this,SIGNAL(ordersLogChanged(QString)),mainClass,SLOT(ordersLogChanged(QString)));
@@ -335,7 +335,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					double doublePrice=getMidData("\"price\": \"","\"",&tradeData).toDouble();
 					if(doubleAmount>0.0&&doublePrice>0.0)
 					{
-						emit addLastTrade(doubleAmount,tradeDate.toLongLong(),doublePrice,"USD",true);
+						emit addLastTrade(doubleAmount,tradeDate.toLongLong(),doublePrice,"BTCUSD",true);
 						if(n==0&&!nextFetchDate.isEmpty())lastFetchDate=nextFetchDate;
 					}
 					else if(isLogEnabled)logThread->writeLog("Invalid trades fetch data line:"+tradeData);
@@ -494,27 +494,24 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				data.remove(data.size()-2,2);
 				}
 				QStringList ordersList=QString(data).split("}, {");
-				QString rezultData;
+				QList<OrderItem> *orders=new QList<OrderItem>;
 				for(int n=0;n<ordersList.count();n++)
 				{	
-					//oid+";"+itemDate+";"+itemType+";"+itemStatus+";"+itemAmount+";"+itemPrice+";"+orderSign+";"+priceSign+";"+currencyPair
-					QByteArray currentOrder=ordersList.at(n).toAscii();
-					rezultData.append(getMidData("\"id\": ",",",&currentOrder));
-					rezultData.append(QLatin1String(";"));
-					QDateTime orderDateTime=QDateTime::fromString(getMidData("\"datetime\": \"","\"",&currentOrder),"yyyy-MM-dd HH:mm:ss");
+					OrderItem currentOrder;
+					QByteArray currentOrderData=ordersList.at(n).toAscii();
+					currentOrder.oid=getMidData("\"id\": ",",",&currentOrderData);
+
+					QDateTime orderDateTime=QDateTime::fromString(getMidData("\"datetime\": \"","\"",&currentOrderData),"yyyy-MM-dd HH:mm:ss");
 					orderDateTime.setTimeSpec(Qt::UTC);
-					rezultData.append(QByteArray::number(orderDateTime.toTime_t()));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append((getMidData("\"type\": ",",",&currentOrder)=="1")?"ask":"bid");
-					rezultData.append(QLatin1String(";OPEN;"));
-					rezultData.append(getMidData("\"amount\": \"","\"",&currentOrder));
-					rezultData.append(QLatin1String(";"));
-					rezultData.append(getMidData("\"price\": \"","\"",&currentOrder));
-					rezultData.append(QLatin1String(";$;"));
-					rezultData.append(currencySignMap->value("BTC","$"));
-					rezultData.append(QLatin1String(";BTCUSD\n"));
+					currentOrder.date=orderDateTime.toTime_t();
+					currentOrder.type=getMidData("\"type\": ",",",&currentOrderData)=="1";
+					currentOrder.status=1;
+					currentOrder.amount=getMidData("\"amount\": \"","\"",&currentOrderData).toDouble();
+					currentOrder.price=getMidData("\"price\": \"","\"",&currentOrderData).toDouble();
+					currentOrder.symbol="BTCUSD";
+					if(currentOrder.isValid())(*orders)<<currentOrder;
 				}
-				emit ordersChanged(rezultData);
+				emit ordersChanged(orders);
 				lastInfoReceived=false;
 			}
 		}

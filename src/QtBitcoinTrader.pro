@@ -39,7 +39,9 @@ HEADERS += aboutdialog.h \
            tradesmodel.h \
            depthmodel.h \
            exchange_bitstamp.h \
-           rulesmodel.h
+           rulesmodel.h \
+           orderitem.h \
+           ordersmodel.h
 #
 # Forms
 #
@@ -80,7 +82,8 @@ SOURCES += aboutdialog.cpp \
            tradesmodel.cpp \
            depthmodel.cpp \
            exchange_bitstamp.cpp \
-           rulesmodel.cpp
+           rulesmodel.cpp \
+           ordersmodel.cpp
 #
 # Resources
 # 

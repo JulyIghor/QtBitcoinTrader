@@ -78,6 +78,8 @@ void pickDefaultLangFile()
 	QString sysLocale=QLocale().name();
 	if(sysLocale.startsWith("de"))defaultLangFile=":/Resources/Language/German.lng";
 	else 
+	if(sysLocale.startsWith("zh"))defaultLangFile=":/Resources/Language/Chinese.lng";
+	else 
 	if(sysLocale.startsWith("ru"))defaultLangFile=":/Resources/Language/Russian.lng";
 	else 
 	if(sysLocale.startsWith("uk"))defaultLangFile=":/Resources/Language/Ukrainian.lng";
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0781");
+	appVerStr_=new QByteArray("1.0785");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 

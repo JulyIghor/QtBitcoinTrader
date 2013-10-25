@@ -20,7 +20,7 @@ class TradesModel : public QAbstractItemModel
 public:
 	TradesModel();
 	~TradesModel();
-	double getTotalBTC();
+	void updateTotalBTC();
 	double getRowPrice(int);
 	double getRowVolume(int);
 	bool getRowType(int);
@@ -41,6 +41,7 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
+	qint64 lastRemoveDate;
 	void removeFirst();
 	QString textBid;
 	QString textAsk;
@@ -58,9 +59,10 @@ private:
 	QList<qint64> dateList;
 	QList<double> volumeList;
 	QList<double> priceList;
-	QList<QByteArray> curencyList;
 	QList<bool> typesList;
 	QList<int> directionList;
+signals:
+	void trades10MinVolumeChanged(double);
 };
 
 #endif // TRADESMODEL_H
