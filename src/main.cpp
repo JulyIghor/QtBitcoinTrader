@@ -73,6 +73,7 @@ double *groupPriceValue_;
 bool *depthRefreshBlocked_;
 int *defaultSectionSize_;
 QByteArray *currencySymbol_;
+bool *highResolutionDisplay_;
 
 void pickDefaultLangFile()
 {
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0786");
+	appVerStr_=new QByteArray("1.0787");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -123,6 +124,7 @@ int main(int argc, char *argv[])
 	defaultLangFile_=new QString();pickDefaultLangFile();
 	currencySignMap=new QMap<QByteArray,QByteArray>;
 	currencyNamesMap=new QMap<QByteArray,QByteArray>;
+	highResolutionDisplay_=new bool(true);
 	dateTimeFormat_=new QString(QLocale().dateTimeFormat(QLocale::ShortFormat));
 	timeFormat_=new QString(QLocale().timeFormat(QLocale::ShortFormat));
 	exchangeName_=new QString("Mt.Gox");

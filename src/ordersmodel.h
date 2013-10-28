@@ -12,7 +12,6 @@ class OrdersModel : public QAbstractItemModel
 public:
 	void ordersCancelAll();
 	void setOrderCanceled(QByteArray);
-	void cancelOrderByRow(int);
 
 	void clear();
 
@@ -42,6 +41,7 @@ private:
 
 	bool haveOrders;
 
+	int countWidth;
 	int columnsCount;
 	int dateWidth;
 	int typeWidth;

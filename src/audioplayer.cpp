@@ -22,6 +22,8 @@ const int BufferSize      = 32768;
 AudioPlayer::AudioPlayer(QObject *parent)
 	: QObject(parent)
 {
+	invalidDevice=QAudioDeviceInfo::availableDevices(QAudio::AudioOutput).count()==0;
+	if(invalidDevice)return;
 	m_timeOutTimer=new QTimer(this);
 	m_timeOutTimer->setSingleShot(true);
 	m_device=QAudioDeviceInfo::defaultOutputDevice();

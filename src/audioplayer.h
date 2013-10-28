@@ -44,6 +44,7 @@ class AudioPlayer : public QObject
 	Q_OBJECT
 
 public:
+	bool invalidDevice;
 	void beep();
 	AudioPlayer(QObject *parent);
 	~AudioPlayer();

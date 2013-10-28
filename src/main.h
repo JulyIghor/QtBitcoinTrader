@@ -62,7 +62,9 @@
 #define groupPriceValue (*groupPriceValue_)
 #define depthRefreshBlocked (*depthRefreshBlocked_)
 #define defaultSectionSize (*defaultSectionSize_)
+#define highResolutionDisplay (*highResolutionDisplay_)
 
+extern bool *highResolutionDisplay_;
 extern QByteArray *currencySymbol_;
 extern double *priceMinimumValue_;
 extern int *defaultSectionSize_;

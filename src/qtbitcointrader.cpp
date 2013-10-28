@@ -107,12 +107,17 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ordersSortModel=new QSortFilterProxyModel;
 	ordersSortModel->setSourceModel(ordersModel);
 	ui.ordersTable->setModel(ordersSortModel);
-	ui.ordersTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
-	ui.ordersTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
 	ui.ordersTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
 	ui.ordersTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
 	ui.ordersTable->horizontalHeader()->setResizeMode(4,QHeaderView::ResizeToContents);
 	ui.ordersTable->horizontalHeader()->setResizeMode(5,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(6,QHeaderView::ResizeToContents);
+
+	ui.ordersTable->setSortingEnabled(true);
+	ui.ordersTable->sortByColumn(0,Qt::AscendingOrder);
+
 	connect(ordersModel,SIGNAL(ordersIsAvailable()),this,SLOT(ordersIsAvailable()));
 	connect(ordersModel,SIGNAL(cancelOrder(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
 	connect(ordersModel,SIGNAL(volumeAmountChanged(double, double)),this,SLOT(volumeAmountChanged(double, double)));
@@ -303,13 +308,16 @@ QtBitcoinTrader::QtBitcoinTrader()
 		tables->verticalHeader()->setDefaultSectionSize(defaultSectionSize);
 	}
 
+	highResolutionDisplay=false;
 	int screenCount=QApplication::desktop()->screenCount();
 	QPoint cursorPos=QCursor::pos();
 	currentDesktopRect=QRect(0,0,1024,720);
 	for(int n=0;n<screenCount;n++)
 	{
-		if(QApplication::desktop()->screenGeometry(n).contains(cursorPos))
+		QRect currScrRect=QApplication::desktop()->screenGeometry(n);
+		if(currScrRect.contains(cursorPos))
 			currentDesktopRect=QApplication::desktop()->availableGeometry(n);
+		if(currentDesktopRect.width()>1024&&currentDesktopRect.height()>768)highResolutionDisplay=true;
 	}
 
 	rulesEnableDisableMenu=new QMenu;
@@ -1276,6 +1284,7 @@ void QtBitcoinTrader::ordersChanged(QList<OrderItem> *orders)
 	ordersModel->ordersChanged(orders);
 	ui.ordersTable->setSortingEnabled(true);
 	calcOrdersTotalValues();
+	checkValidOrdersButtons();
 }
 
 void QtBitcoinTrader::showErrorMessage(QString message)
@@ -1376,7 +1385,11 @@ void QtBitcoinTrader::ordersCancelSelected()
 {
 	QModelIndexList selectedRows=ui.ordersTable->selectionModel()->selectedRows();
 	if(selectedRows.count()==0)return;
-	ordersModel->cancelOrderByRow(selectedRows.first().row());
+	for(int n=0;n<selectedRows.count();n++)
+	{
+	QByteArray oid=selectedRows.at(n).data(Qt::UserRole).toByteArray();
+	if(!oid.isEmpty())cancelOrder(oid);
+	}
 }
 
 void QtBitcoinTrader::calcButtonClicked()
@@ -1829,7 +1842,14 @@ void QtBitcoinTrader::ruleRemoveAll()
 void QtBitcoinTrader::beep()
 {
 #ifdef USE_QTMULTIMEDIA
-	static AudioPlayer *player=new AudioPlayer(this);
+	static AudioPlayer *player=0;
+	if(player==0)player=new AudioPlayer(this);
+	if(player->invalidDevice)
+	{
+		delete player;
+		player=0;
+	}
+	else
 	player->beep();
 #endif
 
@@ -2274,7 +2294,7 @@ void QtBitcoinTrader::languageChanged()
 	localDateTimeFormat=julyTr("DATETIME_FORMAT",localDateTimeFormat);
 	localTimeFormat=julyTr("TIME_FORMAT",localTimeFormat);
 	QStringList ordersLabels;
-	ordersLabels<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_TYPE","Type")<<julyTr("ORDERS_STATUS","Status")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_PRICE","Price")<<julyTr("ORDERS_TOTAL","Total");
+	ordersLabels<<julyTr("ORDERS_COUNTER","#")<<julyTr("ORDERS_DATE","Date")<<julyTr("ORDERS_TYPE","Type")<<julyTr("ORDERS_STATUS","Status")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("ORDERS_PRICE","Price")<<julyTr("ORDERS_TOTAL","Total");
 	ordersModel->setHorizontalHeaderLabels(ordersLabels);
 	QStringList rulesLabels;
 	rulesLabels<<julyTr("RULES_T_STATE","State")<<julyTr("RULES_T_DESCR","Description")<<julyTr("RULES_T_ACTION","Action")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("RULES_T_PRICE","Price");

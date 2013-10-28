@@ -2160,7 +2160,7 @@
            <item row="0" column="0">
             <widget class="QTableView" name="ordersTable">
              <property name="horizontalScrollBarPolicy">
-              <enum>Qt::ScrollBarAlwaysOff</enum>
+              <enum>Qt::ScrollBarAsNeeded</enum>
              </property>
              <property name="editTriggers">
               <set>QAbstractItemView::NoEditTriggers</set>

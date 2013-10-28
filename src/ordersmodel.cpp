@@ -5,9 +5,10 @@ OrdersModel::OrdersModel()
 	: QAbstractItemModel()
 {
 	haveOrders=false;
-	columnsCount=6;
+	columnsCount=7;
 	dateWidth=100;
 	typeWidth=100;
+	countWidth=20;
 	statusWidth=100;
 
 	textStatusList<<"CANCELED"<<"OPEN"<<"PENDING"<<"POST-PENDING"<<"INVALID";
@@ -134,6 +135,7 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 		emit ordersIsAvailable();
 		haveOrders=true;
 	}
+	countWidth=textWidth(QString::number(oidList.count()+1))+6;
 	emit volumeAmountChanged(volumeTotal, amountTotal);
 }
 
@@ -143,9 +145,15 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 	int currentRow=oidList.count()-index.row()-1;
 	if(currentRow<0||currentRow>=oidList.count())return QVariant();
 
+	if(role==Qt::UserRole)
+	{
+		if(statusList.at(currentRow))return oidList.at(currentRow);
+		return QVariant();
+	}
+
 	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::TextAlignmentRole&&role!=Qt::BackgroundRole)return QVariant();
 
-	int indexColumn=index.column();
+	int indexColumn=index.column()-1;
 
 	if(role==Qt::TextAlignmentRole)return 0x0084;
 
@@ -174,9 +182,18 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 
 	switch(indexColumn)
 	{
+	case -1://Counter
+		{
+			return oidList.count()-currentRow;
+		}
+		break;
 	case 0:
 		{//Date
-			return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat);
+			if(role==Qt::ToolTipRole)
+				return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat);
+			if(highResolutionDisplay)
+				return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat);
+			return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localTimeFormat);
 		}
 		break;
 	case 1:
@@ -218,14 +235,9 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 
 void OrdersModel::ordersCancelAll()
 {
-	for(int n=0;n<oidList.count();n++)
+	for(int n=oidList.count()-1;n>=0;n--)
 		if(statusList.at(n))
 			emit cancelOrder(oidList.at(n));
-}
-
-void OrdersModel::cancelOrderByRow(int row)
-{
-	if(statusList.at(row))emit cancelOrder(oidList.at(row));
 }
 
 void OrdersModel::setOrderCanceled(QByteArray oid)
@@ -248,9 +260,10 @@ QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int r
 	{
 		switch(section)
 		{
-		case 0: return QSize(dateWidth,defaultSectionSize);//Date
-		case 1: return QSize(typeWidth,defaultSectionSize);//Type
-		case 2: return QSize(statusWidth,defaultSectionSize);//Status
+		case 0: return QSize(countWidth,defaultSectionSize);//Counter
+		case 1: return QSize(dateWidth,defaultSectionSize);//Date
+		case 2: return QSize(typeWidth,defaultSectionSize);//Type
+		case 3: return QSize(statusWidth,defaultSectionSize);//Status
 		}
 		return QVariant();
 	}
