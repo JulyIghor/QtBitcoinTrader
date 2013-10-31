@@ -88,8 +88,7 @@ SOURCES += aboutdialog.cpp \
            rulesmodel.cpp \
            ordersmodel.cpp \
            historymodel.cpp \
-           exchange_btcchina.cpp \
-           historyitem.cpp
+           exchange_btcchina.cpp
 #
 # Resources
 # 
