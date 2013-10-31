@@ -30,7 +30,7 @@ public:
 	void prepareDataSend();
 	void prepareDataClear();
 
-	JulyHttp(const QString &hostName, const QByteArray &restKeyLine, QObject *parent, const bool &secure=true, const bool &keepAlive=true);
+	JulyHttp(const QString &hostName, const QByteArray &restKeyLine, QObject *parent, const bool &secure=true, const bool &keepAlive=true, const QByteArray &contentType="application/x-www-form-urlencoded");
 	~JulyHttp();
 
 private:

@@ -41,7 +41,7 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
 		connect(this,SIGNAL(ordersChanged(QList<OrderItem> *)),mainClass,SLOT(ordersChanged(QList<OrderItem> *)));
 		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
-		connect(this,SIGNAL(ordersLogChanged(QString)),mainClass,SLOT(ordersLogChanged(QString)));
+		connect(this,SIGNAL(historyChanged(QList<HistoryItem>*)),mainClass,SLOT(historyChanged(QList<HistoryItem>*)));
 		connect(this,SIGNAL(orderCanceled(QByteArray)),mainClass,SLOT(orderCanceled(QByteArray)));
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
@@ -49,8 +49,6 @@ void Exchange_MtGox::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	connect(this,SIGNAL(depthFirstOrder(double,double,bool)),mainClass,SLOT(depthFirstOrder(double,double,bool)));
 	connect(this,SIGNAL(depthUpdateOrder(double,double,bool)),mainClass,SLOT(depthUpdateOrder(double,double,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
-	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
-	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
 
 	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
 	connect(mainClass,SIGNAL(reloadDepth()),this,SLOT(reloadDepth()));
@@ -575,90 +573,70 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		}
 		break;//order/cancel
 	case 306: //order/buy
-			  if(!success)break;
-			  if(data.startsWith("{\"result\":\"success\",\"data\":\""))
-			  {
-				 if(isLogEnabled)logThread->writeLog("Buy OK: "+data);
-			  }
-			  else if(isLogEnabled)logThread->writeLog("Invalid Order Buy Data:"+data);
-			  break;//order/buy
+			if(!success||!isLogEnabled)break;
+			   if(data.startsWith("{\"result\":\"success\",\"data\":\""))logThread->writeLog("Buy OK: "+data);
+			  else logThread->writeLog("Invalid Order Buy Data:"+data);
+			break;//order/buy
 	case 307: //order/sell
-			  if(!success)break;
-			  if(data.startsWith("{\"result\":\"success\",\"data\":\""))
-			  {
-				 if(isLogEnabled)logThread->writeLog("Sell OK: "+data);
-			  }
-			  else if(isLogEnabled)logThread->writeLog("Invalid Order Sell Data:"+data);
-			  break;//order/sell
+			if(!success||!isLogEnabled)break;
+			  if(data.startsWith("{\"result\":\"success\",\"data\":\""))logThread->writeLog("Sell OK: "+data);
+			  else logThread->writeLog("Invalid Order Sell Data:"+data);
+			 break;//order/sell
 	case 208: //money/wallet/history 
 		if(!success)break;
 		if(data.startsWith("{\"result\":\"success\",\"data\":{\"records"))
 		{
 			if(lastHistory!=data)
 			{
-				double lastBuyPrice=0.0;
-				double lastSellPrice=0.0;
+				QList<HistoryItem> *historyItems=new QList<HistoryItem>;
+
 				QString newLog(data);
 				translateUnicodeStr(&newLog);
 				QStringList dataList=newLog.split("\"Index\"");
 				newLog.clear();
 				for(int n=0;n<dataList.count();n++)
 				{
+					HistoryItem currentHistoryItem;
+					currentHistoryItem.type=0;
+					currentHistoryItem.price=0.0;
+					currentHistoryItem.volume=0.0;
+					currentHistoryItem.date=0;
+
 					QByteArray curLog(dataList.at(n).toAscii());
 					QByteArray logType=getMidData("\"Type\":\"","\",\"",&curLog);
-					int logTypeInt=0;
-					if(logType=="out"){logTypeInt=1;logType="<font color=\"red\">("+julyTr("LOG_SOLD","Sold").toAscii()+")</font>";}
+
+					if(logType=="out")currentHistoryItem.type=1;
 					else 
-						if(logType=="in"){logTypeInt=2;logType="<font color=\"blue\">("+julyTr("LOG_BOUGHT","Bought").toAscii()+")</font>";}
-						else 
-							if(logType=="fee"){logTypeInt=3;logType.clear();}
-							else 
-								if(logType=="deposit"){logTypeInt=4;logType.clear();logType="<font color=\"green\">("+julyTr("LOG_DEPOSIT","Deposit").toAscii()+")</font>";}
-								else
-									if(logType=="withdraw"){logTypeInt=5;logType.clear();logType="<font color=\"brown\">("+julyTr("LOG_WITHDRAW","Withdraw").toAscii()+")</font>";}
-									if(logTypeInt)
-									{
-										QByteArray currencyA("USD");
-										QByteArray currencyB("USD");
-										QByteArray logValue=getMidData("\"Value\":{\"value\":\"","\",\"",&curLog);
-										QByteArray logDate=getMidData("\"Date\":",",\"",&curLog);
-										QByteArray logText=getMidData(" at ","\",\"",&curLog);
-										currencyA=getMidData("\"currency\":\"","\"",&curLog);
-										if((logTypeInt==1||logTypeInt==2)&&(lastSellPrice==0.0||lastBuyPrice==0.0))
-										{
-											QByteArray priceValue;
-											QByteArray priceSign;
-											for(int n=0;n<logText.size();n++)
-												if(QChar(logText.at(n)).isDigit()||logText.at(n)=='.')priceValue.append(logText.at(n));
-												else priceSign.append(logText.at(n));
-												if(priceSign.isEmpty())priceSign="$";
+					if(logType=="in")currentHistoryItem.type=2;
+					else 
+					if(logType=="fee")currentHistoryItem.type=3;
+					else 
+					if(logType=="deposit")currentHistoryItem.type=4;
+					else
+					if(logType=="withdraw")currentHistoryItem.type=5;
+					if(currentHistoryItem.type)
+					{
+						QByteArray currencyA("USD");
+						currentHistoryItem.volume=getMidData("\"Value\":{\"value\":\"","\",\"",&curLog).toDouble();
+						currentHistoryItem.date=getMidData("\"Date\":",",\"",&curLog).toUInt();
+						QByteArray logText=getMidData(" at ","\",\"",&curLog);
 
-												currencyB=currencySignMap->key(priceSign,"$");
-												if(lastSellPrice==0.0&&logTypeInt==1)
-												{
-													lastSellPrice=priceValue.toDouble();
-													emit accLastSellChanged(currencyB,lastSellPrice);
-												}
-												if(lastBuyPrice==0.0&&logTypeInt==2)
-												{
-													lastBuyPrice=priceValue.toDouble();
-													emit accLastBuyChanged(currencyB,lastBuyPrice);
-												}
-										}
+						QByteArray priceValue;
+						QByteArray priceSign;
+						for(int n=0;n<logText.size();n++)
+						{
+							if(QChar(logText.at(n)).isSpace())break;
+							if(QChar(logText.at(n)).isDigit()||logText.at(n)=='.')priceValue.append(logText.at(n));
+							else priceSign.append(logText.at(n));
+						}
+							if(priceSign.isEmpty())priceSign="$";
+						currentHistoryItem.price=priceValue.toDouble();
 
-										if(logTypeInt==3&&logText.isEmpty())
-										{
-											logText="<font color=\"darkgreen\">";
-											logText.append(" ("+julyTr("LOG_FEE","fee")+")");
-											logText.append("</font>");
-										}
-										else
-											if(!logText.isEmpty())logText=" "+julyTr("AT"," at %1").arg(QString("<font color=\"darkgreen\">"+logText+"</font>").replace("fee",julyTr("LOG_FEE","fee"))).toAscii();
-
-										newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString(localDateTimeFormat)+"</font>&nbsp;<font color=\"#996515\">"+currencySignMap->value(currencyA,"USD")+logValue+"</font>"+logText+" "+logType+"<br>");
-									}
+						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+currencySignMap->key(priceSign,"$");
+						if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
+					}
 				}
-				emit ordersLogChanged(newLog);
+				emit historyChanged(historyItems);
 				lastHistory=data;
 			}
 		}

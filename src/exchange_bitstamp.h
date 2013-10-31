@@ -78,7 +78,7 @@ signals:
 	void ordersChanged(QList<OrderItem> *);
 	void showErrorMessage(QString);
 
-	void ordersLogChanged(QString);
+	void historyChanged(QList<HistoryItem>*);
 
 	void ordersIsEmpty();
 	void orderCanceled(QByteArray);

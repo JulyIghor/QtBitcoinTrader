@@ -79,10 +79,7 @@ signals:
 	void ordersChanged(QList<OrderItem> *orders);
 	void showErrorMessage(QString);
 
-	void ordersLogChanged(QString);
-
-	void accLastSellChanged(QByteArray,double);
-	void accLastBuyChanged(QByteArray,double);
+	void historyChanged(QList<HistoryItem>*);
 
 	void ordersIsEmpty();
 	void orderCanceled(QByteArray);

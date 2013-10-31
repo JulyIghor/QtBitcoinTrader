@@ -30,7 +30,7 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 	mainWindow.fillAllBtcLabels(this,currencyAStr);
 
 
-	if(mainWindow.exchangeId==2)//Bitstamp exception
+	if(mainWindow.exchangeId==3)//BTC China exception
 	{
 		ui.checkOrdersLastBuyPrice->setVisible(false);
 		ui.checkOrdersLastSellPrice->setVisible(false);
@@ -42,9 +42,9 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 	new JulySpinBoxFix(ui.btcValue);
 	new JulySpinBoxFix(ui.exactPriceValue);
 
-	foreach(QPushButton* pushButtons, findChildren<QPushButton*>())pushButtons->setMinimumWidth(textWidth(pushButtons->text())+10);
+	foreach(QPushButton* pushButtons, findChildren<QPushButton*>())pushButtons->setMinimumWidth(textFontWidth(pushButtons->text())+10);
 
-	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())checkBoxes->setMinimumWidth(textWidth(checkBoxes->text())+10);
+	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())checkBoxes->setMinimumWidth(textFontWidth(checkBoxes->text())+10);
 
 	ui.exactPriceValue->setVisible(false);
 	ui.label_53->setVisible(false);//sorry for that label name

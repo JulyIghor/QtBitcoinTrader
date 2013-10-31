@@ -1,11 +1,11 @@
-﻿BTC=Bitcoin=Ƀ
-LTC=Litecoin=Ł
+﻿BTC=Bitcoin=Ƀ=B
+LTC=Litecoin=Ł=L
 USD=US Dollar=$
 AUD=Australian Dollar=$
 CAD=Canadian Dollar=$
 CHF=Swiss Franc=CHF
 CNY=Chinese Yuan=¥
-CZK=Czech koruna=Kč
+CZK=Czech koruna=Kč=Kc
 DKK=Danish Krone=kr
 EUR=Euro=€
 GBP=Great British Pound=£
@@ -20,8 +20,8 @@ RUB=Russian Rouble=руб
 RUR=Russian Rouble=руб
 SEK=Swedish Krona=kr
 SGD=Singapore Dollar=$
-THB=Thai Baht=฿
+THB=Thai Baht=฿=B
 TRC=Terracoin=T
 PPC=PPCoin=P
 FTC=Feathercoin=F
-XPM=PrimeCoin=Ψ
+XPM=PrimeCoin=Ψ=XPM

@@ -1,7 +1,8 @@
 <RCC>
   <qresource prefix="/">
-    <file>Resources/Thawte_Primary_Root_CA.cer</file>
+    <file>Resources/CertBase.cer</file>
     <file>Resources/Exchanges/BTC-e.png</file>
+    <file>Resources/Exchanges/BTCChina.png</file>
     <file>Resources/Exchanges/Mt.Gox.png</file>
     <file>Resources/Exchanges/Bitstamp.png</file>
     <file>Resources/exit.png</file>
@@ -13,6 +14,7 @@
     <file>Resources/Currencies.map</file>
     <file>Resources/CurrenciesMtGox.map</file>
     <file>Resources/CurrenciesBTCe.map</file>
+    <file>Resources/CurrenciesBTCChina.map</file>
     <file>Resources/CurrenciesBitstamp.map</file>
     <file>Resources/CurrencySign/AUD.png</file>
     <file>Resources/CurrencySign/BTC.png</file>
@@ -41,6 +43,7 @@
     <file>Resources/CurrencySign/PPC.png</file>
     <file>Resources/CurrencySign/FTC.png</file>
     <file>Resources/CurrencySign/XPM.png</file>
+    <file>Resources/Swap.png</file>
     <file>Resources/Public.key</file>
     <file>Resources/QtBitcoinTrader.png</file>
     <file>Resources/Language/English.lng</file>

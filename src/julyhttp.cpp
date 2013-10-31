@@ -12,7 +12,7 @@
 #include <QTimer>
 #include <zlib.h>
 
-JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive)
+JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
 	: QObject(parent)
 {
 	secureConnection=secure;
@@ -37,7 +37,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+appVerStr+"\r\n");
 	httpHeader.append("Host: "+hostName+"\r\n");
 	httpHeader.append("Accept-Encoding: gzip\r\n");
-	httpHeader.append("Content-Type: application/x-www-form-urlencoded\r\n");
+	httpHeader.append("Content-Type: "+contentType+"\r\n");
 	if(keepAlive)httpHeader.append("Connection: keep-alive\r\n");
 	else httpHeader.append("Connection: close\r\n");
 	apiDownState=false;
@@ -56,7 +56,36 @@ JulyHttp::~JulyHttp()
 
 void JulyHttp::setupSocket(QSslSocket *socket)
 {
-	socket->setSocketOption(QAbstractSocket::LowDelayOption,true);
+	static QList<QSslCertificate> certs;
+	if(certs.count()==0)
+	{
+		QFile readCerts(":/Resources/CertBase.cer");
+		if(readCerts.open(QIODevice::ReadOnly))
+		{
+			QByteArray certData=readCerts.readAll()+"{SPLIT}";
+			readCerts.close();
+			do 
+			{
+			int nextCert=certData.indexOf("{SPLIT}");
+			if(nextCert>-1)
+			{
+				QByteArray currentCert=certData.left(nextCert);
+				QSslCertificate derCert(currentCert,QSsl::Der);
+				if(derCert.isValid())certs<<derCert;
+				certData.remove(0,nextCert+7);
+			}
+			else certData.clear();
+			}while(certData.size());
+		}
+	}
+
+	if(certs.count())
+	{
+	socket->addCaCertificates(certs);
+	socket->addDefaultCaCertificates(certs);
+	}
+
+	socket->setPeerVerifyMode(QSslSocket::VerifyPeer);
 	socket->setSocketOption(QAbstractSocket::KeepAliveOption,true);
 	connect(socket,SIGNAL(readyRead()),SLOT(readSocket()));
 	connect(socket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(errorSlot(QAbstractSocket::SocketError)));

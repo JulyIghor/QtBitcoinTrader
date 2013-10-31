@@ -7,40 +7,43 @@
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
 // GNU General Public License version 3
 
-#ifndef EXCHANGE_BTCE_H
-#define EXCHANGE_BTCE_H
+#ifndef EXCHANGE_BTCCHINA_H
+#define EXCHANGE_BTCCHINA_H
 
 #include <QThread>
-#include "julyhttp.h"
 #include <QTimer>
 #include <QTime>
 #include "qtbitcointrader.h"
+#include "julyhttp.h"
 
-class Exchange_BTCe : public QThread
+class Exchange_BTCChina : public QThread
 {
 	Q_OBJECT
 
 public:
 	void setupApi(QtBitcoinTrader *, bool tickerOnly=false);
-	Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_BTCe();
+	Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey);
+	~Exchange_BTCChina();
 
 private:
+	QByteArray numForSellFromDouble(double val, int maxDecimals);
+	void translateUnicodeStr(QString *str);
+	QList<QByteArray> cancelingOrderIDs;
 	bool forceDepthLoad;
-	void depthSubmitOrder(QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
+	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
 	QMap<double,double> lastDepthAsksMap;
 	QMap<double,double> lastDepthBidsMap;
-	QByteArray lastDepthData;
 	void clearVariables();
-	JulyHttp *julyHttp;
-
-	qint64 lastFetchTid;
+	JulyHttp *julyHttpAuth;
+	JulyHttp *julyHttpPublic;
+	QTime authRequestTime;
+	QByteArray lastFetchDate;
+	QByteArray lastDepthData;
 	bool tickerOnly;
-	bool isApiDown;
 	QByteArray lastHistory;
 	QByteArray lastOrders;
+	bool lastInfoReceived;
 	bool isFirstTicker;
-	bool isFirstAccInfo;
 
 	double lastTickerHigh;
 	double lastTickerLow;
@@ -54,30 +57,28 @@ private:
 	double lastVolume;
 	double lastFee;
 
+	QString apiLogin;
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
-
-	qint64 lastPriceDate;
-
-	QTime authRequestTime;
 	int apiDownCounter;
+	int secondPart;
 	QByteArray privateRestSign;
 	QByteArray privateRestKey;
-	quint32 privateNonce;
+	quint32 privateTonce;
+	quint32 tonceCounter;
 
 	bool isReplayPending(int);
 
 	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 	QTimer *secondTimer;
-	int lastOpenedOrders;
 	void run();
 signals:
 	void depthFirstOrder(double,double,bool);
 	void depthUpdateOrder(double,double,bool);
-	void showErrorMessage(QString);
+
 	void addLastTrade(double,qint64,double,QByteArray,bool);
 
 	void ordersChanged(QList<OrderItem> *);
-	void identificationRequired(QString);
+	void showErrorMessage(QString);
 
 	void historyChanged(QList<HistoryItem>*);
 
@@ -92,9 +93,11 @@ signals:
 	void tickerBuyChanged(double);
 	void tickerVolumeChanged(double);
 
+	void accVolumeChanged(double);
 	void accFeeChanged(double);
 	void accBtcBalanceChanged(double);
 	void accUsdBalanceChanged(double);
+	void loginChanged(QString);
 	void apiDownChanged(bool);
 	void apiLagChanged(double);
 	void softLagChanged(int);
@@ -111,4 +114,4 @@ public slots:
 	void cancelOrder(QByteArray);
 };
 
-#endif // EXCHANGE_BTCE_H
+#endif // EXCHANGE_BTCCHINA_H

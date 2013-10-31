@@ -84,6 +84,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 		if(currentProfileExchangeId==0)itemIcon=":/Resources/Exchanges/Mt.Gox.png";
 		if(currentProfileExchangeId==1)itemIcon=":/Resources/Exchanges/BTC-e.png";
 		if(currentProfileExchangeId==2)itemIcon=":/Resources/Exchanges/Bitstamp.png";
+		if(currentProfileExchangeId==3)itemIcon=":/Resources/Exchanges/BTCChina.png";
 
 		ui.profileComboBox->addItem(QIcon(itemIcon),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
@@ -98,7 +99,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	julyTranslator->translateUi(this);
 
 	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())
-		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),textWidth(checkBoxes->text())+20));
+		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),textFontWidth(checkBoxes->text())+20));
 	QSize minSizeHint=minimumSizeHint();
 	if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
 }

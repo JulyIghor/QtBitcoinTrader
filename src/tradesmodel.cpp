@@ -206,11 +206,12 @@ void TradesModel::setHorizontalHeaderLabels(QStringList list)
 
 	textAsk=julyTr("ORDER_TYPE_ASK","ask");
 	textBid=julyTr("ORDER_TYPE_BID","bid");
-	dateWidth=qMax(qMax(textWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(localDateTimeFormat)),textWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(localDateTimeFormat))),textWidth(list.at(0)))+10;
-	typeWidth=qMax(qMax(textWidth(textAsk),textWidth(textBid)),textWidth(list.at(2)))+10;
+	dateWidth=qMax(qMax(textFontWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(localDateTimeFormat)),textFontWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(localDateTimeFormat))),textFontWidth(list.at(0)))+10;
+	typeWidth=qMax(qMax(textFontWidth(textAsk),textFontWidth(textBid)),textFontWidth(list.at(2)))+10;
 
 	headerLabels=list;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
+	emit layoutChanged();
 }
 
 QModelIndex TradesModel::index(int row, int column, const QModelIndex &parent) const
@@ -227,6 +228,7 @@ QModelIndex TradesModel::parent(const QModelIndex &) const
 void TradesModel::addNewTrade(qint64 dateT, double volumeT, double priceT, QByteArray symbol, bool isSell)
 {
 	if(symbol!=currencySymbol||dateT<=lastRemoveDate)return;
+
 	beginInsertRows(QModelIndex(),0,0);
 	dateList<<dateT;
 	volumeList<<volumeT;

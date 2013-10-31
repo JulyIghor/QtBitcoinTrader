@@ -135,7 +135,7 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 		emit ordersIsAvailable();
 		haveOrders=true;
 	}
-	countWidth=textWidth(QString::number(oidList.count()+1))+6;
+	countWidth=textFontWidth(QString::number(oidList.count()+1))+6;
 	emit volumeAmountChanged(volumeTotal, amountTotal);
 }
 
@@ -189,11 +189,11 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		break;
 	case 0:
 		{//Date
-			if(role==Qt::ToolTipRole)
+			//if(role==Qt::ToolTipRole)
 				return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat);
-			if(highResolutionDisplay)
-				return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat);
-			return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localTimeFormat);
+			//if(highResolutionDisplay)
+			//	return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat);
+			//return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localTimeFormat);
 		}
 		break;
 	case 1:
@@ -292,14 +292,15 @@ void OrdersModel::setHorizontalHeaderLabels(QStringList list)
 	textStatusList[3]=julyTr("ORDER_STATE_POST-PENDING",textStatusList.at(3));
 	textStatusList[4]=julyTr("ORDER_STATE_INVALID",textStatusList.at(4));
 
-	dateWidth=qMax(qMax(textWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(localDateTimeFormat)),textWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(localDateTimeFormat))),textWidth(list.at(0)))+10;
-	typeWidth=qMax(qMax(textWidth(textAsk),textWidth(textBid)),textWidth(list.at(1)))+10;
+	dateWidth=qMax(qMax(textFontWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(localDateTimeFormat)),textFontWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(localDateTimeFormat))),textFontWidth(list.at(0)))+10;
+	typeWidth=qMax(qMax(textFontWidth(textAsk),textFontWidth(textBid)),textFontWidth(list.at(1)))+10;
 
-	for(int n=0;n<4;n++)statusWidth=qMax(textWidth(textStatusList.at(n)),textWidth(textStatusList.at(n+1)));
+	for(int n=0;n<4;n++)statusWidth=qMax(textFontWidth(textStatusList.at(n)),textFontWidth(textStatusList.at(n+1)));
 	statusWidth+=10;
 
 	headerLabels=list;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
+	emit layoutChanged();
 }
 
 QModelIndex OrdersModel::index(int row, int column, const QModelIndex &parent) const

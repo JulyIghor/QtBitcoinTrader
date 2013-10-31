@@ -23,6 +23,7 @@ AudioPlayer::AudioPlayer(QObject *parent)
 	: QObject(parent)
 {
 	invalidDevice=QAudioDeviceInfo::availableDevices(QAudio::AudioOutput).count()==0;
+	invalidDevice=true;
 	if(invalidDevice)return;
 	m_timeOutTimer=new QTimer(this);
 	m_timeOutTimer->setSingleShot(true);
@@ -50,7 +51,7 @@ AudioPlayer::AudioPlayer(QObject *parent)
 
 AudioPlayer::~AudioPlayer()
 {
-	m_audioOutput->stop();
+	if(!invalidDevice)m_audioOutput->stop();
 }
 
 void AudioPlayer::pullTimerExpired()

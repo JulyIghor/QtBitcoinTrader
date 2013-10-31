@@ -27,6 +27,8 @@ NewPasswordDialog::NewPasswordDialog()
 
 	julyTranslator->translateUi(this);
 
+	if(QLocale().name().startsWith("zh"))ui.exchangeComboBox->setCurrentIndex(3);
+	else
 	exchangeChanged(ui.exchangeComboBox->currentText());
 }
 
@@ -76,6 +78,7 @@ void NewPasswordDialog::getApiKeySecretButton()
 	case 0:	QDesktopServices::openUrl(QUrl("https://www.mtgox.com/security")); break;
 	case 1: QDesktopServices::openUrl(QUrl("https://btc-e.com/profile#api_keys")); break;
 	case 2: QDesktopServices::openUrl(QUrl("https://www.bitstamp.net/account/security/api/")); break;
+	case 3: QDesktopServices::openUrl(QUrl("https://www.btcchina.com/account/apikeys")); break;
 	default: break;
 	}
 }
@@ -148,7 +151,11 @@ void NewPasswordDialog::updateIniFileName()
 	if(ui.profileNameEdit->text().isEmpty())
 	iniFileName=appDataDir+"QtBitcoinTrader.ini";
 	else
-	iniFileName=appDataDir+ui.exchangeComboBox->currentText()+"_"+ui.profileNameEdit->text().toAscii()+".ini";
+	{
+		iniFileName=ui.exchangeComboBox->currentText()+"_"+ui.profileNameEdit->text().toAscii()+".ini";
+		iniFileName.replace(' ','_');
+		iniFileName.prepend(appDataDir);
+	}
 
 	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	settings.setValue("LastProfile",iniFileName);

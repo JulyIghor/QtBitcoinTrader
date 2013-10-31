@@ -14,13 +14,18 @@
 DepthModel::DepthModel(bool isAskData)
 	: QAbstractItemModel()
 {
+	widthPriceTitle=75;
+	widthVolumeTitle=75;
+	widthSizeTitle=75;
+
 	groupedPrice=0.0;
 	groupedVolume=0.0;
-	widthPrice=50;
-	widthVolume=50;
-	widthSize=50;
+	widthPrice=75;
+	widthVolume=75;
+	widthSize=75;
 	somethingChanged=true;
 	isAsk=isAskData;
+	originalIsAsk=isAsk;
 	columnsCount=4;
 }
 
@@ -66,7 +71,7 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 	if(grouped)currentRow-=grouped;
 	if(currentRow<0||currentRow>=priceList.count())return QVariant();
 
-	if(!isAsk)currentRow=priceList.count()-currentRow-1;
+	if(!originalIsAsk)currentRow=priceList.count()-currentRow-1;
 
 	if(role==Qt::ForegroundRole)
 	{
@@ -114,9 +119,9 @@ void DepthModel::calculateSize()
 	if(!somethingChanged)return;
 	somethingChanged=true;
 
-	quint32 currentPriceWidth=9;
-	quint32 currentVolumeWidth=9;
-	quint32 currentSizeWidth=9;
+	double maxPrice=0.0;
+	double maxVolume=0.0;
+	double maxTotal=0.0;
 
 	double totalSize=0.0;
 	if(isAsk)
@@ -126,9 +131,9 @@ void DepthModel::calculateSize()
 			totalSize+=volumeList.at(n);
 			sizeList[n]=totalSize;
 
-			while(currentPriceWidth<priceList.at(n)){currentPriceWidth*=10;currentPriceWidth+=9;}
-			while(currentVolumeWidth<volumeList.at(n)){currentVolumeWidth*=10;currentVolumeWidth+=9;}
-			while(currentSizeWidth<sizeList.at(n)){currentSizeWidth*=10;currentSizeWidth+=9;}
+			maxPrice=qMax(maxPrice,priceList.at(n));
+			maxVolume=qMax(maxVolume,volumeList.at(n));
+			maxTotal=qMax(maxTotal,sizeList.at(n));
 		}
 	}
 	else
@@ -138,18 +143,19 @@ void DepthModel::calculateSize()
 			totalSize+=volumeList.at(n);
 			sizeList[n]=totalSize;
 
-			while(currentPriceWidth<priceList.at(n)){currentPriceWidth*=10;currentPriceWidth+=9;}
-			while(currentVolumeWidth<volumeList.at(n)){currentVolumeWidth*=10;currentVolumeWidth+=9;}
-			while(currentSizeWidth<sizeList.at(n)){currentSizeWidth*=10;currentSizeWidth+=9;}
+			maxPrice=qMax(maxPrice,priceList.at(n));
+			maxVolume=qMax(maxVolume,volumeList.at(n));
+			maxTotal=qMax(maxTotal,sizeList.at(n));
 		}
 	}
 
-	QString curAPudding=QLatin1String(".")+QString('9').repeated(btcDecimals);
-	QString curBPudding=QLatin1String(".")+QString('9').repeated(usdDecimals);
-
-	widthPrice=10+textWidth(currencyBSign+QLatin1String(" ")+QString::number(currentPriceWidth)+curBPudding);
-	widthVolume=10+textWidth(currencyASign+QLatin1String(" ")+QString::number(currentVolumeWidth)+curAPudding);
-	widthSize=10+textWidth(currencyASign+QLatin1String(" ")+QString::number(currentSizeWidth)+curAPudding);
+	widthPrice=10+textFontWidth(currencyBSign+QLatin1String(" ")+mainWindow.numFromDouble(maxPrice,priceDecimals));
+	widthVolume=10+textFontWidth(currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(maxVolume,btcDecimals));
+	widthSize=10+textFontWidth(currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(maxTotal,usdDecimals));
+	
+	widthPrice=qMax(widthPrice,widthPriceTitle);
+	widthVolume=qMax(widthVolume,widthVolumeTitle);
+	widthSize=qMax(widthSize,widthSizeTitle);
 
 	int sizeColumn=2;
 	if(isAsk)sizeColumn=1;
@@ -217,7 +223,11 @@ void DepthModel::setHorizontalHeaderLabels(QStringList list)
 {
 	if(list.count()!=columnsCount)return;
 	headerLabels=list;
+	widthPriceTitle=textFontWidth(headerLabels.at(0))+10;
+	widthVolumeTitle=textFontWidth(headerLabels.at(1))+10;
+	widthSizeTitle=textFontWidth(headerLabels.at(2))+10;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
+	emit layoutChanged();
 }
 
 void DepthModel::depthFirstOrder(double price, double volume)

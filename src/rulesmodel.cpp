@@ -272,10 +272,10 @@ void RulesModel::setHorizontalHeaderLabels(QStringList list)
 {
 	if(list.count()!=columnsCount)return;
 	headerLabels=list;
-	stateWidth=qMax(textWidth(headerLabels.first()),textWidth(julyTr("RULE_STATE_PROCESSING","processing")));
-	stateWidth=qMax(stateWidth,textWidth(julyTr("RULE_STATE_PENDING","pending")));
-	stateWidth=qMax(stateWidth,textWidth(julyTr("RULE_STATE_DONE","done")));
-	stateWidth=qMax(stateWidth,textWidth(julyTr("RULE_STATE_DISABLED","disabled")));
+	stateWidth=qMax(textFontWidth(headerLabels.first()),textFontWidth(julyTr("RULE_STATE_PROCESSING","processing")));
+	stateWidth=qMax(stateWidth,textFontWidth(julyTr("RULE_STATE_PENDING","pending")));
+	stateWidth=qMax(stateWidth,textFontWidth(julyTr("RULE_STATE_DONE","done")));
+	stateWidth=qMax(stateWidth,textFontWidth(julyTr("RULE_STATE_DISABLED","disabled")));
 	stateWidth+=12;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 }

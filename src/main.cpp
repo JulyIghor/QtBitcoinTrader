@@ -74,6 +74,7 @@ bool *depthRefreshBlocked_;
 int *defaultSectionSize_;
 QByteArray *currencySymbol_;
 bool *highResolutionDisplay_;
+bool *supportsUtfUI_;
 
 void pickDefaultLangFile()
 {
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0787");
+	appVerStr_=new QByteArray("1.0791");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -135,6 +136,10 @@ int main(int argc, char *argv[])
 	depthCountLimit_=new int(100);
 	uiUpdateInterval_=new int(100);
 	depthRefreshBlocked_=new bool(false);
+	supportsUtfUI_=new bool(true);
+#ifdef Q_WS_WIN
+	if(QSysInfo::windowsVersion()<=QSysInfo::WV_XP)supportsUtfUI=false;
+#endif
 
 	minTradePrice_=new double(0.01);
 	minTradeVolume_=new double(0.01);
@@ -273,9 +278,11 @@ int main(int argc, char *argv[])
 		for(int n=0;n<currencyList.count();n++)
 		{
 			QStringList currencyName=currencyList.at(n).split("=");
-			if(currencyName.count()!=3)continue;
+			if(currencyName.count()<3)continue;
 			currencyNamesMap->insert(currencyName.at(0).toAscii(),currencyName.at(1).toAscii());
-			currencySignMap->insert(currencyName.at(0).toAscii(),currencyName.at(2).toAscii());
+
+			if(currencyName.count()==4&&!supportsUtfUI)currencySignMap->insert(currencyName.at(0).toAscii(),currencyName.at(3).toAscii());
+			else currencySignMap->insert(currencyName.at(0).toAscii(),currencyName.at(2).toAscii());
 		}
 		if(!QFile::exists(appDataDir+"Language"))QDir().mkpath(appDataDir+"Language");
 		QString langFile=settingsMain.value("LanguageFile","").toString();
@@ -307,19 +314,29 @@ int main(int argc, char *argv[])
 			switch(newPassword.getExchangeId())
 			{
 			case 0:
-				{
+				{//Mt.Gox
 				restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
 				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+				}
 				break;
-				}
 			case 1:
-				{
+				{//BTC-e
 				restSign=newPassword.getRestSign().toAscii();
 				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
 				}
+				break;
 			case 2:
+				{//Bitstamp
 				restSign=newPassword.getRestSign().toAscii();
 				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+				}
+				break;
+			case 3:
+				{//BTC China
+				restSign=newPassword.getRestSign().toAscii();
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+restKey+"\r\n"+restSign.toBase64(),tryPassword.toAscii());
+				}
+				break;
 			default: break;
 			}
 			settings.setValue("EncryptedData/ApiKeySign",QString(encryptedData.toBase64()));

@@ -22,6 +22,7 @@
 #define julyTr julyTranslator->translateString
 #define hmacSha512(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha512(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),64)
 #define hmacSha256(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha256(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),32)
+#define hmacSha1(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha1(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),20)
 #define restKey (*restKey_)
 #define restSign (*restSign_)
 #define mainWindow (*mainWindow_)
@@ -58,12 +59,14 @@
 #define depthCountLimit (*depthCountLimit_)
 #define uiUpdateInterval (*uiUpdateInterval_)
 #define apiDownCount (*apiDownCount_)
-#define textWidth(text) fontMetrics_->width(text)
+#define textFontWidth(text) fontMetrics_->width(text)
 #define groupPriceValue (*groupPriceValue_)
 #define depthRefreshBlocked (*depthRefreshBlocked_)
 #define defaultSectionSize (*defaultSectionSize_)
 #define highResolutionDisplay (*highResolutionDisplay_)
+#define supportsUtfUI (*supportsUtfUI_)
 
+extern bool *supportsUtfUI_;
 extern bool *highResolutionDisplay_;
 extern QByteArray *currencySymbol_;
 extern double *priceMinimumValue_;

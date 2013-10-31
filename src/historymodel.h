@@ -7,27 +7,27 @@
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
 // GNU General Public License version 3
 
-#ifndef DEPTHMODEL_H
-#define DEPTHMODEL_H
+#ifndef HISTORYMODEL_H
+#define HISTORYMODEL_H
 
 #include <QAbstractItemModel>
 #include <QStringList>
+#include "historyitem.h"
 
-class DepthModel : public QAbstractItemModel
+class HistoryModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	int itemsCount(){return volumeList.count();}
-	void calculateSize();
-	void clear();
+	HistoryModel();
+	~HistoryModel();
+	double getRowPrice(int);
+	double getRowVolume(int);
+	int getRowType(int);
+
+	void historyChanged(QList<HistoryItem> *histList);
+
 	void setHorizontalHeaderLabels(QStringList list);
-	void setAsk(bool on){isAsk=on;};
-	DepthModel(bool isAskData=true);
-	~DepthModel();
-	double rowPrice(int row);
-	double rowVolume(int row);
-	double rowSize(int row);
 
 	QModelIndex index(int row, int column, const QModelIndex &parent=QModelIndex()) const;
 	QModelIndex parent(const QModelIndex &index) const;
@@ -38,32 +38,21 @@ public:
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
-
-	void depthUpdateOrder(double price, double volume);
-	void depthFirstOrder(double price, double volume);
-
 private:
-	bool originalIsAsk;
-	bool somethingChanged;
-	double groupedPrice;
-	double groupedVolume;
-
-	int widthPrice;
-	int widthVolume;
-	int widthSize;
-
-	int widthPriceTitle;
-	int widthVolumeTitle;
-	int widthSizeTitle;
-
+	int typeWidth;
+	qint64 lastDate;
 	int columnsCount;
 	QStringList headerLabels;
-	bool isAsk;
-	QList<double> volumeList;
-	QList<double> sizeList;
-	QList<double> priceList;
+	QStringList typesLabels;
 
-protected:
+	QList<qint64> dateList;
+	QList<double> volumeList;
+	QList<double> priceList;
+	QList<QByteArray> symbolList;
+	QList<int> typesList;//0=General, 1=Buy, 2=Sell, 3=Widthdraw, 4=Found
+signals:
+	void accLastSellChanged(QByteArray,double);
+	void accLastBuyChanged(QByteArray,double);
 };
 
-#endif // DEPTHMODEL_H
+#endif // HISTORYMODEL_H

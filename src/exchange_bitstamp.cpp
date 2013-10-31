@@ -42,7 +42,7 @@ void Exchange_Bitstamp::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(this,SIGNAL(ordersChanged(QList<OrderItem> *)),mainClass,SLOT(ordersChanged(QList<OrderItem> *)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
 		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
-		connect(this,SIGNAL(ordersLogChanged(QString)),mainClass,SLOT(ordersLogChanged(QString)));
+		connect(this,SIGNAL(historyChanged(QList<HistoryItem>*)),mainClass,SLOT(historyChanged(QList<HistoryItem>*)));
 		connect(this,SIGNAL(orderCanceled(QByteArray)),mainClass,SLOT(orderCanceled(QByteArray)));
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
@@ -325,7 +325,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 			if(data.startsWith("[{\"date\":"))
 			{
 				QStringList tradeList=QString(data).split("}, {");
-				for(int n=tradeList.count()-1;n>=0;n--)
+				for(int n=0;n<tradeList.count();n++)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
 					QByteArray tradeDate=getMidData("\"date\": \"","\"",&tradeData);
@@ -335,8 +335,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					double doublePrice=getMidData("\"price\": \"","\"",&tradeData).toDouble();
 					if(doubleAmount>0.0&&doublePrice>0.0)
 					{
-						emit addLastTrade(doubleAmount,tradeDate.toLongLong(),doublePrice,"BTCUSD",true);
-						if(n==0&&!nextFetchDate.isEmpty())lastFetchDate=nextFetchDate;
+						emit addLastTrade(doubleAmount,tradeDate.toLongLong(),doublePrice,currencySymbol,true);
+						if(n==tradeList.count()-1&&!nextFetchDate.isEmpty())lastFetchDate=nextFetchDate;
 					}
 					else if(isLogEnabled)logThread->writeLog("Invalid trades fetch data line:"+tradeData);
 				}
@@ -508,7 +508,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					currentOrder.status=1;
 					currentOrder.amount=getMidData("\"amount\": \"","\"",&currentOrderData).toDouble();
 					currentOrder.price=getMidData("\"price\": \"","\"",&currentOrderData).toDouble();
-					currentOrder.symbol="BTCUSD";
+					currentOrder.symbol=currencySymbol;
 					if(currentOrder.isValid())(*orders)<<currentOrder;
 				}
 				emit ordersChanged(orders);
@@ -529,21 +529,15 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 		}
 		break;//cancel_order
 	case 306: //order/buy
-		if(!success)break;
-			  if(data.startsWith("{\"result\":\"success\",\"data\":\""))
-			  {
-				 if(isLogEnabled)logThread->writeLog("Buy OK: "+data);
-			  }
-			  else if(isLogEnabled)logThread->writeLog("Invalid Order Buy Data:"+data);
-			  break;//order/buy
+		if(!success||!isLogEnabled)break;
+			  if(data.startsWith("{\"result\":\"success\",\"data\":\""))logThread->writeLog("Buy OK: "+data);
+			  else logThread->writeLog("Invalid Order Buy Data:"+data);
+		break;//order/buy
 	case 307: //order/sell
-		if(!success)break;
-			  if(data.startsWith("{\"result\":\"success\",\"data\":\""))
-			  {
-				 if(isLogEnabled)logThread->writeLog("Sell OK: "+data);
-			  }
-			  else if(isLogEnabled)logThread->writeLog("Invalid Order Sell Data:"+data);
-			  break;//order/sell
+		if(!success||!isLogEnabled)break;
+			  if(data.startsWith("{\"result\":\"success\",\"data\":\""))logThread->writeLog("Sell OK: "+data);
+			  else logThread->writeLog("Invalid Order Sell Data:"+data);
+		break;//order/sell
 	case 208: //user_transactions
 		if(!success)break;
 		if(data.startsWith("["))
@@ -551,49 +545,47 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 			if(lastHistory!=data)
 			{
 				lastHistory=data;
-				if(data=="[]"){emit ordersLogChanged("");break;}
+				if(data=="[]")break;
 
+				QList<HistoryItem> *historyItems=new QList<HistoryItem>;
 				QString newLog(data);
 				QStringList dataList=newLog.split("}, {");
 				newLog.clear();
 				for(int n=0;n<dataList.count();n++)
 				{
+					HistoryItem currentHistoryItem;
+					currentHistoryItem.type=0;
+					currentHistoryItem.price=0.0;
+					currentHistoryItem.volume=0.0;
+					currentHistoryItem.date=0;
+
 					QByteArray curLog(dataList.at(n).toAscii());
 					int logTypeInt=getMidData("\"type\": ",",",&curLog).toInt();
-					QByteArray usdPrice=getMidData("\"usd\": \"","\"",&curLog);
 					QByteArray btcAmount=getMidData("\"btc\": \"","\"",&curLog);
-					QByteArray feeAmount=getMidData("\"fee\": \"","\"",&curLog);
 					bool negativeAmount=btcAmount.startsWith("-");
 					if(negativeAmount)btcAmount.remove(0,1);
 					QDateTime orderDateTime=QDateTime::fromString(getMidData("\"datetime\": \"","\"",&curLog),"yyyy-MM-dd HH:mm:ss");
 					orderDateTime.setTimeSpec(Qt::UTC);
 
+					currentHistoryItem.price=getMidData("_usd\": \"","\"",&curLog).toDouble();
+					currentHistoryItem.volume=btcAmount.toDouble();
+
 					QByteArray logType;
 
-					if(logTypeInt==0)//Deposit
-					{
-						logType="<font color=\"green\">("+julyTr("LOG_DEPOSIT","Deposit").toAscii()+")</font>";
-					}
+					if(logTypeInt==0)currentHistoryItem.type=4;//Deposit
 					else
-					if(logTypeInt==1)//Withdrawal
-					{
-						logType="<font color=\"brown\">("+julyTr("LOG_WITHDRAW","Withdraw").toAscii()+")</font>";
-					}
+					if(logTypeInt==1)currentHistoryItem.type=5;//Withdrawal
 					else
 					if(logTypeInt==2)//Market Trade
 					{
-						if(negativeAmount)
-						{//Sell
-							logType="<font color=\"red\">("+julyTr("LOG_SOLD","Sold").toAscii()+")</font>";
-						}
-						else
-						{//Buy
-							logType="<font color=\"blue\">("+julyTr("LOG_BOUGHT","Bought").toAscii()+")</font>";
-						}
+						if(negativeAmount)currentHistoryItem.type=1;//Sell
+						else currentHistoryItem.type=2;//Buy
 					}
-					newLog.append(" <font color=\"gray\">"+orderDateTime.toLocalTime().toString(localDateTimeFormat)+"</font>&nbsp;<font color=\"#996515\">"+currencySignMap->value("BTC","$")+btcAmount+"</font> "+logType+"<br>");
+					currentHistoryItem.date=orderDateTime.toTime_t();
+					currentHistoryItem.symbol="BTCUSD";
+					if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 				}
-				emit ordersLogChanged(newLog);
+				emit historyChanged(historyItems);
 			}
 		}
 		else if(isLogEnabled)logThread->writeLog("Invalid History data:"+data.left(200));

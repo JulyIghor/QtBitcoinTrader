@@ -8,7 +8,6 @@
 // GNU General Public License version 3
 
 #include "updaterdialog.h"
-#include <QSslSocket>
 #include <QMessageBox>
 #include "main.h"
 #include "julyrsa.h"
@@ -25,6 +24,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	feedbackMessage=fbMess;
 	stateUpdate=0;
 	ui.setupUi(this);
+	ui.btcLabel11->setPixmap(QPixmap("://Resources/CurrencySign/BTC.png"));
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
 	httpGet=new JulyHttp("raw.github.com",0,this,true,false);
 	timeOutTimer=new QTimer(this);

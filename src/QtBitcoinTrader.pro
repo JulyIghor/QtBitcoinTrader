@@ -41,7 +41,10 @@ HEADERS += aboutdialog.h \
            exchange_bitstamp.h \
            rulesmodel.h \
            orderitem.h \
-           ordersmodel.h
+           ordersmodel.h \
+           historymodel.h \
+           exchange_btcchina.h \
+           historyitem.h
 #
 # Forms
 #
@@ -83,7 +86,10 @@ SOURCES += aboutdialog.cpp \
            depthmodel.cpp \
            exchange_bitstamp.cpp \
            rulesmodel.cpp \
-           ordersmodel.cpp
+           ordersmodel.cpp \
+           historymodel.cpp \
+           exchange_btcchina.cpp \
+           historyitem.cpp
 #
 # Resources
 # 

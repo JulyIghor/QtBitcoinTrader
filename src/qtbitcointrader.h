@@ -25,6 +25,7 @@
 #include "rulesmodel.h"
 #include "ordersmodel.h"
 #include "orderitem.h"
+#include "historymodel.h"
 
 class QtBitcoinTrader : public QDialog
 {
@@ -38,7 +39,7 @@ public:
 
 	double getFeeForUSDDec(double usd);
 	double getFeeForUSDInc(double usd);
-	double getValidDoubleForPercision(const double &val, const double &percision, bool roundUp=true);
+	double getValidDoubleForPercision(const double &val, const int &percision, bool roundUp=true);
 
 	double floatFee;
 	double floatFeeDec;
@@ -68,9 +69,11 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	bool swapedDepth;
 	DepthModel *depthAsksModel;
 	DepthModel *depthBidsModel;
 	TradesModel *tradesModel;
+	HistoryModel *historyModel;
 	OrdersModel *ordersModel;
 	QSortFilterProxyModel *ordersSortModel;
 	void clearDepth();
@@ -147,7 +150,9 @@ private:
 	bool isDetachedRules;
 	bool isDetachedDepth;
 	bool isDetachedCharts;
+	void depthSelectOrder(QModelIndex, bool isSell);
 public slots:
+	void on_swapDepth_clicked();
 	void checkValidOrdersButtons();
 	void cancelOrder(QByteArray);
 	void volumeAmountChanged(double,double);
@@ -165,6 +170,7 @@ public slots:
 	void on_comboBoxGroupByPrice_currentIndexChanged(int);
 	void depthSelectSellOrder(QModelIndex);
 	void depthSelectBuyOrder(QModelIndex);
+	void historyDoubleClicked(QModelIndex);
 	void tradesDoubleClicked(QModelIndex);
 	void setDataPending(bool);
 	void anyDataReceived();
@@ -209,7 +215,7 @@ public slots:
 	void identificationRequired(QString);
 
 	void updateLogTable();
-	void ordersLogChanged(QString);
+	void historyChanged(QList<HistoryItem>*);
 
 	void accLastSellChanged(QByteArray,double);
 	void accLastBuyChanged(QByteArray,double);

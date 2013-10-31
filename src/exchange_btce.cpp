@@ -44,7 +44,7 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 		connect(this,SIGNAL(ordersChanged(QList<OrderItem> *)),mainClass,SLOT(ordersChanged(QList<OrderItem> *)));
 		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
 		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
-		connect(this,SIGNAL(ordersLogChanged(QString)),mainClass,SLOT(ordersLogChanged(QString)));
+		connect(this,SIGNAL(historyChanged(QList<HistoryItem>*)),mainClass,SLOT(historyChanged(QList<HistoryItem>*)));
 		connect(this,SIGNAL(orderCanceled(QByteArray)),mainClass,SLOT(orderCanceled(QByteArray)));
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
@@ -52,8 +52,6 @@ void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	connect(this,SIGNAL(depthFirstOrder(double,double,bool)),mainClass,SLOT(depthFirstOrder(double,double,bool)));
 	connect(this,SIGNAL(depthUpdateOrder(double,double,bool)),mainClass,SLOT(depthUpdateOrder(double,double,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
-	connect(this,SIGNAL(accLastSellChanged(QByteArray,double)),mainClass,SLOT(accLastSellChanged(QByteArray,double)));
-	connect(this,SIGNAL(accLastBuyChanged(QByteArray,double)),mainClass,SLOT(accLastBuyChanged(QByteArray,double)));
 
 	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
 	connect(mainClass,SIGNAL(reloadDepth()),this,SLOT(reloadDepth()));
@@ -416,8 +414,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 		{
 			lastHistory=data;
 			if(!success)break;
-			double lastBuyPrice=0.0;
-			double lastSellPrice=0.0;
+			QList<HistoryItem> *historyItems=new QList<HistoryItem>;
+
 			QString newLog(data);
 			QStringList dataList=newLog.split("\":{\"");
 			if(dataList.count())dataList.removeFirst();
@@ -426,42 +424,31 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			newLog.clear();
 			for(int n=0;n<dataList.count();n++)
 			{
+				HistoryItem currentHistoryItem;
+				currentHistoryItem.type=0;
+				currentHistoryItem.price=0.0;
+				currentHistoryItem.volume=0.0;
+				currentHistoryItem.date=0;
+
 				QByteArray curLog(dataList.at(n).toAscii());
 				QByteArray logType=getMidData("type\":\"","\",\"",&curLog);
-				int logTypeInt=0;
-				if(logType=="sell"){logTypeInt=1;logType="<font color=\"red\">("+julyTr("LOG_SOLD","Sold").toAscii()+")</font>";}
+
+				if(logType=="sell")currentHistoryItem.type=1;
 				else 
-					if(logType=="buy"){logTypeInt=2;logType="<font color=\"blue\">("+julyTr("LOG_BOUGHT","Bought").toAscii()+")</font>";}
-					if(logTypeInt)
-					{
-						QByteArray logValue=getMidData("amount\":",",\"",&curLog);
-						QByteArray logDate=getMidData("timestamp\":","}",&curLog);
-						QByteArray priceValue=getMidData("rate\":",",\"",&curLog);
-						QStringList currencyPair;
-						if(logTypeInt==1||logTypeInt==2)
-						{
-							currencyPair=QString(getMidData("pair\":\"","\",\"",&curLog)).toUpper().split("_");
-							if(currencyPair.count()!=2||currencyPair.first().isEmpty()||currencyPair.last().isEmpty())continue;
-							if(lastSellPrice==0.0&&logTypeInt==1)
-							{
-								lastSellPrice=priceValue.toDouble();
-								emit accLastSellChanged(currencyPair.last().toAscii(),lastSellPrice);
-							}
-							if(lastBuyPrice==0.0&&logTypeInt==2)
-							{
-								lastBuyPrice=priceValue.toDouble();
-								emit accLastBuyChanged(currencyPair.last().toAscii(),lastBuyPrice);
-							}
-						}
-						if(currencyPair.count()!=2)continue;
-						QString priceText="<font color=\"darkgreen\">"+currencySignMap->value(currencyPair.last().toAscii(),"USD")+" "+priceValue+"</font>";
-						newLog.append("<font color=\"gray\">"+QDateTime::fromTime_t(logDate.toUInt()).toString(localDateTimeFormat).toAscii()+"</font>&nbsp;");
-						newLog.append("<font color=\"#996515\">");
-						newLog.append(currencySignMap->value(currencyPair.first().toAscii(),"BTC"));
-						newLog.append(" "+logValue+"</font> "+julyTr("AT"," at %1").arg(priceText).toAscii()+" "+logType+"<br>");
-					}
+				if(logType=="buy")currentHistoryItem.type=2;
+				
+				if(currentHistoryItem.type)
+				{
+					QStringList currencyPair;
+					if(currentHistoryItem.type==1||currentHistoryItem.type==2)
+						currentHistoryItem.symbol=getMidData("pair\":\"","\",\"",&curLog).toUpper().replace("_","");
+					currentHistoryItem.date=getMidData("timestamp\":","}",&curLog).toUInt();
+					currentHistoryItem.price=getMidData("rate\":",",\"",&curLog).toDouble();
+					currentHistoryItem.volume=getMidData("amount\":",",\"",&curLog).toDouble();
+					if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
+				}
 			}
-			emit ordersLogChanged(newLog);
+			emit historyChanged(historyItems);
 		}
 		break;//money/wallet/history
 		}

@@ -1241,7 +1241,7 @@
            <item row="1" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_14">
              <item>
-              <widget class="QLabel" name="label_19">
+              <widget class="QLabel" name="labelAccountVolume">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -1445,7 +1445,7 @@
              <number>2</number>
             </property>
             <property name="minimum">
-             <double>0.010000000000000</double>
+             <double>0.000000000000000</double>
             </property>
             <property name="maximum">
              <double>0.600000000000000</double>
@@ -2175,7 +2175,7 @@
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
              <property name="textElideMode">
-              <enum>Qt::ElideNone</enum>
+              <enum>Qt::ElideLeft</enum>
              </property>
              <property name="verticalScrollMode">
               <enum>QAbstractItemView::ScrollPerPixel</enum>
@@ -2504,45 +2504,59 @@
           </widget>
          </item>
          <item row="1" column="0" colspan="4">
-          <widget class="QTextEdit" name="logTextEdit">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+          <widget class="QTableView" name="tableHistory">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAsNeeded</enum>
            </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>60</height>
-            </size>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
            </property>
-           <property name="undoRedoEnabled">
+           <property name="showDropIndicator" stdset="0">
             <bool>false</bool>
            </property>
-           <property name="lineWrapMode">
-            <enum>QTextEdit::NoWrap</enum>
-           </property>
-           <property name="readOnly">
+           <property name="alternatingRowColors">
             <bool>true</bool>
            </property>
-           <property name="html">
-            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
            </property>
-           <property name="acceptRichText">
-            <bool>true</bool>
+           <property name="textElideMode">
+            <enum>Qt::ElideLeft</enum>
            </property>
+           <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid">
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled">
+            <bool>false</bool>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <attribute name="horizontalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
           </widget>
          </item>
         </layout>
-        <zorder>logTextEdit</zorder>
         <zorder>detachOrdersLog</zorder>
         <zorder>tabOrdersLogOnTop</zorder>
         <zorder>ordersLogInfoPanel</zorder>
+        <zorder>tableHistory</zorder>
        </widget>
        <widget class="QWidget" name="tabRules">
         <attribute name="title">
@@ -2884,7 +2898,7 @@ p, li { white-space: pre-wrap; }
         <attribute name="title">
          <string>Order Book</string>
         </attribute>
-        <layout class="QGridLayout" name="gridLayout_27">
+        <layout class="QGridLayout" name="gridLayout_34">
          <item row="0" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_20">
            <property name="rightMargin">
@@ -2965,38 +2979,23 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="sellOrdersLabel">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <spacer name="horizontalSpacer_8">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
-             <property name="accessibleName">
-              <string>SELL_ORDERS</string>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>20</height>
+              </size>
              </property>
-             <property name="styleSheet">
-              <string notr="true">color: blue;</string>
-             </property>
-             <property name="text">
-              <string>Sell orders</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
+            </spacer>
            </item>
           </layout>
          </item>
-         <item row="0" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_18">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="leftMargin">
-            <number>10</number>
-           </property>
-           <item>
+         <item row="0" column="1" colspan="2">
+          <layout class="QGridLayout" name="gridLayout_27">
+           <item row="0" column="3">
             <widget class="QLabel" name="buyOrdersLabel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -3014,9 +3013,71 @@ p, li { white-space: pre-wrap; }
               <string>Buy orders</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="sellOrdersLabel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="accessibleName">
+              <string>SELL_ORDERS</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: blue;</string>
+             </property>
+             <property name="text">
+              <string>Sell orders</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QToolButton" name="swapDepth">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="QtResource.qrc">
+               <normaloff>:/Resources/Swap.png</normaloff>:/Resources/Swap.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>16</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="3">
+          <layout class="QHBoxLayout" name="horizontalLayout_18">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>10</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item>
             <widget class="QCheckBox" name="tabDepthOnTop">
@@ -3055,7 +3116,93 @@ p, li { white-space: pre-wrap; }
            </item>
           </layout>
          </item>
-         <item row="2" column="0" colspan="2">
+         <item row="1" column="0" colspan="2">
+          <widget class="QTableView" name="depthAsksTable">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="showDropIndicator" stdset="0">
+            <bool>false</bool>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="textElideMode">
+            <enum>Qt::ElideNone</enum>
+           </property>
+           <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid">
+            <bool>false</bool>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <attribute name="horizontalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
+          </widget>
+         </item>
+         <item row="1" column="2" colspan="2">
+          <widget class="QTableView" name="depthBidsTable">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="showDropIndicator" stdset="0">
+            <bool>false</bool>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="textElideMode">
+            <enum>Qt::ElideNone</enum>
+           </property>
+           <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid">
+            <bool>false</bool>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <attribute name="horizontalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderHighlightSections">
+            <bool>false</bool>
+           </attribute>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="4">
           <layout class="QGridLayout" name="gridLayout_31">
            <property name="topMargin">
             <number>3</number>
@@ -3303,92 +3450,6 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
           </layout>
-         </item>
-         <item row="1" column="0">
-          <widget class="QTableView" name="depthAsksTable">
-           <property name="horizontalScrollBarPolicy">
-            <enum>Qt::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="showDropIndicator" stdset="0">
-            <bool>false</bool>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-           <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
-           </property>
-           <property name="textElideMode">
-            <enum>Qt::ElideNone</enum>
-           </property>
-           <property name="verticalScrollMode">
-            <enum>QAbstractItemView::ScrollPerPixel</enum>
-           </property>
-           <property name="horizontalScrollMode">
-            <enum>QAbstractItemView::ScrollPerPixel</enum>
-           </property>
-           <property name="showGrid">
-            <bool>false</bool>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <attribute name="horizontalHeaderHighlightSections">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderHighlightSections">
-            <bool>false</bool>
-           </attribute>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QTableView" name="depthBidsTable">
-           <property name="horizontalScrollBarPolicy">
-            <enum>Qt::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="showDropIndicator" stdset="0">
-            <bool>false</bool>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-           <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
-           </property>
-           <property name="textElideMode">
-            <enum>Qt::ElideNone</enum>
-           </property>
-           <property name="verticalScrollMode">
-            <enum>QAbstractItemView::ScrollPerPixel</enum>
-           </property>
-           <property name="horizontalScrollMode">
-            <enum>QAbstractItemView::ScrollPerPixel</enum>
-           </property>
-           <property name="showGrid">
-            <bool>false</bool>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <attribute name="horizontalHeaderHighlightSections">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
-           <attribute name="verticalHeaderHighlightSections">
-            <bool>false</bool>
-           </attribute>
-          </widget>
          </item>
         </layout>
        </widget>
@@ -3638,6 +3699,9 @@ p, li { white-space: pre-wrap; }
               </property>
               <property name="openExternalLinks">
                <bool>true</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
               </property>
              </widget>
             </item>
@@ -6257,8 +6321,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleAddButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>601</x>
-     <y>381</y>
+     <x>633</x>
+     <y>174</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6273,8 +6337,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemoveAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>984</x>
-     <y>381</y>
+     <x>633</x>
+     <y>174</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6289,8 +6353,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleRemove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1065</x>
-     <y>381</y>
+     <x>633</x>
+     <y>174</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6689,8 +6753,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleEditButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>682</x>
-     <y>381</y>
+     <x>633</x>
+     <y>174</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6705,8 +6769,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleUp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>577</x>
-     <y>151</y>
+     <x>551</x>
+     <y>129</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6721,8 +6785,8 @@ p, li { white-space: pre-wrap; }
    <slot>ruleDown()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>606</x>
-     <y>151</y>
+     <x>563</x>
+     <y>129</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -6737,8 +6801,8 @@ p, li { white-space: pre-wrap; }
    <slot>saveSoundToggles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>548</x>
-     <y>151</y>
+     <x>539</x>
+     <y>129</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -7073,8 +7137,8 @@ p, li { white-space: pre-wrap; }
    <slot>detachRules()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1066</x>
-     <y>152</y>
+     <x>616</x>
+     <y>129</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -7201,8 +7265,8 @@ p, li { white-space: pre-wrap; }
    <slot>tabRulesOnTop(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>985</x>
-     <y>149</y>
+     <x>604</x>
+     <y>129</y>
     </hint>
     <hint type="destinationlabel">
      <x>1192</x>
@@ -7370,6 +7434,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>tableHistory</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>QtBitcoinTraderClass</receiver>
+   <slot>historyDoubleClicked(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>835</x>
+     <y>257</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1175</x>
+     <y>246</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>restKeyChanged(QString)</slot>
@@ -7457,5 +7537,6 @@ p, li { white-space: pre-wrap; }
   <slot>depthSelectSellOrder(QModelIndex)</slot>
   <slot>depthSelectBuyOrder(QModelIndex)</slot>
   <slot>tradesDoubleClicked(QModelIndex)</slot>
+  <slot>historyDoubleClicked(QModelIndex)</slot>
  </slots>
 </ui>
