@@ -11,6 +11,7 @@
 #include "main.h"
 #include <QTimer>
 #include <zlib.h>
+#include <QFile>
 
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
 	: QObject(parent)

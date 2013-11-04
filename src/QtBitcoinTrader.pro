@@ -8,7 +8,14 @@ DEPENDPATH 	+= .
 INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 QT		+= network multimedia
+
+win32 {
+LIBS		+= -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32
+}
+!win32 {
 LIBS		+= -lcrypto -lz
+}
+
 CONFIG		+= qt warn_off release
 
 #

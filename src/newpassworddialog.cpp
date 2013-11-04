@@ -67,8 +67,8 @@ QString NewPasswordDialog::getRestSign()
 
 QString NewPasswordDialog::getRestKey()
 {
-	if(ui.exchangeComboBox->currentIndex()==2)return ui.clientIdLine->text()+":"+ui.restKeyLine->text();//Bitstamp
-	return ui.restKeyLine->text();
+	if(ui.exchangeComboBox->currentIndex()==2)return ui.clientIdLine->text().replace("\n","").replace("\r","")+":"+ui.restKeyLine->text().replace("\n","").replace("\r","");//Bitstamp
+	return ui.restKeyLine->text().replace("\n","").replace("\r","");
 }
 
 void NewPasswordDialog::getApiKeySecretButton()
