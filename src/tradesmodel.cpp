@@ -13,9 +13,10 @@
 TradesModel::TradesModel()
 	: QAbstractItemModel()
 {
+	lastPrecentBids=0.0;
 	lastRemoveDate=0;
 	lastPrice=0.0;
-	columnsCount=4;
+	columnsCount=5;
 	dateWidth=100;
 	typeWidth=100;
 	upArrow=QByteArray::fromBase64("4oaR");
@@ -81,6 +82,7 @@ void TradesModel::removeDataOlderThen(qint64 date)
 	endRemoveRows();
 	if(priceList.count()==0)clear();
 	updateTotalBTC();
+	emit layoutChanged();
 }
 
 QVariant TradesModel::data(const QModelIndex &index, int role) const
@@ -96,7 +98,7 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 	if(role==Qt::TextAlignmentRole)
 	{
 		if(indexColumn==1)return 0x0082;
-		if(indexColumn==3)return 0x0081;
+		if(indexColumn==4)return 0x0081;
 		return 0x0084;
 	}
 
@@ -134,7 +136,8 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 		{//Volume
 			double requestedVolume=volumeList.at(currentRow);
 			if(requestedVolume<=0.0)return QVariant();
-			return currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(requestedVolume);
+			if(role==Qt::ToolTipRole)return currencyASign+QLatin1String(" ")+QString::number(requestedVolume,'f',btcDecimals);
+			return QString::number(requestedVolume,'f',btcDecimals);
 		}
 		break;
 	case 2:
@@ -144,17 +147,23 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 		}
 		break;
 	case 3:
+		{//Direction
+			double requestedPrice=priceList.at(currentRow);
+			if(requestedPrice<=0.0)return QVariant();
+			if(directionList.at(currentRow))
+			{
+				if(directionList.at(currentRow)==1)return upArrow;
+				else return downArrow;
+			}
+			return QVariant();
+		}
+		break;
+	case 4:
 		{//Price
 			double requestedPrice=priceList.at(currentRow);
 			if(requestedPrice<=0.0)return QVariant();
-			QString returnPrice=currencyBSign+QLatin1String(" ")+mainWindow.numFromDouble(requestedPrice);
-			if(directionList.at(currentRow))
-			{
-				if(directionList.at(currentRow)==1)
-					returnPrice.append(QLatin1String(" ")+upArrow);
-				else returnPrice.append(QLatin1String(" ")+downArrow);
-			}
-			return returnPrice;
+			if(role==Qt::ToolTipRole)return currencyBSign+QLatin1String(" ")+mainWindow.numFromDouble(requestedPrice);
+			return mainWindow.numFromDouble(requestedPrice);
 		}
 		break;
 	default: break;
@@ -168,7 +177,7 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
 	if(role==Qt::TextAlignmentRole)
 	{
 		if(section==1)return 0x0082;
-		if(section==3)return 0x0081;
+		if(section==4)return 0x0081;
 		return 0x0084;
 	}
 
@@ -185,13 +194,30 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
 	if(role!=Qt::DisplayRole)return QVariant();
 	if(headerLabels.count()!=columnsCount)return QVariant();
 
+	switch(section)
+	{
+	case 1: return headerLabels.at(section)+QLatin1String(" ")+currencyASign;
+	case 4: return headerLabels.at(section)+QLatin1String(" ")+currencyBSign;
+	default: break;
+	}
 	return headerLabels.at(section);
 }
 
 void TradesModel::updateTotalBTC()
 {
 	double summ=0.0;
-	foreach(double vol, volumeList)summ+=vol;
+	double bidsSumm=0.0;
+	for(int n=0;n<volumeList.count();n++)
+	{
+		summ+=volumeList.at(n);
+		if(typesList.at(n)==false)bidsSumm+=volumeList.at(n);
+	}
+	bidsSumm=100.0*bidsSumm/summ;
+	if(bidsSumm!=lastPrecentBids)
+	{
+		lastPrecentBids=bidsSumm;
+		emit precentBidsChanged(lastPrecentBids);
+	}
 	emit trades10MinVolumeChanged(summ);
 }
 
@@ -210,6 +236,7 @@ void TradesModel::setHorizontalHeaderLabels(QStringList list)
 	typeWidth=qMax(qMax(textFontWidth(textAsk),textFontWidth(textBid)),textFontWidth(list.at(2)))+10;
 
 	headerLabels=list;
+	headerLabels[3]=upArrow+downArrow;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 	emit layoutChanged();
 }

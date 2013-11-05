@@ -47,6 +47,7 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 	delete histList;
 	if(maxListDate>lastDate)lastDate=maxListDate;
 	endInsertRows();
+	emit layoutChanged();
 }
 
 double HistoryModel::getRowPrice(int row)
@@ -124,7 +125,7 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 		{//Volume
 			double requestedVolume=volumeList.at(currentRow);
 			if(requestedVolume<=0.0)return QVariant();
-			return currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(requestedVolume);
+			return currencySignMap->value(symbolList.at(currentRow).left(3),"BTC")+QLatin1String(" ")+QString::number(requestedVolume,'f',btcDecimals);
 		}
 		break;
 	case 2://Type
@@ -135,7 +136,7 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 		{//Price
 			double requestedPrice=priceList.at(currentRow);
 			if(requestedPrice<=0.0)return QVariant();
-			QString returnPrice=currencyBSign+QLatin1String(" ")+mainWindow.numFromDouble(requestedPrice);
+			QString returnPrice=currencySignMap->value(symbolList.at(currentRow).right(3),"USD")+QLatin1String(" ")+mainWindow.numFromDouble(requestedPrice);
 			return returnPrice;
 		}
 		break;

@@ -51,7 +51,9 @@ HEADERS += aboutdialog.h \
            ordersmodel.h \
            historymodel.h \
            exchange_btcchina.h \
-           historyitem.h
+           historyitem.h \
+           exchange.h \
+           debugviewer.h
 #
 # Forms
 #
@@ -63,7 +65,8 @@ FORMS += addrulewindow.ui \
          translationabout.ui \
          translationdialog.ui \
          updaterdialog.ui \
-         datafolderchusedialog.ui
+         datafolderchusedialog.ui \
+         debugviewer.ui
 #
 # Sources
 #
@@ -95,7 +98,9 @@ SOURCES += aboutdialog.cpp \
            rulesmodel.cpp \
            ordersmodel.cpp \
            historymodel.cpp \
-           exchange_btcchina.cpp
+           exchange_btcchina.cpp \
+           exchange.cpp \
+           debugviewer.cpp
 #
 # Resources
 # 

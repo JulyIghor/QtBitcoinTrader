@@ -27,6 +27,7 @@
 #include <QDateTime>
 #include "datafolderchusedialog.h"
 
+int *debugLevel_;
 QByteArray *appDataDir_;
 QMap<QByteArray,QByteArray> *currencySignMap;
 QMap<QByteArray,QByteArray> *currencyNamesMap;
@@ -41,7 +42,6 @@ QByteArray *restSign_;
 LogThread *logThread;
 QtBitcoinTrader *mainWindow_;
 quint64 *nonce_;
-bool *logEnabled_;
 QString *iniFileName_;
 QString *logFileName_;
 double *appVerReal_;
@@ -57,6 +57,8 @@ QString *exchangeName_;
 QByteArray *currencyRequest_;
 int *btcDecimals_;
 int *usdDecimals_;
+int *btcBalanceDecimals_;
+int *usdBalanceDecimals_;
 int *priceDecimals_;
 double *priceMinimumValue_;
 double *minTradePrice_;
@@ -66,6 +68,7 @@ int *httpRequestTimeout_;
 bool *httpSplitPackets_;
 int *httpRetryCount_;
 int *depthCountLimit_;
+QByteArray *depthCountLimitStr_;
 int *uiUpdateInterval_;
 int *apiDownCount_;
 QFontMetrics *fontMetrics_;
@@ -105,7 +108,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0791");
+	appVerStr_=new QByteArray("1.0792");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
@@ -131,12 +134,16 @@ int main(int argc, char *argv[])
 	exchangeName_=new QString("Mt.Gox");
 	btcDecimals_=new int(8);
 	usdDecimals_=new int(5);
+	btcBalanceDecimals_=new int(8);
+	usdBalanceDecimals_=new int(5);
 	priceDecimals_=new int(5);
 	priceMinimumValue_=new double(0.00001);
 	depthCountLimit_=new int(100);
+	depthCountLimitStr_=new QByteArray("100");
 	uiUpdateInterval_=new int(100);
 	depthRefreshBlocked_=new bool(false);
 	supportsUtfUI_=new bool(true);
+	debugLevel_=new int(0);
 #ifdef Q_WS_WIN
 	if(QSysInfo::windowsVersion()<=QSysInfo::WV_XP)supportsUtfUI=false;
 #endif
@@ -147,7 +154,6 @@ int main(int argc, char *argv[])
 	httpRequestTimeout_=new int(5000);
 	httpSplitPackets_=new bool(true);
 	httpRetryCount_=new int(5);
-	logEnabled_=new bool(false);
 	apiDownCount_=new int(0);
 	groupPriceValue_=new double(0.0);
 	defaultSectionSize_=new int(26);
@@ -401,13 +407,13 @@ int main(int argc, char *argv[])
 	}
 
 	QSettings iniSettings(iniFileName,QSettings::IniFormat);
-	isLogEnabled=iniSettings.value("Debug/LogEnabled",false).toBool();
-	iniSettings.setValue("Debug/LogEnabled",isLogEnabled);
+	if(iniSettings.value("Debug/LogEnabled",false).toBool())debugLevel=1;
+	iniSettings.setValue("Debug/LogEnabled",debugLevel>0);
 	currencyASign=currencySignMap->value("BTC","BTC");
 	currencyBStr=iniSettings.value("Profile/Currency","USD").toString().toAscii();
 	currencyBSign=currencySignMap->value(currencyBStr,"$");
 
-	if(isLogEnabled)
+	if(debugLevel)
 	{
 		logThread=new LogThread;
 		logThread->writeLog("Proxy settings: "+proxy.hostName().toAscii()+":"+QByteArray::number(proxy.port())+" "+proxy.user().toAscii());

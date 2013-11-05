@@ -41,6 +41,7 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
+	double lastPrecentBids;
 	qint64 lastRemoveDate;
 	void removeFirst();
 	QString textBid;
@@ -56,12 +57,15 @@ private:
 
 	QStringList headerLabels;
 
+	QHash<qint64,int> colorMap;
+
 	QList<qint64> dateList;
 	QList<double> volumeList;
 	QList<double> priceList;
 	QList<bool> typesList;
 	QList<int> directionList;
 signals:
+	void precentBidsChanged(double);
 	void trades10MinVolumeChanged(double);
 };
 

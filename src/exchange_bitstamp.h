@@ -10,24 +10,21 @@
 #ifndef EXCHANGE_BITSTAMP_H
 #define EXCHANGE_BITSTAMP_H
 
-#include <QThread>
-#include <QTimer>
-#include <QTime>
-#include "qtbitcointrader.h"
-#include "julyhttp.h"
+#include "exchange.h"
 
-class Exchange_Bitstamp : public QThread
+class Exchange_Bitstamp : public Exchange
 {
 	Q_OBJECT
 
 public:
-	void setupApi(QtBitcoinTrader *, bool tickerOnly=false);
 	Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey);
 	~Exchange_Bitstamp();
 
 private:
+	void depthUpdateOrder(double,double,bool);
+	QList<DepthItem> *depthAsks;
+	QList<DepthItem> *depthBids;
 	QList<QByteArray> cancelingOrderIDs;
-	bool forceDepthLoad;
 	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
 	QMap<double,double> lastDepthAsksMap;
 	QMap<double,double> lastDepthBidsMap;
@@ -56,11 +53,8 @@ private:
 	double lastFee;
 
 	QString apiLogin;
-	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	int apiDownCounter;
 	int secondPart;
-	QByteArray privateRestSign;
-	QByteArray privateRestKey;
 	QByteArray privateClientId;
 	quint32 privateNonce;
 
@@ -68,37 +62,6 @@ private:
 
 	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 	QTimer *secondTimer;
-	void run();
-signals:
-	void depthFirstOrder(double,double,bool);
-	void depthUpdateOrder(double,double,bool);
-
-	void addLastTrade(double,qint64,double,QByteArray,bool);
-
-	void ordersChanged(QList<OrderItem> *);
-	void showErrorMessage(QString);
-
-	void historyChanged(QList<HistoryItem>*);
-
-	void ordersIsEmpty();
-	void orderCanceled(QByteArray);
-
-	void firstTicker();
-	void tickerHighChanged(double);
-	void tickerLowChanged(double);
-	void tickerSellChanged(double);
-	void tickerLastChanged(double);
-	void tickerBuyChanged(double);
-	void tickerVolumeChanged(double);
-
-	void accVolumeChanged(double);
-	void accFeeChanged(double);
-	void accBtcBalanceChanged(double);
-	void accUsdBalanceChanged(double);
-	void loginChanged(QString);
-	void apiDownChanged(bool);
-	void apiLagChanged(double);
-	void softLagChanged(int);
 private slots:
 	void reloadDepth();
 	void sslErrors(const QList<QSslError> &);

@@ -4,6 +4,7 @@
 OrdersModel::OrdersModel()
 	: QAbstractItemModel()
 {
+	checkDuplicatedOID=false;
 	haveOrders=false;
 	columnsCount=7;
 	dateWidth=100;
@@ -45,6 +46,7 @@ void OrdersModel::clear()
 	itemSignList.clear();
 	priceSignList.clear();
 	haveOrders=false;
+	if(checkDuplicatedOID)oidMapForCheckingDuplicates.clear();
 
 	emit volumeAmountChanged(0.0, 0.0);
 	endResetModel();
@@ -74,6 +76,7 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 		if(orderSymbol.endsWith(currencyBStr)&&!isAsk)amountTotal+=orders->at(n).amount*orders->at(n).price;
 
 		existingOids.insert(orders->at(n).oid,true);
+		if(checkDuplicatedOID)(*orders)[n].date=oidMapForCheckingDuplicates.value(orders->at(n).oid,orders->at(n).date);
 
 		int currentIndex=qLowerBound(dateList.begin(),dateList.end(),orders->at(n).date)-dateList.begin();
 		bool matchListRang=currentIndex>-1&&dateList.count()>currentIndex;
@@ -104,6 +107,9 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 			priceList.insert(currentIndex,orders->at(n).price);
 			symbolList.insert(currentIndex,orders->at(n).symbol);
 
+			if(checkDuplicatedOID)
+				oidMapForCheckingDuplicates.insert(orders->at(n).oid,orders->at(n).date);
+
 			itemSignList.insert(currentIndex,currencySignMap->value(orders->at(n).symbol.left(3),"$"));
 			priceSignList.insert(currentIndex,currencySignMap->value(orders->at(n).symbol.right(3),"$"));
 			
@@ -115,6 +121,7 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 		if(existingOids.value(oidList.at(n),false)==false)
 		{
 			beginRemoveRows(QModelIndex(), n, n);
+			if(checkDuplicatedOID)oidMapForCheckingDuplicates.remove(oidList.at(n));
 			oidList.removeAt(n);
 			dateList.removeAt(n);
 			typesList.removeAt(n);
@@ -137,6 +144,7 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 	}
 	countWidth=textFontWidth(QString::number(oidList.count()+1))+6;
 	emit volumeAmountChanged(volumeTotal, amountTotal);
+	emit layoutChanged();
 }
 
 QVariant OrdersModel::data(const QModelIndex &index, int role) const
@@ -184,6 +192,7 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 	{
 	case -1://Counter
 		{
+			if(role==Qt::ToolTipRole)return oidList.at(currentRow);
 			return oidList.count()-currentRow;
 		}
 		break;

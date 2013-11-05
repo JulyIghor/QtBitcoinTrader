@@ -26,7 +26,6 @@
 #define restKey (*restKey_)
 #define restSign (*restSign_)
 #define mainWindow (*mainWindow_)
-#define isLogEnabled (*logEnabled_)
 #define iniFileName (*iniFileName_)
 #define logFileName (*logFileName_)
 #define appVerReal (*appVerReal_)
@@ -48,6 +47,8 @@
 #define exchangeName (*exchangeName_)
 #define btcDecimals (*btcDecimals_)
 #define usdDecimals (*usdDecimals_)
+#define btcBalanceDecimals (*btcBalanceDecimals_)
+#define usdBalanceDecimals (*usdBalanceDecimals_)
 #define priceDecimals (*priceDecimals_)
 #define priceMinimumValue (*priceMinimumValue_)
 #define minTradeVolume (*minTradeVolume_)
@@ -57,6 +58,7 @@
 #define httpSplitPackets (*httpSplitPackets_)
 #define httpRetryCount (*httpRetryCount_)
 #define depthCountLimit (*depthCountLimit_)
+#define depthCountLimitStr (*depthCountLimitStr_)
 #define uiUpdateInterval (*uiUpdateInterval_)
 #define apiDownCount (*apiDownCount_)
 #define textFontWidth(text) fontMetrics_->width(text)
@@ -65,7 +67,9 @@
 #define defaultSectionSize (*defaultSectionSize_)
 #define highResolutionDisplay (*highResolutionDisplay_)
 #define supportsUtfUI (*supportsUtfUI_)
+#define debugLevel (*debugLevel_)
 
+extern int *debugLevel_;//0: Disabled; 1: Debug; 2: Log
 extern bool *supportsUtfUI_;
 extern bool *highResolutionDisplay_;
 extern QByteArray *currencySymbol_;
@@ -76,6 +80,7 @@ extern double *groupPriceValue_;
 extern QFontMetrics *fontMetrics_;
 extern int *apiDownCount_;
 extern int *uiUpdateInterval_;
+extern QByteArray *depthCountLimitStr_;
 extern int *depthCountLimit_;
 extern int *httpRetryCount_ ;
 extern bool *httpSplitPackets_;
@@ -85,6 +90,8 @@ extern double *minTradeVolume_;
 extern double *minTradePrice_;
 extern int *btcDecimals_;
 extern int *usdDecimals_;
+extern int *btcBalanceDecimals_;
+extern int *usdBalanceDecimals_;
 extern int *priceDecimals_;
 extern QByteArray *currencyRequest_;
 extern QString *exchangeName_;
@@ -104,7 +111,6 @@ extern LogThread *logThread;
 extern QByteArray *restKey_;
 extern QByteArray *restSign_;
 extern QtBitcoinTrader *mainWindow_;
-extern bool *logEnabled_;
 extern QString *logFileName_;
 extern QString *iniFileName_;
 extern double *appVerReal_;

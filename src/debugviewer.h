@@ -7,14 +7,29 @@
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
 // GNU General Public License version 3
 
-#ifndef DEPTHITEM_H
-#define DEPTHITEM_H
+#ifndef DEBUGVIEWER_H
+#define DEBUGVIEWER_H
 
-struct DepthItem 
+#include <QWidget>
+#include <QTimer>
+#include "ui_debugviewer.h"
+
+class DebugViewer : public QWidget
 {
-	double price;
-	double volume;
-	bool isValid(){return price>=0.0&&volume>=0.0;}
+	Q_OBJECT
+
+public:
+	DebugViewer();
+	~DebugViewer();
+
+private:
+	QTimer secondTimer;
+	QByteArray buffer;
+	Ui::DebugViewer ui;
+private slots:
+	void secondSlot();
+	void sendLogSlot(QByteArray);
+	void on_radioDebug_toggled(bool);
 };
 
-#endif // DEPTHITEM_H
+#endif // DEBUGVIEWER_H

@@ -1,8 +1,8 @@
 IDI_ICON1 ICON "Icon.ico"
 
 1 VERSIONINFO
- FILEVERSION 1,0,7,81
- PRODUCTVERSION 1,0,7,81
+ FILEVERSION 1,0,7,92
+ PRODUCTVERSION 1,0,7,92
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -19,12 +19,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GigaSOFT Group"
             VALUE "FileDescription", "Qt Bitcoin Trader"
-            VALUE "FileVersion", "1.07.81"
+            VALUE "FileVersion", "1.07.92"
             VALUE "InternalName", "Qt Bitcoin Trader"
             VALUE "LegalCopyright", "Copyright (C) 2013 July IGHOR"
             VALUE "OriginalFilename", "QtBitcoinTrader.exe"
             VALUE "ProductName", "Qt Bitcoin Trader Application"
-            VALUE "ProductVersion", "1.07.81"
+            VALUE "ProductVersion", "1.07.92"
         END
     END
 	BLOCK "VarFileInfo"

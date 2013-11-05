@@ -49,10 +49,18 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 	if(!index.isValid())return QVariant();
 	int currentRow=index.row();
 
-	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole)return QVariant();
+	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
 
 	int indexColumn=index.column();
 	if(isAsk)indexColumn=columnsCount-indexColumn-1;
+
+	if(role==Qt::TextAlignmentRole)
+	{
+		if(indexColumn==0)return 0x0081;
+		if(indexColumn==1)return 0x0082;
+		if(indexColumn==2)return 0x0082;
+		return 0x0084;
+	}
 
 	if(grouped&&currentRow<2)
 	{
@@ -61,8 +69,14 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 		QString firstRowText;
 		switch(indexColumn)
 		{
-		case 0: firstRowText=currencyBSign+QLatin1String(" ")+mainWindow.numFromDouble(groupedPrice); break; //Price
-		case 1: firstRowText=currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(groupedVolume); break; //Volume
+		case 0: //Price
+				firstRowText=mainWindow.numFromDouble(groupedPrice);
+				if(role==Qt::ToolTipRole)firstRowText.prepend(currencyBSign+QLatin1String(" "));	
+				break; 
+		case 1: //Volume
+				firstRowText=QString::number(groupedVolume,'f',btcDecimals);  
+				if(role==Qt::ToolTipRole)firstRowText.prepend(currencyASign+QLatin1String(" "));
+				break;
 		}
 		if(firstRowText.isEmpty())return QVariant();
 		return firstRowText;
@@ -93,19 +107,24 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 
 	switch(indexColumn)
 	{
-	case 0:	returnText=currencyBSign+QLatin1String(" ")+mainWindow.numFromDouble(requestedPrice); break;//Price
+	case 0://Price
+		returnText=mainWindow.numFromDouble(requestedPrice);
+		if(role==Qt::ToolTipRole)returnText.prepend(currencyBSign+QLatin1String(" "));
+		break;
 	case 1:
 		{//Volume
 		double requestedVolume=volumeList.at(currentRow);
 		if(requestedVolume<=0.0)return QVariant();
-		returnText=currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(requestedVolume);
+		returnText=QString::number(requestedVolume,'f',btcDecimals);
+		if(role==Qt::ToolTipRole)returnText.prepend(currencyASign+QLatin1String(" "));
 		}
 		break;
 	case 2:
 		{//Size
 		double requestedSize=sizeList.at(currentRow);
 		if(requestedSize<=0.0)return QVariant();
-		returnText=currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(requestedSize);
+		returnText=QString::number(requestedSize,'f',btcDecimals);
+		if(role==Qt::ToolTipRole)returnText.prepend(currencyASign+QLatin1String(" "));
 		}
 		break;
 	default: break;
@@ -128,30 +147,35 @@ void DepthModel::calculateSize()
 	{
 		for(int n=0;n<priceList.count();n++)
 		{
-			totalSize+=volumeList.at(n);
-			sizeList[n]=totalSize;
+			int currentRow=n;
+			if(!originalIsAsk)currentRow=priceList.count()-currentRow-1;
 
-			maxPrice=qMax(maxPrice,priceList.at(n));
-			maxVolume=qMax(maxVolume,volumeList.at(n));
-			maxTotal=qMax(maxTotal,sizeList.at(n));
+			totalSize+=volumeList.at(currentRow);
+			sizeList[currentRow]=totalSize;
+
+			maxPrice=qMax(maxPrice,priceList.at(currentRow));
+			maxVolume=qMax(maxVolume,volumeList.at(currentRow));
+			maxTotal=qMax(maxTotal,sizeList.at(currentRow));
 		}
 	}
 	else
 	{
 		for(int n=priceList.count()-1;n>=0;n--)
 		{
-			totalSize+=volumeList.at(n);
-			sizeList[n]=totalSize;
+			int currentRow=n;
+			if(originalIsAsk)currentRow=priceList.count()-currentRow-1;
+			totalSize+=volumeList.at(currentRow);
+			sizeList[currentRow]=totalSize;
 
-			maxPrice=qMax(maxPrice,priceList.at(n));
-			maxVolume=qMax(maxVolume,volumeList.at(n));
-			maxTotal=qMax(maxTotal,sizeList.at(n));
+			maxPrice=qMax(maxPrice,priceList.at(currentRow));
+			maxVolume=qMax(maxVolume,volumeList.at(currentRow));
+			maxTotal=qMax(maxTotal,sizeList.at(currentRow));
 		}
 	}
 
-	widthPrice=10+textFontWidth(currencyBSign+QLatin1String(" ")+mainWindow.numFromDouble(maxPrice,priceDecimals));
-	widthVolume=10+textFontWidth(currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(maxVolume,btcDecimals));
-	widthSize=10+textFontWidth(currencyASign+QLatin1String(" ")+mainWindow.numFromDouble(maxTotal,usdDecimals));
+	widthPrice=10+textFontWidth(mainWindow.numFromDouble(maxPrice,priceDecimals));
+	widthVolume=10+textFontWidth(QString::number(maxVolume,'f',btcDecimals));
+	widthSize=10+textFontWidth(QString::number(maxTotal,'f',btcDecimals));
 	
 	widthPrice=qMax(widthPrice,widthPriceTitle);
 	widthVolume=qMax(widthVolume,widthVolumeTitle);
@@ -160,6 +184,7 @@ void DepthModel::calculateSize()
 	int sizeColumn=2;
 	if(isAsk)sizeColumn=1;
 	emit dataChanged(index(0,sizeColumn),index(priceList.count(),sizeColumn));
+	emit layoutChanged();
 }
 
 QModelIndex DepthModel::index(int row, int column, const QModelIndex &parent) const
@@ -202,6 +227,15 @@ QVariant DepthModel::headerData(int section, Qt::Orientation orientation, int ro
 	if(isAsk)indexColumn=columnsCount-indexColumn-1;
 
 	if(orientation!=Qt::Horizontal)return QVariant();
+
+	if(role==Qt::TextAlignmentRole)
+	{
+		if(indexColumn==0)return 0x0081;
+		if(indexColumn==1)return 0x0082;
+		if(indexColumn==2)return 0x0082;
+		return 0x0084;
+	}
+
 	if(role==Qt::SizeHintRole)
 	{
 		switch(indexColumn)
@@ -216,6 +250,13 @@ QVariant DepthModel::headerData(int section, Qt::Orientation orientation, int ro
 	if(role!=Qt::DisplayRole)return QVariant();
 	if(headerLabels.count()!=columnsCount)return QVariant();
 
+	switch(indexColumn)
+	{
+	case 0: return headerLabels.at(indexColumn)+QLatin1String(" ")+currencyBSign;
+	case 1: return headerLabels.at(indexColumn)+QLatin1String(" ")+currencyASign;
+	case 2: return headerLabels.at(indexColumn)+QLatin1String(" ")+currencyASign;
+	}
+
 	return headerLabels.at(indexColumn);
 }
 
@@ -223,9 +264,9 @@ void DepthModel::setHorizontalHeaderLabels(QStringList list)
 {
 	if(list.count()!=columnsCount)return;
 	headerLabels=list;
-	widthPriceTitle=textFontWidth(headerLabels.at(0))+10;
-	widthVolumeTitle=textFontWidth(headerLabels.at(1))+10;
-	widthSizeTitle=textFontWidth(headerLabels.at(2))+10;
+	widthPriceTitle=textFontWidth(headerLabels.at(0))+20;
+	widthVolumeTitle=textFontWidth(headerLabels.at(1))+20;
+	widthSizeTitle=textFontWidth(headerLabels.at(2))+20;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 	emit layoutChanged();
 }
@@ -240,6 +281,14 @@ void DepthModel::depthFirstOrder(double price, double volume)
 		emit dataChanged(index(0,2),index(0,3));
 	else 
 		emit dataChanged(index(0,0),index(0,1));
+}
+
+void DepthModel::depthUpdateOrders(QList<DepthItem> *items)
+{
+	if(items==0)return;
+	for(int n=0;n<items->count();n++)depthUpdateOrder(items->at(n).price,items->at(n).volume);
+	delete items;
+	calculateSize();
 }
 
 void DepthModel::depthUpdateOrder(double price, double volume)

@@ -13,8 +13,11 @@
 #include <QDateTime>
 
 Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
-	: QThread()
+	: Exchange()
 {
+	exchangeID="BTC-e";
+	depthAsks=0;
+	depthBids=0;
 	forceDepthLoad=false;
 	lastPriceDate=0;
 	julyHttp=0;
@@ -30,47 +33,6 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 
 Exchange_BTCe::~Exchange_BTCe()
 {
-	if(isLogEnabled)logThread->writeLog("BTC-E API Thread Deleted");
-}
-
-void Exchange_BTCe::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
-{
-	tickerOnly=tickOnly;
-	if(!tickerOnly)
-	{
-		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
-		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
-		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
-		connect(this,SIGNAL(ordersChanged(QList<OrderItem> *)),mainClass,SLOT(ordersChanged(QList<OrderItem> *)));
-		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
-		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
-		connect(this,SIGNAL(historyChanged(QList<HistoryItem>*)),mainClass,SLOT(historyChanged(QList<HistoryItem>*)));
-		connect(this,SIGNAL(orderCanceled(QByteArray)),mainClass,SLOT(orderCanceled(QByteArray)));
-		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
-	}
-
-	connect(this,SIGNAL(depthFirstOrder(double,double,bool)),mainClass,SLOT(depthFirstOrder(double,double,bool)));
-	connect(this,SIGNAL(depthUpdateOrder(double,double,bool)),mainClass,SLOT(depthUpdateOrder(double,double,bool)));
-	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
-
-	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
-	connect(mainClass,SIGNAL(reloadDepth()),this,SLOT(reloadDepth()));
-	connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));
-	connect(this,SIGNAL(apiLagChanged(double)),mainClass->ui.lagValue,SLOT(setValue(double)));
-	connect(this,SIGNAL(accFeeChanged(double)),mainClass->ui.accountFee,SLOT(setValue(double)));
-	connect(this,SIGNAL(accBtcBalanceChanged(double)),mainClass->ui.accountBTC,SLOT(setValue(double)));
-	connect(this,SIGNAL(accUsdBalanceChanged(double)),mainClass->ui.accountUSD,SLOT(setValue(double)));
-
-	connect(this,SIGNAL(tickerHighChanged(double)),mainClass->ui.marketHigh,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerLowChanged(double)),mainClass->ui.marketLow,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerSellChanged(double)),mainClass->ui.marketSell,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerLastChanged(double)),mainClass->ui.marketLast,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerBuyChanged(double)),mainClass->ui.marketBuy,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerVolumeChanged(double)),mainClass->ui.marketVolume,SLOT(setValue(double)));
-
-	connect(this,SIGNAL(addLastTrade(double, qint64, double, QByteArray, bool)),mainClass,SLOT(addLastTrade(double, qint64, double, QByteArray, bool)));
-
-	start();
 }
 
 void Exchange_BTCe::clearVariables()
@@ -102,25 +64,12 @@ void Exchange_BTCe::clearValues()
 	if(julyHttp)julyHttp->clearPendingData();
 }
 
-QByteArray Exchange_BTCe::getMidData(QString a, QString b,QByteArray *data)
-{
-	QByteArray rez;
-	if(b.isEmpty())b=QLatin1String("\",");
-	int startPos=data->indexOf(a,0);
-	if(startPos>-1)
-	{
-		int endPos=data->indexOf(b,startPos+a.length());
-		if(endPos>-1)rez=data->mid(startPos+a.length(),endPos-startPos-a.length());
-	}
-	return rez;
-}
-
 void Exchange_BTCe::reloadDepth()
 {
 	lastDepthBidsMap.clear();
 	lastDepthAsksMap.clear();
 	lastDepthData.clear();
-	forceDepthLoad=true;
+	Exchange::reloadDepth();
 }
 
 void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
@@ -227,10 +176,14 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	case 111: //depth
 		if(data.startsWith("{\"asks\":["))
 		{
-			emit depthUpdateOrder(0.0,0.0,true);
+			emit depthRequestReceived();
+
 			if(lastDepthData!=data)
 			{
 				lastDepthData=data;
+				depthAsks=new QList<DepthItem>;
+				depthBids=new QList<DepthItem>;
+
 				QMap<double,double> currentAsksMap;
 				QStringList asksList=QString(getMidData("asks\":[[","]]",&data)).split("],[");
 				double groupedPrice=0.0;
@@ -274,7 +227,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				}
 				QList<double> currentAsksList=lastDepthAsksMap.keys();
 				for(int n=0;n<currentAsksList.count();n++)
-					if(currentAsksMap.value(currentAsksList.at(n),0)==0)emit depthUpdateOrder(currentAsksList.at(n),0.0,true);
+					if(currentAsksMap.value(currentAsksList.at(n),0)==0)depthUpdateOrder(currentAsksList.at(n),0.0,true);
 				lastDepthAsksMap=currentAsksMap;
 
 				QMap<double,double> currentBidsMap;
@@ -319,11 +272,15 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				}
 				QList<double> currentBidsList=lastDepthBidsMap.keys();
 				for(int n=0;n<currentBidsList.count();n++)
-					if(currentBidsMap.value(currentBidsList.at(n),0)==0)emit depthUpdateOrder(currentBidsList.at(n),0.0,false);
+					if(currentBidsMap.value(currentBidsList.at(n),0)==0)depthUpdateOrder(currentBidsList.at(n),0.0,false);
 				lastDepthBidsMap=currentBidsMap;
+
+				emit depthSubmitOrders(depthAsks, depthBids);
+				depthAsks=0;
+				depthBids=0;
 			}
 		}
-		else if(isLogEnabled)logThread->writeLog("Invalid depth data:"+data);
+		else if(debugLevel)logThread->writeLog("Invalid depth data:"+data,2);
 		break;
 	case 202: //info
 		{
@@ -405,8 +362,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(!oid.isEmpty())emit orderCanceled(oid);
 		}
 		break;//order/cancel
-	case 306: if(isLogEnabled)logThread->writeLog("Buy OK: "+data);break;//order/buy
-	case 307: if(isLogEnabled)logThread->writeLog("Sell OK: "+data);break;//order/sell
+	case 306: if(debugLevel)logThread->writeLog("Buy OK: "+data,2);break;//order/buy
+	case 307: if(debugLevel)logThread->writeLog("Sell OK: "+data,2);break;//order/sell
 	case 208: ///history
 		{
 		bool isEmptyOrders=!success&&errorString==QLatin1String("no trades");if(isEmptyOrders)success=true;
@@ -460,12 +417,34 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	{
 		errorCount++;
 		if(errorCount<3)return;
-		if(isLogEnabled)logThread->writeLog("API error: "+errorString.toAscii());
+		if(debugLevel)logThread->writeLog("API error: "+errorString.toAscii()+" ReqType:"+QByteArray::number(reqType),2);
 		if(errorString.isEmpty())return;
 		if(errorString==QLatin1String("no orders"))return;
 		if(reqType<300)emit showErrorMessage("I:>"+errorString);
 	}
 	else errorCount=0;
+}
+
+void Exchange_BTCe::depthUpdateOrder(double price, double amount, bool isAsk)
+{
+	if(isAsk)
+	{
+		if(depthAsks==0)return;
+		DepthItem newItem;
+		newItem.price=price;
+		newItem.volume=amount;
+		if(newItem.isValid())
+			(*depthAsks)<<newItem;
+	}
+	else
+	{
+		if(depthBids==0)return;
+		DepthItem newItem;
+		newItem.price=price;
+		newItem.volume=amount;
+		if(newItem.isValid())
+			(*depthBids)<<newItem;
+	}
 }
 
 void Exchange_BTCe::depthSubmitOrder(QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk)
@@ -476,27 +455,14 @@ void Exchange_BTCe::depthSubmitOrder(QMap<double,double> *currentMap ,double pri
 	{
 		(*currentMap)[priceDouble]=amount;
 		if(lastDepthAsksMap.value(priceDouble,0.0)!=amount)
-			emit depthUpdateOrder(priceDouble,amount,true);
+			depthUpdateOrder(priceDouble,amount,true);
 	}
 	else
 	{
 		(*currentMap)[priceDouble]=amount;
 		if(lastDepthBidsMap.value(priceDouble,0.0)!=amount)
-			emit depthUpdateOrder(priceDouble,amount,false);
+			depthUpdateOrder(priceDouble,amount,false);
 	}
-}
-
-void Exchange_BTCe::run()
-{
-	if(isLogEnabled)logThread->writeLog("BTC-e API Thread Started");
-
-	clearVariables();
-
-	secondTimer=new QTimer;
-	secondTimer->setSingleShot(true);
-	connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
-	secondSlot();
-	exec();
 }
 
 bool Exchange_BTCe::isReplayPending(int reqType)
@@ -512,12 +478,13 @@ void Exchange_BTCe::secondSlot()
 
 	if(!isReplayPending(202))sendToApi(202,"",true,httpSplitPackets,"method=getInfo&");
 
-	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,httpSplitPackets,"method=OrderList&");
+	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,httpSplitPackets,"method=ActiveOrders&");
 	
 	if(!isReplayPending(103))sendToApi(103,currencyRequestPair+"/ticker",false,httpSplitPackets);
 	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/trades",false,httpSplitPackets);
 	if(!depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
 	{
+		emit depthRequested();
 		sendToApi(111,currencyRequestPair+"/depth",false,httpSplitPackets);
 		forceDepthLoad=false;
 	}
@@ -530,7 +497,7 @@ void Exchange_BTCe::secondSlot()
 		quint32 syncNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 		if(privateNonce<syncNonce)privateNonce=syncNonce;
 	}
-	secondTimer->start(httpRequestInterval);
+	Exchange::secondSlot();
 }
 
 void Exchange_BTCe::getHistory(bool force)
@@ -554,8 +521,9 @@ void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 		int toCut=(btcToBuy.size()-dotPos-1)-digitsToCut;
 		if(toCut>0)btcToBuy.remove(btcToBuy.size()-toCut-1,toCut);
 	}
-	sendToApi(306,"",true,true,"method=Trade&pair="+currencyRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy)+"&amount="+btcToBuy+"&");
-	secondSlot();
+	QByteArray data="method=Trade&pair="+currencyRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy)+"&amount="+btcToBuy+"&";
+	if(debugLevel)logThread->writeLog("Buy: "+data,2);
+	sendToApi(306,"",true,true,data);
 }
 
 void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
@@ -569,7 +537,9 @@ void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
 		int toCut=(btcToSell.size()-dotPos-1)-btcDecimals;
 		if(toCut>0)btcToSell.remove(btcToSell.size()-toCut-1,toCut);
 	}
-	sendToApi(307,"",true,true,"method=Trade&pair="+currencyRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell)+"&amount="+btcToSell+"&");
+	QByteArray data="method=Trade&pair="+currencyRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell)+"&amount="+btcToSell+"&";
+	if(debugLevel)logThread->writeLog("Sell: "+data,2);
+	sendToApi(307,"",true,true,data);
 }
 
 void Exchange_BTCe::cancelOrder(QByteArray order)
@@ -578,6 +548,7 @@ void Exchange_BTCe::cancelOrder(QByteArray order)
 
 	order.prepend("method=CancelOrder&order_id=");
 	order.append("&");
+	if(debugLevel)logThread->writeLog("Cancel order: "+order,2);
 	sendToApi(305,"",true,true,order);
 }
 
@@ -597,8 +568,6 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 	if(auth)
 	{
 		QByteArray postData=commands+"nonce="+QByteArray::number(++privateNonce);
-		if(isLogEnabled)logThread->writeLog("/tapi"+method+"?"+postData);
-
 		if(sendNow)
 			julyHttp->sendData(reqType, "POST /tapi/"+method, postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
 		else
@@ -627,6 +596,6 @@ void Exchange_BTCe::sslErrors(const QList<QSslError> &errors)
 {
 	QStringList errorList;
 	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
-	if(isLogEnabled)logThread->writeLog(errorList.join(" ").toAscii());
+	if(debugLevel)logThread->writeLog(errorList.join(" ").toAscii(),2);
 	emit showErrorMessage("SSL Error: "+errorList.join(" "));
 }

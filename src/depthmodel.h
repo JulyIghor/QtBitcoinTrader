@@ -12,6 +12,7 @@
 
 #include <QAbstractItemModel>
 #include <QStringList>
+#include "depthitem.h"
 
 class DepthModel : public QAbstractItemModel
 {
@@ -39,10 +40,11 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-	void depthUpdateOrder(double price, double volume);
+	void depthUpdateOrders(QList<DepthItem> *items);
 	void depthFirstOrder(double price, double volume);
 
 private:
+	void depthUpdateOrder(double price, double volume);
 	bool originalIsAsk;
 	bool somethingChanged;
 	double groupedPrice;

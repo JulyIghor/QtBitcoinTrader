@@ -10,6 +10,7 @@ class OrdersModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+	bool checkDuplicatedOID;
 	void ordersCancelAll();
 	void setOrderCanceled(QByteArray);
 
@@ -35,6 +36,7 @@ public:
 	QList<OrderItem> orders;
 
 private:
+	QHash<QByteArray,qint64> oidMapForCheckingDuplicates;
 	QStringList textStatusList;
 	QString textAsk;
 	QString textBid;

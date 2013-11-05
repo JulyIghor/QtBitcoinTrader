@@ -10,27 +10,23 @@
 #ifndef EXCHANGE_BTCCHINA_H
 #define EXCHANGE_BTCCHINA_H
 
-#include <QThread>
-#include <QTimer>
-#include <QTime>
-#include "qtbitcointrader.h"
-#include "julyhttp.h"
+#include "exchange.h"
 
-class Exchange_BTCChina : public QThread
+class Exchange_BTCChina : public Exchange
 {
 	Q_OBJECT
 
 public:
-	void setupApi(QtBitcoinTrader *, bool tickerOnly=false);
 	Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey);
 	~Exchange_BTCChina();
 
 private:
 	QByteArray numForSellFromDouble(double val, int maxDecimals);
-	void translateUnicodeStr(QString *str);
-	QList<QByteArray> cancelingOrderIDs;
-	bool forceDepthLoad;
+	void depthUpdateOrder(double,double,bool);
+	QList<DepthItem> *depthAsks;
+	QList<DepthItem> *depthBids;
 	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
+	QList<QByteArray> cancelingOrderIDs;
 	QMap<double,double> lastDepthAsksMap;
 	QMap<double,double> lastDepthBidsMap;
 	void clearVariables();
@@ -61,8 +57,6 @@ private:
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	int apiDownCounter;
 	int secondPart;
-	QByteArray privateRestSign;
-	QByteArray privateRestKey;
 	quint32 privateTonce;
 	quint32 tonceCounter;
 
@@ -70,37 +64,6 @@ private:
 
 	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 	QTimer *secondTimer;
-	void run();
-signals:
-	void depthFirstOrder(double,double,bool);
-	void depthUpdateOrder(double,double,bool);
-
-	void addLastTrade(double,qint64,double,QByteArray,bool);
-
-	void ordersChanged(QList<OrderItem> *);
-	void showErrorMessage(QString);
-
-	void historyChanged(QList<HistoryItem>*);
-
-	void ordersIsEmpty();
-	void orderCanceled(QByteArray);
-
-	void firstTicker();
-	void tickerHighChanged(double);
-	void tickerLowChanged(double);
-	void tickerSellChanged(double);
-	void tickerLastChanged(double);
-	void tickerBuyChanged(double);
-	void tickerVolumeChanged(double);
-
-	void accVolumeChanged(double);
-	void accFeeChanged(double);
-	void accBtcBalanceChanged(double);
-	void accUsdBalanceChanged(double);
-	void loginChanged(QString);
-	void apiDownChanged(bool);
-	void apiLagChanged(double);
-	void softLagChanged(int);
 private slots:
 	void reloadDepth();
 	void sslErrors(const QList<QSslError> &);

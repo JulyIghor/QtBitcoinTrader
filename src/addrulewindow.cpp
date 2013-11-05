@@ -29,15 +29,6 @@ AddRuleWindow::AddRuleWindow(QWidget *parent)
 
 	mainWindow.fillAllBtcLabels(this,currencyAStr);
 
-
-	if(mainWindow.exchangeId==3)//BTC China exception
-	{
-		ui.checkOrdersLastBuyPrice->setVisible(false);
-		ui.checkOrdersLastSellPrice->setVisible(false);
-		ui.checkOrdersLastBuyPrice_2->setVisible(false);
-		ui.checkOrdersLastSellPrice_2->setVisible(false);
-	}
-
 	new JulySpinBoxFix(ui.thanValue);
 	new JulySpinBoxFix(ui.btcValue);
 	new JulySpinBoxFix(ui.exactPriceValue);

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1090</width>
-    <height>641</height>
+    <height>612</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -85,7 +85,7 @@
            </size>
           </property>
           <property name="accessibleName">
-           <string>BTC</string>
+           <string>BTC_BALANCE</string>
           </property>
           <property name="accessibleDescription">
            <string>CAN_BE_ZERO</string>
@@ -160,7 +160,7 @@
            </size>
           </property>
           <property name="accessibleName">
-           <string>USD</string>
+           <string>USD_BALANCE</string>
           </property>
           <property name="accessibleDescription">
            <string>CAN_BE_ZERO</string>
@@ -1558,7 +1558,7 @@
               </size>
              </property>
              <property name="accessibleName">
-              <string>USD</string>
+              <string>USD_BALANCE</string>
              </property>
              <property name="accessibleDescription">
               <string>CAN_BE_ZERO</string>
@@ -1627,7 +1627,7 @@
               </size>
              </property>
              <property name="accessibleName">
-              <string>BTC</string>
+              <string>BTC_BALANCE</string>
              </property>
              <property name="accessibleDescription">
               <string>CAN_BE_ZERO</string>
@@ -1744,7 +1744,7 @@
               </size>
              </property>
              <property name="accessibleName">
-              <string>USD</string>
+              <string>USD_BALANCE</string>
              </property>
              <property name="accessibleDescription">
               <string>CAN_BE_ZERO</string>
@@ -1813,7 +1813,7 @@
               </size>
              </property>
              <property name="accessibleName">
-              <string>BTC</string>
+              <string>BTC_BALANCE</string>
              </property>
              <property name="accessibleDescription">
               <string>CAN_BE_ZERO</string>
@@ -2257,7 +2257,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
@@ -3458,51 +3458,6 @@
          <string>Trades</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_23">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_27">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="accessibleName">
-            <string>XMIN_VOLUME</string>
-           </property>
-           <property name="text">
-            <string>10 min. Volume:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="btcLabel3_3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="accessibleDescription">
-            <string>BTC_ICON</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="2">
           <widget class="QDoubleSpinBox" name="tradesVolume5m">
            <property name="sizePolicy">
@@ -3552,7 +3507,59 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_27">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="accessibleName">
+            <string>XMIN_VOLUME</string>
+           </property>
+           <property name="text">
+            <string>10 min. Volume:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLabel" name="btcLabel3_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="accessibleDescription">
+            <string>BTC_ICON</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="3">
+          <widget class="QLabel" name="tradesLabelDirection">
+           <property name="text">
+            <string>-</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5">
           <widget class="QCheckBox" name="tradesAutoScrollCheck">
            <property name="accessibleName">
             <string>AUTO_SCROLL</string>
@@ -3565,7 +3572,17 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="4">
+         <item row="0" column="7">
+          <widget class="QCheckBox" name="tabTradesOnTop">
+           <property name="accessibleName">
+            <string>STAYS_ON_TOP</string>
+           </property>
+           <property name="text">
+            <string>Stay on Top</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="6">
           <spacer name="horizontalSpacer_5">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -3578,17 +3595,7 @@
            </property>
           </spacer>
          </item>
-         <item row="0" column="5">
-          <widget class="QCheckBox" name="tabTradesOnTop">
-           <property name="accessibleName">
-            <string>STAYS_ON_TOP</string>
-           </property>
-           <property name="text">
-            <string>Stay on Top</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="6">
+         <item row="0" column="8">
           <widget class="QPushButton" name="detachTrades">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -3604,7 +3611,7 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0" colspan="7">
+         <item row="1" column="0" colspan="9">
           <widget class="QTableView" name="tableTrades">
            <property name="horizontalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -3639,12 +3646,70 @@
            <attribute name="horizontalHeaderHighlightSections">
             <bool>false</bool>
            </attribute>
+           <attribute name="horizontalHeaderMinimumSectionSize">
+            <number>10</number>
+           </attribute>
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
            <attribute name="verticalHeaderHighlightSections">
             <bool>false</bool>
            </attribute>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="QDoubleSpinBox" name="tradesBidsPrecent">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>90</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="accessibleName">
+            <string/>
+           </property>
+           <property name="accessibleDescription">
+            <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="specialValueText">
+            <string/>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string> %</string>
+           </property>
+           <property name="decimals">
+            <number>2</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="value">
+            <double>50.000000000000000</double>
+           </property>
           </widget>
          </item>
         </layout>
@@ -4231,6 +4296,12 @@
               <height>0</height>
              </size>
             </property>
+            <property name="accessibleName">
+             <string>BTC</string>
+            </property>
+            <property name="accessibleDescription">
+             <string>CAN_BE_ZERO</string>
+            </property>
             <property name="styleSheet">
              <string notr="true">QDoubleSpinBox {border: 0px; background: transparent;}</string>
             </property>
@@ -4445,9 +4516,6 @@
              </property>
              <property name="text">
               <string>BUY</string>
-             </property>
-             <property name="shortcut">
-              <string>Ctrl+B</string>
              </property>
             </widget>
            </item>
@@ -5386,9 +5454,6 @@
              <property name="text">
               <string>SELL</string>
              </property>
-             <property name="shortcut">
-              <string>Ctrl+S</string>
-             </property>
             </widget>
            </item>
           </layout>
@@ -5809,34 +5874,6 @@
            <number>8</number>
           </property>
           <item>
-           <widget class="QLabel" name="bitcoinTalkUrl">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>https://bitcointalk.org/index.php?topic=201062.0</string>
-            </property>
-            <property name="text">
-             <string>&lt;a href=&quot;https://bitcointalk.org/index.php?topic=201062.0&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;BitcoinTalk&lt;/span&gt;&lt;/a&gt;</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="openExternalLinks">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QLabel" name="label_53">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -5854,35 +5891,7 @@
              <string>https://sourceforge.net/projects/bitcointrader</string>
             </property>
             <property name="text">
-             <string>&lt;a href=&quot;https://sourceforge.net/projects/bitcointrader/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;SourceForge&lt;/span&gt;&lt;/a&gt;</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="openExternalLinks">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_54">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>https://github.com/JulyIGHOR/QtBitcoinTrader</string>
-            </property>
-            <property name="text">
-             <string>&lt;a href=&quot;https://github.com/JulyIGHOR/QtBitcoinTrader&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;GitHub&lt;/span&gt;&lt;/a&gt;</string>
+             <string>&lt;a href=&quot;http://qtopentrader.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://QtOpenTrader.com&lt;/span&gt;&lt;/a&gt;</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>

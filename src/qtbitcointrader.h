@@ -26,6 +26,7 @@
 #include "ordersmodel.h"
 #include "orderitem.h"
 #include "historymodel.h"
+#include <QKeyEvent>
 
 class QtBitcoinTrader : public QDialog
 {
@@ -69,6 +70,7 @@ public:
 	~QtBitcoinTrader();
 
 private:
+	void keyPressEvent(QKeyEvent *event);
 	bool swapedDepth;
 	DepthModel *depthAsksModel;
 	DepthModel *depthBidsModel;
@@ -85,6 +87,7 @@ private:
 	bool isDataPending;
 	QTime softLagTime;
 	QTime depthLagTime;
+	bool waitingDepthLag;
 	int depthAsksLastScrollValue;
 	int depthBidsLastScrollValue;
 
@@ -151,7 +154,11 @@ private:
 	bool isDetachedDepth;
 	bool isDetachedCharts;
 	void depthSelectOrder(QModelIndex, bool isSell);
+	double tradesPrecentLast;
 public slots:
+	void precentBidsChanged(double);
+	void depthRequested();
+	void depthRequestReceived();
 	void on_swapDepth_clicked();
 	void checkValidOrdersButtons();
 	void cancelOrder(QByteArray);
@@ -175,7 +182,7 @@ public slots:
 	void setDataPending(bool);
 	void anyDataReceived();
 	void depthFirstOrder(double,double,bool);
-	void depthUpdateOrder(double,double,bool);
+	void depthSubmitOrders(QList<DepthItem> *, QList<DepthItem> *);
 	void showErrorMessage(QString);
 	void exitApp();
 	void setWindowStaysOnTop(bool);
