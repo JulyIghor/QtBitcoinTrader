@@ -19,6 +19,7 @@ class DepthModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+	void fixTitleWidths();
 	int itemsCount(){return volumeList.count();}
 	void calculateSize();
 	void clear();

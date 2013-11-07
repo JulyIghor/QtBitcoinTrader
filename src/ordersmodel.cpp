@@ -66,14 +66,17 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 
 	double volumeTotal=0.0;
 	double amountTotal=0.0;
+	double decValue=0.0;
+
+	if(mainWindow.exchangeId==2)decValue=0.01;//Bitstamp exception
 
 	for(int n=0;n<orders->count();n++)
 	{
 		bool isAsk=orders->at(n).type;
 		QByteArray orderSymbol=orders->at(n).symbol;
 
-		if(orderSymbol.startsWith(currencyAStr)&&isAsk)volumeTotal+=orders->at(n).amount;
-		if(orderSymbol.endsWith(currencyBStr)&&!isAsk)amountTotal+=orders->at(n).amount*orders->at(n).price;
+		if(orderSymbol.startsWith(currencyAStr)&&isAsk)volumeTotal+=orders->at(n).amount-decValue;
+		if(orderSymbol.endsWith(currencyBStr)&&!isAsk)amountTotal+=(orders->at(n).amount-decValue)*orders->at(n).price;
 
 		existingOids.insert(orders->at(n).oid,true);
 		if(checkDuplicatedOID)(*orders)[n].date=oidMapForCheckingDuplicates.value(orders->at(n).oid,orders->at(n).date);

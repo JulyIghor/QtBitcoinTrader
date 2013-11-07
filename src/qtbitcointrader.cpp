@@ -422,7 +422,10 @@ void QtBitcoinTrader::keyPressEvent(QKeyEvent *event)
 		if(event->key()==Qt::Key_T)ui.widgetStaysOnTop->setChecked(!ui.widgetStaysOnTop->isChecked());
 		return;
 	}
-	if(debugLevel==0&&(event->key()==Qt::Key_D&&(event->modifiers()&Qt::ControlModifier&&event->modifiers()&Qt::ShiftModifier||event->modifiers()&Qt::ControlModifier&&event->modifiers()&Qt::AltModifier||event->modifiers()&Qt::ShiftModifier&&event->modifiers()&Qt::AltModifier)))
+	if(debugLevel==0&&event->key()==Qt::Key_D&&
+	  (event->modifiers()&Qt::ControlModifier&&event->modifiers()&Qt::ShiftModifier||
+	   event->modifiers()&Qt::ControlModifier&&event->modifiers()&Qt::AltModifier||
+	   event->modifiers()&Qt::ShiftModifier&&event->modifiers()&Qt::AltModifier))
 	{
 		new DebugViewer;
 	}
@@ -1163,6 +1166,9 @@ void QtBitcoinTrader::currencyChanged(int val)
 
 	iniSettings->sync();
 
+	depthAsksModel->fixTitleWidths();
+	depthBidsModel->fixTitleWidths();
+
 	calcOrdersTotalValues();
 }
 
@@ -1178,7 +1184,6 @@ void QtBitcoinTrader::volumeAmountChanged(double volumeTotal, double amountTotal
 {
 	ui.ordersTotalBTC->setValue(volumeTotal);
 	ui.ordersTotalUSD->setValue(amountTotal);
-
 }
 
 void QtBitcoinTrader::calcOrdersTotalValues()
@@ -1904,10 +1909,17 @@ void QtBitcoinTrader::buyBitcoinsButton()
 	msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
 	if(msgBox.exec()!=QMessageBox::Yes)return;
 	
+	double btcToBuy=0.0;
+	double priceToBuy=ui.buyPricePerCoin->value();
 	if(exchangeId==2||exchangeId==3)//Bitstamp exception
-	emit apiBuy(ui.buyTotalBtcResult->value(),ui.buyPricePerCoin->value());
-	else
-	emit apiBuy(ui.buyTotalBtc->value(),ui.buyPricePerCoin->value());
+		 btcToBuy=ui.buyTotalBtcResult->value();
+	else btcToBuy=ui.buyTotalBtc->value();
+
+	double amountWithoutFee=getAvailableUSD()/priceToBuy;
+	amountWithoutFee=getValidDoubleForPercision(amountWithoutFee,btcDecimals,false);
+	if(amountWithoutFee==btcToBuy)btcToBuy-=qPow(0.1,btcDecimals);
+
+	emit apiBuy(btcToBuy,priceToBuy);
 }
 
 void QtBitcoinTrader::copyDonateButton()
@@ -2389,7 +2401,7 @@ void QtBitcoinTrader::historyDoubleClicked(QModelIndex index)
 	if(rowType==1)
 	{
 		ui.sellPricePerCoin->setValue(itemPrice);
-		ui.sellTotalBtc->setValue(qMin(getAvailableBTC(),itemVolume));
+		ui.sellTotalBtc->setValue(itemVolume);
 	}
 	if(rowType==2)
 	{

@@ -260,13 +260,21 @@ QVariant DepthModel::headerData(int section, Qt::Orientation orientation, int ro
 	return headerLabels.at(indexColumn);
 }
 
+void DepthModel::fixTitleWidths()
+{
+	int curASize=textFontWidth(" "+currencyASign);
+	int curBSize=textFontWidth(" "+currencyBSign);
+	widthPriceTitle=textFontWidth(headerLabels.at(0))+20+curBSize;
+	widthVolumeTitle=textFontWidth(headerLabels.at(1))+20+curASize;
+	widthSizeTitle=textFontWidth(headerLabels.at(2))+20+curASize;
+	emit layoutChanged();
+}
+
 void DepthModel::setHorizontalHeaderLabels(QStringList list)
 {
 	if(list.count()!=columnsCount)return;
 	headerLabels=list;
-	widthPriceTitle=textFontWidth(headerLabels.at(0))+20;
-	widthVolumeTitle=textFontWidth(headerLabels.at(1))+20;
-	widthSizeTitle=textFontWidth(headerLabels.at(2))+20;
+	fixTitleWidths();
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 	emit layoutChanged();
 }

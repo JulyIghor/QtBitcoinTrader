@@ -192,11 +192,10 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 		QByteArray postData;
 		QByteArray appendedHeader;
 		QByteArray tonceCounterData=QByteArray::number(tonceCounter++);
+		if(tonceCounter>9)tonceCounterData.append("0000");
+		else tonceCounterData.append("00000");
 
-		tonceCounterData.prepend(QByteArray("0").repeated(6-tonceCounterData.size()));
-
-
-		QByteArray tonce=QByteArray::number(QDateTime::currentDateTime().toTime_t())+tonceCounterData;
+		QByteArray tonce=QByteArray::number(privateTonce)+tonceCounterData;
 		QByteArray signatureString="tonce="+tonce+"&accesskey="+privateRestKey+"&requestmethod=post&id=1&method="+method+"&params="+signatureParams;
 
 		signatureString=privateRestKey+":"+hmacSha1(privateRestSign,signatureString).toHex();
@@ -388,7 +387,6 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				QByteArray bidsData=data.mid(35,asksStart-38);
 				data.remove(0,asksStart+8);
 				data.remove(data.size()-14,14);
-
 
 				QMap<double,double> currentBidsMap;
 				QStringList bidsList=QString(bidsData).split("},{");
@@ -648,7 +646,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 	}
 
 	static int errorCount=0;
-	if(!success&&reqType!=305)
+	if(!success&&reqType!=305&&reqType!=111)
 	{
 		errorCount++;
 		QString errorString;

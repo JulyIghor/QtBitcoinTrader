@@ -3473,10 +3473,10 @@
             </size>
            </property>
            <property name="accessibleName">
-            <string>BTC</string>
+            <string/>
            </property>
            <property name="accessibleDescription">
-            <string>CAN_BE_ZERO</string>
+            <string/>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -3494,7 +3494,7 @@
             <string/>
            </property>
            <property name="decimals">
-            <number>8</number>
+            <number>2</number>
            </property>
            <property name="minimum">
             <double>0.000000000000000</double>
@@ -5888,7 +5888,7 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>https://sourceforge.net/projects/bitcointrader</string>
+             <string>http://qtopentrader.com</string>
             </property>
             <property name="text">
              <string>&lt;a href=&quot;http://qtopentrader.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://QtOpenTrader.com&lt;/span&gt;&lt;/a&gt;</string>

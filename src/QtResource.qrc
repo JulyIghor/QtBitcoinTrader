@@ -55,6 +55,7 @@
     <file>Resources/Language/Spanish.lng</file>
     <file>Resources/Language/Dutch.lng</file>
     <file>Resources/Language/Norwegian.lng</file>
+    <file>Resources/Language/French.lng</file>
     <file>Resources/Language/LangList.ini</file>
   </qresource>
 </RCC>

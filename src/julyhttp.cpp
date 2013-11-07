@@ -612,5 +612,12 @@ void JulyHttp::sendPendingData()
 
 void JulyHttp::sslErrorsSlot(const QList<QSslError> &val)
 {
+	for(int n=0;n<val.count();n++)
+		if(val.at(n).error()==QAbstractSocket::SocketTimeoutError)
+		{
+			requestTimeOut.addMSecs(httpRequestTimeout);
+			sendPendingData();
+			break;
+		}
 	emit sslErrorSignal(val);
 }
