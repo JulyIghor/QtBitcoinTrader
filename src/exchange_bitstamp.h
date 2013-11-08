@@ -32,6 +32,7 @@ private:
 	JulyHttp *julyHttp;
 	QTime authRequestTime;
 	QByteArray lastFetchDate;
+	QByteArray lastTickerDate;
 	QByteArray lastDepthData;
 	QByteArray lastBidAskTimestamp;
 	bool tickerOnly;
@@ -43,7 +44,6 @@ private:
 	double lastTickerHigh;
 	double lastTickerLow;
 	double lastTickerSell;
-	double lastTickerLast;
 	double lastTickerBuy;
 	double lastTickerVolume;
 

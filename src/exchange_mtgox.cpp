@@ -36,7 +36,6 @@ void Exchange_MtGox::clearVariables()
 	lastTickerHigh=0.0;
 	lastTickerLow=0.0;
 	lastTickerSell=0.0;
-	lastTickerLast=0.0;
 	lastTickerBuy=0.0;
 	lastTickerVolume=0.0;
 	lastBtcBalance=0.0;
@@ -49,7 +48,7 @@ void Exchange_MtGox::clearVariables()
 	lastOrders.clear();
 	reloadDepth();
 	lastInfoReceived=false;
-	lastFetchDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-600).toTime_t())+"000000";
+	tickerLastDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-600).toTime_t())+"000000";
 }
 
 void Exchange_MtGox::clearValues()
@@ -80,7 +79,7 @@ void Exchange_MtGox::secondSlot()
 	if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
 	if(!isReplayPending(104))sendToApi(104,currencyRequestPair+"/money/ticker_fast",false,httpSplitPackets);
 
-	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/money/trades/fetch?since="+lastFetchDate,false,httpSplitPackets);
+	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/money/trades/fetch?since="+tickerLastDate,false,httpSplitPackets);
 	if(lastHistory.isEmpty())
 		if(!isReplayPending(208))sendToApi(208,"money/wallet/history",true,httpSplitPackets,"&currency=BTC");
 	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
@@ -272,14 +271,14 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				lastTickerBuy=newTickerBuy;
 			}
 			QByteArray tickerNow=getMidData("now\":\"","\"}",&data);
-			if(lastFetchDate<tickerNow)
+			if(tickerLastDate<tickerNow)
 			{
 				QByteArray tickerLast=getMidData("last\":{\"value\":\"","",&data);
-				if(!tickerLast.isEmpty())
+				double newTickerLast=tickerLast.toDouble();
+				if(newTickerLast>0.0)
 				{
-					double newTickerLast=tickerLast.toDouble();
-					if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
-					lastTickerLast=newTickerLast;
+					emit tickerLastChanged(newTickerLast);
+					tickerLastDate=tickerNow;
 				}
 			}
 			if(isFirstTicker)
@@ -295,22 +294,30 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		{
 			if(data.startsWith("{\"result\":\"success\",\"data\":[{\"date"))
 			{
+				QByteArray tradesDate=getMidData("\"date\":",",",&data);
 				QStringList tradeList=QString(data).split("\"},{\"");
 				for(int n=0;n<tradeList.count();n++)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
+					if(lastTradesDate>=tradeData)continue;
 					double doubleAmount=getMidData("\"amount\":\"","\",",&tradeData).toDouble();
 					double doublePrice=getMidData("\"price\":\"","\",",&tradeData).toDouble();
+
 					QByteArray symbol=getMidData("\"item\":\"","\",\"",&tradeData)+getMidData("\"price_currency\":\"","\",\"",&tradeData);
 					QByteArray tradeType=getMidData("\"trade_type\":\"","\"",&tradeData);
 					if(doubleAmount>0.0&&doublePrice>0.0&&!symbol.isEmpty())
 					{
 						emit addLastTrade(doubleAmount,getMidData("date\":",",\"",&tradeData).toLongLong(),doublePrice,symbol,tradeType=="ask");
-						if(n==tradeList.count()-1)
+						if(n==tradeList.count()-1&&tickerLastDate<tradesDate)
 						{
 							QByteArray nextFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
-							if(!nextFetchDate.isEmpty())lastFetchDate=nextFetchDate;
+							if(!nextFetchDate.isEmpty())
+							{
+							emit tickerLastChanged(doublePrice);
+							tickerLastDate=nextFetchDate;
+							}
 						}
+						if(n==tradeList.count()-1)lastTradesDate=tradeData;
 					}
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
 				}

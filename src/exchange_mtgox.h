@@ -28,7 +28,8 @@ private:
 	void clearVariables();
 	JulyHttp *julyHttp;
 	QTime authRequestTime;
-	QByteArray lastFetchDate;
+	QByteArray tickerLastDate;
+	QByteArray lastTradesDate;
 	QByteArray lastDepthData;
 	QByteArray lastHistory;
 	QByteArray lastOrders;
@@ -39,7 +40,6 @@ private:
 	double lastTickerHigh;
 	double lastTickerLow;
 	double lastTickerSell;
-	double lastTickerLast;
 	double lastTickerBuy;
 	double lastTickerVolume;
 

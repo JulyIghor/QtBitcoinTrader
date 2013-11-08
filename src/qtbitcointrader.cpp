@@ -842,7 +842,6 @@ void QtBitcoinTrader::availableAmountChanged(double val)
 void QtBitcoinTrader::addLastTrade(double volumeDouble, qint64 dateT, double priceDouble, QByteArray symbol, bool isAsk)
 {
 	if(dateT<1000)return;
-	ui.marketLast->setValue(priceDouble);
 
 	tradesModel->addNewTrade(dateT,volumeDouble,priceDouble,symbol,isAsk);
 	tradesModel->updateTotalBTC();

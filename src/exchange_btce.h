@@ -42,7 +42,7 @@ private:
 	double lastTickerHigh;
 	double lastTickerLow;
 	double lastTickerSell;
-	double lastTickerLast;
+	QByteArray lastTickerDate;
 	double lastTickerBuy;
 	double lastTickerVolume;
 

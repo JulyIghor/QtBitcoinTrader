@@ -19,7 +19,6 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	depthAsks=0;
 	depthBids=0;
 	forceDepthLoad=false;
-	lastPriceDate=0;
 	julyHttp=0;
 	isApiDown=false;
 	tickerOnly=false;
@@ -42,7 +41,6 @@ void Exchange_BTCe::clearVariables()
 	lastTickerHigh=0.0;
 	lastTickerLow=0.0;
 	lastTickerSell=0.0;
-	lastTickerLast=0.0;
 	lastTickerBuy=0.0;
 	lastTickerVolume=0.0;
 	lastBtcBalance=0.0;
@@ -122,20 +120,13 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				lastTickerVolume=newTickerVolume;
 			}
 
-			QByteArray tickerUpdated=getMidData("\"updated\":",",\"",&data);
-			if(!tickerUpdated.isEmpty())
+			QByteArray newTickerDate=getMidData("\"updated\":",",\"",&data);
+			if(!newTickerDate.isEmpty()&&lastTickerDate<newTickerDate)
 			{
-				qint64 newTickerUpdated=tickerUpdated.toLongLong();
-				if(newTickerUpdated>lastFetchTid)
-				{
-					QByteArray tickerLast=getMidData("\"last\":",",\"",&data);
-					if(!tickerLast.isEmpty())
-					{
-						double newTickerLast=tickerLast.toDouble();
-						if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
-						lastTickerLast=newTickerLast;
-					}
-				}
+				lastTickerDate=newTickerDate;
+				QByteArray tickerLast=getMidData("\"last\":",",\"",&data);
+				double tickerLastDouble=tickerLast.toDouble();
+				if(tickerLastDouble>0.0)emit tickerLastChanged(tickerLastDouble);
 			}
 
 			if(isFirstTicker)
@@ -152,13 +143,19 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			for(int n=tradeList.count()-1;n>=0;n--)
 			{
 				QByteArray tradeData=tradeList.at(n).toAscii();
-				qint64 tradeDate=getMidData("date\":",",\"",&tradeData).toLongLong();
+				QByteArray newTickerDate=getMidData("date\":",",\"",&tradeData);
+				double currentTradePrice=getMidData("\"price\":",",\"",&tradeData).toDouble();
+				qint64 tradeDate=newTickerDate.toLongLong();
 				if(lastFetchTid<0&&tradeDate<-lastFetchTid)continue;
 				qint64 currentTid=getMidData("\"tid\":",",\"",&tradeData).toLongLong();
 				if(currentTid<1000||lastFetchTid>=currentTid)continue;
 				lastFetchTid=currentTid;
-				if(tradeDate>lastPriceDate)lastPriceDate=tradeDate;
-				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),tradeDate,getMidData("\"price\":",",\"",&tradeData).toDouble(),getMidData("\"item\":\"","\",\"",&tradeData)+getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
+				if(n==0&&lastTickerDate<newTickerDate)
+				{
+					lastTickerDate=newTickerDate;
+					emit tickerLastChanged(currentTradePrice);
+				}
+				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),tradeDate,currentTradePrice,getMidData("\"item\":\"","\",\"",&tradeData)+getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
 			}
 		}
 		break;//trades

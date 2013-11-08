@@ -40,7 +40,6 @@ void Exchange_Bitstamp::clearVariables()
 	lastTickerHigh=0.0;
 	lastTickerLow=0.0;
 	lastTickerSell=0.0;
-	lastTickerLast=0.0;
 	lastTickerBuy=0.0;
 	lastTickerVolume=0.0;
 	lastBtcBalance=0.0;
@@ -247,11 +246,14 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				}
 
 				QByteArray tickerLast=getMidData("\"last\": \"","\"",&data);
-				if(!tickerLast.isEmpty())
+				if(!tickerLast.isEmpty()&&lastTickerDate<tickerTimestamp)
 				{
 					double newTickerLast=tickerLast.toDouble();
-					if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
-					lastTickerLast=newTickerLast;
+					if(newTickerLast>0.0)
+					{
+						emit tickerLastChanged(newTickerLast);
+						lastTickerDate=tickerTimestamp;
+					}
 				}
 				if(tickerTimestamp>lastBidAskTimestamp)
 				{
@@ -287,18 +289,25 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 			if(data.startsWith("[{\"date\":"))
 			{
 				QStringList tradeList=QString(data).split("}, {");
-				for(int n=0;n<tradeList.count();n++)
+				for(int n=tradeList.count()-1;n>=0;n--)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
 					QByteArray tradeDate=getMidData("\"date\": \"","\"",&tradeData);
 					QByteArray nextFetchDate=tradeDate+getMidData("\"tid\": ",",",&tradeData);
 					if(nextFetchDate<=lastFetchDate)continue;
 					double doubleAmount=getMidData("\"amount\": \"","\"",&tradeData).toDouble();
-					double doublePrice=getMidData("\"price\": \"","\"",&tradeData).toDouble();
+					QByteArray priceBytes=getMidData("\"price\": \"","\"",&tradeData);
+					double doublePrice=priceBytes.toDouble();
+					if(n==0&&lastTickerDate<tradeDate&&doublePrice>0.0)
+					{
+						lastTickerDate=tradeDate;
+						emit tickerLastChanged(doublePrice);
+					}
+
 					if(doubleAmount>0.0&&doublePrice>0.0)
 					{
 						emit addLastTrade(doubleAmount,tradeDate.toLongLong(),doublePrice,currencySymbol,true);
-						if(n==tradeList.count()-1&&!nextFetchDate.isEmpty())lastFetchDate=nextFetchDate;
+						if(n==0&&!nextFetchDate.isEmpty())lastFetchDate=tradeDate;
 					}
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
 				}
