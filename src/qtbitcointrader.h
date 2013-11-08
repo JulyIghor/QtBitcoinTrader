@@ -33,6 +33,8 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	bool exchangeSupportsAvailableAmount;
+	double availableAmount;
 	RulesModel *rulesModel;
 	int exchangeId;
 	double getAvailableBTC();
@@ -156,6 +158,7 @@ private:
 	void depthSelectOrder(QModelIndex, bool isSell);
 	double tradesPrecentLast;
 public slots:
+	void availableAmountChanged(double);
 	void precentBidsChanged(double);
 	void depthRequested();
 	void depthRequestReceived();

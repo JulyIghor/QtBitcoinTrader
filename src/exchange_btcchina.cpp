@@ -92,12 +92,12 @@ void Exchange_BTCChina::secondSlot()
 			sendToApi(111,"getMarketDepth2",true,true,depthCountLimitStr);
 		}
 		forceDepthLoad=false;
-
-	if(!isReplayPending(103))sendToApi(103,"ticker",false,false);
-	if(!isReplayPending(109))sendToApi(109,"trades",false,false);
-
 	}
-	if(julyHttpPublic)julyHttpPublic->prepareDataSend();
+
+	if(!isReplayPending(103))sendToApi(103,"ticker",false,true);
+
+	if(infoCounter==3&&!isReplayPending(109))sendToApi(109,"trades",false,true);
+
 
 	if(++infoCounter>3)
 	{

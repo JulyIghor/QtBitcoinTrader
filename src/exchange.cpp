@@ -89,6 +89,7 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	connect(this,SIGNAL(depthFirstOrder(double,double,bool)),mainClass,SLOT(depthFirstOrder(double,double,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
 
+	connect(this,SIGNAL(availableAmountChanged(double)),mainClass,SLOT(availableAmountChanged(double)));
 	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
 	connect(mainClass,SIGNAL(reloadDepth()),this,SLOT(reloadDepth()));
 	connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));

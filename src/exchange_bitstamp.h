@@ -49,6 +49,7 @@ private:
 
 	double lastBtcBalance;
 	double lastUsdBalance;
+	double lastAvUsdBalance;
 	double lastVolume;
 	double lastFee;
 

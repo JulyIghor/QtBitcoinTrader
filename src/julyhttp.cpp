@@ -548,14 +548,14 @@ QSslSocket *JulyHttp::getStableSocket()
 
 	if(socket->state()!=QAbstractSocket::UnconnectedState)
 	{
-		if(socket->state()==QAbstractSocket::ConnectingState||socket->state()==QAbstractSocket::HostLookupState)socket->waitForConnected(5000);
+		if(socket->state()==QAbstractSocket::ConnectingState||socket->state()==QAbstractSocket::HostLookupState)socket->waitForConnected(httpRequestTimeout+1000);
 	}
 	if(socket->state()!=QAbstractSocket::ConnectedState)
 	{
 		setApiDown(true);
 		if(debugLevel)logThread->writeLog("Socket error: "+socket->errorString().toAscii(),2);
 		reconnectSocket(socket,false);
-		if(socket->state()==QAbstractSocket::ConnectingState)socket->waitForConnected(5000);
+		if(socket->state()==QAbstractSocket::ConnectingState)socket->waitForConnected(httpRequestTimeout+1000);
 	}
 	else reconnectSocket(socket,false);
 	return socket;
@@ -578,6 +578,7 @@ void JulyHttp::sendPendingData()
 		{
 			if(debugLevel)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(httpRequestTimeout).toAscii(),2);
 			reconnectSocket(socket,true);
+			setApiDown(true);
 			if(requestRetryCount>0){retryRequest();return;}
 		}
 	}
@@ -617,6 +618,7 @@ void JulyHttp::sslErrorsSlot(const QList<QSslError> &val)
 		{
 			requestTimeOut.addMSecs(httpRequestTimeout);
 			sendPendingData();
+			setApiDown(true);
 			break;
 		}
 	emit sslErrorSignal(val);

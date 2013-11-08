@@ -45,6 +45,7 @@ void Exchange_Bitstamp::clearVariables()
 	lastTickerVolume=0.0;
 	lastBtcBalance=0.0;
 	lastUsdBalance=0.0;
+	lastAvUsdBalance=0.0;
 	lastVolume=0.0;
 	lastFee=0.0;
 	secondPart=0;
@@ -445,6 +446,15 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(newUsdBalance);
 					lastUsdBalance=newUsdBalance;
 				}
+
+				QByteArray usdAvBalance=getMidData("\"usd_available\": \"","\"",&data);
+				if(!usdAvBalance.isEmpty())
+				{
+					double newAvUsdBalance=usdAvBalance.toDouble();
+					if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(newAvUsdBalance);
+					lastAvUsdBalance=newAvUsdBalance;
+				}
+
 			}
 			else if(debugLevel)logThread->writeLog("Invalid Info data:"+data,2);
 		}

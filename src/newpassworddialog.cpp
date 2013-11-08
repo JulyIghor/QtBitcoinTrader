@@ -62,13 +62,14 @@ QString NewPasswordDialog::getPassword()
 
 QString NewPasswordDialog::getRestSign()
 {
-	return ui.restSignLine->text();
+	return ui.restSignLine->text().replace("\n","").replace("\r","").replace("\t","");
 }
 
 QString NewPasswordDialog::getRestKey()
 {
-	if(ui.exchangeComboBox->currentIndex()==2)return ui.clientIdLine->text().replace("\n","").replace("\r","")+":"+ui.restKeyLine->text().replace("\n","").replace("\r","");//Bitstamp
-	return ui.restKeyLine->text().replace("\n","").replace("\r","");
+	if(ui.exchangeComboBox->currentIndex()==2)
+		return ui.clientIdLine->text().replace("\n","").replace("\r","").replace("\t","")+":"+ui.restKeyLine->text().replace("\n","").replace("\r","").replace("\t","");//Bitstamp
+	return ui.restKeyLine->text().replace("\n","").replace("\r","").replace("\t","");
 }
 
 void NewPasswordDialog::getApiKeySecretButton()

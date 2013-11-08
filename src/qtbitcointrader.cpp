@@ -43,6 +43,8 @@
 QtBitcoinTrader::QtBitcoinTrader()
 	: QDialog()
 {
+	availableAmount=0.0;
+	exchangeSupportsAvailableAmount=false;
 	swapedDepth=false;
 	waitingDepthLag=false;
 	depthLagTime.restart();
@@ -119,7 +121,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.ordersTableFrame->setVisible(false);
 
 	ordersModel=new OrdersModel;
-	ordersSortModel=new QSortFilterProxyModel;
+	ordersSortModel=new QSortFilterProxyModel(this);
+	ordersSortModel->setDynamicSortFilter(true);
 	ordersSortModel->setSourceModel(ordersModel);
 	ui.ordersTable->setModel(ordersSortModel);
 	ui.ordersTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
@@ -712,6 +715,7 @@ void QtBitcoinTrader::loadUiSettings()
 		}break;
 	case 2:
 		{//Bitstamp
+			exchangeSupportsAvailableAmount=true;
 			ui.tableTrades->horizontalHeader()->hideSection(2);
 			ui.tradesBidsPrecent->setVisible(false);
 			ui.tradesLabelDirection->setVisible(false);
@@ -828,6 +832,11 @@ void QtBitcoinTrader::resizeEvent(QResizeEvent *event)
 void QtBitcoinTrader::setLastTrades10MinVolume(double val)
 {
 	ui.tradesVolume5m->setValue(val);
+}
+
+void QtBitcoinTrader::availableAmountChanged(double val)
+{
+	availableAmount=val;
 }
 
 void QtBitcoinTrader::addLastTrade(double volumeDouble, qint64 dateT, double priceDouble, QByteArray symbol, bool isAsk)
@@ -1452,8 +1461,21 @@ QString QtBitcoinTrader::numFromDouble(const double &val, int maxDecimals)
 void QtBitcoinTrader::ordersChanged(QList<OrderItem> *orders)
 {
 	ui.ordersTable->setSortingEnabled(false);
+
+	ordersSortModel->setSourceModel(0);
 	ordersModel->ordersChanged(orders);
+	ordersSortModel->setSourceModel(ordersModel);
+
+	ui.ordersTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
+	ui.ordersTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(4,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(5,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(6,QHeaderView::ResizeToContents);
+
 	ui.ordersTable->setSortingEnabled(true);
+	
 	calcOrdersTotalValues();
 	checkValidOrdersButtons();
 }
@@ -2750,5 +2772,7 @@ double QtBitcoinTrader::getAvailableUSD()
 		amountToReturn=ui.accountUSD->value()-ui.ordersTotalUSD->value();
 	else amountToReturn=ui.accountUSD->value();
 	amountToReturn=getValidDoubleForPercision(amountToReturn,usdDecimals,false);
+
+	if(exchangeSupportsAvailableAmount)amountToReturn=qMin(availableAmount,amountToReturn);
 	return amountToReturn;
 }

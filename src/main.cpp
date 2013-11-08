@@ -81,8 +81,10 @@ bool *supportsUtfUI_;
 
 void pickDefaultLangFile()
 {
-	QString sysLocale=QLocale().name();
+	QString sysLocale=QLocale().name().toLower();
 	if(sysLocale.startsWith("de"))defaultLangFile=":/Resources/Language/German.lng";
+	else 
+	if(sysLocale.startsWith("fr"))defaultLangFile=":/Resources/Language/French.lng";
 	else 
 	if(sysLocale.startsWith("zh"))defaultLangFile=":/Resources/Language/Chinese.lng";
 	else 
@@ -108,7 +110,7 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0792");
+	appVerStr_=new QByteArray("1.0793");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 

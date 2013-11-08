@@ -43,6 +43,7 @@ private:
 	void run();
 
 signals:
+	void availableAmountChanged(double);
 	void depthRequested();
 	void depthRequestReceived();
 	void depthFirstOrder(double,double,bool);
