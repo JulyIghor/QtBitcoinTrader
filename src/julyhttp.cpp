@@ -597,7 +597,7 @@ void JulyHttp::sendPendingData()
 
 	if(currentPendingRequest)
 	{
-		if(requestList.first().skipOnce==true)requestList[0].retryCount=false;
+		if(requestList.first().skipOnce==true)requestList[0].skipOnce=false;
 		else
 		{
 			if(bytesAvailable())

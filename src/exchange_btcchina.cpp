@@ -102,7 +102,7 @@ void Exchange_BTCChina::secondSlot()
 
 	}
 
-	if(infoCounter==3)
+	if(infoCounter++==3)
 	{
 		infoCounter=0;
 		quint32 syncTonce=QDateTime::currentDateTime().toTime_t();

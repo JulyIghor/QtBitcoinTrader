@@ -110,10 +110,11 @@ int main(int argc, char *argv[])
 	julyTranslator=new JulyTranslator;
 	appDataDir_=new QByteArray();
 	appVerIsBeta_=new bool(false);
-	appVerStr_=new QByteArray("1.0795");
+	appVerStr_=new QByteArray("1.07951");
 	appVerReal_=new double(appVerStr.toDouble());
 	if(appVerStr.size()>4)
 	{ 
+		if(appVerStr.size()==7)appVerStr.remove(6,1);
 		appVerStr.insert(4,".");
 		if(appVerStr.at(appVerStr.size()-1)!='0')appVerIsBeta=true;
 	}
