@@ -599,7 +599,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 						QByteArray logText=getMidData(" at ","\",\"",&curLog);
 
 						QByteArray priceSign;
-						static QList<QPair<QByteArray,QByteArray>> utfSignList;
+						static QList<QPair<QByteArray,QByteArray> > utfSignList;
 						if(utfSignList.count()==0)
 						{
 							QPair<QByteArray,QByteArray> curPair;
