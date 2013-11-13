@@ -33,6 +33,8 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	double meridianPrice;
+	bool exchangeSupportsLastTradesType;
 	bool exchangeSupportsAvailableAmount;
 	double availableAmount;
 	RulesModel *rulesModel;
@@ -71,14 +73,15 @@ public:
 	QtBitcoinTrader();
 	~QtBitcoinTrader();
 
+	OrdersModel *ordersModel;
 private:
+	quint32 currencyChangedDate;
 	void keyPressEvent(QKeyEvent *event);
 	bool swapedDepth;
 	DepthModel *depthAsksModel;
 	DepthModel *depthBidsModel;
 	TradesModel *tradesModel;
 	HistoryModel *historyModel;
-	OrdersModel *ordersModel;
 	QSortFilterProxyModel *ordersSortModel;
 	void clearDepth();
 	void calcOrdersTotalValues();
@@ -202,7 +205,7 @@ public slots:
 	void setTradesScrollBarValue(int);
 	void tabTradesIndexChanged(int);
 	void tabTradesScrollUp();
-	void addLastTrade(double, qint64, double, QByteArray, bool);
+	void addLastTrade(double, quint32, double, QByteArray, bool);
 
 	void detachLog();
 	void detachTrades();

@@ -107,6 +107,8 @@ void AddRuleWindow::amountChanged()
 	ui.labelSpendAll->setVisible(ui.checkBuyAllIn->isChecked());
 	ui.labelSpendHalf->setVisible(ui.checkBuyHalfIn->isChecked());
 	ui.labelCancelAllOrders->setVisible(ui.checkCancelAllOrders->isChecked());
+	ui.labelEnableAllRules->setVisible(ui.checkEnableAllRules->isChecked());
+	ui.labelDisableAllRules->setVisible(ui.checkDisableAllRules->isChecked());
 	checkToEnableButtons();
 }
 
@@ -159,6 +161,8 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder *holder)
 	if(fillRuleBtc==-3.0)ui.checkBuyAllIn->setChecked(true);
 	if(fillRuleBtc==-4.0)ui.checkBuyHalfIn->setChecked(true);
 	if(fillRuleBtc==-5.0)ui.checkCancelAllOrders->setChecked(true);
+	if(fillRuleBtc==-6.0)ui.checkEnableAllRules->setChecked(true);
+	if(fillRuleBtc==-7.0)ui.checkDisableAllRules->setChecked(true);
 	}
 
 	double fillRulePrice=holder->getRulePrice();
@@ -191,6 +195,8 @@ RuleHolder AddRuleWindow::getRuleHolder()
 	if(ui.checkBuyAllIn->isChecked()){isBuying=true;btcValue=-3.0;}
 	if(ui.checkBuyHalfIn->isChecked()){isBuying=true;btcValue=-4.0;}
 	if(ui.checkCancelAllOrders->isChecked())btcValue=-5.0;
+	if(ui.checkEnableAllRules->isChecked())btcValue=-6.0;
+	if(ui.checkDisableAllRules->isChecked())btcValue=-7.0;
 
 	double ruleSellPrice=ui.exactPriceValue->value();
 

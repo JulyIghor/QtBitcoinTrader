@@ -10,6 +10,7 @@
 #include "depthmodel.h"
 #include "main.h"
 #define grouped (groupPriceValue>0.0?2:0)
+#include <QTimer>
 
 DepthModel::DepthModel(bool isAskData)
 	: QAbstractItemModel()
@@ -49,7 +50,7 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 	if(!index.isValid())return QVariant();
 	int currentRow=index.row();
 
-	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
+	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::BackgroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
 
 	int indexColumn=index.column();
 	if(isAsk)indexColumn=columnsCount-indexColumn-1;
@@ -103,6 +104,20 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 
 	double requestedPrice=priceList.at(currentRow);
 	if(requestedPrice<=0.0)return QVariant();
+
+	if(role==Qt::BackgroundRole)
+	{
+		if(!isAsk)
+		{
+			if(mainWindow.ordersModel->currentAsksPrices.value(requestedPrice,false))return QColor(200,255,200);
+		}
+		else
+		{
+			if(mainWindow.ordersModel->currentBidsPrices.value(requestedPrice,false))return QColor(200,255,200);
+		}
+		return QVariant();
+	}
+
 	QString returnText;
 
 	switch(indexColumn)
@@ -131,6 +146,17 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 	}
 	if(!returnText.isEmpty())return returnText;
 	return QVariant();
+}
+
+void DepthModel::reloadVisibleItems()
+{
+	QTimer::singleShot(100,this,SLOT(delayedReloadVisibleItems()));
+}
+
+void DepthModel::delayedReloadVisibleItems()
+{
+	emit dataChanged(index(0,0),index(priceList.count()-1,columnsCount-1));
+	emit layoutChanged();
 }
 
 void DepthModel::calculateSize()
@@ -183,7 +209,7 @@ void DepthModel::calculateSize()
 
 	int sizeColumn=2;
 	if(isAsk)sizeColumn=1;
-	emit dataChanged(index(0,sizeColumn),index(priceList.count(),sizeColumn));
+	emit dataChanged(index(0,sizeColumn),index(priceList.count()-1,sizeColumn));
 	emit layoutChanged();
 }
 

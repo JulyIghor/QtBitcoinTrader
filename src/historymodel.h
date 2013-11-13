@@ -40,12 +40,12 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 private:
 	int typeWidth;
-	qint64 lastDate;
+	quint32 lastDate;
 	int columnsCount;
 	QStringList headerLabels;
 	QStringList typesLabels;
 
-	QList<qint64> dateList;
+	QList<quint32> dateList;
 	QList<double> volumeList;
 	QList<double> priceList;
 	QList<QByteArray> symbolList;

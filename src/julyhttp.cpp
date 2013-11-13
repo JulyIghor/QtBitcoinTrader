@@ -14,7 +14,7 @@
 #include <QFile>
 
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
-	: QObject(parent)
+	: QSslSocket(parent)
 {
 	secureConnection=secure;
 	isDataPending=false;
@@ -29,8 +29,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	outGoingPacketsCount=0;
 	contentGzipped=false;
 
-	socket=new QSslSocket(this);
-	setupSocket(socket);
+	setupSocket();
 	
 	requestTimeOut.restart();
 	hostName=hostN;
@@ -55,7 +54,7 @@ JulyHttp::~JulyHttp()
 	abortSocket();
 }
 
-void JulyHttp::setupSocket(QSslSocket *socket)
+void JulyHttp::setupSocket()
 {
 	static QList<QSslCertificate> certs;
 	if(certs.count()==0)
@@ -82,15 +81,15 @@ void JulyHttp::setupSocket(QSslSocket *socket)
 
 	if(certs.count())
 	{
-	socket->addCaCertificates(certs);
-	socket->addDefaultCaCertificates(certs);
+	addCaCertificates(certs);
+	addDefaultCaCertificates(certs);
 	}
 
-	socket->setPeerVerifyMode(QSslSocket::VerifyPeer);
-	socket->setSocketOption(QAbstractSocket::KeepAliveOption,true);
-	connect(socket,SIGNAL(readyRead()),SLOT(readSocket()));
-	connect(socket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(errorSlot(QAbstractSocket::SocketError)));
-	connect(socket,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrorsSlot(const QList<QSslError> &)));
+	setPeerVerifyMode(QSslSocket::VerifyPeer);
+	setSocketOption(QAbstractSocket::KeepAliveOption,true);
+	connect(this,SIGNAL(readyRead()),SLOT(readSocket()));
+	connect(this,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(errorSlot(QAbstractSocket::SocketError)));
+	connect(this,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrorsSlot(const QList<QSslError> &)));
 }
 
 void JulyHttp::clearPendingData()
@@ -102,27 +101,25 @@ void JulyHttp::clearPendingData()
 void JulyHttp::reConnect(bool mastAbort)
 {
 	if(isDisabled)return;
-	reconnectSocket(socket,mastAbort);
+	reconnectSocket(mastAbort);
 	retryRequest();
 }
 
 void JulyHttp::abortSocket()
 {
-	if(socket==0)return;
-	socket->blockSignals(true);
-	socket->abort();
-	socket->blockSignals(false);
+	blockSignals(true);
+	abort();
+	blockSignals(false);
 }
 
-void JulyHttp::reconnectSocket(QSslSocket *socket, bool mastAbort)
+void JulyHttp::reconnectSocket(bool mastAbort)
 {
 	if(isDisabled)return;
-	if(socket==0)return;
 	if(mastAbort)abortSocket();
-	if(socket->state()==QAbstractSocket::UnconnectedState||socket->state()==QAbstractSocket::UnconnectedState)
+	if(state()==QAbstractSocket::UnconnectedState||state()==QAbstractSocket::UnconnectedState)
 	{
-		if(secureConnection)socket->connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
-		else socket->connectToHost(hostName,80,QIODevice::ReadWrite);
+		if(secureConnection)connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
+		else connectToHost(hostName,80,QIODevice::ReadWrite);
 	}
 }
 
@@ -160,9 +157,9 @@ void JulyHttp::readSocket()
 	{
 		bool endFound=false;
 		QByteArray currentLine;
-		while(!endFound&&socket->canReadLine())
+		while(!endFound&&canReadLine())
 		{
-			currentLine=socket->readLine();
+			currentLine=readLine();
 			if(currentLine=="\r\n"||
 			   currentLine=="\n"||
 			   currentLine.isEmpty())endFound=true;
@@ -207,7 +204,7 @@ void JulyHttp::readSocket()
 
 	bool allDataReaded=false;
 
-		qint64 readSize=socket->bytesAvailable();
+		qint64 readSize=bytesAvailable();
 
 		QByteArray *dataArray=0;
 		if(chunkedSize!=-1)
@@ -216,8 +213,8 @@ void JulyHttp::readSocket()
 			{
 				if(chunkedSize==0)
 				{
-					if(!socket->canReadLine())break;
-					QString sizeString=socket->readLine();
+					if(!canReadLine())break;
+					QString sizeString=readLine();
 					int tPos=sizeString.indexOf(QLatin1Char(';'));
 					if(tPos!=-1)sizeString.truncate(tPos);
 					bool ok;
@@ -232,9 +229,9 @@ void JulyHttp::readSocket()
 					if(chunkedSize==0)chunkedSize=-2;
 				}
 
-				while(chunkedSize==-2&&socket->canReadLine())
+				while(chunkedSize==-2&&canReadLine())
 				{
-					QString currentLine=socket->readLine();
+					QString currentLine=readLine();
 					 if(currentLine==QLatin1String("\r\n")||
 						currentLine==QLatin1String("\n"))chunkedSize=-1;
 				}
@@ -244,7 +241,7 @@ void JulyHttp::readSocket()
 					break;
 				}
 
-				readSize=socket->bytesAvailable();
+				readSize=bytesAvailable();
 				if(readSize==0)break;
 				if(readSize==chunkedSize||readSize==chunkedSize+1)
 				{
@@ -256,14 +253,14 @@ void JulyHttp::readSocket()
 				if(!dataArray)dataArray=new QByteArray;
 				quint32 oldDataSize=dataArray->size();
 				dataArray->resize(oldDataSize+bytesToRead);
-				qint64 read=socket->read(dataArray->data()+oldDataSize,bytesToRead);
+				qint64 read=this->read(dataArray->data()+oldDataSize,bytesToRead);
 				dataArray->resize(oldDataSize+read);
 
 				chunkedSize-=read;
 				if(chunkedSize==0&&readSize-read>=2)
 				{
 					char twoBytes[2];
-					socket->read(twoBytes,2);
+					this->read(twoBytes,2);
 					if(twoBytes[0]!='\r'||twoBytes[1]!='\n')
 					{
 						if(debugLevel)logThread->writeLog("Invalid HTTP chunked body",2);
@@ -283,14 +280,14 @@ void JulyHttp::readSocket()
 				if(dataArray){delete dataArray;dataArray=0;}
 				dataArray=new QByteArray;
 				dataArray->resize(readSize);
-				dataArray->resize(socket->read(dataArray->data(),readSize));
+				dataArray->resize(read(dataArray->data(),readSize));
 			}
-			if(bytesDone+socket->bytesAvailable()+readSize==contentLength)allDataReaded=true;
+			if(bytesDone+bytesAvailable()+readSize==contentLength)allDataReaded=true;
 			}
 			else 
 			if(readSize>0)
 			{
-			if(!dataArray)dataArray=new QByteArray(socket->readAll());
+			if(!dataArray)dataArray=new QByteArray(readAll());
 			}
 
 		if(dataArray)
@@ -313,17 +310,22 @@ void JulyHttp::readSocket()
 			if(contentGzipped)uncompress(&buffer);
 			bool apiMaybeDown=buffer[0]=='<';
 			setApiDown(apiMaybeDown);
-			if(debugLevel)logThread->writeLog("RCV: "+buffer);
-			if(!apiMaybeDown)emit dataReceived(buffer,requestList.first().second);
+			if(debugLevel&&buffer.isEmpty())logThread->writeLog("Response is EMPTY",2);
+			if(!apiMaybeDown)emit dataReceived(buffer,requestList.first().reqType);
 		}
 		waitingReplay=false;
 		readingHeader=true;
+		if(!buffer.isEmpty())
+		{
+		if(requestList.count())requestList[0].retryCount=0;
+
 		takeFirstRequest();
 		clearRequest();
 		if(connectionClose)
 		{
 			if(debugLevel)logThread->writeLog("HTTP: connection closed");
 			reConnect(true);
+		}
 		}
 		sendPendingData();
 	}
@@ -381,15 +383,18 @@ bool JulyHttp::isReqTypePending(int val)
 
 void JulyHttp::retryRequest()
 {
-	if(isDisabled)return;
-	if(requestRetryCount<=0)takeFirstRequest();
-	else requestRetryCount--;
+	if(isDisabled||requestList.count()==0)return;
+	if(requestList.first().retryCount<=0)takeFirstRequest();
+	else
+	{
+		if(debugLevel)logThread->writeLog("Warning: Request resent due timeout",2);
+		requestList[0].retryCount--;
+	}
 	sendPendingData();
 }
 
 void JulyHttp::clearRequest()
 {
-	requestRetryCount=0;
 	buffer.clear();
 	chunkedSize=-1;
 	nextPacketMastBeSize=false;
@@ -408,17 +413,20 @@ void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray pos
 	}
 	else data->append("\r\n");
 
-	QPair<QByteArray*,int> reqPair;
-	reqPair.first=data;
-	reqPair.second=reqType;
-	preparedList<<reqPair;
+	PacketItem newPacket;
+			   newPacket.data=data;
+			   newPacket.reqType=reqType;
+			   newPacket.retryCount=0;
+			   newPacket.skipOnce=false;
+
 	if(forceRetryCount==-1)
 	{
-	if(reqType>300)retryCountMap[data]=httpRetryCount-1;
-	else retryCountMap[data]=0;
+		if(reqType>300)newPacket.retryCount=httpRetryCount-1;
 	}
-	else retryCountMap[data]=forceRetryCount;
+	else newPacket.retryCount=forceRetryCount;
 	reqTypePending[reqType]=reqTypePending.value(reqType,0)+1;
+
+	preparedList<<newPacket;
 }
 
 void JulyHttp::prepareDataSend()
@@ -428,8 +436,8 @@ void JulyHttp::prepareDataSend()
 
 	for(int n=1;n<preparedList.count();n++)
 	{
-		preparedList.at(0).first->append(*(preparedList.at(n).first))+"\r\n\r\n";
-		skipOnceMap[preparedList.at(n).first]=true;
+		preparedList[0].data->append(*(preparedList[n].data))+"\r\n\r\n";
+		preparedList[n].skipOnce=true;
 	}
 	for(int n=0;n<preparedList.count();n++)requestList<<preparedList.at(n);
 	preparedList.clear();
@@ -445,10 +453,9 @@ void JulyHttp::prepareDataClear()
 	if(isDisabled)return;
 	for(int n=0;n<preparedList.count();n++)
 	{
-		QPair<QByteArray*,int> reqPair=preparedList.at(n);
-		retryCountMap.remove(reqPair.first);
-		reqTypePending[reqPair.second]=reqTypePending.value(reqPair.second,1)-1;
-		if(reqPair.first)delete reqPair.first;
+		PacketItem preparingPacket=preparedList.at(n);
+		reqTypePending[preparingPacket.reqType]=reqTypePending.value(preparingPacket.reqType,1)-1;
+		if(preparingPacket.data)delete preparingPacket.data;
 	}
 	preparedList.clear();
 }
@@ -467,20 +474,24 @@ void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postDa
 
 	if(reqType>300)
 		for(int n=requestList.count()-1;n>=1;n--)
-			if(requestList.at(n).second<300&&skipOnceMap.value(requestList.at(n).first,false)!=true)
+			if(requestList.at(n).reqType<300&&requestList[n].skipOnce!=true)
 				takeRequestAt(n);
 
-	QPair<QByteArray*,int> reqPair;
-	reqPair.first=data;
-	reqPair.second=reqType;
+	PacketItem newPacket;
+	           newPacket.data=data;
+	           newPacket.reqType=reqType;
+	           newPacket.retryCount=0;
+	           newPacket.skipOnce=false;
+
 	if(forceRetryCount==-1)
 	{
-	if(reqType>300)retryCountMap[data]=httpRetryCount-1;
-	else retryCountMap[data]=0;
+	if(reqType>300)newPacket.retryCount=httpRetryCount-1;
+	else newPacket.retryCount=0;
 	}
-	else retryCountMap[data]=forceRetryCount;
+	else newPacket.retryCount=forceRetryCount;
 
-	requestList<<reqPair;
+	if(newPacket.retryCount>0&&debugLevel&&newPacket.reqType>299)logThread->writeLog("Added to Query RetryCount="+QByteArray::number(newPacket.retryCount),2);
+	requestList<<newPacket;
 
 	if(isDataPending!=true)
 	{
@@ -495,17 +506,17 @@ void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postDa
 void JulyHttp::takeRequestAt(int pos)
 {
 	if(requestList.count()<=pos)return;
-	QPair<QByteArray*,int> reqPair=requestList.at(pos);
-	reqTypePending[reqPair.second]=reqTypePending.value(reqPair.second,1)-1;
-	retryCountMap.remove(reqPair.first);
-	if(debugLevel)logThread->writeLog("Data taken: "+*reqPair.first);
-	delete reqPair.first;
-	reqPair.first=0;
+	PacketItem packetTake=requestList.at(pos);
+	reqTypePending[packetTake.reqType]=reqTypePending.value(packetTake.reqType,1)-1;
+
+	if(debugLevel)logThread->writeLog("Data taken: "+*packetTake.data);
+	delete packetTake.data;
+	packetTake.data=0;
 	requestList.removeAt(pos);
+
 	if(requestList.count()==0)
 	{
 		reqTypePending.clear();
-		retryCountMap.clear();
 
 		if(isDataPending!=false)
 		{
@@ -525,40 +536,20 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 {
 	if(socketError!=QAbstractSocket::RemoteHostClosedError||socketError!=QAbstractSocket::UnfinishedSocketOperationError)setApiDown(true);
 
-	if(debugLevel)logThread->writeLog("SocketError: "+socket->errorString().toAscii(),2);
+	if(debugLevel)logThread->writeLog("SocketError: "+errorString().toAscii(),2);
 
 	if(socketError==QAbstractSocket::ProxyAuthenticationRequiredError)
 	{
 		isDisabled=true;
-		emit errorSignal(socket->errorString());
+		emit errorSignal(errorString());
 		abortSocket();
 	}
-	else reconnectSocket(socket,false);
+	else reconnectSocket(false);
 }
 
-bool JulyHttp::isSocketConnected(QSslSocket *socket)
+bool JulyHttp::isSocketConnected()
 {
-	return socket->state()==QAbstractSocket::ConnectedState;
-}
-
-QSslSocket *JulyHttp::getStableSocket()
-{
-	if(isSocketConnected(socket))return socket;
-	else reconnectSocket(socket,false);
-
-	if(socket->state()!=QAbstractSocket::UnconnectedState)
-	{
-		if(socket->state()==QAbstractSocket::ConnectingState||socket->state()==QAbstractSocket::HostLookupState)socket->waitForConnected(httpRequestTimeout+1000);
-	}
-	if(socket->state()!=QAbstractSocket::ConnectedState)
-	{
-		setApiDown(true);
-		if(debugLevel)logThread->writeLog("Socket error: "+socket->errorString().toAscii(),2);
-		reconnectSocket(socket,false);
-		if(socket->state()==QAbstractSocket::ConnectingState)socket->waitForConnected(httpRequestTimeout+1000);
-	}
-	else reconnectSocket(socket,false);
-	return socket;
+	return state()==QAbstractSocket::ConnectedState;
 }
 
 void JulyHttp::sendPendingData()
@@ -566,46 +557,57 @@ void JulyHttp::sendPendingData()
 	if(isDisabled)return;
 	if(requestList.count()==0)return;
 
-	QSslSocket *currentSocket=getStableSocket();
+	if(!isSocketConnected())reconnectSocket(false);
 
-	if(currentSocket->state()!=QAbstractSocket::ConnectedState)return;
+	if(state()!=QAbstractSocket::UnconnectedState)
+	{
+		if(state()==QAbstractSocket::ConnectingState||state()==QAbstractSocket::HostLookupState)waitForConnected(httpRequestTimeout+1000);
+	}
+	if(state()!=QAbstractSocket::ConnectedState)
+	{
+		setApiDown(true);
+		if(debugLevel)logThread->writeLog("Socket state: "+errorString().toAscii(),2);
+		reconnectSocket(false);
+		if(state()==QAbstractSocket::ConnectingState)waitForConnected(httpRequestTimeout+1000);
+	}
+	else reconnectSocket(false);
 
-	QByteArray *pendingRequest=pendingRequestMap.value(currentSocket,0);
-	if(pendingRequest==requestList.first().first)
+	if(state()!=QAbstractSocket::ConnectedState)return;
+
+	if(currentPendingRequest==requestList.first().data)
 	{
 		if(requestTimeOut.elapsed()<httpRequestTimeout)return;
 		else
 		{
 			if(debugLevel)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(httpRequestTimeout).toAscii(),2);
-			reconnectSocket(socket,true);
+			reconnectSocket(true);
 			setApiDown(true);
-			if(requestRetryCount>0){retryRequest();return;}
+			if(requestList.first().retryCount>0){retryRequest();return;}
 		}
 	}
 	else
 	{
-		pendingRequestMap[currentSocket]=requestList.first().first;
-		pendingRequest=pendingRequestMap.value(currentSocket,0);
+		currentPendingRequest=requestList.first().data;
+		if(debugLevel&&requestList.first().reqType>299)logThread->writeLog("Sending request ID: "+QByteArray::number(requestList.first().reqType),2);
 	}
 	clearRequest();
-	requestRetryCount=retryCountMap.value(pendingRequest,0);
-	if(requestRetryCount<0||requestRetryCount>100)requestRetryCount=0;
-	requestTimeOut.restart();
-	if(debugLevel)logThread->writeLog("SND: "+QByteArray(*pendingRequest).replace(restKey,"REST_KEY").replace(restSign,"REST_SIGN"));
 
-	if(pendingRequest)
+	requestTimeOut.restart();
+	if(debugLevel)logThread->writeLog("SND: "+QByteArray(*currentPendingRequest).replace(restKey,"REST_KEY").replace(restSign,"REST_SIGN"));
+
+	if(currentPendingRequest)
 	{
-		if(skipOnceMap.value(pendingRequest,false)==true)skipOnceMap.remove(pendingRequest);
+		if(requestList.first().skipOnce==true)requestList[0].retryCount=false;
 		else
 		{
-			if(currentSocket->bytesAvailable())
+			if(bytesAvailable())
 			{
-				if(debugLevel)logThread->writeLog("Cleared previous data: "+currentSocket->readAll());
-				else currentSocket->readAll();
+				if(debugLevel)logThread->writeLog("Cleared previous data: "+readAll());
+				else readAll();
 			}
 			waitingReplay=false;
-			currentSocket->write(*pendingRequest);
-			currentSocket->flush();
+			write(*currentPendingRequest);
+			flush();
 		}
 	}
 	else if(debugLevel)logThread->writeLog("PendingRequest pointer not exist",2);

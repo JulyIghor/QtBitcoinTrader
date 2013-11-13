@@ -19,6 +19,7 @@ class DepthModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+	void reloadVisibleItems();
 	void fixTitleWidths();
 	int itemsCount(){return volumeList.count();}
 	void calculateSize();
@@ -44,6 +45,8 @@ public:
 	void depthUpdateOrders(QList<DepthItem> *items);
 	void depthFirstOrder(double price, double volume);
 
+private slots:
+	void delayedReloadVisibleItems();
 private:
 	void depthUpdateOrder(double price, double volume);
 	bool originalIsAsk;

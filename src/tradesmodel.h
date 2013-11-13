@@ -25,8 +25,8 @@ public:
 	double getRowVolume(int);
 	bool getRowType(int);
 	void clear();
-	void removeDataOlderThen(qint64);
-	void addNewTrade(qint64 dateT, double volumeT, double priceT, QByteArray curRency, bool isSell);
+	void removeDataOlderThen(quint32);
+	void addNewTrade(quint32 dateT, double volumeT, double priceT, QByteArray curRency, int isSell);
 
 	void setHorizontalHeaderLabels(QStringList list);
 
@@ -42,7 +42,7 @@ public:
 
 private:
 	double lastPrecentBids;
-	qint64 lastRemoveDate;
+	quint32 lastRemoveDate;
 	void removeFirst();
 	QString textBid;
 	QString textAsk;
@@ -57,12 +57,12 @@ private:
 
 	QStringList headerLabels;
 
-	QHash<qint64,int> colorMap;
+	QHash<quint32,int> colorMap;
 
-	QList<qint64> dateList;
+	QList<quint32> dateList;
 	QList<double> volumeList;
 	QList<double> priceList;
-	QList<bool> typesList;
+	QList<int> typesList;
 	QList<int> directionList;
 signals:
 	void precentBidsChanged(double);

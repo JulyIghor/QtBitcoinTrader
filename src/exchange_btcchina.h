@@ -21,7 +21,7 @@ public:
 	~Exchange_BTCChina();
 
 private:
-	QByteArray numForSellFromDouble(double val, int maxDecimals);
+	QByteArray numForBuySellFromDouble(double val, int maxDecimals);
 	void depthUpdateOrder(double,double,bool);
 	QList<DepthItem> *depthAsks;
 	QList<DepthItem> *depthBids;

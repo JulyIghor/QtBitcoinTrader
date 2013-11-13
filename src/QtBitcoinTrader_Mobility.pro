@@ -5,18 +5,21 @@ TEMPLATE	= app
 LANGUAGE        = C++
 TARGET 		= QtBitcoinTrader
 DEPENDPATH 	+= .
+QT		+= network
 INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
-QT		+= network multimedia
+INCLUDEPATH    += /usr/include/QtMultimediaKit
+INCLUDEPATH    += /usr/include/QtMobility
+MOBILITY       = multimedia
 
 win32 {
 LIBS		+= -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32
 }
 !win32 {
-LIBS		+= -lcrypto -lz
+LIBS		+= -lcrypto -lz -lQtMultimediaKit
 }
 
-CONFIG		+= qt warn_off release
+CONFIG		+= qt warn_off release mobility
 
 #
 # Headers

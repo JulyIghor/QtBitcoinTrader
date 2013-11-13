@@ -282,3 +282,10 @@ String_YES=是
 String_LANGUAGE_NAME=简体中文
 String_LANGUAGE_AUTHOR=kim wu <a href="mailto:kimkimbag1@gmail.com">kimkimbag1@gmail.com</a><br>捐赠 BTC: <a href="bitcoin:15E8SNzoy64Aa1SY37xcphhZF4mFnDfCu3">15E8SNzoy64Aa1SY37xcphhZF4mFnDfCu3</a>
 String_LANGUAGE_LOCALE=zh
+String_ENABLE_ALL_RULES=启用所有规则
+String_DISABLE_ALL_RULES=禁用所有规则
+CheckBox_ENABLE_ALL_RULES=启用所有规则
+CheckBox_DISABLE_ALL_RULES=禁用所有规则
+Label_ENABLE_ALL_RULES=启用所有规则禁止在执行规则时。
+Label_DISABLE_ALL_RULES=禁用所有规则在执行规则时启用。
+Label_REMOVE_RULES=移除

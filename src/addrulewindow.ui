@@ -330,28 +330,6 @@
          <string notr="true"/>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="btcLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="accessibleDescription">
-            <string>BTC_ICON</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: #996515</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="1">
           <widget class="QDoubleSpinBox" name="btcValue">
            <property name="sizePolicy">
@@ -386,6 +364,62 @@
            </property>
            <property name="singleStep">
             <double>0.100000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="btcLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="accessibleDescription">
+            <string>BTC_ICON</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: #996515</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="QLabel" name="labelSpendAll">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="accessibleName">
+            <string>TR00078</string>
+           </property>
+           <property name="text">
+            <string>Spend All my Funds available at the time of rule executed.</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -457,40 +491,6 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0" colspan="2">
-          <widget class="QLabel" name="labelSpendAll">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>150</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="accessibleName">
-            <string>TR00078</string>
-           </property>
-           <property name="text">
-            <string>Spend All my Funds available at the time of rule executed.</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
          <item row="4" column="0" colspan="2">
           <widget class="QLabel" name="labelSpendHalf">
            <property name="sizePolicy">
@@ -550,6 +550,74 @@
            </property>
            <property name="text">
             <string>Cancel All Orders opened at the time of rule executed.</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0" colspan="2">
+          <widget class="QLabel" name="labelEnableAllRules">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="accessibleName">
+            <string>ENABLE_ALL_RULES</string>
+           </property>
+           <property name="text">
+            <string>Enable All Rules disabled at the time of rule executed.</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0" colspan="2">
+          <widget class="QLabel" name="labelDisableAllRules">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="accessibleName">
+            <string>DISABLE_ALL_RULES</string>
+           </property>
+           <property name="text">
+            <string>Disable All Rules enabled at the time of rule executed.</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -689,6 +757,38 @@
            </property>
            <property name="text">
             <string>Cancel All Orders</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkEnableAllRules">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="accessibleName">
+            <string>ENABLE_ALL_RULES</string>
+           </property>
+           <property name="text">
+            <string>Enable All Rules</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="checkDisableAllRules">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="accessibleName">
+            <string>DISABLE_ALL_RULES</string>
+           </property>
+           <property name="text">
+            <string>Disable All Rules</string>
            </property>
           </widget>
          </item>
@@ -1075,8 +1175,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>616</x>
-     <y>368</y>
+     <x>594</x>
+     <y>380</y>
     </hint>
     <hint type="destinationlabel">
      <x>433</x>
@@ -1091,8 +1191,8 @@
    <slot>buttonAddRule()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>454</x>
-     <y>368</y>
+     <x>432</x>
+     <y>380</y>
     </hint>
     <hint type="destinationlabel">
      <x>304</x>
@@ -1108,7 +1208,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>638</x>
-     <y>118</y>
+     <y>95</y>
     </hint>
     <hint type="destinationlabel">
      <x>580</x>
@@ -1124,7 +1224,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>638</x>
-     <y>141</y>
+     <y>118</y>
     </hint>
     <hint type="destinationlabel">
      <x>551</x>
@@ -1140,7 +1240,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>638</x>
-     <y>164</y>
+     <y>141</y>
     </hint>
     <hint type="destinationlabel">
      <x>552</x>
@@ -1156,7 +1256,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>638</x>
-     <y>187</y>
+     <y>164</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -1172,7 +1272,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>638</x>
-     <y>210</y>
+     <y>187</y>
     </hint>
     <hint type="destinationlabel">
      <x>646</x>
@@ -1188,7 +1288,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>638</x>
-     <y>233</y>
+     <y>210</y>
     </hint>
     <hint type="destinationlabel">
      <x>516</x>
@@ -1204,7 +1304,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>638</x>
-     <y>256</y>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>634</x>
@@ -1252,7 +1352,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>638</x>
-     <y>256</y>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>708</x>
@@ -1545,6 +1645,70 @@
     <hint type="destinationlabel">
      <x>1098</x>
      <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkEnableAllRules</sender>
+   <signal>clicked()</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>amountChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>605</x>
+     <y>256</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>709</x>
+     <y>423</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDisableAllRules</sender>
+   <signal>clicked()</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>amountChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>622</x>
+     <y>275</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>669</x>
+     <y>448</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkEnableAllRules</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>setOrdersBackInvisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>649</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>663</x>
+     <y>477</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDisableAllRules</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleWindow</receiver>
+   <slot>setOrdersBackInvisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>627</x>
+     <y>284</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>929</x>
+     <y>548</y>
     </hint>
    </hints>
   </connection>

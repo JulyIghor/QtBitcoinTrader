@@ -282,3 +282,10 @@ String_YES=Oui
 String_LANGUAGE_NAME=Français
 String_LANGUAGE_AUTHOR=Thomas P.<br><a href="mailto:horatio.btc@gmail.com">horatio.btc@gmail.com</a><br>Faire un don de Bitcoins:<br><a href="bitcoin:13sj2UyHgtrprbr43kREUanfqDG5cokfv2">13sj2UyHgtrprbr43kREUanfqDG5cokfv2</a>
 String_LANGUAGE_LOCALE=fr
+String_ENABLE_ALL_RULES=Enable All Rules
+String_DISABLE_ALL_RULES=Disable All Rules
+CheckBox_ENABLE_ALL_RULES=Enable All Rules
+CheckBox_DISABLE_ALL_RULES=Disable All Rules
+Label_ENABLE_ALL_RULES=Enable All Rules disabled at the time of rule executed.
+Label_DISABLE_ALL_RULES=Disable All Rules enabled at the time of rule executed.
+Label_REMOVE_RULES=Remove:

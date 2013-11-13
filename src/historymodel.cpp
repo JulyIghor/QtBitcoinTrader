@@ -30,10 +30,10 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 	if(histList->count()==0){delete histList; return;}
 
 	beginInsertRows(QModelIndex(), 0, histList->count());
-	qint64 maxListDate=0;
+	quint32 maxListDate=0;
 	for(int n=histList->count()-1;n>=0;n--)
 	{
-		qint64 curItemDate=histList->at(n).date;
+		quint32 curItemDate=histList->at(n).date;
 		if(maxListDate<curItemDate)maxListDate=curItemDate;
 		dateList<<curItemDate;
 		volumeList<<histList->at(n).volume;

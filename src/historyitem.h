@@ -12,7 +12,7 @@
 
 struct HistoryItem 
 {
-	qint64 date;
+	quint32 date;
 	double volume;
 	double price;
 	QByteArray symbol;

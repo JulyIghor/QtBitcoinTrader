@@ -140,6 +140,8 @@ QString RuleHolder::getDescriptionString()
 QString RuleHolder::getSellOrBuyString()
 {
 	if(ruleBtc==-5.0)return julyTr("CANCEL_ALL_ORDERS","Cancel All Orders");
+	if(ruleBtc==-6.0)return julyTr("ENABLE_ALL_RULES","Enable All Rules");
+	if(ruleBtc==-7.0)return julyTr("DISABLE_ALL_RULES","Disable All Rules");
 	if(buying)return julyTr("ORDER_TYPE_BID","Buy");
 	return julyTr("ORDER_TYPE_ASK","Sell");
 }
@@ -151,6 +153,8 @@ QString RuleHolder::getBitcoinsString()
 	if(ruleBtc==-3.0)return julyTr("SPEND_ALL_FUNDS","Spend All my Funds");
 	if(ruleBtc==-4.0)return julyTr("SPEND_HALF_FUNDS","Spend Half my Funds");
 	if(ruleBtc==-5.0)return julyTr("NOT_USED","Not Used");
+	if(ruleBtc==-6.0)return julyTr("NOT_USED","Not Used");
+	if(ruleBtc==-7.0)return julyTr("NOT_USED","Not Used");
 
 	return currencyASign+" "+mainWindow.numFromDouble(ruleBtc);
 }

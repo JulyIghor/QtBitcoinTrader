@@ -15,6 +15,9 @@
 Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
 {
+	lastBidAskTimestamp=0;
+	lastTradesDate=0;
+	lastTickerDate=0;
 	exchangeID="Bitstamp";
 	depthAsks=0;
 	depthBids=0;
@@ -53,8 +56,8 @@ void Exchange_Bitstamp::clearVariables()
 	lastOrders.clear();
 	reloadDepth();
 	lastInfoReceived=false;
-	lastBidAskTimestamp.clear();
-	lastFetchDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-600).toTime_t())+"0000000";
+	lastBidAskTimestamp=0;
+	lastTradesDate=QDateTime::currentDateTime().addSecs(-600).toTime_t();
 }
 
 void Exchange_Bitstamp::clearValues()
@@ -220,7 +223,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 		if(!success)break;
 			if(data.startsWith("{\"high\":"))
 			{
-				QByteArray tickerTimestamp=getMidData("\"timestamp\": \"","\"",&data);
+				quint32 tickerTimestamp=getMidData("\"timestamp\": \"","\"",&data).toUInt();
 				QByteArray tickerHigh=getMidData("\"high\": \"","\"",&data);
 				if(!tickerHigh.isEmpty())
 				{
@@ -292,23 +295,24 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=tradeList.count()-1;n>=0;n--)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
-					QByteArray tradeDate=getMidData("\"date\": \"","\"",&tradeData);
-					QByteArray nextFetchDate=tradeDate+getMidData("\"tid\": ",",",&tradeData);
-					if(nextFetchDate<=lastFetchDate)continue;
+					quint32 currentTradeDate=getMidData("\"date\": \"","\"",&tradeData).toUInt();
+					if(currentTradeDate<=lastTradesDate)continue;
 					double doubleAmount=getMidData("\"amount\": \"","\"",&tradeData).toDouble();
 					QByteArray priceBytes=getMidData("\"price\": \"","\"",&tradeData);
 					double doublePrice=priceBytes.toDouble();
-					if(n==0&&lastTickerDate<tradeDate&&doublePrice>0.0)
+					if(n==0&&doublePrice>0.0)
 					{
-						lastTickerDate=tradeDate;
+						lastTradesDate=currentTradeDate;
+						if(lastTickerDate<currentTradeDate)
+						{
+						lastTickerDate=currentTradeDate;
 						emit tickerLastChanged(doublePrice);
+						}
 					}
 
 					if(doubleAmount>0.0&&doublePrice>0.0)
-					{
-						emit addLastTrade(doubleAmount,tradeDate.toLongLong(),doublePrice,currencySymbol,true);
-						if(n==0&&!nextFetchDate.isEmpty())lastFetchDate=tradeDate;
-					}
+						emit addLastTrade(doubleAmount,currentTradeDate,doublePrice,currencySymbol,true);
+
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
 				}
 			}
@@ -326,7 +330,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				depthAsks=new QList<DepthItem>;
 				depthBids=new QList<DepthItem>;
 
-				QByteArray tickerTimestamp=getMidData("\"timestamp\": \"","\"",&data);
+				quint32 tickerTimestamp=getMidData("\"timestamp\": \"","\"",&data).toUInt();
 				QMap<double,double> currentAsksMap;
 				QStringList asksList=QString(getMidData("\"asks\": [[","]]",&data)).split("], [");
 				double groupedPrice=0.0;

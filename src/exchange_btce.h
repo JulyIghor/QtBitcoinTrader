@@ -42,7 +42,7 @@ private:
 	double lastTickerHigh;
 	double lastTickerLow;
 	double lastTickerSell;
-	QByteArray lastTickerDate;
+	quint32 lastTickerDate;
 	double lastTickerBuy;
 	double lastTickerVolume;
 
@@ -51,7 +51,7 @@ private:
 	double lastVolume;
 	double lastFee;
 
-	qint64 lastPriceDate;
+	quint32 lastPriceDate;
 
 	QTime authRequestTime;
 	int apiDownCounter;

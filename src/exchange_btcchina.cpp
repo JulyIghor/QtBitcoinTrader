@@ -96,10 +96,13 @@ void Exchange_BTCChina::secondSlot()
 
 	if(!isReplayPending(103))sendToApi(103,"ticker",false,true);
 
-	if(infoCounter==3&&!isReplayPending(109))sendToApi(109,"trades",false,true);
+	if(infoCounter==3&&!isReplayPending(109))
+	{
+		sendToApi(109,"trades",false,true);
 
+	}
 
-	if(++infoCounter>3)
+	if(infoCounter==3)
 	{
 		infoCounter=0;
 		quint32 syncTonce=QDateTime::currentDateTime().toTime_t();
@@ -133,7 +136,7 @@ void Exchange_BTCChina::getHistory(bool force)
 }
 
 
-QByteArray Exchange_BTCChina::numForSellFromDouble(double val, int maxDecimals)
+QByteArray Exchange_BTCChina::numForBuySellFromDouble(double val, int maxDecimals)
 {
 	val=mainWindow.getValidDoubleForPercision(val,3,false);
 	QByteArray numberText=QByteArray::number(val,'f',maxDecimals);
@@ -146,7 +149,7 @@ QByteArray Exchange_BTCChina::numForSellFromDouble(double val, int maxDecimals)
 void Exchange_BTCChina::buy(double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	QByteArray data=numForSellFromDouble(apiPriceToBuy,priceDecimals)+","+numForSellFromDouble(apiBtcToBuy,btcDecimals);
+	QByteArray data=numForBuySellFromDouble(apiPriceToBuy,priceDecimals)+","+numForBuySellFromDouble(apiBtcToBuy,btcDecimals);
 	if(debugLevel)logThread->writeLog("Buy: "+data,2);
 	sendToApi(306,"buyOrder",true,true,data);
 }
@@ -154,7 +157,7 @@ void Exchange_BTCChina::buy(double apiBtcToBuy, double apiPriceToBuy)
 void Exchange_BTCChina::sell(double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
-	QByteArray data=numForSellFromDouble(apiPriceToSell,priceDecimals)+","+numForSellFromDouble(apiBtcToSell,btcDecimals);
+	QByteArray data=numForBuySellFromDouble(apiPriceToSell,priceDecimals)+","+numForBuySellFromDouble(apiBtcToSell,btcDecimals);
 	if(debugLevel)logThread->writeLog("Sell: "+data,2);
 	sendToApi(307,"sellOrder",true,true,data);
 }
@@ -362,7 +365,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					double doublePrice=getMidData("\"price\":",",",&tradeData).toDouble();
 					if(doubleAmount>0.0&&doublePrice>0.0)
 					{
-						emit addLastTrade(doubleAmount,tradeDate.toLongLong(),doublePrice,currencySymbol,true);
+						emit addLastTrade(doubleAmount,tradeDate.toUInt(),doublePrice,currencySymbol,true);
 						if(n==tradeList.count()-1&&!nextFetchDate.isEmpty())lastFetchDate=nextFetchDate;
 					}
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
@@ -645,8 +648,9 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 	default: break;
 	}
 
+	if(reqType<200||reqType==204||reqType==305)return;
 	static int errorCount=0;
-	if(!success&&reqType!=305&&reqType!=111)
+	if(!success)
 	{
 		errorCount++;
 		QString errorString;

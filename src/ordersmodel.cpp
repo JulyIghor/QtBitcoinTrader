@@ -35,6 +35,8 @@ void OrdersModel::clear()
 	if(oidList.count()==0)return;
 
 	beginResetModel();
+	currentAsksPrices.clear();
+	currentBidsPrices.clear();
 	oidList.clear();
 	dateList.clear();
 	typesList.clear();
@@ -54,6 +56,9 @@ void OrdersModel::clear()
 
 void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 {
+	currentAsksPrices.clear();
+	currentBidsPrices.clear();
+
 	if(orders->count()==0)
 	{
 		delete orders;
@@ -77,6 +82,12 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 
 		if(orderSymbol.startsWith(currencyAStr)&&isAsk)volumeTotal+=orders->at(n).amount-decValue;
 		if(orderSymbol.endsWith(currencyBStr)&&!isAsk)amountTotal+=(orders->at(n).amount-decValue)*orders->at(n).price;
+
+		if(orderSymbol==currencySymbol)
+		{
+			if(isAsk)currentAsksPrices[orders->at(n).price]=true;
+			else currentBidsPrices[orders->at(n).price]=true;
+		}
 
 		existingOids.insert(orders->at(n).oid,true);
 		if(checkDuplicatedOID)(*orders)[n].date=oidMapForCheckingDuplicates.value(orders->at(n).oid,orders->at(n).date);

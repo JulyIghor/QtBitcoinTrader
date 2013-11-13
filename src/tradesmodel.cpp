@@ -61,7 +61,7 @@ void TradesModel::removeFirst()
 	directionList.removeFirst();
 }
 
-void TradesModel::removeDataOlderThen(qint64 date)
+void TradesModel::removeDataOlderThen(quint32 date)
 {
 	lastRemoveDate=date;
 	if(priceList.count()==0){updateTotalBTC();return;}
@@ -118,7 +118,7 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 			}
 			break;
 		case 2:
-			if(typesList.at(currentRow))return Qt::red;
+			if(typesList.at(currentRow)==1)return Qt::red;
 			return Qt::blue;
 			break;
 		default: break;
@@ -142,8 +142,12 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 		break;
 	case 2:
 		{//Type
-			if(typesList.at(currentRow))return textAsk;
-			else return textBid;
+			switch(typesList.at(currentRow))
+			{
+			case -1: return textBid;
+			case 1: return textAsk;
+			default: return QVariant();
+			}
 		}
 		break;
 	case 3:
@@ -210,7 +214,7 @@ void TradesModel::updateTotalBTC()
 	for(int n=0;n<volumeList.count();n++)
 	{
 		summ+=volumeList.at(n);
-		if(typesList.at(n)==false)bidsSumm+=volumeList.at(n);
+		if(typesList.at(n)==-1)bidsSumm+=volumeList.at(n);
 	}
 	bidsSumm=100.0*bidsSumm/summ;
 	if(bidsSumm!=lastPrecentBids)
@@ -252,7 +256,7 @@ QModelIndex TradesModel::parent(const QModelIndex &) const
 	return QModelIndex();
 }
 
-void TradesModel::addNewTrade(qint64 dateT, double volumeT, double priceT, QByteArray symbol, bool isSell)
+void TradesModel::addNewTrade(quint32 dateT, double volumeT, double priceT, QByteArray symbol, int isSell)
 {
 	if(symbol!=currencySymbol||dateT<=lastRemoveDate)return;
 
@@ -286,6 +290,6 @@ double TradesModel::getRowVolume(int row)
 bool TradesModel::getRowType(int row)
 {
 	row=typesList.count()-row-1;
-	if(row<0||row>=typesList.count())return 0.0;
-	return typesList.at(row);
+	if(row<0||row>=typesList.count())return true;
+	return typesList.at(row)==1;
 }

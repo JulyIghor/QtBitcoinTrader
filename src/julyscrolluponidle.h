@@ -7,19 +7,28 @@
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
 // GNU General Public License version 3
 
-#ifndef ORDERITEM_H
-#define ORDERITEM_H
+#ifndef JULYSCROLLUPONIDLE_H
+#define JULYSCROLLUPONIDLE_H
 
-struct OrderItem 
+#include <QObject>
+#include <QScrollBar>
+#include <QTimer>
+
+class JulyScrollUpOnIdle : public QObject
 {
-	QByteArray oid;
-	quint32 date;
-	bool type;//true=Ask, false=Bid
-	int status;//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
-	double amount;
-	double price;
-	QByteArray symbol;
-	bool isValid(){return date>0&&price>0.0&&symbol.size()==6;}
+	Q_OBJECT
+
+public:
+	JulyScrollUpOnIdle(QScrollBar *parent);
+	~JulyScrollUpOnIdle();
+
+private:
+	QTimer *idleTimer;
+	QScrollBar *scrollBar;
+private slots:
+	void timeOut();
+	void valueChanged(int);
+
 };
 
-#endif // ORDERITEM_H
+#endif // JULYSCROLLUPONIDLE_H

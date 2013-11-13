@@ -2257,7 +2257,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>1</number>
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
@@ -2790,10 +2790,10 @@
               </sizepolicy>
              </property>
              <property name="accessibleName">
-              <string>REMOVE_ORDERS</string>
+              <string>REMOVE_RULES</string>
              </property>
              <property name="text">
-              <string>Cancel:</string>
+              <string>Remove:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

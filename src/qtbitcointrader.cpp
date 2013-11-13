@@ -16,6 +16,7 @@
 #include "main.h"
 #include "julylightchanges.h"
 #include "julyspinboxfix.h"
+#include "julyscrolluponidle.h"
 #include "addrulewindow.h"
 #include <QFileInfo>
 #include <QClipboard>
@@ -43,6 +44,9 @@
 QtBitcoinTrader::QtBitcoinTrader()
 	: QDialog()
 {
+	currencyChangedDate=0;
+	exchangeSupportsLastTradesType=true;
+	meridianPrice=0.0;
 	availableAmount=0.0;
 	exchangeSupportsAvailableAmount=false;
 	swapedDepth=false;
@@ -181,6 +185,9 @@ QtBitcoinTrader::QtBitcoinTrader()
 	depthBidsModel=new DepthModel(false);
 	ui.depthBidsTable->setModel(depthBidsModel);
 
+	new JulyScrollUpOnIdle(ui.depthAsksTable->verticalScrollBar());
+	new JulyScrollUpOnIdle(ui.depthBidsTable->verticalScrollBar());
+
 	ui.depthAsksTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
 	ui.depthAsksTable->horizontalHeader()->setResizeMode(1,QHeaderView::ResizeToContents);
 	ui.depthAsksTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
@@ -306,7 +313,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(httpRequestInterval<50)httpRequestInterval=500;
 	if(httpRequestTimeout<100)httpRequestTimeout=3000;
 
-	if(exchangeId==2)//Bitstamp exception
+	if(exchangeId==2||exchangeId==3)//Bitstamp and BTC China exception
 	{
 		if(httpRequestInterval<1200)httpRequestInterval=1200;
 	}
@@ -716,7 +723,7 @@ void QtBitcoinTrader::loadUiSettings()
 	case 2:
 		{//Bitstamp
 			exchangeSupportsAvailableAmount=true;
-			ui.tableTrades->horizontalHeader()->hideSection(2);
+			exchangeSupportsLastTradesType=false;
 			ui.tradesBidsPrecent->setVisible(false);
 			ui.tradesLabelDirection->setVisible(false);
 
@@ -748,7 +755,7 @@ void QtBitcoinTrader::loadUiSettings()
 		break;
 	case 3:
 		{//BTC China
-			ui.tableTrades->horizontalHeader()->hideSection(2);
+			exchangeSupportsLastTradesType=false;
 			ui.tradesBidsPrecent->setVisible(false);
 			ui.tradesLabelDirection->setVisible(false);
 			btcDecimals=3;
@@ -839,11 +846,26 @@ void QtBitcoinTrader::availableAmountChanged(double val)
 	availableAmount=val;
 }
 
-void QtBitcoinTrader::addLastTrade(double volumeDouble, qint64 dateT, double priceDouble, QByteArray symbol, bool isAsk)
+void QtBitcoinTrader::addLastTrade(double volumeDouble, quint32 dateT, double priceDouble, QByteArray symbol, bool isAsk)
 {
 	if(dateT<1000)return;
 
-	tradesModel->addNewTrade(dateT,volumeDouble,priceDouble,symbol,isAsk);
+	int isAskInt=0;
+	if(!exchangeSupportsLastTradesType)
+	{
+		if(dateT>currencyChangedDate)
+		{
+			if(priceDouble<meridianPrice)isAskInt=1;
+			else isAskInt=-1;
+		}
+	}
+	else
+	{
+		if(isAsk)isAskInt=1;
+		else isAskInt=-1;
+	}
+
+	tradesModel->addNewTrade(dateT,volumeDouble,priceDouble,symbol,isAskInt);
 	tradesModel->updateTotalBTC();
 	if(ui.tradesAutoScrollCheck->isChecked()&&ui.tabLastTrades->isVisible())
 	{
@@ -1159,7 +1181,6 @@ void QtBitcoinTrader::currencyChanged(int val)
 
 	ui.sellGroupBox->setTitle(sellGroupboxText);
 
-
 	static int firstLoad=0;
 	if(firstLoad++>1)
 	{
@@ -1178,6 +1199,8 @@ void QtBitcoinTrader::currencyChanged(int val)
 	depthBidsModel->fixTitleWidths();
 
 	calcOrdersTotalValues();
+
+	currencyChangedDate=QDateTime::currentDateTime().toTime_t();
 }
 
 void QtBitcoinTrader::clearDepth()
@@ -1477,6 +1500,9 @@ void QtBitcoinTrader::ordersChanged(QList<OrderItem> *orders)
 	
 	calcOrdersTotalValues();
 	checkValidOrdersButtons();
+
+	depthAsksModel->reloadVisibleItems();
+	depthBidsModel->reloadVisibleItems();
 }
 
 void QtBitcoinTrader::showErrorMessage(QString message)
@@ -1974,7 +2000,7 @@ void QtBitcoinTrader::ruleAddButton()
 	addRule.setWindowFlags(windowFlags());
 	if(addRule.exec()!=QDialog::Accepted)return;
 	RuleHolder *newHolder=new RuleHolder(addRule.getRuleHolder());
-	newHolder->setRuleState(1);
+	//newHolder->setRuleState(1);
 	rulesModel->addRule(newHolder);
 
 	ui.rulesNoMessage->setVisible(false);
@@ -2132,12 +2158,14 @@ void QtBitcoinTrader::marketBuyChanged(double val)
 {
 	checkAndExecuteRule(2,val);
 	ruleTotalToBuyBSValueChanged();
+	if(!exchangeSupportsLastTradesType)meridianPrice=(val+ui.marketSell->value())/2;
 }
 
 void QtBitcoinTrader::marketSellChanged(double val)
 {
 	checkAndExecuteRule(3,val);
 	ruleAmountToReceiveBSValueChanged();
+	if(!exchangeSupportsLastTradesType)meridianPrice=(val+ui.marketBuy->value())/2;
 }
 
 void QtBitcoinTrader::marketLastChanged(double val)
@@ -2226,6 +2254,18 @@ void QtBitcoinTrader::checkAndExecuteRule(int ruleType, double price)
 						continue;
 					}
 				}
+			}
+			else
+			if(ruleBtc==-6.0)//Enable All Rules
+			{
+				ruleEnableAll();
+				if(ui.ruleBeep->isChecked())beep();continue;
+			}
+			else
+			if(ruleBtc==-7.0)//Disable All Rules
+			{
+				ruleDisableAll();
+				if(ui.ruleBeep->isChecked())beep();continue;
 			}
 		}
 
@@ -2417,14 +2457,14 @@ void QtBitcoinTrader::historyDoubleClicked(QModelIndex index)
 	double itemPrice=historyModel->getRowPrice(index.row());
 	double itemVolume=historyModel->getRowVolume(index.row());
 	if(itemPrice==0.0)return;
-	int rowType=historyModel->getRowType(index.row());
+	//int rowType=historyModel->getRowType(index.row());
 
-	if(rowType==1)
+	//if(rowType==1)
 	{
 		ui.sellPricePerCoin->setValue(itemPrice);
 		ui.sellTotalBtc->setValue(itemVolume);
 	}
-	if(rowType==2)
+	//if(rowType==2)
 	{
 		ui.buyPricePerCoin->setValue(itemPrice);
 		double avUSD=getAvailableUSD();
@@ -2445,7 +2485,7 @@ void QtBitcoinTrader::tradesDoubleClicked(QModelIndex index)
 	double itemPrice=tradesModel->getRowPrice(index.row());
 	double itemVolume=tradesModel->getRowVolume(index.row());
 	if(itemPrice==0.0)return;
-	if(!tradesModel->getRowType(index.row()))
+	//if(!tradesModel->getRowType(index.row()))
 	{
 		ui.buyPricePerCoin->setValue(itemPrice);
 		double avUSD=getAvailableUSD();
@@ -2459,7 +2499,7 @@ void QtBitcoinTrader::tradesDoubleClicked(QModelIndex index)
 
 		ui.buyTotalBtc->setValue(totalBtcValue);
 	}
-	else
+	//else
 	{
 		ui.sellPricePerCoin->setValue(itemPrice);
 		ui.sellTotalBtc->setValue(qMin(getAvailableBTC(),itemVolume));
@@ -2468,17 +2508,32 @@ void QtBitcoinTrader::tradesDoubleClicked(QModelIndex index)
 
 void QtBitcoinTrader::depthSelectOrder(QModelIndex index, bool isSell)
 {
-	if(swapedDepth)isSell=!isSell;
+	double itemPrice=0.0;
+	double itemVolume=0.0;
+	int row=0;
+
+	row=index.row();
+	
+	if(swapedDepth){isSell=!isSell;row=depthBidsModel->rowCount()-index.row()-1;}
+
 	if(isSell)
 	{
-		int row=index.row();
 		if(row<0||depthAsksModel->rowCount()<=row)return;
-		double itemPrice=depthAsksModel->rowPrice(row);
-		ui.buyPricePerCoin->setValue(itemPrice);
-		double itemVolume=0.0;
-		if(index.column()==1)itemVolume=depthAsksModel->rowSize(row);
+		itemPrice=depthAsksModel->rowPrice(row);
+		if(swapedDepth&&index.column()==2||!swapedDepth&&index.column()==1)itemVolume=depthAsksModel->rowSize(row);
 		else itemVolume=depthAsksModel->rowVolume(row);
+	}
+	else
+	{
+		if(row<0||depthBidsModel->rowCount()<=row)return;
+		itemPrice=depthBidsModel->rowPrice(row);
+		if(!swapedDepth&&index.column()==2||swapedDepth&&index.column()==1)itemVolume=depthBidsModel->rowSize(row);
+		else itemVolume=depthBidsModel->rowVolume(row);
+	}
 
+	//if(isSell)
+	{
+		ui.buyPricePerCoin->setValue(itemPrice);
 
 		double avUSD=getAvailableUSD();
 		double totalBtcValue=avUSD/itemPrice;
@@ -2491,14 +2546,9 @@ void QtBitcoinTrader::depthSelectOrder(QModelIndex index, bool isSell)
 
 		ui.buyTotalBtc->setValue(totalBtcValue);
 	}
-	else
+	//else
 	{
-		int row=index.row();
-		if(row<0||depthBidsModel->rowCount()<=row)return;
-		ui.sellPricePerCoin->setValue(depthBidsModel->rowPrice(row));
-		double itemVolume=0.0;
-		if(index.column()==2)itemVolume=depthBidsModel->rowSize(row);
-		else itemVolume=depthBidsModel->rowVolume(row);
+		ui.sellPricePerCoin->setValue(itemPrice);
 		ui.sellTotalBtc->setValue(qMin(getAvailableBTC(),itemVolume));
 	}
 }
@@ -2648,9 +2698,12 @@ void QtBitcoinTrader::depthFirstOrder(double price, double volume, bool isAsk)
 void QtBitcoinTrader::depthSubmitOrders(QList<DepthItem> *asks, QList<DepthItem> *bids)
 {
 	waitingDepthLag=false;
-
+	int currentAsksScroll=ui.depthAsksTable->verticalScrollBar()->value();
+	int currentBidsScroll=ui.depthBidsTable->verticalScrollBar()->value();
 	depthAsksModel->depthUpdateOrders(asks);
 	depthBidsModel->depthUpdateOrders(bids);
+	ui.depthAsksTable->verticalScrollBar()->setValue(qMin(currentAsksScroll,ui.depthAsksTable->verticalScrollBar()->maximum()));
+	ui.depthBidsTable->verticalScrollBar()->setValue(qMin(currentBidsScroll,ui.depthBidsTable->verticalScrollBar()->maximum()));
 }
 
 void QtBitcoinTrader::exitApp()
@@ -2770,6 +2823,7 @@ double QtBitcoinTrader::getAvailableUSD()
 	if(exchangeId==2||exchangeId==3)//Bitstamp and BTCChina exception
 		amountToReturn=ui.accountUSD->value()-ui.ordersTotalUSD->value();
 	else amountToReturn=ui.accountUSD->value();
+	if(exchangeId==3)amountToReturn*=0.99;//Temporary BTCChina fix
 	amountToReturn=getValidDoubleForPercision(amountToReturn,usdDecimals,false);
 
 	if(exchangeSupportsAvailableAmount)amountToReturn=qMin(availableAmount,amountToReturn);

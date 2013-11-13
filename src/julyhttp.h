@@ -14,13 +14,20 @@
 #include <QSslSocket>
 #include <QTime>
 
-class JulyHttp : public QObject
+struct PacketItem
+{
+	QByteArray *data;
+	int reqType;
+	int retryCount;
+	bool skipOnce;
+};
+
+class JulyHttp : public QSslSocket
 {
 	Q_OBJECT
 
 public:
 	uint getCurrentPacketContentLength(){return contentLength;}
-	QString errorString(){if(socket)return socket->errorString(); return QString();}
 	void clearPendingData();
 	void reConnect(bool mastAbort=true);
 	bool isReqTypePending(int);
@@ -38,7 +45,7 @@ private:
 	bool isDataPending;
 	void uncompress(QByteArray *data);
 	bool contentGzipped;
-	QMap<QSslSocket *,QByteArray *>pendingRequestMap;
+	QByteArray *currentPendingRequest;
 	bool connectionClose;
 	int httpState;
 	qint64 bytesDone;
@@ -48,19 +55,15 @@ private:
 	qint64 chunkedSize;
 
 	void abortSocket();
-	QSslSocket *socket;
 	bool isDisabled;
 	QByteArray cookie;
 	int outGoingPacketsCount;
-	void pickNextConnectedSocket();
-	QSslSocket *getStableSocket();
-	void setupSocket(QSslSocket *socket);
-	bool isSocketConnected(QSslSocket *socket);
-	void reconnectSocket(QSslSocket *socket, bool mastAbort);
+	void setupSocket();
+	bool isSocketConnected();
+	void reconnectSocket(bool mastAbort);
 	void setApiDown(bool);
 	bool apiDownState;
 	int apiDownCounter;
-	int requestRetryCount;
 	bool packetIsChunked;
 	QByteArray buffer;
 	bool nextPacketMastBeSize;
@@ -69,12 +72,10 @@ private:
 	void retryRequest();
 
 	QTime requestTimeOut;
-	QList<QPair<QByteArray*,int> >requestList;
-	QMap<QByteArray*,int> retryCountMap;
+	QList<PacketItem>requestList;
 	QMap<int,int> reqTypePending;
-	QMap<QByteArray*,bool> skipOnceMap;
 
-	QList<QPair<QByteArray*,int> >preparedList;
+	QList<PacketItem>preparedList;
 
 	void takeFirstRequest();
 	void takeRequestAt(int);

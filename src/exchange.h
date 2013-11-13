@@ -34,6 +34,7 @@ public:
 	QByteArray privateRestKey;
 	virtual void clearVariables();
 	void translateUnicodeStr(QString *str);
+	void translateUnicodeOne(QByteArray *str);
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	void setupApi(QtBitcoinTrader *, bool tickerOnly=false);
 	Exchange();
@@ -50,7 +51,7 @@ signals:
 
 	void depthSubmitOrders(QList<DepthItem> *asks, QList<DepthItem> *bids);
 
-	void addLastTrade(double,qint64,double,QByteArray,bool);
+	void addLastTrade(double,quint32,double,QByteArray,bool);
 
 	void ordersChanged(QList<OrderItem> *orders);
 	void showErrorMessage(QString);

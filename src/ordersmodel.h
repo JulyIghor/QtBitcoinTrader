@@ -10,6 +10,9 @@ class OrdersModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+	QMap<double,bool> currentAsksPrices;
+	QMap<double,bool> currentBidsPrices;
+
 	bool checkDuplicatedOID;
 	void ordersCancelAll();
 	void setOrderCanceled(QByteArray);
@@ -36,7 +39,7 @@ public:
 	QList<OrderItem> orders;
 
 private:
-	QHash<QByteArray,qint64> oidMapForCheckingDuplicates;
+	QHash<QByteArray,quint32> oidMapForCheckingDuplicates;
 	QStringList textStatusList;
 	QString textAsk;
 	QString textBid;
@@ -52,7 +55,7 @@ private:
 	QStringList headerLabels;
 
 	QList<QByteArray> oidList;
-	QList<qint64> dateList;
+	QList<quint32> dateList;
 	QList<bool> typesList;
 	QList<int> statusList;
 	QList<double> amountList;

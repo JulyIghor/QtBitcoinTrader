@@ -16,6 +16,8 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
 {
 	exchangeID="BTC-e";
+	lastTickerDate=0;
+	lastFetchTid=0;
 	depthAsks=0;
 	depthBids=0;
 	forceDepthLoad=false;
@@ -120,8 +122,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				lastTickerVolume=newTickerVolume;
 			}
 
-			QByteArray newTickerDate=getMidData("\"updated\":",",\"",&data);
-			if(!newTickerDate.isEmpty()&&lastTickerDate<newTickerDate)
+			quint32 newTickerDate=getMidData("\"updated\":","}",&data).toUInt();
+			if(lastTickerDate<newTickerDate)
 			{
 				lastTickerDate=newTickerDate;
 				QByteArray tickerLast=getMidData("\"last\":",",\"",&data);
@@ -139,29 +141,30 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	case 109: //trades
 		{
 			if(data.size()<10)break;
+			QByteArray currentRequestSymbol=getMidData("\"","\":[{",&data).toUpper().replace("_","");
+
 			QStringList tradeList=QString(data).split("},{");
 			for(int n=tradeList.count()-1;n>=0;n--)
 			{
-				QByteArray tradeData=tradeList.at(n).toAscii();
-				QByteArray newTickerDate=getMidData("date\":",",\"",&tradeData);
+				QByteArray tradeData=tradeList.at(n).toAscii()+"}";
+				quint32 currentTradeDate=getMidData("timestamp\":","}",&tradeData).toUInt();
 				double currentTradePrice=getMidData("\"price\":",",\"",&tradeData).toDouble();
-				qint64 tradeDate=newTickerDate.toLongLong();
-				if(lastFetchTid<0&&tradeDate<-lastFetchTid)continue;
-				qint64 currentTid=getMidData("\"tid\":",",\"",&tradeData).toLongLong();
+				if(lastFetchTid<0&&currentTradeDate<-lastFetchTid)continue;
+				quint32 currentTid=getMidData("\"tid\":",",\"",&tradeData).toUInt();
 				if(currentTid<1000||lastFetchTid>=currentTid)continue;
 				lastFetchTid=currentTid;
-				if(n==0&&lastTickerDate<newTickerDate)
+				if(n==0&&lastTickerDate<currentTradeDate)
 				{
-					lastTickerDate=newTickerDate;
+					lastTickerDate=currentTradeDate;
 					emit tickerLastChanged(currentTradePrice);
 				}
-				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),tradeDate,currentTradePrice,getMidData("\"item\":\"","\",\"",&tradeData)+getMidData("\"price_currency\":\"","\",\"",&tradeData),getMidData("\"trade_type\":\"","\"",&tradeData)=="ask");
+				emit addLastTrade(getMidData("\"amount\":",",\"",&tradeData).toDouble(),currentTradeDate,currentTradePrice, currentRequestSymbol ,getMidData("\"type\":\"","\"",&tradeData)=="ask");
 			}
 		}
 		break;//trades
 	case 110: //Fee
 		{
-			QByteArray tradeFee=getMidData("trade\":","}",&data);
+			QByteArray tradeFee=getMidData("fee\":","}",&data);
 			if(!tradeFee.isEmpty())
 			{
 				double newFee=tradeFee.toDouble();
@@ -171,7 +174,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 		}
 		break;// Fee
 	case 111: //depth
-		if(data.startsWith("{\"asks\":["))
+		if(data.startsWith("{\""+currencyRequestPair+"\":{\"asks"))
 		{
 			emit depthRequestReceived();
 
@@ -477,12 +480,12 @@ void Exchange_BTCe::secondSlot()
 
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,httpSplitPackets,"method=ActiveOrders&");
 	
-	if(!isReplayPending(103))sendToApi(103,currencyRequestPair+"/ticker",false,httpSplitPackets);
-	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/trades",false,httpSplitPackets);
+	if(!isReplayPending(103))sendToApi(103,"ticker/"+currencyRequestPair,false,httpSplitPackets);
+	if(!isReplayPending(109))sendToApi(109,"trades/"+currencyRequestPair,false,httpSplitPackets);
 	if(!depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
 	{
 		emit depthRequested();
-		sendToApi(111,currencyRequestPair+"/depth",false,httpSplitPackets);
+		sendToApi(111,"depth/"+currencyRequestPair+"?limit="+depthCountLimitStr,false,httpSplitPackets);
 		forceDepthLoad=false;
 	}
 
@@ -502,7 +505,7 @@ void Exchange_BTCe::getHistory(bool force)
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
 	if(!isReplayPending(208))sendToApi(208,"",true,httpSplitPackets,"method=TradeHistory&");
-	if(!isReplayPending(110))sendToApi(110,currencyRequestPair+"/fee",false,httpSplitPackets);
+	if(!isReplayPending(110))sendToApi(110,"info/"+currencyRequestPair,false,httpSplitPackets);
 	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 }
 
@@ -575,16 +578,16 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 		if(commands.isEmpty())
 		{
 			if(sendNow)
-				julyHttp->sendData(reqType, "GET /api/2/"+method);
+				julyHttp->sendData(reqType, "GET /api/3/"+method);
 			else 
-				julyHttp->prepareData(reqType, "GET /api/2/"+method);
+				julyHttp->prepareData(reqType, "GET /api/3/"+method);
 		}
 		else
 		{
 			if(sendNow)
-				julyHttp->sendData(reqType, "POST /api/2/"+method, commands);
+				julyHttp->sendData(reqType, "POST /api/3/"+method, commands);
 			else 
-				julyHttp->prepareData(reqType, "POST /api/2/"+method, commands);
+				julyHttp->prepareData(reqType, "POST /api/3/"+method, commands);
 		}
 	}
 }

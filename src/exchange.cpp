@@ -42,6 +42,20 @@ void Exchange::translateUnicodeStr(QString *str)
 	while((pos=rx.indexIn(*str,pos))!=-1)str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(0, 16)));
 }
 
+void Exchange::translateUnicodeOne(QByteArray *str)
+{
+	if(!str->contains("\\u"))return;
+	QStringList bytesList=QString(*str).split("\\u");
+	if(bytesList.count())bytesList.removeFirst();
+	else return;
+	QString strToReturn;
+	for(int n=0;n<bytesList.count();n++)
+		if(bytesList.at(n).length()>3)
+			strToReturn+="\\u"+bytesList.at(n).left(4);
+	translateUnicodeStr(&strToReturn);
+	*str=strToReturn.toAscii();
+}
+
 void Exchange::run()
 {
 	if(debugLevel)logThread->writeLog(exchangeID+" API Thread Started",2);
@@ -107,7 +121,7 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	connect(this,SIGNAL(tickerBuyChanged(double)),mainClass->ui.marketBuy,SLOT(setValue(double)));
 	connect(this,SIGNAL(tickerVolumeChanged(double)),mainClass->ui.marketVolume,SLOT(setValue(double)));
 
-	connect(this,SIGNAL(addLastTrade(double, qint64, double, QByteArray, bool)),mainClass,SLOT(addLastTrade(double, qint64, double, QByteArray, bool)));
+	connect(this,SIGNAL(addLastTrade(double, quint32, double, QByteArray, bool)),mainClass,SLOT(addLastTrade(double, quint32, double, QByteArray, bool)));
 
 	start();
 }

@@ -12,6 +12,8 @@
 Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
 {
+	lastTradesDate=0;
+	tickerLastDate=0;
 	exchangeID="Mt.Gox";
 	privateRestSign=pRestSign;
 	privateRestKey=pRestKey;
@@ -48,7 +50,10 @@ void Exchange_MtGox::clearVariables()
 	lastOrders.clear();
 	reloadDepth();
 	lastInfoReceived=false;
-	tickerLastDate=QByteArray::number(QDateTime::currentDateTime().addSecs(-600).toTime_t())+"000000";
+	tickerLastDate=0;
+	lastTradesDate=QDateTime::currentDateTime().addSecs(-600).toTime_t();
+	lastTradesDate*=1000000;
+	lastTradesDateCache=QByteArray::number(lastTradesDate);
 }
 
 void Exchange_MtGox::clearValues()
@@ -79,7 +84,7 @@ void Exchange_MtGox::secondSlot()
 	if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
 	if(!isReplayPending(104))sendToApi(104,currencyRequestPair+"/money/ticker_fast",false,httpSplitPackets);
 
-	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/money/trades/fetch?since="+tickerLastDate,false,httpSplitPackets);
+	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/money/trades/fetch?since="+lastTradesDateCache,false,httpSplitPackets);
 	if(lastHistory.isEmpty())
 		if(!isReplayPending(208))sendToApi(208,"money/wallet/history",true,httpSplitPackets,"&currency=BTC");
 	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
@@ -218,7 +223,13 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 	{
 	case 101:
 		if(!success)break;
-		if(data.startsWith("{\"result\":\"success\",\"data\":{\"lag"))emit apiLagChanged(getMidData("lag_secs\":",",\"",&data).toDouble());//lag
+		if(data.startsWith("{\"result\":\"success\",\"data\":{\"lag"))
+		{
+			double currentLag=getMidData("lag_secs\":",",\"",&data).toDouble();
+			static double lastLag=0.0;
+			if(lastLag!=currentLag&&currentLag<9999.0)emit apiLagChanged(currentLag);//lag
+			lastLag=currentLag;
+		}
 		else if(debugLevel)logThread->writeLog("Invalid lag data:"+data,2);
 		break;
 	case 103: //ticker
@@ -270,7 +281,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
-			QByteArray tickerNow=getMidData("now\":\"","\"}",&data);
+			qint64 tickerNow=getMidData("now\":\"","\"}",&data).toLongLong();
 			if(tickerLastDate<tickerNow)
 			{
 				QByteArray tickerLast=getMidData("last\":{\"value\":\"","",&data);
@@ -294,12 +305,12 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		{
 			if(data.startsWith("{\"result\":\"success\",\"data\":[{\"date"))
 			{
-				QByteArray tradesDate=getMidData("\"date\":",",",&data);
 				QStringList tradeList=QString(data).split("\"},{\"");
 				for(int n=0;n<tradeList.count();n++)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
-					if(lastTradesDate>=tradeData)continue;
+					qint64 currentTid=getMidData("\"tid\":\"","\",\"",&tradeData).toLongLong();
+					if(lastTradesDate>=currentTid||currentTid==0)continue;
 					double doubleAmount=getMidData("\"amount\":\"","\",",&tradeData).toDouble();
 					double doublePrice=getMidData("\"price\":\"","\",",&tradeData).toDouble();
 
@@ -307,17 +318,18 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray tradeType=getMidData("\"trade_type\":\"","\"",&tradeData);
 					if(doubleAmount>0.0&&doublePrice>0.0&&!symbol.isEmpty())
 					{
-						emit addLastTrade(doubleAmount,getMidData("date\":",",\"",&tradeData).toLongLong(),doublePrice,symbol,tradeType=="ask");
-						if(n==tradeList.count()-1&&tickerLastDate<tradesDate)
+						quint32 currentTradeDate=getMidData("date\":",",",&tradeData).toUInt();
+						if(currentTradeDate>0)
 						{
-							QByteArray nextFetchDate=getMidData("\"tid\":\"","\",\"",&tradeData);
-							if(!nextFetchDate.isEmpty())
+							emit addLastTrade(doubleAmount,currentTradeDate,doublePrice,symbol,tradeType=="ask");
+							if(n==tradeList.count()-1)
 							{
-							emit tickerLastChanged(doublePrice);
-							tickerLastDate=nextFetchDate;
+								emit tickerLastChanged(doublePrice);
+								tickerLastDate=currentTid;
+								lastTradesDate=currentTid;
+								lastTradesDateCache=QByteArray::number(tickerLastDate+1);
 							}
 						}
-						if(n==tradeList.count()-1)lastTradesDate=tradeData;
 					}
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
 				}
@@ -558,10 +570,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				lastHistory=data;
 				QList<HistoryItem> *historyItems=new QList<HistoryItem>;
 
-				QString newLog(data);
-				translateUnicodeStr(&newLog);
-				QStringList dataList=newLog.split("\"Index\"");
-				newLog.clear();
+				QStringList dataList=QString(data).split("},{");
 				for(int n=0;n<dataList.count();n++)
 				{
 					HistoryItem currentHistoryItem;
@@ -589,15 +598,50 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 						currentHistoryItem.date=getMidData("\"Date\":",",\"",&curLog).toUInt();
 						QByteArray logText=getMidData(" at ","\",\"",&curLog);
 
-						QByteArray priceValue;
 						QByteArray priceSign;
+						static QList<QPair<QByteArray,QByteArray>> utfSignList;
+						if(utfSignList.count()==0)
+						{
+							QPair<QByteArray,QByteArray> curPair;
+							curPair.first="$";curPair.second="USD";utfSignList<<curPair;
+							curPair.first="\\u00a0\\u20ac";curPair.second="EUR";utfSignList<<curPair;
+							curPair.first="\\u00a0RUB";curPair.second="RUB";utfSignList<<curPair;
+							curPair.first="AU$";curPair.second="AUD";utfSignList<<curPair;
+							curPair.first="CA$";curPair.second="CAD";utfSignList<<curPair;
+							curPair.first="\\u00a0CHF";curPair.second="CHF";utfSignList<<curPair;
+							curPair.first="\\u00a0\\u5143";curPair.second="CNY";utfSignList<<curPair;
+							curPair.first="\\u00a0CZK";curPair.second="CZK";utfSignList<<curPair;
+							curPair.first="\\u00a0Kr";curPair.second="DKK";utfSignList<<curPair;
+							curPair.first="\\u00a3";curPair.second="GBP";utfSignList<<curPair;
+							curPair.first="HK$";curPair.second="HKD";utfSignList<<curPair;
+							curPair.first="\\u00a5";curPair.second="JPY";utfSignList<<curPair;
+							curPair.first="\\u00a0Kr";curPair.second="NOK";utfSignList<<curPair;
+							curPair.first="NZ$";curPair.second="NZD";utfSignList<<curPair;
+							curPair.first="\\u00a0z\\u0142";curPair.second="PLN";utfSignList<<curPair;
+							curPair.first="\\u00a0Kr";curPair.second="SEK";utfSignList<<curPair;
+							curPair.first="SG$";curPair.second="SGD";utfSignList<<curPair;
+							curPair.first=" \\u0e3f";curPair.second="THB";utfSignList<<curPair;
+						}
+
+						for(int n=0;n<utfSignList.count();n++)
+						{
+							if(logText.contains(utfSignList.at(n).first))
+							{
+								logText.replace(utfSignList.at(n).first,"");
+								priceSign=currencySignMap->value(utfSignList.at(n).second,"$");
+								break;
+							}
+						}
+						if(priceSign.isEmpty())priceSign="$";
+
+						translateUnicodeOne(&logText);
+						QByteArray priceValue;
 						for(int n=0;n<logText.size();n++)
 						{
 							if(QChar(logText.at(n)).isSpace())break;
 							if(QChar(logText.at(n)).isDigit()||logText.at(n)=='.')priceValue.append(logText.at(n));
-							else priceSign.append(logText.at(n));
 						}
-							if(priceSign.isEmpty())priceSign="$";
+
 						currentHistoryItem.price=priceValue.toDouble();
 
 						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+currencySignMap->key(priceSign,"$");

@@ -282,3 +282,4 @@ String_RULE_ENABLE=Enable Selected
 String_RULE_DISABLE=Disable Selected
 String_RULE_ENABLE_ALL=Enable All
 String_RULE_DISABLE_ALL=Disable All
+Label_REMOVE_RULES=Remove:
