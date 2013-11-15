@@ -167,6 +167,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tableTrades->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
 	ui.tableTrades->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
 	ui.tableTrades->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
+	ui.tableTrades->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.tableTrades, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(tradesMenuRequested(const QPoint&)));
 	connect(tradesModel,SIGNAL(trades10MinVolumeChanged(double)),this,SLOT(setLastTrades10MinVolume(double)));
 	connect(tradesModel,SIGNAL(precentBidsChanged(double)),this,SLOT(precentBidsChanged(double)));
 
@@ -176,6 +178,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.tableHistory->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
 	ui.tableHistory->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
 	ui.tableHistory->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
+	ui.tableHistory->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.tableHistory, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(historyMenuRequested(const QPoint&)));
 	connect(historyModel,SIGNAL(accLastSellChanged(QByteArray,double)),this,SLOT(accLastSellChanged(QByteArray,double)));
 	connect(historyModel,SIGNAL(accLastBuyChanged(QByteArray,double)),this,SLOT(accLastBuyChanged(QByteArray,double)));
 
@@ -199,6 +203,11 @@ QtBitcoinTrader::QtBitcoinTrader()
 	ui.depthBidsTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
 	ui.depthBidsTable->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
 	ui.depthBidsTable->horizontalHeader()->setMinimumSectionSize(0);
+
+	ui.depthAsksTable->setContextMenuPolicy(Qt::CustomContextMenu);
+	ui.depthBidsTable->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui.depthAsksTable, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(depthAsksMenuRequested(const QPoint&)));
+	connect(ui.depthBidsTable, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(depthBidsMenuRequested(const QPoint&)));
 
 	ui.accountBTCBeep->setChecked(iniSettings->value("Sounds/AccountBTCBeep",false).toBool());
 	ui.accountUSDBeep->setChecked(iniSettings->value("Sounds/AccountUSDBeep",false).toBool());
@@ -359,6 +368,42 @@ QtBitcoinTrader::QtBitcoinTrader()
 			currentDesktopRect=QApplication::desktop()->availableGeometry(n);
 		if(currentDesktopRect.width()>1024&&currentDesktopRect.height()>768)highResolutionDisplay=true;
 	}
+
+	historyCopyMenu=new QMenu;
+	historyCopyMenu->addAction("Copy Date");
+	connect(historyCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(historyCopyDateSelected()));
+	historyCopyMenu->addAction("Copy Amount");
+	connect(historyCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(historyCopyAmountSelected()));
+	historyCopyMenu->addAction("Copy Price");
+	connect(historyCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(historyCopyPriceSelected()));
+	connect(historyCopyMenu,SIGNAL(aboutToShow()),this,SLOT(historyCopyMenuFix()));
+
+	tradesCopyMenu=new QMenu;
+	tradesCopyMenu->addAction("Copy Date");
+	connect(tradesCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(tradesCopyDateSelected()));
+	tradesCopyMenu->addAction("Copy Amount");
+	connect(tradesCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(tradesCopyAmountSelected()));
+	tradesCopyMenu->addAction("Copy Price");
+	connect(tradesCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(tradesCopyPriceSelected()));
+	connect(tradesCopyMenu,SIGNAL(aboutToShow()),this,SLOT(tradesCopyMenuFix()));
+
+	depthAsksCopyMenu=new QMenu;
+	depthAsksCopyMenu->addAction("Copy Total");
+	connect(depthAsksCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(depthAsksCopyTotalSelected()));
+	depthAsksCopyMenu->addAction("Copy Amount");
+	connect(depthAsksCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(depthAsksCopyAmountSelected()));
+	depthAsksCopyMenu->addAction("Copy Price");
+	connect(depthAsksCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(depthAsksCopyPriceSelected()));
+	connect(depthAsksCopyMenu,SIGNAL(aboutToShow()),this,SLOT(depthAsksCopyMenuFix()));
+
+	depthBidsCopyMenu=new QMenu;
+	depthBidsCopyMenu->addAction("Copy Total");
+	connect(depthBidsCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(depthBidsCopyTotalSelected()));
+	depthBidsCopyMenu->addAction("Copy Amount");
+	connect(depthBidsCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(depthBidsCopyAmountSelected()));
+	depthBidsCopyMenu->addAction("Copy Price");
+	connect(depthBidsCopyMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(depthBidsCopyPriceSelected()));
+	connect(depthBidsCopyMenu,SIGNAL(aboutToShow()),this,SLOT(depthBidsCopyMenuFix()));
 
 	rulesEnableDisableMenu=new QMenu;
 	rulesEnableDisableMenu->addAction("Enable Selected");
@@ -522,6 +567,70 @@ void QtBitcoinTrader::ruleDisableEnableMenuFix()
 	}
 	rulesEnableDisableMenu->actions().at(2)->setEnabled(haveRules);
 	rulesEnableDisableMenu->actions().at(3)->setEnabled(haveRules);
+}
+
+void QtBitcoinTrader::historyMenuRequested(const QPoint& point)
+{
+	historyCopyMenu->exec(ui.tableHistory->viewport()->mapToGlobal(point));
+}
+
+void QtBitcoinTrader::historyCopyMenuFix()
+{
+	bool haveHistory=historyModel->rowCount();
+	QModelIndexList selectedRows=ui.tableHistory->selectionModel()->selectedRows();
+
+	int selectedHistoryCount=selectedRows.count();
+	historyCopyMenu->actions().at(0)->setEnabled(selectedHistoryCount>0);
+	historyCopyMenu->actions().at(1)->setEnabled(selectedHistoryCount>0);
+	historyCopyMenu->actions().at(2)->setEnabled(selectedHistoryCount>0);
+}
+
+void QtBitcoinTrader::depthAsksMenuRequested(const QPoint& point)
+{
+	depthAsksCopyMenu->exec(ui.depthAsksTable->viewport()->mapToGlobal(point));
+}
+
+void QtBitcoinTrader::depthAsksCopyMenuFix()
+{
+	bool haveAsks=depthAsksModel->rowCount();
+	QModelIndexList selectedRows=ui.depthAsksTable->selectionModel()->selectedRows();
+
+	int selectedAsksCount=selectedRows.count();
+	depthAsksCopyMenu->actions().at(0)->setEnabled(selectedAsksCount>0);
+	depthAsksCopyMenu->actions().at(1)->setEnabled(selectedAsksCount>0);
+	depthAsksCopyMenu->actions().at(2)->setEnabled(selectedAsksCount>0);
+}
+
+void QtBitcoinTrader::depthBidsMenuRequested(const QPoint& point)
+{
+	depthBidsCopyMenu->exec(ui.depthBidsTable->viewport()->mapToGlobal(point));
+}
+
+void QtBitcoinTrader::depthBidsCopyMenuFix()
+{
+	bool haveBids=depthBidsModel->rowCount();
+	QModelIndexList selectedRows=ui.depthBidsTable->selectionModel()->selectedRows();
+
+	int selectedBidsCount=selectedRows.count();
+	depthBidsCopyMenu->actions().at(0)->setEnabled(selectedBidsCount>0);
+	depthBidsCopyMenu->actions().at(1)->setEnabled(selectedBidsCount>0);
+	depthBidsCopyMenu->actions().at(2)->setEnabled(selectedBidsCount>0);
+}
+
+void QtBitcoinTrader::tradesMenuRequested(const QPoint& point)
+{
+	tradesCopyMenu->exec(ui.tableTrades->viewport()->mapToGlobal(point));
+}
+
+void QtBitcoinTrader::tradesCopyMenuFix()
+{
+	bool haveTrades=tradesModel->rowCount();
+	QModelIndexList selectedRows=ui.tableTrades->selectionModel()->selectedRows();
+
+	int selectedTradesCount=selectedRows.count();
+	tradesCopyMenu->actions().at(0)->setEnabled(selectedTradesCount>0);
+	tradesCopyMenu->actions().at(1)->setEnabled(selectedTradesCount>0);
+	tradesCopyMenu->actions().at(2)->setEnabled(selectedTradesCount>0);
 }
 
 void QtBitcoinTrader::anyDataReceived()
@@ -2627,6 +2736,22 @@ void QtBitcoinTrader::languageChanged()
 	ui.comboBoxGroupByPrice->setItemText(0,julyTr("DONT_GROUP","None"));
 	ui.comboBoxGroupByPrice->setMinimumWidth(qMax(textFontWidth(ui.comboBoxGroupByPrice->itemText(0))+(int)(ui.comboBoxGroupByPrice->height()*1.1),textFontWidth("50.000")));
 
+	historyCopyMenu->actions().at(0)->setText(julyTr("COPY_DATE","Copy Date"));
+	historyCopyMenu->actions().at(1)->setText(julyTr("COPY_AMOUNT","Copy Amount"));
+	historyCopyMenu->actions().at(2)->setText(julyTr("COPY_PRICE","Copy Price"));
+
+	depthAsksCopyMenu->actions().at(0)->setText(julyTr("COPY_TOTAL","Copy Total"));
+	depthAsksCopyMenu->actions().at(1)->setText(julyTr("COPY_AMOUNT","Copy Amount"));
+	depthAsksCopyMenu->actions().at(2)->setText(julyTr("COPY_PRICE","Copy Price"));
+
+	depthBidsCopyMenu->actions().at(0)->setText(julyTr("COPY_TOTAL","Copy Total"));
+	depthBidsCopyMenu->actions().at(1)->setText(julyTr("COPY_AMOUNT","Copy Amount"));
+	depthBidsCopyMenu->actions().at(2)->setText(julyTr("COPY_PRICE","Copy Price"));
+
+	tradesCopyMenu->actions().at(0)->setText(julyTr("COPY_DATE","Copy Date"));
+	tradesCopyMenu->actions().at(1)->setText(julyTr("COPY_AMOUNT","Copy Amount"));
+	tradesCopyMenu->actions().at(2)->setText(julyTr("COPY_PRICE","Copy Price"));
+
 	rulesEnableDisableMenu->actions().at(0)->setText(julyTr("RULE_ENABLE","Enable Selected"));
 	rulesEnableDisableMenu->actions().at(1)->setText(julyTr("RULE_DISABLE","Disable Selected"));
 	rulesEnableDisableMenu->actions().at(3)->setText(julyTr("RULE_ENABLE_ALL","Enable All"));
@@ -2776,6 +2901,74 @@ void QtBitcoinTrader::on_depthAutoResize_toggled(bool on)
 	ui.depthAsksTable->horizontalHeader()->hideSection(0);
 	ui.depthBidsTable->horizontalHeader()->hideSection(3);
 	}
+}
+
+void QtBitcoinTrader::CopyInfo(QTableView *table, QAbstractItemModel *model, int i)
+{
+	QModelIndexList selectedRows=table->selectionModel()->selectedRows();
+	if(selectedRows.count()==0)return;
+	int curRow=selectedRows.first().row();
+	QApplication::clipboard()->setText(model->index(curRow, i).data().toString());
+}
+
+void QtBitcoinTrader::historyCopyDateSelected()
+{
+	CopyInfo(ui.tableHistory, historyModel, 0);
+}
+
+void QtBitcoinTrader::historyCopyAmountSelected()
+{
+	CopyInfo(ui.tableHistory, historyModel, 1);
+}
+
+void QtBitcoinTrader::historyCopyPriceSelected()
+{
+	CopyInfo(ui.tableHistory, historyModel, 3);
+}
+
+void QtBitcoinTrader::depthAsksCopyTotalSelected()
+{
+	CopyInfo(ui.depthAsksTable, depthAsksModel, 1);
+}
+
+void QtBitcoinTrader::depthAsksCopyAmountSelected()
+{
+	CopyInfo(ui.depthAsksTable, depthAsksModel, 2);
+}
+
+void QtBitcoinTrader::depthAsksCopyPriceSelected()
+{
+	CopyInfo(ui.depthAsksTable, depthAsksModel, 3);
+}
+
+void QtBitcoinTrader::depthBidsCopyTotalSelected()
+{
+	CopyInfo(ui.depthBidsTable, depthBidsModel, 2);
+}
+
+void QtBitcoinTrader::depthBidsCopyAmountSelected()
+{
+	CopyInfo(ui.depthBidsTable, depthBidsModel, 1);
+}
+
+void QtBitcoinTrader::depthBidsCopyPriceSelected()
+{
+	CopyInfo(ui.depthBidsTable, depthBidsModel, 0);
+}
+
+void QtBitcoinTrader::tradesCopyDateSelected()
+{
+	CopyInfo(ui.tableTrades, tradesModel, 0);
+}
+
+void QtBitcoinTrader::tradesCopyAmountSelected()
+{
+	CopyInfo(ui.tableTrades, tradesModel, 1);
+}
+
+void QtBitcoinTrader::tradesCopyPriceSelected()
+{
+	CopyInfo(ui.tableTrades, tradesModel, 4);
 }
 
 void QtBitcoinTrader::ruleEnableSelected()
