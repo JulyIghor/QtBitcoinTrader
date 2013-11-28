@@ -544,7 +544,7 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 		emit errorSignal(errorString());
 		abortSocket();
 	}
-	else reconnectSocket(false);
+	//else reconnectSocket(false); // don't call reconnectSocket() recursive
 }
 
 bool JulyHttp::isSocketConnected()
