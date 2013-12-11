@@ -10,14 +10,35 @@
 #ifndef HISTORYITEM_H
 #define HISTORYITEM_H
 
-struct HistoryItem 
+#include <QObject>
+
+class HistoryItem
 {
-	quint32 date;
+public:
+	HistoryItem();
+
+	bool displayFullDate;
+	quint32 dateTimeInt;
+	quint32 dateInt;
+	QString dateTimeStr;
+	QString timeStr;
+
 	double volume;
+	QString volumeStr;
+
 	double price;
+	QString priceStr;
+
+	double total;
+	QString totalStr;
+
 	QByteArray symbol;
-	int type;//0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
-	bool isValid(){return date>0&&symbol.size()==6;}
+
+	int type; //0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
+
+	void cacheStrings();
+
+	bool isValid();
 };
 
 #endif // HISTORYITEM_H

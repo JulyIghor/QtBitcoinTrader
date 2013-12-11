@@ -30,6 +30,6 @@ void JulyScrollUpOnIdle::timeOut()
 
 void JulyScrollUpOnIdle::valueChanged(int val)
 {
-	if(val>0)idleTimer->start(10000);
+	if(val>0)idleTimer->start(30000);
 	else idleTimer->stop();
 }

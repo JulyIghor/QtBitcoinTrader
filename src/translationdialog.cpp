@@ -23,9 +23,9 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	//setFixedSize(size());
 
-	julyTranslator->translateUi(this);
+	julyTranslator.translateUi(this);
 
-	ui.deleteTranslationButton->setEnabled(!julyTranslator->lastFile().startsWith(":/Resource"));
+	ui.deleteTranslationButton->setEnabled(!julyTranslator.lastFile().startsWith(":/Resource"));
 
 	ui.languageName->setText(julyTr("LANGUAGE_NAME","Invalid"));
 	authorAbout=new TranslationLine;
@@ -39,12 +39,12 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 	JulyTranslator defaultTranslation;
 	defaultTranslation.loadFromFile(":/Resources/Language/English.lng");
 
-	fillLayoutByMap(&(julyTranslator->labelMap),"Label_",&(defaultTranslation.labelMap));
-	fillLayoutByMap(&(julyTranslator->groupBoxMap),"GroupBox_",&(defaultTranslation.groupBoxMap));
-	fillLayoutByMap(&(julyTranslator->checkBoxMap),"CheckBox_",&(defaultTranslation.checkBoxMap));
-	fillLayoutByMap(&(julyTranslator->buttonMap),"Button_",&(defaultTranslation.buttonMap));
-	fillLayoutByMap(&(julyTranslator->spinBoxMap),"SpinBox_",&(defaultTranslation.spinBoxMap));
-	fillLayoutByMap(&(julyTranslator->stringMap),"String_",&(defaultTranslation.stringMap));
+	fillLayoutByMap(&(julyTranslator.labelMap),"Label_",&(defaultTranslation.labelMap));
+	fillLayoutByMap(&(julyTranslator.groupBoxMap),"GroupBox_",&(defaultTranslation.groupBoxMap));
+	fillLayoutByMap(&(julyTranslator.checkBoxMap),"CheckBox_",&(defaultTranslation.checkBoxMap));
+	fillLayoutByMap(&(julyTranslator.buttonMap),"Button_",&(defaultTranslation.buttonMap));
+	fillLayoutByMap(&(julyTranslator.spinBoxMap),"SpinBox_",&(defaultTranslation.spinBoxMap));
+	fillLayoutByMap(&(julyTranslator.stringMap),"String_",&(defaultTranslation.stringMap));
 
 	setTabOrder(ui.languageName,authorAbout);
 
@@ -71,7 +71,7 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 
         resize(640,640);
         fixLayout();
-	if(mainWindow_)mainWindow.addPopupDialog(1);
+	if(baseValues.mainWindow_)mainWindow.addPopupDialog(1);
 
     QTimer::singleShot(100,this,SLOT(fixLayout()));
 }
@@ -79,7 +79,7 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 TranslationDialog::~TranslationDialog()
 {
 	if(gridLayout)delete gridLayout;
-	if(mainWindow_)mainWindow.addPopupDialog(-1);
+	if(baseValues.mainWindow_)mainWindow.addPopupDialog(-1);
 }
 
 void TranslationDialog::fixLayout()
@@ -105,8 +105,8 @@ void TranslationDialog::deleteTranslationButton()
 	msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
 	msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
 	if(msgBox.exec()!=QMessageBox::Yes)return;
-	if(QFile::exists(julyTranslator->lastFile()))QFile::remove(julyTranslator->lastFile());
-	ui.deleteTranslationButton->setEnabled(QFile::exists(julyTranslator->lastFile()));
+	if(QFile::exists(julyTranslator.lastFile()))QFile::remove(julyTranslator.lastFile());
+	ui.deleteTranslationButton->setEnabled(QFile::exists(julyTranslator.lastFile()));
 	mainWindow.reloadLanguageList();
 	close();
 }
@@ -156,7 +156,7 @@ void TranslationDialog::applyButton()
 	writeFile.write(resultList.join("\r\n").toUtf8());
 	writeFile.close();
 
-	if(mainWindow_)mainWindow.reloadLanguageList(appDataDir+"Language/Custom.lng");
+	if(baseValues.mainWindow_)mainWindow.reloadLanguageList(appDataDir+"Language/Custom.lng");
 	ui.buttonSaveAs->setEnabled(true);
 	ui.buttonApply->setEnabled(false);
 	ui.deleteTranslationButton->setEnabled(QFile::exists(appDataDir+"Language/Custom.lng"));
@@ -170,7 +170,7 @@ void TranslationDialog::saveAsButton()
 	QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_TRANSLATION","Save Translation"),QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)+"/"+ui.languageName->text().replace("/","_").replace("\\","").replace(":","").replace("?","")+".lng","(*.lng)");
 	if(fileName.isEmpty())return;
 	if(QFile::exists(fileName))QFile::remove(fileName);
-	QFile::copy(julyTranslator->lastFile(),fileName);
+	QFile::copy(julyTranslator.lastFile(),fileName);
 }
 
 void TranslationDialog::searchLang(QString filterText)

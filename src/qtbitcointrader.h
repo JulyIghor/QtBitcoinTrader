@@ -22,28 +22,32 @@
 #include <QMenu>
 #include <QTime>
 #include "tradesmodel.h"
-#include "rulesmodel.h"
 #include "ordersmodel.h"
 #include "orderitem.h"
 #include "historymodel.h"
 #include <QKeyEvent>
+#include "currencypairitem.h"
+#include "rulewidget.h"
+#include "feecalculator.h"
+
+class Exchange;
 
 class QtBitcoinTrader : public QDialog
 {
 	Q_OBJECT
 
 public:
+	bool feeCalculatorSingleInstance;
+	FeeCalculator *feeCalculator;
+
 	double meridianPrice;
-	bool exchangeSupportsLastTradesType;
-	bool exchangeSupportsAvailableAmount;
 	double availableAmount;
-	RulesModel *rulesModel;
 	int exchangeId;
 	double getAvailableBTC();
 	double getAvailableUSD();
+	double getAvailableUSDtoBTC(double price);
 
 	double getFeeForUSDDec(double usd);
-	double getFeeForUSDInc(double usd);
 	double getValidDoubleForPercision(const double &val, const int &percision, bool roundUp=true);
 
 	double floatFee;
@@ -51,9 +55,6 @@ public:
 	double floatFeeInc;
 
 	QString numFromDouble(const double &value, int maxDecimals=10);
-
-	QString upArrow;
-	QString downArrow;
 
 	void addPopupDialog(int);
 
@@ -74,8 +75,23 @@ public:
 	~QtBitcoinTrader();
 
 	OrdersModel *ordersModel;
-private:
+
 	quint32 currencyChangedDate;
+
+	QSettings *iniSettings;
+	bool isValidSoftLag;
+	void beep();
+
+	void apiSellSend(double btc, double price);
+	void apiBuySend(double btc, double price);
+
+private:	
+	QMenu copyTableValuesMenu;
+	QTableView *lastCopyTable;
+
+	void copyInfoFromTable(QTableView *table, QAbstractItemModel *model, int i);
+
+	void addRuleGroupByName(QString groupName, QString copyFrom="");
 	void keyPressEvent(QKeyEvent *event);
 	bool swapedDepth;
 	DepthModel *depthAsksModel;
@@ -96,15 +112,8 @@ private:
 	int depthAsksLastScrollValue;
 	int depthBidsLastScrollValue;
 
-	QMenu *rulesEnableDisableMenu;
-	QMenu *historyCopyMenu;
-	QMenu *tradesCopyMenu;
-	QMenu *depthAsksCopyMenu;
-	QMenu *depthBidsCopyMenu;
 	QMenu *trayMenu;
-	QSettings *iniSettings;
 	QRect currentDesktopRect;
-	bool isValidSoftLag;
 	void saveDetachedWindowsSettings(bool force=false);
 	QString windowTitleP;
 	QSystemTrayIcon *trayIcon;
@@ -127,17 +136,18 @@ private:
 
 	QString appDir;
 	bool showingMessage;
-	void beep();
 
 	bool balanceNotLoaded;
 	bool marketPricesNotLoaded;
 	void checkValidSellButtons();
 	void checkValidBuyButtons();
+
 	bool sellLockBtcToSell;
 	bool sellLockPricePerCoin;
 	bool sellLockAmountToReceive;
 
 	bool buyLockTotalBtc;
+	bool buyLockTotalBtcSelf;
 	bool buyLockPricePerCoin;
 	bool buyLockTotalSpend;
 
@@ -162,9 +172,32 @@ private:
 	bool isDetachedRules;
 	bool isDetachedDepth;
 	bool isDetachedCharts;
-	void depthSelectOrder(QModelIndex, bool isSell);
+	void depthSelectOrder(QModelIndex, bool isSel, int type=0);
 	double tradesPrecentLast;
+	QList<CurrencyPairItem> currPairsList;
+
+	void repeatOrderFromTrades(int type,int row);
+	void repeatOrderFromValues(int type,double price, double amount);
+	void repeatOrderByType(int type);
+
 public slots:
+	void repeatBuySellOrder();
+	void repeatBuyOrder();
+	void repeatSellOrder();
+	void copySelectedRow();
+	void copyDate();
+	void copyAmount();
+	void copyPrice();
+	void copyTotal();
+
+	void tableCopyContextMenuRequested(QPoint);
+
+	void rulesCountChanged();
+
+	void on_rulesTabs_tabCloseRequested(int);
+	void on_buttonAddRuleGroup_clicked();
+	void setCurrencyPairsList(QList<CurrencyPairItem> currPairs);
+
 	void availableAmountChanged(double);
 	void precentBidsChanged(double);
 	void depthRequested();
@@ -174,35 +207,6 @@ public slots:
 	void cancelOrder(QByteArray);
 	void volumeAmountChanged(double,double);
 	void setLastTrades10MinVolume(double);
-	void rulesMenuRequested(const QPoint&);
-	void historyMenuRequested(const QPoint&);
-	void tradesMenuRequested(const QPoint&);
-	void depthAsksMenuRequested(const QPoint&);
-	void depthBidsMenuRequested(const QPoint&);
-	void saveRulesData();
-	void ruleDisableEnableMenuFix();
-	void CopyInfo(QTableView *table, QAbstractItemModel *model, int i);
-	void historyCopyMenuFix();
-	void historyCopyDateSelected();
-	void historyCopyAmountSelected();
-	void historyCopyPriceSelected();
-	void tradesCopyMenuFix();
-	void tradesCopyDateSelected();
-	void tradesCopyAmountSelected();
-	void tradesCopyPriceSelected();
-	void depthAsksCopyMenuFix();
-	void depthAsksCopyTotalSelected();
-	void depthAsksCopyAmountSelected();
-	void depthAsksCopyPriceSelected();
-	void depthBidsCopyMenuFix();
-	void depthBidsCopyTotalSelected();
-	void depthBidsCopyAmountSelected();
-	void depthBidsCopyPriceSelected();
-	void on_ruleConcurrentMode_toggled(bool);
-	void ruleEnableSelected();
-	void ruleDisableSelected();
-	void ruleEnableAll();
-	void ruleDisableAll();
 	void on_depthAutoResize_toggled(bool);
 	void on_depthComboBoxLimitRows_currentIndexChanged(int);
 	void on_comboBoxGroupByPrice_currentIndexChanged(int);
@@ -230,7 +234,7 @@ public slots:
 	void setTradesScrollBarValue(int);
 	void tabTradesIndexChanged(int);
 	void tabTradesScrollUp();
-	void addLastTrade(double, quint32, double, QByteArray, bool);
+	void addLastTrades(QList<TradesItem> *newItems);
 
 	void detachLog();
 	void detachTrades();
@@ -264,8 +268,6 @@ public slots:
 	void firstTicker();
 
 	void fixWindowMinimumSize();
-	void ruleUp();
-	void ruleDown();
 
 	void languageComboBoxChanged(int);
 
@@ -283,7 +285,6 @@ public slots:
 
 	void buttonNewWindow();
 
-	void checkValidRulesButtons();
 	void aboutTranslationButton();
 
 	void currencyChanged(int);
@@ -292,13 +293,7 @@ public slots:
 	void checkUpdate();
 
 	void saveSoundToggles();
-	void ruleAddButton();
-	void ruleEditButton();
-	void ruleRemove();
-	void ruleRemoveAll();
-
-	void copyDonateButton();
-
+	
 	void accountUSDChanged(double);
 	void accountBTCChanged(double);
 	void marketBuyChanged(double);

@@ -17,52 +17,45 @@ class Exchange_Bitstamp : public Exchange
 	Q_OBJECT
 
 public:
+	void filterAvailableUSDAmountValue(double *amount);
 	Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey);
 	~Exchange_Bitstamp();
 
 private:
-	void depthUpdateOrder(double,double,bool);
+	double accountFee;
+	bool isFirstTicker;
+	bool isReplayPending(int);
+	bool lastInfoReceived;
+	bool tickerOnly;
+
+	int apiDownCounter;
+	int secondPart;
+
+	JulyHttp *julyHttp;
+
+	QByteArray privateClientId;
+
 	QList<DepthItem> *depthAsks;
 	QList<DepthItem> *depthBids;
 	QList<QByteArray> cancelingOrderIDs;
-	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
+
 	QMap<double,double> lastDepthAsksMap;
 	QMap<double,double> lastDepthBidsMap;
-	void clearVariables();
-	JulyHttp *julyHttp;
-	QTime authRequestTime;
-	quint32 lastTradesDate;
-	quint32 lastTickerDate;
-	QByteArray lastDepthData;
-	quint32 lastBidAskTimestamp;
-	bool tickerOnly;
-	QByteArray lastHistory;
-	QByteArray lastOrders;
-	bool lastInfoReceived;
-	bool isFirstTicker;
-
-	double lastTickerHigh;
-	double lastTickerLow;
-	double lastTickerSell;
-	double lastTickerBuy;
-	double lastTickerVolume;
-
-	double lastBtcBalance;
-	double lastUsdBalance;
-	double lastAvUsdBalance;
-	double lastVolume;
-	double lastFee;
-
 	QString apiLogin;
-	int apiDownCounter;
-	int secondPart;
-	QByteArray privateClientId;
+
+	QTime authRequestTime;
+	QTimer *secondTimer;
+
+	quint32 lastBidAskTimestamp;
+	quint32 lastTickerDate;
+	quint32 lastTradesDate;
 	quint32 privateNonce;
 
-	bool isReplayPending(int);
-
+	void clearVariables();
+	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
+	void depthUpdateOrder(double,double,bool);
 	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
-	QTimer *secondTimer;
+
 private slots:
 	void reloadDepth();
 	void sslErrors(const QList<QSslError> &);

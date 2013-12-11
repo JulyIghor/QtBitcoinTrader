@@ -21,49 +21,40 @@ public:
 	~Exchange_BTCChina();
 
 private:
-	QByteArray numForBuySellFromDouble(double val, int maxDecimals);
-	void depthUpdateOrder(double,double,bool);
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
-	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
-	QList<QByteArray> cancelingOrderIDs;
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
-	void clearVariables();
-	JulyHttp *julyHttpAuth;
-	JulyHttp *julyHttpPublic;
-	QTime authRequestTime;
-	QByteArray lastFetchDate;
-	QByteArray lastDepthData;
-	bool tickerOnly;
-	QByteArray lastHistory;
-	QByteArray lastOrders;
-	bool lastInfoReceived;
 	bool isFirstTicker;
+	bool isReplayPending(int);
+	bool lastInfoReceived;
+	bool tickerOnly;
 
-	double lastTickerHigh;
-	double lastTickerLow;
-	double lastTickerSell;
-	double lastTickerLast;
-	double lastTickerBuy;
-	double lastTickerVolume;
-
-	double lastBtcBalance;
-	double lastUsdBalance;
-	double lastVolume;
-	double lastFee;
-
-	QString apiLogin;
-	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	int apiDownCounter;
 	int secondPart;
+
+	JulyHttp *julyHttpAuth;
+	JulyHttp *julyHttpPublic;
+
+	QByteArray lastFetchTid;
+	QByteArray getMidData(QString a, QString b,QByteArray *data);
+	QByteArray numForBuySellFromDouble(double val, int maxDecimals);
+
+	QList<DepthItem> *depthAsks;
+	QList<DepthItem> *depthBids;
+	QList<QByteArray> cancelingOrderIDs;
+
+	QMap<double,double> lastDepthAsksMap;
+	QMap<double,double> lastDepthBidsMap;
+
+	QString apiLogin;
+
+	QTime authRequestTime;
+	QTimer *secondTimer;
+
 	quint32 privateTonce;
 	quint32 tonceCounter;
 
-	bool isReplayPending(int);
-
+	void clearVariables();
+	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
+	void depthUpdateOrder(double,double,bool);
 	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
-	QTimer *secondTimer;
 private slots:
 	void reloadDepth();
 	void sslErrors(const QList<QSslError> &);

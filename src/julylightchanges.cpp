@@ -8,13 +8,13 @@
 // GNU General Public License version 3
 
 #include "julylightchanges.h"
+#include <QApplication>
+#include "main.h"
 
-JulyLightChanges::JulyLightChanges(QDoubleSpinBox *parent, QString colL, QString colH)
+JulyLightChanges::JulyLightChanges(QDoubleSpinBox *parent)
 	: QObject()
 {
 	lastValue=0.0;
-	colorL=colL;
-	colorH=colH;
 	parentSpinBox=parent;
 	setParent(parentSpinBox);
 	changeTimer=new QTimer;
@@ -31,16 +31,16 @@ JulyLightChanges::~JulyLightChanges()
 
 void JulyLightChanges::changeTimerSlot()
 {
-	parentSpinBox->setStyleSheet("QDoubleSpinBox:disabled{color:black; background: \"white\";} QDoubleSpinBox {color:black;background: \"white\";}");
+	parentSpinBox->setStyleSheet("QDoubleSpinBox:disabled{color:"+baseValues.appTheme.black.name()+"; background: "+baseValues.appTheme.white.name()+";} QDoubleSpinBox {color:"+baseValues.appTheme.black.name()+";background: "+baseValues.appTheme.white.name()+";}");
 }
 
 void JulyLightChanges::valueChanged(double val)
 {
 	changeTimer->stop();
 	if(lastValue<=val)
-		parentSpinBox->setStyleSheet("QDoubleSpinBox:disabled{color:black; background: \""+colorH+"\";} QDoubleSpinBox {color:black;background: \""+colorH+"\";}");
+		parentSpinBox->setStyleSheet("QDoubleSpinBox:disabled{color:"+baseValues.appTheme.black.name()+"; background: \""+baseValues.appTheme.lightGreen.name()+"\";} QDoubleSpinBox {color:"+baseValues.appTheme.black.name()+";background: \""+baseValues.appTheme.lightGreen.name()+"\";}");
 	else
-		parentSpinBox->setStyleSheet("QDoubleSpinBox:disabled{color:black; background: \""+colorL+"\";} QDoubleSpinBox {color:black;background: \""+colorL+"\";}");
+		parentSpinBox->setStyleSheet("QDoubleSpinBox:disabled{color:"+baseValues.appTheme.black.name()+"; background: \""+baseValues.appTheme.lightRed.name()+"\";} QDoubleSpinBox {color:"+baseValues.appTheme.black.name()+";background: \""+baseValues.appTheme.lightRed.name()+"\";}");
 	lastValue=val;
 	changeTimer->start(2000);
 }

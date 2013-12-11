@@ -12,6 +12,8 @@
 #include <QTimer>
 #include <zlib.h>
 #include <QFile>
+#include <QMutex>
+#include <QWaitCondition>
 
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
 	: QSslSocket(parent)
@@ -34,15 +36,30 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	requestTimeOut.restart();
 	hostName=hostN;
 	httpHeader.append(" HTTP/1.1\r\n");
-	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+appVerStr+"\r\n");
+	if(baseValues.customUserAgent.length()>0)
+	httpHeader.append("User-Agent: "+baseValues.customUserAgent+"\r\n");
+		else
+	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+baseValues.appVerStr+"\r\n");
 	httpHeader.append("Host: "+hostName+"\r\n");
-	httpHeader.append("Accept-Encoding: gzip\r\n");
+	if(baseValues.gzipEnabled)httpHeader.append("Accept-Encoding: gzip\r\n");
 	httpHeader.append("Content-Type: "+contentType+"\r\n");
 	if(keepAlive)httpHeader.append("Connection: keep-alive\r\n");
 	else httpHeader.append("Connection: close\r\n");
 	apiDownState=false;
 	apiDownCounter=0;
 	restKeyLine=restLine;
+
+	if(baseValues.customCookies.length()>0)
+	{
+		lastCookie="SetCookie: "+baseValues.customCookies.toAscii()+"\r\n";
+		QStringList cookieListStr=baseValues.customCookies.split("; ");
+		for(int n=0;n<cookieListStr.count();n++)
+		{
+			QStringList nameValue=cookieListStr.at(n).split("=");
+			if(nameValue.count()!=2)continue;
+			cookiesList<<QNetworkCookie(nameValue.first().toAscii(),nameValue.last().toAscii());
+		}
+	}
 
 	QTimer *secondTimer=new QTimer(this);
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(sendPendingData()));
@@ -127,12 +144,43 @@ void JulyHttp::setApiDown(bool httpError)
 {
 	if(httpError)apiDownCounter++;else apiDownCounter=0;
 
-	bool currentApiDownState=apiDownCounter>apiDownCount;
+	bool currentApiDownState=apiDownCounter>baseValues.apiDownCount;
 	if(apiDownState!=currentApiDownState)
 	{
 		apiDownState=currentApiDownState;
 		emit apiDown(apiDownState);
 	}
+}
+
+void JulyHttp::updateCookiesFromLastCookie()
+{
+	QByteArray currentCookie=lastCookie;
+	int currentCookiesCount=cookiesList.count();
+	QList<QNetworkCookie> newCookedList=QNetworkCookie::parseCookies(currentCookie);
+	for(int k=0;k<newCookedList.count();k++)
+	{
+		bool updated=false;
+		for(int n=currentCookiesCount-1;n>=0;n--)
+			if(newCookedList.at(k).name()==cookiesList.at(n).name())
+			{
+				updated=true;
+				cookiesList[n]=newCookedList.at(k);
+			}
+			if(!updated)cookiesList<<newCookedList.at(k);
+	}
+
+	cookieLine.clear();
+	for(int n=0;n<cookiesList.count();n++)
+	{
+		if(cookiesList.at(n).value().isEmpty())continue;
+		QByteArray currentParsedCookie=cookiesList.at(n).toRawForm(QNetworkCookie::NameAndValueOnly);
+		if(currentParsedCookie.size()<=12)continue;
+		if(currentParsedCookie.toLower().startsWith("set-cookie: "))
+			currentParsedCookie.remove(0,12);
+		cookieLine.append(currentParsedCookie);
+		if(n<cookiesList.count()-1)cookieLine.append("; ");
+	}
+	if(!cookieLine.isEmpty()){cookieLine.prepend("Cookie: ");cookieLine.append("\r\n");}
 }
 
 void JulyHttp::readSocket()
@@ -169,12 +217,19 @@ void JulyHttp::readSocket()
 				if(currentLineLow.startsWith("http/1.1 "))
 				{
 					if(currentLineLow.length()>12)httpState=currentLineLow.mid(9,3).toInt();
+					if(debugLevel)
+					{
+						if(httpState!=200)logThread->writeLog(currentLine+readAll());
+					}
 				}
 				else
 				if(currentLineLow.startsWith("set-cookie"))
 				{
-					cookie=currentLine;
-					cookie.remove(0,4);
+					if(lastCookie!=currentLine)
+					{
+					lastCookie=currentLine;
+					updateCookiesFromLastCookie();
+					}
 				}
 				else 
 				if(currentLineLow.startsWith("transfer-encoding")&&
@@ -404,7 +459,7 @@ void JulyHttp::clearRequest()
 void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray postData, const QByteArray &restSignLine, const int &forceRetryCount)
 {
 	if(isDisabled)return;
-	QByteArray *data=new QByteArray(method+httpHeader+cookie);
+	QByteArray *data=new QByteArray(method+httpHeader+cookieLine);
 	if(!restSignLine.isEmpty())data->append(restKeyLine+restSignLine);
 	if(!postData.isEmpty())
 	{
@@ -421,7 +476,7 @@ void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray pos
 
 	if(forceRetryCount==-1)
 	{
-		if(reqType>300)newPacket.retryCount=httpRetryCount-1;
+		if(reqType>300)newPacket.retryCount=baseValues.httpRetryCount-1;
 	}
 	else newPacket.retryCount=forceRetryCount;
 	reqTypePending[reqType]=reqTypePending.value(reqType,0)+1;
@@ -463,7 +518,7 @@ void JulyHttp::prepareDataClear()
 void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postData, const QByteArray &restSignLine, const int &forceRetryCount)
 {
 	if(isDisabled)return;
-	QByteArray *data=new QByteArray(method+httpHeader+cookie);
+	QByteArray *data=new QByteArray(method+httpHeader+cookieLine);
 	if(!restSignLine.isEmpty())data->append(restKeyLine+restSignLine);
 	if(!postData.isEmpty())
 	{
@@ -485,7 +540,7 @@ void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postDa
 
 	if(forceRetryCount==-1)
 	{
-	if(reqType>300)newPacket.retryCount=httpRetryCount-1;
+	if(reqType>300)newPacket.retryCount=baseValues.httpRetryCount-1;
 	else newPacket.retryCount=0;
 	}
 	else newPacket.retryCount=forceRetryCount;
@@ -509,7 +564,6 @@ void JulyHttp::takeRequestAt(int pos)
 	PacketItem packetTake=requestList.at(pos);
 	reqTypePending[packetTake.reqType]=reqTypePending.value(packetTake.reqType,1)-1;
 
-	if(debugLevel)logThread->writeLog("Data taken: "+*packetTake.data);
 	delete packetTake.data;
 	packetTake.data=0;
 	requestList.removeAt(pos);
@@ -544,7 +598,18 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 		emit errorSignal(errorString());
 		abortSocket();
 	}
-	//else reconnectSocket(false); // don't call reconnectSocket() recursive
+	else
+	{
+		QMutex mutex;
+		mutex.lock();
+
+		QWaitCondition waitCondition;
+		waitCondition.wait(&mutex, 1000);
+
+		mutex.unlock();
+
+		reconnectSocket(false);
+	}
 }
 
 bool JulyHttp::isSocketConnected()
@@ -561,25 +626,25 @@ void JulyHttp::sendPendingData()
 
 	if(state()!=QAbstractSocket::UnconnectedState)
 	{
-		if(state()==QAbstractSocket::ConnectingState||state()==QAbstractSocket::HostLookupState)waitForConnected(httpRequestTimeout+1000);
+		if(state()==QAbstractSocket::ConnectingState||state()==QAbstractSocket::HostLookupState)waitForConnected(baseValues.httpRequestTimeout+1000);
 	}
-	if(state()!=QAbstractSocket::ConnectedState)
+	if(!isSocketConnected())
 	{
 		setApiDown(true);
 		if(debugLevel)logThread->writeLog("Socket state: "+errorString().toAscii(),2);
 		reconnectSocket(false);
-		if(state()==QAbstractSocket::ConnectingState)waitForConnected(httpRequestTimeout+1000);
+		if(state()==QAbstractSocket::ConnectingState)waitForConnected(baseValues.httpRequestTimeout+1000);
 	}
 	else reconnectSocket(false);
 
-	if(state()!=QAbstractSocket::ConnectedState)return;
+	if(!isSocketConnected())return;
 
 	if(currentPendingRequest==requestList.first().data)
 	{
-		if(requestTimeOut.elapsed()<httpRequestTimeout)return;
+		if(requestTimeOut.elapsed()<baseValues.httpRequestTimeout)return;
 		else
 		{
-			if(debugLevel)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(httpRequestTimeout).toAscii(),2);
+			if(debugLevel)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(baseValues.httpRequestTimeout).toAscii(),2);
 			reconnectSocket(true);
 			setApiDown(true);
 			if(requestList.first().retryCount>0){retryRequest();return;}
@@ -593,7 +658,7 @@ void JulyHttp::sendPendingData()
 	clearRequest();
 
 	requestTimeOut.restart();
-	if(debugLevel)logThread->writeLog("SND: "+QByteArray(*currentPendingRequest).replace(restKey,"REST_KEY").replace(restSign,"REST_SIGN"));
+	if(debugLevel)logThread->writeLog("SND: "+QByteArray(*currentPendingRequest).replace(baseValues.restKey,"REST_KEY").replace(baseValues.restSign,"REST_SIGN"));
 
 	if(currentPendingRequest)
 	{
@@ -618,7 +683,7 @@ void JulyHttp::sslErrorsSlot(const QList<QSslError> &val)
 	for(int n=0;n<val.count();n++)
 		if(val.at(n).error()==QAbstractSocket::SocketTimeoutError)
 		{
-			requestTimeOut.addMSecs(httpRequestTimeout);
+			requestTimeOut.addMSecs(baseValues.httpRequestTimeout);
 			sendPendingData();
 			setApiDown(true);
 			break;

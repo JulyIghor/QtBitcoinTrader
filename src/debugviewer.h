@@ -23,10 +23,12 @@ public:
 	~DebugViewer();
 
 private:
+	bool savingFile;
 	QTimer secondTimer;
 	QByteArray buffer;
 	Ui::DebugViewer ui;
 private slots:
+	void on_buttonSaveAs_clicked();
 	void secondSlot();
 	void sendLogSlot(QByteArray);
 	void on_radioDebug_toggled(bool);

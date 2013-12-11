@@ -21,9 +21,9 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	resetData=false;
 	newProfile=false;
 	ui.setupUi(this);
-    setWindowTitle(windowTitle()+" v"+appVerStr);
+    setWindowTitle(windowTitle()+" v"+baseValues.appVerStr);
 	setWindowFlags(Qt::WindowCloseButtonHint);
-	ui.updateCheckBox->setStyleSheet("QCheckBox {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent)}");
+	//ui.updateCheckBox->setStyleSheet("QCheckBox {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent)}");
 	ui.okButton->setEnabled(false);
 
 	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
@@ -37,7 +37,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 		QSettings settIni(appDataDir+settingsList.at(n),QSettings::IniFormat);
 
 
-		if(appVerLastReal<1.0772)
+		if(baseValues.appVerLastReal<1.0772)
 		{
 			QString cryptedData=settIni.value("CryptedData","").toString();
 			if(!cryptedData.isEmpty())settIni.setValue("EncryptedData/ApiKeySign",cryptedData);
@@ -65,7 +65,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 		}
 		int currentProfileExchangeId=settIni.value("Profile/ExchangeId",0).toInt();
 
-		if(appVerLastReal<1.0775)
+		if(baseValues.appVerLastReal<1.0775)
 		{
 			if(currentProfileExchangeId==2)
 			{
@@ -96,7 +96,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	if(firstUnlockedProfileIndex!=-1&&lastProfileIndex==-1)lastProfileIndex=firstUnlockedProfileIndex;
 	if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);
 
-	julyTranslator->translateUi(this);
+	julyTranslator.translateUi(this);
 
 	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())
 		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),textFontWidth(checkBoxes->text())+20));

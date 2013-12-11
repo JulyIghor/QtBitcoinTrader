@@ -19,16 +19,53 @@
 #include "qtbitcointrader.h"
 #include "julyhttp.h"
 #include "orderitem.h"
-#include "depthitem.h"
+#include "tradesitem.h"
+
+struct DepthItem;
 
 class Exchange : public QThread
 {
 	Q_OBJECT
 
 public:
-	QByteArray exchangeID;
+	virtual void filterAvailableUSDAmountValue(double *amount);
+
+	CurrencyPairItem defaultCurrencyParams;
+	bool balanceDisplayAvailableAmount;
+	int minimumRequestIntervalAllowed;
+	double decAmountFromOpenOrder;
+	int calculatingFeeMode;//0: direct multiply; 1: rounded by decimals
+	bool buySellAmountExcludedFee;
+
+	CurrencyPairItem currencyPairInfo;
+
+	double lastTickerLast;
+	double lastTickerHigh;
+	double lastTickerLow;
+	double lastTickerSell;
+	double lastTickerBuy;
+	double lastTickerVolume;
+
+	double lastBtcBalance;
+	double lastUsdBalance;
+	double lastAvUsdBalance;
+	double lastVolume;
+	double lastFee;
+
+	QByteArray lastDepthData;
+	QByteArray lastHistory;
+	QByteArray lastOrders;
+
+	QString currencyMapFile;
+	bool isLastTradesTypeSupported;
+	bool exchangeSupportsAvailableAmount;
+	bool checkDuplicatedOID;
 	bool forceDepthLoad;
 	bool tickerOnly;
+	bool supportsLoginIndicator;
+	bool supportsAccountVolume;
+	bool supportsExchangeLag;
+
 	QTimer *secondTimer;
 	QByteArray privateRestSign;
 	QByteArray privateRestKey;
@@ -44,6 +81,8 @@ private:
 	void run();
 
 signals:
+	void setCurrencyPairsList(QList<CurrencyPairItem>);
+
 	void availableAmountChanged(double);
 	void depthRequested();
 	void depthRequestReceived();
@@ -51,7 +90,7 @@ signals:
 
 	void depthSubmitOrders(QList<DepthItem> *asks, QList<DepthItem> *bids);
 
-	void addLastTrade(double,quint32,double,QByteArray,bool);
+	void addLastTrades(QList<TradesItem> *trades);
 
 	void ordersChanged(QList<OrderItem> *orders);
 	void showErrorMessage(QString);

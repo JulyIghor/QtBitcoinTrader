@@ -12,6 +12,7 @@
 
 #include <QAbstractItemModel>
 #include <QStringList>
+#include "tradesitem.h"
 
 class TradesModel : public QAbstractItemModel
 {
@@ -23,10 +24,10 @@ public:
 	void updateTotalBTC();
 	double getRowPrice(int);
 	double getRowVolume(int);
-	bool getRowType(int);
+	int getRowType(int);
 	void clear();
 	void removeDataOlderThen(quint32);
-	void addNewTrade(quint32 dateT, double volumeT, double priceT, QByteArray curRency, int isSell);
+	void addNewTrades(QList<TradesItem> *);
 
 	void setHorizontalHeaderLabels(QStringList list);
 
@@ -46,10 +47,7 @@ private:
 	void removeFirst();
 	QString textBid;
 	QString textAsk;
-
-	QString upArrow;
-	QString downArrow;
-
+	
 	double lastPrice;
 	int columnsCount;
 	int dateWidth;
@@ -57,13 +55,7 @@ private:
 
 	QStringList headerLabels;
 
-	QHash<quint32,int> colorMap;
-
-	QList<quint32> dateList;
-	QList<double> volumeList;
-	QList<double> priceList;
-	QList<int> typesList;
-	QList<int> directionList;
+	QList<TradesItem> itemsList;
 signals:
 	void precentBidsChanged(double);
 	void trades10MinVolumeChanged(double);

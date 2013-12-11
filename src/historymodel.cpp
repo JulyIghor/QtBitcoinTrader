@@ -14,7 +14,7 @@ HistoryModel::HistoryModel()
 	: QAbstractItemModel()
 {
 	typeWidth=75;
-	columnsCount=4;
+	columnsCount=7;
 	lastDate=0;
 	typesLabels<<""<<"Bought"<<"Sell"<<"Buy"<<"Fee"<<"Deposit"<<"Withdraw";//0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
 }
@@ -26,20 +26,23 @@ HistoryModel::~HistoryModel()
 
 void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 {
-	while(histList->count()&&histList->last().date<=lastDate)histList->removeLast();
+	while(histList->count()&&histList->last().dateTimeInt<=lastDate)histList->removeLast();
 	if(histList->count()==0){delete histList; return;}
 
 	beginInsertRows(QModelIndex(), 0, histList->count());
+
+	if(histList->count()&&itemsList.count())
+	{
+		(*histList)[histList->count()-1].displayFullDate=histList->at(histList->count()-1).dateInt!=itemsList.last().dateInt;
+	}
 	quint32 maxListDate=0;
 	for(int n=histList->count()-1;n>=0;n--)
 	{
-		quint32 curItemDate=histList->at(n).date;
-		if(maxListDate<curItemDate)maxListDate=curItemDate;
-		dateList<<curItemDate;
-		volumeList<<histList->at(n).volume;
-		priceList<<histList->at(n).price;
-		symbolList<<histList->at(n).symbol;
-		typesList<<histList->at(n).type;
+		if(maxListDate<histList->at(n).dateTimeInt)maxListDate=histList->at(n).dateTimeInt;
+
+		if(n!=histList->count()-1)(*histList)[n].displayFullDate=histList->at(n).dateInt!=histList->at(n+1).dateInt;
+
+		itemsList<<histList->at(n);
 		if(histList->at(n).type==1)emit accLastSellChanged(histList->at(n).symbol.right(3),histList->at(n).price);
 		else
 		if(histList->at(n).type==2)emit accLastBuyChanged(histList->at(n).symbol.right(3),histList->at(n).price);
@@ -52,29 +55,29 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 
 double HistoryModel::getRowPrice(int row)
 {
-	row=priceList.count()-row-1;
-	if(row<0||row>=priceList.count())return 0.0;
-	return priceList.at(row);
+	row=itemsList.count()-row-1;
+	if(row<0||row>=itemsList.count())return 0.0;
+	return itemsList.at(row).price;
 }
 
 double HistoryModel::getRowVolume(int row)
 {
-	row=volumeList.count()-row-1;
-	if(row<0||row>=volumeList.count())return 0.0;
-	return volumeList.at(row);
+	row=itemsList.count()-row-1;
+	if(row<0||row>=itemsList.count())return 0.0;
+	return itemsList.at(row).volume;
 }
 
 int HistoryModel::getRowType(int row)
 {
-	row=typesList.count()-row-1;
-	if(row<0||row>=typesList.count())return 0.0;
-	return typesList.at(row);
+	row=itemsList.count()-row-1;
+	if(row<0||row>=itemsList.count())return 0.0;
+	return itemsList.at(row).type;
 }
 
 
 int HistoryModel::rowCount(const QModelIndex &) const
 {
-	return dateList.count();
+	return itemsList.count();
 }
 
 int HistoryModel::columnCount(const QModelIndex &) const
@@ -84,8 +87,13 @@ int HistoryModel::columnCount(const QModelIndex &) const
 
 QVariant HistoryModel::data(const QModelIndex &index, int role) const
 {
-	int currentRow=dateList.count()-index.row()-1;
-	if(currentRow<0||currentRow>=dateList.count())return QVariant();
+	int currentRow=itemsList.count()-index.row()-1;
+	if(currentRow<0||currentRow>=itemsList.count())return QVariant();
+
+	if(role==Qt::WhatsThisRole)
+	{
+		return itemsList.at(currentRow).dateTimeStr+" "+typesLabels.at(itemsList.at(currentRow).type)+" "+itemsList.at(currentRow).priceStr+" "+itemsList.at(currentRow).totalStr;
+	}
 
 	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
 
@@ -94,7 +102,9 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 	if(role==Qt::TextAlignmentRole)
 	{
 		if(indexColumn==1)return 0x0082;
-		if(indexColumn==3)return 0x0081;
+		if(indexColumn==2)return 0x0082;
+		if(indexColumn==4)return 0x0081;
+		if(indexColumn==5)return 0x0082;
 		return 0x0084;
 	}
 
@@ -102,44 +112,34 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 	{
 		switch(indexColumn)
 		{
-		case 0: return Qt::gray; break;
-		case 2:
-			switch(typesList.at(currentRow))
+		case 1: return baseValues.appTheme.gray; break;
+		case 3:
+			switch(itemsList.at(currentRow).type)
 			{
-			case 1: return Qt::red;
-			case 2: return Qt::blue;
-			case 3: return Qt::darkGreen;
-			case 4: return Qt::darkRed;
-			case 5: return Qt::darkBlue;
+			case 1: return baseValues.appTheme.red;
+			case 2: return baseValues.appTheme.blue;
+			case 3: return baseValues.appTheme.darkGreen;
+			case 4: return baseValues.appTheme.darkRed;
+			case 5: return baseValues.appTheme.darkBlue;
 			default: break;
 			}
 		default: break;
 		}
-		return Qt::black;
+		return QVariant();
 	}
 
 	switch(indexColumn)
 	{
-	case 0:	return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat); break;//Date
 	case 1:
-		{//Volume
-			double requestedVolume=volumeList.at(currentRow);
-			if(requestedVolume<=0.0)return QVariant();
-			return currencySignMap->value(symbolList.at(currentRow).left(3),"BTC")+QLatin1String(" ")+QString::number(requestedVolume,'f',btcDecimals);
-		}
-		break;
-	case 2://Type
-		{
-			return typesLabels.at(typesList.at(currentRow));
-		}
-	case 3:
-		{//Price
-			double requestedPrice=priceList.at(currentRow);
-			if(requestedPrice<=0.0)return QVariant();
-			QString returnPrice=currencySignMap->value(symbolList.at(currentRow).right(3),"USD")+QLatin1String(" ")+mainWindow.numFromDouble(requestedPrice);
-			return returnPrice;
-		}
-		break;
+		 {//Date
+			if(role==Qt::ToolTipRole||itemsList.at(currentRow).displayFullDate)
+				return itemsList.at(currentRow).dateTimeStr;//DateTime
+			return itemsList.at(currentRow).timeStr;//Time
+		 }
+	case 2: return itemsList.at(currentRow).volumeStr;//Volume
+	case 3: return typesLabels.at(itemsList.at(currentRow).type);//Type
+	case 4: return itemsList.at(currentRow).priceStr;//Price
+	case 5: return itemsList.at(currentRow).totalStr;//Total
 	default: break;
 	}
 	return QVariant();
@@ -150,9 +150,19 @@ QVariant HistoryModel::headerData(int section, Qt::Orientation orientation, int 
 	if(orientation!=Qt::Horizontal)return QVariant();
 	if(role==Qt::TextAlignmentRole)
 	{
-		if(section==1)return 0x0082;
-		if(section==3)return 0x0081;
+		if(section==2)return 0x0082;
+		if(section==4)return 0x0081;
 		return 0x0084;
+	}
+
+	if(role==Qt::SizeHintRole)
+	{
+		switch(section)
+		{
+		case 1: return QSize(dateWidth,defaultHeightForRow);//Date
+		case 3: return QSize(typeWidth,defaultHeightForRow);//Type
+		}
+		return QVariant();
 	}
 
 	if(role!=Qt::DisplayRole)return QVariant();
@@ -182,6 +192,9 @@ void HistoryModel::setHorizontalHeaderLabels(QStringList list)
 		typeWidth=qMax(typeWidth,textFontWidth(typesLabels.at(n)));
 	typeWidth=qMax(typeWidth,textFontWidth(list.at(2)));
 	typeWidth+=10;
+
+	dateWidth=qMax(qMax(textFontWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(baseValues.dateTimeFormat)),textFontWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(baseValues.dateTimeFormat))),textFontWidth(list.at(0)))+10;
+	
 	headerLabels=list;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 	emit layoutChanged();

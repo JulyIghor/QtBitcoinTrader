@@ -48,7 +48,7 @@ public:
 private slots:
 	void delayedReloadVisibleItems();
 private:
-	void depthUpdateOrder(double price, double volume);
+	void depthUpdateOrder(DepthItem item);
 	bool originalIsAsk;
 	bool somethingChanged;
 	double groupedPrice;
@@ -68,6 +68,10 @@ private:
 	QList<double> volumeList;
 	QList<double> sizeList;
 	QList<double> priceList;
+	QStringList volumeListStr;
+	QStringList sizeListStr;
+	QStringList priceListStr;
+	QList<int> directionList;
 
 protected:
 };

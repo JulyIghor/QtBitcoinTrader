@@ -13,6 +13,7 @@
 #include <QObject>
 #include <QSslSocket>
 #include <QTime>
+#include <QNetworkCookie>
 
 struct PacketItem
 {
@@ -41,6 +42,10 @@ public:
 	~JulyHttp();
 
 private:
+	void updateCookiesFromLastCookie();
+	int apiDownCounter;
+	QByteArray lastCookie;
+	QList<QNetworkCookie> cookiesList;
 	bool secureConnection;
 	bool isDataPending;
 	void uncompress(QByteArray *data);
@@ -56,14 +61,13 @@ private:
 
 	void abortSocket();
 	bool isDisabled;
-	QByteArray cookie;
+	QByteArray cookieLine;
 	int outGoingPacketsCount;
 	void setupSocket();
 	bool isSocketConnected();
 	void reconnectSocket(bool mastAbort);
 	void setApiDown(bool);
 	bool apiDownState;
-	int apiDownCounter;
 	bool packetIsChunked;
 	QByteArray buffer;
 	bool nextPacketMastBeSize;

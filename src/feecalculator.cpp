@@ -18,18 +18,19 @@ FeeCalculator::FeeCalculator()
 	buyBtcLocked=true;
 	buyBtcReceivedLocked=false;
 	ui.setupUi(this);
+	setAttribute(Qt::WA_DeleteOnClose,true);
 	setWindowFlags(Qt::WindowCloseButtonHint);
 	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
-	mainWindow.fillAllBtcLabels(this,currencyAStr);
-	mainWindow.fillAllUsdLabels(this,currencyBStr);
+	mainWindow.fillAllBtcLabels(this,baseValues.currentPair.currAStr);
+	mainWindow.fillAllUsdLabels(this,baseValues.currentPair.currBStr);
 	mainWindow.fixDecimals(this);
 
 	ui.feeValue->setValue(mainWindow.ui.accountFee->value());
 
 	ui.buyPrice->setValue(mainWindow.ui.marketBuy->value());
 	double btcVal=mainWindow.getAvailableUSD()/ui.buyPrice->value();
-	if(btcVal<minTradeVolume)btcVal=minTradeVolume;
+	if(btcVal<baseValues.currentPair.tradeVolumeMin)btcVal=baseValues.currentPair.tradeVolumeMin;
 	ui.buyTotalBtc->setValue(btcVal);
 
 	buyBtcLocked=false;
@@ -38,10 +39,12 @@ FeeCalculator::FeeCalculator()
 	buyBtcChanged(ui.buyTotalBtc->value());//I'll remove this soon
 	setZeroProfitPrice();//and this too
 
-	julyTranslator->translateUi(this);
+	ui.singleInstance->setChecked(mainWindow.feeCalculatorSingleInstance);
+
+	julyTranslator.translateUi(this);
 
 	languageChanged();
-	connect(julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
+	connect(&julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
 
 	if(mainWindow.ui.widgetStaysOnTop->isChecked())ui.widgetStaysOnTop->setChecked(true);
 	else setStaysOnTop(false);
@@ -49,7 +52,12 @@ FeeCalculator::FeeCalculator()
 
 FeeCalculator::~FeeCalculator()
 {
+	if(mainWindow.feeCalculatorSingleInstance)mainWindow.feeCalculator=0;
+}
 
+void FeeCalculator::on_singleInstance_toggled(bool on)
+{
+	mainWindow.feeCalculatorSingleInstance=on;
 }
 
 void FeeCalculator::setStaysOnTop(bool on)
@@ -62,7 +70,7 @@ void FeeCalculator::setStaysOnTop(bool on)
 
 void FeeCalculator::languageChanged()
 {
-	julyTranslator->translateUi(this);
+	julyTranslator.translateUi(this);
 	setWindowTitle(julyTr("FEE_CALCULATOR_TITLE","Calculator"));
 
 	mainWindow.fixAllChildButtonsAndLabels(this);
@@ -72,15 +80,15 @@ void FeeCalculator::languageChanged()
 
 void FeeCalculator::setZeroProfitPrice()
 {
-	ui.sellPrice->setValue(ui.buyPrice->value()*mainWindow.floatFeeInc*mainWindow.floatFeeInc+priceMinimumValue);
+	ui.sellPrice->setValue(ui.buyPrice->value()*mainWindow.floatFeeInc*mainWindow.floatFeeInc+baseValues.currentPair.priceMin);
 }
 
 void FeeCalculator::profitLossChanged(double val)
 {
 	if(val<0)
-		ui.profitLoss->setStyleSheet("QDoubleSpinBox {background: #ffaaaa;}");
+		ui.profitLoss->setStyleSheet("QDoubleSpinBox {background: "+baseValues.appTheme.lightRed.name()+";}");
 	else
-		ui.profitLoss->setStyleSheet("QDoubleSpinBox {background: #aaffaa;}");
+		ui.profitLoss->setStyleSheet("QDoubleSpinBox {background: "+baseValues.appTheme.lightGreen.name()+";}");
 }
 
 void FeeCalculator::buyBtcChanged(double)

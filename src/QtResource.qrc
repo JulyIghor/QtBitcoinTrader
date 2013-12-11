@@ -2,6 +2,9 @@
   <qresource prefix="/">
     <file>Resources/CertBase.cer</file>
     <file>Resources/Exchanges/BTC-e.png</file>
+    <file>Resources/Donate/Bitcoin.png</file>
+    <file>Resources/Donate/Litecoin.png</file>
+    <file>Resources/Donate/WebMoney.png</file>
     <file>Resources/Exchanges/BTCChina.png</file>
     <file>Resources/Exchanges/Mt.Gox.png</file>
     <file>Resources/Exchanges/Bitstamp.png</file>
@@ -43,6 +46,7 @@
     <file>Resources/CurrencySign/PPC.png</file>
     <file>Resources/CurrencySign/FTC.png</file>
     <file>Resources/CurrencySign/XPM.png</file>
+    <file>Resources/CurrencySign/UAH.png</file>
     <file>Resources/Swap.png</file>
     <file>Resources/Public.key</file>
     <file>Resources/QtBitcoinTrader.png</file>
@@ -56,6 +60,7 @@
     <file>Resources/Language/Dutch.lng</file>
     <file>Resources/Language/Norwegian.lng</file>
     <file>Resources/Language/French.lng</file>
+    <file>Resources/Language/Bulgarian.lng</file>
     <file>Resources/Language/LangList.ini</file>
   </qresource>
 </RCC>

@@ -13,6 +13,7 @@
 RulesModel::RulesModel()
 	: QAbstractItemModel()
 {
+	lastRulesCount=0;
 	allDisabled=false;
 	stateWidth=80;
 	lastQueringHolder=0;
@@ -23,7 +24,7 @@ RulesModel::RulesModel()
 
 RulesModel::~RulesModel()
 {
-
+	clear();
 }
 
 QString RulesModel::saveRulesToString()
@@ -32,6 +33,13 @@ QString RulesModel::saveRulesToString()
 	for(int n=0;n<holderList.count();n++)
 		savableList<<holderList.at(n)->generateSavableData();
 	return savableList.join("@");
+}
+
+void RulesModel::submitRulesCountChanged()
+{
+	if(lastRulesCount==holderList.count())return;
+	lastRulesCount=holderList.count();
+	emit rulesCountChanged();
 }
 
 void RulesModel::restoreRulesFromString(QString strData)
@@ -139,6 +147,7 @@ void RulesModel::clear()
 	qDeleteAll(holderList.begin(), holderList.end());
 	holderList.clear();
 	endResetModel();
+	submitRulesCountChanged();
 }
 
 int RulesModel::rowCount(const QModelIndex &) const
@@ -156,6 +165,7 @@ void RulesModel::addRule(RuleHolder *holder)
 	beginInsertRows(QModelIndex(),holderList.count(),holderList.count());
 	holderList<<holder;
 	endInsertRows();
+	submitRulesCountChanged();
 }
 
 void RulesModel::removeRuleByRow(int row)
@@ -164,6 +174,7 @@ void RulesModel::removeRuleByRow(int row)
 	delete holderList.at(row);
 	holderList.removeAt(row);
 	endRemoveRows();
+	submitRulesCountChanged();
 }
 
 QVariant RulesModel::data(const QModelIndex &index, int role) const
@@ -178,7 +189,7 @@ QVariant RulesModel::data(const QModelIndex &index, int role) const
 
 	if(role==Qt::TextAlignmentRole)return 0x0084;
 
-	if(role==Qt::ForegroundRole)return Qt::black;
+	if(role==Qt::ForegroundRole)return QVariant();
 
 	if(role==Qt::BackgroundRole)
 	{
@@ -250,7 +261,7 @@ QVariant RulesModel::headerData(int section, Qt::Orientation orientation, int ro
 	{
 		switch(section)
 		{
-		case 0: return QSize(stateWidth,defaultSectionSize);//State
+		case 0: return QSize(stateWidth,defaultHeightForRow);//State
 		//case 2: return QSize(typeWidth,defaultSectionSize);//Type
 		}
 		return QVariant();

@@ -18,6 +18,7 @@ class LogThread : public QThread
 
 public:
 	void writeLog(QByteArray,int debugLevel=0);
+	void writeLogB(QString mess,int dLevel=0){writeLog(mess.toAscii(),dLevel);}
 	LogThread(bool writeFile=true);
 	~LogThread();
 

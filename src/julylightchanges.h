@@ -19,12 +19,10 @@ class JulyLightChanges : public QObject
 	Q_OBJECT
 
 public:
-	JulyLightChanges(QDoubleSpinBox *parent, QString colorL="#FFAAAA", QString colorH="#AAFFAA");
+	JulyLightChanges(QDoubleSpinBox *parent);
 	~JulyLightChanges();
 private:
 	double lastValue;
-	QString colorL;
-	QString colorH;
 	QDoubleSpinBox *parentSpinBox;
 	QTimer *changeTimer;
 private slots:

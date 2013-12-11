@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AddRuleGroup</class>
+ <widget class="QDialog" name="AddRuleGroup">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>394</width>
+    <height>208</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Add Rule Group</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupNameGroupbox">
+     <property name="accessibleName">
+      <string>RULE_GROUP_NAME</string>
+     </property>
+     <property name="title">
+      <string>Group Name</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="groupNameLabel">
+        <property name="accessibleName">
+         <string>SHORT_NAME</string>
+        </property>
+        <property name="text">
+         <string>Short name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="groupName"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QToolButton" name="groupNameClear">
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupContentGroupBox">
+     <property name="accessibleName">
+      <string>RULES_GROUP_CONTENT</string>
+     </property>
+     <property name="title">
+      <string>Ruels group content</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="checkEmptyRule">
+        <property name="accessibleName">
+         <string>CREATE_EMPTY_RULES_GROUP</string>
+        </property>
+        <property name="text">
+         <string>Create empty rules group</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="checkExistingRule">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="accessibleName">
+         <string>COPY_FROM_EXISTING_GROUP</string>
+        </property>
+        <property name="text">
+         <string>Copy from existing group:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="existingRulesList">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QRadioButton" name="checkUseTemplate">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="accessibleName">
+         <string>USE_RULES_GROUP_TEMPLATE</string>
+        </property>
+        <property name="text">
+         <string>Use rules group template:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="useRulesGroupTemplateList">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>101</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="buttonAddRule">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="accessibleName">
+      <string>ADD_GROUP</string>
+     </property>
+     <property name="text">
+      <string>Add Group</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="buttonCancel">
+     <property name="accessibleName">
+      <string>TRCANCEL</string>
+     </property>
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>101</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>AddRuleGroup</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>233</x>
+     <y>190</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>312</x>
+     <y>314</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>groupNameClear</sender>
+   <signal>clicked()</signal>
+   <receiver>groupName</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>371</x>
+     <y>37</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>341</x>
+     <y>38</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkEmptyRule</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleGroup</receiver>
+   <slot>onGroupContentChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>87</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-22</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkExistingRule</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleGroup</receiver>
+   <slot>onGroupContentChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>28</x>
+     <y>118</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-16</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkUseTemplate</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddRuleGroup</receiver>
+   <slot>onGroupContentChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>41</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-30</x>
+     <y>147</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onGroupContentChanged(bool)</slot>
+ </slots>
+</ui>

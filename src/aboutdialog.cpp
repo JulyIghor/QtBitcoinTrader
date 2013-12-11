@@ -20,17 +20,17 @@ TranslationAbout::TranslationAbout(QWidget *par)
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	//setFixedSize(size());
 
-	julyTranslator->translateUi(this);
+	julyTranslator.translateUi(this);
 	ui.languageField->setText(julyTr("LANGUAGE_NAME","Invalid Language"));
 	ui.translationAuthor->setText(julyTr("LANGUAGE_AUTHOR","Invalid About"));
 	ui.aboutBitcoinTraderGroupBox->setTitle(julyTr("ABOUT_QT_BITCOIN_TRADER","About %1").arg(windowTitle()));
 	ui.aboutTextLabel->setText(julyTr("ABOUT_QT_BITCOIN_TRADER_TEXT","Qt Bitcoin Trader is a free Open Source project<br>developed on C++ Qt and OpenSSL.<br>If you want to help make project better please donate: %1<br>Feel free to send me recommendations and fixes to: %2").arg("<a href=\"bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc\">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>").arg("<a href=\"mailto:julyighor@gmail.com\">julyighor@gmail.com</a>"));
-	if(mainWindow_)mainWindow.addPopupDialog(1);
+	if(baseValues.mainWindow_)mainWindow.addPopupDialog(1);
 }
 
 TranslationAbout::~TranslationAbout()
 {
-	if(mainWindow_)mainWindow.addPopupDialog(-1);
+	if(baseValues.mainWindow_)mainWindow.addPopupDialog(-1);
 }
 
 void TranslationAbout::createTranslation()

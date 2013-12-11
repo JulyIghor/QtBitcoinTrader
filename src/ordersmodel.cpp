@@ -1,5 +1,15 @@
+// Copyright (C) 2013 July IGHOR.
+// I want to create trading application that can be configured for any rule and strategy.
+// If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
+// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// Or send e-mail directly to julyighor@gmail.com
+//
+// You may use, distribute and copy the Qt Bitcion Trader under the terms of
+// GNU General Public License version 3
+
 #include "ordersmodel.h"
 #include "main.h"
+#include "exchange.h"
 
 OrdersModel::OrdersModel()
 	: QAbstractItemModel()
@@ -71,19 +81,16 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 
 	double volumeTotal=0.0;
 	double amountTotal=0.0;
-	double decValue=0.0;
-
-	if(mainWindow.exchangeId==2)decValue=0.01;//Bitstamp exception
 
 	for(int n=0;n<orders->count();n++)
 	{
 		bool isAsk=orders->at(n).type;
 		QByteArray orderSymbol=orders->at(n).symbol;
 
-		if(orderSymbol.startsWith(currencyAStr)&&isAsk)volumeTotal+=orders->at(n).amount-decValue;
-		if(orderSymbol.endsWith(currencyBStr)&&!isAsk)amountTotal+=(orders->at(n).amount-decValue)*orders->at(n).price;
+		if(orderSymbol.startsWith(baseValues.currentPair.currAStr)&&isAsk)volumeTotal+=orders->at(n).amount-currentExchange->decAmountFromOpenOrder;
+		if(orderSymbol.endsWith(baseValues.currentPair.currBStr)&&!isAsk)amountTotal+=(orders->at(n).amount-currentExchange->decAmountFromOpenOrder)*orders->at(n).price;
 
-		if(orderSymbol==currencySymbol)
+		if(orders->at(n).status>0&&orderSymbol==baseValues.currentPair.currSymbol)
 		{
 			if(isAsk)currentAsksPrices[orders->at(n).price]=true;
 			else currentBidsPrices[orders->at(n).price]=true;
@@ -105,8 +112,6 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 			statusList[currentIndex]=orders->at(n).status;
 			amountList[currentIndex]=orders->at(n).amount;
 			priceList[currentIndex]=orders->at(n).price;
-
-			emit dataChanged(index(currentIndex,0),index(currentIndex,columnsCount-1));
 			}
 		}
 		else
@@ -124,8 +129,8 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 			if(checkDuplicatedOID)
 				oidMapForCheckingDuplicates.insert(orders->at(n).oid,orders->at(n).date);
 
-			itemSignList.insert(currentIndex,currencySignMap->value(orders->at(n).symbol.left(3),"$"));
-			priceSignList.insert(currentIndex,currencySignMap->value(orders->at(n).symbol.right(3),"$"));
+			itemSignList.insert(currentIndex,baseValues.currencySignMap.value(orders->at(n).symbol.left(3),"$"));
+			priceSignList.insert(currentIndex,baseValues.currencySignMap.value(orders->at(n).symbol.right(3),"$"));
 			
 			endInsertRows();
 		}
@@ -158,7 +163,20 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 	}
 	countWidth=textFontWidth(QString::number(oidList.count()+1))+6;
 	emit volumeAmountChanged(volumeTotal, amountTotal);
+	emit dataChanged(index(0,0),index(oidList.count()-1,columnsCount-1));
 	emit layoutChanged();
+}
+
+double OrdersModel::getRowPrice(int row)
+{
+	if(row<0||row>=priceList.count())return 0.0;
+	return priceList.at(row);
+}
+
+double OrdersModel::getRowVolume(int row)
+{
+	if(row<0||row>=amountList.count())return 0.0;
+	return amountList.at(row);
 }
 
 QVariant OrdersModel::data(const QModelIndex &index, int role) const
@@ -173,6 +191,24 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	if(role==Qt::WhatsThisRole)
+	{
+		QString copyText=QDateTime::fromTime_t(dateList.at(currentRow)).toString(baseValues.dateTimeFormat)+" "+(typesList.at(currentRow)?textAsk:textBid)+" ";
+		switch(statusList.at(currentRow))
+		{
+		case 0: copyText+=textStatusList.at(0)+" "; break;
+		case 1: copyText+=textStatusList.at(1)+" "; break;
+		case 2: copyText+=textStatusList.at(2)+" "; break;
+		case 3: copyText+=textStatusList.at(3)+" "; break;
+		default: copyText+=textStatusList.at(4)+" "; break; 
+		}
+		copyText+=itemSignList.at(currentRow)+mainWindow.numFromDouble(amountList.at(currentRow))+" ";
+		copyText+=priceSignList.at(currentRow)+mainWindow.numFromDouble(priceList.at(currentRow))+" ";
+		copyText+=priceSignList.at(currentRow)+mainWindow.numFromDouble(amountList.at(currentRow)*priceList.at(currentRow),baseValues.currentPair.currBDecimals);
+
+		return copyText;
+	}
+
 	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::TextAlignmentRole&&role!=Qt::BackgroundRole)return QVariant();
 
 	int indexColumn=index.column()-1;
@@ -183,20 +219,20 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 	{
 		switch(indexColumn)
 		{
-		case 1: return typesList.at(currentRow)?Qt::red:Qt::blue;
+		case 1: return typesList.at(currentRow)?baseValues.appTheme.red:baseValues.appTheme.blue;
 		default: break;
 		}
-		return Qt::black;
+		return QVariant();
 	}
 
 	if(role==Qt::BackgroundRole)
 	{
 		switch(statusList.at(currentRow))
 		{
-			case 0: return QColor(255,200,200);
-			case 2: //return QColor(200,255,200);
-			case 3: return QColor(255,255,200);
-			case 4: return Qt::red;
+			case 0: return baseValues.appTheme.lightRed;
+			case 2: //return baseValues.appTheme.lightGreen;
+			case 3: return baseValues.appTheme.lightRedGreen;
+			case 4: return baseValues.appTheme.red;
 			default: break;
 		}
 		return QVariant();
@@ -212,11 +248,7 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		break;
 	case 0:
 		{//Date
-			//if(role==Qt::ToolTipRole)
-				return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat);
-			//if(highResolutionDisplay)
-			//	return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localDateTimeFormat);
-			//return QDateTime::fromTime_t(dateList.at(currentRow)).toString(localTimeFormat);
+			return QDateTime::fromTime_t(dateList.at(currentRow)).toString(baseValues.dateTimeFormat);
 		}
 		break;
 	case 1:
@@ -238,17 +270,17 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		break;
 	case 3:
 		{//Amount
-			return itemSignList.at(currentRow)+" "+mainWindow.numFromDouble(amountList.at(currentRow));
+			return itemSignList.at(currentRow)+mainWindow.numFromDouble(amountList.at(currentRow));
 		}
 		break;
 	case 4:
 		{//Price
-			return priceSignList.at(currentRow)+" "+mainWindow.numFromDouble(priceList.at(currentRow));
+			return priceSignList.at(currentRow)+mainWindow.numFromDouble(priceList.at(currentRow));
 		}
 		break;
 	case 5:
 		{//Total
-			return priceSignList.at(currentRow)+" "+mainWindow.numFromDouble(amountList.at(currentRow)*priceList.at(currentRow),usdDecimals);
+			return priceSignList.at(currentRow)+mainWindow.numFromDouble(amountList.at(currentRow)*priceList.at(currentRow),baseValues.currentPair.currBDecimals);
 		}
 		break;
 	default: break;
@@ -269,9 +301,17 @@ void OrdersModel::setOrderCanceled(QByteArray oid)
 		if(oidList.at(n)==oid)
 		{
 			statusList[n]=0;
-			emit dataChanged(index(n,0),index(n,columnsCount-1));
+
+			if(symbolList.at(n)==baseValues.currentPair.currSymbol)
+			{
+			if(typesList.at(n))currentAsksPrices.remove(priceList.at(n));
+			else currentBidsPrices.remove(priceList.at(n));
+			}
 			break;
 		}
+
+	emit dataChanged(index(0,0),index(oidList.count()-1,columnsCount-1));
+	emit layoutChanged();
 }
 
 QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -283,10 +323,10 @@ QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int r
 	{
 		switch(section)
 		{
-		case 0: return QSize(countWidth,defaultSectionSize);//Counter
-		case 1: return QSize(dateWidth,defaultSectionSize);//Date
-		case 2: return QSize(typeWidth,defaultSectionSize);//Type
-		case 3: return QSize(statusWidth,defaultSectionSize);//Status
+		case 0: return QSize(countWidth,defaultHeightForRow);//Counter
+		case 1: return QSize(dateWidth,defaultHeightForRow);//Date
+		case 2: return QSize(typeWidth,defaultHeightForRow);//Type
+		case 3: return QSize(statusWidth,defaultHeightForRow);//Status
 		}
 		return QVariant();
 	}
@@ -315,7 +355,7 @@ void OrdersModel::setHorizontalHeaderLabels(QStringList list)
 	textStatusList[3]=julyTr("ORDER_STATE_POST-PENDING",textStatusList.at(3));
 	textStatusList[4]=julyTr("ORDER_STATE_INVALID",textStatusList.at(4));
 
-	dateWidth=qMax(qMax(textFontWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(localDateTimeFormat)),textFontWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(localDateTimeFormat))),textFontWidth(list.at(0)))+10;
+	dateWidth=qMax(qMax(textFontWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(baseValues.dateTimeFormat)),textFontWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(baseValues.dateTimeFormat))),textFontWidth(list.at(0)))+10;
 	typeWidth=qMax(qMax(textFontWidth(textAsk),textFontWidth(textBid)),textFontWidth(list.at(1)))+10;
 
 	for(int n=0;n<4;n++)statusWidth=qMax(textFontWidth(textStatusList.at(n)),textFontWidth(textStatusList.at(n+1)));

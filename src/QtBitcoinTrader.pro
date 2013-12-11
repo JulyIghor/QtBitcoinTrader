@@ -54,7 +54,15 @@ HEADERS += aboutdialog.h \
            historyitem.h \
            exchange.h \
            debugviewer.h \
-           julyscrolluponidle.h
+           julyscrolluponidle.h \
+           addrulegroup.h \
+           currencypairitem.h \
+           donatebtc.h \
+           donatepanel.h \
+           donatewebmoney.h \
+           rulewidget.h \
+           thisfeatureunderdevelopment.h \
+           tradesitem.h
 #
 # Forms
 #
@@ -67,7 +75,13 @@ FORMS += addrulewindow.ui \
          translationdialog.ui \
          updaterdialog.ui \
          datafolderchusedialog.ui \
-         debugviewer.ui
+         debugviewer.ui \
+         donatepanel.ui \
+         donatebtc.ui \
+         donatewebmoney.ui \
+         rulewidget.ui \
+         thisfeatureunderdevelopment.ui \
+         addrulegroup.ui
 #
 # Sources
 #
@@ -102,7 +116,17 @@ SOURCES += aboutdialog.cpp \
            exchange_btcchina.cpp \
            exchange.cpp \
            debugviewer.cpp \
-           julyscrolluponidle.cpp
+           julyscrolluponidle.cpp \
+           addrulegroup.cpp \
+           currencypairitem.cpp \
+           depthitem.cpp \
+           donatebtc.cpp \
+           donatepanel.cpp \
+           donatewebmoney.cpp \
+           historyitem.cpp \
+           rulewidget.cpp \
+           thisfeatureunderdevelopment.cpp \
+           tradesitem.cpp
 #
 # Resources
 # 

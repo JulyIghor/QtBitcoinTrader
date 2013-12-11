@@ -39,17 +39,15 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 private:
+	int dateWidth;
 	int typeWidth;
 	quint32 lastDate;
 	int columnsCount;
 	QStringList headerLabels;
 	QStringList typesLabels;
 
-	QList<quint32> dateList;
-	QList<double> volumeList;
-	QList<double> priceList;
-	QList<QByteArray> symbolList;
-	QList<int> typesList;//0=General, 1=Buy, 2=Sell, 3=Widthdraw, 4=Found
+	QList<HistoryItem> itemsList;
+	//typesList; 0=General, 1=Buy, 2=Sell, 3=Widthdraw, 4=Found
 signals:
 	void accLastSellChanged(QByteArray,double);
 	void accLastBuyChanged(QByteArray,double);

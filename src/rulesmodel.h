@@ -54,12 +54,16 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 private:
+	int lastRulesCount;
+	void submitRulesCountChanged();
 	int stateWidth;
 	RuleHolder *firstQueringHolder;
 	RuleHolder *lastQueringHolder;
 	QStringList headerLabels;
 	int columnsCount;
 	QList<RuleHolder*> holderList;
+signals:
+	void rulesCountChanged();
 };
 
 #endif // RULESMODEL_H

@@ -15,10 +15,17 @@
 Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
 {
+	checkDuplicatedOID=true;
+	accountFee=0.0;
+	balanceDisplayAvailableAmount=false;
+	minimumRequestIntervalAllowed=1200;
+	calculatingFeeMode=1;
+	isLastTradesTypeSupported=false;
+	exchangeSupportsAvailableAmount=true;
 	lastBidAskTimestamp=0;
 	lastTradesDate=0;
 	lastTickerDate=0;
-	exchangeID="Bitstamp";
+	baseValues.exchangeName="Bitstamp";
 	depthAsks=0;
 	depthBids=0;
 	forceDepthLoad=false;
@@ -27,6 +34,19 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	privateRestSign=pRestSign;
 	privateRestKey=pRestKey.split(':').last();
 	privateClientId=pRestKey.split(':').first();
+
+	currencyMapFile="CurrenciesBitstamp.map";
+	defaultCurrencyParams.currADecimals=8;
+	defaultCurrencyParams.currBDecimals=5;
+	defaultCurrencyParams.currABalanceDecimals=8;
+	defaultCurrencyParams.currBBalanceDecimals=5;
+	defaultCurrencyParams.priceDecimals=2;
+	defaultCurrencyParams.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
+
+	supportsLoginIndicator=true;
+	supportsAccountVolume=false;
+	supportsExchangeLag=false;
+
 	moveToThread(this);
 	authRequestTime.restart();
 	privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
@@ -36,20 +56,16 @@ Exchange_Bitstamp::~Exchange_Bitstamp()
 {
 }
 
+void Exchange_Bitstamp::filterAvailableUSDAmountValue(double *amount)
+{
+	*amount=*amount/(1.0+accountFee/100.0);
+}
+
 void Exchange_Bitstamp::clearVariables()
 {
 	isFirstTicker=true;
 	cancelingOrderIDs.clear();
-	lastTickerHigh=0.0;
-	lastTickerLow=0.0;
-	lastTickerSell=0.0;
-	lastTickerBuy=0.0;
-	lastTickerVolume=0.0;
-	lastBtcBalance=0.0;
-	lastUsdBalance=0.0;
-	lastAvUsdBalance=0.0;
-	lastVolume=0.0;
-	lastFee=0.0;
+	Exchange::clearVariables();
 	secondPart=0;
 	apiDownCounter=0;
 	lastHistory.clear();
@@ -79,7 +95,7 @@ void Exchange_Bitstamp::secondSlot()
 	default: break;
 	}
 
-	if(!depthRefreshBlocked&&(forceDepthLoad||infoCounter==5&&!isReplayPending(111)))
+	if(!baseValues.depthRefreshBlocked&&(forceDepthLoad||infoCounter==5&&!isReplayPending(111)))
 	{
 		emit depthRequested();
 		sendToApi(111,"order_book/",false,true);
@@ -112,7 +128,7 @@ void Exchange_Bitstamp::getHistory(bool force)
 void Exchange_Bitstamp::buy(double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	QByteArray params="amount="+QByteArray::number(apiBtcToBuy,'f',btcDecimals)+"&price="+QByteArray::number(apiPriceToBuy,'f',priceDecimals);
+	QByteArray params="amount="+QByteArray::number(apiBtcToBuy,'f',baseValues.currentPair.currADecimals)+"&price="+QByteArray::number(apiPriceToBuy,'f',baseValues.currentPair.priceDecimals);
 	if(debugLevel)logThread->writeLog("Buy: "+params,2);
 	sendToApi(306,"buy/",true,true,params);
 }
@@ -120,7 +136,7 @@ void Exchange_Bitstamp::buy(double apiBtcToBuy, double apiPriceToBuy)
 void Exchange_Bitstamp::sell(double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
-	QByteArray params="amount="+QByteArray::number(apiBtcToSell,'f',btcDecimals)+"&price="+QByteArray::number(apiPriceToSell,'f',priceDecimals);
+	QByteArray params="amount="+QByteArray::number(apiBtcToSell,'f',baseValues.currentPair.currADecimals)+"&price="+QByteArray::number(apiPriceToSell,'f',baseValues.currentPair.priceDecimals);
 	if(debugLevel)logThread->writeLog("Sell: "+params,2);
 	sendToApi(307,"sell/",true,true,params);
 }
@@ -138,10 +154,10 @@ void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, boo
 	if(julyHttp==0)
 	{ 
 		julyHttp=new JulyHttp("www.bitstamp.net","",this);
-		connect(julyHttp,SIGNAL(anyDataReceived()),mainWindow_,SLOT(anyDataReceived()));
-		connect(julyHttp,SIGNAL(setDataPending(bool)),mainWindow_,SLOT(setDataPending(bool)));
-		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
-		connect(julyHttp,SIGNAL(errorSignal(QString)),mainWindow_,SLOT(showErrorMessage(QString)));
+		connect(julyHttp,SIGNAL(anyDataReceived()),baseValues_->mainWindow_,SLOT(anyDataReceived()));
+		connect(julyHttp,SIGNAL(setDataPending(bool)),baseValues_->mainWindow_,SLOT(setDataPending(bool)));
+		connect(julyHttp,SIGNAL(apiDown(bool)),baseValues_->mainWindow_,SLOT(setApiDown(bool)));
+		connect(julyHttp,SIGNAL(errorSignal(QString)),baseValues_->mainWindow_,SLOT(showErrorMessage(QString)));
 		connect(julyHttp,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 		connect(julyHttp,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceivedAuth(QByteArray,int)));
 	}
@@ -216,6 +232,7 @@ void Exchange_Bitstamp::reloadDepth()
 
 void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 {
+	if(debugLevel)logThread->writeLog("RCV: "+data);
 	bool success=!data.startsWith("{\"error\"")&&(data.startsWith("{")||data.startsWith("["))||data=="true"||data=="false";
 	switch(reqType)
 	{
@@ -292,29 +309,34 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 			if(data.startsWith("[{\"date\":"))
 			{
 				QStringList tradeList=QString(data).split("}, {");
+				QList<TradesItem> *newTradesItems=new QList<TradesItem>;
+
 				for(int n=tradeList.count()-1;n>=0;n--)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
-					quint32 currentTradeDate=getMidData("\"date\": \"","\"",&tradeData).toUInt();
-					if(currentTradeDate<=lastTradesDate)continue;
-					double doubleAmount=getMidData("\"amount\": \"","\"",&tradeData).toDouble();
+					TradesItem newItem;
+					newItem.date=getMidData("\"date\": \"","\"",&tradeData).toUInt();
+					if(newItem.date<=lastTradesDate)continue;
+					newItem.amount=getMidData("\"amount\": \"","\"",&tradeData).toDouble();
 					QByteArray priceBytes=getMidData("\"price\": \"","\"",&tradeData);
-					double doublePrice=priceBytes.toDouble();
-					if(n==0&&doublePrice>0.0)
+					newItem.price=priceBytes.toDouble();
+					if(n==0&&newItem.price>0.0)
 					{
-						lastTradesDate=currentTradeDate;
-						if(lastTickerDate<currentTradeDate)
+						lastTradesDate=newItem.date;
+						if(lastTickerDate<newItem.date)
 						{
-						lastTickerDate=currentTradeDate;
-						emit tickerLastChanged(doublePrice);
+						lastTickerDate=newItem.date;
+						emit tickerLastChanged(newItem.price);
 						}
 					}
+					newItem.symbol=baseValues.currentPair.currSymbol;
+					//newItem.type=0;
 
-					if(doubleAmount>0.0&&doublePrice>0.0)
-						emit addLastTrade(doubleAmount,currentTradeDate,doublePrice,currencySymbol,true);
-
+					if(newItem.isValid())(*newTradesItems)<<newItem;
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
 				}
+				if(newTradesItems->count())emit addLastTrades(newTradesItems);
+				else delete newTradesItems;
 			}
 			else if(debugLevel)logThread->writeLog("Invalid trades fetch data:"+data,2);
 		}
@@ -341,31 +363,31 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 
 				for(int n=0;n<asksList.count();n++)
 				{
-					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
+					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
 					QByteArray currentRow=asksList.at(n).toAscii();
 					double priceDouble=getMidData("\"","\"",&currentRow).toDouble();
 					double amount=getMidData(", \"","\"",&currentRow).toDouble();
 
 					if(n==0&&updateTicker)emit tickerBuyChanged(priceDouble);
 
-					if(groupPriceValue>0.0)
+					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==0)
 						{
 							emit depthFirstOrder(priceDouble,amount,true);
-							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
+							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
 							groupedVolume=amount;
 						}
 						else
 						{
-							bool matchCurrentGroup=priceDouble<groupedPrice+groupPriceValue;
+							bool matchCurrentGroup=priceDouble<groupedPrice+baseValues.groupPriceValue;
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==asksList.count()-1)
 							{
-								depthSubmitOrder(&currentAsksMap,groupedPrice+groupPriceValue,groupedVolume,true);
+								depthSubmitOrder(&currentAsksMap,groupedPrice+baseValues.groupPriceValue,groupedVolume,true);
 								rowCounter++;
 								groupedVolume=amount;
-								groupedPrice+=groupPriceValue;
+								groupedPrice+=baseValues.groupPriceValue;
 							}
 						}
 					}
@@ -387,31 +409,31 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				rowCounter=0;
 				for(int n=0;n<bidsList.count();n++)
 				{
-					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
+					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
 					QByteArray currentRow=bidsList.at(n).toAscii();
 					double priceDouble=getMidData("\"","\"",&currentRow).toDouble();
 					double amount=getMidData(", \"","\"",&currentRow).toDouble();
 
 					if(n==0&&updateTicker)emit tickerSellChanged(priceDouble);
 
-					if(groupPriceValue>0.0)
+					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==0)
 						{
 							emit depthFirstOrder(priceDouble,amount,false);
-							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
+							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
 							groupedVolume=amount;
 						}
 						else
 						{
-							bool matchCurrentGroup=priceDouble>groupedPrice-groupPriceValue;
+							bool matchCurrentGroup=priceDouble>groupedPrice-baseValues.groupPriceValue;
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==bidsList.count()-1)
 							{
-								depthSubmitOrder(&currentBidsMap,groupedPrice-groupPriceValue,groupedVolume,false);
+								depthSubmitOrder(&currentBidsMap,groupedPrice-baseValues.groupPriceValue,groupedVolume,false);
 								rowCounter++;
 								groupedVolume=amount;
-								groupedPrice-=groupPriceValue;
+								groupedPrice-=baseValues.groupPriceValue;
 							}
 						}
 					}
@@ -442,7 +464,11 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				if(debugLevel)logThread->writeLog("Info: "+data);
 
 				double accFee=getMidData("\"fee\": \"","\"",&data).toDouble();
-				if(accFee>0.0)emit accFeeChanged(accFee);
+				if(accFee>0.0)
+				{
+					emit accFeeChanged(accFee);
+					accountFee=accFee;
+				}
 
 				QByteArray btcBalance=getMidData("\"btc_balance\": \"","\"",&data);
 				if(!btcBalance.isEmpty())
@@ -467,7 +493,12 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(newAvUsdBalance);
 					lastAvUsdBalance=newAvUsdBalance;
 				}
-
+				static bool balanceSent=false;
+				if(!balanceSent)
+				{
+					balanceSent=true;
+					emit loginChanged(privateClientId);
+				}
 			}
 			else if(debugLevel)logThread->writeLog("Invalid Info data:"+data,2);
 		}
@@ -501,7 +532,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					currentOrder.status=1;
 					currentOrder.amount=getMidData("\"amount\": \"","\"",&currentOrderData).toDouble();
 					currentOrder.price=getMidData("\"price\": \"","\"",&currentOrderData).toDouble();
-					currentOrder.symbol=currencySymbol;
+					currentOrder.symbol=baseValues.currentPair.currSymbol;
 					if(currentOrder.isValid())(*orders)<<currentOrder;
 				}
 				emit ordersChanged(orders);
@@ -547,10 +578,6 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=0;n<dataList.count();n++)
 				{
 					HistoryItem currentHistoryItem;
-					currentHistoryItem.type=0;
-					currentHistoryItem.price=0.0;
-					currentHistoryItem.volume=0.0;
-					currentHistoryItem.date=0;
 
 					QByteArray curLog(dataList.at(n).toAscii());
 					int logTypeInt=getMidData("\"type\": ",",",&curLog).toInt();
@@ -574,7 +601,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 						if(negativeAmount)currentHistoryItem.type=1;//Sell
 						else currentHistoryItem.type=2;//Buy
 					}
-					currentHistoryItem.date=orderDateTime.toTime_t();
+					currentHistoryItem.dateTimeInt=orderDateTime.toTime_t();
 					currentHistoryItem.symbol="BTCUSD";
 					if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 				}

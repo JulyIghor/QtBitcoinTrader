@@ -29,6 +29,7 @@ private:
 public slots:
 	void languageChanged();
 private slots:
+	void on_singleInstance_toggled(bool);
 	void setStaysOnTop(bool);
 	void setZeroProfitPrice();
 	void profitLossChanged(double);

@@ -46,7 +46,7 @@ void LogThread::writeLogSlot(QByteArray data, int dbLvl)
 	data="------------------\r\n"+QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss LVL:").toAscii()+QByteArray::number(dbLvl)+"\r\n"+data+"\r\n------------------\r\n\r\n";
 	if(writeFile)
 	{
-		QFile logFile(logFileName);
+		QFile logFile(baseValues.logFileName);
 		if(logFile.open(QIODevice::Append))
 		{
 			logFile.write(data);

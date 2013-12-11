@@ -13,6 +13,7 @@
 #include <QDialog>
 #include "ui_addrulewindow.h"
 #include "ruleholder.h"
+#include "rulewidget.h"
 
 class AddRuleWindow : public QDialog
 {
@@ -20,16 +21,20 @@ class AddRuleWindow : public QDialog
 
 public:
 	Ui::AddRuleWindow ui;
-	AddRuleWindow(QWidget *parent = 0);
+	AddRuleWindow(RuleWidget *parent = 0);
 	~AddRuleWindow();
 	RuleHolder getRuleHolder();
 	void fillByRuleHolder(RuleHolder *holder);
 private:
+	RuleWidget *parentRuleGroup;
 	int thanType();
 	bool checkIsValidRule();
 public slots:
 	void languageChanged();
 public slots:
+	void on_fillFromBuyPanel_clicked();
+	void on_fillFromSellPanel_clicked();
+
 	void ifChanged(bool);
 	void setOrdersBackInvisible(bool);
 	void amountChanged();

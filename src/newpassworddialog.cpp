@@ -19,13 +19,13 @@ NewPasswordDialog::NewPasswordDialog()
 	: QDialog()
 {
 	ui.setupUi(this);
-	setWindowTitle(windowTitle()+" v"+appVerStr);
+	setWindowTitle(windowTitle()+" v"+baseValues.appVerStr);
 	ui.okButton->setEnabled(false);
 	QSize minSizeHint=minimumSizeHint();
 	if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
 	setWindowFlags(Qt::WindowCloseButtonHint);
 
-	julyTranslator->translateUi(this);
+	julyTranslator.translateUi(this);
 
 	if(QLocale().name().startsWith("zh"))ui.exchangeComboBox->setCurrentIndex(3);
 	else
@@ -150,16 +150,16 @@ bool NewPasswordDialog::isValidPassword()
 void NewPasswordDialog::updateIniFileName()
 {
 	if(ui.profileNameEdit->text().isEmpty())
-	iniFileName=appDataDir+"QtBitcoinTrader.ini";
+	baseValues.iniFileName=appDataDir+"QtBitcoinTrader.ini";
 	else
 	{
-		iniFileName=ui.exchangeComboBox->currentText()+"_"+ui.profileNameEdit->text().toAscii()+".ini";
-		iniFileName.replace(' ','_');
-		iniFileName.prepend(appDataDir);
+		baseValues.iniFileName=ui.exchangeComboBox->currentText()+"_"+ui.profileNameEdit->text().toAscii()+".ini";
+		baseValues.iniFileName.replace(' ','_');
+		baseValues.iniFileName.prepend(appDataDir);
 	}
 
 	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
-	settings.setValue("LastProfile",iniFileName);
+	settings.setValue("LastProfile",baseValues.iniFileName);
 }
 
 QString NewPasswordDialog::selectedProfileName()
@@ -172,5 +172,5 @@ void NewPasswordDialog::okPressed()
 {
 	if(isValidPassword())accept();
 	else
-		QMessageBox::warning(this,"Qt Bitcoin Trader",julyTranslator->translateLabel("TR00100","Your password must be at least 8 characters and contain letters, digits, and special characters."));
+		QMessageBox::warning(this,"Qt Bitcoin Trader",julyTranslator.translateLabel("TR00100","Your password must be at least 8 characters and contain letters, digits, and special characters."));
 }

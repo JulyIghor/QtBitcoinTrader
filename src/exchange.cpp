@@ -9,17 +9,32 @@
 
 #include "exchange.h"
 #include <QDateTime>
+#include "main.h"
+#include "depthitem.h"
 
 Exchange::Exchange()
 	: QThread()
 {
+	balanceDisplayAvailableAmount=true;
+	minimumRequestIntervalAllowed=100;
+	decAmountFromOpenOrder=0.0;
+	buySellAmountExcludedFee=false;
+	calculatingFeeMode=0;
+	supportsLoginIndicator=true;
+	supportsAccountVolume=true;
+	supportsExchangeLag=true;
+	exchangeSupportsAvailableAmount=false;
+	checkDuplicatedOID=false;
+	isLastTradesTypeSupported=true;
 	forceDepthLoad=false;
+
+	clearVariables();
 	moveToThread(this);
 }
 
 Exchange::~Exchange()
 {
-	if(debugLevel)logThread->writeLog(exchangeID+" API Thread Deleted",2);
+	if(debugLevel)logThread->writeLogB(baseValues.exchangeName+" API Thread Deleted",2);
 }
 
 QByteArray Exchange::getMidData(QString a, QString b,QByteArray *data)
@@ -58,7 +73,7 @@ void Exchange::translateUnicodeOne(QByteArray *str)
 
 void Exchange::run()
 {
-	if(debugLevel)logThread->writeLog(exchangeID+" API Thread Started",2);
+	if(debugLevel)logThread->writeLogB(baseValues.exchangeName+" API Thread Started",2);
 	clearVariables();
 
 	secondTimer=new QTimer;
@@ -70,7 +85,7 @@ void Exchange::run()
 
 void Exchange::secondSlot()
 {
-	if(secondTimer)secondTimer->start(httpRequestInterval);
+	if(secondTimer)secondTimer->start(baseValues.httpRequestInterval);
 }
 
 void Exchange::dataReceivedAuth(QByteArray, int)
@@ -82,8 +97,55 @@ void Exchange::reloadDepth()
 	forceDepthLoad=true;
 }
 
-void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
+void Exchange::clearVariables()
 {
+	lastTickerLast=0.0;
+	lastTickerHigh=0.0;
+	lastTickerLow=0.0;
+	lastTickerSell=0.0;
+	lastTickerBuy=0.0;
+	lastTickerVolume=0.0;
+
+	lastBtcBalance=0.0;
+	lastUsdBalance=0.0;
+	lastAvUsdBalance=0.0;
+	lastVolume=0.0;
+	lastFee=0.0;
+}
+
+void Exchange::filterAvailableUSDAmountValue(double *)
+{
+
+}
+
+void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only once
+{
+	QFile curMap(":/Resources/"+currencyMapFile);
+	curMap.open(QIODevice::ReadOnly);
+	QStringList curencyList=QString(curMap.readAll().replace("\r","")).split("\n");
+	curMap.close();
+	QList<CurrencyPairItem> newCurrPairs;
+
+	for(int n=0;n<curencyList.count();n++)
+	{
+		QStringList curDataList=curencyList.at(n).split("=");
+		if(curDataList.count()!=5)continue;
+		CurrencyPairItem currentPair=defaultCurrencyParams;
+		currentPair.name=curDataList.first();
+		currentPair.setSymbol(curDataList.first().replace("/","").toAscii());
+		curDataList.removeFirst();
+		currentPair.currRequestPair=curDataList.first().toAscii();
+		currentPair.priceDecimals=curDataList.at(1).toInt();
+		currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
+		currentPair.tradeVolumeMin=curDataList.at(2).toDouble();
+		currentPair.tradePriceMin=curDataList.at(3).toDouble();
+		newCurrPairs<<currentPair;
+	}
+
+	connect(this,SIGNAL(setCurrencyPairsList(QList<CurrencyPairItem>)),mainClass,SLOT(setCurrencyPairsList(QList<CurrencyPairItem>)));
+
+	emit setCurrencyPairsList(newCurrPairs);
+
 	tickerOnly=tickOnly;
 	if(!tickerOnly)
 	{
@@ -121,7 +183,7 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)
 	connect(this,SIGNAL(tickerBuyChanged(double)),mainClass->ui.marketBuy,SLOT(setValue(double)));
 	connect(this,SIGNAL(tickerVolumeChanged(double)),mainClass->ui.marketVolume,SLOT(setValue(double)));
 
-	connect(this,SIGNAL(addLastTrade(double, quint32, double, QByteArray, bool)),mainClass,SLOT(addLastTrade(double, quint32, double, QByteArray, bool)));
+	connect(this,SIGNAL(addLastTrades(QList<TradesItem> *)),mainClass,SLOT(addLastTrades(QList<TradesItem> *)));
 
 	start();
 }
@@ -145,10 +207,6 @@ void Exchange::sell(double, double)
 }
 
 void Exchange::cancelOrder(QByteArray)
-{
-}
-
-void Exchange::clearVariables()
 {
 }
 

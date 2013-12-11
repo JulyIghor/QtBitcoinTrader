@@ -14,13 +14,6 @@
    <string>Qt Bitcoin Trader [DEBUG VIEWER]</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="4">
-    <widget class="QPushButton" name="buttonClearLog">
-     <property name="text">
-      <string>Clear</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
@@ -34,13 +27,6 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="2">
-    <widget class="QRadioButton" name="radioDebug">
-     <property name="text">
-      <string>Debug</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="1">
     <widget class="QRadioButton" name="radioLog">
      <property name="text">
@@ -51,6 +37,20 @@
      </property>
     </widget>
    </item>
+   <item row="1" column="5">
+    <widget class="QPushButton" name="buttonClearLog">
+     <property name="text">
+      <string>Clear</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QRadioButton" name="radioDebug">
+     <property name="text">
+      <string>Debug</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0">
     <widget class="QCheckBox" name="checkEnabled">
      <property name="text">
@@ -58,13 +58,20 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="5">
+   <item row="0" column="0" colspan="6">
     <widget class="QPlainTextEdit" name="debugText">
      <property name="undoRedoEnabled">
       <bool>false</bool>
      </property>
      <property name="readOnly">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QPushButton" name="buttonSaveAs">
+     <property name="text">
+      <string>Save As..</string>
      </property>
     </widget>
    </item>

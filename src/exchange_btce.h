@@ -21,46 +21,35 @@ public:
 	~Exchange_BTCe();
 
 private:
-	void depthUpdateOrder(double,double,bool);
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
-	void depthSubmitOrder(QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
-	QByteArray lastDepthData;
-	void clearVariables();
+	bool isApiDown;
+	bool isFirstAccInfo;
+	bool isFirstTicker;
+	bool isReplayPending(int);
+	bool tickerOnly;
+
+	int apiDownCounter;
+	int lastOpenedOrders;
+
 	JulyHttp *julyHttp;
 
 	qint64 lastFetchTid;
-	bool tickerOnly;
-	bool isApiDown;
-	QByteArray lastHistory;
-	QByteArray lastOrders;
-	bool isFirstTicker;
-	bool isFirstAccInfo;
 
-	double lastTickerHigh;
-	double lastTickerLow;
-	double lastTickerSell;
-	quint32 lastTickerDate;
-	double lastTickerBuy;
-	double lastTickerVolume;
+	QList<DepthItem> *depthAsks;
+	QList<DepthItem> *depthBids;
 
-	double lastBtcBalance;
-	double lastUsdBalance;
-	double lastVolume;
-	double lastFee;
-
-	quint32 lastPriceDate;
+	QMap<double,double> lastDepthAsksMap;
+	QMap<double,double> lastDepthBidsMap;
 
 	QTime authRequestTime;
-	int apiDownCounter;
+
+	quint32 lastPriceDate;
+	quint32 lastTickerDate;
 	quint32 privateNonce;
 
-	bool isReplayPending(int);
-
+	void clearVariables();
+	void depthSubmitOrder(QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
+	void depthUpdateOrder(double,double,bool);
 	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
-	int lastOpenedOrders;
 private slots:
 	void reloadDepth();
 	void sslErrors(const QList<QSslError> &);

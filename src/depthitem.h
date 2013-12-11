@@ -10,11 +10,15 @@
 #ifndef DEPTHITEM_H
 #define DEPTHITEM_H
 
+#include <QString>
+
 struct DepthItem 
 {
 	double price;
 	double volume;
-	bool isValid(){return price>=0.0&&volume>=0.0;}
+	QString priceStr;
+	QString volumeStr;
+	bool isValid();
 };
 
 #endif // DEPTHITEM_H

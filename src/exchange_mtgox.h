@@ -21,47 +21,38 @@ public:
 	~Exchange_MtGox();
 
 private:
-	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
-	QTime userInfoTime;
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
-	void clearVariables();
-	JulyHttp *julyHttp;
-	QTime authRequestTime;
-	qint64 tickerLastDate;
-	QByteArray lastTradesDateCache;
-	qint64 lastTradesDate;
-	QByteArray lastDepthData;
-	QByteArray lastHistory;
-	QByteArray lastOrders;
-	bool lastInfoReceived;
-	bool isFirstTicker;
 	bool isFirstAccInfo;
+	bool isFirstTicker;
+	bool isReplayPending(int);
+	bool lastInfoReceived;
 
-	double lastTickerHigh;
-	double lastTickerLow;
-	double lastTickerSell;
-	double lastTickerBuy;
-	double lastTickerVolume;
-
-	double lastBtcBalance;
-	double lastUsdBalance;
-	double lastVolume;
-	double lastFee;
-
-	QString apiLogin;
 	int apiDownCounter;
 	int secondPart;
-	quint32 privateNonce;
 
-	bool isReplayPending(int);
+	JulyHttp *julyHttp;
 
-	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
+	QByteArray lastTradesDateCache;
 
-	void depthUpdateOrder(double,double,bool);
+	qint64 lastTradesDate;
+	qint64 tickerLastDate;
+
 	QList<DepthItem> *depthAsks;
 	QList<DepthItem> *depthBids;
 
+	QMap<double,double> lastDepthAsksMap;
+	QMap<double,double> lastDepthBidsMap;
+
+	QString apiLogin;
+
+	QTime authRequestTime;
+	QTime userInfoTime;
+
+	quint32 privateNonce;
+
+	void clearVariables();
+	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
+	void depthUpdateOrder(double,double,bool);
+	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 private slots:
 	void secondSlot();
 public slots:

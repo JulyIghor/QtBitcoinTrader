@@ -12,9 +12,10 @@
 Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
 {
+	calculatingFeeMode=0;
 	lastTradesDate=0;
 	tickerLastDate=0;
-	exchangeID="Mt.Gox";
+	baseValues.exchangeName="Mt.Gox";
 	privateRestSign=pRestSign;
 	privateRestKey=pRestKey;
 	depthAsks=0;
@@ -22,6 +23,19 @@ Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	forceDepthLoad=false;
 	julyHttp=0;
 	tickerOnly=false;
+
+	currencyMapFile="CurrenciesMtGox.map";
+	defaultCurrencyParams.currADecimals=8;
+	defaultCurrencyParams.currBDecimals=5;
+	defaultCurrencyParams.currABalanceDecimals=8;
+	defaultCurrencyParams.currBBalanceDecimals=5;
+	defaultCurrencyParams.priceDecimals=5;
+	defaultCurrencyParams.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
+
+	supportsLoginIndicator=true;
+	supportsAccountVolume=true;
+	supportsExchangeLag=true;
+
 	authRequestTime.restart();
 	privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 }
@@ -68,26 +82,26 @@ void Exchange_MtGox::secondSlot()
 	if(userInfoTime.elapsed()>(lastInfoReceived?10000:1000)&&!isReplayPending(202))
 	{
 		userInfoTime.restart();
-		sendToApi(202,currencyRequestPair+"/money/info",true,httpSplitPackets);
+		sendToApi(202,baseValues.currentPair.currRequestPair+"/money/info",true,baseValues.httpSplitPackets);
 	}
 
-	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,currencyRequestPair+"/money/orders",true,httpSplitPackets);
+	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,baseValues.currentPair.currRequestPair+"/money/orders",true,baseValues.httpSplitPackets);
 
-	if(!depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
+	if(!baseValues.depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
 	{
 		emit depthRequested();
-		sendToApi(111,currencyRequestPair+"/money/depth/fetch",false,httpSplitPackets);
+		sendToApi(111,baseValues.currentPair.currRequestPair+"/money/depth/fetch",false,baseValues.httpSplitPackets);
 		forceDepthLoad=false;
 	}
 
-	if(!isReplayPending(101))sendToApi(101,currencyRequestPair+"/money/order/lag",false,httpSplitPackets);
-	if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,currencyRequestPair+"/money/ticker",false,httpSplitPackets);
-	if(!isReplayPending(104))sendToApi(104,currencyRequestPair+"/money/ticker_fast",false,httpSplitPackets);
+	if(!isReplayPending(101))sendToApi(101,baseValues.currentPair.currRequestPair+"/money/order/lag",false,baseValues.httpSplitPackets);
+	if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,baseValues.currentPair.currRequestPair+"/money/ticker",false,baseValues.httpSplitPackets);
+	if(!isReplayPending(104))sendToApi(104,baseValues.currentPair.currRequestPair+"/money/ticker_fast",false,baseValues.httpSplitPackets);
 
-	if(!isReplayPending(109))sendToApi(109,currencyRequestPair+"/money/trades/fetch?since="+lastTradesDateCache,false,httpSplitPackets);
+	if(!isReplayPending(109))sendToApi(109,baseValues.currentPair.currRequestPair+"/money/trades/fetch?since="+lastTradesDateCache,false,baseValues.httpSplitPackets);
 	if(lastHistory.isEmpty())
-		if(!isReplayPending(208))sendToApi(208,"money/wallet/history",true,httpSplitPackets,"&currency=BTC");
-	if(!httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
+		if(!isReplayPending(208))sendToApi(208,"money/wallet/history",true,baseValues.httpSplitPackets,"&currency=BTC");
+	if(!baseValues.httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 
 	if(++infoCounter>9)
 	{
@@ -114,24 +128,24 @@ void Exchange_MtGox::getHistory(bool force)
 void Exchange_MtGox::buy(double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	QByteArray params="&type=bid&amount_int="+QByteArray::number(apiBtcToBuy*qPow(10,btcDecimals),'f',0)+"&price_int="+QByteArray::number(apiPriceToBuy*qPow(10,priceDecimals),'f',0);
+	QByteArray params="&type=bid&amount_int="+QByteArray::number(apiBtcToBuy*qPow(10,baseValues.currentPair.currADecimals),'f',0)+"&price_int="+QByteArray::number(apiPriceToBuy*qPow(10,baseValues.currentPair.priceDecimals),'f',0);
 	if(debugLevel)logThread->writeLog("Buy: "+params,2);
-	sendToApi(306,currencyRequestPair+"/money/order/add",true,true,params);
+	sendToApi(306,baseValues.currentPair.currRequestPair+"/money/order/add",true,true,params);
 }
 
 void Exchange_MtGox::sell(double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
-	QByteArray params="&type=ask&amount_int="+QByteArray::number(apiBtcToSell*qPow(10,btcDecimals),'f',0)+"&price_int="+QByteArray::number(apiPriceToSell*qPow(10,priceDecimals),'f',0);
+	QByteArray params="&type=ask&amount_int="+QByteArray::number(apiBtcToSell*qPow(10,baseValues.currentPair.currADecimals),'f',0)+"&price_int="+QByteArray::number(apiPriceToSell*qPow(10,baseValues.currentPair.priceDecimals),'f',0);
 	if(debugLevel)logThread->writeLog("Sell: "+params,2);
-	sendToApi(307,currencyRequestPair+"/money/order/add",true,true,params);
+	sendToApi(307,baseValues.currentPair.currRequestPair+"/money/order/add",true,true,params);
 }
 
 void Exchange_MtGox::cancelOrder(QByteArray order)
 {
 	if(tickerOnly)return;
 	if(debugLevel)logThread->writeLog("Cancel order: "+order,2);
-	sendToApi(305,currencyRequestPair+"/money/order/cancel",true,true,"&oid="+order);
+	sendToApi(305,baseValues.currentPair.currRequestPair+"/money/order/cancel",true,true,"&oid="+order);
 }
 
 void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
@@ -139,10 +153,10 @@ void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool s
 	if(julyHttp==0)
 	{ 
 		julyHttp=new JulyHttp("data.mtgox.com","Rest-Key: "+privateRestKey+"\r\n",this);
-		connect(julyHttp,SIGNAL(anyDataReceived()),mainWindow_,SLOT(anyDataReceived()));
-		connect(julyHttp,SIGNAL(setDataPending(bool)),mainWindow_,SLOT(setDataPending(bool)));
-		connect(julyHttp,SIGNAL(apiDown(bool)),mainWindow_,SLOT(setApiDown(bool)));
-		connect(julyHttp,SIGNAL(errorSignal(QString)),mainWindow_,SLOT(showErrorMessage(QString)));
+		connect(julyHttp,SIGNAL(anyDataReceived()),baseValues_->mainWindow_,SLOT(anyDataReceived()));
+		connect(julyHttp,SIGNAL(setDataPending(bool)),baseValues_->mainWindow_,SLOT(setDataPending(bool)));
+		connect(julyHttp,SIGNAL(apiDown(bool)),baseValues_->mainWindow_,SLOT(setApiDown(bool)));
+		connect(julyHttp,SIGNAL(errorSignal(QString)),baseValues_->mainWindow_,SLOT(showErrorMessage(QString)));
 		connect(julyHttp,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 		connect(julyHttp,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceivedAuth(QByteArray,int)));
 	}
@@ -217,6 +231,7 @@ void Exchange_MtGox::reloadDepth()
 
 void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 {
+	if(debugLevel)logThread->writeLog("RCV: "+data);
 	bool success=getMidData("{\"result\":\"","\",",&data)=="success";
 
 	switch(reqType)
@@ -306,33 +321,34 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 			if(data.startsWith("{\"result\":\"success\",\"data\":[{\"date"))
 			{
 				QStringList tradeList=QString(data).split("\"},{\"");
+				QList<TradesItem> *newTradesItems=new QList<TradesItem>;
 				for(int n=0;n<tradeList.count();n++)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
 					qint64 currentTid=getMidData("\"tid\":\"","\",\"",&tradeData).toLongLong();
 					if(lastTradesDate>=currentTid||currentTid==0)continue;
-					double doubleAmount=getMidData("\"amount\":\"","\",",&tradeData).toDouble();
-					double doublePrice=getMidData("\"price\":\"","\",",&tradeData).toDouble();
 
-					QByteArray symbol=getMidData("\"item\":\"","\",\"",&tradeData)+getMidData("\"price_currency\":\"","\",\"",&tradeData);
-					QByteArray tradeType=getMidData("\"trade_type\":\"","\"",&tradeData);
-					if(doubleAmount>0.0&&doublePrice>0.0&&!symbol.isEmpty())
-					{
-						quint32 currentTradeDate=getMidData("date\":",",",&tradeData).toUInt();
-						if(currentTradeDate>0)
-						{
-							emit addLastTrade(doubleAmount,currentTradeDate,doublePrice,symbol,tradeType=="ask");
-							if(n==tradeList.count()-1)
-							{
-								emit tickerLastChanged(doublePrice);
-								tickerLastDate=currentTid;
-								lastTradesDate=currentTid;
-								lastTradesDateCache=QByteArray::number(tickerLastDate+1);
-							}
-						}
-					}
+					TradesItem newItem;
+					newItem.amount=getMidData("\"amount\":\"","\",",&tradeData).toDouble();
+					newItem.price=getMidData("\"price\":\"","\",",&tradeData).toDouble();
+
+					newItem.symbol=getMidData("\"item\":\"","\",\"",&tradeData)+getMidData("\"price_currency\":\"","\",\"",&tradeData);
+					newItem.orderType=getMidData("\"trade_type\":\"","\"",&tradeData)=="ask"?1:-1;
+					newItem.date=getMidData("date\":",",",&tradeData).toUInt();
+
+					if(newItem.isValid())(*newTradesItems)<<newItem;
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
+
+					if(n==tradeList.count()-1)
+					{
+						emit tickerLastChanged(newItem.price);
+						tickerLastDate=currentTid;
+						lastTradesDate=currentTid;
+						lastTradesDateCache=QByteArray::number(tickerLastDate+1);
+					}
 				}
+				if(newTradesItems->count())emit addLastTrades(newTradesItems);
+				else delete newTradesItems;
 			}
 			else if(debugLevel)logThread->writeLog("Invalid trades fetch data:"+data,2);
 		}
@@ -356,29 +372,29 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				int rowCounter=0;
 				for(int n=0;n<asksList.count();n++)
 				{
-					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
+					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
 					QByteArray currentRow=asksList.at(n).toAscii();
 					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
 					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
 
-					if(groupPriceValue>0.0)
+					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==0)
 						{
 							emit depthFirstOrder(priceDouble,amount,true);
-							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
+							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
 							groupedVolume=amount;
 						}
 						else
 						{
-							bool matchCurrentGroup=priceDouble<groupedPrice+groupPriceValue;
+							bool matchCurrentGroup=priceDouble<groupedPrice+baseValues.groupPriceValue;
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==asksList.count()-1)
 							{
-								depthSubmitOrder(&currentAsksMap,groupedPrice+groupPriceValue,groupedVolume,true);
+								depthSubmitOrder(&currentAsksMap,groupedPrice+baseValues.groupPriceValue,groupedVolume,true);
 								rowCounter++;
 								groupedVolume=amount;
-								groupedPrice+=groupPriceValue;
+								groupedPrice+=baseValues.groupPriceValue;
 							}
 						}
 					}
@@ -400,29 +416,29 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				rowCounter=0;
 				for(int n=bidsList.count()-1;n>=0;n--)
 				{
-					if(depthCountLimit&&rowCounter>=depthCountLimit)break;
+					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
 					QByteArray currentRow=bidsList.at(n).toAscii();
 					double priceDouble=getMidData("price\":",",\"",&currentRow).toDouble();
 					double amount=getMidData("amount\":",",\"",&currentRow).toDouble();
 
-					if(groupPriceValue>0.0)
+					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==bidsList.count()-1)
 						{
 							emit depthFirstOrder(priceDouble,amount,false);
-							groupedPrice=groupPriceValue*(int)(priceDouble/groupPriceValue);
+							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
 							groupedVolume=amount;
 						}
 						else
 						{
-							bool matchCurrentGroup=priceDouble>groupedPrice+groupPriceValue;
+							bool matchCurrentGroup=priceDouble>groupedPrice+baseValues.groupPriceValue;
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==0)
 							{
-								depthSubmitOrder(&currentBidsMap,groupedPrice-groupPriceValue,groupedVolume,false);
+								depthSubmitOrder(&currentBidsMap,groupedPrice-baseValues.groupPriceValue,groupedVolume,false);
 								rowCounter++;
 								groupedVolume=amount;
-								groupedPrice-=groupPriceValue;
+								groupedPrice-=baseValues.groupPriceValue;
 							}
 						}
 					}
@@ -457,7 +473,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					if(!login.isEmpty()){apiLogin=login;emit loginChanged(login);}
 				}
 
-				QByteArray btcBalance=getMidData(currencyAStr+"\":{\"Balance\":{\"value\":\"","",&data);
+				QByteArray btcBalance=getMidData(baseValues.currentPair.currAStr+"\":{\"Balance\":{\"value\":\"","",&data);
 				if(!btcBalance.isEmpty())
 				{
 					double newBtcBalance=btcBalance.toDouble();
@@ -465,7 +481,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					lastBtcBalance=newBtcBalance;
 				}
 
-				QByteArray usdBalance=getMidData(currencyBStr+"\":{\"Balance\":{\"value\":\"","",&data);
+				QByteArray usdBalance=getMidData(baseValues.currentPair.currBStr+"\":{\"Balance\":{\"value\":\"","",&data);
 				if(!usdBalance.isEmpty())
 				{
 					double newUsdBalance=usdBalance.toDouble();
@@ -574,10 +590,6 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=0;n<dataList.count();n++)
 				{
 					HistoryItem currentHistoryItem;
-					currentHistoryItem.type=0;
-					currentHistoryItem.price=0.0;
-					currentHistoryItem.volume=0.0;
-					currentHistoryItem.date=0;
 
 					QByteArray curLog(dataList.at(n).toAscii());
 					QByteArray logType=getMidData("\"Type\":\"","\",\"",&curLog);
@@ -595,7 +607,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 					{
 						QByteArray currencyA("USD");
 						currentHistoryItem.volume=getMidData("\"Value\":{\"value\":\"","\",\"",&curLog).toDouble();
-						currentHistoryItem.date=getMidData("\"Date\":",",\"",&curLog).toUInt();
+						currentHistoryItem.dateTimeInt=getMidData("\"Date\":",",\"",&curLog).toUInt();
 						QByteArray logText=getMidData(" at ","\",\"",&curLog);
 
 						QByteArray priceSign;
@@ -628,7 +640,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 							if(logText.contains(utfSignList.at(n).first))
 							{
 								logText.replace(utfSignList.at(n).first,"");
-								priceSign=currencySignMap->value(utfSignList.at(n).second,"$");
+								priceSign=baseValues.currencySignMap.value(utfSignList.at(n).second,"$");
 								break;
 							}
 						}
@@ -644,7 +656,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 
 						currentHistoryItem.price=priceValue.toDouble();
 
-						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+currencySignMap->key(priceSign,"$");
+						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+baseValues.currencySignMap.key(priceSign,"$");
 						if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 					}
 				}

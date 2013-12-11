@@ -63,7 +63,7 @@ void TranslationLine::fixSize()
 
 void TranslationLine::setDefaultText(QString defText)
 {
-	if(defText!="yyyy-MM-dd HH:mm:ss"&&defText!=exchangeName+":")defaultText=defText.replace("<br>","\n");
+	if(defText!="yyyy-MM-dd HH:mm:ss"&&defText!=baseValues.exchangeName+":")defaultText=defText.replace("<br>","\n");
 }
 
 void TranslationLine::setItemText(QString text)

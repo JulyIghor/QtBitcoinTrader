@@ -17,6 +17,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QFile>
+#include "donatepanel.h"
 
 UpdaterDialog::UpdaterDialog(bool fbMess)
 	: QDialog()
@@ -24,14 +25,15 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	feedbackMessage=fbMess;
 	stateUpdate=0;
 	ui.setupUi(this);
-	ui.btcLabel11->setPixmap(QPixmap("://Resources/CurrencySign/BTC.png"));
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
 	httpGet=new JulyHttp("raw.github.com",0,this,true,false);
 	timeOutTimer=new QTimer(this);
 	connect(timeOutTimer,SIGNAL(timeout()),this,SLOT(exitSlot()));
 	connect(httpGet,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
 
-	if(appVerIsBeta)httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
+	ui.donateGroupBox->layout()->addWidget(new DonatePanel(this));
+
+	if(baseValues.appVerIsBeta)httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
 			else	httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versions.txt");
 	timeOutTimer->start(30000);
 }
@@ -77,7 +79,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 		if(!updateSignature.isEmpty())updateSignature=QByteArray::fromBase64(updateSignature);
 		updateChangeLog=versionsMap.value(os+"ChangeLog");
 		updateLink=versionsMap.value(os+"Bin");
-		if(updateVersion.toDouble()<=appVerReal)
+		if(updateVersion.toDouble()<=baseValues.appVerReal)
 		{
 			if(feedbackMessage)
 				QMessageBox::information(0,"Qt Bitcoin Trader",julyTr("UP_TO_DATE","Your version of Qt Bitcoin Trader is up to date."));
@@ -89,7 +91,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 		ui.changeLogText->setHtml(updateChangeLog);
 		ui.versionLabel->setText("v"+updateVersion);
 
-		julyTranslator->translateUi(this);
+		julyTranslator.translateUi(this);
 		ui.iconLabel->setPixmap(QPixmap(":/Resources/QtBitcoinTrader.png"));
 		QSize minSizeHint=minimumSizeHint();
 		if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
@@ -137,13 +139,6 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 				exitSlot();
 			}
 		}
-}
-
-void UpdaterDialog::copyDonateButton()
-{
-	QApplication::clipboard()->setText(ui.bitcoinAddress->text());
-	QDesktopServices::openUrl(QUrl("bitcoin:"+ui.bitcoinAddress->text()));
-	QMessageBox::information(this,"Qt Bitcoin Trader",julyTr("COPY_DONATE_MESSAGE","Bitcoin address copied to clipboard.<br>Thank you for support!"));
 }
 
 void UpdaterDialog::exitSlot()
