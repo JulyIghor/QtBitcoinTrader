@@ -279,10 +279,7 @@ int main(int argc, char *argv[])
 
 			a.setPalette(darkPalette);
 			}
-			else
-			{
-				a.setStyleSheet(globalStyleSheet);
-			}
+			a.setStyleSheet(globalStyleSheet);
 		}
 
 		settingsMain.beginGroup("Proxy");
