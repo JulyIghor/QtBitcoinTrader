@@ -247,8 +247,10 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	baseValues.httpRequestInterval=iniSettings->value("Network/HttpRequestsInterval",500).toInt();
 	baseValues.httpRequestTimeout=iniSettings->value("Network/HttpRequestsTimeout",3000).toInt();
-	baseValues.httpRetryCount=iniSettings->value("Network/HttpRetryCount",5).toInt();
-	if(baseValues.httpRetryCount<1||baseValues.httpRetryCount>50)baseValues.httpRetryCount=5;
+	baseValues.httpRetryCount=iniSettings->value("Network/HttpRetryCount",10).toInt();
+	if(baseValues.httpRetryCount<1||baseValues.httpRetryCount>50)baseValues.httpRetryCount=10;
+	if(baseValues.appVerLastReal<1.0793)baseValues.httpRetryCount=10;
+	iniSettings->setValue("Network/HttpRetryCount",baseValues.httpRetryCount);
 
 	baseValues.uiUpdateInterval=iniSettings->value("UI/UiUpdateInterval",100).toInt();
 	if(baseValues.uiUpdateInterval<1)baseValues.uiUpdateInterval=100;

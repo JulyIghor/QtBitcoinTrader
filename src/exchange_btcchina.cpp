@@ -27,11 +27,19 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	privateRestKey=pRestKey;
 
 	currencyMapFile="CurrenciesBTCChina.map";
+	baseValues.currentPair.name="BTC/CNY";
+	baseValues.currentPair.setSymbol("BTCCNY");
+	baseValues.currentPair.currRequestPair="BTCCNY";
+	baseValues.currentPair.priceDecimals=2;
+	baseValues.currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
+	baseValues.currentPair.tradeVolumeMin=0.001;
+	baseValues.currentPair.tradePriceMin=0.1;
+
 	defaultCurrencyParams.currADecimals=3;
 	defaultCurrencyParams.currBDecimals=2;
 	defaultCurrencyParams.currABalanceDecimals=8;
 	defaultCurrencyParams.currBBalanceDecimals=5;
-	defaultCurrencyParams.priceDecimals=5;
+	defaultCurrencyParams.priceDecimals=2;
 	defaultCurrencyParams.currABalanceDecimals=8;
 	defaultCurrencyParams.currBBalanceDecimals=5;
 	defaultCurrencyParams.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);

@@ -25,6 +25,13 @@ Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	tickerOnly=false;
 
 	currencyMapFile="CurrenciesMtGox.map";
+	baseValues.currentPair.name="BTC/USD";
+	baseValues.currentPair.setSymbol("BTCUSD");
+	baseValues.currentPair.currRequestPair="BTCUSD";
+	baseValues.currentPair.priceDecimals=5;
+	baseValues.currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
+	baseValues.currentPair.tradeVolumeMin=0.01;
+	baseValues.currentPair.tradePriceMin=0.1;
 	defaultCurrencyParams.currADecimals=8;
 	defaultCurrencyParams.currBDecimals=5;
 	defaultCurrencyParams.currABalanceDecimals=8;

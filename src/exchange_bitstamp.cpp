@@ -26,6 +26,13 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	lastTradesDate=0;
 	lastTickerDate=0;
 	baseValues.exchangeName="Bitstamp";
+	baseValues.currentPair.name="BTC/USD";
+	baseValues.currentPair.setSymbol("BTCUSD");
+	baseValues.currentPair.currRequestPair="BTCUSD";
+	baseValues.currentPair.priceDecimals=2;
+	baseValues.currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
+	baseValues.currentPair.tradeVolumeMin=0.01;
+	baseValues.currentPair.tradePriceMin=0.1;
 	depthAsks=0;
 	depthBids=0;
 	forceDepthLoad=false;
