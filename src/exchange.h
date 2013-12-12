@@ -81,7 +81,7 @@ private:
 	void run();
 
 signals:
-	void setCurrencyPairsList(QList<CurrencyPairItem>);
+	void setCurrencyPairsList(QList<CurrencyPairItem>*);
 
 	void availableAmountChanged(double);
 	void depthRequested();

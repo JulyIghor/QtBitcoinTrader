@@ -1080,9 +1080,10 @@ void QtBitcoinTrader::loginChanged(QString text)
 	fixWindowMinimumSize();
 }
 
-void QtBitcoinTrader::setCurrencyPairsList(QList<CurrencyPairItem> currPairs)
+void QtBitcoinTrader::setCurrencyPairsList(QList<CurrencyPairItem> *currPairs)
 {
-	currPairsList=currPairs;
+	currPairsList=*currPairs;
+	delete currPairs;
 
 	QString savedCurrency=iniSettings->value("Profile/Currency","BTC/USD").toString();
 
@@ -1090,10 +1091,10 @@ void QtBitcoinTrader::setCurrencyPairsList(QList<CurrencyPairItem> currPairs)
 	
 	QStringList currentyItems;
 	int indexCurrency=-1;
-	for(int n=0;n<currPairs.count();n++)
+	for(int n=0;n<currPairsList.count();n++)
 	{
-		if(currPairs.at(n).name==savedCurrency)indexCurrency=n;
-		currentyItems<<currPairs.at(n).name;
+		if(currPairsList.at(n).name==savedCurrency)indexCurrency=n;
+		currentyItems<<currPairsList.at(n).name;
 	}
 	ui.currencyComboBox->insertItems(0,currentyItems);
 	if(indexCurrency>-1)ui.currencyComboBox->setCurrentIndex(indexCurrency);

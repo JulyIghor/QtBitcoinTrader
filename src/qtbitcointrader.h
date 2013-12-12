@@ -196,7 +196,7 @@ public slots:
 
 	void on_rulesTabs_tabCloseRequested(int);
 	void on_buttonAddRuleGroup_clicked();
-	void setCurrencyPairsList(QList<CurrencyPairItem> currPairs);
+	void setCurrencyPairsList(QList<CurrencyPairItem> *currPairs);
 
 	void availableAmountChanged(double);
 	void precentBidsChanged(double);

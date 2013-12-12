@@ -11,6 +11,7 @@
 #include <QDateTime>
 #include "main.h"
 #include "depthitem.h"
+#include <QFile>
 
 Exchange::Exchange()
 	: QThread()
@@ -124,7 +125,7 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 	curMap.open(QIODevice::ReadOnly);
 	QStringList curencyList=QString(curMap.readAll().replace("\r","")).split("\n");
 	curMap.close();
-	QList<CurrencyPairItem> newCurrPairs;
+	QList<CurrencyPairItem> *newCurrPairs=new QList<CurrencyPairItem>;
 
 	for(int n=0;n<curencyList.count();n++)
 	{
@@ -139,10 +140,10 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 		currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 		currentPair.tradeVolumeMin=curDataList.at(2).toDouble();
 		currentPair.tradePriceMin=curDataList.at(3).toDouble();
-		newCurrPairs<<currentPair;
+		(*newCurrPairs)<<currentPair;
 	}
 
-	connect(this,SIGNAL(setCurrencyPairsList(QList<CurrencyPairItem>)),mainClass,SLOT(setCurrencyPairsList(QList<CurrencyPairItem>)));
+	connect(this,SIGNAL(setCurrencyPairsList(QList<CurrencyPairItem>*)),mainClass,SLOT(setCurrencyPairsList(QList<CurrencyPairItem>*)));
 
 	emit setCurrencyPairsList(newCurrPairs);
 
