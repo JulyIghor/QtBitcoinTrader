@@ -1440,7 +1440,21 @@ void QtBitcoinTrader::orderCanceled(QByteArray oid)
 {
 	if(debugLevel)logThread->writeLog("Removed order: "+oid);
 
+	ui.ordersTable->setSortingEnabled(false);
+
+	ordersSortModel->setSourceModel(0);
 	ordersModel->setOrderCanceled(oid);
+	ordersSortModel->setSourceModel(ordersModel);
+
+	ui.ordersTable->horizontalHeader()->setResizeMode(0,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
+	ui.ordersTable->horizontalHeader()->setResizeMode(2,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(3,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(4,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(5,QHeaderView::ResizeToContents);
+	ui.ordersTable->horizontalHeader()->setResizeMode(6,QHeaderView::ResizeToContents);
+
+	ui.ordersTable->setSortingEnabled(true);
 }
 
 QString QtBitcoinTrader::numFromDouble(const double &val, int maxDecimals)
