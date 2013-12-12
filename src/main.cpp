@@ -67,7 +67,7 @@ void BaseValues::Construct()
 {
 	gzipEnabled=true;
 	appVerIsBeta=false;
-	appVerStr="1.0796";
+	appVerStr="1.07961";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 

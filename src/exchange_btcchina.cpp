@@ -371,13 +371,12 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=0;n<tradeList.count();n++)
 				{
 					QByteArray tradeData=tradeList.at(n).toAscii();
-					QByteArray tradeDate=getMidData("\"date\":\"","\"",&tradeData);
-					QByteArray nextFetchTid=tradeDate+getMidData("\"tid\":\"","\"",&tradeData);
+					QByteArray nextFetchTid=getMidData("\"tid\":\"","\"",&tradeData);
 					if(nextFetchTid<=lastFetchTid)continue;
 					TradesItem newItem;
 					newItem.amount=getMidData("\"amount\":",",",&tradeData).toDouble();
 					newItem.price=getMidData("\"price\":",",",&tradeData).toDouble();
-					newItem.date=tradeDate.toUInt();
+					newItem.date=getMidData("\"date\":\"","\"",&tradeData).toUInt();
 					newItem.symbol=baseValues.currentPair.currSymbol;
 					newItem.orderType=getMidData("\"type\":\"","\"",&tradeData)=="sell"?1:-1;
 
