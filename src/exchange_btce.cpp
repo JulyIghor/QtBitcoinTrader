@@ -17,6 +17,13 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 {
 	calculatingFeeMode=0;
 	baseValues.exchangeName="BTC-e";
+	baseValues.currentPair.name="BTC/USD";
+	baseValues.currentPair.setSymbol("BTCUSD");
+	baseValues.currentPair.currRequestPair="btc_usd";
+	baseValues.currentPair.priceDecimals=3;
+	baseValues.currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
+	baseValues.currentPair.tradeVolumeMin=0.01;
+	baseValues.currentPair.tradePriceMin=0.1;
 	lastTickerDate=0;
 	lastFetchTid=0;
 	depthAsks=0;
