@@ -222,9 +222,9 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
 
 	switch(section)
 	{
-	case 2: return headerLabels.at(section)+baseValues.currentPair.currASign;
+	case 2: return headerLabels.at(section)+" "+baseValues.currentPair.currASign;
 	case 5: 
-	case 6: return headerLabels.at(section)+baseValues.currentPair.currBSign;
+	case 6: return headerLabels.at(section)+" "+baseValues.currentPair.currBSign;
 	default: break;
 	}
 	return headerLabels.at(section);
