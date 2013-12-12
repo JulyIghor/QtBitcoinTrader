@@ -26,7 +26,7 @@ public:
 private:
 	bool feedbackMessage;
 	QTimer *timeOutTimer;
-	void downloadError();
+	void downloadError(int);
 	QString updateVersion;
 	QByteArray updateSignature;
 	QString updateChangeLog;

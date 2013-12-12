@@ -58,7 +58,7 @@ public:
 
 	void addPopupDialog(int);
 
-	void loadUiSettings();
+	void setupClass();
 	bool isValidSize(QSize *sizeV){if(sizeV->width()<3||sizeV->width()>2000||sizeV->height()<3||sizeV->height()>2000)return false; return true;}
 	void reloadLanguageList(QString preferedLangFile="");
 	void fixAllChildButtonsAndLabels(QWidget *par);
@@ -84,6 +84,8 @@ public:
 
 	void apiSellSend(double btc, double price);
 	void apiBuySend(double btc, double price);
+
+	QTime lastRuleExecutedTime;
 
 private:	
 	QMenu copyTableValuesMenu;
@@ -181,6 +183,8 @@ private:
 	void repeatOrderByType(int type);
 
 public slots:
+	void on_delauBetweenExecutingRules_toggled(bool);
+
 	void repeatBuySellOrder();
 	void repeatBuyOrder();
 	void repeatSellOrder();

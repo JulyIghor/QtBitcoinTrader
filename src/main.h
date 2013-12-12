@@ -74,6 +74,9 @@ struct BaseValues
 	void Construct();
 
 	CurrencyPairItem currentPair;
+
+	bool rulesSafeMode;
+	int rulesSafeModeInterval;
 	
 	QByteArray upArrow;
 	QByteArray downArrow;

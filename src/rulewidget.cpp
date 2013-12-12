@@ -16,6 +16,7 @@
 RuleWidget::RuleWidget(QString gName, RuleWidget *copyFrom)
 	: QWidget()
 {
+	ordersCancelTime=QTime(1,0,0,0);
 	groupName=gName;
 	ui.setupUi(this);
 	setWindowTitle(groupName);
@@ -270,6 +271,12 @@ void RuleWidget::checkAndExecuteRule(int ruleType, double price)
 	QList<RuleHolder *> achievedHolderList=rulesModel->getAchievedRules(ruleType,price);
 	for(int n=0;n<achievedHolderList.count();n++)
 	{
+		if(baseValues.rulesSafeMode)
+		{
+		if(mainWindow.lastRuleExecutedTime.elapsed()<baseValues.rulesSafeModeInterval)continue;
+		mainWindow.lastRuleExecutedTime.restart();
+		}
+
 		if(!mainWindow.isValidSoftLag){achievedHolderList.at(n)->startWaitingLowLag();continue;}
 
 		double ruleBtc=achievedHolderList.at(n)->getRuleBtc();
@@ -301,7 +308,6 @@ void RuleWidget::checkAndExecuteRule(int ruleType, double price)
 									}
 									else
 									{
-										static QTime ordersCancelTime(1,0,0,0);
 										if(ordersCancelTime.elapsed()>5000)mainWindow.ordersCancelAll();
 										ordersCancelTime.restart();
 										continue;
@@ -338,6 +344,7 @@ void RuleWidget::checkAndExecuteRule(int ruleType, double price)
 			if(isBuying)mainWindow.apiBuySend(ruleBtc,priceToExec);
 			else mainWindow.apiSellSend(ruleBtc,priceToExec);
 		}
+		//qDebug()<<"State"<<priceToExec<<2;
 		rulesModel->setRuleStateByHolder(achievedHolderList.at(n),2);
 		if(ui.ruleBeep->isChecked())mainWindow.beep();
 	}

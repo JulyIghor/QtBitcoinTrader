@@ -115,6 +115,7 @@ SOURCES += aboutdialog.cpp \
            exchange_bitstamp.cpp \
            rulesmodel.cpp \
            ordersmodel.cpp \
+           orderitem.cpp \
            historymodel.cpp \
            exchange_btcchina.cpp \
            exchange.cpp \

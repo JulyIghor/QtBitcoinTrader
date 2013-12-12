@@ -66,8 +66,9 @@ bool RulesModel::haveWorkingRule()
 QList<RuleHolder *> RulesModel::getAchievedRules(int type, double val)
 {
 	QList<RuleHolder*> achievedRules;
-	foreach(RuleHolder *holder, holderList)
+	for(int n=0;n<holderList.count();n++)
 	{
+		RuleHolder *holder=holderList.at(n);
 		if(holder&&holder->getRuleState()==1)
 		{
 			if(holder->isAchieved(val)&&holder->getRulePriceType()==type)achievedRules<<holder;

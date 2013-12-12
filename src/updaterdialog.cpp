@@ -112,14 +112,14 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 				QString bkpBin=curBin+".bkp";
 				if(QFile::exists(updBin))QFile::remove(updBin);
 				if(QFile::exists(bkpBin))QFile::remove(bkpBin);
-				if(QFile::exists(updBin)||QFile::exists(bkpBin)){downloadError();return;}
+				if(QFile::exists(updBin)||QFile::exists(bkpBin)){downloadError(1);return;}
 				{
 					QFile wrFile(updBin);
 					if(wrFile.open(QIODevice::WriteOnly|QIODevice::Truncate))
 					{
 						wrFile.write(dataReceived);
 						wrFile.close();
-					}else {downloadError();return;}
+					}else {downloadError(2);return;}
 				}
 				QByteArray fileData;
 				{
@@ -127,11 +127,11 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 					if(opFile.open(QIODevice::ReadOnly))fileData=opFile.readAll();
 					opFile.close();
 				}
-				if(QCryptographicHash::hash(fileData,QCryptographicHash::Sha1)!=fileSha1){downloadError();return;}
+				if(QCryptographicHash::hash(fileData,QCryptographicHash::Sha1)!=fileSha1){downloadError(3);return;}
 				QFile::rename(curBin,bkpBin);
-				if(!QFile::exists(bkpBin)){downloadError();return;}
+				if(!QFile::exists(bkpBin)){downloadError(4);return;}
 				QFile::rename(updBin,curBin);
-				if(!QFile::exists(curBin)){QMessageBox::critical(this,windowTitle(),"Critical error. Please reinstall application. Download it from http://sourceforge.net/projects/bitcointrader/<br>File not exists: "+curBin+"<br>"+updBin);downloadError();return;}
+				if(!QFile::exists(curBin)){QMessageBox::critical(this,windowTitle(),"Critical error. Please reinstall application. Download it from http://sourceforge.net/projects/bitcointrader/<br>File not exists: "+curBin+"<br>"+updBin);downloadError(5);return;}
 #ifdef Q_OS_MAC
 				QFile(curBin).setPermissions(QFile(bkpBin).permissions());
 #endif
@@ -151,13 +151,13 @@ void UpdaterDialog::buttonUpdate()
 	ui.buttonUpdate->setEnabled(false);
 	if(httpGet)delete httpGet;
 	QStringList tempList=updateLink.split("//");
-	if(tempList.count()!=2){downloadError();return;}
+	if(tempList.count()!=2){downloadError(6);return;}
 	QString protocol=tempList.first();
 	tempList=tempList.last().split("/");
-	if(tempList.count()==0){downloadError();return;}
+	if(tempList.count()==0){downloadError(7);return;}
 	QString domain=tempList.first();
 	int removeLength=domain.length()+protocol.length()+2;
-	if(updateLink.length()<=removeLength){downloadError();return;}
+	if(updateLink.length()<=removeLength){downloadError(8);return;}
 	updateLink.remove(0,removeLength);
 
 	httpGet=new JulyHttp(domain,0,this,protocol.startsWith("https"),false);
@@ -170,17 +170,17 @@ void UpdaterDialog::buttonUpdate()
 
 void UpdaterDialog::invalidData(bool err)
 {
-	if(err)downloadError();
+	if(err)downloadError(9);
 }
 
-void UpdaterDialog::downloadError()
+void UpdaterDialog::downloadError(int val)
 {
-	QMessageBox::warning(this,windowTitle(),julyTr("DOWNLOAD_ERROR","Download error. Please try again.")+"<br>"+httpGet->errorString());
+	QMessageBox::warning(this,windowTitle(),julyTr("DOWNLOAD_ERROR","Download error. Please try again.")+"<br>"+httpGet->errorString()+"<br>CODE: "+QString::number(val));
 	exitSlot();
 }
 
 void UpdaterDialog::dataProgress(int precent)
 {
-	if(httpGet->getCurrentPacketContentLength()>15000000)downloadError();
+	if(httpGet->getCurrentPacketContentLength()>20000000)downloadError(10);
 	ui.progressBar->setValue(precent);
 }

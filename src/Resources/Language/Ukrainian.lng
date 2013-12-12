@@ -313,3 +313,4 @@ String_CANCEL_ORDER=Видалити обрані ордери
 Button_FILL_FROM_BUY_PANEL=Заповнити з панелі Купівлі
 Button_FILL_FROM_Sell_PANEL=Заповнити з панелі Продажі
 CheckBox_FEECALC_SINGLE_INSTANCE=Тільки одне вікно
+CheckBox_RULES_SAFE_MODE=Пауза після виконання

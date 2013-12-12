@@ -65,9 +65,11 @@ QColor swapColor(QColor color)
 
 void BaseValues::Construct()
 {
+	rulesSafeMode=true;
+	rulesSafeModeInterval=5000;
 	gzipEnabled=true;
 	appVerIsBeta=false;
-	appVerStr="1.07962";
+	appVerStr="1.07963";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -467,7 +469,7 @@ int main(int argc, char *argv[])
 	baseValues.mainWindow_=new QtBitcoinTrader;
 	QObject::connect(baseValues.mainWindow_,SIGNAL(quit()),&a,SLOT(quit()));
 	}
-	mainWindow.loadUiSettings();
+	mainWindow.setupClass();
 	a.exec();
 
 	if(lockFile)

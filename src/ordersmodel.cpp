@@ -49,14 +49,17 @@ void OrdersModel::clear()
 	currentBidsPrices.clear();
 	oidList.clear();
 	dateList.clear();
+	dateStrList.clear();
 	typesList.clear();
 	statusList.clear();
 	amountList.clear();
+	amountStrList.clear();
 	priceList.clear();
+	priceStrList.clear();
+	totalList.clear();
+	totalStrList.clear();
 	symbolList.clear();
 
-	itemSignList.clear();
-	priceSignList.clear();
 	haveOrders=false;
 	if(checkDuplicatedOID)oidMapForCheckingDuplicates.clear();
 
@@ -110,8 +113,15 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 			   priceList.at(currentIndex)!=orders->at(n).price))
 			{
 			statusList[currentIndex]=orders->at(n).status;
+
 			amountList[currentIndex]=orders->at(n).amount;
+			amountStrList[currentIndex]=orders->at(n).amountStr;
+
 			priceList[currentIndex]=orders->at(n).price;
+			priceStrList[currentIndex]=orders->at(n).priceStr;
+
+			totalList[currentIndex]=orders->at(n).total;
+			totalStrList[currentIndex]=orders->at(n).totalStr;
 			}
 		}
 		else
@@ -119,18 +129,25 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 			beginInsertRows(QModelIndex(), currentIndex, currentIndex);
 
 			oidList.insert(currentIndex,orders->at(n).oid);
+
 			dateList.insert(currentIndex,orders->at(n).date);
+			dateStrList.insert(currentIndex,orders->at(n).dateStr);
+
 			typesList.insert(currentIndex,orders->at(n).type);
 			statusList.insert(currentIndex,orders->at(n).status);
+
 			amountList.insert(currentIndex,orders->at(n).amount);
+			amountStrList.insert(currentIndex,orders->at(n).amountStr);
+
 			priceList.insert(currentIndex,orders->at(n).price);
+			priceStrList.insert(currentIndex,orders->at(n).priceStr);
+
+			totalList.insert(currentIndex,orders->at(n).total);
+			totalStrList.insert(currentIndex,orders->at(n).totalStr);
+
 			symbolList.insert(currentIndex,orders->at(n).symbol);
 
-			if(checkDuplicatedOID)
-				oidMapForCheckingDuplicates.insert(orders->at(n).oid,orders->at(n).date);
-
-			itemSignList.insert(currentIndex,baseValues.currencySignMap.value(orders->at(n).symbol.left(3),"$"));
-			priceSignList.insert(currentIndex,baseValues.currencySignMap.value(orders->at(n).symbol.right(3),"$"));
+			if(checkDuplicatedOID)oidMapForCheckingDuplicates.insert(orders->at(n).oid,orders->at(n).date);
 			
 			endInsertRows();
 		}
@@ -143,14 +160,16 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 			if(checkDuplicatedOID)oidMapForCheckingDuplicates.remove(oidList.at(n));
 			oidList.removeAt(n);
 			dateList.removeAt(n);
+			dateStrList.removeAt(n);
 			typesList.removeAt(n);
 			statusList.removeAt(n);
 			amountList.removeAt(n);
+			amountStrList.removeAt(n);
 			priceList.removeAt(n);
+			priceStrList.removeAt(n);
+			totalList.removeAt(n);
+			totalStrList.removeAt(n);
 			symbolList.removeAt(n);
-
-			itemSignList.removeAt(n);
-			priceSignList.removeAt(n);
 			endRemoveRows();
 		}
 
@@ -164,19 +183,6 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 	countWidth=textFontWidth(QString::number(oidList.count()+1))+6;
 	emit volumeAmountChanged(volumeTotal, amountTotal);
 	emit dataChanged(index(0,0),index(oidList.count()-1,columnsCount-1));
-	emit layoutChanged();
-}
-
-double OrdersModel::getRowPrice(int row)
-{
-	if(row<0||row>=priceList.count())return 0.0;
-	return priceList.at(row);
-}
-
-double OrdersModel::getRowVolume(int row)
-{
-	if(row<0||row>=amountList.count())return 0.0;
-	return amountList.at(row);
 }
 
 QVariant OrdersModel::data(const QModelIndex &index, int role) const
@@ -191,9 +197,26 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	int indexColumn=index.column()-1;
+
+	if(role==Qt::EditRole)
+	{
+		switch(indexColumn)
+		{
+		case -1: return oidList.count()-currentRow;
+		case 0: return dateList.at(currentRow);
+		case 1: return typesList.at(currentRow);
+		case 2: return statusList.at(currentRow);
+		case 3: return amountList.at(currentRow);
+		case 4: return priceList.at(currentRow);
+		case 5: return totalList.at(currentRow);
+		}
+		return QVariant();
+	}
+
 	if(role==Qt::WhatsThisRole)
 	{
-		QString copyText=QDateTime::fromTime_t(dateList.at(currentRow)).toString(baseValues.dateTimeFormat)+" "+(typesList.at(currentRow)?textAsk:textBid)+" ";
+		QString copyText=dateStrList.at(currentRow)+" "+(typesList.at(currentRow)?textAsk:textBid)+" ";
 		switch(statusList.at(currentRow))
 		{
 		case 0: copyText+=textStatusList.at(0)+" "; break;
@@ -202,16 +225,14 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		case 3: copyText+=textStatusList.at(3)+" "; break;
 		default: copyText+=textStatusList.at(4)+" "; break; 
 		}
-		copyText+=itemSignList.at(currentRow)+mainWindow.numFromDouble(amountList.at(currentRow))+" ";
-		copyText+=priceSignList.at(currentRow)+mainWindow.numFromDouble(priceList.at(currentRow))+" ";
-		copyText+=priceSignList.at(currentRow)+mainWindow.numFromDouble(amountList.at(currentRow)*priceList.at(currentRow),baseValues.currentPair.currBDecimals);
+		copyText+=amountStrList.at(currentRow)+" ";
+		copyText+=priceStrList.at(currentRow)+" ";
+		copyText+=totalStrList.at(currentRow);
 
 		return copyText;
 	}
 
 	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::TextAlignmentRole&&role!=Qt::BackgroundRole)return QVariant();
-
-	int indexColumn=index.column()-1;
 
 	if(role==Qt::TextAlignmentRole)return 0x0084;
 
@@ -248,7 +269,7 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		break;
 	case 0:
 		{//Date
-			return QDateTime::fromTime_t(dateList.at(currentRow)).toString(baseValues.dateTimeFormat);
+			return dateStrList.at(currentRow);
 		}
 		break;
 	case 1:
@@ -270,17 +291,17 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		break;
 	case 3:
 		{//Amount
-			return itemSignList.at(currentRow)+mainWindow.numFromDouble(amountList.at(currentRow));
+			return amountStrList.at(currentRow);
 		}
 		break;
 	case 4:
 		{//Price
-			return priceSignList.at(currentRow)+mainWindow.numFromDouble(priceList.at(currentRow));
+			return priceStrList.at(currentRow);
 		}
 		break;
 	case 5:
 		{//Total
-			return priceSignList.at(currentRow)+mainWindow.numFromDouble(amountList.at(currentRow)*priceList.at(currentRow),baseValues.currentPair.currBDecimals);
+			return totalStrList.at(currentRow);
 		}
 		break;
 	default: break;
@@ -311,7 +332,6 @@ void OrdersModel::setOrderCanceled(QByteArray oid)
 		}
 
 	emit dataChanged(index(0,0),index(oidList.count()-1,columnsCount-1));
-	emit layoutChanged();
 }
 
 QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -363,7 +383,6 @@ void OrdersModel::setHorizontalHeaderLabels(QStringList list)
 
 	headerLabels=list;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
-	emit layoutChanged();
 }
 
 QModelIndex OrdersModel::index(int row, int column, const QModelIndex &parent) const
@@ -376,3 +395,11 @@ QModelIndex OrdersModel::parent(const QModelIndex &) const
 {
 	return QModelIndex();
 }
+
+quint32 OrdersModel::getRowNum(int row){if(row<0||row>=oidList.count())return 0; return oidList.count()-row;}
+quint32 OrdersModel::getRowDate(int row){if(row<0||row>=dateList.count())return 0; return dateList.at(row);}
+int OrdersModel::getRowType(int row){if(row<0||row>=typesList.count())return 0; return typesList.at(row)?1:0;}
+int OrdersModel::getRowStatus(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(row);}
+double OrdersModel::getRowPrice(int row){if(row<0||row>=priceList.count())return 0.0;return priceList.at(row);}
+double OrdersModel::getRowVolume(int row){if(row<0||row>=amountList.count())return 0.0;return amountList.at(row);}
+double OrdersModel::getRowTotal(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(row);}

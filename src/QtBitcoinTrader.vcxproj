@@ -276,6 +276,7 @@
     <ClCompile Include="logthread.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="newpassworddialog.cpp" />
+    <ClCompile Include="orderitem.cpp" />
     <ClCompile Include="ordersmodel.cpp" />
     <ClCompile Include="passworddialog.cpp" />
     <ClCompile Include="qtbitcointrader.cpp" />

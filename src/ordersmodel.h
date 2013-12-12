@@ -19,8 +19,13 @@ class OrdersModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	double getRowPrice(int);
-	double getRowVolume(int);
+	quint32 getRowNum(int row);
+	quint32 getRowDate(int row);
+	int getRowType(int row);
+	int getRowStatus(int row);
+	double getRowPrice(int row);
+	double getRowVolume(int row);
+	double getRowTotal(int row);
 
 	QMap<double,bool> currentAsksPrices;
 	QMap<double,bool> currentBidsPrices;
@@ -67,14 +72,25 @@ private:
 	QStringList headerLabels;
 
 	QList<QByteArray> oidList;
+
 	QList<quint32> dateList;
+	QStringList dateStrList;
+
 	QList<bool> typesList;
+
 	QList<int> statusList;
+
 	QList<double> amountList;
+	QStringList amountStrList;
+
 	QList<double> priceList;
+	QStringList priceStrList;
+
+	QList<double> totalList;
+	QStringList totalStrList;
+
 	QStringList symbolList;
-	QStringList itemSignList;
-	QStringList priceSignList;
+
 signals:
 	void cancelOrder(QByteArray);
 	void ordersIsAvailable();

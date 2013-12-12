@@ -170,7 +170,6 @@ void DepthModel::reloadVisibleItems()
 void DepthModel::delayedReloadVisibleItems()
 {
 	emit dataChanged(index(0,0),index(priceList.count()-1,columnsCount-1));
-	emit layoutChanged();
 }
 
 void DepthModel::calculateSize()
@@ -226,7 +225,6 @@ void DepthModel::calculateSize()
 	int sizeColumn=2;
 	if(isAsk)sizeColumn=1;
 	emit dataChanged(index(0,sizeColumn),index(priceList.count()-1,sizeColumn));
-	emit layoutChanged();
 }
 
 QModelIndex DepthModel::index(int row, int column, const QModelIndex &parent) const
@@ -313,7 +311,6 @@ void DepthModel::fixTitleWidths()
 	widthPriceTitle=textFontWidth(headerLabels.at(0))+20+curBSize;
 	widthVolumeTitle=textFontWidth(headerLabels.at(1))+20+curASize;
 	widthSizeTitle=textFontWidth(headerLabels.at(3))+20+curASize;
-	emit layoutChanged();
 }
 
 void DepthModel::setHorizontalHeaderLabels(QStringList list)
@@ -322,7 +319,6 @@ void DepthModel::setHorizontalHeaderLabels(QStringList list)
 	headerLabels=list;
 	fixTitleWidths();
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
-	emit layoutChanged();
 }
 
 void DepthModel::depthFirstOrder(double price, double volume)

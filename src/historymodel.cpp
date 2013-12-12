@@ -50,7 +50,6 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 	delete histList;
 	if(maxListDate>lastDate)lastDate=maxListDate;
 	endInsertRows();
-	emit layoutChanged();
 }
 
 double HistoryModel::getRowPrice(int row)
@@ -197,7 +196,6 @@ void HistoryModel::setHorizontalHeaderLabels(QStringList list)
 	
 	headerLabels=list;
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
-	emit layoutChanged();
 }
 
 QModelIndex HistoryModel::index(int row, int column, const QModelIndex &parent) const

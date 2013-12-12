@@ -71,7 +71,6 @@ void TradesModel::removeDataOlderThen(quint32 date)
 
 	if(itemsList.count()==0)clear();
 	updateTotalBTC();
-	emit layoutChanged();
 }
 
 QVariant TradesModel::data(const QModelIndex &index, int role) const

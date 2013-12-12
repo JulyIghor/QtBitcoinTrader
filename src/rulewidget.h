@@ -13,6 +13,7 @@
 #include <QWidget>
 #include "ui_rulewidget.h"
 #include "rulesmodel.h"
+#include <QTime>
 
 class RuleWidget : public QWidget
 {
@@ -31,6 +32,7 @@ public:
 	~RuleWidget();
 
 private:
+	QTime ordersCancelTime;
 	QMenu *rulesEnableDisableMenu;
 	QString groupName;
 private slots:

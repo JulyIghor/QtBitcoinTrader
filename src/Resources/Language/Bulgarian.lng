@@ -313,3 +313,4 @@ String_COPY_ROW=Copy selected Rows
 Button_FILL_FROM_BUY_PANEL=Fill from Buy Panel
 Button_FILL_FROM_Sell_PANEL=Fill from Sell Panel
 CheckBox_FEECALC_SINGLE_INSTANCE=Single instance
+CheckBox_RULES_SAFE_MODE=Delay between executing rules
