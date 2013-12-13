@@ -16,8 +16,8 @@ bool OrderItem::isValid()
 	if(isVal)
 	{
 		dateStr=QDateTime::fromTime_t(date).toString(baseValues.dateTimeFormat);
-		QString priceSign=baseValues.currencySignMap.value(symbol.left(3),"$");
-		amountStr=baseValues.currencySignMap.value(symbol.right(3),"$")+mainWindow.numFromDouble(amount);
+		QString priceSign=baseValues.currencySignMap.value(symbol.right(3),"$");
+		amountStr=baseValues.currencySignMap.value(symbol.left(3),"$")+mainWindow.numFromDouble(amount);
 		priceStr=priceSign+mainWindow.numFromDouble(price);
 		total=price*amount;
 		totalStr=priceSign+mainWindow.numFromDouble(total,baseValues.currentPair.currBDecimals);

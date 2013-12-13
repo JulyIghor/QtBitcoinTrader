@@ -709,7 +709,6 @@ double QtBitcoinTrader::getFeeForUSDDec(double usd)
 	double calcFee=getValidDoubleForPercision(result,baseValues.currentPair.priceDecimals,true)*floatFee;
 	calcFee=getValidDoubleForPercision(calcFee,baseValues.currentPair.priceDecimals,true);
 	result=result-calcFee;
-	if(result>=usd)result-=qPow(0.1,baseValues.currentPair.currBDecimals);
 	return result;
 }
 
@@ -1729,22 +1728,11 @@ void QtBitcoinTrader::buyTotalToSpendInUsdChanged(double val)
 	profitSellThanBuyCalc();
 
 	buyLockTotalBtc=true;
-	double btcValue=0.0;
-	if(currentExchange->calculatingFeeMode==1)//Round to precision
-	{
-		btcValue=val*floatFeeDec/ui.buyPricePerCoin->value();
-		btcValue=getValidDoubleForPercision(btcValue,baseValues.currentPair.currADecimals,false);
-	}
-	else
-	if(currentExchange->calculatingFeeMode==0)//Direct multiply
-		btcValue=val/ui.buyPricePerCoin->value();
-
-	if(!buyLockTotalBtcSelf)ui.buyTotalBtc->setValue(btcValue);
+	if(!buyLockTotalBtcSelf)ui.buyTotalBtc->setValue(val/ui.buyPricePerCoin->value());
 	buyLockTotalBtc=false;
 
 	double valueForResult=getFeeForUSDDec(val)/ui.buyPricePerCoin->value();
 	valueForResult=getValidDoubleForPercision(valueForResult,baseValues.currentPair.currADecimals,false);
-	if(currentExchange->calculatingFeeMode==1&&valueForResult==ui.buyTotalBtc->value())valueForResult-=qPow(0.1,baseValues.currentPair.currADecimals);
 	ui.buyTotalBtcResult->setValue(valueForResult);
 
 	if(buyLockTotalSpend)return;
@@ -1768,17 +1756,8 @@ void QtBitcoinTrader::buyBtcToBuyChanged(double)
 	buyLockTotalBtcSelf=true;
 
 	buyLockTotalSpend=true;
-	double usdValue=0.0;
-	if(currentExchange->calculatingFeeMode==1)//Round by decimals
-	{
-		usdValue=ui.buyTotalBtc->value()*ui.buyPricePerCoin->value()*floatFeeInc;
-		usdValue=getValidDoubleForPercision(usdValue,baseValues.currentPair.currBDecimals,false);
-	}
-	else
-	if(currentExchange->calculatingFeeMode==0)//Direct Multiply
-		usdValue=ui.buyTotalBtc->value()*ui.buyPricePerCoin->value();
 
-	ui.buyTotalSpend->setValue(usdValue);
+	ui.buyTotalSpend->setValue(ui.buyTotalBtc->value()*ui.buyPricePerCoin->value());
 	buyLockTotalSpend=false;
 	buyLockTotalBtcSelf=false;
 	buyLockTotalBtc=false;
@@ -1941,7 +1920,6 @@ void QtBitcoinTrader::buyBitcoinsButton()
 
 	double amountWithoutFee=getAvailableUSD()/priceToBuy;
 	amountWithoutFee=getValidDoubleForPercision(amountWithoutFee,baseValues.currentPair.currADecimals,false);
-	if(amountWithoutFee<=btcToBuy)btcToBuy-=qPow(0.1,baseValues.currentPair.currADecimals);
 	apiBuySend(btcToBuy,priceToBuy);
 }
 
@@ -2632,7 +2610,9 @@ double QtBitcoinTrader::getAvailableUSD()
 
 double QtBitcoinTrader::getAvailableUSDtoBTC(double priceToBuy)
 {
-	return getValidDoubleForPercision(getAvailableUSD()/priceToBuy,baseValues.currentPair.currADecimals,false)-qPow(0.1,baseValues.currentPair.currADecimals);
+	double decValue=0.0;
+	if(currentExchange->calculatingFeeMode==1)decValue=qPow(0.1,baseValues.currentPair.currADecimals)*2;
+	return getValidDoubleForPercision(getAvailableUSD()/priceToBuy,baseValues.currentPair.currADecimals,false)-decValue;;
 }
 
 void QtBitcoinTrader::apiSellSend(double btc, double price)
