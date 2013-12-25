@@ -53,8 +53,14 @@ DebugViewer::~DebugViewer()
 
 void DebugViewer::on_buttonSaveAs_clicked()
 {
+	QDateTime currentdate;
 	savingFile=true;
-	QString fileName=QFileDialog::getSaveFileName(this, "Save Debug Information",QDateTime::currentDateTimeUtc().toString("yyyy-MM-dd HH.mm.ss")+".log","Log file (*.log)");
+#if QT_VERSION >= 0x040700
+	currentdate = QDateTime::currentDateTimeUtc();
+#else
+	currentdate = QDateTime::currentDateTime().toUTC();
+#endif
+	QString fileName=QFileDialog::getSaveFileName(this, "Save Debug Information",currentdate.toString("yyyy-MM-dd HH.mm.ss")+".log","Log file (*.log)");
 	if(fileName.isEmpty()){savingFile=false;return;}
 	
 	QFile writeLog(fileName);
