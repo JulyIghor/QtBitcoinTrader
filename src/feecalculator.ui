@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>791</width>
-    <height>181</height>
+    <width>816</width>
+    <height>183</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -113,17 +113,14 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <layout class="QGridLayout" name="gridLayout_7">
+       <layout class="QHBoxLayout" name="buyBtcLayout">
+        <property name="spacing">
+         <number>4</number>
+        </property>
         <property name="rightMargin">
-         <number>10</number>
-        </property>
-        <property name="horizontalSpacing">
-         <number>2</number>
-        </property>
-        <property name="verticalSpacing">
          <number>0</number>
         </property>
-        <item row="0" column="0">
+        <item>
          <widget class="QLabel" name="btcLabel1">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -155,7 +152,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
+        <item>
          <widget class="QDoubleSpinBox" name="buyTotalBtc">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -224,12 +221,12 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <layout class="QHBoxLayout" name="buyPriceLayout">
         <property name="spacing">
-         <number>2</number>
+         <number>4</number>
         </property>
         <property name="rightMargin">
-         <number>10</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="QLabel" name="usdLabel1">
@@ -335,12 +332,12 @@
        </widget>
       </item>
       <item row="1" column="4">
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <layout class="QHBoxLayout" name="totalPaidLayout">
         <property name="spacing">
-         <number>2</number>
+         <number>4</number>
         </property>
         <property name="rightMargin">
-         <number>10</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="QLabel" name="usdLabel2">
@@ -451,7 +448,7 @@
          <number>10</number>
         </property>
         <property name="horizontalSpacing">
-         <number>2</number>
+         <number>4</number>
         </property>
         <property name="verticalSpacing">
          <number>0</number>
@@ -566,14 +563,8 @@
        </widget>
       </item>
       <item row="1" column="8">
-       <layout class="QGridLayout" name="gridLayout_9">
-        <property name="horizontalSpacing">
-         <number>2</number>
-        </property>
-        <property name="verticalSpacing">
-         <number>0</number>
-        </property>
-        <item row="0" column="0">
+       <layout class="QHBoxLayout" name="receivedLayout">
+        <item>
          <widget class="QLabel" name="btcLabel4">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -605,7 +596,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
+        <item>
          <widget class="QDoubleSpinBox" name="btcReceived">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -724,10 +715,10 @@
       <item row="3" column="0">
        <layout class="QGridLayout" name="gridLayout_10">
         <property name="rightMargin">
-         <number>10</number>
+         <number>15</number>
         </property>
         <property name="horizontalSpacing">
-         <number>2</number>
+         <number>4</number>
         </property>
         <property name="verticalSpacing">
          <number>0</number>
@@ -842,12 +833,12 @@
        </widget>
       </item>
       <item row="3" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <layout class="QHBoxLayout" name="sellPriceLayout">
         <property name="spacing">
-         <number>2</number>
+         <number>4</number>
         </property>
         <property name="rightMargin">
-         <number>10</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="QLabel" name="usdLabel3">
@@ -955,10 +946,10 @@
       <item row="3" column="4">
        <layout class="QHBoxLayout" name="horizontalLayout_9">
         <property name="spacing">
-         <number>2</number>
+         <number>4</number>
         </property>
         <property name="rightMargin">
-         <number>10</number>
+         <number>15</number>
         </property>
         <item>
          <widget class="QLabel" name="usdLabel4">
@@ -1075,7 +1066,7 @@
       <item row="3" column="6">
        <layout class="QHBoxLayout" name="horizontalLayout_10">
         <property name="spacing">
-         <number>2</number>
+         <number>4</number>
         </property>
         <property name="rightMargin">
          <number>10</number>
@@ -1193,9 +1184,12 @@
        </widget>
       </item>
       <item row="3" column="8">
-       <layout class="QHBoxLayout" name="horizontalLayout_11">
+       <layout class="QHBoxLayout" name="fiatReceivedLayout">
         <property name="spacing">
-         <number>2</number>
+         <number>4</number>
+        </property>
+        <property name="rightMargin">
+         <number>15</number>
         </property>
         <item>
          <widget class="QLabel" name="usdLabel6">
@@ -1294,9 +1288,9 @@
        </widget>
       </item>
       <item row="5" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="feeLayout">
         <property name="rightMargin">
-         <number>10</number>
+         <number>4</number>
         </property>
         <item>
          <widget class="QLabel" name="label_20">
@@ -1350,7 +1344,7 @@
            <double>0.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>0.600000000000000</double>
+           <double>10.000000000000000</double>
           </property>
           <property name="singleStep">
            <double>0.010000000000000</double>
@@ -1365,7 +1359,10 @@
       <item row="5" column="8">
        <layout class="QHBoxLayout" name="horizontalLayout_12">
         <property name="spacing">
-         <number>2</number>
+         <number>4</number>
+        </property>
+        <property name="rightMargin">
+         <number>15</number>
         </property>
         <item>
          <widget class="QLabel" name="usdLabel7">
@@ -1456,6 +1453,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::TabFocus</enum>
           </property>
           <property name="accessibleName">
            <string>TR00096</string>

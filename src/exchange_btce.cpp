@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -12,7 +12,7 @@
 #include "main.h"
 #include <QDateTime>
 
-Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
+Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey) 
 	: Exchange()
 {
 	calculatingFeeMode=0;
@@ -21,6 +21,7 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	baseValues.currentPair.setSymbol("BTCUSD");
 	baseValues.currentPair.currRequestPair="btc_usd";
 	baseValues.currentPair.priceDecimals=3;
+	minimumRequestIntervalAllowed=600;
 	baseValues.currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 	baseValues.currentPair.tradeVolumeMin=0.01;
 	baseValues.currentPair.tradePriceMin=0.1;
@@ -36,7 +37,7 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	privateRestKey=pRestKey;
 	moveToThread(this);
 
-	currencyMapFile="CurrenciesBTCe.map";
+	currencyMapFile="BTCe";
 	defaultCurrencyParams.currADecimals=8;
 	defaultCurrencyParams.currBDecimals=8;
 	defaultCurrencyParams.currABalanceDecimals=8;
@@ -156,7 +157,6 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 		{
 			if(data.size()<10)break;
 			QByteArray currentRequestSymbol=getMidData("\"","\":[{",&data).toUpper().replace("_","");
-
 			QStringList tradeList=QString(data).split("},{");
 			QList<TradesItem> *newTradesItems=new QList<TradesItem>;
 
@@ -281,7 +281,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 						{
 							bool matchCurrentGroup=priceDouble>groupedPrice-baseValues.groupPriceValue;
 							if(matchCurrentGroup)groupedVolume+=amount;
-							if(!matchCurrentGroup||n==0)
+							if(!matchCurrentGroup||n==asksList.count()-1)
 							{
 								depthSubmitOrder(&currentBidsMap,groupedPrice-baseValues.groupPriceValue,groupedVolume,false);
 								rowCounter++;
@@ -503,7 +503,7 @@ void Exchange_BTCe::secondSlot()
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,baseValues.httpSplitPackets,"method=ActiveOrders&");
 	if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
 	if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
-	if(!baseValues.depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
+	if(depthEnabled&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
 		emit depthRequested();
 		sendToApi(111,"depth/"+baseValues.currentPair.currRequestPair+"?limit="+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);
@@ -541,7 +541,7 @@ void Exchange_BTCe::buy(double apiBtcToBuy, double apiPriceToBuy)
 		int toCut=(btcToBuy.size()-dotPos-1)-digitsToCut;
 		if(toCut>0)btcToBuy.remove(btcToBuy.size()-toCut-1,toCut);
 	}
-	QByteArray data="method=Trade&pair="+baseValues.currentPair.currRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy)+"&amount="+btcToBuy+"&";
+	QByteArray data="method=Trade&pair="+baseValues.currentPair.currRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy,'f',baseValues.currentPair.priceDecimals)+"&amount="+btcToBuy+"&";
 	if(debugLevel)logThread->writeLog("Buy: "+data,2);
 	sendToApi(306,"",true,true,data);
 }

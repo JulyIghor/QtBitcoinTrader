@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -24,8 +24,36 @@ HistoryModel::~HistoryModel()
 
 }
 
+void HistoryModel::clear()
+{
+	if(itemsList.isEmpty())return;
+	beginResetModel();
+	lastDate=0;
+	itemsList.clear();
+	endResetModel();
+}
+
 void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 {
+	bool haveLastBuy=false;
+	bool haveLastSell=false;
+	for(int n=0;n<histList->count();n++)
+	if(histList->at(n).symbol==baseValues.currentPair.currSymbol)
+	{
+		if(histList->at(n).type==1)
+		{
+			emit accLastSellChanged(histList->at(n).symbol.right(3),histList->at(n).price);
+			haveLastSell=true;
+		}
+		else
+		if(histList->at(n).type==2)
+		{
+			emit accLastBuyChanged(histList->at(n).symbol.right(3),histList->at(n).price);
+			haveLastBuy=true;
+		}
+		if(haveLastSell&&haveLastBuy)break;
+	}
+
 	while(histList->count()&&histList->last().dateTimeInt<=lastDate)histList->removeLast();
 	if(histList->count()==0){delete histList; return;}
 
@@ -43,9 +71,6 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 		if(n!=histList->count()-1)(*histList)[n].displayFullDate=histList->at(n).dateInt!=histList->at(n+1).dateInt;
 
 		itemsList<<histList->at(n);
-		if(histList->at(n).type==1)emit accLastSellChanged(histList->at(n).symbol.right(3),histList->at(n).price);
-		else
-		if(histList->at(n).type==2)emit accLastBuyChanged(histList->at(n).symbol.right(3),histList->at(n).price);
 	}
 	delete histList;
 	if(maxListDate>lastDate)lastDate=maxListDate;
@@ -94,6 +119,11 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 		return itemsList.at(currentRow).dateTimeStr+" "+typesLabels.at(itemsList.at(currentRow).type)+" "+itemsList.at(currentRow).priceStr+" "+itemsList.at(currentRow).totalStr;
 	}
 
+	if(role==Qt::StatusTipRole)
+	{
+		return itemsList.at(currentRow).dateTimeStr+"\t"+itemsList.at(currentRow).volumeStr+"\t"+typesLabels.at(itemsList.at(currentRow).type)+"\t"+itemsList.at(currentRow).priceStr+"\t"+itemsList.at(currentRow).totalStr;
+	}
+
 	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
 
 	int indexColumn=index.column();
@@ -104,6 +134,7 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 		if(indexColumn==2)return 0x0082;
 		if(indexColumn==4)return 0x0081;
 		if(indexColumn==5)return 0x0082;
+		if(indexColumn==6)return 0x0081;
 		return 0x0084;
 	}
 
@@ -119,12 +150,14 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 			case 2: return baseValues.appTheme.blue;
 			case 3: return baseValues.appTheme.darkGreen;
 			case 4: return baseValues.appTheme.darkRed;
-			case 5: return baseValues.appTheme.darkBlue;
+			case 5: return baseValues.appTheme.darkRedBlue;
 			default: break;
 			}
+			break;
+		case 6: return baseValues.appTheme.gray; break;
 		default: break;
 		}
-		return QVariant();
+		return baseValues.appTheme.black;
 	}
 
 	switch(indexColumn)
@@ -139,6 +172,7 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 	case 3: return typesLabels.at(itemsList.at(currentRow).type);//Type
 	case 4: return itemsList.at(currentRow).priceStr;//Price
 	case 5: return itemsList.at(currentRow).totalStr;//Total
+	case 6: return itemsList.at(currentRow).description;//Description
 	default: break;
 	}
 	return QVariant();

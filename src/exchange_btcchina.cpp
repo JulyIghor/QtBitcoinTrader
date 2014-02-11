@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -14,7 +14,7 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 {
 	isLastTradesTypeSupported=true;
 	balanceDisplayAvailableAmount=false;
-	minimumRequestIntervalAllowed=1200;
+	minimumRequestIntervalAllowed=600;
 	calculatingFeeMode=1;
 	baseValues.exchangeName="BTC China";
 	depthAsks=0;
@@ -26,7 +26,7 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	privateRestSign=pRestSign;
 	privateRestKey=pRestKey;
 
-	currencyMapFile="CurrenciesBTCChina.map";
+	currencyMapFile="BTCChina";
 	baseValues.currentPair.name="BTC/CNY";
 	baseValues.currentPair.setSymbol("BTCCNY");
 	baseValues.currentPair.currRequestPair="BTCCNY";
@@ -102,7 +102,7 @@ void Exchange_BTCChina::secondSlot()
 	default: break;
 	}
 
-	if(!baseValues.depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
+	if(depthEnabled&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
 		if(!isReplayPending(111))
 		{
@@ -534,7 +534,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					}
 				}
 
-				QByteArray feeData=getMidData("trade_fee\":\"","\"",&data);
+				QByteArray feeData=getMidData("trade_fee\":",",",&data);
 				if(!feeData.isEmpty())emit accFeeChanged(feeData.toDouble());
 
 				QByteArray frozenData=getMidData("\"frozen\":","}}}",&data);

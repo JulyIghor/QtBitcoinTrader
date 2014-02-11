@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -31,6 +31,17 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	QString lastProfile=settings.value("LastProfile","").toString();
 	int lastProfileIndex=-1;
 	int firstUnlockedProfileIndex=-1;
+
+	QMap<int,QString> logosMap;
+	QSettings listSettings(":/Resources/Exchanges/List.ini",QSettings::IniFormat);
+	QStringList exchangesList=listSettings.childGroups();
+	for(int n=0;n<exchangesList.count();n++)
+	{
+		QString currentLogo=listSettings.value(exchangesList.at(n)+"/Logo").toString();
+		if(currentLogo.isEmpty())continue;
+		logosMap.insert(n,":/Resources/Exchanges/Logos/"+currentLogo);
+	}
+
 	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
 	for(int n=0;n<settingsList.count();n++)
 	{
@@ -80,13 +91,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 			}
 		}
 
-		QString itemIcon;
-		if(currentProfileExchangeId==0)itemIcon=":/Resources/Exchanges/Mt.Gox.png";
-		if(currentProfileExchangeId==1)itemIcon=":/Resources/Exchanges/BTC-e.png";
-		if(currentProfileExchangeId==2)itemIcon=":/Resources/Exchanges/Bitstamp.png";
-		if(currentProfileExchangeId==3)itemIcon=":/Resources/Exchanges/BTCChina.png";
-
-		ui.profileComboBox->addItem(QIcon(itemIcon),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
+		ui.profileComboBox->addItem(QIcon(logosMap.value(currentProfileExchangeId)),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
 
 		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;

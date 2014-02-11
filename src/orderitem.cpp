@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -16,8 +16,8 @@ bool OrderItem::isValid()
 	if(isVal)
 	{
 		dateStr=QDateTime::fromTime_t(date).toString(baseValues.dateTimeFormat);
-		QString priceSign=baseValues.currencySignMap.value(symbol.right(3),"$");
-		amountStr=baseValues.currencySignMap.value(symbol.left(3),"$")+mainWindow.numFromDouble(amount);
+		QString priceSign=baseValues.currencyMap.value(symbol.right(3),CurencyInfo("$")).sign;
+		amountStr=baseValues.currencyMap.value(symbol.left(3),CurencyInfo("$")).sign+mainWindow.numFromDouble(amount);
 		priceStr=priceSign+mainWindow.numFromDouble(price);
 		total=price*amount;
 		totalStr=priceSign+mainWindow.numFromDouble(total,baseValues.currentPair.currBDecimals);

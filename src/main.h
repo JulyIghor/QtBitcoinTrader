@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -38,32 +38,12 @@
 #include "qtbitcointrader.h"
 
 #define hmacSha512(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha512(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),64)
+#define hmacSha384(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha384(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),48)
 #define hmacSha256(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha256(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),32)
 #define hmacSha1(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha1(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), baseString.size(), 0, 0)),20)
 
-
-struct AppTheme
-{
-	AppTheme();
-	bool nightMode;
-	QColor altRowColor;
-	QColor gray;
-	QColor lightGray;
-	QColor red;
-	QColor green;
-	QColor blue;
-	QColor lightRed;
-	QColor lightGreen;
-	QColor lightBlue;
-	QColor darkRed;
-	QColor darkGreen;
-	QColor darkBlue;
-	QColor lightRedGreen;
-	QColor lightGreenBlue;
-	QColor lightRedBlue;
-	QColor black;
-	QColor white;
-};
+#include "currencyinfo.h"
+#include "apptheme.h"
 
 class Exchange;
 
@@ -73,8 +53,17 @@ struct BaseValues
 {
 	void Construct();
 
+	QString osStyle;
+	int lastGroupID;
+	bool forceDotInSpinBoxes;
+
+	int trafficSpeed;
+	qint64 trafficTotal;
+	int trafficTotalType;
+
 	CurrencyPairItem currentPair;
 
+	bool nightMode;
 	bool rulesSafeMode;
 	int rulesSafeModeInterval;
 	
@@ -93,7 +82,6 @@ struct BaseValues
 	bool supportsUtfUI;
 	bool highResolutionDisplay;
 	int defaultHeightForRow_;
-	bool depthRefreshBlocked;
 	double groupPriceValue;
 	QFontMetrics *fontMetrics_;
 	int apiDownCount;
@@ -115,14 +103,15 @@ struct BaseValues
 	LogThread *logThread_;
 	QByteArray restKey;
 	QByteArray restSign;
+	QByteArray randomPassword;
 	QtBitcoinTrader *mainWindow_;
 	QString logFileName;
 	QString iniFileName;
 	double appVerReal;
 	double appVerLastReal;
 	bool appVerIsBeta;
-	QMap<QByteArray,QByteArray> currencySignMap;
-	QMap<QByteArray,QByteArray> currencyNamesMap;
+	QMap<QByteArray,QByteArray> currencyMapSign;
+	QMap<QByteArray,CurencyInfo> currencyMap;
 };
 
 #define baseValues (*baseValues_)

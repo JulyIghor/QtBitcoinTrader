@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -24,11 +24,12 @@ Exchange_MtGox::Exchange_MtGox(QByteArray pRestSign, QByteArray pRestKey)
 	julyHttp=0;
 	tickerOnly=false;
 
-	currencyMapFile="CurrenciesMtGox.map";
+	currencyMapFile="MtGox";
 	baseValues.currentPair.name="BTC/USD";
 	baseValues.currentPair.setSymbol("BTCUSD");
 	baseValues.currentPair.currRequestPair="BTCUSD";
 	baseValues.currentPair.priceDecimals=5;
+	minimumRequestIntervalAllowed=500;
 	baseValues.currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 	baseValues.currentPair.tradeVolumeMin=0.01;
 	baseValues.currentPair.tradePriceMin=0.1;
@@ -94,7 +95,7 @@ void Exchange_MtGox::secondSlot()
 
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,baseValues.currentPair.currRequestPair+"/money/orders",true,baseValues.httpSplitPackets);
 
-	if(!baseValues.depthRefreshBlocked&&(forceDepthLoad||infoCounter==3&&!isReplayPending(111)))
+	if(depthEnabled&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
 		emit depthRequested();
 		sendToApi(111,baseValues.currentPair.currRequestPair+"/money/depth/fetch",false,baseValues.httpSplitPackets);
@@ -158,7 +159,7 @@ void Exchange_MtGox::cancelOrder(QByteArray order)
 void Exchange_MtGox::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
 {
 	if(julyHttp==0)
-	{ 
+	{
 		julyHttp=new JulyHttp("data.mtgox.com","Rest-Key: "+privateRestKey+"\r\n",this);
 		connect(julyHttp,SIGNAL(anyDataReceived()),baseValues_->mainWindow_,SLOT(anyDataReceived()));
 		connect(julyHttp,SIGNAL(setDataPending(bool)),baseValues_->mainWindow_,SLOT(setDataPending(bool)));
@@ -647,7 +648,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 							if(logText.contains(utfSignList.at(n).first))
 							{
 								logText.replace(utfSignList.at(n).first,"");
-								priceSign=baseValues.currencySignMap.value(utfSignList.at(n).second,"$");
+								priceSign=baseValues.currencyMap.value(utfSignList.at(n).second,CurencyInfo("$")).sign;
 								break;
 							}
 						}
@@ -663,7 +664,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 
 						currentHistoryItem.price=priceValue.toDouble();
 
-						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+baseValues.currencySignMap.key(priceSign,"$");
+						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+baseValues.currencyMapSign.key(priceSign,"$");
 						if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 					}
 				}

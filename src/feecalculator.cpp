@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -10,6 +10,7 @@
 #include "feecalculator.h"
 #include "main.h"
 #include "julyspinboxfix.h"
+#include "julyspinboxpicker.h"
 
 FeeCalculator::FeeCalculator()
 	: QDialog()
@@ -28,10 +29,17 @@ FeeCalculator::FeeCalculator()
 
 	ui.feeValue->setValue(mainWindow.ui.accountFee->value());
 
-	ui.buyPrice->setValue(mainWindow.ui.marketBuy->value());
+	ui.buyPrice->setValue(mainWindow.ui.marketBid->value());
 	double btcVal=mainWindow.getAvailableUSD()/ui.buyPrice->value();
 	if(btcVal<baseValues.currentPair.tradeVolumeMin)btcVal=baseValues.currentPair.tradeVolumeMin;
 	ui.buyTotalBtc->setValue(btcVal);
+
+	ui.buyBtcLayout->addWidget(new JulySpinBoxPicker(ui.buyTotalBtc));
+	ui.buyPriceLayout->addWidget(new JulySpinBoxPicker(ui.buyPrice));
+	ui.sellPriceLayout->addWidget(new JulySpinBoxPicker(ui.sellPrice));
+	ui.feeLayout->addWidget(new JulySpinBoxPicker(ui.feeValue));
+	ui.totalPaidLayout->addWidget(new JulySpinBoxPicker(ui.totalPaid));
+	ui.receivedLayout->addWidget(new JulySpinBoxPicker(ui.btcReceived));
 
 	buyBtcLocked=false;
 	buyBtcChanged(ui.buyTotalBtc->value());
@@ -45,6 +53,8 @@ FeeCalculator::FeeCalculator()
 
 	languageChanged();
 	connect(&julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
+
+	ui.groupBox->setStyleSheet("QGroupBox {background: rgba(255,255,255,60); border: 1px solid "+baseValues.appTheme.gray.name()+";border-radius: 3px;margin-top: 7px;}");
 
 	if(mainWindow.ui.widgetStaysOnTop->isChecked())ui.widgetStaysOnTop->setChecked(true);
 	else setStaysOnTop(false);
@@ -80,7 +90,7 @@ void FeeCalculator::languageChanged()
 
 void FeeCalculator::setZeroProfitPrice()
 {
-	ui.sellPrice->setValue(ui.buyPrice->value()*mainWindow.floatFeeInc*mainWindow.floatFeeInc+baseValues.currentPair.priceMin);
+	ui.sellPrice->setValue(ui.buyPrice->value()*mainWindow.floatFeeInc*mainWindow.floatFeeInc);
 }
 
 void FeeCalculator::profitLossChanged(double val)

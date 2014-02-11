@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -28,6 +28,7 @@
 #include <QStyleFactory>
 #include "datafolderchusedialog.h"
 #include <QMetaEnum>
+#include <QUuid>
 
 BaseValues *baseValues_;
 
@@ -53,23 +54,29 @@ void selectSystemLanguage()
 	if(sysLocale.startsWith("nb"))baseValues.defaultLangFile=":/Resources/Language/Norwegian.lng";
 	else 
 	if(sysLocale.startsWith("bg"))baseValues.defaultLangFile=":/Resources/Language/Bulgarian.lng";
+	else 
+	if(sysLocale.startsWith("cs"))baseValues.defaultLangFile=":/Resources/Language/Czech.lng";
+	else 
+	if(sysLocale.startsWith("tr"))baseValues.defaultLangFile=":/Resources/Language/Turkish.lng";
+	else 
+	if(sysLocale.startsWith("it"))baseValues.defaultLangFile=":/Resources/Language/Italiano.lng";
 	else baseValues.defaultLangFile=":/Resources/Language/English.lng";
-}
-
-QColor swapColor(QColor color)
-{
-	//return color.darker(150);
-	//int alpha=255-color.alpha();
-	return QColor(255-color.red(),255-color.green(),255-color.blue(),color.alpha()).lighter(200).lighter(200);
 }
 
 void BaseValues::Construct()
 {
+	lastGroupID=0;
+	forceDotInSpinBoxes=true;
+	trafficSpeed=0;
+	trafficTotal=0;
+	trafficTotalType=0;
+	currentExchange_=0;
+	nightMode=false;
 	rulesSafeMode=true;
 	rulesSafeModeInterval=5000;
 	gzipEnabled=true;
 	appVerIsBeta=false;
-	appVerStr="1.07964";
+	appVerStr="1.0797";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -87,7 +94,6 @@ void BaseValues::Construct()
 	depthCountLimit=100;
 	depthCountLimitStr="100";
 	uiUpdateInterval=100;
-	depthRefreshBlocked=false;
 	supportsUtfUI=true;
 	debugLevel_=0;
 
@@ -115,79 +121,28 @@ void BaseValues::Construct()
 	httpRetryCount=5;
 	apiDownCount=0;
 	groupPriceValue=0.0;
-	defaultHeightForRow_=26;
-
-
-	baseValues.appThemeLight.altRowColor=QColor(240,240,240);
-	baseValues.appThemeLight.gray=Qt::gray;
-	baseValues.appThemeLight.red=Qt::red;
-	baseValues.appThemeLight.green=Qt::green;
-	baseValues.appThemeLight.blue=Qt::blue;
-	baseValues.appThemeLight.lightRed.setRgb(255,200,200);
-	baseValues.appThemeLight.lightGreen.setRgb(200,255,200);
-	baseValues.appThemeLight.lightBlue.setRgb(200,200,255);
-	baseValues.appThemeLight.lightGreenBlue.setRgb(200,255,255);
-	baseValues.appThemeLight.lightRedBlue.setRgb(255,200,255);
-	baseValues.appThemeLight.lightRedGreen.setRgb(255,255,200);
-	baseValues.appThemeLight.darkRed=Qt::darkRed;
-	baseValues.appThemeLight.darkGreen=Qt::darkGreen;
-	baseValues.appThemeLight.darkBlue=Qt::darkBlue;
-	baseValues.appThemeLight.black=Qt::black;
-	baseValues.appThemeLight.white=Qt::white;
-
-	baseValues.appThemeDark.altRowColor=QColor(20,20,20);
-	baseValues.appThemeDark.gray=Qt::gray;
-	baseValues.appThemeDark.red=Qt::red;
-	baseValues.appThemeDark.green=Qt::green;
-	baseValues.appThemeDark.blue=QColor(20,20,100);
-	baseValues.appThemeDark.lightRed.setRgb(0,55,55);
-	baseValues.appThemeDark.lightGreen.setRgb(55,0,55);
-	baseValues.appThemeDark.lightBlue.setRgb(55,55,0);
-	baseValues.appThemeDark.lightGreenBlue.setRgb(55,0,0);
-	baseValues.appThemeDark.lightRedBlue.setRgb(0,55,0);
-	baseValues.appThemeDark.lightRedGreen.setRgb(0,0,55);
-	baseValues.appThemeDark.darkRed=Qt::darkRed;
-	baseValues.appThemeDark.darkGreen=Qt::darkGreen;
-	baseValues.appThemeDark.darkBlue=Qt::darkBlue;
-	baseValues.appThemeDark.black=Qt::white;
-	baseValues.appThemeDark.white=Qt::black;
+	defaultHeightForRow_=22;
 
 	selectSystemLanguage();
-}
-
-AppTheme::AppTheme()
-{
-	nightMode=false;
-	gray=Qt::gray;
-	altRowColor=QColor(240,240,240);
-	lightGray=Qt::lightGray;
-	red=Qt::red;
-	green=Qt::green;
-	blue=Qt::blue;
-	lightRed.setRgb(255,200,200);
-	lightGreen.setRgb(200,255,200);
-	lightBlue.setRgb(200,200,255);
-	lightGreenBlue.setRgb(200,255,255);
-	lightRedBlue.setRgb(255,200,255);
-	lightRedGreen.setRgb(255,255,200);
-	darkRed=Qt::darkRed;
-	darkGreen=Qt::darkGreen;
-	darkBlue=Qt::darkBlue;
-	black=Qt::black;
-	white=Qt::white;
 }
 
 int main(int argc, char *argv[])
 {
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
-	
+
 	baseValues_=new BaseValues;
 	baseValues.Construct();
 
-	QString globalStyleSheet="QGroupBox {background: rgba(255,255,255,190); border: 1px solid gray;border-radius: 3px;margin-top: 7px;} QGroupBox:title {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: black;} QDoubleSpinBox {background: white;} QTextEdit {background: white;} QPlainTextEdit {background: white;} QCheckBox {color: black;} QLineEdit {color: black; background: white; border: 1px solid gray;}";
-
 	QApplication a(argc,argv);
+	
+	baseValues.appThemeLight.palette=a.palette();
+	baseValues.appThemeDark.palette=a.palette();
+
+	baseValues.appThemeLight.loadTheme("Light");
+	baseValues.appThemeDark.loadTheme("Dark");
+	baseValues.appTheme=baseValues.appThemeLight;
+
 	baseValues_->fontMetrics_=new QFontMetrics(a.font());
 
 #ifdef Q_OS_WIN
@@ -224,7 +179,7 @@ int main(int argc, char *argv[])
 	{
         if(a.arguments().last().startsWith("/checkupdate"))
 		{
-			a.setStyleSheet(globalStyleSheet);
+			a.setStyleSheet(baseValues.appTheme.styleSheet);
 
 			QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 			QString langFile=settings.value("LanguageFile","").toString();
@@ -260,29 +215,9 @@ int main(int argc, char *argv[])
 		plastiqueStyle=settingsMain.value("PlastiqueStyle",plastiqueStyle).toBool();
 		settingsMain.setValue("PlastiqueStyle",plastiqueStyle);
 		if(plastiqueStyle)a.setStyle(new QPlastiqueStyle);
-		else
-		{
-			baseValues.appTheme.nightMode=false;
-			if(baseValues.appTheme.nightMode)
-			{
-			a.setStyle(new QPlastiqueStyle);
-			baseValues.appTheme=baseValues.appThemeDark;
+		baseValues.osStyle=a.style()->objectName();
 
-			QPalette darkPalette=a.palette();
-			for(int n=0; n<3; n++)
-			{
-				if(n==3)continue;
-				for(int i=0; i<20; i++)
-				{
-					darkPalette.setColor(QPalette::ColorGroup(n),QPalette::ColorRole(i),swapColor(darkPalette.color(QPalette::ColorGroup(n),QPalette::ColorRole(i))));
-				}
-			}
-
-
-			a.setPalette(darkPalette);
-			}
-		}
-		a.setStyleSheet(globalStyleSheet);
+		a.setStyleSheet(baseValues.appTheme.styleSheet);
 
 		settingsMain.beginGroup("Proxy");
 
@@ -323,19 +258,25 @@ int main(int argc, char *argv[])
 	baseValues.iniFileName=QLatin1String("QtBitcoinTrader.ini");
 
 	{
-		QFile currencyFile("://Resources/Currencies.map");
-		currencyFile.open(QIODevice::ReadOnly);
-		QStringList currencyList=QString(currencyFile.readAll().replace("\r","")).split("\n");
-		currencyFile.close();
-		for(int n=0;n<currencyList.count();n++)
-		{
-			QStringList currencyName=currencyList.at(n).split("=");
-			if(currencyName.count()<3)continue;
-			baseValues.currencyNamesMap.insert(currencyName.at(0).toAscii(),currencyName.at(1).toAscii());
 
-			if(currencyName.count()==4&&!baseValues.supportsUtfUI)baseValues.currencySignMap.insert(currencyName.at(0).toAscii(),currencyName.at(3).toAscii());
-			else baseValues.currencySignMap.insert(currencyName.at(0).toAscii(),currencyName.at(2).toAscii());
+		QSettings settingsCurrencies("://Resources/Currencies.ini",QSettings::IniFormat); 
+		QStringList currenciesList=settingsCurrencies.childGroups();
+		for(int n=0;n<currenciesList.count();n++)
+		{
+			if(currenciesList.at(n).length()!=3)continue;
+			CurencyInfo newCurr;
+			newCurr.name=settingsCurrencies.value(currenciesList.at(n)+"/Name","").toString().toAscii();
+			if(baseValues.supportsUtfUI)newCurr.sign=settingsCurrencies.value(currenciesList.at(n)+"/Sign","").toString().toAscii();
+			else newCurr.sign=settingsCurrencies.value(currenciesList.at(n)+"/SignNonUTF8","").toString().toAscii();
+			newCurr.valueStep=settingsCurrencies.value(currenciesList.at(n)+"/ValueStep",0.01).toDouble();
+			newCurr.valueSmall=settingsCurrencies.value(currenciesList.at(n)+"/ValueSmall",0.1).toDouble();
+			if(newCurr.isValid())
+			{
+				baseValues.currencyMap.insert(currenciesList.at(n).toAscii(),newCurr);
+				baseValues.currencyMapSign.insert(newCurr.sign,currenciesList.at(n).toAscii());
+			}
 		}
+
 		if(!QFile::exists(appDataDir+"Language"))QDir().mkpath(appDataDir+"Language");
 		QString langFile=settingsMain.value("LanguageFile","").toString();
 		baseValues.appVerLastReal=settingsMain.value("Version",1.0).toDouble();
@@ -343,7 +284,7 @@ int main(int argc, char *argv[])
 		if(langFile.isEmpty()||!langFile.isEmpty()&&!QFile::exists(langFile))langFile=baseValues.defaultLangFile;
 			julyTranslator.loadFromFile(langFile);
 	}
-
+	
 	bool tryDecrypt=true;
 	bool showNewPasswordDialog=false;
 	while(tryDecrypt)
@@ -368,25 +309,31 @@ int main(int argc, char *argv[])
 			case 0:
 				{//Mt.Gox
 				baseValues.restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64(),tryPassword.toAscii());
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
 				}
 				break;
 			case 1:
 				{//BTC-e
 				baseValues.restSign=newPassword.getRestSign().toAscii();
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64(),tryPassword.toAscii());
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
 				}
 				break;
 			case 2:
 				{//Bitstamp
 				baseValues.restSign=newPassword.getRestSign().toAscii();
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64(),tryPassword.toAscii());
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
 				}
 				break;
 			case 3:
 				{//BTC China
-				baseValues.restSign=newPassword.getRestSign().toAscii();
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64(),tryPassword.toAscii());
+					baseValues.restSign=newPassword.getRestSign().toAscii();
+					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
+				}
+				break;
+			case 4:
+				{//Bitfinex
+					baseValues.restSign=newPassword.getRestSign().toAscii();
+					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
 				}
 				break;
 			default: break;
@@ -438,11 +385,17 @@ int main(int argc, char *argv[])
 
 				QStringList decryptedList=QString(JulyAES256::decrypt(QByteArray::fromBase64(settings.value("EncryptedData/ApiKeySign","").toString().toAscii()),tryPassword.toAscii())).split("\r\n");
 
-				if(decryptedList.count()==3&&decryptedList.first()=="Qt Bitcoin Trader")
+				if(decryptedList.count()>=3&&decryptedList.first()=="Qt Bitcoin Trader")
 				{
 					baseValues.restKey=decryptedList.at(1).toAscii();
-					baseValues.restSign=QByteArray::fromBase64(decryptedList.last().toAscii());
-
+					baseValues.restSign=QByteArray::fromBase64(decryptedList.at(2).toAscii());
+					if(decryptedList.count()==3)
+					{
+						decryptedList<<QUuid::createUuid().toByteArray();
+						settings.setValue("EncryptedData/ApiKeySign",QString(JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+decryptedList.at(1).toAscii()+"\r\n"+decryptedList.at(2).toAscii()+"\r\n"+decryptedList.at(3).toAscii(),tryPassword.toAscii()).toBase64()));
+						settings.sync();
+					}
+					baseValues.randomPassword=decryptedList.at(3).toAscii();
                     tryDecrypt=false;
 					lockFile=new QFile(enterPassword.lockFilePath(baseValues.iniFileName));
                     lockFile->open(QIODevice::WriteOnly|QIODevice::Truncate);
@@ -455,9 +408,9 @@ int main(int argc, char *argv[])
 	QSettings iniSettings(baseValues.iniFileName,QSettings::IniFormat);
 	if(iniSettings.value("Debug/LogEnabled",false).toBool())debugLevel=1;
 	iniSettings.setValue("Debug/LogEnabled",debugLevel>0);
-	baseValues.currentPair.currASign=baseValues.currencySignMap.value("BTC","BTC");
+	baseValues.currentPair.currASign=baseValues.currencyMap.value("BTC",CurencyInfo("BTC")).sign;
 	baseValues.currentPair.currBStr=iniSettings.value("Profile/Currency","USD").toString().toAscii();
-	baseValues.currentPair.currBSign=baseValues.currencySignMap.value(baseValues.currentPair.currBStr,"$");
+	baseValues.currentPair.currBSign=baseValues.currencyMap.value(baseValues.currentPair.currBStr,CurencyInfo("$")).sign;
 
 	baseValues.logThread_=0;
 	if(debugLevel)

@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -13,16 +13,14 @@
 #include <QMessageBox>
 #include <QtCore/qmath.h>
 
-RuleWidget::RuleWidget(QString gName, RuleWidget *copyFrom)
+RuleWidget::RuleWidget(int gID, QString gName, RuleWidget *copyFrom)
 	: QWidget()
 {
 	ordersCancelTime=QTime(1,0,0,0);
-	groupName=gName;
 	ui.setupUi(this);
-	setWindowTitle(groupName);
 	setAttribute(Qt::WA_DeleteOnClose,true);
 
-	ui.rulesNoMessage->setStyleSheet("border: 1px solid gray; background: "+baseValues.appTheme.white.name()+"; color: "+baseValues.appTheme.gray.name());
+	updateStyleSheets();
 
 	ui.rulesNoMessage->setVisible(true);
 	ui.rulesTable->setVisible(false);
@@ -38,7 +36,6 @@ RuleWidget::RuleWidget(QString gName, RuleWidget *copyFrom)
 	connect(ui.rulesTable->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),this,SLOT(checkValidRulesButtons()));
 	ui.rulesTable->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui.rulesTable, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(rulesMenuRequested(const QPoint&)));
-	connect(rulesModel,SIGNAL(rulesCountChanged()),baseValues.mainWindow_,SLOT(rulesCountChanged()));
 
 	rulesEnableDisableMenu=new QMenu;
 	rulesEnableDisableMenu->addAction("Enable Selected");
@@ -53,15 +50,19 @@ RuleWidget::RuleWidget(QString gName, RuleWidget *copyFrom)
 	ui.ruleEnableDisable->setMenu(rulesEnableDisableMenu);
 	connect(rulesEnableDisableMenu,SIGNAL(aboutToShow()),this,SLOT(ruleDisableEnableMenuFix()));
 
+	setRuleGroupId(gID);
+
 	languageChanged();
 
 	QString restorableString;
+
+	groupName=gName;
 
 	if(copyFrom)restorableString=copyFrom->rulesModel->saveRulesToString();
 	   else
 	{
 		mainWindow.iniSettings->beginGroup("Rules");
-		restorableString=mainWindow.iniSettings->value(groupName,"").toString();
+		restorableString=mainWindow.iniSettings->value(ruleGroupIdStr,"").toString();
 		mainWindow.iniSettings->endGroup();
 	}
 
@@ -72,7 +73,17 @@ RuleWidget::RuleWidget(QString gName, RuleWidget *copyFrom)
 		settingsParams.removeFirst();
 		ui.ruleBeep->setChecked(settingsParams.first().toInt()==1);
 	}
-	
+
+	if(settingsParams.count()>1)
+	{
+		if(groupName.isEmpty())
+		{
+		settingsParams.removeFirst();
+		groupName=settingsParams.first();
+		}
+	}
+	setWindowTitle(groupName);
+
 	rulesModel->restoreRulesFromString(restorableString);
 
 	saveRulesData();
@@ -85,9 +96,31 @@ RuleWidget::~RuleWidget()
 	if(!groupName.isEmpty())saveRulesData();
 }
 
+void RuleWidget::setRuleGroupId(int id)
+{
+	ui.groupID->setValue(id);
+	ruleGroupIdStr=QString::number(id);
+	while(ruleGroupIdStr.length()<3)ruleGroupIdStr.prepend("0");
+}
+
+QString RuleWidget::getRuleGroupIdStr()
+{
+	return ruleGroupIdStr;
+}
+
+int RuleWidget::getRuleGroupId()
+{
+	return ui.groupID->value();
+}
+
+void RuleWidget::updateStyleSheets()
+{
+	ui.rulesNoMessage->setStyleSheet("border: 1px solid gray; background: "+baseValues.appTheme.white.name()+"; color: "+baseValues.appTheme.gray.name());
+}
+
 void RuleWidget::removeGroup()
 {
-	mainWindow.iniSettings->remove("Rules/"+groupName);
+	mainWindow.iniSettings->remove("Rules/"+ruleGroupIdStr);
 	mainWindow.iniSettings->sync();
 	groupName.clear();
 }
@@ -109,7 +142,7 @@ void RuleWidget::languageChanged()
 void RuleWidget::saveRulesData()
 {
 	mainWindow.iniSettings->beginGroup("Rules");
-	mainWindow.iniSettings->setValue(groupName,rulesModel->saveRulesToString()+":"+QString::number((ui.ruleBeep->isChecked()?1:0)));
+	mainWindow.iniSettings->setValue(ruleGroupIdStr,rulesModel->saveRulesToString()+":"+QString::number((ui.ruleBeep->isChecked()?1:0))+":"+groupName);
 	mainWindow.iniSettings->endGroup();
 	mainWindow.iniSettings->sync();
 }
@@ -117,7 +150,8 @@ void RuleWidget::saveRulesData()
 void RuleWidget::on_ruleAddButton_clicked()
 {
 	AddRuleWindow addRule(this);
-	addRule.setWindowFlags(windowFlags());
+	if(!mainWindow.isDetachedRules)addRule.setWindowFlags(mainWindow.windowFlags());
+	else addRule.setWindowFlags(windowFlags());
 	if(addRule.exec()!=QDialog::Accepted)return;
 	RuleHolder *newHolder=new RuleHolder(addRule.getRuleHolder());
 	//newHolder->setRuleState(1);
@@ -228,6 +262,11 @@ bool RuleWidget::haveAnyRules()
 	return rulesModel->rowCount()>0;
 }
 
+bool RuleWidget::haveAnyTradingRules()
+{
+	return rulesModel->haveAnyTradingRules();
+}
+
 void RuleWidget::checkValidRulesButtons()
 {
 	int selectedCount=ui.rulesTable->selectionModel()->selectedRows().count();
@@ -281,19 +320,21 @@ void RuleWidget::checkAndExecuteRule(int ruleType, double price)
 
 		double ruleBtc=achievedHolderList.at(n)->getRuleBtc();
 		bool isBuying=achievedHolderList.at(n)->isBuying();
-		double priceToExec=achievedHolderList.at(n)->getRulePrice();
+		double priceToExec=achievedHolderList.at(n)->getRuleExecutePrice();
+		double amountPercentage=achievedHolderList.at(n)->getRuleAmountPercentage();
+		if(priceToExec<0)priceToExec=achievedHolderList.at(n)->getCurrentExecPrice();
 
 		if(ruleBtc<0)
 		{
-			if(ruleBtc==-1.0)ruleBtc=mainWindow.getAvailableBTC();else//"Sell All my BTC"
+			if(ruleBtc==-1.0)ruleBtc=mainWindow.getAvailableBTC()*amountPercentage;else//"Sell All my BTC"
 				if(ruleBtc==-2.0)ruleBtc=mainWindow.getAvailableBTC()/2.0;else//"Sell Half my BTC"
-					if(ruleBtc==-3.0)ruleBtc=mainWindow.getAvailableUSDtoBTC(priceToExec);else//"Spend All my Funds"
+					if(ruleBtc==-3.0)ruleBtc=mainWindow.getAvailableUSDtoBTC(priceToExec)*amountPercentage;else//"Spend All my Funds"
 						if(ruleBtc==-4.0)ruleBtc=mainWindow.getAvailableUSDtoBTC(priceToExec)/2.0;else//"Spend Half my Funds"
 							if(ruleBtc==-5.0)//"Cancel All Orders"
 							{
 								if(ui.ruleConcurrentMode->isChecked())
 								{
-									mainWindow.ordersCancelAll();
+									mainWindow.cancelAllCurrentPairOrders();
 									if(ui.ruleBeep->isChecked())
 										mainWindow.beep();
 									continue;
@@ -308,43 +349,59 @@ void RuleWidget::checkAndExecuteRule(int ruleType, double price)
 									}
 									else
 									{
-										if(ordersCancelTime.elapsed()>5000)mainWindow.ordersCancelAll();
+										if(ordersCancelTime.elapsed()>5000)mainWindow.cancelAllCurrentPairOrders();
 										ordersCancelTime.restart();
 										continue;
 									}
 								}
 							}
 							else
-								if(ruleBtc==-6.0)//Enable All Rules
-								{
-									ruleEnableAll();
-									if(ui.ruleBeep->isChecked())mainWindow.beep();continue;
-								}
-								else
-									if(ruleBtc==-7.0)//Disable All Rules
-									{
-										ruleDisableAll();
-										if(ui.ruleBeep->isChecked())mainWindow.beep();continue;
-									}
+							if(ruleBtc==-6.0)//Enable All Rules
+							{
+								ruleEnableAll();
+								if(ui.ruleBeep->isChecked())mainWindow.beep();continue;
+							}
+							else
+							if(ruleBtc==-7.0)//Disable All Rules
+							{
+								ruleDisableAll();
+								if(ui.ruleBeep->isChecked())mainWindow.beep();continue;
+							}
+							else
+							if(ruleBtc==-8.0)//Enable All Rules in Group #
+							{
+								mainWindow.enableGroupId(achievedHolderList.at(n)->getRuleGroupId());
+								if(ui.ruleBeep->isChecked())mainWindow.beep();
+								rulesModel->setRuleStateByHolder(achievedHolderList.at(n),2);continue;
+							}
+							else
+							if(ruleBtc==-9.0)//Disable All Rules in Group #
+							{
+								mainWindow.disableGroupId(achievedHolderList.at(n)->getRuleGroupId());
+								if(ui.ruleBeep->isChecked())mainWindow.beep();
+								rulesModel->setRuleStateByHolder(achievedHolderList.at(n),2);continue;
+							}
+							else
+							if(ruleBtc==-10.0)//Beep
+							{
+								mainWindow.beep(true);
+								rulesModel->setRuleStateByHolder(achievedHolderList.at(n),2);continue;
+							}
+							else
+							if(ruleBtc==-11.0)//Play Sound
+							{
+								mainWindow.playWav(achievedHolderList.at(n)->getRuleWavFile(),true);
+										rulesModel->setRuleStateByHolder(achievedHolderList.at(n),2);continue;
+							}
 		}
 
-		if(priceToExec<0)
-		{
-			if(priceToExec==-1.0)priceToExec=mainWindow.ui.marketLast->value();
-			if(priceToExec==-2.0)priceToExec=mainWindow.ui.marketBuy->value();
-			if(priceToExec==-3.0)priceToExec=mainWindow.ui.marketSell->value();
-			if(priceToExec==-4.0)priceToExec=mainWindow.ui.marketHigh->value();
-			if(priceToExec==-5.0)priceToExec=mainWindow.ui.marketLow->value();
-			if(priceToExec==-6.0)priceToExec=mainWindow.ui.ordersLastBuyPrice->value();
-			if(priceToExec==-7.0)priceToExec=mainWindow.ui.ordersLastSellPrice->value();
-		}			
 
-		if(ruleBtc>=baseValues.currentPair.tradeVolumeMin)
-		{
-			if(isBuying)mainWindow.apiBuySend(ruleBtc,priceToExec);
-			else mainWindow.apiSellSend(ruleBtc,priceToExec);
-		}
-		//qDebug()<<"State"<<priceToExec<<2;
+		if(ruleBtc<baseValues.currentPair.tradeVolumeMin)
+			if(debugLevel)logThread->writeLog("Volume too low");
+
+		if(isBuying)mainWindow.apiBuySend(ruleBtc,priceToExec);
+		else mainWindow.apiSellSend(ruleBtc,priceToExec);
+
 		rulesModel->setRuleStateByHolder(achievedHolderList.at(n),2);
 		if(ui.ruleBeep->isChecked())mainWindow.beep();
 	}

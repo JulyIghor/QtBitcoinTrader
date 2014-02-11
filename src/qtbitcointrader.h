@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -29,8 +29,18 @@
 #include "currencypairitem.h"
 #include "rulewidget.h"
 #include "feecalculator.h"
+#include "percentpicker.h"
+#include <QScrollArea>
 
 class Exchange;
+
+class WindowScrollBars : public QScrollArea
+{
+private:
+	void closeEvent(QCloseEvent *);
+	void keyPressEvent(QKeyEvent *);
+	void resizeEvent(QResizeEvent *);
+};
 
 class QtBitcoinTrader : public QDialog
 {
@@ -80,27 +90,40 @@ public:
 
 	QSettings *iniSettings;
 	bool isValidSoftLag;
-	void beep();
+	void beep(bool noBlink=false);
+	void playWav(QString, bool noBlink=false);
+	void blinkWindow();
 
 	void apiSellSend(double btc, double price);
 	void apiBuySend(double btc, double price);
 
 	QTime lastRuleExecutedTime;
 
-private:	
+	QSortFilterProxyModel *ordersSortModel;
+	bool currentlyAddingOrders;
+	bool windowCloseRequested();
+	void keyPressEvent(QKeyEvent *event);
+	void closeEvent(QCloseEvent *event);
+	void resizeEvent(QResizeEvent *event);
+
+	bool isDetachedLog;
+	bool isDetachedTrades;
+	bool isDetachedRules;
+	bool isDetachedDepth;
+	bool isDetachedCharts;
+private:
+	QWidget *windowWidget;
 	QMenu copyTableValuesMenu;
 	QTableView *lastCopyTable;
 
 	void copyInfoFromTable(QTableView *table, QAbstractItemModel *model, int i);
 
-	void addRuleGroupByName(QString groupName, QString copyFrom="");
-	void keyPressEvent(QKeyEvent *event);
+	void addRuleGroupByID(QString groupName, int copyFrom=0, int gID=0);
 	bool swapedDepth;
 	DepthModel *depthAsksModel;
 	DepthModel *depthBidsModel;
 	TradesModel *tradesModel;
 	HistoryModel *historyModel;
-	QSortFilterProxyModel *ordersSortModel;
 	void clearDepth();
 	void calcOrdersTotalValues();
 	void ruleTotalToBuyValueChanged();
@@ -115,12 +138,10 @@ private:
 	int depthBidsLastScrollValue;
 
 	QMenu *trayMenu;
-	QRect currentDesktopRect;
 	void saveDetachedWindowsSettings(bool force=false);
 	QString windowTitleP;
 	QSystemTrayIcon *trayIcon;
 	QString profileName;
-	void resizeEvent(QResizeEvent *);
 	void makeRitchValue(QString *text);
 	bool checkForUpdates;
 
@@ -128,11 +149,7 @@ private:
 	int lastLoadedCurrency;
 	void checkAllRules();
 
-	double lastMarketLowPrice;
-	double lastMarketHighPrice;
-
 	bool constructorFinished;
-	void closeEvent(QCloseEvent *event);
 	void reject(){};
 	QString clearData(QString data);
 
@@ -169,20 +186,28 @@ private:
 	QRect rectInRect(QRect aRect, QSize bSize);
 	void saveWindowState(QWidget *, QString name);
 	void loadWindowState(QWidget *, QString name);
-	bool isDetachedLog;
-	bool isDetachedTrades;
-	bool isDetachedRules;
-	bool isDetachedDepth;
-	bool isDetachedCharts;
 	void depthSelectOrder(QModelIndex, bool isSel, int type=0);
 	double tradesPrecentLast;
 	QList<CurrencyPairItem> currPairsList;
 
 	void repeatOrderFromTrades(int type,int row);
-	void repeatOrderFromValues(int type,double price, double amount);
-	void repeatOrderByType(int type);
+	void repeatOrderFromValues(int type,double price, double amount, bool availableOnly=true);
+	void repeatSelectedOrderByType(int type, bool availableOnly=true);
 
+	void updateTrafficTotalValue();
 public slots:
+	void on_tradesVolume5m_valueChanged(double);
+	void on_tradesBidsPrecent_valueChanged(double);
+	void disableGroupId(int);
+	void enableGroupId(int);
+	void on_buyPercentage_clicked();
+	void on_sellPercentage_clicked();
+	void on_buyPriceAsMarketBid_clicked();
+	void on_sellPriceAsMarketAsk_clicked();
+	void on_trafficTotalToZero_clicked();
+	void on_buttonNight_clicked();
+	void ordersFilterChanged();
+	void cancelOrderByXButton();
 	void on_delauBetweenExecutingRules_toggled(bool);
 
 	void repeatBuySellOrder();
@@ -195,8 +220,6 @@ public slots:
 	void copyTotal();
 
 	void tableCopyContextMenuRequested(QPoint);
-
-	void rulesCountChanged();
 
 	void on_rulesTabs_tabCloseRequested(int);
 	void on_buttonAddRuleGroup_clicked();
@@ -224,15 +247,15 @@ public slots:
 	void depthSubmitOrders(QList<DepthItem> *, QList<DepthItem> *);
 	void showErrorMessage(QString);
 	void exitApp();
-	void setWindowStaysOnTop(bool);
+	void on_widgetStaysOnTop_toggled(bool);
 	void setSoftLagValue(int);
 	void trayActivated(QSystemTrayIcon::ActivationReason);
 	void buttonMinimizeToTray();
-	void tabLogOrdersOnTop(bool);
-	void tabRulesOnTop(bool);
-	void tabTradesOnTop(bool);
-	void tabChartsOnTop(bool);
-	void tabDepthOnTop(bool);
+	void on_tabOrdersLogOnTop_toggled(bool);
+	void on_tabRulesOnTop_toggled(bool);
+	void on_tabTradesOnTop_toggled(bool);
+	void on_tabChartsOnTop_toggled(bool);
+	void on_tabDepthOnTop_toggled(bool);
 
 	void secondSlot();
 	void setTradesScrollBarValue(int);
@@ -276,63 +299,65 @@ public slots:
 	void languageComboBoxChanged(int);
 
 	void languageChanged();
-	void zeroSellThanBuyProfit();
-	void zeroBuyThanSellProfit();
+	void on_zeroSellThanBuyProfit_clicked();
+	void on_zeroBuyThanSellProfit_clicked();
 	void profitSellThanBuy();
-	void profitSellThanBuyChanged(double);
-	void profitSellThanBuyPrecChanged(double);
+	void on_sellThanBuySpinBox_valueChanged(double);
+	void on_sellThanBuySpinBoxPrec_valueChanged(double);
 	void profitSellThanBuyCalc();
 	void profitBuyThanSellCalc();
 	void profitBuyThanSell();
-	void profitBuyThanSellChanged(double);
-	void profitBuyThanSellPrecChanged(double);
+	void on_profitLossSpinBox_valueChanged(double);
+	void on_profitLossSpinBoxPrec_valueChanged(double);
 
 	void buttonNewWindow();
 
 	void aboutTranslationButton();
 
-	void currencyChanged(int);
+	void on_currencyComboBox_currentIndexChanged(int);
 
-	void calcButtonClicked();
+	void on_calcButton_clicked();
 	void checkUpdate();
-
-	void saveSoundToggles();
 	
-	void accountUSDChanged(double);
-	void accountBTCChanged(double);
-	void marketBuyChanged(double);
-	void marketSellChanged(double);
-	void marketLowChanged(double);
-	void marketHighChanged(double);
-	void marketLastChanged(double);
-	void ordersLastBuyPriceChanged(double);
-	void ordersLastSellPriceChanged(double);
+	void on_accountUSD_valueChanged(double);
+	void on_accountBTC_valueChanged(double);
+	void on_marketBid_valueChanged(double);
+	void on_marketAsk_valueChanged(double);
+	void on_marketLow_valueChanged(double);
+	void on_marketHigh_valueChanged(double);
+	void on_marketLast_valueChanged(double);
+	void on_ordersLastBuyPrice_valueChanged(double);
+	void on_ordersLastSellPrice_valueChanged(double);
 
 	void balanceChanged(double);
-	void mtgoxLagChanged(double);
-	void ordersCancelSelected();
+	void on_lagValue_valueChanged(double);
 
-	void ordersCancelAll();
-	void accountFeeChanged(double);
+	void on_ordersCancelBidsButton_clicked();
+	void on_ordersCancelAsksButton_clicked();
+	void on_ordersCancelSelected_clicked();
+	void on_ordersCancelAllButton_clicked();
+	void cancelAllCurrentPairOrders();
+	void on_accountFee_valueChanged(double);
 
-	void buyBtcToBuyChanged(double);
-	void buyPricePerCoinChanged(double);
-	void buyBtcToBuyAllIn();
-	void buyBtcToBuyHalfIn();
-	void on_buyPriceAsMarketPrice_clicked();
+	void on_buyTotalBtc_valueChanged(double);
+	void on_buyPricePerCoin_valueChanged(double);
+	void on_buyTotalBtcAllIn_clicked();
+	void on_buyTotalBtcHalfIn_clicked();
+	void on_buyPriceAsMarketAsk_clicked();
 	void on_buyPriceAsMarketLastPrice_clicked();
 	void buyBitcoinsButton();
-	void buyTotalToSpendInUsdChanged(double);
+	void on_buyTotalSpend_valueChanged(double);
 
 	void sellBitcoinButton();
-	void sellAmountToReceiveChanged(double);
-	void sellPricePerCoinInUsdChanged(double);
-	void on_sellPricePerCoinAsMarketPrice_clicked();
+	void on_sellAmountToReceive_valueChanged(double);
+	void on_sellPricePerCoin_valueChanged(double);
+	void on_sellPriceAsMarketBid_clicked();
 	void on_sellPricePerCoinAsMarketLastPrice_clicked();
-	void sellTotalBtcToSellAllIn();
-	void sellTotalBtcToSellHalfIn();
-	void sellTotalBtcToSellChanged(double);
+	void on_sellTotalBtcAllIn_clicked();
+	void on_sellTotalBtcHalfIn_clicked();
+	void on_sellTotalBtc_valueChanged(double);
 signals:
+	void themeChanged();
 	void reloadDepth();
 	void cancelOrderByOid(QByteArray);
 	void apiSell(double btc, double price);

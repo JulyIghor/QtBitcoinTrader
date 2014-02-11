@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -51,15 +51,16 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 
 	if(baseValues.customCookies.length()>0)
 	{
-		lastCookie="SetCookie: "+baseValues.customCookies.toAscii()+"\r\n";
+		baseValues.customCookies.append(" ");
 		QStringList cookieListStr=baseValues.customCookies.split("; ");
 		for(int n=0;n<cookieListStr.count();n++)
 		{
 			QStringList nameValue=cookieListStr.at(n).split("=");
-			if(nameValue.count()!=2)continue;
-			cookiesList<<QNetworkCookie(nameValue.first().toAscii(),nameValue.last().toAscii());
+			if(nameValue.count()!=2||nameValue.first().isEmpty()||nameValue.last().isEmpty())continue;
+			cookiesMap.insert(nameValue.first().toAscii(),nameValue.last().toAscii());
 		}
 	}
+	saveCookies();
 
 	QTimer *secondTimer=new QTimer(this);
 	connect(secondTimer,SIGNAL(timeout()),this,SLOT(sendPendingData()));
@@ -119,7 +120,6 @@ void JulyHttp::reConnect(bool mastAbort)
 {
 	if(isDisabled)return;
 	reconnectSocket(mastAbort);
-	retryRequest();
 }
 
 void JulyHttp::abortSocket()
@@ -152,33 +152,16 @@ void JulyHttp::setApiDown(bool httpError)
 	}
 }
 
-void JulyHttp::updateCookiesFromLastCookie()
+void JulyHttp::saveCookies()
 {
-	QByteArray currentCookie=lastCookie;
-	int currentCookiesCount=cookiesList.count();
-	QList<QNetworkCookie> newCookedList=QNetworkCookie::parseCookies(currentCookie);
-	for(int k=0;k<newCookedList.count();k++)
-	{
-		bool updated=false;
-		for(int n=currentCookiesCount-1;n>=0;n--)
-			if(newCookedList.at(k).name()==cookiesList.at(n).name())
-			{
-				updated=true;
-				cookiesList[n]=newCookedList.at(k);
-			}
-			if(!updated)cookiesList<<newCookedList.at(k);
-	}
-
+	QByteArray currentCookie;
 	cookieLine.clear();
-	for(int n=0;n<cookiesList.count();n++)
+	int cookiesCount=0;
+	foreach(QByteArray name, cookiesMap.keys())
 	{
-		if(cookiesList.at(n).value().isEmpty())continue;
-		QByteArray currentParsedCookie=cookiesList.at(n).toRawForm(QNetworkCookie::NameAndValueOnly);
-		if(currentParsedCookie.size()<=12)continue;
-		if(currentParsedCookie.toLower().startsWith("set-cookie: "))
-			currentParsedCookie.remove(0,12);
-		cookieLine.append(currentParsedCookie);
-		if(n<cookiesList.count()-1)cookieLine.append("; ");
+		if(cookiesCount>0)cookieLine.append("; ");
+		cookieLine.append(name+": "+cookiesMap.value(name));
+		cookiesCount++;
 	}
 	if(!cookieLine.isEmpty()){cookieLine.prepend("Cookie: ");cookieLine.append("\r\n");}
 }
@@ -225,10 +208,22 @@ void JulyHttp::readSocket()
 				else
 				if(currentLineLow.startsWith("set-cookie"))
 				{
-					if(lastCookie!=currentLine)
+					int cookieNameEnds=currentLine.indexOf(";");
+					if(cookieNameEnds==-1)cookieNameEnds=currentLine.size()-2;
+					if(cookieNameEnds>13)
 					{
-					lastCookie=currentLine;
-					updateCookiesFromLastCookie();
+						int cookieSplitPos=currentLine.indexOf("=");
+						if(cookieSplitPos!=-1&&0<cookieSplitPos-12&&0<cookieNameEnds-cookieSplitPos)
+						{
+							QByteArray cookieName=currentLine.mid(12,cookieSplitPos-12);
+							QByteArray cookieValue=currentLine.mid(cookieSplitPos+1,cookieNameEnds-cookieSplitPos-1);
+							if(cookiesMap.value(cookieName)!=cookieValue)
+							{
+								if(cookieValue.isEmpty())cookiesMap.remove(cookieName);
+								else cookiesMap[cookieName]=cookieValue;
+								saveCookies();
+							}
+						}
 					}
 				}
 				else 
@@ -260,6 +255,8 @@ void JulyHttp::readSocket()
 	bool allDataReaded=false;
 
 		qint64 readSize=bytesAvailable();
+		
+		addSpeedSize(readSize);
 
 		QByteArray *dataArray=0;
 		if(chunkedSize!=-1)
@@ -671,11 +668,17 @@ void JulyHttp::sendPendingData()
 				else readAll();
 			}
 			waitingReplay=false;
+			addSpeedSize(currentPendingRequest->size());
 			write(*currentPendingRequest);
 			flush();
 		}
 	}
 	else if(debugLevel)logThread->writeLog("PendingRequest pointer not exist",2);
+}
+
+void JulyHttp::addSpeedSize(qint64 size)
+{
+	baseValues.trafficSpeed+=size;
 }
 
 void JulyHttp::sslErrorsSlot(const QList<QSslError> &val)

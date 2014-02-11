@@ -24,113 +24,123 @@ CONFIG		+= qt warn_off release mobility
 #
 # Headers
 #
+
 HEADERS += aboutdialog.h \
+           addrulegroup.h \
            addrulewindow.h \
+           audioplayer.h \
+           currencyinfo.h \
+           currencypairitem.h \
+           datafolderchusedialog.h \
+           debugviewer.h \
+           depthitem.h \
+           depthmodel.h \
+           donatebtc.h \
+           donatepanel.h \
+           donatewebmoney.h \
+           exchange.h \
+           exchange_bitfinex.h \
+           exchange_bitstamp.h \
+           exchange_btcchina.h \
+           exchange_btce.h \
+           exchange_cryptsy.h \
+           exchange_mtgox.h \
+           exchangemtgox.h \
            feecalculator.h \
+           historyitem.h \
+           historymodel.h \
            julyaes256.h \
+           julyhttp.h \
            julylightchanges.h \
            julyrsa.h \
-           julyhttp.h \
+           julyscrolluponidle.h \
            julyspinboxfix.h \
+           julyspinboxpicker.h \
            julytranslator.h \
            logthread.h \
            main.h \
            newpassworddialog.h \
-           passworddialog.h \
-           qtbitcointrader.h \
-           ruleholder.h \
-           exchange_mtgox.h \
-           translationdialog.h \
-           translationline.h \
-           updaterdialog.h \
-           audioplayer.h \
-           exchange_btce.h \
-           datafolderchusedialog.h \
-           tradesmodel.h \
-           depthmodel.h \
-           exchange_bitstamp.h \
-           rulesmodel.h \
            orderitem.h \
            ordersmodel.h \
-           historymodel.h \
-           exchange_btcchina.h \
-           historyitem.h \
-           exchange.h \
-           debugviewer.h \
-           julyscrolluponidle.h \
-           addrulegroup.h \
-           currencypairitem.h \
-           donatebtc.h \
-           donatepanel.h \
-           donatewebmoney.h \
+           orderstablecancelbutton.h \
+           passworddialog.h \
+           percentpicker.h \
+           qtbitcointrader.h \
+           ruleholder.h \
+           rulesmodel.h \
            rulewidget.h \
            thisfeatureunderdevelopment.h \
-           tradesitem.h
-#
-# Forms
-#
-FORMS += addrulewindow.ui \
+           tradesitem.h \
+           tradesmodel.h \
+           translationdialog.h \
+           translationline.h \
+           updaterdialog.h
+FORMS += addrulegroup.ui \
+         addrulewindow.ui \
+         datafolderchusedialog.ui \
+         debugviewer.ui \
+         donatebtc.ui \
+         donatepanel.ui \
+         donatewebmoney.ui \
          feecalculator.ui \
          newpassworddialog.ui \
          passworddialog.ui \
+         percentpicker.ui \
          qtbitcointrader.ui \
-         translationabout.ui \
-         translationdialog.ui \
-         updaterdialog.ui \
-         datafolderchusedialog.ui \
-         debugviewer.ui \
-         donatepanel.ui \
-         donatebtc.ui \
-         donatewebmoney.ui \
          rulewidget.ui \
          thisfeatureunderdevelopment.ui \
-         addrulegroup.ui
-#
-# Sources
-#
+         translationabout.ui \
+         translationdialog.ui \
+         updaterdialog.ui
 SOURCES += aboutdialog.cpp \
+           addrulegroup.cpp \
            addrulewindow.cpp \
+           audioplayer.cpp \
+           currencypairitem.cpp \
+           datafolderchusedialog.cpp \
+           debugviewer.cpp \
+           depthitem.cpp \
+           depthmodel.cpp \
+           donatebtc.cpp \
+           donatepanel.cpp \
+           donatewebmoney.cpp \
+           exchange.cpp \
+           exchange_bitfinex.cpp \
+           exchange_bitstamp.cpp \
+           exchange_btcchina.cpp \
+           exchange_btce.cpp \
+           exchange_cryptsy.cpp \
+           exchange_mtgox.cpp \
+           exchangemtgox.cpp \
            feecalculator.cpp \
+           historyitem.cpp \
+           historymodel.cpp \
            julyaes256.cpp \
+           julyhttp.cpp \
            julylightchanges.cpp \
            julyrsa.cpp \
-           julyhttp.cpp \
+           julyscrolluponidle.cpp \
            julyspinboxfix.cpp \
+           julyspinboxpicker.cpp \
            julytranslator.cpp \
            logthread.cpp \
            main.cpp \
            newpassworddialog.cpp \
+           orderitem.cpp \
+           ordersmodel.cpp \
+           orderstablecancelbutton.cpp \
            passworddialog.cpp \
+           percentpicker.cpp \
            qtbitcointrader.cpp \
            ruleholder.cpp \
-           exchange_mtgox.cpp \
-           translationdialog.cpp \
-           translationline.cpp \
-           updaterdialog.cpp \
-           audioplayer.cpp \
-           exchange_btce.cpp \
-           datafolderchusedialog.cpp \
-           tradesmodel.cpp \
-           depthmodel.cpp \
-           exchange_bitstamp.cpp \
            rulesmodel.cpp \
-           ordersmodel.cpp \
-           orderitem.cpp \
-           historymodel.cpp \
-           exchange_btcchina.cpp \
-           exchange.cpp \
-           debugviewer.cpp \
-           julyscrolluponidle.cpp \
-           addrulegroup.cpp \
-           currencypairitem.cpp \
-           depthitem.cpp \
-           donatebtc.cpp \
-           donatepanel.cpp \
-           donatewebmoney.cpp \
-           historyitem.cpp \
            rulewidget.cpp \
            thisfeatureunderdevelopment.cpp \
-           tradesitem.cpp
+           tradesitem.cpp \
+           tradesmodel.cpp \
+           translationdialog.cpp \
+           translationline.cpp \
+           updaterdialog.cpp
 #
 # Resources
 # 

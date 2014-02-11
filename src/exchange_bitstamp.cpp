@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -19,7 +19,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	accountFee=0.0;
 	balanceDisplayAvailableAmount=false;
 	minimumRequestIntervalAllowed=1200;
-	calculatingFeeMode=1;
+	calculatingFeeMode=2;
 	isLastTradesTypeSupported=false;
 	exchangeSupportsAvailableAmount=true;
 	lastBidAskTimestamp=0;
@@ -42,7 +42,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	privateRestKey=pRestKey.split(':').last();
 	privateClientId=pRestKey.split(':').first();
 
-	currencyMapFile="CurrenciesBitstamp.map";
+	currencyMapFile="Bitstamp";
 	defaultCurrencyParams.currADecimals=8;
 	defaultCurrencyParams.currBDecimals=5;
 	defaultCurrencyParams.currABalanceDecimals=8;
@@ -102,14 +102,17 @@ void Exchange_Bitstamp::secondSlot()
 	default: break;
 	}
 
-	if(!baseValues.depthRefreshBlocked&&(forceDepthLoad||infoCounter==5&&!isReplayPending(111)))
+	if(depthEnabled)
 	{
-		emit depthRequested();
-		sendToApi(111,"order_book/",false,true);
-		forceDepthLoad=false;
+		if(forceDepthLoad||/*infoCounter==5&&*/!isReplayPending(111))
+		{
+			emit depthRequested();
+			sendToApi(111,"order_book/",false,true);
+			forceDepthLoad=false;
+		}
 	}
 
-	if(++infoCounter>5)
+	if(++infoCounter>4)
 	{
 		infoCounter=0;
 		quint32 syncNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;

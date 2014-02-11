@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -90,6 +90,33 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 		return itemsList.at(currentRow).dateStr+" "+baseValues.currentPair.currASign+itemsList.at(currentRow).amountStr+" "+typeText+" "+(itemsList.at(currentRow).direction==1?upArrowStr:downArrowStr)+" "+baseValues.currentPair.currBSign+itemsList.at(currentRow).priceStr+" "+baseValues.currentPair.currBSign+itemsList.at(currentRow).totalStr;
 	}
 
+	if(role==Qt::StatusTipRole)
+	{
+		QString lineText;
+		lineText+=itemsList.at(currentRow).dateStr+"\t";
+		lineText+=baseValues.currentPair.currASign+itemsList.at(currentRow).amountStr;
+		
+		switch(itemsList.at(currentRow).orderType)
+		{
+		case -1: lineText+="\t"+textBid; break;
+		case 1: lineText+="\t"+textAsk; break;
+		}
+
+		if(itemsList.at(currentRow).price>0.0)
+		{
+			if(itemsList.at(currentRow).direction)
+			{
+				if(itemsList.at(currentRow).direction==1)lineText+="\t"+upArrowStr;
+				else lineText+="\t"+downArrowStr;
+			}
+
+			lineText+="\t"+baseValues.currentPair.currBSign+itemsList.at(currentRow).priceStr+"\t";
+			lineText+=baseValues.currentPair.currBSign+itemsList.at(currentRow).totalStr;
+		}
+
+		return lineText;
+	}
+
 	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::BackgroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
 
 	int indexColumn=index.column();
@@ -105,7 +132,7 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 
 	if(role==Qt::BackgroundRole)
 	{
-		return itemsList.at(currentRow).backGray?baseValues.appTheme.altRowColor:baseValues.appTheme.white;
+		return itemsList.at(currentRow).backGray?baseValues.appTheme.altRowColor:QVariant();
 	}
 
 	if(role==Qt::ForegroundRole)
@@ -116,16 +143,12 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 		case 2:
 			{
 			double amount=itemsList.at(currentRow).amount;
-			if(amount<1.0)
-			{
-				//if(baseValues.appTheme.nightMode) return QColor(255,255,255,255-(155+amount*100.0)).lighter(200).lighter(200);
-				//else 
-					return QColor(0,0,0,155+amount*100.0);
-			}
-			else if(amount<100.0)return baseValues.appTheme.black;
-			else if(amount<1000.0)return baseValues.appTheme.blue;
-			else return baseValues.appTheme.red;
-			return baseValues.appTheme.black;
+			double smallValue=baseValues.currentPair.currAInfo.valueSmall;
+			if(amount<=smallValue)return baseValues.appTheme.gray; smallValue*=10.0;
+			if(amount<=smallValue)return baseValues.appTheme.black; smallValue*=10.0;
+			if(amount<=smallValue)return baseValues.appTheme.darkGreen; smallValue*=10.0;
+			if(amount<=smallValue)return baseValues.appTheme.darkRedBlue;
+			return baseValues.appTheme.red;
 			}
 			break;
 		case 3:

@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -22,11 +22,19 @@ DonateWebMoney::DonateWebMoney(QPushButton *button)
 	mainWindow.fixAllChildButtonsAndLabels(this);
 	setFixedHeight(minimumSizeHint().height());
 	setFixedWidth(width());
+	QPalette pal=palette();
+	pal.setColor(QPalette::Window, QColor(80,80,80));
+	setPalette(pal);
 }
 
 DonateWebMoney::~DonateWebMoney()
 {
 
+}
+
+void DonateWebMoney::mouseReleaseEvent(QMouseEvent *event)
+{
+	event->ignore();
 }
 
 void DonateWebMoney::aboutToHideWindow()

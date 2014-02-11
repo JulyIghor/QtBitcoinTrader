@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -16,6 +16,12 @@
 Exchange::Exchange()
 	: QThread()
 {
+	orderBookItemIsDedicatedOrder=false;
+	supportsExchangeFee=true;
+	supportsExchangeVolume=true;
+	clearHistoryOnCurrencyChanged=false;
+	exchangeTickerSupportsHiLowPrices=true;
+	depthEnabled=true;
 	balanceDisplayAvailableAmount=true;
 	minimumRequestIntervalAllowed=100;
 	decAmountFromOpenOrder=0.0;
@@ -121,25 +127,26 @@ void Exchange::filterAvailableUSDAmountValue(double *)
 
 void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only once
 {
-	QFile curMap(":/Resources/"+currencyMapFile);
-	curMap.open(QIODevice::ReadOnly);
-	QStringList curencyList=QString(curMap.readAll().replace("\r","")).split("\n");
-	curMap.close();
+	QSettings settingsParams(":/Resources/Exchanges/"+currencyMapFile+".ini",QSettings::IniFormat);
+	QStringList symbolList=settingsParams.childGroups();
 	QList<CurrencyPairItem> *newCurrPairs=new QList<CurrencyPairItem>;
 
-	for(int n=0;n<curencyList.count();n++)
+	for(int n=0;n<symbolList.count();n++)
 	{
-		QStringList curDataList=curencyList.at(n).split("=");
-		if(curDataList.count()!=5)continue;
 		CurrencyPairItem currentPair=defaultCurrencyParams;
-		currentPair.name=curDataList.first();
-		currentPair.setSymbol(curDataList.first().replace("/","").toAscii());
-		curDataList.removeFirst();
-		currentPair.currRequestPair=curDataList.first().toAscii();
-		currentPair.priceDecimals=curDataList.at(1).toInt();
-		currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
-		currentPair.tradeVolumeMin=curDataList.at(2).toDouble();
-		currentPair.tradePriceMin=curDataList.at(3).toDouble();
+		currentPair.name=settingsParams.value(symbolList.at(n)+"/Symbol","").toByteArray();
+		if(currentPair.name.length()!=6)continue;
+		currentPair.setSymbol(currentPair.name.toAscii());
+		currentPair.name.insert(3,"/");
+		currentPair.currRequestSecond=settingsParams.value(symbolList.at(n)+"/RequestSecond","").toByteArray();
+		if(!currentPair.currRequestSecond.isEmpty())
+			currentPair.name.append(" ["+currentPair.currRequestSecond+"]");
+		currentPair.currRequestPair=settingsParams.value(symbolList.at(n)+"/Request","").toByteArray();
+		if(currentPair.currRequestPair.isEmpty())continue;
+		currentPair.priceDecimals=settingsParams.value(symbolList.at(n)+"/PriceDecimals","").toInt();
+		currentPair.priceMin=settingsParams.value(symbolList.at(n)+"/PriceMin","").toDouble();
+		currentPair.tradeVolumeMin=settingsParams.value(symbolList.at(n)+"/TradeVolumeMin","").toDouble();
+		currentPair.tradePriceMin=settingsParams.value(symbolList.at(n)+"/TradePriceMin","").toDouble();
 		(*newCurrPairs)<<currentPair;
 	}
 
@@ -179,9 +186,9 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 
 	connect(this,SIGNAL(tickerHighChanged(double)),mainClass->ui.marketHigh,SLOT(setValue(double)));
 	connect(this,SIGNAL(tickerLowChanged(double)),mainClass->ui.marketLow,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerSellChanged(double)),mainClass->ui.marketSell,SLOT(setValue(double)));
+	connect(this,SIGNAL(tickerSellChanged(double)),mainClass->ui.marketAsk,SLOT(setValue(double)));
 	connect(this,SIGNAL(tickerLastChanged(double)),mainClass->ui.marketLast,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerBuyChanged(double)),mainClass->ui.marketBuy,SLOT(setValue(double)));
+	connect(this,SIGNAL(tickerBuyChanged(double)),mainClass->ui.marketBid,SLOT(setValue(double)));
 	connect(this,SIGNAL(tickerVolumeChanged(double)),mainClass->ui.marketVolume,SLOT(setValue(double)));
 
 	connect(this,SIGNAL(addLastTrades(QList<TradesItem> *)),mainClass,SLOT(addLastTrades(QList<TradesItem> *)));

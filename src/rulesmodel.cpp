@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -13,7 +13,6 @@
 RulesModel::RulesModel()
 	: QAbstractItemModel()
 {
-	lastRulesCount=0;
 	allDisabled=false;
 	stateWidth=80;
 	lastQueringHolder=0;
@@ -35,13 +34,6 @@ QString RulesModel::saveRulesToString()
 	return savableList.join("@");
 }
 
-void RulesModel::submitRulesCountChanged()
-{
-	if(lastRulesCount==holderList.count())return;
-	lastRulesCount=holderList.count();
-	emit rulesCountChanged();
-}
-
 void RulesModel::restoreRulesFromString(QString strData)
 {
 	if(strData.isEmpty())return;
@@ -55,6 +47,12 @@ void RulesModel::restoreRulesFromString(QString strData)
 		else delete restoredHolder;
 	}
 	allDisabled=true;
+}
+
+bool RulesModel::haveAnyTradingRules()
+{
+	foreach(RuleHolder *holder, holderList)if(holder->isTrading())return true;
+	return false;
 }
 
 bool RulesModel::haveWorkingRule()
@@ -71,7 +69,7 @@ QList<RuleHolder *> RulesModel::getAchievedRules(int type, double val)
 		RuleHolder *holder=holderList.at(n);
 		if(holder&&holder->getRuleState()==1)
 		{
-			if(holder->isAchieved(val)&&holder->getRulePriceType()==type)achievedRules<<holder;
+			if(holder->getRulePriceType()==type&&holder->isAchieved(val))achievedRules<<holder;
 			if(!isConcurrentMode)
 			{
 				firstQueringHolder=holder;
@@ -148,7 +146,6 @@ void RulesModel::clear()
 	qDeleteAll(holderList.begin(), holderList.end());
 	holderList.clear();
 	endResetModel();
-	submitRulesCountChanged();
 }
 
 int RulesModel::rowCount(const QModelIndex &) const
@@ -166,7 +163,6 @@ void RulesModel::addRule(RuleHolder *holder)
 	beginInsertRows(QModelIndex(),holderList.count(),holderList.count());
 	holderList<<holder;
 	endInsertRows();
-	submitRulesCountChanged();
 }
 
 void RulesModel::removeRuleByRow(int row)
@@ -175,7 +171,6 @@ void RulesModel::removeRuleByRow(int row)
 	delete holderList.at(row);
 	holderList.removeAt(row);
 	endRemoveRows();
-	submitRulesCountChanged();
 }
 
 QVariant RulesModel::data(const QModelIndex &index, int role) const
@@ -190,7 +185,7 @@ QVariant RulesModel::data(const QModelIndex &index, int role) const
 
 	if(role==Qt::TextAlignmentRole)return 0x0084;
 
-	if(role==Qt::ForegroundRole)return QVariant();
+	if(role==Qt::ForegroundRole)return baseValues.appTheme.black;
 
 	if(role==Qt::BackgroundRole)
 	{
@@ -200,11 +195,11 @@ QVariant RulesModel::data(const QModelIndex &index, int role) const
 			{
 				if(isConcurrentMode||firstQueringHolder&&firstQueringHolder==holderList.at(currentRow))
 					return QVariant();
-				return QColor(255,255,200);
+				return baseValues.appTheme.lightRedGreen;
 			}
 			break;
-			case 2: return QColor(200,255,200); break;
-			default: return QColor(255,200,200);break;
+			case 2: return baseValues.appTheme.lightGreen; break;
+			default: return baseValues.appTheme.lightRed;break;
 		}
 		return QVariant();
 	}

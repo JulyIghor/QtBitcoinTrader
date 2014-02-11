@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -20,22 +20,28 @@ class RuleWidget : public QWidget
 	Q_OBJECT
 
 public:
+	void setRuleGroupId(int id);
+	int getRuleGroupId();
+	QString getRuleGroupIdStr();
+	void updateStyleSheets();
 	void saveRulesData();
 	bool haveWorkingRules();
 	bool haveAnyRules();
+	bool haveAnyTradingRules();
 	void removeGroup();
 	void languageChanged();
 	void checkAndExecuteRule(int ruleType, double price);
 	Ui::RuleWidget ui;
 	RulesModel *rulesModel;
-	RuleWidget(QString groupName, RuleWidget *copyFrom=0);
+	RuleWidget(int gID, QString groupName, RuleWidget *copyFrom=0);
 	~RuleWidget();
 
 private:
+	QString ruleGroupIdStr;
 	QTime ordersCancelTime;
 	QMenu *rulesEnableDisableMenu;
 	QString groupName;
-private slots:
+public slots:
 	void on_ruleUp_clicked();
 	void on_ruleDown_clicked();
 	void rulesMenuRequested(const QPoint&);

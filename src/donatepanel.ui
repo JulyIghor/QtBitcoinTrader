@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>250</width>
+    <width>258</width>
     <height>26</height>
    </rect>
   </property>
@@ -60,6 +60,9 @@
        <width>70</width>
        <height>18</height>
       </size>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -82,7 +82,14 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 		if(updateVersion.toDouble()<=baseValues.appVerReal)
 		{
 			if(feedbackMessage)
-				QMessageBox::information(0,"Qt Bitcoin Trader",julyTr("UP_TO_DATE","Your version of Qt Bitcoin Trader is up to date."));
+			{
+				QMessageBox msgb;
+				msgb.setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
+				msgb.setWindowTitle("Qt Bitcoin Trader");
+				msgb.setIcon(QMessageBox::Information);
+				msgb.setText(julyTr("UP_TO_DATE","Your version of Qt Bitcoin Trader is up to date."));
+				msgb.exec();
+			}
 			exitSlot();
 			return;
 		}

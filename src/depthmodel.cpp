@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -54,7 +54,7 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 		return baseValues.currentPair.currBSign+priceListStr.at(currentRow)+" "+baseValues.currentPair.currASign+volumeListStr.at(currentRow)+" "+baseValues.currentPair.currASign+sizeListStr.at(currentRow);
 	}
 
-	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::BackgroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
+	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::StatusTipRole&&role!=Qt::ForegroundRole&&role!=Qt::BackgroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
 
 	int indexColumn=index.column();
 	if(isAsk)indexColumn=columnsCount-indexColumn-1;
@@ -69,7 +69,7 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 
 	if(grouped&&currentRow<2)
 	{
-		if(role==Qt::ForegroundRole)return QVariant();
+		if(role==Qt::ForegroundRole)return baseValues.appTheme.black;
 		if(currentRow==1||groupedPrice==0.0)return QVariant();
 		QString firstRowText;
 		switch(indexColumn)
@@ -92,21 +92,31 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 
 	if(!originalIsAsk)currentRow=priceList.count()-currentRow-1;
 
+	if(role==Qt::StatusTipRole)
+	{
+		QString direction;
+
+		switch(directionList.at(currentRow))
+		{
+		case -1: direction=downArrowStr+"\t"; break;
+		case 1: direction=upArrowStr+"\t"; break;
+		}
+		return baseValues.currentPair.currBSign+priceListStr.at(currentRow)+"\t"+baseValues.currentPair.currASign+volumeListStr.at(currentRow)+"\t"+direction+baseValues.currentPair.currASign+sizeListStr.at(currentRow);
+	}
+
 	if(role==Qt::ForegroundRole)
 	{
 		if(indexColumn==1)
 		{
-		double volume=volumeList.at(currentRow);
-		if(volume<1.0)
-		{
-			if(baseValues.appTheme.nightMode) return QColor(255,255,255,255-(155+volume*100.0)).lighter(200).lighter(200);
-			else return QColor(0,0,0,155+volume*100.0);
+			double volume=volumeList.at(currentRow);
+			double smallValue=baseValues.currentPair.currAInfo.valueSmall;
+			if(volume<=smallValue)return baseValues.appTheme.gray; smallValue*=10.0;
+			if(volume<=smallValue)return baseValues.appTheme.black; smallValue*=10.0;
+			if(volume<=smallValue)return baseValues.appTheme.darkGreen; smallValue*=10.0;
+			if(volume<=smallValue)return baseValues.appTheme.darkRedBlue;
+			return baseValues.appTheme.red;
 		}
-		else if(volume<100.0)return QVariant();
-		else if(volume<1000.0)return baseValues.appTheme.blue;
-		else return baseValues.appTheme.red;
-		}
-		return QVariant();
+		return baseValues.appTheme.black;
 	}
 
 	double requestedPrice=priceList.at(currentRow);

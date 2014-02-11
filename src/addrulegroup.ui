@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>394</width>
+    <width>376</width>
     <height>208</height>
    </rect>
   </property>
@@ -23,6 +23,34 @@
       <string>Group Name</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="5">
+       <widget class="QSpinBox" name="groupID">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="keyboardTracking">
+         <bool>false</bool>
+        </property>
+        <property name="suffix">
+         <string/>
+        </property>
+        <property name="prefix">
+         <string/>
+        </property>
+        <property name="maximum">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="groupNameLabel">
         <property name="accessibleName">
@@ -34,10 +62,52 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="groupName"/>
+       <widget class="QLineEdit" name="groupName">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="gruopIDLabel">
+        <property name="accessibleName">
+         <string>GROUP_ID</string>
+        </property>
+        <property name="text">
+         <string>Group ID:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item row="0" column="2">
-       <widget class="QToolButton" name="groupNameClear">
+       <widget class="QPushButton" name="groupNameClear">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>X</string>
         </property>
@@ -194,22 +264,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>groupNameClear</sender>
-   <signal>clicked()</signal>
-   <receiver>groupName</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>371</x>
-     <y>37</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>341</x>
-     <y>38</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>checkEmptyRule</sender>
    <signal>toggled(bool)</signal>
    <receiver>AddRuleGroup</receiver>
@@ -217,7 +271,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>87</x>
-     <y>93</y>
+     <y>96</y>
     </hint>
     <hint type="destinationlabel">
      <x>-22</x>
@@ -254,6 +308,22 @@
     <hint type="destinationlabel">
      <x>-30</x>
      <y>147</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>groupNameClear</sender>
+   <signal>clicked()</signal>
+   <receiver>groupName</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>234</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>181</x>
+     <y>42</y>
     </hint>
    </hints>
   </connection>

@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -119,8 +119,10 @@ void TranslationDialog::fillLayoutByMap(QMap<QString,QString>* cMap, QString sub
 	{
 		if(currentIdList.at(n).startsWith("LANGUAGE_"))continue;
 		TranslationLine *newEdit=new TranslationLine;
-		newEdit->setToolTip(subName+currentIdList.at(n));
-		newEdit->setDefaultText(dMap->value(currentIdList.at(n),""));
+		QString defText=dMap->value(currentIdList.at(n),"");
+		newEdit->setDefaultText(defText);
+		newEdit->setToolTip(defText.replace("<br>","\n"));
+		newEdit->setWindowTitle(subName+currentIdList.at(n));
 		newEdit->setItemText(cMap->value(currentIdList.at(n),""));
 		connect(newEdit,SIGNAL(lineTextChanged()),this,SLOT(lineTextChanged()));
 		lineEdits<<newEdit;
@@ -145,7 +147,7 @@ void TranslationDialog::applyButton()
 			QMessageBox::warning(this,windowTitle(),julyTr("LANGUAGE_NOT_APPROVED","Please fill empty fields"));
 			return;
 		}
-		resultList<<lineEdits.at(n)->toolTip()+"="+curText;
+		resultList<<lineEdits.at(n)->windowTitle()+"="+curText;
 	}
 	resultList<<"String_LANGUAGE_NAME="+ui.languageName->text();
 	resultList<<"String_LANGUAGE_AUTHOR="+authorAbout->getValidText();

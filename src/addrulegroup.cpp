@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -18,14 +18,13 @@ AddRuleGroup::AddRuleGroup(QWidget *parent)
 	setWindowFlags(Qt::WindowCloseButtonHint);
 
 	foreach(RuleWidget* currentGroup, mainWindow.ui.tabRules->findChildren<RuleWidget*>())
+	{
+		existingGroupsIDs<<currentGroup->getRuleGroupId();
 		existingGroups<<currentGroup->windowTitle();
+	}
 
 	existingGroups.sort();
-	int ruleInc=mainWindow.ui.rulesTabs->count();
-	QString newGroupName;
-	do newGroupName=julyTr("RULE_GROUP","Group %1").arg(++ruleInc);
-	while(existingGroups.contains(newGroupName));
-	ui.groupName->setText(newGroupName);
+	ui.groupName->setText(julyTr("RULE_GROUP","Group"));
 	ui.existingRulesList->addItems(existingGroups);
 
 	ui.checkExistingRule->setEnabled(existingGroups.count());
@@ -40,6 +39,8 @@ AddRuleGroup::AddRuleGroup(QWidget *parent)
 	resize(width(),minimumSizeHint().height());
 	setFixedHeight(height());
 	onGroupContentChanged(true);
+	ui.groupID->setMaximum(baseValues.lastGroupID+1);
+	ui.groupID->setValue(ui.groupID->maximum());
 }
 
 AddRuleGroup::~AddRuleGroup()
@@ -68,11 +69,11 @@ void AddRuleGroup::onGroupContentChanged(bool on)
 void AddRuleGroup::on_buttonAddRule_clicked()
 {
 	groupName=ui.groupName->text();
-	if(ui.checkExistingRule->isChecked())copyFromExistingGroup=ui.existingRulesList->currentText();
+	if(ui.checkExistingRule->isChecked())copyFromExistingGroup=existingGroupsIDs.at(ui.existingRulesList->currentIndex());
 	accept();
 }
 
 void AddRuleGroup::on_groupName_textChanged(QString text)
 {
-	ui.buttonAddRule->setEnabled(text.length()&&!existingGroups.contains(text));
+	ui.buttonAddRule->setEnabled(!existingGroups.contains(":"));
 }

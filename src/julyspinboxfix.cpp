@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -13,11 +13,12 @@
 JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox *parentSB, int minWid)
 	: QObject()
 {
-	parentSB->setLocale(QLocale::English);
+	if(baseValues.forceDotInSpinBoxes)parentSB->setLocale(QLocale::English);
+	else parentSB->setLocale(QLocale::Ukrainian);
 	parentSB->setMaximumWidth(110);
 	pMinimumWidth=minWid;
 	spinMargin=30;
-	if(parentSB->buttonSymbols()==QDoubleSpinBox::NoButtons)spinMargin=10;
+	if(parentSB->buttonSymbols()==QDoubleSpinBox::NoButtons)spinMargin=6;
 	parentSpinBox=parentSB;
 	valueChanged(parentSB->text());
 	if(!parentSB->suffix().isEmpty())

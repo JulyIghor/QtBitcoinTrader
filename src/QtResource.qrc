@@ -1,24 +1,41 @@
 <RCC>
   <qresource prefix="/">
+    <file>Resources/Themes/Dark.thm</file>
+    <file>Resources/Themes/Light.thm</file>
+    <file>Resources/ArrowDown.png</file>
+    <file>Resources/Play.png</file>
+    <file>Resources/ArrowUp.png</file>
+    <file>Resources/Mouse.png</file>
+    <file>Resources/MouseDrag.png</file>
+    <file>Resources/MouseDragLeftRight.png</file>
+    <file>Resources/MouseDragUpDown.png</file>
+    <file>Resources/Night.png</file>
+    <file>Resources/Day.png</file>
     <file>Resources/CertBase.cer</file>
-    <file>Resources/Exchanges/BTC-e.png</file>
     <file>Resources/Donate/Bitcoin.png</file>
     <file>Resources/Donate/Litecoin.png</file>
     <file>Resources/Donate/WebMoney.png</file>
-    <file>Resources/Exchanges/BTCChina.png</file>
-    <file>Resources/Exchanges/Mt.Gox.png</file>
-    <file>Resources/Exchanges/Bitstamp.png</file>
+    <file>Resources/Settings.png</file>
+    <file>Resources/Exchanges/Logos/BTCChina.png</file>
+    <file>Resources/Exchanges/Logos/Mt.Gox.png</file>
+    <file>Resources/Exchanges/Logos/Bitstamp.png</file>
+    <file>Resources/Exchanges/Logos/Bitfinex.png</file>
+    <file>Resources/Exchanges/Logos/BTC-e.png</file>
     <file>Resources/exit.png</file>
     <file>Resources/Mute.png</file>
+    <file>Resources/OnTop.png</file>
     <file>Resources/minus.png</file>
+    <file>Resources/plus.png</file>
     <file>Resources/multiply.png</file>
     <file>Resources/equal.png</file>
     <file>Resources/calc.png</file>
-    <file>Resources/Currencies.map</file>
-    <file>Resources/CurrenciesMtGox.map</file>
-    <file>Resources/CurrenciesBTCe.map</file>
-    <file>Resources/CurrenciesBTCChina.map</file>
-    <file>Resources/CurrenciesBitstamp.map</file>
+    <file>Resources/Currencies.ini</file>
+    <file>Resources/Exchanges/List.ini</file>
+    <file>Resources/Exchanges/MtGox.ini</file>
+    <file>Resources/Exchanges/BTCe.ini</file>
+    <file>Resources/Exchanges/Bitfinex.ini</file>
+    <file>Resources/Exchanges/BTCChina.ini</file>
+    <file>Resources/Exchanges/Bitstamp.ini</file>
     <file>Resources/CurrencySign/AUD.png</file>
     <file>Resources/CurrencySign/BTC.png</file>
     <file>Resources/CurrencySign/LTC.png</file>
@@ -56,11 +73,14 @@
     <file>Resources/Language/Russian.lng</file>
     <file>Resources/Language/Polish.lng</file>
     <file>Resources/Language/Ukrainian.lng</file>
+    <file>Resources/Language/Italiano.lng</file>
     <file>Resources/Language/Spanish.lng</file>
     <file>Resources/Language/Dutch.lng</file>
     <file>Resources/Language/Norwegian.lng</file>
     <file>Resources/Language/French.lng</file>
     <file>Resources/Language/Bulgarian.lng</file>
+    <file>Resources/Language/Czech.lng</file>
+    <file>Resources/Language/Turkish.lng</file>
     <file>Resources/Language/LangList.ini</file>
   </qresource>
 </RCC>

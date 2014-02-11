@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -15,6 +15,8 @@
 #include <QMessageBox>
 #include <QSettings>
 
+#include <QDebug>
+
 NewPasswordDialog::NewPasswordDialog()
 	: QDialog()
 {
@@ -27,6 +29,20 @@ NewPasswordDialog::NewPasswordDialog()
 
 	julyTranslator.translateUi(this);
 
+	QSettings listSettings(":/Resources/Exchanges/List.ini",QSettings::IniFormat);
+	QStringList exchangesList=listSettings.childGroups();
+	for(int n=0;n<exchangesList.count();n++)
+	{
+		QString currentName=listSettings.value(exchangesList.at(n)+"/Name").toString();
+		QString currentLogo=listSettings.value(exchangesList.at(n)+"/Logo").toString();
+		bool currentClientIdEnabled=listSettings.value(exchangesList.at(n)+"/ClientID",false).toBool();
+		QString currentGetApiUrl=listSettings.value(exchangesList.at(n)+"/GetApiUrl").toString();
+		if(currentName.isEmpty()||currentLogo.isEmpty())continue;
+		clientIdVisibleMap.insert(n,currentClientIdEnabled);
+		getApiUrlMap.insert(n,currentGetApiUrl);
+		ui.exchangeComboBox->addItem(QIcon(":/Resources/Exchanges/Logos/"+currentLogo),currentName,currentClientIdEnabled);
+	}
+	if(ui.exchangeComboBox->count()<4)return;
 	if(QLocale().name().startsWith("zh"))ui.exchangeComboBox->setCurrentIndex(3);
 	else
 	exchangeChanged(ui.exchangeComboBox->currentText());
@@ -40,18 +56,18 @@ NewPasswordDialog::~NewPasswordDialog()
 void NewPasswordDialog::exchangeChanged(QString name)
 {
 	ui.groupBoxApiKeyAndSecret->setTitle(julyTr("API_KEY_AND_SECRET","%1 API key and Secret").arg(name));
-	switch(ui.exchangeComboBox->currentIndex())
+
+	if(ui.exchangeComboBox->itemData(ui.exchangeComboBox->currentIndex()).toBool())
 	{
-	case 2:
 		ui.labelClientID->setVisible(true);
 		ui.clientIdLine->setVisible(true);
 		ui.clearClientIdLine->setVisible(true);
-		break;
-	default:
+	}
+	else
+	{
 		ui.labelClientID->setVisible(false);
 		ui.clientIdLine->setVisible(false);
 		ui.clearClientIdLine->setVisible(false);
-		break;
 	}
 }
 
@@ -67,21 +83,14 @@ QString NewPasswordDialog::getRestSign()
 
 QString NewPasswordDialog::getRestKey()
 {
-	if(ui.exchangeComboBox->currentIndex()==2)
-		return ui.clientIdLine->text().replace("\n","").replace("\r","").replace("\t","")+":"+ui.restKeyLine->text().replace("\n","").replace("\r","").replace("\t","");//Bitstamp
+	if(ui.exchangeComboBox->itemData(ui.exchangeComboBox->currentIndex()).toBool())
+		return ui.clientIdLine->text().replace("\n","").replace("\r","").replace("\t","")+":"+ui.restKeyLine->text().replace("\n","").replace("\r","").replace("\t","");//ClientID visible
 	return ui.restKeyLine->text().replace("\n","").replace("\r","").replace("\t","");
 }
 
 void NewPasswordDialog::getApiKeySecretButton()
 {
-	switch(ui.exchangeComboBox->currentIndex())
-	{
-	case 0:	QDesktopServices::openUrl(QUrl("https://www.mtgox.com/security")); break;
-	case 1: QDesktopServices::openUrl(QUrl("https://btc-e.com/profile#api_keys")); break;
-	case 2: QDesktopServices::openUrl(QUrl("https://www.bitstamp.net/account/security/api/")); break;
-	case 3: QDesktopServices::openUrl(QUrl("https://www.btcchina.com/account/apikeys")); break;
-	default: break;
-	}
+	QDesktopServices::openUrl(QUrl(getApiUrlMap.value(ui.exchangeComboBox->currentIndex())));
 }
 
 int NewPasswordDialog::getExchangeId()

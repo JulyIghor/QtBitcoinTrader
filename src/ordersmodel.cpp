@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -16,7 +16,7 @@ OrdersModel::OrdersModel()
 {
 	checkDuplicatedOID=false;
 	haveOrders=false;
-	columnsCount=7;
+	columnsCount=8;
 	dateWidth=100;
 	typeWidth=100;
 	countWidth=20;
@@ -103,7 +103,17 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 		if(checkDuplicatedOID)(*orders)[n].date=oidMapForCheckingDuplicates.value(orders->at(n).oid,orders->at(n).date);
 
 		int currentIndex=qLowerBound(dateList.begin(),dateList.end(),orders->at(n).date)-dateList.begin();
+		int currentIndexUpper=qUpperBound(dateList.begin(),dateList.end(),orders->at(n).date)-dateList.begin();
+
 		bool matchListRang=currentIndex>-1&&dateList.count()>currentIndex;
+
+		if(matchListRang&&oidList.at(currentIndex)!=orders->at(n).oid)
+			while(oidList.at(currentIndex)!=orders->at(n).oid&&currentIndex<currentIndexUpper)
+			{
+				if(currentIndex+1>-1&&dateList.count()>currentIndex+1)
+					currentIndex++;
+				else break;
+			}
 
 		if(matchListRang&&oidList.at(currentIndex)==orders->at(n).oid)
 		{//Update
@@ -180,7 +190,7 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 		emit ordersIsAvailable();
 		haveOrders=true;
 	}
-	countWidth=textFontWidth(QString::number(oidList.count()+1))+6;
+	countWidth=qMax(textFontWidth(QString::number(oidList.count()+1))+6,defaultHeightForRow);
 	emit volumeAmountChanged(volumeTotal, amountTotal);
 	emit dataChanged(index(0,0),index(oidList.count()-1,columnsCount-1));
 }
@@ -190,6 +200,8 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 	if(!index.isValid())return QVariant();
 	int currentRow=oidList.count()-index.row()-1;
 	if(currentRow<0||currentRow>=oidList.count())return QVariant();
+
+	if(role==Qt::WhatsThisRole)return symbolList.at(currentRow);
 
 	if(role==Qt::UserRole)
 	{
@@ -210,23 +222,24 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		case 3: return amountList.at(currentRow);
 		case 4: return priceList.at(currentRow);
 		case 5: return totalList.at(currentRow);
+		case 6: return oidList.at(currentRow);
 		}
-		return QVariant();
+		return oidList.count()-currentRow;
 	}
 
-	if(role==Qt::WhatsThisRole)
+	if(role==Qt::StatusTipRole)
 	{
-		QString copyText=dateStrList.at(currentRow)+" "+(typesList.at(currentRow)?textAsk:textBid)+" ";
+		QString copyText=dateStrList.at(currentRow)+"\t"+(typesList.at(currentRow)?textAsk:textBid)+"\t";
 		switch(statusList.at(currentRow))
 		{
-		case 0: copyText+=textStatusList.at(0)+" "; break;
-		case 1: copyText+=textStatusList.at(1)+" "; break;
-		case 2: copyText+=textStatusList.at(2)+" "; break;
-		case 3: copyText+=textStatusList.at(3)+" "; break;
-		default: copyText+=textStatusList.at(4)+" "; break; 
+		case 0: copyText+=textStatusList.at(0)+"\t"; break;
+		case 1: copyText+=textStatusList.at(1)+"\t"; break;
+		case 2: copyText+=textStatusList.at(2)+"\t"; break;
+		case 3: copyText+=textStatusList.at(3)+"\t"; break;
+		default: copyText+=textStatusList.at(4)+"\t"; break; 
 		}
-		copyText+=amountStrList.at(currentRow)+" ";
-		copyText+=priceStrList.at(currentRow)+" ";
+		copyText+=amountStrList.at(currentRow)+"\t";
+		copyText+=priceStrList.at(currentRow)+"\t";
 		copyText+=totalStrList.at(currentRow);
 
 		return copyText;
@@ -243,7 +256,7 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 		case 1: return typesList.at(currentRow)?baseValues.appTheme.red:baseValues.appTheme.blue;
 		default: break;
 		}
-		return QVariant();
+		return baseValues.appTheme.black;
 	}
 
 	if(role==Qt::BackgroundRole)
@@ -304,15 +317,33 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 			return totalStrList.at(currentRow);
 		}
 		break;
+	case 6:
+		{//X
+			return QVariant();
+		}
 	default: break;
 	}
 	return QVariant();
 }
 
-void OrdersModel::ordersCancelAll()
+void OrdersModel::ordersCancelAll(QByteArray pair)
 {
 	for(int n=oidList.count()-1;n>=0;n--)
-		if(statusList.at(n))
+		if(statusList.at(n)&&(pair.isEmpty()||symbolList.at(n)==pair))
+			emit cancelOrder(oidList.at(n));
+}
+
+void OrdersModel::ordersCancelBids(QByteArray pair)
+{
+	for(int n=oidList.count()-1;n>=0;n--)
+		if(statusList.at(n)&&typesList.at(n)==false&&(pair.isEmpty()||symbolList.at(n)==pair))
+			emit cancelOrder(oidList.at(n));
+}
+
+void OrdersModel::ordersCancelAsks(QByteArray pair)
+{
+	for(int n=oidList.count()-1;n>=0;n--)
+		if(statusList.at(n)&&typesList.at(n)==true&&(pair.isEmpty()||symbolList.at(n)==pair))
 			emit cancelOrder(oidList.at(n));
 }
 
@@ -347,6 +378,7 @@ QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int r
 		case 1: return QSize(dateWidth,defaultHeightForRow);//Date
 		case 2: return QSize(typeWidth,defaultHeightForRow);//Type
 		case 3: return QSize(statusWidth,defaultHeightForRow);//Status
+		case 7: return QSize(defaultHeightForRow,defaultHeightForRow);//X
 		}
 		return QVariant();
 	}
@@ -364,6 +396,7 @@ Qt::ItemFlags OrdersModel::flags(const QModelIndex &) const
 
 void OrdersModel::setHorizontalHeaderLabels(QStringList list)
 {
+	list<<"-";
 	if(list.count()!=columnsCount)return;
 
 	textAsk=julyTr("ORDER_TYPE_ASK","ask");
@@ -396,10 +429,11 @@ QModelIndex OrdersModel::parent(const QModelIndex &) const
 	return QModelIndex();
 }
 
-quint32 OrdersModel::getRowNum(int row){if(row<0||row>=oidList.count())return 0; return oidList.count()-row;}
-quint32 OrdersModel::getRowDate(int row){if(row<0||row>=dateList.count())return 0; return dateList.at(row);}
-int OrdersModel::getRowType(int row){if(row<0||row>=typesList.count())return 0; return typesList.at(row)?1:0;}
-int OrdersModel::getRowStatus(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(row);}
-double OrdersModel::getRowPrice(int row){if(row<0||row>=priceList.count())return 0.0;return priceList.at(row);}
-double OrdersModel::getRowVolume(int row){if(row<0||row>=amountList.count())return 0.0;return amountList.at(row);}
-double OrdersModel::getRowTotal(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(row);}
+int OrdersModel::getRowNum(int row){if(row<0||row>=oidList.count())return 0; return oidList.count()-row-1;}
+quint32 OrdersModel::getRowDate(int row){if(row<0||row>=dateList.count())return 0; return dateList.at(getRowNum(row));}
+QByteArray OrdersModel::getRowOid(int row){if(row<0||row>=oidList.count())return 0; return oidList.at(getRowNum(row));}
+int OrdersModel::getRowType(int row){if(row<0||row>=typesList.count())return 0; return typesList.at(getRowNum(row))?1:0;}
+int OrdersModel::getRowStatus(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(getRowNum(row));}
+double OrdersModel::getRowPrice(int row){if(row<0||row>=priceList.count())return 0.0;return priceList.at(getRowNum(row));}
+double OrdersModel::getRowVolume(int row){if(row<0||row>=amountList.count())return 0.0;return amountList.at(getRowNum(row));}
+double OrdersModel::getRowTotal(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(getRowNum(row));}

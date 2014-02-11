@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -53,14 +53,8 @@ DebugViewer::~DebugViewer()
 
 void DebugViewer::on_buttonSaveAs_clicked()
 {
-	QDateTime currentdate;
 	savingFile=true;
-#if QT_VERSION >= 0x040700
-	currentdate = QDateTime::currentDateTimeUtc();
-#else
-	currentdate = QDateTime::currentDateTime().toUTC();
-#endif
-	QString fileName=QFileDialog::getSaveFileName(this, "Save Debug Information",currentdate.toString("yyyy-MM-dd HH.mm.ss")+".log","Log file (*.log)");
+	QString fileName=QFileDialog::getSaveFileName(this, "Save Debug Information",QDateTime::currentDateTimeUtc().toString("yyyy-MM-dd HH.mm.ss")+".log","Log file (*.log)");
 	if(fileName.isEmpty()){savingFile=false;return;}
 	
 	QFile writeLog(fileName);

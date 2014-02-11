@@ -1,0 +1,378 @@
+Bids=Ordini D'acquisto
+Client ID:=ID Cliente:
+Disable All Rules enabled at the time of rule executed.=Disabilita tutte le regole abilitate al tempo di quelle eseguite.
+Disable All Rules in specified Group # disabled at the time of rule executed=Disabilita tutte le regole in uno specifico gruppo # disabilitato al tempo di eseguzione 
+Your support is very important. Thank you!=Il tuo supporto è molto importante. Grazie!
+Enable All Rules disabled at the time of rule executed.=Abilita le regole disabilitate al tempo di quelle eseguite
+Enable All Rules in specified Group # disabled at the time of rule executed=Abilita tutte le regole in uno specifico gruppo # disabilitato al tempo di eseguzione 
+Exchange:=Cambio:
+Fee:=Tassa:
+Group by Price:=Raggruppa per prezzo:
+Group ID:=ID Gruppo:
+Please fill all fields. Than press Apply button and verify that translation looks good. Save translation file and send it to <a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a>
+After verification your translation will be added to next Qt Bitcoin Trader releases.=Perfavore compila tutti i campi. clicca Applica quando hai finito. Salva la tua traduzione e inviala a <a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Dopo la verifica da parte dello sviluppatore inseriremo la traduzione nella prossima release di Qt Bitcoin trader.
+Login:=Cliente:
+Speed:=Velocità:
+Total:=Totale:
+Play beep sound when rule executed=Avvia suono quando viene eseguita la regola
+Play WAV file when rule executed=Avvia WAV quando viene eseguita la regola
+Profit:=Profitto:
+Cancel:=Cancella:
+Remove:=Rimuovi:
+Rows to Display:=Righe da visualizzare:
+No Rules=Nessuna Regola
+Asks=Ordini di vendita
+Short name=Nome Corto
+This feature is not available now.
+I'm still working on it.
+You will receive update notify at same time it released.
+Thank you for support and feedbacks!=Questa funzione non è disponibile.<br>Stiamo lavorando su di essa.<br>Riceverai una notifica quando sarà pronta.<br>Grazie per il tuo supporto e feedback!
+Total:=Totale:
+Vol:=Volume:
+Symbol:=Valuta:
+Bid:=Compra:
+Ask:=Vendi:
+High:=Alto:
+Low:=Basso:
+Last Price:=Ultimo Prezzo:
+Volume:=Volume:
+API Lag:=API Lag:
+API Is Down=API Offline
+Last Buy Price:=Ultimo Prezzo D'acquisto:
+Last Sell Price:=Ultimo prezzo di vendita:
+Total to spend:=Totale da spendere:
+Price per coin:=Prezzo per coin:
+Total to BUY:=Totale da Comprare:
+Zero profit Price:=Prezzo senza profitto:
+Zero profit Step:=Step senza profitto:
+Total to SELL:=Totale da vendere:
+Price per coin:=Prezzo per coin:
+Amount to receive:=Ammontare da ricevere:
+Zero profit Price:=Prezzo senza profitto:
+Zero profit Step:=Step senza profitto:
+Language:=Lingua:
+Security:=Sicurezza:
+Support:=Supporto:
+If=Se
+No Open Orders=Nessun ordine aperto
+Sell All available at the time of rule executed.=Vendi tutto il disponibile nel tempo della regola eseguita.
+Sell Half available at the time of rule executed.=Vendi metà del disponibile nel tempo della regola eseguita.
+Spend All my Funds available at the time of rule executed.=Spendi tutti i miei fondi nel tempo della regola eseguita.
+Spend Half my Funds available at the time of rule executed.=Spendi metà dei miei fondi nel tempo della regola eseguita.
+Cancel All Orders opened at the time of rule executed.=Cancella tutti gli ordini nelt empo della regola eseguita.
+at =al 
+Buy=Compra
+Price=Prezzo
+Total Paid=Totale pagato
+Fee=Tassa
+Received=Ricevuto
+Sell=Vendi
+Price=Prezzo
+Amount=Ammontare
+Fee=Tassa
+Fiat (Received)=Fiat (Ricevuto)
+Profit/Loss=Profitto/Perdita
+Fee:=Tassa:
+Your password must be at least 8 characters and contain letters, digits, and special characters.=La tua password deve avere almeno 8 caratteri e contenere lettere, numeri, e caratteri speciali.
+API Key:=Chiave API:
+Secret:=Segreto:
+Password:=Password:
+Confirm:=Conferma:
+Profile name:=Nome profilo:
+Profile:=Profilo:
+Password:=Password:
+Your API Key and Secret will be encrypted by AES256.=La tua API e chiave segreta sono criptate in AES256.
+Your API Key and Secret are crypted by AES256.
+Please enter password to decrypt data.
+Or reset data and re-enter API keys.=La tua API e chiave segreta sono criptate in AES256.<br>Perfavore inserisci la password per decriptare la chiave.<br>O resettare i dati e reinserire l'API.
+Language:=Lingua:
+Translator:=Traduttore:
+If you want to translate Qt Bitcoin Trader to your native language.
+
+Or if you want to fix errors in existing translation.
+Please follow instructions.=Se vuoi tradutte Qt Bitcoin Trader nella tua lingua.<br><br>O se vuoi aggiustare qualche errore gia presente.<br>Perfavore segui le istruzioni.
+1) Press &quot;Create translation button&quot;
+
+2) Make your changes for all fields. You can use Html formatting
+
+3) Press &quot;Apply&quot; button and verify that all text fits good
+
+4) Press &quot;Save As&quot; button and save language file
+
+5) Send language file to <a href="mailto:julyighor@gmail.com"> julyighor@gmail.com</a>=1) Premi &quot;Crea traduzione &quot;<br><br>2) Modifica tutti i campi. Puoi usare il formato HTML<br><br>3) Premi &quot;Applica&quot; e verifica che tutto sia a posto<br><br>4) Premi &quot; Salva con nome&quot; e salva il file di lingua<br><br>5) Invia il file di lingua a <a href="mailto:julyighor@gmail.com"> julyighor@gmail.com</a>
+And after verification your translation will be added
+to next version of Qt Bitcoin Trader.=E dopo la verifica la tua traduzione verrà inserita nella prossima versione
+Your platform supports secure automatic update.
+Download file will be validated by RSA2048 protected checksum.=La piattaforma utilizza un update sicuro.<br>il file di download è verificato dal RSA2048 checksum.
+Qt Bitcoin Trader Update Released!=Qt Bitcoin Trader Update Disponibile!
+10 min. Volume:=10 min. Volume:
+About Translation=Sulle Traduzioni:
+Add new rule=Aggiungi nuova regola
+Automatic download and Installation=Installazione e download automatici
+Balance=Bilancio
+Total at Ask/Bid Price=Totale al prezzo Compra/Vendi
+Total at Last Price=Totale all'ultimo prezzo
+Change Log=Log Cambiamenti
+Filter=Filtri
+Make your translation=Fai la tua traduzione
+Market=Mercato
+Network=Network Rete
+Rules group content=Gruppo di regole
+Group Name=Nome gruppo
+Lag=Lag
+Your Open Orders=I tuoi ordini aperti
+Generate subsequent sell order=Genera un susseguente ordine di vendita
+Generate subsequent buy order=Genera un susseguente ordine di aquisto
+General=Generale
+Donate=Donazione
+Create new Password=Crea nuova password
+Data Password Protection=Protezione dati password
+About Translation=Sulle traduzioni
+Create translation=Crea Traduzione
+Auto Resize Columns=Auto calibra colonne
+Auto Scroll=Scroll automatico
+Check for updates at startup=Controlla aggiornamenti all'avvio
+Same as Rule Price=Lo stesso al prezzo della regola
+Close to Tray=Chiudi in "tray"
+Concurrent Mode=Modalità corrente
+Confirm open order=Conferma ordini aperti
+Copy from existing group:=Copia da un gruppo esistente:
+Create empty rules group=Aggiungi gruppo vuoto
+Disable All Rules in Current Group=Disabilita le regole
+Disable All Rules in Group #=Disabilita tutte le regole del gruppo #
+Enable All Rules in Current Group=Abilita le regole
+Enable All Rules in Group #=Abilita tutte le regole del gruppo #
+Exact value=Valore Esatto
+Single instance=Istanza singola
+Execute immediately=Esegui immediatamente
+10 min. Buy/Sell Volume %=10 min. Compra/Vendi Volume %
+10 min. Volume=10 min. Volume
+Filter:=Filtri:
+Percentage=Percentuale
+Play sound (Beep)=Avvia suono (Beep)
+Play sound (WAV file)=Avvia suono (WAV file)
+Plus percentage=Piu percentuale
+Delay between executing rules=Ritardo fra ogni regola
+Amount to Receive at Last price=Ammontare da ricevere all'ultimo prezzo
+Amount to Receive at Ask price=Ammontare da ricevere al prezzo di vendita
+Rule is Enabled=Regole abilitate
+Total to Buy at market Bid price=Totale da acquistare al prezzo di acquisto
+Total to Buy at market Last price=Totale da acquistare all'ultimo prezzo
+Run command=Esegui comando
+Send e-mail=Invia e-mail
+Sequential Mode=Modalità sequenziale
+Stay on Top=Stai in primo piano
+More or Less Than=Piu o meno di
+Market Last Price=Ultimo prezzo di mercato
+Market Bid Price=Prezzo d'aquisto del mercato
+Market Ask Price=Prezzo di vendita del mercato
+Market High Price=Prezzo piu alto del mercato
+Market Low Price=Prezzo piu basso del mercato
+My Orders Last Buy Price=Ordina all'ultimo prezzo d'acquisto
+My Orders Last Sell Price=Ordina all'ultimo prezzo di vendita
+Goes More Than=è piu di
+Equal To=Uguale a
+Goes Less Than=è meno di
+Sell Amount=Ammontare in vendita
+Buy Amount=Ammontare in acquisto
+Cancel All Orders=Cancella tutti gli ordini
+Exact Price=Prezzo esatto
+Trailing value=Valore finale
+Use Percentage value=Usa valore di percentuale
+Use rules group template:=usa template di un gruppo di regole
+Add group=Aggiungi gruppo
+Add Rule=Aggiungi regola
+Add rules group=Aggiungi gruppo di regole
+Last=Ultimo Prezzo
+Bid=Prezzo d'Acquisto
+Market Price=Prezzo mercato
+Ask=Prezzo di vendita
+BUY=COMPRA
+All=tutto
+Selected=selezionato
+Check for updates=Controlla aggiornamenti
+Delete=Elimina
+Detach=Distacco
+Enable / Disable=Abilità / Disabilita
+Exit=Esci
+Fill from Buy Panel=Riempi dal pannello acquisto
+Fill from Sell Panel=Riempi dal pannello vendi
+Install=Installa
+OK=Ok
+Edit Rule=Modifica regola 
+Save as..=Salva con nome
+Save Rule=Salva regola
+SELL=VENDI
+Add Rule=Aggiungi regola
+All In=Tutto
+Half In=Metà
+Apply=Applica
+About=A proposito
+New Window=Nuova finestra
+Copy=Copia
+Zero profit Price=Prezzo a zero profitto
+Get new API Key and Secret=Prendi una nuova chiave API e chiave segreta
+Create translation=Crea traduzione
+Cancel=Cancella
+Close=Chiudi
+ sec=sec
+About %1=A proposito di %1
+Qt Bitcoin Trader is a free Open Source project
+developed on pure C++ Qt and OpenSSL.
+If you want to help make project better please donate.
+Feel free to send me recommendations and fixes to: %1=Qt Bitcoin Trader è un progetto open source<br>sviluppato in  C++ Qt e OpenSSL.<br>Se vuoi aiutarmi nel progetto dona: %1<br>Sentiti libero di inviarmi delle raccomandazioni e aggiustamenti: %2
+%1 Account=%1 Account
+Sell %1% of my %2=Vendi %1% del mio %2
+Spend %1% of my %2=Spendi %1% del mio %2
+%1 API Key and Secret=%1 Chiave segreta e API
+Bid Price=Mercato d'acquisto
+High Price=Mercato alto
+Last Price=Ultimo del mercato
+Low Price=Mercato basso
+Ask Price=Mercato di vendita
+My Orders Last Buy=Ordini ultimo d'acquisto
+My Orders Last Sell=Ordini ultimo di vendita
+at %1=a %1
+%1 Error=%1 Errore
+buy=Compra
+Cancel All Orders=Cancella tutti gli ordini
+Cancel selected Orders=Cancella gli ordini selezionati
+Are you sure to delete "%1" profile?=Sei sicuro di eliminare il profilo "%1" ?
+Are you sure to close Application?
+Active rules works only while application is running.=Sei sicuro di voler chiudere l'applicazione?<br>Le regole attive lavorano solo ad applicazione aperta.
+Copy Amount=Copia quantità
+Copy Date=Copia data
+Bitcoin address copied to clipboard.
+Thank you for support!=Indirizzo bitcoin copiato.<br>Grazie per il supporto!
+Copy Price=Copia prezzo
+Copy selected Rows=Copia righe selezionate
+Copy Total=Copia il totale
+Default Profile=Profilo standard
+Disable All Rules=Disabilita tutte le regole
+Disable Group #%1=Disabilita gruppo #%1
+Don't group=Non raggruppare
+Download error. Please try again.=Errore download. Riprova
+Edit rule=Modifica regole
+Enable All Rules=Abilta tutte le regole
+Enable Group #%1=Abilita gruppo #%1
+Exit=Esci
+Calculator=Calcolatore
+Buy %1=Compra %1
+Sell %1=Vendi %1
+If Amount to Receive at Last price goes less than %1=Se la quantità da ricevere all'ultimo prezzo d'aquisto è meno di %1
+If Amount to Receive at Last price goes more than %1=Se la quantità da ricevere all'ultimo prezzo d'aquisto è piu di %1
+If Amount to Receive at Ask price goes less than %1=Se la quantità da ricevere al prezzo di vendita è meno di %1
+If Amount to Receive at Ask price goes more than %1=Se la quantità da ricevere al prezzo di vendita è piu di %1
+%1 Balance=%1 Bilancio
+If %1 balance equal to %2=Se %1 il bilancio è uguale a %2
+If %1 balance goes less than %2=Se %1 il bilancio è meno di %2
+If %1 balance goes more than %2=Se %1 il bilancio è piu di %2
+If market bid price=%1=Se il prezzo d'acquisto di mercato=%1
+If market bid price<%1=Se il prezzo d'acquisto di mercato<%1
+If market bid price>%1=Se il prezzo d'acquisto di mercato>%1
+If market high price=%1=Se il prezzo d'acquisto di mercato=%1
+If market high price<%1=Se il prezzo d'acquisto di mercato<%1
+If market high price>%1=Se il prezzo d'acquisto di mercato>%1
+If my orders last buy price=%1=Se gli ordini al prezzo d'aquisto=%1
+If my orders last buy price<%1=Se gli ordini al prezzo d'aquisto<%1
+If my orders last buy price>%1=Se gli ordini al prezzo d'aquisto>%1
+If market last price=%1=Se l'ultimo prezzo di mercato=%1
+If market last price<%1=Se l'ultimo prezzo di mercato<%1
+If market last price>%1=Se l'ultimo prezzo di mecato>%1
+If my orders last sell price=%1=Se ordini all'ultimo prezzo di vendita=%1
+If my orders last sell price<%1=Se ordini all'ultimo prezzo di vendita<%1
+If my orders last sell price>%1=Se ordini all'ultimo prezzo di vendita>%1
+If market low price=%1=Se il mercato a basso prezzo=%1
+If market low price<%1=Se il mercato a basso prezzo<%1
+If market low price>%1=Se il mercato a basso prezzo>%1
+If market ask price=%1=Se il mercato a basso prezzo=%1
+If market ask price<%1=Se il mercato a prezzo di vendita<%1
+If market ask price>%1=Se il mercato a prezzo di vendita>%1
+If Total to Buy at Bid price goes less than %1=Se il totale d'acquisto al prezzo d'acquisto è meno di %1
+If Total to Buy at Bid price goes more than %1=Se il totale d'acquisto al prezzo d'acquisto è piu di %1
+If Total to Buy at Last price goes less than %1=Se  il totale d'acquisto all'ultimo prezzo è meno di %1
+If Total to Buy at Last price goes more than %1=Se il totale d'acquisto all'ultimo prezzo è piu di  %1
+This rule will be executed instantly.
+This means that you made a mistake.
+Please check values you entered.=Questa regola verrà eseguita immediatamente.<br>Questo accade quando hai fatto un errore.<br>Perfavore, controlla i valori inseriti.
+bought=comprato
+deposit=deposito
+fee=tassa
+sold=venduto
+withdraw=prelievi
+Please confirm new order=Perfavore conferma un nuovo ordine
+Are you sure to buy %1 at %2 ?
+
+Note: If total orders amount of your funds exceeds your balance, %3 will remove this order immediately.=Sei sicuro di acquistare %1 a %2 ?<br><br>Nota: se la quantità di ordine supera il tuo bilancio, %3 rimuoveremo il tuo ordine immediatamente.
+Please confirm removing file=Conferma la rimozione del file
+Are you sure to delete translation file?=Sei sicuro di rimuovere il file di traduzione?
+Please confirm transaction=Conferma la transazione
+Are you sure to sell %1 at %2 ?
+
+Note: If total orders amount of your Bitcoins exceeds your balance, %3 will remove this order immediately.=Sei sicuro di vednere %1 a %2 ?<br><br>Nota: se la quantità di ordine supera il tuo bilancio, %3 rimuoveremo il tuo ordine immediatamente.
+No=no
+Not Used=Non usato
+Amount=Quantità
+Date=Data
+Price=Prezzo
+Status=Stato
+Total=Totale
+Type=Tipo
+canceled=cancellato
+invalid=invalido
+open=aperto
+pending=attesa
+post pending=post attesa
+ask=richiesta
+bid=offerta
+Beep=Beep
+Play Sound=Avvia suono
+Repeat Buy and Sell order=Ripeti l'ordine di aquisto e vendita
+Repeat Buy order=Ripeti l'ordine di aquisto
+Repeat Sell order=Ripeti l'ordine di vendita
+Action=Azione
+Description=Descrizione
+Price=Prezzo
+State=Stato
+Are you sure to remove this rule?=Sei sicuro di rimuovere questa regola?
+Are you sure to remove all rules?=Sei sicuro di rimuovere tutte le regole?
+Disable Selected=Disabilita selezionate
+Disable All=Disabilita tutte
+Enable Selected=Abilita selezionate
+Enable All=Abilita tutto
+Group=Gruppo %1
+disabled=disabilitato
+done=fatto
+pending=attesa
+processing=in corso
+Save translation file=Salva file traduzione
+sell=vendi
+Sell All my %1=Vendi tutto %1
+Sell Half my %1=Vendi metà %1
+Spend All my %1=Spendi tutto %1
+Spend Half my %1=Spendi metà %1
+Charts=Grafici
+Order Book=Libro degli ordini
+Last Trades=Ultime Trades
+My orders Log=Log dei miei ordini
+Rules=Regole
+This profile is already used by another instance.
+API does not allow to run two instances with same key sign pair.
+Please create new profile if you want to use two instances.=QUesto profilo è gia stato usato in un altra finestra.<br>API non consente di essere eseguita due volte allo stesso tempo.<br>Perfavore registra un altro profilo se vuoi usare una nuova finestra.
+Toggle sound notification on value change=Attiva suono quando i valori cambiano
+API Lag is to High=il lag API è altissimo
+(trailing)=(finale)
+ Identification required to access private API.
+Please enter valid API key and secret.
+Please try to enable "Trade" and "Info" rights for this API pair.
+If it didn't help, please generate new API keys and re-create a new profile.=Identificazione richiesta per accedere all'API.<br>Inserisci delle chiavi API valide.<br>Prova ad attivare le voci "TRADE" e "INFO" per questa sessione.<br>Se non è stato d'aiuto prova a creare una nuova API e riprovare.
+Application updated successfully. Please restart application to apply changes.=Applicazione aggiornata con successo. Riavvia l'applicazione.
+Cannot check for update. Network error: %1=Non riesco a controllare gli aggiornamenti. Errore di rete: %1
+Update released %1. Please download from %2=Aggiornamento rilasciato %1. Scaricalo da %2
+Your version of Qt Bitcoin Trader is up to date=La versione di Qt Bitcoin Trader è troppo vecchia
+Enable portable mode. Store your data and settings in same folder as executable file.=Abilita la modalità portatile. Salva i tuoi dati in una cartella come eseguibile.
+Store your data and settings in system folder.=Archivia i tuoi dati nella cartella di sistema.
+Yes=Si
+String_LANGUAGE_NAME=Italiano
+String_LANGUAGE_AUTHOR=Andrea Pugno<br><a href="mailto:andreapugno5@gmail.com">andreapugno5@gmail.com</a><br>Dona Bitcoin:<br><a href="bitcoin:1K5qdYCagBbRmFD6tvjd5yCNQeeTSdTyVJ">1K5qdYCagBbRmFD6tvjd5yCNQeeTSdTyVJ</a>
+String_LANGUAGE_LOCALE=it_IT

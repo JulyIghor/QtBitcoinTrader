@@ -1,7 +1,7 @@
-// Copyright (C) 2013 July IGHOR.
+// Copyright (C) 2014 July IGHOR.
 // I want to create trading application that can be configured for any rule and strategy.
 // If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
+// For any questions please use contact form http://qtopentrader.com
 // Or send e-mail directly to julyighor@gmail.com
 //
 // You may use, distribute and copy the Qt Bitcion Trader under the terms of
@@ -43,8 +43,12 @@ void CurrencyPairItem::setSymbol(QByteArray symb)
 	currBStr=currSymbol.right(3);
 	currBStrLow=currBStr.toLower();
 
-	currASign=baseValues_->currencySignMap.value(currAStr,"$");
-	currBSign=baseValues_->currencySignMap.value(currBStr,"$");
 
-	currAName=baseValues_->currencyNamesMap.value(currAStr,"BITCOINS");
+	currAInfo=baseValues_->currencyMap.value(currAStr,CurencyInfo("$"));
+	currBInfo=baseValues_->currencyMap.value(currBStr,CurencyInfo("$"));
+	
+	currASign=currAInfo.sign;
+	currBSign=currBInfo.sign;
+
+	currAName=currAInfo.name;
 }
