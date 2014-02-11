@@ -74,7 +74,8 @@ HEADERS += aboutdialog.h \
            tradesmodel.h \
            translationdialog.h \
            translationline.h \
-           updaterdialog.h
+           updaterdialog.h \
+           apptheme.h
 FORMS += addrulegroup.ui \
          addrulewindow.ui \
          datafolderchusedialog.ui \
@@ -140,7 +141,8 @@ SOURCES += aboutdialog.cpp \
            tradesmodel.cpp \
            translationdialog.cpp \
            translationline.cpp \
-           updaterdialog.cpp
+           updaterdialog.cpp \
+           apptheme.cpp
 #
 # Resources
 # 
