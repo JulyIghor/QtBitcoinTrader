@@ -26,6 +26,7 @@ public:
 	RuleHolder getRuleHolder();
 	void fillByRuleHolder(RuleHolder *holder);
 private:
+	bool wasTrailingVisible;
 	int getRuleIfType();
 	bool changingSound;
 	QString sound;

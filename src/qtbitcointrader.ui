@@ -3812,7 +3812,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="iconSize">
         <size>
@@ -5080,6 +5080,9 @@
              <width>90</width>
              <height>0</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>(10 min Bids Volume)/(10 min Asks Volume)*100</string>
            </property>
            <property name="accessibleName">
             <string/>

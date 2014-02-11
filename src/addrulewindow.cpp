@@ -20,6 +20,7 @@
 AddRuleWindow::AddRuleWindow(RuleWidget *parent)
 	: QDialog()
 {
+	wasTrailingVisible=false;
 	changingSound=false;
 	parentRuleGroup=parent;
 	ui.setupUi(this);
@@ -223,6 +224,7 @@ void AddRuleWindow::languageChanged()
 
 void AddRuleWindow::buttonAddRule()
 {
+	wasTrailingVisible=ui.checkTrailingEnabled->isVisible();
 	if(!ui.ruleIsEnabled->isChecked()||parentRuleGroup->ui.ruleSequencialMode->isChecked()&&parentRuleGroup->rulesModel->rowCount()>0||checkIsValidRule())accept();
 	else QMessageBox::warning(this,windowTitle(),julyTr("INVALID_RULE_CHECK","This rule will be executed instantly.<br>This means that you make a mistake.<br>Please check values you entered."));
 }
@@ -418,6 +420,7 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder *holder)
 	if(fillRulePrice==-7.0)ui.checkOrdersLastSellPrice_2->setChecked(true);
 	}
 
+	qDebug()<<holder->isTrailingEnabled();
 	ui.checkTrailingEnabled->setChecked(holder->isTrailingEnabled());
 
 	ui.ruleIsEnabled->setChecked(holder->getRuleState()==1);
@@ -514,7 +517,7 @@ RuleHolder AddRuleWindow::getRuleHolder()
 
 	if(ui.checkPlaySound->isChecked())sound="Beep";
 
-	return RuleHolder(moreLessEqual, ui.thanValue->value(), btcValue, isBuying, ruleExecutePrice, getRuleIfType(), rulePricePercentage, execPricePercentage, amountPercentage, gID, sound, ui.checkTrailingEnabled->isVisible()&&ui.checkTrailingEnabled->isChecked(), ui.ruleIsEnabled->isChecked());
+	return RuleHolder(moreLessEqual, ui.thanValue->value(), btcValue, isBuying, ruleExecutePrice, getRuleIfType(), rulePricePercentage, execPricePercentage, amountPercentage, gID, sound, wasTrailingVisible&&ui.checkTrailingEnabled->isChecked(), ui.ruleIsEnabled->isChecked());
 }
 
 int AddRuleWindow::thanType()

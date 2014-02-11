@@ -76,7 +76,7 @@ void BaseValues::Construct()
 	rulesSafeModeInterval=5000;
 	gzipEnabled=true;
 	appVerIsBeta=false;
-	appVerStr="1.0797";
+	appVerStr="1.07971";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -165,7 +165,26 @@ int main(int argc, char *argv[])
 	if(!QFile::exists(appDataDir+"Language"))QDir().mkpath(appDataDir+"Language");
 	}
 #else
-	appDataDir=QDesktopServices::storageLocation(QDesktopServices::HomeLocation).toAscii()+"/.config/QtBitcoinTrader/";
+	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/QtBitcoinTrader/";
+	QString oldAppDataDir=QDesktopServices::storageLocation(QDesktopServices::HomeLocation).toAscii()+"/.config/QtBitcoinTrader/";
+
+	if(!QFile::exists(appDataDir)&&oldAppDataDir!=appDataDir&&QFile::exists(oldAppDataDir))
+	{
+		QFile::rename(oldAppDataDir,appDataDir);
+		if(QFile::exists(oldAppDataDir))
+		{
+			if(!QFile::exists(appDataDir))QDir().mkpath(appDataDir);
+			QStringList fileList=QDir(oldAppDataDir).entryList();
+			for(int n=0;n<fileList.count();n++)
+				if(fileList.at(n).length()>2)
+				{
+					QFile::copy(oldAppDataDir+fileList.at(n),appDataDir+fileList.at(n));
+					if(QFile::exists(oldAppDataDir+fileList.at(n)))
+						QFile::remove(oldAppDataDir+fileList.at(n));
+				}
+		}
+	}
+
 	if(!QFile::exists(appDataDir))QDir().mkpath(appDataDir);
 #endif
 
