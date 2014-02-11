@@ -78,14 +78,14 @@ QString NewPasswordDialog::getPassword()
 
 QString NewPasswordDialog::getRestSign()
 {
-	return ui.restSignLine->text().replace("\n","").replace("\r","").replace("\t","");
+	return ui.restSignLine->text().remove(QRegExp("[^a-zA-Z\\d]"));
 }
 
 QString NewPasswordDialog::getRestKey()
 {
 	if(ui.exchangeComboBox->itemData(ui.exchangeComboBox->currentIndex()).toBool())
-		return ui.clientIdLine->text().replace("\n","").replace("\r","").replace("\t","")+":"+ui.restKeyLine->text().replace("\n","").replace("\r","").replace("\t","");//ClientID visible
-	return ui.restKeyLine->text().replace("\n","").replace("\r","").replace("\t","");
+		return ui.clientIdLine->text().remove(QRegExp("[^a-zA-Z\\d]")) + ":" + ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z\\d]")); //ClientID visible
+	return ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z\\d]"));
 }
 
 void NewPasswordDialog::getApiKeySecretButton()
