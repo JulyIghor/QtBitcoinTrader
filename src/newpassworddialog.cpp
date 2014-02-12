@@ -15,8 +15,6 @@
 #include <QMessageBox>
 #include <QSettings>
 
-#include <QDebug>
-
 NewPasswordDialog::NewPasswordDialog()
 	: QDialog()
 {
@@ -78,14 +76,14 @@ QString NewPasswordDialog::getPassword()
 
 QString NewPasswordDialog::getRestSign()
 {
-	return ui.restSignLine->text().remove(QRegExp("[^a-zA-Z\\d]"));
+	return ui.restSignLine->text().remove(QRegExp("[^a-zA-Z0-9-\\d]"));
 }
 
 QString NewPasswordDialog::getRestKey()
 {
 	if(ui.exchangeComboBox->itemData(ui.exchangeComboBox->currentIndex()).toBool())
-		return ui.clientIdLine->text().remove(QRegExp("[^a-zA-Z\\d]")) + ":" + ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z\\d]")); //ClientID visible
-	return ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z\\d]"));
+		return ui.clientIdLine->text().remove(QRegExp("[^a-zA-Z0-9-\\d]")) + ":" + ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9-\\d]")); //ClientID visible
+	return ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9-\\d]"));
 }
 
 void NewPasswordDialog::getApiKeySecretButton()

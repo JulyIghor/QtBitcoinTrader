@@ -1,6 +1,5 @@
 #include "orderstablecancelbutton.h"
 #include <QPushButton>
-#include <QDebug>
 #include "main.h"
 #include <QTableView>
 

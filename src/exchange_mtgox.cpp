@@ -249,7 +249,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 		if(data.startsWith("{\"result\":\"success\",\"data\":{\"lag"))
 		{
 			double currentLag=getMidData("lag_secs\":",",\"",&data).toDouble();
-			static double lastLag=0.0;
+			static double lastLag=0.0001;
 			if(lastLag!=currentLag&&currentLag<9999.0)emit apiLagChanged(currentLag);//lag
 			lastLag=currentLag;
 		}
@@ -663,8 +663,7 @@ void Exchange_MtGox::dataReceivedAuth(QByteArray data, int reqType)
 						}
 
 						currentHistoryItem.price=priceValue.toDouble();
-
-						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+baseValues.currencyMapSign.key(priceSign,"$");
+						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+baseValues.currencyMapSign.value(priceSign,"USD");
 						if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 					}
 				}

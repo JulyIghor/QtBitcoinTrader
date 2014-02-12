@@ -9,7 +9,6 @@
 
 #include "apptheme.h"
 #include <QSettings>
-#include <QDebug>
 
 AppTheme::AppTheme()
 {

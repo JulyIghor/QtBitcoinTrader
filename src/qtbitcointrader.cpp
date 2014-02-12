@@ -3051,10 +3051,12 @@ double QtBitcoinTrader::getAvailableUSD()
 
 double QtBitcoinTrader::getAvailableUSDtoBTC(double priceToBuy)
 {
+	double avUSD=getAvailableUSD();
 	double decValue=0.0;
 	if(currentExchange->calculatingFeeMode==1)decValue=qPow(0.1,qMax(baseValues.currentPair.currADecimals,1));else
 	if(currentExchange->calculatingFeeMode==2)decValue=2.0*qPow(0.1,qMax(baseValues.currentPair.currADecimals,1));
-	return getValidDoubleForPercision(getAvailableUSD()/priceToBuy-decValue,baseValues.currentPair.currADecimals,false);
+
+	return getValidDoubleForPercision(avUSD/priceToBuy-decValue,baseValues.currentPair.currADecimals,false);
 }
 
 void QtBitcoinTrader::apiSellSend(double btc, double price)

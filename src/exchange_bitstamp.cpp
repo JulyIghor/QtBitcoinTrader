@@ -19,7 +19,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	accountFee=0.0;
 	balanceDisplayAvailableAmount=false;
 	minimumRequestIntervalAllowed=1200;
-	calculatingFeeMode=2;
+	calculatingFeeMode=1;
 	isLastTradesTypeSupported=false;
 	exchangeSupportsAvailableAmount=true;
 	lastBidAskTimestamp=0;
@@ -65,7 +65,9 @@ Exchange_Bitstamp::~Exchange_Bitstamp()
 
 void Exchange_Bitstamp::filterAvailableUSDAmountValue(double *amount)
 {
-	*amount=*amount/(1.0+accountFee/100.0);
+	double decValue=mainWindow.getValidDoubleForPercision((*amount)*mainWindow.floatFee,baseValues.currentPair.priceDecimals,false);
+	decValue+=qPow(0.1,qMax(baseValues.currentPair.priceDecimals,1));
+	*amount=mainWindow.getValidDoubleForPercision((*amount)-decValue,baseValues.currentPair.currBDecimals,false);
 }
 
 void Exchange_Bitstamp::clearVariables()

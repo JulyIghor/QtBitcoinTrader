@@ -664,7 +664,7 @@ void Exchange_Cryptsy::dataReceivedAuth(QByteArray data, int reqType)
 
 						currentHistoryItem.price=priceValue.toDouble();
 
-						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+baseValues.currencyMapSign.value(priceSign,"$");
+						currentHistoryItem.symbol=getMidData("\"currency\":\"","\"",&curLog)+baseValues.currencyMapSign.value(priceSign,"USD");
 						if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 					}
 				}

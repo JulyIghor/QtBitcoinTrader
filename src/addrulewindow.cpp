@@ -420,7 +420,6 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder *holder)
 	if(fillRulePrice==-7.0)ui.checkOrdersLastSellPrice_2->setChecked(true);
 	}
 
-	qDebug()<<holder->isTrailingEnabled();
 	ui.checkTrailingEnabled->setChecked(holder->isTrailingEnabled());
 
 	ui.ruleIsEnabled->setChecked(holder->getRuleState()==1);
