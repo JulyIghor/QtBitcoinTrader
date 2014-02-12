@@ -98,6 +98,7 @@ void JulySpinBoxPicker::mouseMoveEvent(QMouseEvent *event)
 		int t_y=QCursor::pos().y();
 		int t_deltaX=t_x-j_cursorLastMove.x();
 		int t_deltaY=t_y-j_cursorLastMove.y();
+
 		j_cursorLastMove.setX(t_x);
 		j_cursorLastMove.setY(t_y);
 		if((qAbs(t_deltaX)<100)&&(qAbs(t_deltaY)<100))
@@ -123,11 +124,11 @@ void JulySpinBoxPicker::mouseMoveEvent(QMouseEvent *event)
 			parentSpinBox->setValue(parentSpinBox->value()+valueToChange);
 		}
 		int t_deltaXY=100;
-		if((t_x<t_deltaXY)||
-			(t_y<t_deltaXY)||
+		if((t_x<currentScreenRect.left()+t_deltaXY)||
+			(t_y<currentScreenRect.top()+t_deltaXY)||
 			(t_x>currentScreenRect.right()-t_deltaXY)||
 			(t_y>currentScreenRect.bottom()-t_deltaXY))
-			QCursor::setPos(currentScreenRect.center());
+				QCursor::setPos(currentScreenRect.center());
 	}
 	event->accept();
 }
