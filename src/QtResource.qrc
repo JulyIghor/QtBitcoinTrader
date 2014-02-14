@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/">
+    <file>Resources/Open.png</file>
+    <file>Resources/Save.png</file>
     <file>Resources/Themes/Dark.thm</file>
     <file>Resources/Themes/Light.thm</file>
     <file>Resources/ArrowDown.png</file>

@@ -110,6 +110,17 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="ruleSave">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="QtResource.qrc">
+         <normaloff>:/Resources/Save.png</normaloff>:/Resources/Save.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

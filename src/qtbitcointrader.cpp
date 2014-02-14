@@ -766,6 +766,21 @@ void QtBitcoinTrader::on_buttonAddRuleGroup_clicked()
 
 	if(ruleGroup.exec()==QDialog::Rejected||ruleGroup.groupName.isEmpty())return;
 
+	QStringList rulesListLoad=ruleGroup.groupsList;
+	if(rulesListLoad.count())
+	{
+		for(int n=0;n<rulesListLoad.count();n++)
+		{
+			QStringList dataPair=rulesListLoad.at(n).split("==>");
+			if(dataPair.count()!=2)continue;
+
+			RuleWidget *newRule=new RuleWidget(++baseValues.lastGroupID,dataPair.first(),0,dataPair.last());
+			ui.rulesTabs->insertTab(ui.rulesTabs->count(),newRule,newRule->windowTitle());
+		}
+		ui.rulesTabs->setVisible(true);
+		ui.rulesNoMessage->setVisible(false);
+		return;
+	}
 	addRuleGroupByID(ruleGroup.groupName,ruleGroup.copyFromExistingGroup);
 
 	ui.rulesTabs->setCurrentIndex(ui.rulesTabs->count()-1);
@@ -1720,8 +1735,7 @@ void QtBitcoinTrader::updateLogTable()
 
 void QtBitcoinTrader::balanceChanged(double)
 {
-	checkValidSellButtons();
-	checkValidBuyButtons();
+	calcOrdersTotalValues();
 	emit getHistory(true);
 }
 
@@ -1744,7 +1758,7 @@ void QtBitcoinTrader::ordersIsEmpty()
 		ui.ordersTableFrame->setVisible(false);
 		ui.noOpenedOrdersLabel->setVisible(true);
 	}
-	calcOrdersTotalValues();
+	//calcOrdersTotalValues();
 }
 
 void QtBitcoinTrader::orderCanceled(QByteArray oid)
@@ -1957,9 +1971,6 @@ void QtBitcoinTrader::checkValidSellButtons()
 {
 	ui.sellThenBuyGroupBox->setEnabled(ui.sellTotalBtc->value()>=baseValues.currentPair.tradeVolumeMin);
 	ui.sellBitcoinsButton->setEnabled(ui.sellThenBuyGroupBox->isEnabled()&&/*ui.sellTotalBtc->value()<=getAvailableBTC()&&*/ui.sellTotalBtc->value()>0.0);
-
-	profitBuyThanSellCalc();
-	profitSellThanBuyCalc();
 }
 
 void QtBitcoinTrader::on_sellPricePerCoinAsMarketLastPrice_clicked()
@@ -1999,8 +2010,7 @@ void QtBitcoinTrader::setSoftLagValue(int mseconds)
 		lastSoftLagValid=isValidSoftLag;
 		if(!isValidSoftLag)ui.lastUpdate->setStyleSheet("QDoubleSpinBox {background: "+baseValues.appTheme.lightRed.name()+";}");
 		else ui.lastUpdate->setStyleSheet("");
-		checkValidSellButtons();
-		checkValidBuyButtons();
+		calcOrdersTotalValues();
 		ui.ordersControls->setEnabled(isValidSoftLag);
 		ui.buyButtonBack->setEnabled(isValidSoftLag);
 		ui.sellButtonBack->setEnabled(isValidSoftLag);
@@ -2200,8 +2210,6 @@ void QtBitcoinTrader::checkValidBuyButtons()
 {
 	ui.buyThenSellGroupBox->setEnabled(ui.buyTotalBtc->value()>=baseValues.currentPair.tradeVolumeMin);
 	ui.buyBitcoinsButton->setEnabled(ui.buyThenSellGroupBox->isEnabled()&&/*ui.buyTotalSpend->value()<=getAvailableUSD()&&*/ui.buyTotalSpend->value()>0.0);
-	profitBuyThanSellCalc();
-	profitSellThanBuyCalc();
 }
 
 void QtBitcoinTrader::checkValidOrdersButtons()

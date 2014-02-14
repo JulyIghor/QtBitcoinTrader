@@ -33,7 +33,7 @@ public:
 	void checkAndExecuteRule(int ruleType, double price);
 	Ui::RuleWidget ui;
 	RulesModel *rulesModel;
-	RuleWidget(int gID, QString groupName, RuleWidget *copyFrom=0);
+	RuleWidget(int gID, QString groupName, RuleWidget *copyFrom=0, QString restorableString="");
 	~RuleWidget();
 
 private:
@@ -56,6 +56,7 @@ public slots:
 	void on_ruleRemoveAll_clicked();
 	void checkValidRulesButtons();
 	void on_ruleRemove_clicked();
+	void on_ruleSave_clicked();
 };
 
 #endif // RULEWIDGET_H

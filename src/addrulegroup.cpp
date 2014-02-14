@@ -10,6 +10,8 @@
 #include "addrulegroup.h"
 #include "main.h"
 #include "thisfeatureunderdevelopment.h"
+#include <QDesktopServices>
+#include <QFileDialog>
 
 AddRuleGroup::AddRuleGroup(QWidget *parent)
 	: QDialog(parent)
@@ -64,16 +66,59 @@ void AddRuleGroup::onGroupContentChanged(bool on)
 	}
 	if(ui.checkExistingRule->isEnabled())ui.existingRulesList->setEnabled(ui.checkExistingRule->isChecked());
 	if(ui.checkUseTemplate->isEnabled())ui.useRulesGroupTemplateList->setEnabled(ui.checkUseTemplate->isChecked());
+
+	ui.rulesFile->setEnabled(ui.checkUseFile->isChecked());
+	ui.ruleOpen->setEnabled(ui.checkUseFile->isChecked());
+
+	if(ui.checkUseFile->isChecked())on_ruleOpen_clicked();
+
+	checkValidButton();
+}
+
+void AddRuleGroup::on_ruleOpen_clicked()
+{
+	QString lastRulesDir=mainWindow.iniSettings->value("UI/LastRulesPath",QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)).toString();
+
+	QString fileName=QFileDialog::getOpenFileName(this, julyTr("OPEN_GOUP","Open Rules Group"),lastRulesDir,"(*.qbtrule)");
+	if(fileName.isEmpty())return;
+
+	QByteArray rulesData;
+	QFile validateRule(fileName);
+	if(validateRule.open(QIODevice::ReadOnly))rulesData=validateRule.readAll();
+
+	if(rulesData.startsWith("Qt Bitcoin Trader Rules\n"))rulesData.remove(0,24);
+	else return;
+#ifdef Q_OS_WIN
+	fileName.replace("/","\\");
+#endif
+
+	ui.rulesFile->setText(fileName);
+	mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileName).dir().path());
+	mainWindow.iniSettings->sync();
+
+	groupsList=QString(rulesData).split("\n");
 }
 
 void AddRuleGroup::on_buttonAddRule_clicked()
 {
 	groupName=ui.groupName->text();
 	if(ui.checkExistingRule->isChecked())copyFromExistingGroup=existingGroupsIDs.at(ui.existingRulesList->currentIndex());
+	if(!ui.checkUseFile->isChecked())groupsList.clear();
 	accept();
 }
 
-void AddRuleGroup::on_groupName_textChanged(QString text)
+void AddRuleGroup::on_groupName_textChanged(QString)
 {
-	ui.buttonAddRule->setEnabled(!existingGroups.contains(":"));
+	checkValidButton();
+}
+
+void AddRuleGroup::checkValidButton()
+{
+	bool isAbleToSave=!existingGroups.contains(":");
+	if(isAbleToSave&&ui.checkUseFile->isChecked())
+	{
+		if(ui.rulesFile->text().length()<3)isAbleToSave=false;
+		else isAbleToSave=QFile::exists(ui.rulesFile->text());
+	}
+	ui.buttonAddRule->setEnabled(isAbleToSave);
 }

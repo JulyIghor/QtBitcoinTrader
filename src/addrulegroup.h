@@ -18,6 +18,7 @@ class AddRuleGroup : public QDialog
 	Q_OBJECT
 
 public:
+	QStringList groupsList;
 	QString groupName;
 	int copyFromExistingGroup;
 	AddRuleGroup(QWidget *parent = 0);
@@ -29,6 +30,8 @@ private:
 	Ui::AddRuleGroup ui;
 
 private slots:
+	void checkValidButton();
+	void on_ruleOpen_clicked();
 	void onGroupContentChanged(bool);
 	void on_groupName_textChanged(QString);
 	void on_buttonAddRule_clicked();

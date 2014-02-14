@@ -12,8 +12,10 @@
 #include "addrulewindow.h"
 #include <QMessageBox>
 #include <QtCore/qmath.h>
+#include <QFileDialog>
+#include <QDesktopServices>
 
-RuleWidget::RuleWidget(int gID, QString gName, RuleWidget *copyFrom)
+RuleWidget::RuleWidget(int gID, QString gName, RuleWidget *copyFrom, QString restorableString)
 	: QWidget()
 {
 	ordersCancelTime=QTime(1,0,0,0);
@@ -54,12 +56,11 @@ RuleWidget::RuleWidget(int gID, QString gName, RuleWidget *copyFrom)
 
 	languageChanged();
 
-	QString restorableString;
-
 	groupName=gName;
 
 	if(copyFrom)restorableString=copyFrom->rulesModel->saveRulesToString();
 	   else
+	if(restorableString.isEmpty())
 	{
 		mainWindow.iniSettings->beginGroup("Rules");
 		restorableString=mainWindow.iniSettings->value(ruleGroupIdStr,"").toString();
@@ -435,4 +436,24 @@ void RuleWidget::ruleDisableAll()
 {
 	rulesModel->disableAll();
 	checkValidRulesButtons();
+}
+
+void RuleWidget::on_ruleSave_clicked()
+{
+	QString lastRulesDir=mainWindow.iniSettings->value("UI/LastRulesPath",QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)).toString();
+
+	QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_GOUP","Save Rules Group"),lastRulesDir+"/"+groupName+".qbtrule","(*.qbtrule)");
+	if(fileName.isEmpty())return;
+	mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileName).dir().path());
+	mainWindow.iniSettings->sync();
+	if(QFile::exists(fileName))QFile::remove(fileName);
+
+	QFile saveRule(fileName);
+	if(!saveRule.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(this,windowTitle(),"Can not write file");
+		return;
+	}
+	saveRule.write("Qt Bitcoin Trader Rules\n"+groupName.toAscii()+"==>"+rulesModel->saveRulesToString().toAscii());
+	saveRule.close();
 }
