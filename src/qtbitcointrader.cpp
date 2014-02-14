@@ -773,6 +773,7 @@ void QtBitcoinTrader::on_buttonAddRuleGroup_clicked()
 		{
 			QStringList dataPair=rulesListLoad.at(n).split("==>");
 			if(dataPair.count()!=2)continue;
+			if(rulesListLoad.count()==1)dataPair[0]=ruleGroup.groupName;
 
 			RuleWidget *newRule=new RuleWidget(++baseValues.lastGroupID,dataPair.first(),0,dataPair.last());
 			ui.rulesTabs->insertTab(ui.rulesTabs->count(),newRule,newRule->windowTitle());

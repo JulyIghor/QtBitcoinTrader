@@ -71,6 +71,7 @@ void AddRuleGroup::onGroupContentChanged(bool on)
 	ui.ruleOpen->setEnabled(ui.checkUseFile->isChecked());
 
 	if(ui.checkUseFile->isChecked())on_ruleOpen_clicked();
+	else ui.groupNameGroupbox->setEnabled(true);
 
 	checkValidButton();
 }
@@ -97,6 +98,9 @@ void AddRuleGroup::on_ruleOpen_clicked()
 	mainWindow.iniSettings->sync();
 
 	groupsList=QString(rulesData).split("\n");
+
+	ui.groupNameGroupbox->setEnabled(groupsList.count()<=1);
+	if(groupsList.count()==1)ui.groupName->setText(groupsList.first().split("==>").first());
 }
 
 void AddRuleGroup::on_buttonAddRule_clicked()
