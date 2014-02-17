@@ -47,6 +47,8 @@ public:
 	~AddRuleGroup();
 
 private:
+	bool loadGroupFromFile(QString);
+	QStringList templatesList;
 	QStringList existingGroups;
 	QList<int> existingGroupsIDs;
 	Ui::AddRuleGroup ui;

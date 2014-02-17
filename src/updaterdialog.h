@@ -46,6 +46,7 @@ public:
 	~UpdaterDialog();
 
 private:
+	bool downloaded100;
 	bool feedbackMessage;
 	QTimer *timeOutTimer;
 	void downloadError(int);

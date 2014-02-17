@@ -55,26 +55,27 @@ void HistoryModel::clear()
 	endResetModel();
 }
 
+#include <QDebug>
+
 void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 {
 	bool haveLastBuy=false;
 	bool haveLastSell=false;
 	for(int n=0;n<histList->count();n++)
-	if(histList->at(n).symbol==baseValues.currentPair.currSymbol)
-	{
-		if(histList->at(n).type==1)
+		if(histList->at(n).symbol==baseValues.currentPair.currSymbol)
 		{
-			emit accLastSellChanged(histList->at(n).symbol.right(3),histList->at(n).price);
-			haveLastSell=true;
+			if(!haveLastSell&&histList->at(n).type==1)
+			{
+				emit accLastSellChanged(histList->at(n).symbol.right(3),histList->at(n).price);
+				haveLastSell=true;
+			}
+			if(!haveLastBuy&&histList->at(n).type==2)
+			{
+				emit accLastBuyChanged(histList->at(n).symbol.right(3),histList->at(n).price);
+				haveLastBuy=true;
+			}
+			if(haveLastSell&&haveLastBuy)break;
 		}
-		else
-		if(histList->at(n).type==2)
-		{
-			emit accLastBuyChanged(histList->at(n).symbol.right(3),histList->at(n).price);
-			haveLastBuy=true;
-		}
-		if(haveLastSell&&haveLastBuy)break;
-	}
 
 	while(histList->count()&&histList->last().dateTimeInt<=lastDate)histList->removeLast();
 	if(histList->count()==0){delete histList; return;}

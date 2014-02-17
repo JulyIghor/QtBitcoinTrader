@@ -262,7 +262,8 @@ void JulyHttp::readSocket()
 					currentLineLow.endsWith(QLatin1String("close\r\n")))connectionClose=true;
 				else
 				if(currentLineLow.startsWith(QLatin1String("content-encoding"))&&
-					currentLineLow.contains(QLatin1String("gzip")))contentGzipped=true;
+					currentLineLow.contains(QLatin1String("gzip")))
+						contentGzipped=true;
 			}
 		}
 		if(!endFound)

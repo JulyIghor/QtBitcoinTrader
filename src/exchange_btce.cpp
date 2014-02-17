@@ -433,7 +433,6 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 
 				QByteArray curLog(dataList.at(n).toAscii());
 				QByteArray logType=getMidData("type\":\"","\",\"",&curLog);
-
 				if(logType=="sell")currentHistoryItem.type=1;
 				else 
 				if(logType=="buy")currentHistoryItem.type=2;

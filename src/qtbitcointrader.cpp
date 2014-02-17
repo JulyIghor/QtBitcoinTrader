@@ -1539,7 +1539,7 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
 	currencyChangedDate=QDateTime::currentDateTime().toTime_t();
 
 	ui.ordersLastBuyPrice->setValue(0.0);
-	ui.ordersLastBuyPrice->setValue(0.0);
+	ui.ordersLastSellPrice->setValue(0.0);
 	emit getHistory(true);
 }
 

@@ -44,6 +44,7 @@
 UpdaterDialog::UpdaterDialog(bool fbMess)
 	: QDialog()
 {
+	downloaded100=false;
 	feedbackMessage=fbMess;
 	stateUpdate=0;
 	ui.setupUi(this);
@@ -129,6 +130,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 	else
 		if(stateUpdate==1)
 		{
+			downloaded100=true;
 			QByteArray fileSha1=QCryptographicHash::hash(dataReceived,QCryptographicHash::Sha1);
 			QFile readPublicKey(":/Resources/Public.key");
 			if(!readPublicKey.open(QIODevice::ReadOnly)){QMessageBox::critical(this,windowTitle(),"Public.key is missing");return;}
@@ -204,6 +206,7 @@ void UpdaterDialog::invalidData(bool err)
 
 void UpdaterDialog::downloadError(int val)
 {
+	if(downloaded100)return;
 	QMessageBox::warning(this,windowTitle(),julyTr("DOWNLOAD_ERROR","Download error. Please try again.")+"<br>"+httpGet->errorString()+"<br>CODE: "+QString::number(val));
 	exitSlot();
 }

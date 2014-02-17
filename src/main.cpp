@@ -98,7 +98,7 @@ void BaseValues::Construct()
 	rulesSafeModeInterval=5000;
 	gzipEnabled=true;
 	appVerIsBeta=false;
-	appVerStr="1.07972";
+	appVerStr="1.07973";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 

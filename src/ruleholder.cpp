@@ -48,7 +48,7 @@ RuleHolder::RuleHolder(int moreLessEqual, double price, double bitcoins, bool is
 	rulePriceType=rulePriceTp;
 	ruleExecutePrice=sellPrice;
 	ruleCheckPrice=price;
-	ruleMoreLessEqualThreshold=moreLessEqual;
+	ruleMoreLessEqualChanged=moreLessEqual;
 	ruleAmount=bitcoins;
 	buying=isBuy;
 	saveRuleCheckPrice();
@@ -66,7 +66,7 @@ RuleHolder::RuleHolder(QString strData)
 	waitingGoodLag=restorableList.at(1).toInt();
 	buying=restorableList.at(2).toInt();
 	ruleAmount=restorableList.at(3).toDouble();
-	ruleMoreLessEqualThreshold=restorableList.at(4).toInt();
+	ruleMoreLessEqualChanged=restorableList.at(4).toInt();
 	ruleExecutePrice=restorableList.at(5).toDouble();
 	ruleCheckPrice=restorableList.at(6).toDouble();
 
@@ -97,7 +97,7 @@ QString RuleHolder::generateSavableData()
 	savableList<<QString::number(waitingGoodLag);
 	savableList<<QString::number(buying);
 	savableList<<mainWindow.numFromDouble(ruleAmount);
-	savableList<<QString::number(ruleMoreLessEqualThreshold);
+	savableList<<QString::number(ruleMoreLessEqualChanged);
 	savableList<<mainWindow.numFromDouble(ruleExecutePrice);
 	savableList<<mainWindow.numFromDouble(ruleCheckPrice);
 	savableList<<mainWindow.numFromDouble(ruleCheckPricePercentage*100.0);
@@ -155,7 +155,7 @@ double RuleHolder::getCurrentCheckPrice()
 void RuleHolder::saveRuleCheckPrice()
 {
 	if(ruleState==0)return;
-	if(ruleCheckPricePercentage!=0.0||ruleMoreLessEqualThreshold==-2)
+	if(ruleCheckPricePercentage!=0.0||ruleMoreLessEqualChanged==-2)
 		lastRuleCheckPrice=getCurrentCheckPrice();
 }
 
@@ -170,6 +170,8 @@ void RuleHolder::setRuleState(int newState)//0: Disabled; 1:Enabled
 	saveRuleCheckPrice();
 }
 
+#include <QDebug>
+
 bool RuleHolder::isAchieved(double price)
 {
 	if(ruleState!=1)return false;
@@ -179,29 +181,29 @@ bool RuleHolder::isAchieved(double price)
 	if(rulePriceType==16)return true;
 	if(ruleCheckPricePercentage!=0.0)
 	{
-		if(ruleMoreLessEqualThreshold==-1)
+		if(ruleMoreLessEqualChanged==-1)
 		{
 			if(lastRuleCheckPrice-lastRuleCheckPrice*ruleCheckPricePercentage>price)return true;
 			if(trailingEnabled&&lastRuleCheckPrice<price)lastRuleCheckPrice=price;
 		}
-		if(ruleMoreLessEqualThreshold==1)
+		if(ruleMoreLessEqualChanged==1)
 		{
 			if(lastRuleCheckPrice+lastRuleCheckPrice*ruleCheckPricePercentage<price)return true;
 			if(trailingEnabled&&lastRuleCheckPrice>price)lastRuleCheckPrice=price;
 		}
-		if(ruleMoreLessEqualThreshold==0)
+		if(ruleMoreLessEqualChanged==0)
 		{
 			if(lastRuleCheckPrice+lastRuleCheckPrice*ruleCheckPricePercentage==price)return true;
 		}
 	}
 	else
 	{
-		if(ruleMoreLessEqualThreshold==-1&&ruleCheckPrice>price)return true;
-		if(ruleMoreLessEqualThreshold==1&&ruleCheckPrice<price)return true;
-		if(ruleMoreLessEqualThreshold==0&&ruleCheckPrice==price)return true;
+		if(ruleMoreLessEqualChanged==-1&&ruleCheckPrice>price)return true;
+		if(ruleMoreLessEqualChanged==1&&ruleCheckPrice<price)return true;
+		if(ruleMoreLessEqualChanged==0&&ruleCheckPrice==price)return true;
 	}
 
-	if(ruleMoreLessEqualThreshold==-2)
+	if(ruleMoreLessEqualChanged==-2)
 	{
 		if(ruleCheckPricePercentage!=0.0)
 		{
@@ -218,12 +220,12 @@ bool RuleHolder::isAchieved(double price)
 		}
 		else
 		{
-			if(ruleCheckPrice+lastRuleCheckPrice<price)
+			if(lastRuleCheckPrice+ruleCheckPrice<price)
 			{
 				lastRuleCheckPrice=price;
 				return true;
 			}
-			if(ruleCheckPrice-lastRuleCheckPrice>price)
+			if(lastRuleCheckPrice-ruleCheckPrice>price)
 			{
 				lastRuleCheckPrice=price;
 				return true;
@@ -261,27 +263,27 @@ QString RuleHolder::getDescriptionString()
 		if(rulePriceType==8||rulePriceType==10||rulePriceType==12||rulePriceType==14)priceStr.prepend(baseValues.currentPair.currASign);
 		else priceStr.prepend(baseValues.currentPair.currBSign);
 	}
-		if(ruleMoreLessEqualThreshold==-2)
+		if(ruleMoreLessEqualChanged==-2)
 		{
-			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_THRESHOLD","If market last price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==2)return julyTr("IF_MARKET_BUY_THRESHOLD","If market bid price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==3)return julyTr("IF_MARKET_SELL_THRESHOLD","If market ask price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==4)return julyTr("IF_MARKET_HIGH_THRESHOLD","If market high price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==5)return julyTr("IF_MARKET_LOW_THRESHOLD","If market low price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==6)return julyTr("IF_MARKET_LAST_BUY_THRESHOLD","If my orders last buy price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_THRESHOLD","If my orders last sell price threshold %1").arg(priceStr);
-			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_THRESHOLD","If %1 balance threshold %2").arg(QString(baseValues.currentPair.currAStr)).arg(priceStr)+trailingText;
-			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_THRESHOLD","If %1 balance threshold %2").arg(QString(baseValues.currentPair.currBStr)).arg(priceStr)+trailingText;
-			if(rulePriceType==10)return julyTr("IF_TOTAL_TO_BUY_AT_LAST_THRESHOLD","If Total to Buy at Last price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==11)return julyTr("IF_AMOUNT_TO_RECEIVE_AT_LAST_THRESHOLD","If Amount to Receive at Last price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==12)return julyTr("IF_TOTAL_TO_BUY_AT_BUY_PRICE_THRESHOLD","If Total to Buy at Buy price threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==13)return julyTr("IF_AMOUNT_TO_RECEIVE_AT_SELL_PRICE_THRESHOLD","If Amount to Receive at Sell price threshold %1").arg(priceStr)+trailingText;
+			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_CHANGED","If market last price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==2)return julyTr("IF_MARKET_BUY_CHANGED","If market bid price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==3)return julyTr("IF_MARKET_SELL_CHANGED","If market ask price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==4)return julyTr("IF_MARKET_HIGH_CHANGED","If market high price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==5)return julyTr("IF_MARKET_LOW_CHANGED","If market low price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==6)return julyTr("IF_MARKET_LAST_BUY_CHANGED","If my orders last buy price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_CHANGED","If my orders last sell price changed %1").arg(priceStr);
+			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_CHANGED","If %1 balance changed %2").arg(QString(baseValues.currentPair.currAStr)).arg(priceStr)+trailingText;
+			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_CHANGED","If %1 balance changed %2").arg(QString(baseValues.currentPair.currBStr)).arg(priceStr)+trailingText;
+			if(rulePriceType==10)return julyTr("IF_TOTAL_TO_BUY_AT_LAST_CHANGED","If Total to Buy at Last price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==11)return julyTr("IF_AMOUNT_TO_RECEIVE_AT_LAST_CHANGED","If Amount to Receive at Last price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==12)return julyTr("IF_TOTAL_TO_BUY_AT_BUY_PRICE_CHANGED","If Total to Buy at Buy price changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==13)return julyTr("IF_AMOUNT_TO_RECEIVE_AT_SELL_PRICE_CHANGED","If Amount to Receive at Sell price changed %1").arg(priceStr)+trailingText;
 
-			if(rulePriceType==14)return julyTr("IF_10MIN_VOLUME_THRESHOLD","If trades 10 min. volume threshold %1").arg(priceStr)+trailingText;
-			if(rulePriceType==15)return julyTr("IF_10MIN_PERCENTAGE_THRESHOLD","If trades 10 min. Buy/Sell threshold %1").arg(priceStr)+trailingText;
+			if(rulePriceType==14)return julyTr("IF_10MIN_VOLUME_CHANGED","If trades 10 min. volume changed %1").arg(priceStr)+trailingText;
+			if(rulePriceType==15)return julyTr("IF_10MIN_PERCENTAGE_CHANGED","If trades 10 min. Buy/Sell changed %1").arg(priceStr)+trailingText;
 		}
 		else
-		if(ruleMoreLessEqualThreshold==1)
+		if(ruleMoreLessEqualChanged==1)
 		{
 			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_MORE","If market last price goes more than %1").arg(priceStr)+trailingText;
 			if(rulePriceType==2)return julyTr("IF_MARKET_BUY_MORE","If market bid price goes more than %1").arg(priceStr)+trailingText;
@@ -301,7 +303,7 @@ QString RuleHolder::getDescriptionString()
 			if(rulePriceType==15)return julyTr("IF_10MIN_PERCENTAGE_MORE","If trades 10 min. Buy/Sell goes more than %1").arg(priceStr)+trailingText;
 		}
 		else
-		if(ruleMoreLessEqualThreshold==-1)
+		if(ruleMoreLessEqualChanged==-1)
 		{
 			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_LESS","If market last price goes less than %1").arg(priceStr)+trailingText;
 			if(rulePriceType==2)return julyTr("IF_MARKET_BUY_LESS","If market bid price goes less than %1").arg(priceStr)+trailingText;
@@ -321,7 +323,7 @@ QString RuleHolder::getDescriptionString()
 			if(rulePriceType==15)return julyTr("IF_10MIN_PERCENTAGE_LESS","If trades 10 min. Buy/Sell goes less than %1").arg(priceStr)+trailingText;
 		}
 		else
-		if(ruleMoreLessEqualThreshold==0)
+		if(ruleMoreLessEqualChanged==0)
 		{
 			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_EQUAL","If market last price equal to %1").arg(priceStr)+trailingText;
 			if(rulePriceType==2)return julyTr("IF_MARKET_BUY_EQUAL","If market bid price equal to %1").arg(priceStr)+trailingText;

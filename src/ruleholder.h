@@ -46,7 +46,7 @@ public:
 	bool isAchieved(double price);
 	bool isBuying();
 	bool isTrading();
-	int getRuleMoreLessEqual(){return ruleMoreLessEqualThreshold;}
+	int getRuleMoreLessEqual(){return ruleMoreLessEqualChanged;}
 	double getRuleBtc(){return ruleAmount;}
 	double getRuleExecutePrice(){return ruleExecutePrice;}
 	double getRuleCheckPrice(){return ruleCheckPrice;}
@@ -76,7 +76,7 @@ private:
 	int rulePriceType;
 	bool waitingGoodLag;
 	bool buying;
-	int ruleMoreLessEqualThreshold;
+	int ruleMoreLessEqualChanged;
 	double ruleAmount;
 	double ruleAmountPercentage;
 	double ruleExecutePrice;

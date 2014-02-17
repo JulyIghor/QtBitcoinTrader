@@ -34,7 +34,7 @@
 #include "thisfeatureunderdevelopment.h"
 #include <QDesktopServices>
 #include <QFileDialog>
-
+#include <QDebug>
 AddRuleGroup::AddRuleGroup(QWidget *parent)
 	: QDialog(parent)
 {
@@ -65,6 +65,31 @@ AddRuleGroup::AddRuleGroup(QWidget *parent)
 	onGroupContentChanged(true);
 	ui.groupID->setMaximum(baseValues.lastGroupID+1);
 	ui.groupID->setValue(ui.groupID->maximum());
+
+	bool haveTemplate=true;
+	int templateId=1;
+	while(haveTemplate)
+	{
+		QString templateIdStr=QString::number(templateId);
+		if(templateIdStr.length()==1)templateIdStr.prepend("00");
+		if(templateIdStr.length()==2)templateIdStr.prepend("0");
+		QString currentRule=":/Resources/Templates/"+templateIdStr+".qbtrule";
+		haveTemplate=QFile::exists(currentRule);
+		if(haveTemplate)
+		{
+			templateId++;
+			QByteArray currentRuleData;
+			QFile readRule(currentRule);
+			readRule.open(QIODevice::ReadOnly);
+			currentRuleData=readRule.readLine();
+			if(!currentRuleData.startsWith("Qt Bitcoin Trader Rules"))continue;
+
+			QStringList rulePair=QString(readRule.readAll()).split("==>");
+			if(rulePair.count()!=2||rulePair.first().isEmpty())continue;
+			templatesList<<currentRule;
+			ui.useRulesGroupTemplateList->addItem(rulePair.first());
+		}
+	}
 }
 
 AddRuleGroup::~AddRuleGroup()
@@ -75,17 +100,7 @@ AddRuleGroup::~AddRuleGroup()
 void AddRuleGroup::onGroupContentChanged(bool on)
 {
 	if(!on)return;
-	if(ui.checkUseTemplate->isChecked())
-	{
-		ui.checkEmptyRule->setChecked(true);
-		ThisFeatureUnderDevelopment featureNotAvailable;
-		if(mainWindow.ui.widgetStaysOnTop->isChecked())featureNotAvailable.setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
-		else  featureNotAvailable.setWindowFlags(Qt::WindowCloseButtonHint);
-		julyTranslator.translateUi(&featureNotAvailable);
-		featureNotAvailable.setFixedSize(380,featureNotAvailable.minimumSizeHint().height());
-		featureNotAvailable.exec();
-		return;
-	}
+
 	if(ui.checkExistingRule->isEnabled())ui.existingRulesList->setEnabled(ui.checkExistingRule->isChecked());
 	if(ui.checkUseTemplate->isEnabled())ui.useRulesGroupTemplateList->setEnabled(ui.checkUseTemplate->isChecked());
 
@@ -98,19 +113,34 @@ void AddRuleGroup::onGroupContentChanged(bool on)
 	checkValidButton();
 }
 
+bool AddRuleGroup::loadGroupFromFile(QString fileName)
+{
+	QByteArray rulesData;
+	QFile validateRule(fileName);
+	if(validateRule.open(QIODevice::ReadOnly))rulesData=validateRule.readAll();
+	if(rulesData.startsWith("Qt Bitcoin Trader Rules\n"))rulesData.remove(0,24);
+	else return false;
+	groupsList=QString(rulesData).split("\n");
+	return true;
+}
+
 void AddRuleGroup::on_ruleOpen_clicked()
 {
 	QString lastRulesDir=mainWindow.iniSettings->value("UI/LastRulesPath",QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)).toString();
 
 	QString fileName=QFileDialog::getOpenFileName(this, julyTr("OPEN_GOUP","Open Rules Group"),lastRulesDir,"(*.qbtrule)");
-	if(fileName.isEmpty())return;
+	if(fileName.isEmpty())
+	{
+		ui.checkEmptyRule->setChecked(true);
+		return;
+	}
 
-	QByteArray rulesData;
-	QFile validateRule(fileName);
-	if(validateRule.open(QIODevice::ReadOnly))rulesData=validateRule.readAll();
-
-	if(rulesData.startsWith("Qt Bitcoin Trader Rules\n"))rulesData.remove(0,24);
-	else return;
+	if(!loadGroupFromFile(fileName))
+	{
+		ui.checkEmptyRule->setChecked(true);
+		return;
+	}
+	
 #ifdef Q_OS_WIN
 	fileName.replace("/","\\");
 #endif
@@ -119,7 +149,6 @@ void AddRuleGroup::on_ruleOpen_clicked()
 	mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileName).dir().path());
 	mainWindow.iniSettings->sync();
 
-	groupsList=QString(rulesData).split("\n");
 
 	ui.groupNameGroupbox->setEnabled(groupsList.count()<=1);
 	if(groupsList.count()==1)ui.groupName->setText(groupsList.first().split("==>").first());
@@ -129,6 +158,8 @@ void AddRuleGroup::on_buttonAddRule_clicked()
 {
 	groupName=ui.groupName->text();
 	if(ui.checkExistingRule->isChecked())copyFromExistingGroup=existingGroupsIDs.at(ui.existingRulesList->currentIndex());
+	if(ui.checkUseTemplate->isChecked())loadGroupFromFile(templatesList.at(ui.useRulesGroupTemplateList->currentIndex()));
+	else
 	if(!ui.checkUseFile->isChecked())groupsList.clear();
 	accept();
 }

@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="/">
+    <file>Resources/Templates/001.qbtrule</file>
+    <file>Resources/Templates/002.qbtrule</file>
+    <file>Resources/Templates/003.qbtrule</file>
     <file>Resources/Open.png</file>
     <file>Resources/Save.png</file>
     <file>Resources/Themes/Dark.thm</file>
