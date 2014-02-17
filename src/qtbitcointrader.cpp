@@ -2909,6 +2909,7 @@ void QtBitcoinTrader::on_rulesTabs_tabCloseRequested(int tab)
 	if(baseValues.lastGroupID==currentGroup->getRuleGroupId())baseValues.lastGroupID--;
 	delete ui.rulesTabs->widget(tab);
 	
+	if(ui.rulesTabs->count()==0)baseValues.lastGroupID=0;
 	ui.rulesTabs->setVisible(ui.rulesTabs->count());
 	ui.rulesNoMessage->setVisible(!ui.rulesTabs->isVisible());
 }

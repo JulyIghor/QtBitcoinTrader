@@ -55,8 +55,6 @@ void HistoryModel::clear()
 	endResetModel();
 }
 
-#include <QDebug>
-
 void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 {
 	bool haveLastBuy=false;

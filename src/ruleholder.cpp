@@ -170,8 +170,6 @@ void RuleHolder::setRuleState(int newState)//0: Disabled; 1:Enabled
 	saveRuleCheckPrice();
 }
 
-#include <QDebug>
-
 bool RuleHolder::isAchieved(double price)
 {
 	if(ruleState!=1)return false;

@@ -34,7 +34,7 @@
 #include "thisfeatureunderdevelopment.h"
 #include <QDesktopServices>
 #include <QFileDialog>
-#include <QDebug>
+
 AddRuleGroup::AddRuleGroup(QWidget *parent)
 	: QDialog(parent)
 {
@@ -63,8 +63,7 @@ AddRuleGroup::AddRuleGroup(QWidget *parent)
 	resize(width(),minimumSizeHint().height());
 	setFixedHeight(height());
 	onGroupContentChanged(true);
-	ui.groupID->setMaximum(baseValues.lastGroupID+1);
-	ui.groupID->setValue(ui.groupID->maximum());
+	ui.groupID->setValue(baseValues.lastGroupID+1);
 
 	bool haveTemplate=true;
 	int templateId=1;
