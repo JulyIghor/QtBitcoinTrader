@@ -1960,6 +1960,7 @@ void QtBitcoinTrader::on_buttonNight_clicked()
 	on_profitLossSpinBox_valueChanged(ui.profitLossSpinBox->value());
 	on_sellThanBuySpinBox_valueChanged(ui.sellThanBuySpinBox->value());
 	on_buyTotalSpend_valueChanged(ui.buyTotalSpend->value());
+	on_sellTotalBtc_valueChanged(ui.sellTotalBtc->value());
 
 	foreach(RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())currentGroup->updateStyleSheets();
 
