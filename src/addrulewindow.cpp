@@ -447,7 +447,7 @@ void AddRuleWindow::fillByRuleHolder(RuleHolder *holder)
 	ui.ruleIsEnabled->setChecked(holder->getRuleState()==1);
 
 	double ruleExecutePricePercentage=holder->getRuleExecutePricePercentage()*100.0;
-	if(fillRulePrice<=-1.0&&ruleExecutePricePercentage>0.0)
+	if(fillRulePrice<=-1.0&&ruleExecutePricePercentage!=0.0)
 	{
 		ui.checkCheckUsePercentageValue->setChecked(true);
 		ui.valueCheckValuePercentage->setValue(ruleExecutePricePercentage);
