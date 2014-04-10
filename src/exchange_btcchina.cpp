@@ -34,6 +34,9 @@
 Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
 {
+	exchangeDisplayOnlyCurrentPairOpenOrders=true;
+    buySellAmountExcludedFee=true;
+	clearHistoryOnCurrencyChanged=false;
 	isLastTradesTypeSupported=true;
 	balanceDisplayAvailableAmount=false;
 	minimumRequestIntervalAllowed=600;
@@ -72,8 +75,6 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 
 	moveToThread(this);
 	authRequestTime.restart();
-	tonceCounter=0;
-	privateTonce=QDateTime::currentDateTime().toTime_t();
 }
 
 Exchange_BTCChina::~Exchange_BTCChina()
@@ -87,8 +88,11 @@ void Exchange_BTCChina::clearVariables()
 	Exchange::clearVariables();
 	secondPart=0;
 	apiDownCounter=0;
+	historyLastDate.clear();
+	historyLastID.clear();
 	lastHistory.clear();
 	lastOrders.clear();
+	historyLastTradesRequest="historydata?market="+baseValues.currentPair.currRequestPair;
 	reloadDepth();
 	lastInfoReceived=false;
 	lastFetchTid.clear();
@@ -96,8 +100,9 @@ void Exchange_BTCChina::clearVariables()
 
 void Exchange_BTCChina::clearValues()
 {
-	clearVariables();
 	if(julyHttpAuth)julyHttpAuth->clearPendingData();
+	if(julyHttpPublic)julyHttpPublic->clearPendingData();
+	clearVariables();
 }
 
 QByteArray Exchange_BTCChina::getMidData(QString a, QString b,QByteArray *data)
@@ -118,9 +123,16 @@ void Exchange_BTCChina::secondSlot()
 	static int infoCounter=0;
 	switch(infoCounter)
 	{
-	case 0: if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"getOrders",true,true/*,"false"*/); break;
+	case 0: if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"getOrders",true,true,"true,\"ALL\""); break;
 	case 1: if(!isReplayPending(202))sendToApi(202,"getAccountInfo",true,true); break;
-	case 2: if(lastHistory.isEmpty()&&!isReplayPending(208))sendToApi(208,"getTransactions",true,true); break;
+	case 2: if(lastHistory.isEmpty()&&!isReplayPending(208))
+			{
+				if(historyLastDate.isEmpty())
+					sendToApi(208,"getTransactions",true,true,"\"all\",100");
+				else
+					sendToApi(208,"getTransactions",true,true,"\"all\",1000,0,"+historyLastDate);
+			}
+			break;
 	default: break;
 	}
 
@@ -129,29 +141,23 @@ void Exchange_BTCChina::secondSlot()
 		if(!isReplayPending(111))
 		{
 			emit depthRequested();
-			sendToApi(111,"getMarketDepth2",true,true,baseValues.depthCountLimitStr);
+			sendToApi(111,"getMarketDepth2",true,true,baseValues.depthCountLimitStr+",\""+baseValues.currentPair.currRequestPair+"\"");
 		}
 		forceDepthLoad=false;
 	}
 
-	if(!isReplayPending(103))sendToApi(103,"ticker",false,true);
+	if(!isReplayPending(103))sendToApi(103,"ticker?market="+baseValues.currentPair.currRequestPair,false,true);//
 
 	if(infoCounter==3&&!isReplayPending(109))
 	{
-		static QByteArray tradesRequest="historydata";
-		if(!lastFetchTid.isEmpty())tradesRequest="historydata?since="+lastFetchTid;
-		sendToApi(109,tradesRequest,false,true);
+		if(!lastFetchTid.isEmpty())historyLastTradesRequest="historydata?market="+baseValues.currentPair.currRequestPair+"&since="+lastFetchTid;
+		else "historydata?market="+baseValues.currentPair.currRequestPair;
+		sendToApi(109,historyLastTradesRequest,false,true);
 	}
 
 	if(infoCounter++==3)
 	{
 		infoCounter=0;
-		quint32 syncTonce=QDateTime::currentDateTime().toTime_t();
-		if(privateTonce<syncTonce)
-		{
-			privateTonce=syncTonce;
-			tonceCounter=0;
-		}
 	}
 
 	Exchange::secondSlot();
@@ -161,8 +167,8 @@ bool Exchange_BTCChina::isReplayPending(int reqType)
 {
 	if(reqType<200)
 	{
-	if(julyHttpPublic==0)return false;
-	return julyHttpPublic->isReqTypePending(reqType);
+		if(julyHttpPublic==0)return false;
+		return julyHttpPublic->isReqTypePending(reqType);
 	}
 
 	if(julyHttpAuth==0)return false;
@@ -173,7 +179,13 @@ void Exchange_BTCChina::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(!isReplayPending(208))sendToApi(208,"getTransactions",true,true);
+	if(!isReplayPending(208))
+	{
+		if(historyLastDate.isEmpty())
+			sendToApi(208,"getTransactions",true,true,"\"all\",100");
+		else
+			sendToApi(208,"getTransactions",true,true,"\"all\",1000,0,"+historyLastDate);
+	}
 }
 
 
@@ -190,17 +202,17 @@ QByteArray Exchange_BTCChina::numForBuySellFromDouble(double val, int maxDecimal
 void Exchange_BTCChina::buy(double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	QByteArray data=numForBuySellFromDouble(apiPriceToBuy,baseValues.currentPair.priceDecimals)+","+numForBuySellFromDouble(apiBtcToBuy,baseValues.currentPair.currADecimals);
+	QByteArray data=numForBuySellFromDouble(apiPriceToBuy,baseValues.currentPair.priceDecimals)+","+numForBuySellFromDouble(apiBtcToBuy,baseValues.currentPair.currADecimals)+",\""+baseValues.currentPair.currRequestPair+"\"";
 	if(debugLevel)logThread->writeLog("Buy: "+data,2);
-	sendToApi(306,"buyOrder",true,true,data);
+	sendToApi(306,"buyOrder2",true,true,data);
 }
 
 void Exchange_BTCChina::sell(double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
-	QByteArray data=numForBuySellFromDouble(apiPriceToSell,baseValues.currentPair.priceDecimals)+","+numForBuySellFromDouble(apiBtcToSell,baseValues.currentPair.currADecimals);
+	QByteArray data=numForBuySellFromDouble(apiPriceToSell,baseValues.currentPair.priceDecimals)+","+numForBuySellFromDouble(apiBtcToSell,baseValues.currentPair.currADecimals)+",\""+baseValues.currentPair.currRequestPair+"\"";
 	if(debugLevel)logThread->writeLog("Sell: "+data,2);
-	sendToApi(307,"sellOrder",true,true,data);
+	sendToApi(307,"sellOrder2",true,true,data);
 }
 
 void Exchange_BTCChina::cancelOrder(QByteArray order)
@@ -208,7 +220,7 @@ void Exchange_BTCChina::cancelOrder(QByteArray order)
 	if(tickerOnly)return;
 	cancelingOrderIDs<<order;
 	if(debugLevel)logThread->writeLog("Cancel order: "+order,2);
-	sendToApi(305,"cancelOrder",true,true,order);
+	sendToApi(305,"cancelOrder",true,true,order+",\""+baseValues.currentPair.currRequestPair+"\"");
 }
 
 void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
@@ -228,24 +240,40 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 
 		QByteArray signatureParams;
 
-		if(reqType!=204)
-		{
-			signatureParams=commands;
-		}
+		signatureParams=commands;
+		signatureParams.replace("\"","");
+		signatureParams.replace("true","1");
+		signatureParams.replace("false","");
 
 		QByteArray postData;
 		QByteArray appendedHeader;
-		QByteArray tonceCounterData=QByteArray::number(tonceCounter++);
+
+		static int tonceCounter=0;		
+		static quint32 lastTonce=static_cast<quint32>(time(NULL));
+		quint32 newTonce=static_cast<quint32>(time(NULL));
+
+		if(lastTonce!=newTonce)
+		{
+			tonceCounter=0;
+			lastTonce=newTonce;
+		}
+		else
+		{
+			tonceCounter+=10;
+			if(tonceCounter>99)tonceCounter=0;
+		}
+
+		QByteArray tonceCounterData=QByteArray::number(tonceCounter);
 		if(tonceCounter>9)tonceCounterData.append("0000");
 		else tonceCounterData.append("00000");
+		
+		QByteArray tonce=QByteArray::number(newTonce)+tonceCounterData;
 
-		QByteArray tonce=QByteArray::number(privateTonce)+tonceCounterData;
 		QByteArray signatureString="tonce="+tonce+"&accesskey="+privateRestKey+"&requestmethod=post&id=1&method="+method+"&params="+signatureParams;
 
 		signatureString=privateRestKey+":"+hmacSha1(privateRestSign,signatureString).toHex();
-
+		
 		if(debugLevel&&reqType>299)logThread->writeLog(postData);
-
 
 		postData="{\"method\":\""+method+"\",\"params\":["+commands+"],\"id\":1}";
 
@@ -269,6 +297,7 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 			connect(julyHttpPublic,SIGNAL(sslErrorSignal(const QList<QSslError> &)),this,SLOT(sslErrors(const QList<QSslError> &)));
 			connect(julyHttpPublic,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceivedAuth(QByteArray,int)));
 		}
+
 		if(sendNow)
 			julyHttpPublic->sendData(reqType, "GET /data/"+method);
 		else
@@ -328,7 +357,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 	if(debugLevel)logThread->writeLog("RCV: "+data);
 	bool success=data.startsWith("{")&&!data.startsWith("{\"error\":")||data.startsWith("[{");
 	if(success&&data.startsWith("401"))success=false;
-		
+
 	switch(reqType)
 	{
 	case 103: //ticker
@@ -412,7 +441,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
 					if(newItem.isValid())(*newTradesItems)<<newItem;
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
-					
+
 					if(n==tradeList.count()-1&&!nextFetchTid.isEmpty())lastFetchTid=nextFetchTid;
 				}
 				if(newTradesItems->count())emit addLastTrades(newTradesItems);
@@ -431,7 +460,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				lastDepthData=data;
 				depthAsks=new QList<DepthItem>;
 				depthBids=new QList<DepthItem>;
-				
+
 				int asksStart=data.indexOf("\"ask\":");
 				if(asksStart==-1)return;
 				QByteArray bidsData=data.mid(35,asksStart-38);
@@ -500,7 +529,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
 					if(baseValues.groupPriceValue>0.0)
 					{
-						if(n==asksList.count()-1)
+						if(n==0)
 						{
 							emit depthFirstOrder(priceDouble,amount,true);
 							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
@@ -510,7 +539,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 						{
 							bool matchCurrentGroup=priceDouble<groupedPrice+baseValues.groupPriceValue;
 							if(matchCurrentGroup)groupedVolume+=amount;
-							if(!matchCurrentGroup||n==0)
+							if(!matchCurrentGroup||n==asksList.count()-1)
 							{
 								depthSubmitOrder(&currentAsksMap,groupedPrice+baseValues.groupPriceValue,groupedVolume,true);
 								rowCounter++;
@@ -559,20 +588,19 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				QByteArray feeData=getMidData("trade_fee\":",",",&data);
 				if(!feeData.isEmpty())emit accFeeChanged(feeData.toDouble());
 
-				QByteArray frozenData=getMidData("\"frozen\":","}}}",&data);
-
-				QByteArray btcBalance=getMidData("symbol\":\"\\u0e3f\",\"amount\":\"","\"",&data);
+				QByteArray balanceData=getMidData("\"balance\":","}}}",&data)+"}";
+				QByteArray btcBalance=getMidData("\""+baseValues.currentPair.currAStrLow+"\":","}",&balanceData);
 				if(!btcBalance.isEmpty())
 				{
-					double newBtcBalance=btcBalance.toDouble()+getMidData("symbol\":\"\\u0e3f\",\"amount\":\"","\"",&frozenData).toDouble();
+					double newBtcBalance=btcBalance.toDouble()+getMidData("\"amount\":\"","\"",&btcBalance).toDouble();
 					if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(newBtcBalance);
 					lastBtcBalance=newBtcBalance;
 				}
 
-				QByteArray usdBalance=getMidData("symbol\":\"\\u00a5\",\"amount\":\"","\"",&data);
+				QByteArray usdBalance=getMidData("\""+baseValues.currentPair.currBStrLow+"\":","}",&balanceData);
 				if(!usdBalance.isEmpty())
 				{
-					double newUsdBalance=usdBalance.toDouble()+getMidData("symbol\":\"\\u00a5\",\"amount\":\"","\"",&frozenData).toDouble();
+					double newUsdBalance=usdBalance.toDouble()+getMidData("\"amount\":\"","\"",&usdBalance).toDouble();
 					if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(newUsdBalance);
 					lastUsdBalance=newUsdBalance;
 				}
@@ -582,43 +610,42 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 		break;//balance
 	case 204://open_orders
 		if(!success)break;
-		if(data.startsWith("{\"result\":{\"order\":["))
+		if(data.startsWith("{\"result\":{\"order"))
 		{
 			if(lastOrders!=data)
 			{
-				if(data.startsWith("{\"result\":{\"order\":[]}")){lastOrders.clear();emit ordersIsEmpty();break;}
+				if(data.size()<100){lastOrders.clear();emit ordersIsEmpty();break;}
+				QList<OrderItem> *orders=new QList<OrderItem>;
+				QStringList currencyList=QString(data).split("],\"");
+				for(int n=0;n<currencyList.count();n++)
+				{
+					QByteArray currencyByteArray=currencyList[n].toAscii();
+					QString curerntSymbol=getMidData("order_","\":[",&currencyByteArray).toUpper();
 
+					QStringList ordersList=currencyList.at(n).split("},{");
+
+					for(int n=0;n<ordersList.count();n++)
+					{	
+						OrderItem currentOrder;
+						QByteArray currentOrderData=ordersList.at(n).toAscii();
+						currentOrder.oid=getMidData("\"id\":",",",&currentOrderData);
+						currentOrder.date=getMidData("\"date\":",",",&currentOrderData).toUInt();
+						currentOrder.type=getMidData("\"type\":\"","\"",&currentOrderData)=="ask";
+						QByteArray status=getMidData("\"status\":\"","\"",&currentOrderData);
+						//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
+						if(status=="open")currentOrder.status=1;
+						else
+							if(status=="cancelled")currentOrder.status=0;
+							else currentOrder.status=2;
+
+							currentOrder.amount=getMidData("\"amount\":\"","\"",&currentOrderData).toDouble();
+							currentOrder.price=getMidData("\"price\":\"","\"",&currentOrderData).toDouble();
+							currentOrder.symbol=curerntSymbol.toAscii();
+							if(currentOrder.isValid())(*orders)<<currentOrder;
+					}
+				}
 				lastOrders=data;
 
-				if(data.size()>20)
-				{
-					data.remove(0,20);
-					int endOfOrders=data.lastIndexOf(']');
-					if(endOfOrders>-1)data.remove(endOfOrders-1,data.size()-endOfOrders-1);
-				}
-
-				QStringList ordersList=QString(data).split("},{");
-
-				QList<OrderItem> *orders=new QList<OrderItem>;
-				for(int n=0;n<ordersList.count();n++)
-				{	
-					OrderItem currentOrder;
-					QByteArray currentOrderData=ordersList.at(n).toAscii();
-					currentOrder.oid=getMidData("\"id\":",",",&currentOrderData);
-					currentOrder.date=getMidData("\"date\":",",",&currentOrderData).toUInt();
-					currentOrder.type=getMidData("\"type\":\"","\"",&currentOrderData)=="ask";
-					QByteArray status=getMidData("\"status\":\"","\"",&currentOrderData);
-					//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
-					if(status=="open")currentOrder.status=1;
-					else
-					if(status=="cancelled")currentOrder.status=0;
-					else currentOrder.status=2;
-
-					currentOrder.amount=getMidData("\"amount\":\"","\"",&currentOrderData).toDouble();
-					currentOrder.price=getMidData("\"price\":\"","\"",&currentOrderData).toDouble();
-					currentOrder.symbol=baseValues.currentPair.currAStr+getMidData("currency\":\"","\"",&currentOrderData);
-					if(currentOrder.isValid())(*orders)<<currentOrder;
-				}
 				emit ordersChanged(orders);
 				lastInfoReceived=false;
 			}
@@ -638,13 +665,13 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 		break;//cancelOrder
 	case 306: //buyOrder
 		if(!success||!debugLevel)break;
-			if(data.startsWith("{\"result\":"))logThread->writeLog("Buy OK: "+data);
-			else logThread->writeLog("Invalid Order Buy Data:"+data);
+		if(data.startsWith("{\"result\":"))logThread->writeLog("Buy OK: "+data);
+		else logThread->writeLog("Invalid Order Buy Data:"+data);
 		break;//buyOrder
 	case 307: //sellOrder
 		if(!success||!debugLevel)break;
-			if(data.startsWith("{\"result\":"))logThread->writeLog("Sell OK: "+data);
-			else logThread->writeLog("Invalid Order Sell Data:"+data);
+		if(data.startsWith("{\"result\":"))logThread->writeLog("Sell OK: "+data);
+		else logThread->writeLog("Invalid Order Sell Data:"+data);
 		break;//sellOrder
 	case 208: //money/wallet/history 
 		if(!success)break;
@@ -661,11 +688,28 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray curLog(dataList.at(n).toAscii());
 					curLog.append("}");
 
-					QByteArray transactionType=getMidData("type\":\"","\"",&curLog);
+					if(n==0)
+					{
+					QByteArray currentOrderID=getMidData("id\":",",",&curLog);
+					if(!historyLastID.isEmpty()&&currentOrderID>historyLastID)break;
+					historyLastID=currentOrderID;
+					}
+
+					QByteArray currentOrderDate=getMidData("date\":","}",&curLog);
 					
+					if(n==0)
+					{
+						if(!historyLastDate.isEmpty()&&currentOrderDate>historyLastDate)break;
+						historyLastDate=QByteArray::number(currentOrderDate.toUInt()-1);
+					}
+
+					QByteArray transactionType=getMidData("type\":\"","\"",&curLog);
+
 					bool isAsk=false;
-					if(transactionType=="sellbtc")isAsk=true;
-					else if(transactionType!="buybtc")continue;
+					if(transactionType.startsWith("sell"))isAsk=true;
+					else if(!transactionType.startsWith("buy"))continue;
+					
+					QByteArray currencyA=transactionType.right(3).toUpper();
 
 					HistoryItem currentHistoryItem;
 					currentHistoryItem.symbol=baseValues.currentPair.currSymbol;
@@ -675,13 +719,65 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
 					double btcAmount=getMidData("btc_amount\":\"","\"",&curLog).toDouble();
 					if(btcAmount<0.0)btcAmount=-btcAmount;
-					currentHistoryItem.volume=btcAmount;
 
 					double cnyAmount=getMidData("cny_amount\":\"","\"",&curLog).toDouble();
 					if(cnyAmount<0.0)cnyAmount=-cnyAmount;
-					currentHistoryItem.price=cnyAmount/btcAmount;
 
-					currentHistoryItem.dateTimeInt=getMidData("date\":","}",&curLog).toUInt();
+					double ltcAmount=getMidData("ltc_amount\":\"","\"",&curLog).toDouble();
+					if(ltcAmount<0.0)ltcAmount=-ltcAmount;
+
+					QByteArray currencyB;
+					if(currencyA=="BTC")
+					{
+						currentHistoryItem.volume=btcAmount;
+						if(cnyAmount!=0.0)
+						{
+							currentHistoryItem.price=cnyAmount/btcAmount;
+							currencyB="CNY";
+						}
+						else
+						if(ltcAmount!=0.0)
+						{
+							currentHistoryItem.price=ltcAmount/btcAmount;
+							currencyB="LTC";
+						}
+					}
+
+					if(currencyA=="CNY")
+					{
+						currentHistoryItem.volume=cnyAmount;
+						if(btcAmount!=0.0)
+						{
+							currentHistoryItem.price=btcAmount/cnyAmount;
+							currencyB="BTC";
+						}
+						else
+						if(ltcAmount!=0.0)
+						{
+							currentHistoryItem.price=ltcAmount/cnyAmount;
+							currencyB="LTC";
+						}
+					}
+
+					if(currencyA=="LTC")
+					{
+						currentHistoryItem.volume=ltcAmount;
+						if(btcAmount!=0.0)
+						{
+							currentHistoryItem.price=btcAmount/ltcAmount;
+							currencyB="BTC";
+						}
+						else
+						if(cnyAmount!=0.0)
+						{
+							currentHistoryItem.price=cnyAmount/ltcAmount;
+							currencyB="CNY";
+						}
+					}
+
+					currentHistoryItem.symbol=currencyA+currencyB;
+
+					currentHistoryItem.dateTimeInt=currentOrderDate.toUInt();
 
 					if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 				}

@@ -361,3 +361,5 @@ String_IF_10MIN_PERCENTAGE_CHANGED=If trades 10 min. Buy/Sell changed %1
 CheckBox_USE_RULES_GROUP_FILE=Load rules groups from file:
 String_RULES_ARE_YOU_SURE_TO_DELETE_GROUP=Are you sure to delete rules group %1?
 String_RULES_CONFIRM_DELETION=Please confirm rules group deletion
+String_10_MIN_BIDS_VOLUME=(10 min Bids Volume)/(10 min Asks Volume)*100
+String_APPLICATION_TITLE=Qt Bitcoin Trader

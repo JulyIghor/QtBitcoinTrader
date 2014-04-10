@@ -46,6 +46,7 @@ public:
 	~UpdaterDialog();
 
 private:
+	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	bool downloaded100;
 	bool feedbackMessage;
 	QTimer *timeOutTimer;

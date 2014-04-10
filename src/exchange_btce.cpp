@@ -72,7 +72,7 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	supportsExchangeLag=false;
 
 	authRequestTime.restart();
-	privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
+	privateNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
 }
 
 Exchange_BTCe::~Exchange_BTCe()
@@ -536,7 +536,7 @@ void Exchange_BTCe::secondSlot()
 	if(++infoCounter>9)
 	{
 		infoCounter=0;
-		quint32 syncNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
+		quint32 syncNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
 		if(privateNonce<syncNonce)privateNonce=syncNonce;
 	}
 	Exchange::secondSlot();

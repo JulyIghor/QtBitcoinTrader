@@ -39,40 +39,126 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QFile>
-#include "donatepanel.h"
+#include "logobutton.h"
 
 UpdaterDialog::UpdaterDialog(bool fbMess)
 	: QDialog()
 {
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
+	int updateCheckRetryCount=settings.value("UpdateCheckRetryCount",0).toInt();
+	settings.setValue("UpdateCheckRetryCount",updateCheckRetryCount);
+
+	bool useOldUpdateEngine=updateCheckRetryCount>3;
+
 	downloaded100=false;
 	feedbackMessage=fbMess;
 	stateUpdate=0;
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
-	httpGet=new JulyHttp("raw.github.com",0,this,true,false);
+
+
+	foreach(QGroupBox* groupBox, this->findChildren<QGroupBox*>())
+	{
+		if(groupBox->accessibleName()=="LOGOBUTTON")
+		{
+			QLayout *groupboxLayout=groupBox->layout();
+			if(groupboxLayout==0)
+			{
+				groupboxLayout=new QGridLayout;
+				groupboxLayout->setContentsMargins(0,0,0,0);
+				groupboxLayout->setSpacing(0);
+				groupBox->setLayout(groupboxLayout);
+				LogoButton *logoButton=new LogoButton;
+				connect(this,SIGNAL(themeChanged()),logoButton,SLOT(themeChanged()));
+				groupboxLayout->addWidget(logoButton);
+			}
+		}
+	}
+
+	if(useOldUpdateEngine)httpGet=new JulyHttp("raw.github.com",0,this,true,false);
+	else httpGet=new JulyHttp("qbtapi.centrabit.com",0,this,false,false);
 	timeOutTimer=new QTimer(this);
 	connect(timeOutTimer,SIGNAL(timeout()),this,SLOT(exitSlot()));
 	connect(httpGet,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
 
-	ui.donateGroupBox->layout()->addWidget(new DonatePanel(this));
-
+	if(useOldUpdateEngine)
+	{
 	if(baseValues.appVerIsBeta)httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
-			else	httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versions.txt");
-	timeOutTimer->start(30000);
+	else	httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versions.txt");
+	}
+
+	if(!useOldUpdateEngine)
+	{
+	QByteArray osString="Linux";
+
+#ifdef Q_OS_WIN
+	osString="Win";
+#endif
+
+#ifdef Q_OS_MAC
+	osString="Mac";
+#endif
+
+	QByteArray reqStr="Beta=";
+	if(baseValues.appVerIsBeta)reqStr.append("true");
+	else reqStr.append("false");
+
+	reqStr.append("&Version="+QByteArray::number(baseValues.appVerReal*100000,'f',0));
+
+	reqStr.append("&OS="+osString);
+	reqStr.append("&Locale="+QLocale().name());
+
+	httpGet->sendData(400,"POST /",reqStr);
+	}
+
+	timeOutTimer->start(60000);
 }
 
 UpdaterDialog::~UpdaterDialog()
 {
 }
 
-void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
+QByteArray UpdaterDialog::getMidData(QString a, QString b,QByteArray *data)
 {
-	if(httpGet)httpGet->blockSignals(true);
+	QByteArray rez;
+	if(b.isEmpty())b="\",";
+	int startPos=data->indexOf(a,0);
+	if(startPos>-1)
+	{
+		int endPos=data->indexOf(b,startPos+a.length());
+		if(endPos>-1)rez=data->mid(startPos+a.length(),endPos-startPos-a.length());
+	}
+	return rez;
+}
+
+void UpdaterDialog::dataReceived(QByteArray dataReceived,int reqType)
+{
 	timeOutTimer->stop();
 
 	if(stateUpdate==0)
 	{
 		if(dataReceived.size()>10245)exitSlot();
+
+		bool canAutoUpdate=false;
+#ifdef Q_OS_MAC
+		canAutoUpdate=true;
+#endif
+#ifdef Q_OS_WIN
+		canAutoUpdate=true;
+#endif
+
+		if(reqType==400)
+		{
+			updateVersion=getMidData("Version\":\"","\"",&dataReceived);
+			if(updateVersion.size()>2)updateVersion.insert(1,".");
+			updateSignature=getMidData("Hash\":\"","\"",&dataReceived);
+			if(!updateSignature.isEmpty())updateSignature=QByteArray::fromBase64(updateSignature);
+			updateChangeLog=getMidData("ChangeLog\":\"","\"",&dataReceived);
+			updateLink=getMidData("Binary\":\"","\"",&dataReceived).replace("\\/","/");
+		}
+
+		if(reqType==320)
+		{
 		QMap<QString,QString>versionsMap;
 		QStringList dataList=QString(dataReceived).split("\n");
 		for(int n=0;n<dataList.count();n++)
@@ -88,20 +174,19 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 		}
 
 		QString os="Src";
-		bool canAutoUpdate=false;
 #ifdef Q_OS_MAC
 		os="Mac";
-		canAutoUpdate=true;
 #endif
 #ifdef Q_OS_WIN
 		os="Win32";
-		canAutoUpdate=true;
 #endif
 		updateVersion=versionsMap.value(os+"Ver");
 		updateSignature=versionsMap.value(os+"Signature").toAscii();
 		if(!updateSignature.isEmpty())updateSignature=QByteArray::fromBase64(updateSignature);
 		updateChangeLog=versionsMap.value(os+"ChangeLog");
 		updateLink=versionsMap.value(os+"Bin");
+		}
+
 		if(updateVersion.toDouble()<=baseValues.appVerReal)
 		{
 			if(feedbackMessage)
@@ -167,6 +252,8 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int)
 				QFile(curBin).setPermissions(QFile(bkpBin).permissions());
 #endif
 				QMessageBox::information(this,windowTitle(),julyTr("UPDATED_SUCCESSFULLY","Application updated successfully. Please restart application to apply changes."));
+				QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
+				settings.setValue("UpdateCheckRetryCount",0);
 				exitSlot();
 			}
 		}
@@ -208,6 +295,10 @@ void UpdaterDialog::downloadError(int val)
 {
 	if(downloaded100)return;
 	QMessageBox::warning(this,windowTitle(),julyTr("DOWNLOAD_ERROR","Download error. Please try again.")+"<br>"+httpGet->errorString()+"<br>CODE: "+QString::number(val));
+
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
+	settings.setValue("UpdateCheckRetryCount",settings.value("UpdateCheckRetryCount",0).toInt()+1);
+
 	exitSlot();
 }
 

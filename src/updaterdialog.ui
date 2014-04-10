@@ -26,6 +26,58 @@
    <string>Qt Bitcoin Trader</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_6">
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="autoUpdateGroupBox">
+     <property name="accessibleName">
+      <string>AUTOMATIC_DOWNLOAD_ANS_INSTALL</string>
+     </property>
+     <property name="title">
+      <string>Automatic download and Installation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_2">
+        <property name="accessibleName">
+         <string>UPDATE_DESCRIPTION</string>
+        </property>
+        <property name="text">
+         <string>Your platform supports secure automatic update.
+Download file will be validated by RSA2048 protected checksum.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QProgressBar" name="progressBar">
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="buttonUpdate">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string>INSTALL</string>
+        </property>
+        <property name="text">
+         <string>Install</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="font">
@@ -82,6 +134,37 @@
      </layout>
     </widget>
    </item>
+   <item row="3" column="0">
+    <widget class="QGroupBox" name="donateGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>480</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="accessibleName">
+      <string>LOGOBUTTON</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px; background: transparent;</string>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="accessibleName">
@@ -98,125 +181,6 @@
         </property>
        </widget>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QGroupBox" name="autoUpdateGroupBox">
-     <property name="accessibleName">
-      <string>AUTOMATIC_DOWNLOAD_ANS_INSTALL</string>
-     </property>
-     <property name="title">
-      <string>Automatic download and Installation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="label_2">
-        <property name="accessibleName">
-         <string>UPDATE_DESCRIPTION</string>
-        </property>
-        <property name="text">
-         <string>Your platform supports secure automatic update.
-Download file will be validated by RSA2048 protected checksum.</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QProgressBar" name="progressBar">
-        <property name="value">
-         <number>0</number>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="buttonUpdate">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="accessibleName">
-         <string>INSTALL</string>
-        </property>
-        <property name="text">
-         <string>Install</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string/>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <property name="margin">
-       <number>6</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_53">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>https://sourceforge.net/projects/bitcointrader</string>
-        </property>
-        <property name="text">
-         <string>&lt;a href=&quot;http://qtopentrader.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://QtOpenTrader.com&lt;/span&gt;&lt;/a&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QGroupBox" name="donateGroupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>480</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="accessibleName">
-      <string>TR00053</string>
-     </property>
-     <property name="title">
-      <string>Donate</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_5">
-      <property name="margin">
-       <number>9</number>
-      </property>
      </layout>
     </widget>
    </item>

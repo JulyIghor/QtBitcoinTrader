@@ -29,53 +29,50 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "donatebtc.h"
-#include <QClipboard>
+#include "logobutton.h"
 #include "main.h"
+#include <QDesktopServices>
+#include <QUrl>
 
-DonateBTC::DonateBTC(QPushButton *button, bool btc)
-	: QMenu()
+LogoButton::LogoButton(QWidget *parent)
+	: QWidget(parent)
 {
 	ui.setupUi(this);
-	isBtc=btc;
-	if(btc)
-	{
-		ui.btcLabel11->setPixmap(QPixmap(":/Resources/CurrencySign/BTC.png"));
-		ui.bitcoinAddress->setText("1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc");
-	}
-	else//ltc
-	{
-		ui.btcLabel11->setPixmap(QPixmap(":/Resources/CurrencySign/LTC.png"));
-		ui.bitcoinAddress->setText("LPJZTHaHdMwm4kHV6WGNegmoWDSzC9rzYB");
-	}
-	setAttribute(Qt::WA_DeleteOnClose,true);
-	connect(this,SIGNAL(setCheckedButton(bool)),button,SLOT(setChecked(bool)));
-	connect(this,SIGNAL(aboutToHide()),this,SLOT(aboutToHideWindow()));
-	julyTranslator.translateUi(this);
-	mainWindow.fixAllChildButtonsAndLabels(this);
-	setFixedHeight(minimumSizeHint().height());
-	setFixedWidth(width());
-	QPalette pal=palette();
-	pal.setColor(QPalette::Window, QColor(80,80,80));
-	setPalette(pal);
+	themeChanged();
+	setCursor(Qt::PointingHandCursor);
 }
 
-DonateBTC::~DonateBTC()
+LogoButton::~LogoButton()
 {
 
 }
 
-void DonateBTC::mouseReleaseEvent(QMouseEvent *event)
+void LogoButton::mouseReleaseEvent(QMouseEvent *event)
 {
-	event->ignore();
+	event->accept();
+	QPoint pressPos=event->pos();
+	if(pressPos.x()<0||pressPos.y()<0||pressPos.y()>height()||pressPos.x()>width())return;
+
+	if(event->button()==Qt::LeftButton)
+		QDesktopServices::openUrl(QUrl("http://centrabit.com"));
 }
 
-void DonateBTC::aboutToHideWindow()
+void LogoButton::themeChanged()
 {
-	emit setCheckedButton(false);
+	static QPixmap logoDay(":/Resources/CentrabitDay.png");
+	static QPixmap logoNight(":/Resources/CentrabitNight.png");
+	logoSize=logoDay.size();
+
+	if(baseValues.nightMode)
+		ui.logo->setPixmap(logoNight);
+	else
+		ui.logo->setPixmap(logoDay);
 }
 
-void DonateBTC::on_copyDonateButton_clicked()
+void LogoButton::resizeEvent(QResizeEvent *event)
 {
-	QApplication::clipboard()->setText(ui.bitcoinAddress->text());
+	event->accept();
+	QSize newSize=logoSize;
+	newSize.scale(size(),Qt::KeepAspectRatio);
+	ui.logo->setGeometry((width()-newSize.width())/2,(height()-newSize.height())/2,newSize.width(),newSize.height());
 }

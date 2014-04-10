@@ -29,57 +29,29 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "donatewebmoney.h"
-#include <QClipboard>
-#include "main.h"
+#ifndef LOGOBUTTON_H
+#define LOGOBUTTON_H
 
-DonateWebMoney::DonateWebMoney(QPushButton *button)
-	: QMenu()
+#include <QWidget>
+#include "ui_logobutton.h"
+#include <QMouseEvent>
+#include <QResizeEvent>
+
+class LogoButton : public QWidget
 {
-	ui.setupUi(this);
-	setAttribute(Qt::WA_DeleteOnClose,true);
-	connect(this,SIGNAL(setCheckedButton(bool)),button,SLOT(setChecked(bool)));
-	connect(this,SIGNAL(aboutToHide()),this,SLOT(aboutToHideWindow()));
-	julyTranslator.translateUi(this);
-	mainWindow.fixAllChildButtonsAndLabels(this);
-	setFixedHeight(minimumSizeHint().height());
-	setFixedWidth(width());
-	QPalette pal=palette();
-	pal.setColor(QPalette::Window, QColor(80,80,80));
-	setPalette(pal);
-}
+	Q_OBJECT
 
-DonateWebMoney::~DonateWebMoney()
-{
+public:
+	LogoButton(QWidget *parent = 0);
+	~LogoButton();
 
-}
+private:
+	QSize logoSize;
+	void resizeEvent(QResizeEvent *);
+	void mouseReleaseEvent(QMouseEvent *event);
+	Ui::LogoButton ui;
+public slots:
+	void themeChanged();
+};
 
-void DonateWebMoney::mouseReleaseEvent(QMouseEvent *event)
-{
-	event->ignore();
-}
-
-void DonateWebMoney::aboutToHideWindow()
-{
-	emit setCheckedButton(false);
-}
-
-void DonateWebMoney::on_wmzCopy_clicked()
-{
-	QApplication::clipboard()->setText(ui.wmz->text());
-}
-
-void DonateWebMoney::on_wmrCopy_clicked()
-{
-	QApplication::clipboard()->setText(ui.wmr->text());
-}
-
-void DonateWebMoney::on_wmeCopy_clicked()
-{
-	QApplication::clipboard()->setText(ui.wme->text());
-}
-
-void DonateWebMoney::on_wmuCopy_clicked()
-{
-	QApplication::clipboard()->setText(ui.wmu->text());
-}
+#endif // LOGOBUTTON_H

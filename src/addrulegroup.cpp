@@ -117,7 +117,7 @@ bool AddRuleGroup::loadGroupFromFile(QString fileName)
 	QByteArray rulesData;
 	QFile validateRule(fileName);
 	if(validateRule.open(QIODevice::ReadOnly))rulesData=validateRule.readAll();
-	if(rulesData.startsWith("Qt Bitcoin Trader Rules\n"))rulesData.remove(0,24);
+	if(rulesData.startsWith("Qt Bitcoin Trader Rules\n"))rulesData.remove(0,23);
 	else return false;
 	groupsList=QString(rulesData).split("\n");
 	return true;

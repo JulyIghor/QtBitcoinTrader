@@ -50,6 +50,7 @@ class Exchange : public QThread
 	Q_OBJECT
 
 public:
+	bool exchangeDisplayOnlyCurrentPairOpenOrders;
 	bool clearHistoryOnCurrencyChanged;
 	bool exchangeTickerSupportsHiLowPrices;
 	bool depthEnabled;

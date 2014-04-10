@@ -1,5 +1,12 @@
 <RCC>
   <qresource prefix="/">
+    <file>Resources/CentrabitDay.png</file>
+    <file>Resources/CentrabitNight.png</file>
+    <file>Resources/Exchanges/Logos/Bitstamp.png</file>
+    <file>Resources/Exchanges/Logos/Unknown.png</file>
+    <file>Resources/Exchanges/Logos/Bitfinex.png</file>
+    <file>Resources/Exchanges/Logos/BTCChina.png</file>
+    <file>Resources/Exchanges/Logos/BTC-e.png</file>
     <file>Resources/Templates/001.qbtrule</file>
     <file>Resources/Templates/002.qbtrule</file>
     <file>Resources/Templates/003.qbtrule</file>
@@ -21,11 +28,6 @@
     <file>Resources/Donate/Litecoin.png</file>
     <file>Resources/Donate/WebMoney.png</file>
     <file>Resources/Settings.png</file>
-    <file>Resources/Exchanges/Logos/BTCChina.png</file>
-    <file>Resources/Exchanges/Logos/Mt.Gox.png</file>
-    <file>Resources/Exchanges/Logos/Bitstamp.png</file>
-    <file>Resources/Exchanges/Logos/Bitfinex.png</file>
-    <file>Resources/Exchanges/Logos/BTC-e.png</file>
     <file>Resources/exit.png</file>
     <file>Resources/Mute.png</file>
     <file>Resources/OnTop.png</file>
@@ -36,7 +38,6 @@
     <file>Resources/calc.png</file>
     <file>Resources/Currencies.ini</file>
     <file>Resources/Exchanges/List.ini</file>
-    <file>Resources/Exchanges/MtGox.ini</file>
     <file>Resources/Exchanges/BTCe.ini</file>
     <file>Resources/Exchanges/Bitfinex.ini</file>
     <file>Resources/Exchanges/BTCChina.ini</file>

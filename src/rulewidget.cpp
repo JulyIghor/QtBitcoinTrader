@@ -476,6 +476,6 @@ void RuleWidget::on_ruleSave_clicked()
 		QMessageBox::warning(this,windowTitle(),"Can not write file");
 		return;
 	}
-	saveRule.write("Qt Bitcoin Trader Rules\n"+groupName.toAscii()+"==>"+rulesModel->saveRulesToString().toAscii());
+	saveRule.write("Qt Bitcoin Trader Rules\n"+groupName.toUtf8()+"==>"+rulesModel->saveRulesToString().toAscii());
 	saveRule.close();
 }

@@ -78,7 +78,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 
 	moveToThread(this);
 	authRequestTime.restart();
-	privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
+	privateNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
 }
 
 Exchange_Bitstamp::~Exchange_Bitstamp()
@@ -139,7 +139,7 @@ void Exchange_Bitstamp::secondSlot()
 	if(++infoCounter>4)
 	{
 		infoCounter=0;
-		quint32 syncNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
+		quint32 syncNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
 		if(privateNonce<syncNonce)privateNonce=syncNonce;
 	}
 

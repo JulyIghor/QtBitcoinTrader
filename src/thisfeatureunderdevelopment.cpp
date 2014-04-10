@@ -31,7 +31,6 @@
 
 #include "thisfeatureunderdevelopment.h"
 #include "main.h"
-#include "donatepanel.h"
 
 ThisFeatureUnderDevelopment::ThisFeatureUnderDevelopment(QWidget *parent)
 	: QDialog(parent)
@@ -39,7 +38,6 @@ ThisFeatureUnderDevelopment::ThisFeatureUnderDevelopment(QWidget *parent)
 	if(parent==0)parent=this;
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint);
-	ui.donateGroupBoxBottom->layout()->addWidget(new DonatePanel(parent));
 	themeChanged();
 	connect(baseValues.mainWindow_,SIGNAL(themeChanged()),this,SLOT(themeChanged()));
 }

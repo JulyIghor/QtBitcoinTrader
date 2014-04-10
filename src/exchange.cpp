@@ -38,6 +38,7 @@
 Exchange::Exchange()
 	: QThread()
 {
+	exchangeDisplayOnlyCurrentPairOpenOrders=false;
 	orderBookItemIsDedicatedOrder=false;
 	supportsExchangeFee=true;
 	supportsExchangeVolume=true;

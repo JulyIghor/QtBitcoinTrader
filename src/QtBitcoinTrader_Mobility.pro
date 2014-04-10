@@ -35,17 +35,12 @@ HEADERS += aboutdialog.h \
            debugviewer.h \
            depthitem.h \
            depthmodel.h \
-           donatebtc.h \
-           donatepanel.h \
-           donatewebmoney.h \
            exchange.h \
            exchange_bitfinex.h \
            exchange_bitstamp.h \
            exchange_btcchina.h \
            exchange_btce.h \
            exchange_cryptsy.h \
-           exchange_mtgox.h \
-           exchangemtgox.h \
            feecalculator.h \
            historyitem.h \
            historymodel.h \
@@ -75,14 +70,12 @@ HEADERS += aboutdialog.h \
            translationdialog.h \
            translationline.h \
            updaterdialog.h \
-           apptheme.h
+           apptheme.h \
+           logobutton.h
 FORMS += addrulegroup.ui \
          addrulewindow.ui \
          datafolderchusedialog.ui \
          debugviewer.ui \
-         donatebtc.ui \
-         donatepanel.ui \
-         donatewebmoney.ui \
          feecalculator.ui \
          newpassworddialog.ui \
          passworddialog.ui \
@@ -92,7 +85,8 @@ FORMS += addrulegroup.ui \
          thisfeatureunderdevelopment.ui \
          translationabout.ui \
          translationdialog.ui \
-         updaterdialog.ui
+         updaterdialog.ui \
+         logobutton.ui
 SOURCES += aboutdialog.cpp \
            addrulegroup.cpp \
            addrulewindow.cpp \
@@ -102,17 +96,12 @@ SOURCES += aboutdialog.cpp \
            debugviewer.cpp \
            depthitem.cpp \
            depthmodel.cpp \
-           donatebtc.cpp \
-           donatepanel.cpp \
-           donatewebmoney.cpp \
            exchange.cpp \
            exchange_bitfinex.cpp \
            exchange_bitstamp.cpp \
            exchange_btcchina.cpp \
            exchange_btce.cpp \
            exchange_cryptsy.cpp \
-           exchange_mtgox.cpp \
-           exchangemtgox.cpp \
            feecalculator.cpp \
            historyitem.cpp \
            historymodel.cpp \
@@ -142,7 +131,8 @@ SOURCES += aboutdialog.cpp \
            translationdialog.cpp \
            translationline.cpp \
            updaterdialog.cpp \
-           apptheme.cpp
+           apptheme.cpp \
+           logobutton.cpp
 #
 # Resources
 # 
@@ -183,3 +173,5 @@ INSTALLS += icon
 win32 {
 RC_FILE = WinResource.rc
 }
+
+macx:ICON = $${PWD}/QtBitcoinTrader.icns

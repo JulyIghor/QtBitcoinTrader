@@ -115,7 +115,7 @@ void NewPasswordDialog::getApiKeySecretButton()
 
 int NewPasswordDialog::getExchangeId()
 {
-	return ui.exchangeComboBox->currentIndex();
+	return ui.exchangeComboBox->currentIndex()+1;
 }
 
 void NewPasswordDialog::checkToEnableButton()

@@ -32,7 +32,6 @@
 #include "aboutdialog.h"
 #include "main.h"
 #include "translationdialog.h"
-#include "donatepanel.h"
 
 TranslationAbout::TranslationAbout(QWidget *par)
 	: QDialog()
@@ -53,8 +52,6 @@ TranslationAbout::~TranslationAbout()
 
 void TranslationAbout::showWindow()
 {
-	ui.donateGroupBoxBottom->layout()->addWidget(new DonatePanel(this));
-
 	julyTranslator.translateUi(this);
 	ui.languageField->setText(julyTr("LANGUAGE_NAME","Invalid Language"));
 	ui.translationAuthor->setText(julyTr("LANGUAGE_AUTHOR","Invalid About"));

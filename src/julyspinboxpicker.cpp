@@ -48,7 +48,7 @@ JulySpinBoxPicker::JulySpinBoxPicker(QDoubleSpinBox *parent, double *forceMinVal
 	parentSpinBox=parent;
 	setScaledContents(true);
 	setFixedSize(11,16);
-	j_debugMode=true;
+	j_debugMode=false;
 	setIcon(0);
 	setCursor(QCursor(Qt::OpenHandCursor));
 }

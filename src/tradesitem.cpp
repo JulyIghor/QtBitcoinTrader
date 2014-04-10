@@ -51,7 +51,7 @@ void TradesItem::cacheStrings()
 	dateStr=itemDate.toString(baseValues.dateTimeFormat);
 	if(price>0.0)priceStr=mainWindow.numFromDouble(price);
 	if(amount>0.0)amountStr=mainWindow.numFromDouble(amount);
-	if(amount>0.0&&price>0.0)totalStr=QString::number(price*amount,'f',baseValues.currentPair.currBBalanceDecimals);
+	if(amount>0.0&&price>0.0)totalStr=QString::number(price*amount,'f',baseValues.currentPair.currBDecimals);
 }
 
 bool TradesItem::isValid()

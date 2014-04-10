@@ -54,7 +54,10 @@ private:
 	JulyHttp *julyHttpAuth;
 	JulyHttp *julyHttpPublic;
 
+	QByteArray historyLastDate;
+	QByteArray historyLastID;
 	QByteArray lastFetchTid;
+	QByteArray historyLastTradesRequest;
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
 	QByteArray numForBuySellFromDouble(double val, int maxDecimals);
 
@@ -69,9 +72,6 @@ private:
 
 	QTime authRequestTime;
 	QTimer *secondTimer;
-
-	quint32 privateTonce;
-	quint32 tonceCounter;
 
 	void clearVariables();
 	void depthSubmitOrder(QMap<double,double> *,double,double,bool);

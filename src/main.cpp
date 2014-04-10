@@ -98,7 +98,7 @@ void BaseValues::Construct()
 	rulesSafeModeInterval=5000;
 	gzipEnabled=true;
 	appVerIsBeta=false;
-	appVerStr="1.07974";
+	appVerStr="1.0798";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -111,8 +111,8 @@ void BaseValues::Construct()
 	logThread=0;
 
 	highResolutionDisplay=true;
-	dateTimeFormat=QLocale().dateTimeFormat(QLocale::ShortFormat);
-	timeFormat=QLocale().timeFormat(QLocale::ShortFormat);
+	timeFormat=QLocale().timeFormat(QLocale::LongFormat).replace(" ","").replace("t","");
+	dateTimeFormat=QLocale().dateFormat(QLocale::ShortFormat)+" "+timeFormat;
 	depthCountLimit=100;
 	depthCountLimitStr="100";
 	uiUpdateInterval=100;
@@ -215,7 +215,6 @@ int main(int argc, char *argv[])
 		QFile::rename(appDataDir+"/Settings.set",appDataDir+"/QtBitcoinTrader.cfg");
 	}
 
-	
     if(argc>1)
 	{
         if(a.arguments().last().startsWith("/checkupdate"))
