@@ -578,7 +578,7 @@ void Exchange_BTCe::sell(double apiBtcToSell, double apiPriceToSell)
 		int toCut=(btcToSell.size()-dotPos-1)-baseValues.currentPair.currADecimals;
 		if(toCut>0)btcToSell.remove(btcToSell.size()-toCut-1,toCut);
 	}
-	QByteArray data="method=Trade&pair="+baseValues.currentPair.currRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell)+"&amount="+btcToSell+"&";
+	QByteArray data="method=Trade&pair="+baseValues.currentPair.currRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell,'f',baseValues.currentPair.priceDecimals)+"&amount="+btcToSell+"&";
 	if(debugLevel)logThread->writeLog("Sell: "+data,2);
 	sendToApi(307,"",true,true,data);
 }
