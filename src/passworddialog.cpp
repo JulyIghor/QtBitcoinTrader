@@ -115,8 +115,8 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 		ui.profileComboBox->addItem(QIcon(currentLogo),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
 
-		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;
-		if(firstUnlockedProfileIndex==-1&&!isProfLocked)firstUnlockedProfileIndex=n;
+		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n-1;
+		if(firstUnlockedProfileIndex==-1&&!isProfLocked)firstUnlockedProfileIndex=n-1;
 	}
 	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem(julyTr("DEFAULT_PROFILE_NAME","Default Profile"));
 	if(firstUnlockedProfileIndex!=-1&&lastProfileIndex==-1)lastProfileIndex=firstUnlockedProfileIndex;

@@ -20,149 +20,7 @@
    <string>Qt Bitcoin Trader</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="aboutBitcoinTraderGroupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="accessibleName">
-      <string/>
-     </property>
-     <property name="title">
-      <string>About Qt Bitcoin Trader</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
-       <widget class="QLabel" name="aboutTextLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="accessibleName">
-         <string/>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {color: black; border: 1px solid gray; background: white; padding:6px}</string>
-        </property>
-        <property name="text">
-         <string>Qt Bitcoin Trader is a free Open Source project&lt;br&gt;developed on pure C++ Qt and OpenSSL.&lt;br&gt;
-If you want to help make project better please donate: &lt;a href=&quot;bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc&quot;&gt;1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc&lt;/a&gt;&lt;br&gt;
-Feel free to send me recommendations and fixes to: &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt;julyighor@gmail.com&lt;/a&gt;&lt;br&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QGroupBox" name="aboutTranslationGroupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>120</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>140</height>
-      </size>
-     </property>
-     <property name="accessibleName">
-      <string>ABOUT_TRANSLATION</string>
-     </property>
-     <property name="title">
-      <string>About Translation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="langLabel">
-        <property name="accessibleName">
-         <string>TR00115</string>
-        </property>
-        <property name="text">
-         <string>Language:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="languageField">
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="accessibleName">
-         <string>TR00116</string>
-        </property>
-        <property name="text">
-         <string>Translator:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="translationAuthor">
-        <property name="accessibleName">
-         <string>TR00116</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {color: black; border: 1px solid gray; background: white; padding:6px}</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="1" rowspan="3">
+   <item row="0" column="1" rowspan="2">
     <widget class="QGroupBox" name="createTranslationGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -273,7 +131,149 @@ Or if you want to fix errors in existing translation.&lt;br&gt;Please follow ins
      </layout>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="aboutBitcoinTraderGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="accessibleName">
+      <string/>
+     </property>
+     <property name="title">
+      <string>About Qt Bitcoin Trader</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="aboutTextLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string/>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {color: black; border: 1px solid gray; background: white; padding:6px}</string>
+        </property>
+        <property name="text">
+         <string>Qt Bitcoin Trader is a free Open Source project&lt;br&gt;developed on pure C++ Qt and OpenSSL.&lt;br&gt;
+If you want to help make project better please donate: &lt;a href=&quot;bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc&quot;&gt;1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc&lt;/a&gt;&lt;br&gt;
+Feel free to send me recommendations and fixes to: &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt;julyighor@gmail.com&lt;/a&gt;&lt;br&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="aboutTranslationGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>120</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>140</height>
+      </size>
+     </property>
+     <property name="accessibleName">
+      <string>ABOUT_TRANSLATION</string>
+     </property>
+     <property name="title">
+      <string>About Translation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="langLabel">
+        <property name="accessibleName">
+         <string>TR00115</string>
+        </property>
+        <property name="text">
+         <string>Language:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="languageField">
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="accessibleName">
+         <string>TR00116</string>
+        </property>
+        <property name="text">
+         <string>Translator:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="translationAuthor">
+        <property name="accessibleName">
+         <string>TR00116</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {color: black; border: 1px solid gray; background: white; padding:6px}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="buttonCheckUpdates">
@@ -315,17 +315,6 @@ Or if you want to fix errors in existing translation.&lt;br&gt;Please follow ins
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="donateGroupBoxBottom">
-     <property name="accessibleName">
-      <string>TR00053</string>
-     </property>
-     <property name="title">
-      <string>Donate</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_5"/>
-    </widget>
    </item>
   </layout>
  </widget>
