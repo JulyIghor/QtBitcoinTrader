@@ -122,7 +122,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	buyLockTotalBtcSelf=false;
 	buyLockTotalBtc=false;
 	buyLockPricePerCoin=false;
-	buyLockTotalSpend=false;
 
 	ui.setupUi(this);
 	ui.accountFee->setValue(0.0);
@@ -1856,20 +1855,17 @@ void QtBitcoinTrader::showErrorMessage(QString message)
 	static QTime lastMessageTime;
 	if(!showingMessage&&lastMessageTime.elapsed()>10000)
 	{
-		if(!showingMessage)
+		showingMessage=true;
+		if(debugLevel)logThread->writeLog(baseValues.exchangeName.toAscii()+" Error: "+message.toAscii(),2);
+		lastMessageTime.restart();
+		if(message.startsWith("I:>"))
 		{
-			showingMessage=true;
-			if(debugLevel)logThread->writeLog(baseValues.exchangeName.toAscii()+" Error: "+message.toAscii(),2);
-			lastMessageTime.restart();
-			if(message.startsWith("I:>"))
-			{
-				message.remove(0,3);
-				identificationRequired(message);
-			}
-			else
-			QMessageBox::warning(windowWidget,julyTr("AUTH_ERROR","%1 Error").arg(baseValues.exchangeName),message);
-			showingMessage=false;
+			message.remove(0,3);
+			identificationRequired(message);
 		}
+		else
+			QMessageBox::warning(windowWidget,julyTr("AUTH_ERROR","%1 Error").arg(baseValues.exchangeName),message);
+		showingMessage=false;
 	}
 }
 
@@ -2073,9 +2069,9 @@ void QtBitcoinTrader::setSoftLagValue(int mseconds)
 		if(!isValidSoftLag)ui.lastUpdate->setStyleSheet("QDoubleSpinBox {background: "+baseValues.appTheme.lightRed.name()+";}");
 		else ui.lastUpdate->setStyleSheet("");
 		calcOrdersTotalValues();
-		ui.ordersControls->setEnabled(isValidSoftLag);
-		ui.buyButtonBack->setEnabled(isValidSoftLag);
-		ui.sellButtonBack->setEnabled(isValidSoftLag);
+		//ui.ordersControls->setEnabled(isValidSoftLag);
+		//ui.buyButtonBack->setEnabled(isValidSoftLag);
+		//ui.sellButtonBack->setEnabled(isValidSoftLag);
 		QString toolTip;
 		if(!isValidSoftLag)toolTip=julyTr("TOOLTIP_API_LAG_TO_HIGH","API Lag is to High");
 
@@ -2229,11 +2225,6 @@ void QtBitcoinTrader::on_buyTotalSpend_valueChanged(double val)
 	valueForResult=getValidDoubleForPercision(valueForResult,baseValues.currentPair.currADecimals,false);
 	ui.buyTotalBtcResult->setValue(valueForResult);
 
-	if(buyLockTotalSpend)return;
-	buyLockTotalSpend=true;
-
-
-	buyLockTotalSpend=false;
 	checkValidBuyButtons();
 }
 
@@ -2247,10 +2238,7 @@ void QtBitcoinTrader::on_buyTotalBtc_valueChanged(double)
 	buyLockTotalBtc=true;
 	buyLockTotalBtcSelf=true;
 
-	buyLockTotalSpend=true;
-
 	ui.buyTotalSpend->setValue(ui.buyTotalBtc->value()*ui.buyPricePerCoin->value());
-	buyLockTotalSpend=false;
 	buyLockTotalBtcSelf=false;
 	buyLockTotalBtc=false;
 	checkValidBuyButtons();

@@ -64,7 +64,7 @@ public:
 	OrdersModel();
 	~OrdersModel();
 
-	void ordersChanged(QList<OrderItem> *orders);
+	void ordersChanged(QList<OrderItem> *ordersRcv);
 
 	void setHorizontalHeaderLabels(QStringList list);
 

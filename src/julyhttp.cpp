@@ -155,7 +155,7 @@ void JulyHttp::reconnectSocket(bool mastAbort)
 {
 	if(isDisabled)return;
 	if(mastAbort)abortSocket();
-	if(state()==QAbstractSocket::UnconnectedState||state()==QAbstractSocket::UnconnectedState)
+	if(state()==QAbstractSocket::UnconnectedState)
 	{
 		if(secureConnection)connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
 		else connectToHost(hostName,80,QIODevice::ReadWrite);
@@ -608,7 +608,7 @@ void JulyHttp::takeFirstRequest()
 
 void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 {
-	if(socketError!=QAbstractSocket::RemoteHostClosedError||socketError!=QAbstractSocket::UnfinishedSocketOperationError)setApiDown(true);
+	if(socketError!=QAbstractSocket::RemoteHostClosedError&&socketError!=QAbstractSocket::UnfinishedSocketOperationError)setApiDown(true);
 
 	if(debugLevel)logThread->writeLog("SocketError: "+errorString().toAscii(),2);
 
@@ -678,7 +678,7 @@ void JulyHttp::sendPendingData()
 	clearRequest();
 
 	requestTimeOut.restart();
-	if(debugLevel)logThread->writeLog("SND: "+QByteArray(*currentPendingRequest).replace(baseValues.restKey,"REST_KEY").replace(baseValues.restSign,"REST_SIGN"));
+	if(debugLevel&&currentPendingRequest)logThread->writeLog("SND: "+QByteArray(*currentPendingRequest).replace(baseValues.restKey,"REST_KEY").replace(baseValues.restSign,"REST_SIGN"));
 
 	if(currentPendingRequest)
 	{
@@ -706,13 +706,5 @@ void JulyHttp::addSpeedSize(qint64 size)
 
 void JulyHttp::sslErrorsSlot(const QList<QSslError> &val)
 {
-	for(int n=0;n<val.count();n++)
-		if(val.at(n).error()==QAbstractSocket::SocketTimeoutError)
-		{
-			requestTimeOut.addMSecs(baseValues.httpRequestTimeout);
-			sendPendingData();
-			setApiDown(true);
-			break;
-		}
 	emit sslErrorSignal(val);
 }

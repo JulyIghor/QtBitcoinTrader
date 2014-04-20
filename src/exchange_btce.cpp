@@ -37,7 +37,7 @@
 Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey) 
 	: Exchange()
 {
-	calculatingFeeMode=0;
+	calculatingFeeMode=1;
 	baseValues.exchangeName="BTC-e";
 	baseValues.currentPair.name="BTC/USD";
 	baseValues.currentPair.setSymbol("BTCUSD");

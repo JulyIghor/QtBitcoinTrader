@@ -190,7 +190,6 @@ private:
 	bool buyLockTotalBtc;
 	bool buyLockTotalBtcSelf;
 	bool buyLockPricePerCoin;
-	bool buyLockTotalSpend;
 
 	bool profitSellThanBuyUnlocked;
 	bool profitBuyThanSellUnlocked;

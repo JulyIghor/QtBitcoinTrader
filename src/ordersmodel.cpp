@@ -89,14 +89,14 @@ void OrdersModel::clear()
 	endResetModel();
 }
 
-void OrdersModel::ordersChanged(QList<OrderItem> *orders)
+void OrdersModel::ordersChanged(QList<OrderItem> *ordersRcv)
 {
 	currentAsksPrices.clear();
 	currentBidsPrices.clear();
 
-	if(orders->count()==0)
+	if(ordersRcv->count()==0)
 	{
-		delete orders;
+		delete ordersRcv;
 		emit volumeAmountChanged(0.0,0.0);
 		clear();
 		return;
@@ -107,79 +107,79 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 	double volumeTotal=0.0;
 	double amountTotal=0.0;
 
-	for(int n=0;n<orders->count();n++)
+	for(int n=0;n<ordersRcv->count();n++)
 	{
-		bool isAsk=orders->at(n).type;
-		QByteArray orderSymbol=orders->at(n).symbol;
+		bool isAsk=ordersRcv->at(n).type;
+		QByteArray orderSymbol=ordersRcv->at(n).symbol;
 
-		if(orderSymbol.startsWith(baseValues.currentPair.currAStr)&&isAsk)volumeTotal+=orders->at(n).amount-currentExchange->decAmountFromOpenOrder;
-		if(orderSymbol.endsWith(baseValues.currentPair.currBStr)&&!isAsk)amountTotal+=(orders->at(n).amount-currentExchange->decAmountFromOpenOrder)*orders->at(n).price;
+		if(orderSymbol.startsWith(baseValues.currentPair.currAStr)&&isAsk)volumeTotal+=ordersRcv->at(n).amount-currentExchange->decAmountFromOpenOrder;
+		if(orderSymbol.endsWith(baseValues.currentPair.currBStr)&&!isAsk)amountTotal+=(ordersRcv->at(n).amount-currentExchange->decAmountFromOpenOrder)*ordersRcv->at(n).price;
 
-		if(orders->at(n).status>0&&orderSymbol==baseValues.currentPair.currSymbol)
+		if(ordersRcv->at(n).status>0&&orderSymbol==baseValues.currentPair.currSymbol)
 		{
-			if(isAsk)currentAsksPrices[orders->at(n).price]=true;
-			else currentBidsPrices[orders->at(n).price]=true;
+			if(isAsk)currentAsksPrices[ordersRcv->at(n).price]=true;
+			else currentBidsPrices[ordersRcv->at(n).price]=true;
 		}
 
-		existingOids.insert(orders->at(n).oid,true);
-		if(checkDuplicatedOID)(*orders)[n].date=oidMapForCheckingDuplicates.value(orders->at(n).oid,orders->at(n).date);
+		existingOids.insert(ordersRcv->at(n).oid,true);
+		if(checkDuplicatedOID)(*ordersRcv)[n].date=oidMapForCheckingDuplicates.value(ordersRcv->at(n).oid,ordersRcv->at(n).date);
 
-		int currentIndex=qLowerBound(dateList.begin(),dateList.end(),orders->at(n).date)-dateList.begin();
-		int currentIndexUpper=qUpperBound(dateList.begin(),dateList.end(),orders->at(n).date)-dateList.begin();
+		int currentIndex=qLowerBound(dateList.begin(),dateList.end(),ordersRcv->at(n).date)-dateList.begin();
+		int currentIndexUpper=qUpperBound(dateList.begin(),dateList.end(),ordersRcv->at(n).date)-dateList.begin();
 
 		bool matchListRang=currentIndex>-1&&dateList.count()>currentIndex;
 
-		if(matchListRang&&oidList.at(currentIndex)!=orders->at(n).oid)
-			while(oidList.at(currentIndex)!=orders->at(n).oid&&currentIndex<currentIndexUpper)
+		if(matchListRang&&oidList.at(currentIndex)!=ordersRcv->at(n).oid)
+			while(oidList.at(currentIndex)!=ordersRcv->at(n).oid&&currentIndex<currentIndexUpper)
 			{
 				if(currentIndex+1>-1&&dateList.count()>currentIndex+1)
 					currentIndex++;
 				else break;
 			}
 
-		if(matchListRang&&oidList.at(currentIndex)==orders->at(n).oid)
+		if(matchListRang&&oidList.at(currentIndex)==ordersRcv->at(n).oid)
 		{//Update
 		 if(statusList.at(currentIndex)&&
-			 (statusList.at(currentIndex)!=orders->at(n).status||
-			  amountList.at(currentIndex)!=orders->at(n).amount||
-			   priceList.at(currentIndex)!=orders->at(n).price))
+			 (statusList.at(currentIndex)!=ordersRcv->at(n).status||
+			  amountList.at(currentIndex)!=ordersRcv->at(n).amount||
+			   priceList.at(currentIndex)!=ordersRcv->at(n).price))
 			{
-			statusList[currentIndex]=orders->at(n).status;
+			statusList[currentIndex]=ordersRcv->at(n).status;
 
-			amountList[currentIndex]=orders->at(n).amount;
-			amountStrList[currentIndex]=orders->at(n).amountStr;
+			amountList[currentIndex]=ordersRcv->at(n).amount;
+			amountStrList[currentIndex]=ordersRcv->at(n).amountStr;
 
-			priceList[currentIndex]=orders->at(n).price;
-			priceStrList[currentIndex]=orders->at(n).priceStr;
+			priceList[currentIndex]=ordersRcv->at(n).price;
+			priceStrList[currentIndex]=ordersRcv->at(n).priceStr;
 
-			totalList[currentIndex]=orders->at(n).total;
-			totalStrList[currentIndex]=orders->at(n).totalStr;
+			totalList[currentIndex]=ordersRcv->at(n).total;
+			totalStrList[currentIndex]=ordersRcv->at(n).totalStr;
 			}
 		}
 		else
 		{//Insert
 			beginInsertRows(QModelIndex(), currentIndex, currentIndex);
 
-			oidList.insert(currentIndex,orders->at(n).oid);
+			oidList.insert(currentIndex,ordersRcv->at(n).oid);
 
-			dateList.insert(currentIndex,orders->at(n).date);
-			dateStrList.insert(currentIndex,orders->at(n).dateStr);
+			dateList.insert(currentIndex,ordersRcv->at(n).date);
+			dateStrList.insert(currentIndex,ordersRcv->at(n).dateStr);
 
-			typesList.insert(currentIndex,orders->at(n).type);
-			statusList.insert(currentIndex,orders->at(n).status);
+			typesList.insert(currentIndex,ordersRcv->at(n).type);
+			statusList.insert(currentIndex,ordersRcv->at(n).status);
 
-			amountList.insert(currentIndex,orders->at(n).amount);
-			amountStrList.insert(currentIndex,orders->at(n).amountStr);
+			amountList.insert(currentIndex,ordersRcv->at(n).amount);
+			amountStrList.insert(currentIndex,ordersRcv->at(n).amountStr);
 
-			priceList.insert(currentIndex,orders->at(n).price);
-			priceStrList.insert(currentIndex,orders->at(n).priceStr);
+			priceList.insert(currentIndex,ordersRcv->at(n).price);
+			priceStrList.insert(currentIndex,ordersRcv->at(n).priceStr);
 
-			totalList.insert(currentIndex,orders->at(n).total);
-			totalStrList.insert(currentIndex,orders->at(n).totalStr);
+			totalList.insert(currentIndex,ordersRcv->at(n).total);
+			totalStrList.insert(currentIndex,ordersRcv->at(n).totalStr);
 
-			symbolList.insert(currentIndex,orders->at(n).symbol);
+			symbolList.insert(currentIndex,ordersRcv->at(n).symbol);
 
-			if(checkDuplicatedOID)oidMapForCheckingDuplicates.insert(orders->at(n).oid,orders->at(n).date);
+			if(checkDuplicatedOID)oidMapForCheckingDuplicates.insert(ordersRcv->at(n).oid,ordersRcv->at(n).date);
 			
 			endInsertRows();
 		}
@@ -205,7 +205,7 @@ void OrdersModel::ordersChanged(QList<OrderItem> *orders)
 			endRemoveRows();
 		}
 
-	delete orders;
+	delete ordersRcv;
 
 	if(haveOrders==false)
 	{
