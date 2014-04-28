@@ -7,6 +7,7 @@
     <file>Resources/Exchanges/Logos/Bitfinex.png</file>
     <file>Resources/Exchanges/Logos/BTCChina.png</file>
     <file>Resources/Exchanges/Logos/BTC-e.png</file>
+    <file>Resources/Exchanges/Logos/Crypsty.png</file>
     <file>Resources/Templates/001.qbtrule</file>
     <file>Resources/Templates/002.qbtrule</file>
     <file>Resources/Templates/003.qbtrule</file>
@@ -42,6 +43,7 @@
     <file>Resources/Exchanges/Bitfinex.ini</file>
     <file>Resources/Exchanges/BTCChina.ini</file>
     <file>Resources/Exchanges/Bitstamp.ini</file>
+    <file>Resources/Exchanges/Cryptsy.ini</file>
     <file>Resources/CurrencySign/AUD.png</file>
     <file>Resources/CurrencySign/BTC.png</file>
     <file>Resources/CurrencySign/LTC.png</file>
