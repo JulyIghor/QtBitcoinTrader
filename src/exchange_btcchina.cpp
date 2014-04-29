@@ -35,7 +35,7 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
 {
 	exchangeDisplayOnlyCurrentPairOpenOrders=true;
-    buySellAmountExcludedFee=true;
+	buySellAmountExcludedFee=true;
 	clearHistoryOnCurrencyChanged=false;
 	isLastTradesTypeSupported=true;
 	balanceDisplayAvailableAmount=false;
@@ -266,13 +266,13 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 		QByteArray tonceCounterData=QByteArray::number(tonceCounter);
 		if(tonceCounter>9)tonceCounterData.append("0000");
 		else tonceCounterData.append("00000");
-		
+
 		QByteArray tonce=QByteArray::number(newTonce)+tonceCounterData;
 
 		QByteArray signatureString="tonce="+tonce+"&accesskey="+privateRestKey+"&requestmethod=post&id=1&method="+method+"&params="+signatureParams;
 
 		signatureString=privateRestKey+":"+hmacSha1(privateRestSign,signatureString).toHex();
-		
+
 		if(debugLevel&&reqType>299)logThread->writeLog(postData);
 
 		postData="{\"method\":\""+method+"\",\"params\":["+commands+"],\"id\":1}";
@@ -690,32 +690,31 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
 					if(n==0)
 					{
-					QByteArray currentOrderID=getMidData("id\":",",",&curLog);
-					if(!historyLastID.isEmpty()&&currentOrderID>historyLastID)break;
-					historyLastID=currentOrderID;
+						QByteArray currentOrderID=getMidData("id\":",",",&curLog);
+						if(!historyLastID.isEmpty()&&currentOrderID>historyLastID)break;
+						historyLastID=currentOrderID;
 					}
 
-					QByteArray currentOrderDate=getMidData("date\":","}",&curLog);
-					
+					QByteArray currentOrderDate=getMidData("date\":",",",&curLog);
+
 					if(n==0)
 					{
 						if(!historyLastDate.isEmpty()&&currentOrderDate>historyLastDate)break;
 						historyLastDate=QByteArray::number(currentOrderDate.toUInt()-1);
 					}
 
-					QByteArray transactionType=getMidData("type\":\"","\"",&curLog);
-
-					bool isAsk=false;
-					if(transactionType.startsWith("sell"))isAsk=true;
-					else if(!transactionType.startsWith("buy"))continue;
-					
-					QByteArray currencyA=transactionType.right(3).toUpper();
+					QByteArray transactionType=getMidData("type\":\"","\"",&curLog).replace("money","cny");
 
 					HistoryItem currentHistoryItem;
-					currentHistoryItem.symbol=baseValues.currentPair.currSymbol;
 
-					if(isAsk)currentHistoryItem.type=1;
-					else currentHistoryItem.type=2;
+					if(transactionType.startsWith("sell"))currentHistoryItem.type=1;
+					if(transactionType.startsWith("buy"))currentHistoryItem.type=2;
+					if(transactionType.startsWith("fund"))currentHistoryItem.type=4;
+					if(transactionType.startsWith("withdraw"))currentHistoryItem.type=5;
+
+					if(currentHistoryItem.type==0)continue;
+
+					QByteArray currencyA=transactionType.right(3).toUpper();
 
 					double btcAmount=getMidData("btc_amount\":\"","\"",&curLog).toDouble();
 					if(btcAmount<0.0)btcAmount=-btcAmount;
@@ -774,6 +773,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 							currencyB="CNY";
 						}
 					}
+					if(currencyB.isEmpty())currencyB="CNY";
 
 					currentHistoryItem.symbol=currencyA+currencyB;
 
