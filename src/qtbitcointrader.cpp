@@ -1748,6 +1748,27 @@ void QtBitcoinTrader::on_accountFee_valueChanged(double val)
 	floatFeeInc=1.0+floatFee;
 	if(currentExchange&&!currentExchange->supportsExchangeFee)
 		iniSettings->setValue("Profile/CustomFee",ui.accountFee->value());
+
+	bool notZeroFee=floatFee>0.0;
+	ui.buyThenSellGroupBox->setVisible(notZeroFee);
+	ui.sellThenBuyGroupBox->setVisible(notZeroFee);
+	ui.calcButton->setVisible(notZeroFee);
+	ui.label_6->setVisible(notZeroFee);
+	ui.label_10->setVisible(notZeroFee);
+	ui.label_28->setVisible(notZeroFee);
+	ui.label_29->setVisible(notZeroFee);
+	ui.buyNextInSellPrice->setVisible(notZeroFee);
+	ui.buyNextMinBuyStep->setVisible(notZeroFee);
+	ui.sellNextMaxBuyPrice->setVisible(notZeroFee);
+	ui.sellNextMaxBuyStep->setVisible(notZeroFee);
+	ui.usdLabel9->setVisible(notZeroFee);
+	ui.usdLabel10->setVisible(notZeroFee);
+	ui.usdLabel13->setVisible(notZeroFee);
+	ui.usdLabel14->setVisible(notZeroFee);
+	ui.buyTotalBtcResult->setVisible(notZeroFee);
+	ui.btcLabel6->setVisible(notZeroFee);
+	ui.label_62->setVisible(notZeroFee);
+	ui.groupBox->setVisible(notZeroFee);
 }
 
 QByteArray QtBitcoinTrader::getMidData(QString a, QString b,QByteArray *data)
