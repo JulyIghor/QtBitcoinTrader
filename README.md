@@ -1,7 +1,6 @@
 ## Qt Bitcoin Trader
 
-This software helps you to open and to cancel Mt.Gox and BTC-E orders very
-fast with real time data monitoring.
+This software helps you to open and to cancel orders very fast with real time data monitoring.
 
 Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
 
@@ -9,7 +8,7 @@ I want to develop this Trader App so that it can be configured for any rule
 and strategy. If you want to help me, then
 donate Bitcoins to `1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc`
 
-For any questions please use contact form at http://qtopentrader.com
+For any questions please use contact form at http://centrabit.com
 Or send e-mail directly to julyighor@gmail.com
 
 Next ToDo:
