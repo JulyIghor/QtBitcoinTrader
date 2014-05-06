@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 	if(!QFile::exists(appDataDir+"Language"))QDir().mkpath(appDataDir+"Language");
 	}
 #else
-	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/QtBitcoinTrader/";
+    appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/";
 	QString oldAppDataDir=QDesktopServices::storageLocation(QDesktopServices::HomeLocation).toAscii()+"/.config/QtBitcoinTrader/";
 
 	if(!QFile::exists(appDataDir)&&oldAppDataDir!=appDataDir&&QFile::exists(oldAppDataDir))
