@@ -68,8 +68,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 				groupboxLayout->setContentsMargins(0,0,0,0);
 				groupboxLayout->setSpacing(0);
 				groupBox->setLayout(groupboxLayout);
-				LogoButton *logoButton=new LogoButton;
-				connect(this,SIGNAL(themeChanged()),logoButton,SLOT(themeChanged()));
+                LogoButton *logoButton=new LogoButton;
 				groupboxLayout->addWidget(logoButton);
 			}
 		}
