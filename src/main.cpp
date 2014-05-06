@@ -157,7 +157,9 @@ int main(int argc, char *argv[])
 	baseValues.Construct();
 
 	QApplication a(argc,argv);
-	
+	a.setApplicationName("QtBitcoinTrader");
+	a.setApplicationVersion(baseValues.appVerStr);
+
 	baseValues.appThemeLight.palette=a.palette();
 	baseValues.appThemeDark.palette=a.palette();
 
@@ -170,7 +172,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_WIN
 	{
 	QString appLocalStorageDir=a.applicationDirPath()+QLatin1String("/QtBitcoinTrader/");
-	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/QtBitcoinTrader/";
+	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/";
 	if(!QFile::exists(appLocalStorageDir)&&!QFile::exists(appDataDir))
 	{
 		julyTranslator.loadFromFile(baseValues.defaultLangFile);
@@ -209,7 +211,6 @@ int main(int argc, char *argv[])
 
 	if(!QFile::exists(appDataDir))QDir().mkpath(appDataDir);
 #endif
-
 	if(baseValues.appVerLastReal<1.0763)
 	{
 		QFile::rename(appDataDir+"/Settings.set",appDataDir+"/QtBitcoinTrader.cfg");
