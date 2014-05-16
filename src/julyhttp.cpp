@@ -159,6 +159,7 @@ void JulyHttp::reconnectSocket(bool mastAbort)
 	{
 		if(secureConnection)connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
 		else connectToHost(hostName,80,QIODevice::ReadWrite);
+		waitForConnected(baseValues.httpRequestTimeout);
 	}
 }
 
@@ -390,8 +391,7 @@ void JulyHttp::readSocket()
 		}
 		waitingReplay=false;
 		readingHeader=true;
-		if(!buffer.isEmpty())
-		{
+
 		if(requestList.count())requestList[0].retryCount=0;
 
 		takeFirstRequest();
@@ -400,7 +400,6 @@ void JulyHttp::readSocket()
 		{
 			if(debugLevel)logThread->writeLog("HTTP: connection closed");
 			reConnect(true);
-		}
 		}
 		sendPendingData();
 	}
