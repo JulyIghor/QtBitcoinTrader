@@ -112,7 +112,7 @@ void JulyHttp::setupSocket()
 			{
 				QByteArray currentCert=certData.left(nextCert);
 				QSslCertificate derCert(currentCert,QSsl::Der);
-                if(derCert.isNull())certs<<derCert;
+                if(!derCert.isNull())certs<<derCert;
 				certData.remove(0,nextCert+7);
 			}
 			else certData.clear();
