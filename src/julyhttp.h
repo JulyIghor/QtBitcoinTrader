@@ -50,6 +50,7 @@ class JulyHttp : public QSslSocket
 	Q_OBJECT
 
 public:
+    bool noReconnect;
 	uint getCurrentPacketContentLength(){return contentLength;}
 	void clearPendingData();
 	void reConnect(bool mastAbort=true);

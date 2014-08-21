@@ -37,10 +37,10 @@
 struct CurencyInfo
 {
 	CurencyInfo(QByteArray defS="$"){sign=defS;}
-	QByteArray name;
-	QByteArray sign;
-	double valueStep;
-	double valueSmall;
+    QString name;
+    QString sign;
+    qreal valueStep;
+    qreal valueSmall;
 	bool isValid()
 	{
 		return !name.isEmpty()&&!sign.isEmpty();

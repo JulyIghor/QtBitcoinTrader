@@ -54,43 +54,42 @@ public:
 	bool clearHistoryOnCurrencyChanged;
 	bool exchangeTickerSupportsHiLowPrices;
 	bool depthEnabled;
-	virtual void filterAvailableUSDAmountValue(double *amount);
+    virtual void filterAvailableUSDAmountValue(qreal *amount);
 
 	CurrencyPairItem defaultCurrencyParams;
 	bool balanceDisplayAvailableAmount;
 	int minimumRequestIntervalAllowed;
-	double decAmountFromOpenOrder;
+    qreal decAmountFromOpenOrder;
 	int calculatingFeeMode;//0: direct multiply; 1: rounded by decimals
 	bool buySellAmountExcludedFee;
 
 	CurrencyPairItem currencyPairInfo;
+    qreal lastTickerLast;
+    qreal lastTickerHigh;
+    qreal lastTickerLow;
+    qreal lastTickerSell;
+    qreal lastTickerBuy;
+    qreal lastTickerVolume;
 
-	double lastTickerLast;
-	double lastTickerHigh;
-	double lastTickerLow;
-	double lastTickerSell;
-	double lastTickerBuy;
-	double lastTickerVolume;
-
-	double lastBtcBalance;
-	double lastUsdBalance;
-	double lastAvUsdBalance;
-	double lastVolume;
-	double lastFee;
+    qreal lastBtcBalance;
+    qreal lastUsdBalance;
+    qreal lastAvUsdBalance;
+    qreal lastVolume;
+    qreal lastFee;
 
 	QByteArray lastDepthData;
 	QByteArray lastHistory;
 	QByteArray lastOrders;
 
 	QString currencyMapFile;
+    bool multiCurrencyTradeSupport;
 	bool isLastTradesTypeSupported;
 	bool exchangeSupportsAvailableAmount;
 	bool checkDuplicatedOID;
 	bool forceDepthLoad;
 	bool tickerOnly;
 	bool supportsLoginIndicator;
-	bool supportsAccountVolume;
-	bool supportsExchangeLag;
+    bool supportsAccountVolume;
 	bool supportsExchangeFee;
 	bool supportsExchangeVolume;
 
@@ -113,38 +112,37 @@ private:
 signals:
 	void setCurrencyPairsList(QList<CurrencyPairItem>*);
 
-	void availableAmountChanged(double);
+    void availableAmountChanged(QString,double);
 	void depthRequested();
 	void depthRequestReceived();
-	void depthFirstOrder(double,double,bool);
+    void depthFirstOrder(QString,qreal,qreal,bool);
 
-	void depthSubmitOrders(QList<DepthItem> *asks, QList<DepthItem> *bids);
+    void depthSubmitOrders(QString,QList<DepthItem> *asks, QList<DepthItem> *bids);
 
-	void addLastTrades(QList<TradesItem> *trades);
+    void addLastTrades(QString,QList<TradesItem> *trades);
 
-	void ordersChanged(QList<OrderItem> *orders);
+    void orderBookChanged(QString,QList<OrderItem> *orders);
 	void showErrorMessage(QString);
 
 	void historyChanged(QList<HistoryItem>*);
 
 	void ordersIsEmpty();
-	void orderCanceled(QByteArray);
+    void orderCanceled(QString,QByteArray);
 
 	void firstTicker();
-	void tickerHighChanged(double);
-	void tickerLowChanged(double);
-	void tickerSellChanged(double);
-	void tickerLastChanged(double);
-	void tickerBuyChanged(double);
-	void tickerVolumeChanged(double);
+    void tickerHighChanged(QString,double);
+    void tickerLowChanged(QString,double);
+    void tickerSellChanged(QString,double);
+    void tickerLastChanged(QString,double);
+    void tickerBuyChanged(QString,double);
+    void tickerVolumeChanged(QString,double);
 
-	void accVolumeChanged(double);
-	void accFeeChanged(double);
-	void accBtcBalanceChanged(double);
-	void accUsdBalanceChanged(double);
+    void accVolumeChanged(double);
+    void accFeeChanged(QString,double);
+    void accBtcBalanceChanged(QString,double);
+    void accUsdBalanceChanged(QString,double);
 	void loginChanged(QString);
-	void apiDownChanged(bool);
-	void apiLagChanged(double);
+    void apiDownChanged(bool);
 	void softLagChanged(int);
 private slots:
 	void sslErrors(const QList<QSslError> &);
@@ -154,9 +152,9 @@ public slots:
 	virtual void reloadDepth();
 	virtual void clearValues();
 	virtual void getHistory(bool);
-	virtual void buy(double, double);
-	virtual void sell(double, double);
-	virtual void cancelOrder(QByteArray);
+    virtual void buy(QString, qreal, qreal);
+    virtual void sell(QString, qreal, qreal);
+    virtual void cancelOrder(QString, QByteArray);
 };
 
 #endif // EXCHANGE_H

@@ -34,6 +34,7 @@
 
 #include <QMenu>
 #include <QPushButton>
+#include <QToolButton>
 #include <QDoubleSpinBox>
 #include "ui_percentpicker.h"
 #include <QMouseEvent>
@@ -43,14 +44,13 @@ class PercentPicker : public QMenu
 	Q_OBJECT
 
 public:
-	PercentPicker(QPushButton *button, QDoubleSpinBox *spinBox, double maxValue);
+    PercentPicker(QDoubleSpinBox *spinBox, qreal maxValue);
 	~PercentPicker();
 	void setValue(int val){ui.verticalSlider->setValue(val);}
 private:
 	void mouseReleaseEvent(QMouseEvent *);
-	QDoubleSpinBox *spinBox;
-	QPushButton *button;
-	double maxValue;
+    QDoubleSpinBox *spinBox;
+	qreal maxValue;
 	Ui::PercentPicker ui;
 private slots:
 	void on_percentTo1_clicked();

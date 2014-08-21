@@ -29,59 +29,37 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef AUDIOPLAYER_H
-#define AUDIOPLAYER_H
+#ifndef ALLEXCHANGESMODEL_H
+#define ALLEXCHANGESMODEL_H
 
-#include "main.h"
+#include <QAbstractItemModel>
+#include <QStringList>
 
-#ifdef USE_QTMULTIMEDIA
-#include <QAudioOutput>
-#include <QObject>
-#include <QTimer>
-
-class Generator : public QIODevice
-{
-	Q_OBJECT
-public:
-	Generator(const QAudioFormat &format, qint64 durationUs, int frequency, QObject *parent);
-	~Generator();
-
-	void start();
-	void stop();
-
-	qint64 readData(char *data, qint64 maxlen);
-	qint64 writeData(const char *data, qint64 len);
-	qint64 bytesAvailable() const;
-
-private:
-	void generateData(const QAudioFormat &format, qint64 durationUs, int frequency);
-
-private:
-	qint64 m_pos;
-	QByteArray m_buffer;
-};
-
-class AudioPlayer : public QObject
+class AllExchangesModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	bool invalidDevice;
-	void beep();
-	AudioPlayer(QObject *parent);
-	~AudioPlayer();
+	AllExchangesModel();
+	~AllExchangesModel();
+
+	quint32 rowsCount;
+	void addExchange(quint32,QString, QString);
 
 private:
-	QByteArray       m_buffer;
-	QTimer*          m_timeOutTimer;
-	QAudioDeviceInfo m_device;
-	Generator*       m_generator;
-	QAudioOutput*    m_audioOutput;
-	QIODevice*       m_output; // not owned
-	QAudioFormat     m_format;
-private slots:
-	void pullTimerExpired();
+    int columnsCount;
+	QList<quint32> exchangeIdList;
+	QStringList nameList;
+	QStringList currenciesList;
+	QStringList headerList;
+
+	QModelIndex index(int row, int column, const QModelIndex &parent=QModelIndex()) const;
+	QModelIndex parent(const QModelIndex &index) const;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+
 };
 
-#endif
-#endif // AUDIOPLAYER_H
+#endif // ALLEXCHANGESMODEL_H

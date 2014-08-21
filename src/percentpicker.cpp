@@ -31,18 +31,17 @@
 
 #include "percentpicker.h"
 
-PercentPicker::PercentPicker(QPushButton *_button, QDoubleSpinBox *_spinBox, double _maxValue)
-	: QMenu()
+PercentPicker::PercentPicker(QDoubleSpinBox *_spinBox, qreal _maxValue)
+    : QMenu()
 {
-	maxValue=_maxValue;
-	spinBox=_spinBox;
-	button=_button;
-	if(maxValue==0.0)maxValue=0.000000001;
-	ui.setupUi(this);
-	setAttribute(Qt::WA_DeleteOnClose,true);
-	setFixedSize(minimumSizeHint().width(),200);
-	ui.verticalSlider->setValue(spinBox->value()*100.0/maxValue);
-	ui.verticalSlider->setFocus();
+    maxValue=_maxValue;
+    spinBox=_spinBox;
+    if(maxValue==0.0)maxValue=0.000000001;
+    ui.setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose,true);
+    setFixedSize(minimumSizeHint().width(),200);
+    ui.verticalSlider->setValue(spinBox->value()*100.0/maxValue);
+    ui.verticalSlider->setFocus();
 }
 
 PercentPicker::~PercentPicker()
@@ -74,5 +73,5 @@ void PercentPicker::on_verticalSlider_valueChanged(int val)
 {
 	if(val==1)ui.percentTo1->setText("100%");else
 	if(val==100)ui.percentTo1->setText("1%");
-	if(isVisible())spinBox->setValue((double)val*maxValue/100.0);
+	if(isVisible())spinBox->setValue((qreal)val*maxValue/100.0);
 }

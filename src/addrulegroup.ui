@@ -7,167 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>241</height>
+    <height>274</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Add Rule Group</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <item row="0" column="0" colspan="4">
-    <widget class="QGroupBox" name="groupNameGroupbox">
-     <property name="accessibleName">
-      <string>RULE_GROUP_NAME</string>
-     </property>
-     <property name="title">
-      <string>Group Name</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="5">
-       <widget class="QSpinBox" name="groupID">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="keyboardTracking">
-         <bool>false</bool>
-        </property>
-        <property name="suffix">
-         <string/>
-        </property>
-        <property name="prefix">
-         <string/>
-        </property>
-        <property name="maximum">
-         <number>9999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="gruopIDLabel">
-        <property name="accessibleName">
-         <string>GROUP_ID</string>
-        </property>
-        <property name="text">
-         <string>Group ID:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="groupNameClear">
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>X</string>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="groupName">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhNone</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="groupNameLabel">
-        <property name="accessibleName">
-         <string>SHORT_NAME</string>
-        </property>
-        <property name="text">
-         <string>Short name:</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>101</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="buttonAddRule">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="accessibleName">
-      <string>ADD_GROUP</string>
-     </property>
-     <property name="text">
-      <string>Add Group</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2">
-    <widget class="QPushButton" name="buttonCancel">
-     <property name="accessibleName">
-      <string>TRCANCEL</string>
-     </property>
-     <property name="text">
-      <string>Cancel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="3">
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>101</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item row="1" column="0" colspan="4">
     <widget class="QGroupBox" name="groupContentGroupBox">
      <property name="accessibleName">
@@ -203,6 +49,19 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QComboBox" name="existingRulesList">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <widget class="QRadioButton" name="checkUseTemplate">
         <property name="enabled">
@@ -213,6 +72,22 @@
         </property>
         <property name="text">
          <string>Use rules group template:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QComboBox" name="useRulesGroupTemplateList">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
        </widget>
       </item>
@@ -265,32 +140,111 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="QComboBox" name="useRulesGroupTemplateList">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
+     </layout>
+     <zorder>checkEmptyRule</zorder>
+     <zorder>checkExistingRule</zorder>
+     <zorder>checkUseTemplate</zorder>
+     <zorder>checkUseFile</zorder>
+     <zorder>rulesFile</zorder>
+     <zorder>ruleOpen</zorder>
+     <zorder>useRulesGroupTemplateList</zorder>
+     <zorder>existingRulesList</zorder>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="buttonAddRule">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="accessibleName">
+      <string>ADD_GROUP</string>
+     </property>
+     <property name="text">
+      <string>Add Group</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="buttonCancel">
+     <property name="accessibleName">
+      <string>TRCANCEL</string>
+     </property>
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>101</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>101</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupNameGroupbox">
+     <property name="accessibleName">
+      <string>RULE_GROUP_NAME</string>
+     </property>
+     <property name="title">
+      <string>Group Name</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="groupName">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
         </property>
        </widget>
       </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QComboBox" name="existingRulesList">
-        <property name="enabled">
-         <bool>true</bool>
+      <item row="0" column="0">
+       <widget class="QLabel" name="groupNameLabel">
+        <property name="accessibleName">
+         <string>SHORT_NAME</string>
         </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+        <property name="text">
+         <string>Short name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="groupNameClear">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -375,8 +329,8 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
-     <y>42</y>
+     <x>265</x>
+     <y>54</y>
     </hint>
     <hint type="destinationlabel">
      <x>181</x>

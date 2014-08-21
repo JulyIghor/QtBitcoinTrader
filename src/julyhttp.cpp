@@ -40,6 +40,7 @@
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
 	: QSslSocket(parent)
 {
+    noReconnect=false;
 	secureConnection=secure;
 	isDataPending=false;
 	httpState=999;
@@ -79,7 +80,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 		{
 			QStringList nameValue=cookieListStr.at(n).split("=");
 			if(nameValue.count()!=2||nameValue.first().isEmpty()||nameValue.last().isEmpty())continue;
-			cookiesMap.insert(nameValue.first().toAscii(),nameValue.last().toAscii());
+            cookiesMap.insert(nameValue.first().toLatin1(),nameValue.last().toLatin1());
 		}
 	}
 	saveCookies();
@@ -111,7 +112,7 @@ void JulyHttp::setupSocket()
 			{
 				QByteArray currentCert=certData.left(nextCert);
 				QSslCertificate derCert(currentCert,QSsl::Der);
-				if(derCert.isValid())certs<<derCert;
+                if(derCert.isNull())certs<<derCert;
 				certData.remove(0,nextCert+7);
 			}
 			else certData.clear();
@@ -126,7 +127,7 @@ void JulyHttp::setupSocket()
 	}
 
 	setPeerVerifyMode(QSslSocket::VerifyPeer);
-	setSocketOption(QAbstractSocket::KeepAliveOption,true);
+    setSocketOption(QAbstractSocket::KeepAliveOption,1);
 	connect(this,SIGNAL(readyRead()),SLOT(readSocket()));
 	connect(this,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(errorSlot(QAbstractSocket::SocketError)));
 	connect(this,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrorsSlot(const QList<QSslError> &)));
@@ -153,13 +154,13 @@ void JulyHttp::abortSocket()
 
 void JulyHttp::reconnectSocket(bool mastAbort)
 {
-	if(isDisabled)return;
+    if(isDisabled)return;
 	if(mastAbort)abortSocket();
 	if(state()==QAbstractSocket::UnconnectedState)
 	{
 		if(secureConnection)connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
 		else connectToHost(hostName,80,QIODevice::ReadWrite);
-		waitForConnected(baseValues.httpRequestTimeout);
+        waitForConnected((noReconnect?1000:baseValues.httpRequestTimeout));
 	}
 }
 
@@ -180,7 +181,7 @@ void JulyHttp::saveCookies()
 	QByteArray currentCookie;
 	cookieLine.clear();
 	int cookiesCount=0;
-	foreach(QByteArray name, cookiesMap.keys())
+	Q_FOREACH(QByteArray name, cookiesMap.keys())
 	{
 		if(cookiesCount>0)cookieLine.append("; ");
 		cookieLine.append(name+": "+cookiesMap.value(name));
@@ -387,7 +388,7 @@ void JulyHttp::readSocket()
 			bool apiMaybeDown=buffer[0]=='<';
 			setApiDown(apiMaybeDown);
 			if(debugLevel&&buffer.isEmpty())logThread->writeLog("Response is EMPTY",2);
-			if(!apiMaybeDown)emit dataReceived(buffer,requestList.first().reqType);
+            emit dataReceived(buffer,requestList.first().reqType);
 		}
 		waitingReplay=false;
 		readingHeader=true;
@@ -607,9 +608,10 @@ void JulyHttp::takeFirstRequest()
 
 void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 {
+    if(noReconnect){isDisabled=true;return;}
 	if(socketError!=QAbstractSocket::RemoteHostClosedError&&socketError!=QAbstractSocket::UnfinishedSocketOperationError)setApiDown(true);
 
-	if(debugLevel)logThread->writeLog("SocketError: "+errorString().toAscii(),2);
+    if(debugLevel)logThread->writeLog("SocketError: "+errorString().toLatin1(),2);
 
 	if(socketError==QAbstractSocket::ProxyAuthenticationRequiredError)
 	{
@@ -618,14 +620,14 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 		abortSocket();
 	}
 	else
-	{
-		QMutex mutex;
-		mutex.lock();
+    {
+        QMutex mutex;
+        mutex.lock();
 
-		QWaitCondition waitCondition;
-		waitCondition.wait(&mutex, 1000);
+        QWaitCondition waitCondition;
+        waitCondition.wait(&mutex, 1000);
 
-		mutex.unlock();
+        mutex.unlock();
 
 		reconnectSocket(false);
 	}
@@ -645,25 +647,28 @@ void JulyHttp::sendPendingData()
 
 	if(state()!=QAbstractSocket::UnconnectedState)
 	{
-		if(state()==QAbstractSocket::ConnectingState||state()==QAbstractSocket::HostLookupState)waitForConnected(baseValues.httpRequestTimeout+1000);
+        if(state()==QAbstractSocket::ConnectingState||state()==QAbstractSocket::HostLookupState)waitForConnected((noReconnect?0:baseValues.httpRequestTimeout+1000));
 	}
-	if(!isSocketConnected())
-	{
-		setApiDown(true);
-		if(debugLevel)logThread->writeLog("Socket state: "+errorString().toAscii(),2);
-		reconnectSocket(false);
-		if(state()==QAbstractSocket::ConnectingState)waitForConnected(baseValues.httpRequestTimeout+1000);
-	}
-	else reconnectSocket(false);
+    if(!noReconnect)
+    {
+        if(!isSocketConnected())
+        {
+            setApiDown(true);
+            if(debugLevel)logThread->writeLog("Socket state: "+errorString().toLatin1(),2);
+            reconnectSocket(false);
+            if(state()==QAbstractSocket::ConnectingState)waitForConnected((noReconnect?0:baseValues.httpRequestTimeout)+1000);
+        }
+        else reconnectSocket(false);
+    }
 
 	if(!isSocketConnected())return;
 
 	if(currentPendingRequest==requestList.first().data)
 	{
-		if(requestTimeOut.elapsed()<baseValues.httpRequestTimeout)return;
+        if(requestTimeOut.elapsed()<(noReconnect?1000:baseValues.httpRequestTimeout))return;
 		else
 		{
-			if(debugLevel)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(baseValues.httpRequestTimeout).toAscii(),2);
+            if(debugLevel)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(baseValues.httpRequestTimeout).toLatin1(),2);
 			reconnectSocket(true);
 			setApiDown(true);
 			if(requestList.first().retryCount>0){retryRequest();return;}

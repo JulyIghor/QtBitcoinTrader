@@ -191,7 +191,7 @@ void TranslationDialog::saveAsButton()
 	applyButton();
 	if(ui.buttonSaveAs->isEnabled()==false)return;
 
-	QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_TRANSLATION","Save Translation"),QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)+"/"+ui.languageName->text().replace("/","_").replace("\\","").replace(":","").replace("?","")+".lng","(*.lng)");
+    QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_TRANSLATION","Save Translation"),baseValues.desktopLocation+"/"+ui.languageName->text().replace("/","_").replace("\\","").replace(":","").replace("?","")+".lng","(*.lng)");
 	if(fileName.isEmpty())return;
 	if(QFile::exists(fileName))QFile::remove(fileName);
 	QFile::copy(julyTranslator.lastFile(),fileName);

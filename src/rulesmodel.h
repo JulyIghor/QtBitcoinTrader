@@ -33,36 +33,36 @@
 #define RULESMODEL_H
 
 #include <QAbstractItemModel>
-#include "ruleholder.h"
 #include <QStringList>
+#include "ruleholder.h"
+#include "scriptobject.h"
 
 class RulesModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	QString saveRulesToString();
+    void currencyChanged();
+    void addRule(RuleHolder &holder, bool running=false);
+    void updateRule(int row, RuleHolder &holder, bool running=false);
+    QList<RuleHolder> holderList;
+    int getStateByRow(int row);
 	bool haveAnyTradingRules();
 	void restoreRulesFromString(QString);
 	bool haveWorkingRule();
 	bool allDisabled;
 	bool isConcurrentMode;
-	RulesModel();
+    RulesModel(QString groupName);
 	~RulesModel();
 
 	void disableAll();
 	void enableAll();
 
-	QList<RuleHolder *> getAchievedRules(int type, double value);
-	RuleHolder *getRuleHolderByRow(int row);
-	void updateHolderByRow(int row, RuleHolder *holder);
 	void moveRowUp(int row);
 	void moveRowDown(int row);
 
-	void setRuleStateByHolder(RuleHolder *holder, int state);
 	void setRuleStateByRow(int row, int state);
-	void clear();
-	void addRule(RuleHolder *holder);
+    void clear();
 	void removeRuleByRow(int row);
 
 	void setHorizontalHeaderLabels(QStringList list);
@@ -76,14 +76,26 @@ public:
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
+private slots:
+    void runningChanged(bool);
+    void setGroupDone(QString);
 private:
-	int stateWidth;
-	RuleHolder *firstQueringHolder;
-	RuleHolder *lastQueringHolder;
-	QStringList headerLabels;
-	int columnsCount;
-	QList<RuleHolder*> holderList;
+    void swapRows(int,int);
+    bool lastRuleGroupIsRunning;
+    int runningCount;
+    void checkRuleGroupIsRunning(bool done);
+    QString groupName;
+    void setStateByName(QString, int);
+    quint32 lastRuleId;
+    QList<ScriptObject*> scriptList;
+    QList<int> stateList;
+    QList<bool> pauseList;
+    int stateWidth;
+    QStringList headerLabels;
+    int columnsCount;
 signals:
+    void groupDone();
+    void setRuleTabRunning(QString,bool,bool);
 	void rulesCountChanged();
 };
 

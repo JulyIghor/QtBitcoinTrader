@@ -29,62 +29,35 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef EXCHANGE_CRYPTSY_H
-#define EXCHANGE_CRYPTSY_H
+#ifndef ALLEXCHANGESDIALOG_H
+#define ALLEXCHANGESDIALOG_H
 
-#include "exchange.h"
+#include <QDialog>
+#include "ui_allexchangesdialog.h"
+#include "allexchangesmodel.h"
 
-class Exchange_Cryptsy : public Exchange
+class AllExchangesDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	Exchange_Cryptsy(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_Cryptsy();
+	AllExchangesDialog();
+	~AllExchangesDialog();
+	qint32 exchangeNum;
 
 private:
-	bool isFirstAccInfo;
-	bool isFirstTicker;
-	bool isReplayPending(int);
-	bool lastInfoReceived;
+    int startIndex;
+	Ui::AllExchangesDialog ui;
+	AllExchangesModel *allExchangesModel;
+	QString loadCurrencies(QString);
 
-	int apiDownCounter;
-	int secondPart;
-
-	JulyHttp *julyHttp;
-
-	QByteArray lastTradesDateCache;
-
-	qint64 lastTradesDate;
-	qint64 tickerLastDate;
-
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
-
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
-
-	QString apiLogin;
-
-	QTime authRequestTime;
-	QTime userInfoTime;
-
-	quint32 privateNonce;
-
-	void clearVariables();
-	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
-	void depthUpdateOrder(double,double,bool);
-	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 private slots:
-	void secondSlot();
+	void on_okButton_clicked();
+	void on_backButton_clicked();
+	void on_exchangesTableView_doubleClicked();
+
 public slots:
-	void dataReceivedAuth(QByteArray,int);
-	void reloadDepth();
-	void clearValues();
-	void getHistory(bool);
-	void buy(double, double);
-	void sell(double, double);
-	void cancelOrder(QByteArray);
+	void selectionExchange();
 };
 
-#endif // EXCHANGE_CRYPTSY_H
+#endif // ALLEXCHANGESDIALOG_H

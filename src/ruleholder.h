@@ -32,59 +32,40 @@
 #ifndef RULEHOLDER_H
 #define RULEHOLDER_H
 
-#include <QObject>
+#include <QString>
 
-class RuleHolder
+struct RuleHolder
 {
-public:
-	double getCurrentCheckPrice();
-	double getCurrentExecPrice();
-	bool invalidHolder;
-	RuleHolder(){invalidHolder=true;ruleState=0;waitingGoodLag=false;}
-	RuleHolder(int moreLessEqual, double price, double bitcoins, bool isBuy, double sellPrice, int rulePriceType, double rulekPricePercentage, double rulePricePercentage, double ruleAmountPercentage, int ruleGroupId, QString sound, bool trailingStop, bool enabled=true);
-	RuleHolder(QString strData);
-	bool isAchieved(double price);
-	bool isBuying();
-	bool isTrading();
-	int getRuleMoreLessEqual(){return ruleMoreLessEqualChanged;}
-	double getRuleBtc(){return ruleAmount;}
-	double getRuleExecutePrice(){return ruleExecutePrice;}
-	double getRuleCheckPrice(){return ruleCheckPrice;}
-	void startWaitingLowLag();
-	QString getDescriptionString();
-	int getRulePriceType(){return rulePriceType;}
-	QString getSellOrBuyString();
-	QString getBitcoinsString();
-	QString getPriceText();
-	bool isTrailingEnabled(){return trailingEnabled;}
-	int getRuleState();
-	void setRuleState(int);
-	void setRuleWavFile(QString wav){ruleWavFile=wav;}
-	QString getRuleWavFile(){return ruleWavFile;}
-	void setRuleGroupId(int id);
-	int getRuleGroupId(){return ruleGroupId;}
-	double getRuleAmountPercentage(){return ruleAmountPercentage;}
-	double getRuleExecutePricePercentage(){return ruleExecutePricePercentage;}
-	double getRuleCheckPricePercentage(){return ruleCheckPricePercentage;}
-	QString generateSavableData();
-	QString ruleWavFile;
-	
-private:
-	bool trailingEnabled;
-	void saveRuleCheckPrice();
-	int ruleState;
-	int rulePriceType;
-	bool waitingGoodLag;
-	bool buying;
-	int ruleMoreLessEqualChanged;
-	double ruleAmount;
-	double ruleAmountPercentage;
-	double ruleExecutePrice;
-	double ruleExecutePricePercentage;
-	double ruleCheckPrice;
-	double lastRuleCheckPrice;
-	double ruleCheckPricePercentage;
-	int ruleGroupId;
+    RuleHolder();
+    QString description;
+    bool isValidComparation(QString &text);
+    bool isValidSymbol(QString &symbol);
+    bool isValidPlusMinus(QString &plusMinus);
+    bool isValidCode(QString &code);
+    bool isValid();
+
+    bool thanAmountPercentChecked;
+    bool thanPricePercentChecked;
+    bool variableBPercentChecked;
+    int thanAmountFeeIndex;
+    int thanPriceFeeIndex;
+    int thanTypeIndex;
+    int variableBFeeIndex;
+    int variableBModeIndex;
+    qreal thanAmount;
+    qreal thanPrice;
+    qreal variableBExact;
+    QString comparationText;
+    QString thanPricePlusMinusText;
+    QString thanPriceTypeCode;
+    QString thanText;
+    QString tradeSymbolCode;
+    QString valueASymbolCode;
+    QString valueBSymbolCode;
+    QString variableACode;
+    QString variableBCode;
+    QString variableBplusMinus;
+    QString variableBSymbolCode;
 };
 
 #endif // RULEHOLDER_H

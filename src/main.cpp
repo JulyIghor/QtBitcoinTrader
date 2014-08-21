@@ -33,17 +33,14 @@
 #include <QNetworkProxyFactory>
 #include <QNetworkProxy>
 #include <QDir>
-#include <QPlastiqueStyle>
 #include "main.h"
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QFileInfo>
 #include <QSettings>
 #include "updaterdialog.h"
 #include "passworddialog.h"
 #include "newpassworddialog.h"
 #include "julyaes256.h"
-#include <QTextCodec>
-#include <QDesktopServices>
 #include "translationdialog.h"
 #include <QMessageBox>
 #include <QDateTime>
@@ -51,6 +48,18 @@
 #include "datafolderchusedialog.h"
 #include <QMetaEnum>
 #include <QUuid>
+#include "julylockfile.h"
+#include "featuredexchangesdialog.h"
+#include "allexchangesdialog.h"
+
+#if QT_VERSION < 0x050000
+#include <QPlastiqueStyle>
+#include <QTextCodec>
+#include <QDesktopServices>
+#else
+#include <QStyle>
+#include <QStandardPaths>
+#endif
 
 BaseValues *baseValues_;
 
@@ -87,18 +96,16 @@ void selectSystemLanguage()
 
 void BaseValues::Construct()
 {
-	lastGroupID=0;
 	forceDotInSpinBoxes=true;
 	trafficSpeed=0;
 	trafficTotal=0;
 	trafficTotalType=0;
 	currentExchange_=0;
-	nightMode=false;
-	rulesSafeMode=true;
-	rulesSafeModeInterval=5000;
+    nightMode=false;
 	gzipEnabled=true;
 	appVerIsBeta=false;
-	appVerStr="1.0798";
+    jlScriptVersion=1.0;
+    appVerStr="1.0799";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -150,13 +157,21 @@ void BaseValues::Construct()
 
 int main(int argc, char *argv[])
 {
+    JulyLockFile *julyLock=0;
+#if QT_VERSION < 0x050000
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
+#endif
 
 	baseValues_=new BaseValues;
 	baseValues.Construct();
 
 	QApplication a(argc,argv);
+#ifdef Q_OS_WIN//DPI Fix
+	QFont font=a.font();
+	font.setPointSize(8);
+	a.setFont(font);
+#endif
 	a.setApplicationName("QtBitcoinTrader");
 	a.setApplicationVersion(baseValues.appVerStr);
 
@@ -169,10 +184,25 @@ int main(int argc, char *argv[])
 
 	baseValues_->fontMetrics_=new QFontMetrics(a.font());
 
+
+#if QT_VERSION < 0x050000
+    baseValues.tempLocation=QDesktopServices::storageLocation(QDesktopServices::TempLocation).replace('\\','/')+"/";
+    baseValues.desktopLocation=QDesktopServices::storageLocation(QDesktopServices::DesktopLocation).replace('\\','/')+"/";
+#else
+    baseValues.tempLocation=QStandardPaths::standardLocations(QStandardPaths::TempLocation).first().replace('\\','/')+"/";
+    baseValues.desktopLocation=QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first().replace('\\','/')+"/";
+#endif
+
 #ifdef Q_OS_WIN
 	{
 	QString appLocalStorageDir=a.applicationDirPath()+QLatin1String("/QtBitcoinTrader/");
-	appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/";
+
+#if QT_VERSION < 0x050000
+    appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace('\\','/').toLatin1()+"/";
+#else
+    appDataDir=QStandardPaths::standardLocations(QStandardPaths::DataLocation).first().replace('\\','/').toLatin1()+"/";
+#endif
+
 	if(!QFile::exists(appLocalStorageDir)&&!QFile::exists(appDataDir))
 	{
 		julyTranslator.loadFromFile(baseValues.defaultLangFile);
@@ -182,15 +212,21 @@ int main(int argc, char *argv[])
 	}
 	if(QFile::exists(appLocalStorageDir))
 	{
-		appDataDir=appLocalStorageDir.toAscii();
+		appDataDir=appLocalStorageDir.toLatin1();
 		QDir().mkpath(appDataDir+"Language");
 		if(!QFile::exists(appDataDir+"Language"))appDataDir.clear();
 	}
 	if(!QFile::exists(appDataDir+"Language"))QDir().mkpath(appDataDir+"Language");
 	}
 #else
-    appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("\\","/").toAscii()+"/";
-	QString oldAppDataDir=QDesktopServices::storageLocation(QDesktopServices::HomeLocation).toAscii()+"/.config/QtBitcoinTrader/";
+
+#if QT_VERSION < 0x050000
+    appDataDir=QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace('\\','/').toLatin1()+"/";
+    QString oldAppDataDir=QDesktopServices::storageLocation(QDesktopServices::HomeLocation).toLatin1()+"/.config/QtBitcoinTrader/";
+#else
+    appDataDir=QStandardPaths::standardLocations(QStandardPaths::DataLocation).first().replace('\\','/').toLatin1()+"/";
+    QString oldAppDataDir=QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first().toLatin1()+"/.config/QtBitcoinTrader/";
+#endif
 
 	if(!QFile::exists(appDataDir)&&oldAppDataDir!=appDataDir&&QFile::exists(oldAppDataDir))
 	{
@@ -224,7 +260,7 @@ int main(int argc, char *argv[])
 
 			QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 			QString langFile=settings.value("LanguageFile","").toString();
-			if(langFile.isEmpty()||!langFile.isEmpty()&&!QFile::exists(langFile))langFile=baseValues.defaultLangFile;
+            if(langFile.isEmpty()||(!langFile.isEmpty()&&!QFile::exists(langFile)))langFile=baseValues.defaultLangFile;
 			julyTranslator.loadFromFile(langFile);
 
 			UpdaterDialog updater(a.arguments().last()!="/checkupdate");
@@ -242,9 +278,7 @@ int main(int argc, char *argv[])
 	if(QFile::exists(a.applicationFilePath()+".bkp"))QFile::remove(a.applicationFilePath()+".bkp");
 #endif
 
-	a.setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
-	QFile *lockFile=0;
-
+    a.setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
 	{
 		QNetworkProxy proxy;
 		QSettings settingsMain(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
@@ -255,9 +289,16 @@ int main(int argc, char *argv[])
 #endif
 		plastiqueStyle=settingsMain.value("PlastiqueStyle",plastiqueStyle).toBool();
 		settingsMain.setValue("PlastiqueStyle",plastiqueStyle);
-		if(plastiqueStyle)a.setStyle(new QPlastiqueStyle);
+        if(plastiqueStyle)
+#if QT_VERSION < 0x050000
+        a.setStyle(new QPlastiqueStyle);
+#else
+        a.setStyle(QStyleFactory::create("Fusion"));
+#endif
+        baseValues.scriptFolder=appDataDir+"Scripts/";
 		baseValues.osStyle=a.style()->objectName();
 
+        a.setPalette(baseValues.appTheme.palette);
 		a.setStyleSheet(baseValues.appTheme.styleSheet);
 
 		settingsMain.beginGroup("Proxy");
@@ -306,15 +347,15 @@ int main(int argc, char *argv[])
 		{
 			if(currenciesList.at(n).length()!=3)continue;
 			CurencyInfo newCurr;
-			newCurr.name=settingsCurrencies.value(currenciesList.at(n)+"/Name","").toString().toAscii();
-			if(baseValues.supportsUtfUI)newCurr.sign=settingsCurrencies.value(currenciesList.at(n)+"/Sign","").toString().toAscii();
-			else newCurr.sign=settingsCurrencies.value(currenciesList.at(n)+"/SignNonUTF8","").toString().toAscii();
+            newCurr.name=QString::fromUtf8(settingsCurrencies.value(currenciesList.at(n)+"/Name","").toByteArray());
+            if(baseValues.supportsUtfUI)newCurr.sign=QString::fromUtf8(settingsCurrencies.value(currenciesList.at(n)+"/Sign","").toByteArray());
+            else newCurr.sign=QString::fromUtf8(settingsCurrencies.value(currenciesList.at(n)+"/SignNonUTF8","").toByteArray());
 			newCurr.valueStep=settingsCurrencies.value(currenciesList.at(n)+"/ValueStep",0.01).toDouble();
 			newCurr.valueSmall=settingsCurrencies.value(currenciesList.at(n)+"/ValueSmall",0.1).toDouble();
 			if(newCurr.isValid())
-			{
-				baseValues.currencyMap.insert(currenciesList.at(n).toAscii(),newCurr);
-				baseValues.currencyMapSign.insert(newCurr.sign,currenciesList.at(n).toAscii());
+            {
+				baseValues.currencyMap.insert(currenciesList.at(n).toLatin1(),newCurr);
+				baseValues.currencyMapSign.insert(newCurr.sign,currenciesList.at(n).toLatin1());
 			}
 		}
 
@@ -322,7 +363,7 @@ int main(int argc, char *argv[])
 		QString langFile=settingsMain.value("LanguageFile","").toString();
 		baseValues.appVerLastReal=settingsMain.value("Version",1.0).toDouble();
 		settingsMain.setValue("Version",baseValues.appVerReal);
-		if(langFile.isEmpty()||!langFile.isEmpty()&&!QFile::exists(langFile))langFile=baseValues.defaultLangFile;
+        if(langFile.isEmpty()||(!langFile.isEmpty()&&!QFile::exists(langFile)))langFile=baseValues.defaultLangFile;
 			julyTranslator.loadFromFile(langFile);
 	}
 	
@@ -333,49 +374,76 @@ int main(int argc, char *argv[])
 		QString tryPassword;
 		baseValues.restKey.clear();
 		baseValues.restSign.clear();
+        bool noProfiles=QDir(appDataDir,"*.ini").entryList().isEmpty();
+        if(noProfiles||showNewPasswordDialog)
+        {
+            FeaturedExchangesDialog featuredExchanges;
+            int execResult=featuredExchanges.exec();
+            if(noProfiles&&execResult==QDialog::Rejected)return 0;
+            if(featuredExchanges.exchangeNum!=-2)if(execResult==QDialog::Rejected || featuredExchanges.exchangeNum==-1){
+                showNewPasswordDialog=false;
+                continue;
+            }
+            qint32 exchangeNumber=0;
+            if(featuredExchanges.exchangeNum>=0)exchangeNumber=featuredExchanges.exchangeNum;
+            else {
+                AllExchangesDialog allExchanges;
+                if(allExchanges.exec()==QDialog::Rejected)return 0;
+                if(allExchanges.exchangeNum==-1){
+                    showNewPasswordDialog=false;
+                    continue;
+                }
+                if(allExchanges.exchangeNum==-2)continue;
+                exchangeNumber=allExchanges.exchangeNum;
+            }
 
-		if(QDir(appDataDir,"*.ini").entryList().isEmpty()||showNewPasswordDialog)
-		{
-			NewPasswordDialog newPassword;
+            NewPasswordDialog newPassword(exchangeNumber);
 			if(newPassword.exec()==QDialog::Accepted)
 			{
 			tryPassword=newPassword.getPassword();
-			newPassword.updateIniFileName();
-			baseValues.restKey=newPassword.getRestKey().toAscii();
+            newPassword.updateIniFileName();
+			baseValues.restKey=newPassword.getRestKey().toLatin1();
 			QSettings settings(baseValues.iniFileName,QSettings::IniFormat);
 			settings.setValue("Profile/ExchangeId",newPassword.getExchangeId());
+            settings.sync();
 			QByteArray encryptedData;
 			switch(newPassword.getExchangeId())
 			{
 			case 0:
-				{//Mt.Gox
-				baseValues.restSign=QByteArray::fromBase64(newPassword.getRestSign().toAscii());
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
+                {//Secret Exchange
+                baseValues.restSign=newPassword.getRestSign().toLatin1();
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toLatin1());
 				}
 				break;
 			case 1:
 				{//BTC-e
-				baseValues.restSign=newPassword.getRestSign().toAscii();
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
+				baseValues.restSign=newPassword.getRestSign().toLatin1();
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toLatin1());
 				}
 				break;
 			case 2:
 				{//Bitstamp
-				baseValues.restSign=newPassword.getRestSign().toAscii();
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
+				baseValues.restSign=newPassword.getRestSign().toLatin1();
+				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toLatin1());
 				}
 				break;
 			case 3:
 				{//BTC China
-					baseValues.restSign=newPassword.getRestSign().toAscii();
-					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
+					baseValues.restSign=newPassword.getRestSign().toLatin1();
+					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toLatin1());
 				}
 				break;
 			case 4:
 				{//Bitfinex
-					baseValues.restSign=newPassword.getRestSign().toAscii();
-					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toAscii());
+					baseValues.restSign=newPassword.getRestSign().toLatin1();
+					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toLatin1());
 				}
+                break;
+            case 5:
+                {//GOCio
+                    baseValues.restSign=newPassword.getRestSign().toLatin1();
+                    encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toLatin1());
+                }
 				break;
 			default: break;
 			}
@@ -400,23 +468,20 @@ int main(int argc, char *argv[])
 		if(!tryPassword.isEmpty())
 		{
 			baseValues.iniFileName=enterPassword.getIniFilePath();
-			baseValues.logFileName=baseValues.iniFileName;baseValues.logFileName.replace(".ini",".log",Qt::CaseInsensitive);
-			bool profileLocked=enterPassword.isProfileLocked(baseValues.iniFileName);
-			if(profileLocked)
+            baseValues.logFileName=baseValues.iniFileName;
+            baseValues.logFileName.replace(".ini",".log",Qt::CaseInsensitive);
+            if(julyLock)delete julyLock;
+            julyLock=new JulyLockFile(baseValues.iniFileName);
+            bool profileLocked=julyLock->isLocked();
+            if(profileLocked)
 			{
 				QMessageBox msgBox(0);
 				msgBox.setIcon(QMessageBox::Question);
 				msgBox.setWindowTitle("Qt Bitcoin Trader");
-				msgBox.setText(julyTr("THIS_PROFILE_ALREADY_USED","This profile is already used by another instance.<br>API does not allow to run two instances with same key sign pair.<br>Please create new profile if you want to use two instances."));
-#ifdef Q_OS_WIN
+                msgBox.setText(julyTr("THIS_PROFILE_ALREADY_USED","This profile is already used by another instance.<br>API does not allow to run two instances with same key sign pair.<br>Please create new profile if you want to use two instances."));
 				msgBox.setStandardButtons(QMessageBox::Ok);
 				msgBox.setDefaultButton(QMessageBox::Ok);
-				msgBox.exec();
-#else
-				msgBox.setStandardButtons(QMessageBox::Ignore|QMessageBox::Ok);
-				msgBox.setDefaultButton(QMessageBox::Ok);
-				if(msgBox.exec()==QMessageBox::Ignore)profileLocked=false;
-#endif
+                msgBox.exec();
 				if(profileLocked)tryPassword.clear();
 			}
 
@@ -424,23 +489,20 @@ int main(int argc, char *argv[])
 			{
 				QSettings settings(baseValues.iniFileName,QSettings::IniFormat);
 
-				QStringList decryptedList=QString(JulyAES256::decrypt(QByteArray::fromBase64(settings.value("EncryptedData/ApiKeySign","").toString().toAscii()),tryPassword.toAscii())).split("\r\n");
+				QStringList decryptedList=QString(JulyAES256::decrypt(QByteArray::fromBase64(settings.value("EncryptedData/ApiKeySign","").toString().toLatin1()),tryPassword.toLatin1())).split("\r\n");
 
 				if(decryptedList.count()>=3&&decryptedList.first()=="Qt Bitcoin Trader")
 				{
-					baseValues.restKey=decryptedList.at(1).toAscii();
-					baseValues.restSign=QByteArray::fromBase64(decryptedList.at(2).toAscii());
+					baseValues.restKey=decryptedList.at(1).toLatin1();
+					baseValues.restSign=QByteArray::fromBase64(decryptedList.at(2).toLatin1());
 					if(decryptedList.count()==3)
 					{
 						decryptedList<<QUuid::createUuid().toByteArray();
-						settings.setValue("EncryptedData/ApiKeySign",QString(JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+decryptedList.at(1).toAscii()+"\r\n"+decryptedList.at(2).toAscii()+"\r\n"+decryptedList.at(3).toAscii(),tryPassword.toAscii()).toBase64()));
+						settings.setValue("EncryptedData/ApiKeySign",QString(JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+decryptedList.at(1).toLatin1()+"\r\n"+decryptedList.at(2).toLatin1()+"\r\n"+decryptedList.at(3).toLatin1(),tryPassword.toLatin1()).toBase64()));
 						settings.sync();
 					}
-					baseValues.randomPassword=decryptedList.at(3).toAscii();
+					baseValues.randomPassword=decryptedList.at(3).toLatin1();
                     tryDecrypt=false;
-					lockFile=new QFile(enterPassword.lockFilePath(baseValues.iniFileName));
-                    lockFile->open(QIODevice::WriteOnly|QIODevice::Truncate);
-					lockFile->write("Qt Bitcoin Trader Lock File");
 				}
 			}
 		}
@@ -450,14 +512,14 @@ int main(int argc, char *argv[])
 	if(iniSettings.value("Debug/LogEnabled",false).toBool())debugLevel=1;
 	iniSettings.setValue("Debug/LogEnabled",debugLevel>0);
 	baseValues.currentPair.currASign=baseValues.currencyMap.value("BTC",CurencyInfo("BTC")).sign;
-	baseValues.currentPair.currBStr=iniSettings.value("Profile/Currency","USD").toString().toAscii();
+	baseValues.currentPair.currBStr=iniSettings.value("Profile/Currency","USD").toString().toLatin1();
 	baseValues.currentPair.currBSign=baseValues.currencyMap.value(baseValues.currentPair.currBStr,CurencyInfo("$")).sign;
 
 	baseValues.logThread_=0;
 	if(debugLevel)
 	{
 		baseValues.logThread_=new LogThread;
-		logThread->writeLog("Proxy settings: "+proxy.hostName().toAscii()+":"+QByteArray::number(proxy.port())+" "+proxy.user().toAscii());
+		logThread->writeLog("Proxy settings: "+proxy.hostName().toLatin1()+":"+QByteArray::number(proxy.port())+" "+proxy.user().toLatin1());
 	}
 	a.setQuitOnLastWindowClosed(false);
 	baseValues.mainWindow_=new QtBitcoinTrader;
@@ -466,11 +528,6 @@ int main(int argc, char *argv[])
 	mainWindow.setupClass();
 	a.exec();
 
-	if(lockFile)
-	{
-		lockFile->close();
-		lockFile->remove();
-		delete lockFile;
-	}
+    if(julyLock)delete julyLock;
 	return 0;
 }

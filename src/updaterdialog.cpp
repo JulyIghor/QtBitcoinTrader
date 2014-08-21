@@ -57,7 +57,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
 
 
-	foreach(QGroupBox* groupBox, this->findChildren<QGroupBox*>())
+	Q_FOREACH(QGroupBox* groupBox, this->findChildren<QGroupBox*>())
 	{
 		if(groupBox->accessibleName()=="LOGOBUTTON")
 		{
@@ -68,22 +68,24 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 				groupboxLayout->setContentsMargins(0,0,0,0);
 				groupboxLayout->setSpacing(0);
 				groupBox->setLayout(groupboxLayout);
-                LogoButton *logoButton=new LogoButton;
+				LogoButton *logoButton=new LogoButton;
+				connect(this,SIGNAL(themeChanged()),logoButton,SLOT(themeChanged()));
 				groupboxLayout->addWidget(logoButton);
 			}
 		}
 	}
 
 	if(useOldUpdateEngine)httpGet=new JulyHttp("raw.github.com",0,this,true,false);
-	else httpGet=new JulyHttp("qbtapi.centrabit.com",0,this,false,false);
+    else httpGet=new JulyHttp("qbtapi.centrabit.com",0,this,true,false);
+    httpGet->noReconnect=true;
 	timeOutTimer=new QTimer(this);
 	connect(timeOutTimer,SIGNAL(timeout()),this,SLOT(exitSlot()));
 	connect(httpGet,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
 
 	if(useOldUpdateEngine)
 	{
-	if(baseValues.appVerIsBeta)httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
-	else	httpGet->sendData(320,"GET /JulyIGHOR/QtBitcoinTrader/master/versions.txt");
+    if(baseValues.appVerIsBeta)httpGet->sendData(120,"GET /JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
+    else	httpGet->sendData(120,"GET /JulyIGHOR/QtBitcoinTrader/master/versions.txt");
 	}
 
 	if(!useOldUpdateEngine)
@@ -107,7 +109,15 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	reqStr.append("&OS="+osString);
 	reqStr.append("&Locale="+QLocale().name());
 
-	httpGet->sendData(400,"POST /",reqStr);
+    QString md5;
+    QFile readSelf(QApplication::applicationFilePath());
+    if(readSelf.open(QIODevice::ReadOnly))
+    {
+        md5=QCryptographicHash::hash(readSelf.readAll(),QCryptographicHash::Md5).toHex();
+        readSelf.close();
+    }
+    reqStr.append("&MD5="+md5);
+    httpGet->sendData(140,"POST /",reqStr);
 	}
 
 	timeOutTimer->start(60000);
@@ -146,7 +156,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int reqType)
 		canAutoUpdate=true;
 #endif
 
-		if(reqType==400)
+        if(reqType==140)
 		{
 			updateVersion=getMidData("Version\":\"","\"",&dataReceived);
 			if(updateVersion.size()>2)updateVersion.insert(1,".");
@@ -156,7 +166,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int reqType)
 			updateLink=getMidData("Binary\":\"","\"",&dataReceived).replace("\\/","/");
 		}
 
-		if(reqType==320)
+        if(reqType==120)
 		{
 		QMap<QString,QString>versionsMap;
 		QStringList dataList=QString(dataReceived).split("\n");
@@ -180,7 +190,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int reqType)
 		os="Win32";
 #endif
 		updateVersion=versionsMap.value(os+"Ver");
-		updateSignature=versionsMap.value(os+"Signature").toAscii();
+		updateSignature=versionsMap.value(os+"Signature").toLatin1();
 		if(!updateSignature.isEmpty())updateSignature=QByteArray::fromBase64(updateSignature);
 		updateChangeLog=versionsMap.value(os+"ChangeLog");
 		updateLink=versionsMap.value(os+"Bin");
@@ -281,8 +291,9 @@ void UpdaterDialog::buttonUpdate()
 	connect(httpGet,SIGNAL(apiDown(bool)),this,SLOT(invalidData(bool)));
 	connect(httpGet,SIGNAL(dataProgress(int)),this,SLOT(dataProgress(int)));
 	connect(httpGet,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
+    httpGet->noReconnect=true;
 
-	httpGet->sendData(320,"GET "+updateLink.toAscii());
+    httpGet->sendData(120,"GET "+updateLink.toLatin1());
 }
 
 void UpdaterDialog::invalidData(bool err)

@@ -34,10 +34,12 @@
 #include "main.h"
 #include "depthitem.h"
 #include <QFile>
+#include "currencypairitem.h"
 
 Exchange::Exchange()
 	: QThread()
 {
+    multiCurrencyTradeSupport=false;
 	exchangeDisplayOnlyCurrentPairOpenOrders=false;
 	orderBookItemIsDedicatedOrder=false;
 	supportsExchangeFee=true;
@@ -51,11 +53,10 @@ Exchange::Exchange()
 	buySellAmountExcludedFee=false;
 	calculatingFeeMode=0;
 	supportsLoginIndicator=true;
-	supportsAccountVolume=true;
-	supportsExchangeLag=true;
+    supportsAccountVolume=true;
 	exchangeSupportsAvailableAmount=false;
 	checkDuplicatedOID=false;
-	isLastTradesTypeSupported=true;
+    isLastTradesTypeSupported=true;
 	forceDepthLoad=false;
 
 	clearVariables();
@@ -98,7 +99,7 @@ void Exchange::translateUnicodeOne(QByteArray *str)
 		if(bytesList.at(n).length()>3)
 			strToReturn+="\\u"+bytesList.at(n).left(4);
 	translateUnicodeStr(&strToReturn);
-	*str=strToReturn.toAscii();
+	*str=strToReturn.toLatin1();
 }
 
 void Exchange::run()
@@ -143,7 +144,7 @@ void Exchange::clearVariables()
 	lastFee=0.0;
 }
 
-void Exchange::filterAvailableUSDAmountValue(double *)
+void Exchange::filterAvailableUSDAmountValue(qreal *)
 {
 
 }
@@ -159,7 +160,7 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 		CurrencyPairItem currentPair=defaultCurrencyParams;
 		currentPair.name=settingsParams.value(symbolList.at(n)+"/Symbol","").toByteArray();
 		if(currentPair.name.length()!=6)continue;
-		currentPair.setSymbol(currentPair.name.toAscii());
+		currentPair.setSymbol(currentPair.name.toLatin1());
 		currentPair.name.insert(3,"/");
 		currentPair.currRequestSecond=settingsParams.value(symbolList.at(n)+"/RequestSecond","").toByteArray();
 		if(!currentPair.currRequestSecond.isEmpty())
@@ -169,7 +170,9 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 		currentPair.priceDecimals=settingsParams.value(symbolList.at(n)+"/PriceDecimals","").toInt();
 		currentPair.priceMin=settingsParams.value(symbolList.at(n)+"/PriceMin","").toDouble();
 		currentPair.tradeVolumeMin=settingsParams.value(symbolList.at(n)+"/TradeVolumeMin","").toDouble();
-		currentPair.tradePriceMin=settingsParams.value(symbolList.at(n)+"/TradePriceMin","").toDouble();
+        currentPair.tradePriceMin=settingsParams.value(symbolList.at(n)+"/TradePriceMin","").toDouble();
+        currentPair.currADecimals=settingsParams.value(symbolList.at(n)+"/ItemDecimals").toInt();
+        currentPair.currBDecimals=settingsParams.value(symbolList.at(n)+"/ValueDecimals").toInt();
 		(*newCurrPairs)<<currentPair;
 	}
 
@@ -180,41 +183,42 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 	tickerOnly=tickOnly;
 	if(!tickerOnly)
 	{
-		connect(mainClass,SIGNAL(apiBuy(double, double)),this,SLOT(buy(double, double)));
-		connect(mainClass,SIGNAL(apiSell(double, double)),this,SLOT(sell(double, double)));
-		connect(mainClass,SIGNAL(cancelOrderByOid(QByteArray)),this,SLOT(cancelOrder(QByteArray)));
-		connect(this,SIGNAL(ordersChanged(QList<OrderItem> *)),mainClass,SLOT(ordersChanged(QList<OrderItem> *)));
-		connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
+        connect(mainClass,SIGNAL(apiBuy(QString, qreal, qreal)),this,SLOT(buy(QString, qreal, qreal)));
+        connect(mainClass,SIGNAL(apiSell(QString, qreal, qreal)),this,SLOT(sell(QString, qreal, qreal)));
+        connect(mainClass,SIGNAL(cancelOrderByOid(QString, QByteArray)),this,SLOT(cancelOrder(QString, QByteArray)));
+        connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
+
+        connect(this,SIGNAL(orderBookChanged(QString, QList<OrderItem> *)),mainClass,SLOT(orderBookChanged(QString, QList<OrderItem> *)));
 		connect(this,SIGNAL(historyChanged(QList<HistoryItem>*)),mainClass,SLOT(historyChanged(QList<HistoryItem>*)));
-		connect(this,SIGNAL(orderCanceled(QByteArray)),mainClass,SLOT(orderCanceled(QByteArray)));
+        connect(this,SIGNAL(orderCanceled(QString, QByteArray)),mainClass,SLOT(orderCanceled(QString, QByteArray)));
 		connect(this,SIGNAL(ordersIsEmpty()),mainClass,SLOT(ordersIsEmpty()));
 	}
 
 	connect(this,SIGNAL(depthRequested()),mainClass,SLOT(depthRequested()));
 	connect(this,SIGNAL(depthRequestReceived()),mainClass,SLOT(depthRequestReceived()));
-	connect(this,SIGNAL(depthSubmitOrders(QList<DepthItem> *, QList<DepthItem> *)),mainClass,SLOT(depthSubmitOrders(QList<DepthItem> *, QList<DepthItem> *)));
-	connect(this,SIGNAL(depthFirstOrder(double,double,bool)),mainClass,SLOT(depthFirstOrder(double,double,bool)));
+    connect(this,SIGNAL(depthSubmitOrders(QString, QList<DepthItem> *, QList<DepthItem> *)),mainClass,SLOT(depthSubmitOrders(QString, QList<DepthItem> *, QList<DepthItem> *)));
+    connect(this,SIGNAL(depthFirstOrder(QString, qreal,qreal,bool)),mainClass,SLOT(depthFirstOrder(QString, qreal,qreal,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
 
-	connect(this,SIGNAL(availableAmountChanged(double)),mainClass,SLOT(availableAmountChanged(double)));
+    connect(this,SIGNAL(availableAmountChanged(QString, double)),mainClass,SLOT(availableAmountChanged(QString, double)));
 	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
 	connect(mainClass,SIGNAL(reloadDepth()),this,SLOT(reloadDepth()));
-	connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));
-	connect(this,SIGNAL(apiLagChanged(double)),mainClass->ui.lagValue,SLOT(setValue(double)));
-	connect(this,SIGNAL(accVolumeChanged(double)),mainClass->ui.accountVolume,SLOT(setValue(double)));
-	connect(this,SIGNAL(accFeeChanged(double)),mainClass->ui.accountFee,SLOT(setValue(double)));
-	connect(this,SIGNAL(accBtcBalanceChanged(double)),mainClass->ui.accountBTC,SLOT(setValue(double)));
-	connect(this,SIGNAL(accUsdBalanceChanged(double)),mainClass->ui.accountUSD,SLOT(setValue(double)));
-	connect(this,SIGNAL(loginChanged(QString)),mainClass,SLOT(loginChanged(QString)));
+    connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));
 
-	connect(this,SIGNAL(tickerHighChanged(double)),mainClass->ui.marketHigh,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerLowChanged(double)),mainClass->ui.marketLow,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerSellChanged(double)),mainClass->ui.marketAsk,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerLastChanged(double)),mainClass->ui.marketLast,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerBuyChanged(double)),mainClass->ui.marketBid,SLOT(setValue(double)));
-	connect(this,SIGNAL(tickerVolumeChanged(double)),mainClass->ui.marketVolume,SLOT(setValue(double)));
+    connect(this,SIGNAL(accVolumeChanged(double)),mainClass->ui.accountVolume,SLOT(setValue(double)));
+    connect(this,SIGNAL(accFeeChanged(QString, double)),mainClass,SLOT(accFeeChanged(QString,double)));
+    connect(this,SIGNAL(accBtcBalanceChanged(QString, double)),mainClass,SLOT(accBtcBalanceChanged(QString, double)));
+    connect(this,SIGNAL(accUsdBalanceChanged(QString, double)),mainClass,SLOT(accUsdBalanceChanged(QString, double)));
 
-	connect(this,SIGNAL(addLastTrades(QList<TradesItem> *)),mainClass,SLOT(addLastTrades(QList<TradesItem> *)));
+    connect(this,SIGNAL(tickerHighChanged(QString, double)),mainClass,SLOT(tickerHighChanged(QString, double)));
+    connect(this,SIGNAL(tickerLowChanged(QString, double)),mainClass,SLOT(tickerLowChanged(QString, double)));
+    connect(this,SIGNAL(tickerSellChanged(QString, double)),mainClass,SLOT(tickerSellChanged(QString, double)));
+    connect(this,SIGNAL(tickerLastChanged(QString, double)),mainClass,SLOT(tickerLastChanged(QString, double)));
+    connect(this,SIGNAL(tickerBuyChanged(QString, double)),mainClass,SLOT(tickerBuyChanged(QString, double)));
+    connect(this,SIGNAL(tickerVolumeChanged(QString, double)),mainClass,SLOT(tickerVolumeChanged(QString, double)));
+    connect(this,SIGNAL(loginChanged(QString)),mainClass,SLOT(loginChanged(QString)));
+
+    connect(this,SIGNAL(addLastTrades(QString, QList<TradesItem> *)),mainClass,SLOT(addLastTrades(QString, QList<TradesItem> *)));
 
 	start();
 }
@@ -229,15 +233,15 @@ void Exchange::getHistory(bool)
 {
 }
 
-void Exchange::buy(double, double)
+void Exchange::buy(QString, qreal, qreal)
 {
 }
 
-void Exchange::sell(double, double)
+void Exchange::sell(QString, qreal, qreal)
 {
 }
 
-void Exchange::cancelOrder(QByteArray)
+void Exchange::cancelOrder(QString, QByteArray)
 {
 }
 
@@ -245,6 +249,6 @@ void Exchange::sslErrors(const QList<QSslError> &errors)
 {
 	QStringList errorList;
 	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
-	if(debugLevel)logThread->writeLog(errorList.join(" ").toAscii(),2);
+	if(debugLevel)logThread->writeLog(errorList.join(" ").toLatin1(),2);
 	emit showErrorMessage("SSL Error: "+errorList.join(" "));
 }

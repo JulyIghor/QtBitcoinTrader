@@ -32,6 +32,7 @@
 #include "aboutdialog.h"
 #include "main.h"
 #include "translationdialog.h"
+#include "logobutton.h"
 
 TranslationAbout::TranslationAbout(QWidget *par)
 	: QDialog()
@@ -43,6 +44,19 @@ TranslationAbout::TranslationAbout(QWidget *par)
 	//setFixedSize(size());
 	ui.aboutTextLabel->setStyleSheet("QLabel {color: "+baseValues.appTheme.black.name()+"; border: 1px solid "+baseValues.appTheme.gray.name()+"; background: "+baseValues.appTheme.white.name()+"; padding:6px}");
 	ui.translationAuthor->setStyleSheet(ui.aboutTextLabel->styleSheet());
+
+	ui.label_info->setText("Centrabit AG, Zug\nreg. CHE-114.254.375\nVersion: "+baseValues.appVerStr);
+
+	QLayout *groupboxLayout=ui.LogoGroupBox->layout();
+	if(groupboxLayout==0)
+	{
+		groupboxLayout=new QGridLayout;
+		groupboxLayout->setContentsMargins(0,0,0,0);
+		groupboxLayout->setSpacing(0);
+		ui.LogoGroupBox->setLayout(groupboxLayout);
+		LogoButton *logoButton=new LogoButton;
+		groupboxLayout->addWidget(logoButton);
+	}
 }
 
 TranslationAbout::~TranslationAbout()

@@ -37,7 +37,7 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	exchangeDisplayOnlyCurrentPairOpenOrders=true;
 	buySellAmountExcludedFee=true;
 	clearHistoryOnCurrencyChanged=false;
-	isLastTradesTypeSupported=true;
+    isLastTradesTypeSupported=true;
 	balanceDisplayAvailableAmount=false;
 	minimumRequestIntervalAllowed=600;
 	calculatingFeeMode=1;
@@ -60,8 +60,8 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	baseValues.currentPair.tradeVolumeMin=0.001;
 	baseValues.currentPair.tradePriceMin=0.1;
 
-	defaultCurrencyParams.currADecimals=3;
-	defaultCurrencyParams.currBDecimals=2;
+    defaultCurrencyParams.currADecimals=8;
+    defaultCurrencyParams.currBDecimals=8;
 	defaultCurrencyParams.currABalanceDecimals=8;
 	defaultCurrencyParams.currBBalanceDecimals=5;
 	defaultCurrencyParams.priceDecimals=2;
@@ -70,8 +70,7 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	defaultCurrencyParams.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 
 	supportsLoginIndicator=true;
-	supportsAccountVolume=false;
-	supportsExchangeLag=false;
+    supportsAccountVolume=false;
 
 	moveToThread(this);
 	authRequestTime.restart();
@@ -189,9 +188,9 @@ void Exchange_BTCChina::getHistory(bool force)
 }
 
 
-QByteArray Exchange_BTCChina::numForBuySellFromDouble(double val, int maxDecimals)
+QByteArray Exchange_BTCChina::numForBuySellFromDouble(qreal val, int maxDecimals)
 {
-	val=mainWindow.getValidDoubleForPercision(val,3,false);
+    val=mainWindow.getValidDoubleForPercision(val,maxDecimals,false);
 	QByteArray numberText=QByteArray::number(val,'f',maxDecimals);
 	int curPos=numberText.size()-1;
 	while(curPos>0&&numberText.at(curPos)=='0')numberText.remove(curPos--,1);
@@ -199,28 +198,43 @@ QByteArray Exchange_BTCChina::numForBuySellFromDouble(double val, int maxDecimal
 	return numberText;
 }
 
-void Exchange_BTCChina::buy(double apiBtcToBuy, double apiPriceToBuy)
+void Exchange_BTCChina::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	QByteArray data=numForBuySellFromDouble(apiPriceToBuy,baseValues.currentPair.priceDecimals)+","+numForBuySellFromDouble(apiBtcToBuy,baseValues.currentPair.currADecimals)+",\""+baseValues.currentPair.currRequestPair+"\"";
+
+    CurrencyPairItem pairItem;
+    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
+    if(pairItem.symbol.isEmpty())return;
+
+    QByteArray data=numForBuySellFromDouble(apiPriceToBuy,pairItem.priceDecimals)+","+numForBuySellFromDouble(apiBtcToBuy,pairItem.currADecimals)+",\""+pairItem.currRequestPair+"\"";
 	if(debugLevel)logThread->writeLog("Buy: "+data,2);
 	sendToApi(306,"buyOrder2",true,true,data);
 }
 
-void Exchange_BTCChina::sell(double apiBtcToSell, double apiPriceToSell)
+void Exchange_BTCChina::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceToSell)
 {
 	if(tickerOnly)return;
-	QByteArray data=numForBuySellFromDouble(apiPriceToSell,baseValues.currentPair.priceDecimals)+","+numForBuySellFromDouble(apiBtcToSell,baseValues.currentPair.currADecimals)+",\""+baseValues.currentPair.currRequestPair+"\"";
+
+    CurrencyPairItem pairItem;
+    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
+    if(pairItem.symbol.isEmpty())return;
+
+    QByteArray data=numForBuySellFromDouble(apiPriceToSell,pairItem.priceDecimals)+","+numForBuySellFromDouble(apiBtcToSell,baseValues.currentPair.currADecimals)+",\""+pairItem.currRequestPair+"\"";
 	if(debugLevel)logThread->writeLog("Sell: "+data,2);
 	sendToApi(307,"sellOrder2",true,true,data);
 }
 
-void Exchange_BTCChina::cancelOrder(QByteArray order)
+void Exchange_BTCChina::cancelOrder(QString symbol, QByteArray order)
 {
 	if(tickerOnly)return;
+
+    CurrencyPairItem pairItem;
+    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
+    if(pairItem.symbol.isEmpty())return;
+
 	cancelingOrderIDs<<order;
 	if(debugLevel)logThread->writeLog("Cancel order: "+order,2);
-	sendToApi(305,"cancelOrder",true,true,order+",\""+baseValues.currentPair.currRequestPair+"\"");
+    sendToApi(305,"cancelOrder",true,true,order+",\""+pairItem.currRequestPair+"\"");
 }
 
 void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
@@ -305,8 +319,10 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 	}
 }
 
-void Exchange_BTCChina::depthUpdateOrder(double price, double amount, bool isAsk)
+void Exchange_BTCChina::depthUpdateOrder(QString symbol, qreal price, qreal amount, bool isAsk)
 {
+    if(symbol!=baseValues.currentPair.symbol)return;
+
 	if(isAsk)
 	{
 		if(depthAsks==0)return;
@@ -327,20 +343,22 @@ void Exchange_BTCChina::depthUpdateOrder(double price, double amount, bool isAsk
 	}
 }
 
-void Exchange_BTCChina::depthSubmitOrder(QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk)
+void Exchange_BTCChina::depthSubmitOrder(QString symbol, QMap<qreal,qreal> *currentMap ,qreal priceDouble, qreal amount, bool isAsk)
 {
+    if(symbol!=baseValues.currentPair.symbol)return;
+
 	if(priceDouble==0.0||amount==0.0)return;
 	if(isAsk)
 	{
 		(*currentMap)[priceDouble]=amount;
 		if(lastDepthAsksMap.value(priceDouble,0.0)!=amount)
-			depthUpdateOrder(priceDouble,amount,true);
+            depthUpdateOrder(symbol,priceDouble,amount,true);
 	}
 	else
 	{
 		(*currentMap)[priceDouble]=amount;
 		if(lastDepthBidsMap.value(priceDouble,0.0)!=amount)
-			depthUpdateOrder(priceDouble,amount,false);
+            depthUpdateOrder(symbol,priceDouble,amount,false);
 	}
 }
 
@@ -355,7 +373,9 @@ void Exchange_BTCChina::reloadDepth()
 void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 {
 	if(debugLevel)logThread->writeLog("RCV: "+data);
-	bool success=data.startsWith("{")&&!data.startsWith("{\"error\":")||data.startsWith("[{");
+    if(data.size()&&data.at(0)==QLatin1Char('<'))return;
+
+    bool success=(data.startsWith("{")&&!data.startsWith("{\"error\":"))||data.startsWith("[{");
 	if(success&&data.startsWith("401"))success=false;
 
 	switch(reqType)
@@ -367,48 +387,48 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray tickerHigh=getMidData("\"high\":\"","\"",&data);
 			if(!tickerHigh.isEmpty())
 			{
-				double newTickerHigh=tickerHigh.toDouble();
-				if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(newTickerHigh);
+                qreal newTickerHigh=tickerHigh.toDouble();
+                if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(baseValues.currentPair.symbol,newTickerHigh);
 				lastTickerHigh=newTickerHigh;
 			}
 
 			QByteArray tickerLow=getMidData("\"low\":\"","\"",&data);
 			if(!tickerLow.isEmpty())
 			{
-				double newTickerLow=tickerLow.toDouble();
-				if(newTickerLow!=lastTickerLow)emit tickerLowChanged(newTickerLow);
+                qreal newTickerLow=tickerLow.toDouble();
+                if(newTickerLow!=lastTickerLow)emit tickerLowChanged(baseValues.currentPair.symbol,newTickerLow);
 				lastTickerLow=newTickerLow;
 			}
 
 			QByteArray tickerVolume=getMidData("\"vol\":\"","\"",&data);
 			if(!tickerVolume.isEmpty())
 			{
-				double newTickerVolume=tickerVolume.toDouble();
-				if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(newTickerVolume);
+                qreal newTickerVolume=tickerVolume.toDouble();
+                if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(baseValues.currentPair.symbol,newTickerVolume);
 				lastTickerVolume=newTickerVolume;
 			}
 
 			QByteArray tickerLast=getMidData("\"last\":\"","\"",&data);
 			if(!tickerLast.isEmpty())
 			{
-				double newTickerLast=tickerLast.toDouble();
-				if(newTickerLast!=lastTickerLast)emit tickerLastChanged(newTickerLast);
+                qreal newTickerLast=tickerLast.toDouble();
+                if(newTickerLast!=lastTickerLast)emit tickerLastChanged(baseValues.currentPair.symbol,newTickerLast);
 				lastTickerLast=newTickerLast;
 			}
 
 			QByteArray tickerSell=getMidData("\"buy\":\"","\"",&data);
 			if(!tickerSell.isEmpty())
 			{
-				double newTickerSell=tickerSell.toDouble();
-				if(newTickerSell!=lastTickerSell)emit tickerSellChanged(newTickerSell);
+                qreal newTickerSell=tickerSell.toDouble();
+                if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
 				lastTickerSell=newTickerSell;
 			}
 
 			QByteArray tickerBuy=getMidData("\"sell\":\"","\"",&data);
 			if(!tickerBuy.isEmpty())
 			{
-				double newTickerBuy=tickerBuy.toDouble();
-				if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(newTickerBuy);
+                qreal newTickerBuy=tickerBuy.toDouble();
+                if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
 
@@ -429,14 +449,14 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				QList<TradesItem> *newTradesItems=new QList<TradesItem>;
 				for(int n=0;n<tradeList.count();n++)
 				{
-					QByteArray tradeData=tradeList.at(n).toAscii();
+					QByteArray tradeData=tradeList.at(n).toLatin1();
 					QByteArray nextFetchTid=getMidData("\"tid\":\"","\"",&tradeData);
 					if(nextFetchTid<=lastFetchTid)continue;
 					TradesItem newItem;
 					newItem.amount=getMidData("\"amount\":",",",&tradeData).toDouble();
 					newItem.price=getMidData("\"price\":",",",&tradeData).toDouble();
 					newItem.date=getMidData("\"date\":\"","\"",&tradeData).toUInt();
-					newItem.symbol=baseValues.currentPair.currSymbol;
+                    newItem.symbol=baseValues.currentPair.symbol;
 					newItem.orderType=getMidData("\"type\":\"","\"",&tradeData)=="sell"?1:-1;
 
 					if(newItem.isValid())(*newTradesItems)<<newItem;
@@ -444,7 +464,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
 					if(n==tradeList.count()-1&&!nextFetchTid.isEmpty())lastFetchTid=nextFetchTid;
 				}
-				if(newTradesItems->count())emit addLastTrades(newTradesItems);
+                if(newTradesItems->count())emit addLastTrades(baseValues.currentPair.symbol,newTradesItems);
 				else delete newTradesItems;
 			}
 			else if(debugLevel)logThread->writeLog("Invalid trades fetch data:"+data,2);
@@ -467,23 +487,23 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				data.remove(0,asksStart+8);
 				data.remove(data.size()-14,14);
 
-				QMap<double,double> currentBidsMap;
+                QMap<qreal,qreal> currentBidsMap;
 				QStringList bidsList=QString(bidsData).split("},{");
-				double groupedPrice=0.0;
-				double groupedVolume=0.0;
+                qreal groupedPrice=0.0;
+                qreal groupedVolume=0.0;
 				int rowCounter=0;
 				for(int n=0;n<bidsList.count();n++)
 				{
 					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
-					QByteArray currentRow=bidsList.at(n).toAscii()+"}";
-					double priceDouble=getMidData("price\":",",",&currentRow).toDouble();
-					double amount=getMidData("amount\":","}",&currentRow).toDouble();
-					if(n==0)emit tickerSellChanged(priceDouble);
+					QByteArray currentRow=bidsList.at(n).toLatin1()+"}";
+                    qreal priceDouble=getMidData("price\":",",",&currentRow).toDouble();
+                    qreal amount=getMidData("amount\":","}",&currentRow).toDouble();
+                    if(n==0)emit tickerSellChanged(baseValues.currentPair.symbol,priceDouble);
 					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==0)
 						{
-							emit depthFirstOrder(priceDouble,amount,false);
+                            emit depthFirstOrder(baseValues.currentPair.symbol,priceDouble,amount,false);
 							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
 							groupedVolume=amount;
 						}
@@ -493,7 +513,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==bidsList.count()-1)
 							{
-								depthSubmitOrder(&currentBidsMap,groupedPrice-baseValues.groupPriceValue,groupedVolume,false);
+                                depthSubmitOrder(baseValues.currentPair.symbol,
+                                                 &currentBidsMap,groupedPrice-baseValues.groupPriceValue,groupedVolume,false);
 								rowCounter++;
 								groupedVolume=amount;
 								groupedPrice-=baseValues.groupPriceValue;
@@ -502,16 +523,18 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					}
 					else
 					{
-						depthSubmitOrder(&currentBidsMap,priceDouble,amount,false);
+                        depthSubmitOrder(baseValues.currentPair.symbol,
+                                         &currentBidsMap,priceDouble,amount,false);
 						rowCounter++;
 					}
 				}
-				QList<double> currentBidsList=lastDepthBidsMap.keys();
+                QList<qreal> currentBidsList=lastDepthBidsMap.keys();
 				for(int n=0;n<currentBidsList.count();n++)
-					if(currentBidsMap.value(currentBidsList.at(n),0)==0)depthUpdateOrder(currentBidsList.at(n),0.0,false);//Remove price
+                    if(currentBidsMap.value(currentBidsList.at(n),0)==0)depthUpdateOrder(baseValues.currentPair.symbol,
+                                                                                         currentBidsList.at(n),0.0,false);//Remove price
 				lastDepthBidsMap=currentBidsMap;
 
-				QMap<double,double> currentAsksMap;
+                QMap<qreal,qreal> currentAsksMap;
 				QStringList asksList=QString(data).split("},{");
 				groupedPrice=0.0;
 				groupedVolume=0.0;
@@ -520,10 +543,10 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=0;n<asksList.count();n++)
 				{
 					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
-					QByteArray currentRow=asksList.at(n).toAscii()+"}";
-					double priceDouble=getMidData("price\":",",",&currentRow).toDouble();
-					double amount=getMidData("amount\":","}",&currentRow).toDouble();
-					if(n==0)emit tickerBuyChanged(priceDouble);
+					QByteArray currentRow=asksList.at(n).toLatin1()+"}";
+                    qreal priceDouble=getMidData("price\":",",",&currentRow).toDouble();
+                    qreal amount=getMidData("amount\":","}",&currentRow).toDouble();
+                    if(n==0)emit tickerBuyChanged(baseValues.currentPair.symbol,priceDouble);
 
 					if(priceDouble>99999)break;
 
@@ -531,7 +554,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					{
 						if(n==0)
 						{
-							emit depthFirstOrder(priceDouble,amount,true);
+                            emit depthFirstOrder(baseValues.currentPair.symbol,priceDouble,amount,true);
 							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
 							groupedVolume=amount;
 						}
@@ -541,7 +564,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==asksList.count()-1)
 							{
-								depthSubmitOrder(&currentAsksMap,groupedPrice+baseValues.groupPriceValue,groupedVolume,true);
+                                depthSubmitOrder(baseValues.currentPair.symbol,
+                                                 &currentAsksMap,groupedPrice+baseValues.groupPriceValue,groupedVolume,true);
 								rowCounter++;
 								groupedVolume=amount;
 								groupedPrice+=baseValues.groupPriceValue;
@@ -550,16 +574,18 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					}
 					else
 					{
-						depthSubmitOrder(&currentAsksMap,priceDouble,amount,true);
+                        depthSubmitOrder(baseValues.currentPair.symbol,
+                                         &currentAsksMap,priceDouble,amount,true);
 						rowCounter++;
 					}
 				}
-				QList<double> currentAsksList=lastDepthAsksMap.keys();
+                QList<qreal> currentAsksList=lastDepthAsksMap.keys();
 				for(int n=0;n<currentAsksList.count();n++)
-					if(currentAsksMap.value(currentAsksList.at(n),0)==0)depthUpdateOrder(currentAsksList.at(n),0.0,true);//Remove price
+                    if(currentAsksMap.value(currentAsksList.at(n),0)==0)depthUpdateOrder(baseValues.currentPair.symbol,
+                                                                                         currentAsksList.at(n),0.0,true);//Remove price
 				lastDepthAsksMap=currentAsksMap;
 
-				emit depthSubmitOrders(depthAsks, depthBids);
+                emit depthSubmitOrders(baseValues.currentPair.symbol,depthAsks, depthBids);
 				depthAsks=0;
 				depthBids=0;
 			}
@@ -586,22 +612,22 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				}
 
 				QByteArray feeData=getMidData("trade_fee\":",",",&data);
-				if(!feeData.isEmpty())emit accFeeChanged(feeData.toDouble());
+                if(!feeData.isEmpty())emit accFeeChanged(baseValues.currentPair.symbol,feeData.toDouble());
 
 				QByteArray balanceData=getMidData("\"balance\":","}}}",&data)+"}";
 				QByteArray btcBalance=getMidData("\""+baseValues.currentPair.currAStrLow+"\":","}",&balanceData);
 				if(!btcBalance.isEmpty())
 				{
-					double newBtcBalance=btcBalance.toDouble()+getMidData("\"amount\":\"","\"",&btcBalance).toDouble();
-					if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(newBtcBalance);
+                    qreal newBtcBalance=btcBalance.toDouble()+getMidData("\"amount\":\"","\"",&btcBalance).toDouble();
+                    if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbol,newBtcBalance);
 					lastBtcBalance=newBtcBalance;
 				}
 
 				QByteArray usdBalance=getMidData("\""+baseValues.currentPair.currBStrLow+"\":","}",&balanceData);
 				if(!usdBalance.isEmpty())
 				{
-					double newUsdBalance=usdBalance.toDouble()+getMidData("\"amount\":\"","\"",&usdBalance).toDouble();
-					if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(newUsdBalance);
+                    qreal newUsdBalance=usdBalance.toDouble()+getMidData("\"amount\":\"","\"",&usdBalance).toDouble();
+                    if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbol,newUsdBalance);
 					lastUsdBalance=newUsdBalance;
 				}
 			}
@@ -619,7 +645,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				QStringList currencyList=QString(data).split("],\"");
 				for(int n=0;n<currencyList.count();n++)
 				{
-					QByteArray currencyByteArray=currencyList[n].toAscii();
+					QByteArray currencyByteArray=currencyList[n].toLatin1();
 					QString curerntSymbol=getMidData("order_","\":[",&currencyByteArray).toUpper();
 
 					QStringList ordersList=currencyList.at(n).split("},{");
@@ -627,7 +653,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					for(int n=0;n<ordersList.count();n++)
 					{	
 						OrderItem currentOrder;
-						QByteArray currentOrderData=ordersList.at(n).toAscii();
+						QByteArray currentOrderData=ordersList.at(n).toLatin1();
 						currentOrder.oid=getMidData("\"id\":",",",&currentOrderData);
 						currentOrder.date=getMidData("\"date\":",",",&currentOrderData).toUInt();
 						currentOrder.type=getMidData("\"type\":\"","\"",&currentOrderData)=="ask";
@@ -640,13 +666,13 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
 							currentOrder.amount=getMidData("\"amount\":\"","\"",&currentOrderData).toDouble();
 							currentOrder.price=getMidData("\"price\":\"","\"",&currentOrderData).toDouble();
-							currentOrder.symbol=curerntSymbol.toAscii();
+							currentOrder.symbol=curerntSymbol.toLatin1();
 							if(currentOrder.isValid())(*orders)<<currentOrder;
 					}
 				}
 				lastOrders=data;
 
-				emit ordersChanged(orders);
+                emit orderBookChanged(baseValues.currentPair.symbol,orders);
 				lastInfoReceived=false;
 			}
 		}
@@ -657,7 +683,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 			if(!success)break;
 			if(!cancelingOrderIDs.isEmpty())
 			{
-				if(data.startsWith("{\"result\":true"))emit orderCanceled(cancelingOrderIDs.first());
+                if(data.startsWith("{\"result\":true"))emit orderCanceled(baseValues.currentPair.symbol,cancelingOrderIDs.first());
 				if(debugLevel)logThread->writeLog("Order canceled:"+cancelingOrderIDs.first(),2);
 				cancelingOrderIDs.removeFirst();
 			}
@@ -685,7 +711,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				QStringList dataList=QString(data).split("},{");
 				for(int n=0;n<dataList.count();n++)
 				{
-					QByteArray curLog(dataList.at(n).toAscii());
+					QByteArray curLog(dataList.at(n).toLatin1());
 					curLog.append("}");
 
 					if(n==0)
@@ -716,13 +742,13 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
 					QByteArray currencyA=transactionType.right(3).toUpper();
 
-					double btcAmount=getMidData("btc_amount\":\"","\"",&curLog).toDouble();
+                    qreal btcAmount=getMidData("btc_amount\":\"","\"",&curLog).toDouble();
 					if(btcAmount<0.0)btcAmount=-btcAmount;
 
-					double cnyAmount=getMidData("cny_amount\":\"","\"",&curLog).toDouble();
+                    qreal cnyAmount=getMidData("cny_amount\":\"","\"",&curLog).toDouble();
 					if(cnyAmount<0.0)cnyAmount=-cnyAmount;
 
-					double ltcAmount=getMidData("ltc_amount\":\"","\"",&curLog).toDouble();
+                    qreal ltcAmount=getMidData("ltc_amount\":\"","\"",&curLog).toDouble();
 					if(ltcAmount<0.0)ltcAmount=-ltcAmount;
 
 					QByteArray currencyB;
@@ -797,7 +823,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 		if(!invalidMessage)
 			errorString=getMidData("message\":\"","\",",&data)+" Code:"+getMidData("code\":",",",&data);
 		else errorString=data;
-		if(debugLevel)logThread->writeLog("API Error: "+errorString.toAscii()+" ReqType:"+QByteArray::number(reqType),2);
+		if(debugLevel)logThread->writeLog("API Error: "+errorString.toLatin1()+" ReqType:"+QByteArray::number(reqType),2);
 		if(errorCount<3&&reqType<300&&!errorString.endsWith("Unauthorized"))return;
 		if(errorString.isEmpty())return;
 		errorString.append("<br>"+QString::number(reqType));
@@ -810,6 +836,6 @@ void Exchange_BTCChina::sslErrors(const QList<QSslError> &errors)
 {
 	QStringList errorList;
 	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
-	if(debugLevel)logThread->writeLog(errorList.join(" ").toAscii(),2);
+	if(debugLevel)logThread->writeLog(errorList.join(" ").toLatin1(),2);
 	emit showErrorMessage("SSL Error: "+errorList.join(" "));
 }

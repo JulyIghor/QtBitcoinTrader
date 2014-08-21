@@ -43,7 +43,7 @@ FeeCalculator::FeeCalculator()
 	ui.setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	setWindowFlags(Qt::WindowCloseButtonHint);
-	foreach(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
+	Q_FOREACH(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
 	mainWindow.fillAllBtcLabels(this,baseValues.currentPair.currAStr);
 	mainWindow.fillAllUsdLabels(this,baseValues.currentPair.currBStr);
@@ -52,7 +52,7 @@ FeeCalculator::FeeCalculator()
 	ui.feeValue->setValue(mainWindow.ui.accountFee->value());
 
 	ui.buyPrice->setValue(mainWindow.ui.marketBid->value());
-	double btcVal=mainWindow.getAvailableUSD()/ui.buyPrice->value();
+	qreal btcVal=mainWindow.getAvailableUSD()/ui.buyPrice->value();
 	if(btcVal<baseValues.currentPair.tradeVolumeMin)btcVal=baseValues.currentPair.tradeVolumeMin;
 	ui.buyTotalBtc->setValue(btcVal);
 
@@ -115,7 +115,7 @@ void FeeCalculator::setZeroProfitPrice()
 	ui.sellPrice->setValue(ui.buyPrice->value()*mainWindow.floatFeeInc*mainWindow.floatFeeInc);
 }
 
-void FeeCalculator::profitLossChanged(double val)
+void FeeCalculator::profitLossChanged(qreal val)
 {
 	if(val<0)
 		ui.profitLoss->setStyleSheet("QDoubleSpinBox {background: "+baseValues.appTheme.lightRed.name()+";}");
@@ -164,7 +164,7 @@ void FeeCalculator::buyTotalPaidChanged(double)
 	buyPaidLocked=false;
 }
 
-void FeeCalculator::buyBtcReceivedChanged(double val)
+void FeeCalculator::buyBtcReceivedChanged(qreal val)
 {
 	ui.sellAmount->setValue(val*ui.sellPrice->value());
 	ui.sellFiatReceived->setValue(ui.sellAmount->value()-ui.sellFee->value());

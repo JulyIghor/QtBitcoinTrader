@@ -36,6 +36,8 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QCryptographicHash>
+//#include <QUrl>
+#include "logobutton.h"
 
 PasswordDialog::PasswordDialog(QWidget *parent)
 	: QDialog(parent)
@@ -50,7 +52,8 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 
 	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	ui.updateCheckBox->setChecked(settings.value("CheckForUpdates",true).toBool());
-	QString lastProfile=settings.value("LastProfile","").toString();
+
+    QString lastProfile=settings.value("LastProfile","").toString();
 	int lastProfileIndex=-1;
 	int firstUnlockedProfileIndex=-1;
 
@@ -61,7 +64,7 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	{
 		QString currentLogo=listSettings.value(exchangesList.at(n)+"/Logo").toString();
 		if(currentLogo.isEmpty())continue;
-		logosMap.insert(n+1,":/Resources/Exchanges/Logos/"+currentLogo);
+        logosMap.insert(n,":/Resources/Exchanges/Logos/"+currentLogo);
 	}
 
 	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
@@ -112,22 +115,40 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 		}
 		QString currentLogo=logosMap.value(currentProfileExchangeId);
 		if(!QFile::exists(currentLogo))currentLogo=":/Resources/Exchanges/Logos/Unknown.png";
-		ui.profileComboBox->addItem(QIcon(currentLogo),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
+        ui.profileComboBox->addItem(QIcon(currentLogo),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).fileName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
 
-		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n-1;
+		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;
 		if(firstUnlockedProfileIndex==-1&&!isProfLocked)firstUnlockedProfileIndex=n-1;
 	}
 	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem(julyTr("DEFAULT_PROFILE_NAME","Default Profile"));
 	if(firstUnlockedProfileIndex!=-1&&lastProfileIndex==-1)lastProfileIndex=firstUnlockedProfileIndex;
-	if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);
+    if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);
+
+    ui.label_info->setText("Centrabit AG, Zug\nreg. CHE-114.254.375\nVersion: "+baseValues.appVerStr);
 
 	julyTranslator.translateUi(this);
 
 	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())
-		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),textFontWidth(checkBoxes->text())+20));
-	QSize minSizeHint=minimumSizeHint();
-	if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
+        checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),textFontWidth(checkBoxes->text())+20));
+
+
+	QLayout *groupboxLayout=ui.LogoGroupBox->layout();
+	if(groupboxLayout==0)
+	{
+		groupboxLayout=new QGridLayout;
+		groupboxLayout->setContentsMargins(0,0,0,0);
+		groupboxLayout->setSpacing(0);
+		ui.LogoGroupBox->setLayout(groupboxLayout);
+		LogoButton *logoButton=new LogoButton;
+		groupboxLayout->addWidget(logoButton);
+	}
+
+    QSize minSizeHint=minimumSizeHint();
+    if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
+
+    if(settings.value("HidePasswordDescription",false).toBool())
+        ui.descriptionGroupBox->setChecked(false);
 }
 
 PasswordDialog::~PasswordDialog()
@@ -138,7 +159,7 @@ PasswordDialog::~PasswordDialog()
 
 QString PasswordDialog::lockFilePath(QString name)
 {
-	return QDesktopServices::storageLocation(QDesktopServices::TempLocation)+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(appDataDir+"/"+QFileInfo(name).fileName().toAscii(),QCryptographicHash::Sha1).toHex());
+    return baseValues.tempLocation+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(appDataDir+"/"+QFileInfo(name).fileName().toLatin1(),QCryptographicHash::Sha1).toHex());
 }
 
 bool PasswordDialog::isProfileLocked(QString name)
@@ -155,7 +176,7 @@ void PasswordDialog::accept()
 {
 	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	int currIndex=ui.profileComboBox->currentIndex();
-	if(currIndex>0)settings.setValue("LastProfile",ui.profileComboBox->itemData(currIndex).toString());
+	if(currIndex>=0)settings.setValue("LastProfile",ui.profileComboBox->itemData(currIndex).toString());
 	QDialog::accept();
 }
 
@@ -213,9 +234,20 @@ void PasswordDialog::checkToEnableButton(QString pass)
 			if(!containsSpec&&allowedPassChars.contains(pass.at(n)))containsSpec=true;
 			if(!containsUpCase&&pass.at(n).isLetter()&&pass.at(n).isUpper())containsUpCase=true;
 			if(!containsDownCase&&pass.at(n).isLetter()&&pass.at(n).isLower())containsDownCase=true;
-			if(containsLetter&&containsDigit&&containsSpec||containsLetter&&containsDigit&&containsUpCase&&containsDownCase)
+            if((containsLetter&&containsDigit&&containsSpec)||(containsLetter&&containsDigit&&containsUpCase&&containsDownCase))
 			{isValidPassword=true;break;}
 		}
 	}
 	ui.okButton->setEnabled(isValidPassword);
+}
+
+void PasswordDialog::on_descriptionGroupBox_toggled(bool)
+{
+    ui.descriptionGroupBox->setVisible(false);
+
+    QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
+    settings.setValue("HidePasswordDescription",true);
+
+    QSize minSizeHint=minimumSizeHint();
+    setFixedHeight(minSizeHint.height());
 }

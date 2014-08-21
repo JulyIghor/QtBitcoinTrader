@@ -41,13 +41,13 @@ struct OrderItem
 	QString dateStr;
 	bool type;//true=Ask, false=Bid
 	int status;//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
-	double amount;
+    qreal amount;
 	QString amountStr;
-	double price;
+    qreal price;
 	QString priceStr;
-	double total;
+    qreal total;
 	QString totalStr;
-	QByteArray symbol;
+    QString symbol;
 	bool isValid();
 };
 

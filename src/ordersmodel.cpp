@@ -89,7 +89,7 @@ void OrdersModel::clear()
 	endResetModel();
 }
 
-void OrdersModel::ordersChanged(QList<OrderItem> *ordersRcv)
+void OrdersModel::orderBookChanged(QList<OrderItem> *ordersRcv)
 {
 	currentAsksPrices.clear();
 	currentBidsPrices.clear();
@@ -104,18 +104,18 @@ void OrdersModel::ordersChanged(QList<OrderItem> *ordersRcv)
 
 	QHash<QByteArray,bool> existingOids;
 
-	double volumeTotal=0.0;
-	double amountTotal=0.0;
+    qreal volumeTotal=0.0;
+    qreal amountTotal=0.0;
 
 	for(int n=0;n<ordersRcv->count();n++)
 	{
 		bool isAsk=ordersRcv->at(n).type;
-		QByteArray orderSymbol=ordersRcv->at(n).symbol;
+        QString orderSymbol=ordersRcv->at(n).symbol;
 
 		if(orderSymbol.startsWith(baseValues.currentPair.currAStr)&&isAsk)volumeTotal+=ordersRcv->at(n).amount-currentExchange->decAmountFromOpenOrder;
 		if(orderSymbol.endsWith(baseValues.currentPair.currBStr)&&!isAsk)amountTotal+=(ordersRcv->at(n).amount-currentExchange->decAmountFromOpenOrder)*ordersRcv->at(n).price;
 
-		if(ordersRcv->at(n).status>0&&orderSymbol==baseValues.currentPair.currSymbol)
+		if(ordersRcv->at(n).status>0&&orderSymbol==baseValues.currentPair.symbol)
 		{
 			if(isAsk)currentAsksPrices[ordersRcv->at(n).price]=true;
 			else currentBidsPrices[ordersRcv->at(n).price]=true;
@@ -177,7 +177,7 @@ void OrdersModel::ordersChanged(QList<OrderItem> *ordersRcv)
 			totalList.insert(currentIndex,ordersRcv->at(n).total);
 			totalStrList.insert(currentIndex,ordersRcv->at(n).totalStr);
 
-			symbolList.insert(currentIndex,ordersRcv->at(n).symbol);
+            symbolList.insert(currentIndex,ordersRcv->at(n).symbol);
 
 			if(checkDuplicatedOID)oidMapForCheckingDuplicates.insert(ordersRcv->at(n).oid,ordersRcv->at(n).date);
 			
@@ -225,11 +225,16 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 
 	if(role==Qt::WhatsThisRole)return symbolList.at(currentRow);
 
-	if(role==Qt::UserRole)
-	{
-		if(statusList.at(currentRow))return oidList.at(currentRow);
-		return QVariant();
-	}
+    if(role==Qt::UserRole)
+    {
+        if(statusList.at(currentRow))return oidList.at(currentRow);
+        return QVariant();
+    }
+
+    if(role==Qt::AccessibleTextRole)
+    {
+        return symbolList.at(currentRow);
+    }
 
 	int indexColumn=index.column()-1;
 
@@ -348,25 +353,25 @@ QVariant OrdersModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-void OrdersModel::ordersCancelAll(QByteArray pair)
+void OrdersModel::ordersCancelAll(QString pair)
 {
 	for(int n=oidList.count()-1;n>=0;n--)
 		if(statusList.at(n)&&(pair.isEmpty()||symbolList.at(n)==pair))
-			emit cancelOrder(oidList.at(n));
+            emit cancelOrder(pair,oidList.at(n));
 }
 
-void OrdersModel::ordersCancelBids(QByteArray pair)
+void OrdersModel::ordersCancelBids(QString pair)
 {
 	for(int n=oidList.count()-1;n>=0;n--)
 		if(statusList.at(n)&&typesList.at(n)==false&&(pair.isEmpty()||symbolList.at(n)==pair))
-			emit cancelOrder(oidList.at(n));
+            emit cancelOrder(pair,oidList.at(n));
 }
 
-void OrdersModel::ordersCancelAsks(QByteArray pair)
+void OrdersModel::ordersCancelAsks(QString pair)
 {
 	for(int n=oidList.count()-1;n>=0;n--)
 		if(statusList.at(n)&&typesList.at(n)==true&&(pair.isEmpty()||symbolList.at(n)==pair))
-			emit cancelOrder(oidList.at(n));
+            emit cancelOrder(pair,oidList.at(n));
 }
 
 void OrdersModel::setOrderCanceled(QByteArray oid)
@@ -376,7 +381,7 @@ void OrdersModel::setOrderCanceled(QByteArray oid)
 		{
 			statusList[n]=0;
 
-			if(symbolList.at(n)==baseValues.currentPair.currSymbol)
+			if(symbolList.at(n)==baseValues.currentPair.symbol)
 			{
 			if(typesList.at(n))currentAsksPrices.remove(priceList.at(n));
 			else currentBidsPrices.remove(priceList.at(n));
@@ -456,6 +461,6 @@ quint32 OrdersModel::getRowDate(int row){if(row<0||row>=dateList.count())return 
 QByteArray OrdersModel::getRowOid(int row){if(row<0||row>=oidList.count())return 0; return oidList.at(getRowNum(row));}
 int OrdersModel::getRowType(int row){if(row<0||row>=typesList.count())return 0; return typesList.at(getRowNum(row))?1:0;}
 int OrdersModel::getRowStatus(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(getRowNum(row));}
-double OrdersModel::getRowPrice(int row){if(row<0||row>=priceList.count())return 0.0;return priceList.at(getRowNum(row));}
-double OrdersModel::getRowVolume(int row){if(row<0||row>=amountList.count())return 0.0;return amountList.at(getRowNum(row));}
-double OrdersModel::getRowTotal(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(getRowNum(row));}
+qreal OrdersModel::getRowPrice(int row){if(row<0||row>=priceList.count())return 0.0;return priceList.at(getRowNum(row));}
+qreal OrdersModel::getRowVolume(int row){if(row<0||row>=amountList.count())return 0.0;return amountList.at(getRowNum(row));}
+qreal OrdersModel::getRowTotal(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(getRowNum(row));}

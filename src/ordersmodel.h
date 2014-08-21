@@ -46,17 +46,17 @@ public:
 	quint32 getRowDate(int row);
 	int getRowType(int row);
 	int getRowStatus(int row);
-	double getRowPrice(int row);
-	double getRowVolume(int row);
-	double getRowTotal(int row);
+    qreal getRowPrice(int row);
+    qreal getRowVolume(int row);
+    qreal getRowTotal(int row);
 
-	QMap<double,bool> currentAsksPrices;
-	QMap<double,bool> currentBidsPrices;
+    QMap<qreal,bool> currentAsksPrices;
+    QMap<qreal,bool> currentBidsPrices;
 
 	bool checkDuplicatedOID;
-	void ordersCancelAll(QByteArray pair=0);
-	void ordersCancelBids(QByteArray pair=0);
-	void ordersCancelAsks(QByteArray pair=0);
+    void ordersCancelAll(QString pair=0);
+    void ordersCancelBids(QString pair=0);
+    void ordersCancelAsks(QString pair=0);
 	void setOrderCanceled(QByteArray);
 
 	void clear();
@@ -64,7 +64,7 @@ public:
 	OrdersModel();
 	~OrdersModel();
 
-	void ordersChanged(QList<OrderItem> *ordersRcv);
+	void orderBookChanged(QList<OrderItem> *ordersRcv);
 
 	void setHorizontalHeaderLabels(QStringList list);
 
@@ -105,21 +105,21 @@ private:
 
 	QList<int> statusList;
 
-	QList<double> amountList;
+    QList<qreal> amountList;
 	QStringList amountStrList;
 
-	QList<double> priceList;
+    QList<qreal> priceList;
 	QStringList priceStrList;
 
-	QList<double> totalList;
+    QList<qreal> totalList;
 	QStringList totalStrList;
 
 	QStringList symbolList;
 
 signals:
-	void cancelOrder(QByteArray);
+	void cancelOrder(QString, QByteArray);
 	void ordersIsAvailable();
-	void volumeAmountChanged(double, double);
+    void volumeAmountChanged(qreal, qreal);
 };
 
 #endif // ORDERSMODEL_H

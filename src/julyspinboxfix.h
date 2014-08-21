@@ -41,15 +41,15 @@ class JulySpinBoxFix : public QObject
 	Q_OBJECT
 
 public:
-	JulySpinBoxFix(QDoubleSpinBox *parent, int minimumWidth=0);
-	~JulySpinBoxFix();
+    JulySpinBoxFix(QDoubleSpinBox *parent, int minimumWidth=0);
 
 private:
 	int pMinimumWidth;
 	int spinMargin;
 	QDoubleSpinBox *parentSpinBox;
 private slots:
-	void valueChanged(QString);
+    void widthFix(QString);
+    void decimalsFix(double);
 };
 
 #endif // JULYSPINBOXFIX_H

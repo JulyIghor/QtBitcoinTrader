@@ -46,12 +46,17 @@ public:
 	QString getRestSign();
 	QString getRestKey();
 	QString getPassword();
-	NewPasswordDialog();
+	NewPasswordDialog(qint32);
 	~NewPasswordDialog();
 
 private:
-	QMap<int,bool> clientIdVisibleMap;
-	QMap<int,QString> getApiUrlMap;
+    void setDiffBar(int);
+	//QMap<int,bool> clientIdVisibleMap;
+	//QMap<int,QString> getApiUrlMap;
+	qint32 exchangeNum;
+	QString exchangeName;
+	bool clientIdEnabled;
+	QString getApiUrl;
 	bool isValidPassword();
 	Ui::NewPasswordDialog ui;
 private slots:
@@ -59,6 +64,7 @@ private slots:
 	void exchangeChanged(QString);
 	void checkToEnableButton();
 	void getApiKeySecretButton();
+	int difficulty(QString, bool *, QString *);
 };
 
 #endif // NEWPASSWORDDIALOG_H

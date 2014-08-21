@@ -29,55 +29,32 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ADDRULEWINDOW_H
-#define ADDRULEWINDOW_H
+#ifndef NETWORKMENU_H
+#define NETWORKMENU_H
 
-#include <QDialog>
-#include "ui_addrulewindow.h"
-#include "ruleholder.h"
-#include "rulewidget.h"
+#include "julybuttonmenu.h"
 
-class AddRuleWindow : public QDialog
+namespace Ui {
+class NetworkMenu;
+}
+
+class NetworkMenu : public JulyButtonMenu
 {
-	Q_OBJECT
-
+    Q_OBJECT
 public:
-	Ui::AddRuleWindow ui;
-	AddRuleWindow(RuleWidget *parent = 0);
-	~AddRuleWindow();
-	RuleHolder getRuleHolder();
-	void fillByRuleHolder(RuleHolder *holder);
+    explicit NetworkMenu(QToolButton *parentButton);
+    ~NetworkMenu();
+    int getNetworkTotal();
+    void setNetworkTotal(int);
+    int getNetworkTotalMaximum();
+    void setNetworkTotalMaximum(int);
+    void setSuffix(QString);
 private:
-	bool wasTrailingVisible;
-	int getRuleIfType();
-	bool changingSound;
-	QString sound;
-	double getSelectedIfValue();
-	void fixWidth();
-	RuleWidget *parentRuleGroup;
-	int thanType();
-	bool checkIsValidRule();
-public slots:
-	void languageChanged();
-public slots:
-	void on_playSoundBeep_clicked();
-	void on_playSound_clicked();
-	void on_valueCheckValuePercentageToZero_clicked();
-	void on_checkCheckUsePercentageValue_toggled(bool);
-	void on_valueValuePercentage2_3_clicked();
-	void on_valueValuePercentage50_clicked();
-	void on_valueValuePercentage1_3_clicked();
-	void on_exactPrice_toggled(bool);
-	void on_valueValuePercentage100_clicked();
-	void on_thanValuePercentageToZero_clicked();
-	void thanTypeChanged();
-	void on_fillFromBuyPanel_clicked();
-	void on_fillFromSellPanel_clicked();
-
-	void ifChanged(bool);
-	void amountChanged();
-	void buttonAddRule();
-	void checkToEnableButtons();
+    Ui::NetworkMenu *ui;
+private slots:
+    void on_trafficTotalToZero_clicked();
+signals:
+    void trafficTotalToZero_clicked();
 };
 
-#endif // ADDRULEWINDOW_H
+#endif // NETWORKMENU_H

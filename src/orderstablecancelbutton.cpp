@@ -52,16 +52,13 @@ void OrdersTableCancelButton::paint(QPainter *painter, const QStyleOptionViewIte
 		QPushButton* buttonCancel=dynamic_cast<QPushButton*>(parentTable->indexWidget(index));
 		if(!buttonCancel)
 		{
-			QString oID=index.data(Qt::EditRole).toString();
-			if(!oID.isEmpty())
-			{
 			buttonCancel=new QPushButton("X");
-			buttonCancel->setFixedWidth(defaultHeightForRow);
-			buttonCancel->setFixedHeight(defaultHeightForRow);
+			buttonCancel->setFixedSize(defaultHeightForRow,defaultHeightForRow);
 			connect(buttonCancel,SIGNAL(clicked()),baseValues.mainWindow_,SLOT(cancelOrderByXButton()));
 			parentTable->setIndexWidget(index, buttonCancel);
-			}
-		}	
+        }
+        buttonCancel->setProperty("OrderId",index.data(Qt::UserRole).toString());
+        buttonCancel->setProperty("Symbol",index.data(Qt::AccessibleTextRole).toString());
 	}
 	QItemDelegate::paint(painter, option, index);
 }

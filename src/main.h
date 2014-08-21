@@ -75,8 +75,7 @@ struct BaseValues
 {
 	void Construct();
 
-	QString osStyle;
-	int lastGroupID;
+    QString osStyle;
 	bool forceDotInSpinBoxes;
 
 	int trafficSpeed;
@@ -84,10 +83,9 @@ struct BaseValues
 	int trafficTotalType;
 
 	CurrencyPairItem currentPair;
+    QMap<QString,CurrencyPairItem> currencyPairMap;
 
-	bool nightMode;
-	bool rulesSafeMode;
-	int rulesSafeModeInterval;
+    bool nightMode;
 	
 	QByteArray upArrow;
 	QByteArray downArrow;
@@ -104,7 +102,7 @@ struct BaseValues
 	bool supportsUtfUI;
 	bool highResolutionDisplay;
 	int defaultHeightForRow_;
-	double groupPriceValue;
+    qreal groupPriceValue;
 	QFontMetrics *fontMetrics_;
 	int apiDownCount;
 	int uiUpdateInterval;
@@ -115,6 +113,8 @@ struct BaseValues
 	int httpRequestInterval;
 	int httpRequestTimeout;
 	Exchange *currentExchange_;
+    QString scriptFolder;
+    qreal jlScriptVersion;
 	QString exchangeName;
 	QString timeFormat;
 	QString dateTimeFormat;
@@ -129,11 +129,13 @@ struct BaseValues
 	QtBitcoinTrader *mainWindow_;
 	QString logFileName;
 	QString iniFileName;
-	double appVerReal;
-	double appVerLastReal;
+    QString desktopLocation;
+    QString tempLocation;
+    qreal appVerReal;
+    qreal appVerLastReal;
 	bool appVerIsBeta;
-	QMap<QByteArray,QByteArray> currencyMapSign;
-	QMap<QByteArray,CurencyInfo> currencyMap;
+    QMap<QString,QString> currencyMapSign;
+    QMap<QString,CurencyInfo> currencyMap;
 };
 
 #define baseValues (*baseValues_)

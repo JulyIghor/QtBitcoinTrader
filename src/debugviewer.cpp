@@ -96,7 +96,7 @@ void DebugViewer::on_buttonSaveAs_clicked()
 			osLine="OS: Some Linux\r\n";
 
 		writeLog.write(osLine);
-		writeLog.write(ui.debugText->toPlainText().toAscii());
+		writeLog.write(ui.debugText->toPlainText().toLatin1());
 		writeLog.close();
 	}
 	else

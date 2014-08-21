@@ -1,34 +1,24 @@
-#
-# Basic stuff
-#
 TEMPLATE	= app
 LANGUAGE        = C++
 TARGET 		= QtBitcoinTrader
 DEPENDPATH 	+= .
-QT		+= network
 INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
-INCLUDEPATH    += /usr/include/QtMultimediaKit
-INCLUDEPATH    += /usr/include/QtMobility
-MOBILITY       = multimedia
 
-win32 {
-LIBS		+= -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32
-}
-!win32 {
-LIBS		+= -lcrypto -lz -lQtMultimediaKit
-}
+QT		+= network script
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia
 
-CONFIG		+= qt warn_off release mobility
+ win32 { LIBS += -lcrypt32 -leay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lz}
+!win32 { LIBS += -lcrypto -lz }
+
+CONFIG		+= qt #warn_off release
+
 
 #
 # Headers
 #
-
 HEADERS += aboutdialog.h \
            addrulegroup.h \
-           addrulewindow.h \
-           audioplayer.h \
            currencyinfo.h \
            currencypairitem.h \
            datafolderchusedialog.h \
@@ -40,7 +30,6 @@ HEADERS += aboutdialog.h \
            exchange_bitstamp.h \
            exchange_btcchina.h \
            exchange_btce.h \
-           exchange_cryptsy.h \
            feecalculator.h \
            historyitem.h \
            historymodel.h \
@@ -61,7 +50,6 @@ HEADERS += aboutdialog.h \
            passworddialog.h \
            percentpicker.h \
            qtbitcointrader.h \
-           ruleholder.h \
            rulesmodel.h \
            rulewidget.h \
            thisfeatureunderdevelopment.h \
@@ -71,9 +59,23 @@ HEADERS += aboutdialog.h \
            translationline.h \
            updaterdialog.h \
            apptheme.h \
-           logobutton.h
+           logobutton.h \
+    networkmenu.h \
+    julybuttonmenu.h \
+    scriptwidget.h \
+    scriptobject.h \
+    addscriptwindow.h \
+    julylockfile.h \
+    exchange_gocio.h \
+    featuredexchangesdialog.h \
+    allexchangesdialog.h \
+    allexchangesmodel.h \
+    exchangebutton.h \
+    addruledialog.h \
+    rulescriptparser.h \
+    ruleholder.h
+
 FORMS += addrulegroup.ui \
-         addrulewindow.ui \
          datafolderchusedialog.ui \
          debugviewer.ui \
          feecalculator.ui \
@@ -86,11 +88,17 @@ FORMS += addrulegroup.ui \
          translationabout.ui \
          translationdialog.ui \
          updaterdialog.ui \
-         logobutton.ui
+         logobutton.ui \
+    networkmenu.ui \
+    scriptwidget.ui \
+    addscriptwindow.ui \
+    featuredexchangesdialog.ui \
+    allexchangesdialog.ui \
+    exchangebutton.ui \
+    addruledialog.ui
+
 SOURCES += aboutdialog.cpp \
            addrulegroup.cpp \
-           addrulewindow.cpp \
-           audioplayer.cpp \
            currencypairitem.cpp \
            datafolderchusedialog.cpp \
            debugviewer.cpp \
@@ -101,7 +109,6 @@ SOURCES += aboutdialog.cpp \
            exchange_bitstamp.cpp \
            exchange_btcchina.cpp \
            exchange_btce.cpp \
-           exchange_cryptsy.cpp \
            feecalculator.cpp \
            historyitem.cpp \
            historymodel.cpp \
@@ -122,7 +129,6 @@ SOURCES += aboutdialog.cpp \
            passworddialog.cpp \
            percentpicker.cpp \
            qtbitcointrader.cpp \
-           ruleholder.cpp \
            rulesmodel.cpp \
            rulewidget.cpp \
            thisfeatureunderdevelopment.cpp \
@@ -132,7 +138,21 @@ SOURCES += aboutdialog.cpp \
            translationline.cpp \
            updaterdialog.cpp \
            apptheme.cpp \
-           logobutton.cpp
+           logobutton.cpp \
+    networkmenu.cpp \
+    julybuttonmenu.cpp \
+    scriptwidget.cpp \
+    scriptobject.cpp \
+    addscriptwindow.cpp \
+    julylockfile.cpp \
+    exchange_gocio.cpp \
+    featuredexchangesdialog.cpp \
+    allexchangesdialog.cpp \
+    allexchangesmodel.cpp \
+    exchangebutton.cpp \
+    addruledialog.cpp \
+    rulescriptparser.cpp \
+    ruleholder.cpp
 #
 # Resources
 # 

@@ -65,7 +65,7 @@ void LogThread::writeLog(QByteArray data, int dbLvl)
 
 void LogThread::writeLogSlot(QByteArray data, int dbLvl)
 {
-	data="------------------\r\n"+QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss LVL:").toAscii()+QByteArray::number(dbLvl)+"\r\n"+data+"\r\n------------------\r\n\r\n";
+	data="------------------\r\n"+QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1()+QByteArray::number(dbLvl)+"\r\n"+data+"\r\n------------------\r\n\r\n";
 	if(writeFile)
 	{
 		QFile logFile(baseValues.logFileName);

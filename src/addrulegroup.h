@@ -40,17 +40,13 @@ class AddRuleGroup : public QDialog
 	Q_OBJECT
 
 public:
-	QStringList groupsList;
-	QString groupName;
-	int copyFromExistingGroup;
+    QStringList groupsList;
+    QString fileName;
+    QString groupName;
 	AddRuleGroup(QWidget *parent = 0);
 	~AddRuleGroup();
 
 private:
-	bool loadGroupFromFile(QString);
-	QStringList templatesList;
-	QStringList existingGroups;
-	QList<int> existingGroupsIDs;
 	Ui::AddRuleGroup ui;
 
 private slots:

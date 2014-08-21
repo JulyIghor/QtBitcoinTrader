@@ -59,14 +59,14 @@ private:
 	QByteArray lastFetchTid;
 	QByteArray historyLastTradesRequest;
 	QByteArray getMidData(QString a, QString b,QByteArray *data);
-	QByteArray numForBuySellFromDouble(double val, int maxDecimals);
+	QByteArray numForBuySellFromDouble(qreal val, int maxDecimals);
 
 	QList<DepthItem> *depthAsks;
 	QList<DepthItem> *depthBids;
 	QList<QByteArray> cancelingOrderIDs;
 
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
+	QMap<qreal,qreal> lastDepthAsksMap;
+	QMap<qreal,qreal> lastDepthBidsMap;
 
 	QString apiLogin;
 
@@ -74,8 +74,8 @@ private:
 	QTimer *secondTimer;
 
 	void clearVariables();
-	void depthSubmitOrder(QMap<double,double> *,double,double,bool);
-	void depthUpdateOrder(double,double,bool);
+	void depthSubmitOrder(QString,QMap<qreal,qreal> *,qreal,qreal,bool);
+    void depthUpdateOrder(QString, qreal,qreal,bool);
 	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 private slots:
 	void reloadDepth();
@@ -85,9 +85,9 @@ private slots:
 public slots:
 	void clearValues();
 	void getHistory(bool);
-	void buy(double, double);
-	void sell(double, double);
-	void cancelOrder(QByteArray);
+	void buy(QString, qreal, qreal);
+	void sell(QString, qreal, qreal);
+	void cancelOrder(QString, QByteArray);
 };
 
 #endif // EXCHANGE_BTCCHINA_H

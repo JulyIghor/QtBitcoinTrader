@@ -42,27 +42,27 @@ CurrencyPairItem::CurrencyPairItem()
 	currABalanceDecimals=8;
 	currBBalanceDecimals=5;
 
-	currASign="BTC";
-	currAStr="BTC";
-	currAStrLow="btc";
+    //currASign="BTC";
+    //currAStr="BTC";
+    //currAStrLow="btc";
 
-	currBStr="USD";
-	currBStrLow="usd";
-	currBSign="USD";
+    //currBStr="USD";
+    //currBStrLow="usd";
+    //currBSign="USD";
 
-	currSymbol="BTCUSD";
-	currRequestPair="BTCUSD";
+    //currSymbol="BTCUSD";
+    //currRequestPair="BTCUSD";
 }
 
 void CurrencyPairItem::setSymbol(QByteArray symb)
 {
-	currSymbol=symb.toUpper();
-	if(currSymbol.size()!=6){currSymbol.clear();return;}
+    symbol=symb.toUpper();
+    if(symbol.size()!=6){symbol.clear();return;}
 
-	currAStr=currSymbol.left(3);
+    currAStr=symbol.left(3);
 	currAStrLow=currAStr.toLower();
 
-	currBStr=currSymbol.right(3);
+    currBStr=symbol.right(3);
 	currBStrLow=currBStr.toLower();
 
 

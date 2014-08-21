@@ -46,16 +46,16 @@ public:
 	QString timeStr;
 	QString description;
 
-	double volume;
+    qreal volume;
 	QString volumeStr;
 
-	double price;
+    qreal price;
 	QString priceStr;
 
-	double total;
+    qreal total;
 	QString totalStr;
 
-	QByteArray symbol;
+    QString symbol;
 
 	int type; //0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
 

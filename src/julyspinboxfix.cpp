@@ -36,27 +36,36 @@ JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox *parentSB, int minWid)
 	: QObject()
 {
 	if(baseValues.forceDotInSpinBoxes)parentSB->setLocale(QLocale::English);
-	else parentSB->setLocale(QLocale::Ukrainian);
-	parentSB->setMaximumWidth(110);
+    else parentSB->setLocale(QLocale::Ukrainian);
 	pMinimumWidth=minWid;
 	spinMargin=30;
 	if(parentSB->buttonSymbols()==QDoubleSpinBox::NoButtons)spinMargin=6;
 	parentSpinBox=parentSB;
-	valueChanged(parentSB->text());
+    widthFix(parentSB->text());
 	if(!parentSB->suffix().isEmpty())
 	{
 		pMinimumWidth=parentSB->minimumWidth();
 		parentSB->setMinimumWidth(pMinimumWidth);
-		valueChanged(parentSB->text());
+        widthFix(parentSB->text());
     }
-	connect(parentSB,SIGNAL(valueChanged(QString)),this,SLOT(valueChanged(QString)));
+    connect(parentSB,SIGNAL(valueChanged(QString)),this,SLOT(widthFix(QString)));
+    if(parentSB->isReadOnly())
+        connect(parentSB,SIGNAL(valueChanged(double)),this,SLOT(decimalsFix(double)));
 }
 
-JulySpinBoxFix::~JulySpinBoxFix()
+void JulySpinBoxFix::decimalsFix(double val)
 {
+    QByteArray valueStr=QByteArray::number(val,'f',8);
+    int dotPos=valueStr.indexOf('.');
+    if(dotPos==-1){parentSpinBox->setDecimals(1);return;}
+    int lastZeroPos=valueStr.size()-1;
+    while(lastZeroPos>0&&valueStr.size()&&valueStr.at(lastZeroPos)=='0')lastZeroPos--;
+    lastZeroPos-=dotPos;
+    if(lastZeroPos<1)lastZeroPos=1;
+    parentSpinBox->setDecimals(lastZeroPos);
 }
 
-void JulySpinBoxFix::valueChanged(QString text)
+void JulySpinBoxFix::widthFix(QString text)
 {
 	if(pMinimumWidth==0)
 		parentSpinBox->setMinimumWidth(textFontWidth(text)+spinMargin);

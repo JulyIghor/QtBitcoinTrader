@@ -1,15 +1,20 @@
 <RCC>
     <qresource prefix="/">
+        <file>Resources/Close.png</file>
+        <file>Resources/Sound/800.wav</file>
         <file>Resources/CentrabitDay.png</file>
         <file>Resources/CentrabitNight.png</file>
         <file>Resources/Exchanges/Logos/Bitstamp.png</file>
         <file>Resources/Exchanges/Logos/Unknown.png</file>
         <file>Resources/Exchanges/Logos/Bitfinex.png</file>
         <file>Resources/Exchanges/Logos/BTCChina.png</file>
+        <file>Resources/Exchanges/Logos/GOCio.png</file>
         <file>Resources/Exchanges/Logos/BTC-e.png</file>
-        <file>Resources/Templates/001.qbtrule</file>
-        <file>Resources/Templates/002.qbtrule</file>
-        <file>Resources/Templates/003.qbtrule</file>
+        <file>Resources/Exchanges/Logos/Bitstamp_Big.png</file>
+        <file>Resources/Exchanges/Logos/Bitfinex_Big.png</file>
+        <file>Resources/Exchanges/Logos/BTCChina_Big.png</file>
+        <file>Resources/Exchanges/Logos/GOCio_Big.png</file>
+        <file>Resources/Exchanges/Logos/BTC-e_Big.png</file>
         <file>Resources/Open.png</file>
         <file>Resources/Save.png</file>
         <file>Resources/Themes/Dark.thm</file>
@@ -39,6 +44,7 @@
         <file>Resources/Exchanges/Bitfinex.ini</file>
         <file>Resources/Exchanges/BTCChina.ini</file>
         <file>Resources/Exchanges/Bitstamp.ini</file>
+        <file>Resources/Exchanges/GOCio.ini</file>
         <file>Resources/CurrencySign/AUD.png</file>
         <file>Resources/CurrencySign/BTC.png</file>
         <file>Resources/CurrencySign/LTC.png</file>

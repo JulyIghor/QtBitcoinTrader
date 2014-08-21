@@ -129,62 +129,64 @@ QString JulyTranslator::translateString(const QString &tid, const QString &defau
 
 void JulyTranslator::loadMapFromUi(QWidget *par)
 {
-	foreach(QPushButton* curButton, par->findChildren<QPushButton*>())
+	Q_FOREACH(QPushButton* curButton, par->findChildren<QPushButton*>())
 		if(!curButton->accessibleName().isEmpty())
 			buttonMap[curButton->accessibleName()]=curButton->text().replace("\n","<br>").replace("\r","");
 
-	foreach(QToolButton* curButton, par->findChildren<QToolButton*>())
+	Q_FOREACH(QToolButton* curButton, par->findChildren<QToolButton*>())
 		if(!curButton->accessibleName().isEmpty())
 			buttonMap[curButton->accessibleName()]=curButton->text().replace("\n","<br>").replace("\r","");
 		
-	foreach(QCheckBox* curCheckBox, par->findChildren<QCheckBox*>())
+	Q_FOREACH(QCheckBox* curCheckBox, par->findChildren<QCheckBox*>())
 		if(!curCheckBox->accessibleName().isEmpty())
 			checkBoxMap[curCheckBox->accessibleName()]=curCheckBox->text().replace("\n","<br>").replace("\r","");
 
-		foreach(QRadioButton* curCheckBox, par->findChildren<QRadioButton*>())
+		Q_FOREACH(QRadioButton* curCheckBox, par->findChildren<QRadioButton*>())
 			if(!curCheckBox->accessibleName().isEmpty())
 				checkBoxMap[curCheckBox->accessibleName()]=curCheckBox->text().replace("\n","<br>").replace("\r","");
 
-	foreach(QLabel* curLabel, par->findChildren<QLabel*>())
+	Q_FOREACH(QLabel* curLabel, par->findChildren<QLabel*>())
 		if(!curLabel->accessibleName().isEmpty())
 			labelMap[curLabel->accessibleName()]=curLabel->text().replace("\n","<br>").replace("\r","");
 		
-	foreach(QGroupBox* curGroupBox, par->findChildren<QGroupBox*>())
+	Q_FOREACH(QGroupBox* curGroupBox, par->findChildren<QGroupBox*>())
 		if(!curGroupBox->accessibleName().isEmpty())
 			groupBoxMap[curGroupBox->accessibleName()]=curGroupBox->title().replace("\n","<br>").replace("\r","");
 
-	foreach(QDoubleSpinBox* curSpinBox, par->findChildren<QDoubleSpinBox*>())
+	Q_FOREACH(QDoubleSpinBox* curSpinBox, par->findChildren<QDoubleSpinBox*>())
 		if(!curSpinBox->accessibleName().isEmpty())
 			spinBoxMap[curSpinBox->accessibleName()]=curSpinBox->suffix();
 }
 
 void JulyTranslator::translateUi(QWidget *par)
 {
-	foreach(QPushButton* curButton, par->findChildren<QPushButton*>())
+    if(par==0)return;
+
+	Q_FOREACH(QPushButton* curButton, par->findChildren<QPushButton*>())
 		if(!curButton->accessibleName().isEmpty())
 			curButton->setText(translateButton(curButton->accessibleName(),curButton->text()));
 
-	foreach(QToolButton* curButton, par->findChildren<QToolButton*>())
+	Q_FOREACH(QToolButton* curButton, par->findChildren<QToolButton*>())
 		if(!curButton->accessibleName().isEmpty())
 			curButton->setText(translateButton(curButton->accessibleName(),curButton->text()));
 
-	foreach(QCheckBox* curCheckBox, par->findChildren<QCheckBox*>())
+	Q_FOREACH(QCheckBox* curCheckBox, par->findChildren<QCheckBox*>())
 		if(!curCheckBox->accessibleName().isEmpty())
 			curCheckBox->setText(translateCheckBox(curCheckBox->accessibleName(),curCheckBox->text()));
 
-	foreach(QRadioButton* curCheckBox, par->findChildren<QRadioButton*>())
+	Q_FOREACH(QRadioButton* curCheckBox, par->findChildren<QRadioButton*>())
 		if(!curCheckBox->accessibleName().isEmpty())
 			curCheckBox->setText(translateCheckBox(curCheckBox->accessibleName(),curCheckBox->text()));
 
-	foreach(QLabel* curLabel, par->findChildren<QLabel*>())
+	Q_FOREACH(QLabel* curLabel, par->findChildren<QLabel*>())
 		if(!curLabel->accessibleName().isEmpty())
 			curLabel->setText(translateLabel(curLabel->accessibleName(),curLabel->text()));
 
-	foreach(QGroupBox* curGroupBox, par->findChildren<QGroupBox*>())
+	Q_FOREACH(QGroupBox* curGroupBox, par->findChildren<QGroupBox*>())
 		if(!curGroupBox->accessibleName().isEmpty())
 			curGroupBox->setTitle(translateGroupBox(curGroupBox->accessibleName(),curGroupBox->title()));
 
-	foreach(QDoubleSpinBox* curSpinBox, par->findChildren<QDoubleSpinBox*>())
+	Q_FOREACH(QDoubleSpinBox* curSpinBox, par->findChildren<QDoubleSpinBox*>())
 		if(!curSpinBox->accessibleName().isEmpty())
 			curSpinBox->setSuffix(translateSpinBox(curSpinBox->accessibleName(),curSpinBox->suffix()));
 }

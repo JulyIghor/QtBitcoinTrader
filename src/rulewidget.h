@@ -42,27 +42,25 @@ class RuleWidget : public QWidget
 	Q_OBJECT
 
 public:
-	void setRuleGroupId(int id);
-	int getRuleGroupId();
-	QString getRuleGroupIdStr();
+    bool isBeepOnDone();
+    void currencyChanged();
 	void updateStyleSheets();
 	void saveRulesData();
 	bool haveWorkingRules();
 	bool haveAnyRules();
 	bool haveAnyTradingRules();
-	void removeGroup();
-	void languageChanged();
-	void checkAndExecuteRule(int ruleType, double price);
+    bool removeGroup();
+    void languageChanged();
 	Ui::RuleWidget ui;
 	RulesModel *rulesModel;
-	RuleWidget(int gID, QString groupName, RuleWidget *copyFrom=0, QString restorableString="");
+    RuleWidget(QString filePath);
 	~RuleWidget();
 
 private:
-	QString ruleGroupIdStr;
 	QTime ordersCancelTime;
 	QMenu *rulesEnableDisableMenu;
 	QString groupName;
+    QString filePath;
 public slots:
 	void on_ruleUp_clicked();
 	void on_ruleDown_clicked();

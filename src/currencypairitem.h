@@ -46,22 +46,22 @@ struct CurrencyPairItem
 	CurencyInfo currAInfo;
 	CurencyInfo currBInfo;
 
-	QByteArray currSymbol;
+    QString symbol;
 	QByteArray currRequestPair;
 	QByteArray currRequestSecond;
 
-	QByteArray currAStr;
-	QByteArray currAStrLow;
-	QByteArray currASign;
+    QString currAStr;
+    QString currAStrLow;
+    QString currASign;
 
-	QByteArray currBStr;
-	QByteArray currBStrLow;
-	QByteArray currBSign;
+    QString currBStr;
+    QString currBStrLow;
+    QString currBSign;
 
-	double priceMin;//qPow(0.1,priceDecimals);
-	//double priceMax;
-	double tradePriceMin;
-	double tradeVolumeMin;
+    qreal priceMin;//qPow(0.1,priceDecimals);
+    //qreal priceMax;
+    qreal tradePriceMin;
+    qreal tradeVolumeMin;
 
 	int priceDecimals;
 	int currADecimals;

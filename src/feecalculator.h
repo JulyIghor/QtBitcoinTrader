@@ -61,7 +61,7 @@ private slots:
 	void buyBtcReceivedChanged(double);
 	void sellPriceChanged(double);
 	void sellAmountChanged(double);
-	void sellFiatReceived(double);
+    void sellFiatReceived(double);
 	void feeChanged(double);
 
 };

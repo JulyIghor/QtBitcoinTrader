@@ -54,7 +54,7 @@ void LogoButton::mouseReleaseEvent(QMouseEvent *event)
 	if(pressPos.x()<0||pressPos.y()<0||pressPos.y()>height()||pressPos.x()>width())return;
 
 	if(event->button()==Qt::LeftButton)
-		QDesktopServices::openUrl(QUrl("http://centrabit.com"));
+        QDesktopServices::openUrl(QUrl("https://centrabit.com"));
 }
 
 void LogoButton::themeChanged()

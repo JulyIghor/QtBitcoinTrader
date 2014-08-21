@@ -60,31 +60,31 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 	bool haveLastBuy=false;
 	bool haveLastSell=false;
 	for(int n=0;n<histList->count();n++)
-		if(histList->at(n).symbol==baseValues.currentPair.currSymbol)
+		if(histList->at(n).symbol==baseValues.currentPair.symbol)
 		{
 			if(!haveLastSell&&histList->at(n).type==1)
 			{
 				emit accLastSellChanged(histList->at(n).symbol.right(3),histList->at(n).price);
 				haveLastSell=true;
-			}
-			if(!haveLastBuy&&histList->at(n).type==2)
-			{
-				emit accLastBuyChanged(histList->at(n).symbol.right(3),histList->at(n).price);
-				haveLastBuy=true;
-			}
-			if(haveLastSell&&haveLastBuy)break;
-		}
+            }
+            if(!haveLastBuy&&histList->at(n).type==2)
+            {
+                emit accLastBuyChanged(histList->at(n).symbol.right(3),histList->at(n).price);
+                haveLastBuy=true;
+            }
+            if(haveLastSell&&haveLastBuy)break;
+        }
 
-	while(histList->count()&&histList->last().dateTimeInt<=lastDate)histList->removeLast();
-	if(histList->count()==0){delete histList; return;}
+    while(histList->count()&&histList->last().dateTimeInt<=lastDate)histList->removeLast();
+    if(histList->count()==0){delete histList; return;}
 
-	beginInsertRows(QModelIndex(), 0, histList->count());
+    beginInsertRows(QModelIndex(), 0, histList->count());
 
-	if(histList->count()&&itemsList.count())
-	{
-		(*histList)[histList->count()-1].displayFullDate=histList->at(histList->count()-1).dateInt!=itemsList.last().dateInt;
-	}
-	quint32 maxListDate=0;
+    if(histList->count()&&itemsList.count())
+    {
+        (*histList)[histList->count()-1].displayFullDate=histList->at(histList->count()-1).dateInt!=itemsList.last().dateInt;
+    }
+    quint32 maxListDate=0;
 	for(int n=histList->count()-1;n>=0;n--)
 	{
 		if(maxListDate<histList->at(n).dateTimeInt)maxListDate=histList->at(n).dateTimeInt;
@@ -98,14 +98,14 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 	endInsertRows();
 }
 
-double HistoryModel::getRowPrice(int row)
+qreal HistoryModel::getRowPrice(int row)
 {
 	row=itemsList.count()-row-1;
 	if(row<0||row>=itemsList.count())return 0.0;
 	return itemsList.at(row).price;
 }
 
-double HistoryModel::getRowVolume(int row)
+qreal HistoryModel::getRowVolume(int row)
 {
 	row=itemsList.count()-row-1;
 	if(row<0||row>=itemsList.count())return 0.0;

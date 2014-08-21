@@ -32,8 +32,9 @@
 #include "addrulegroup.h"
 #include "main.h"
 #include "thisfeatureunderdevelopment.h"
-#include <QDesktopServices>
 #include <QFileDialog>
+#include "rulescriptparser.h"
+#include <QMessageBox>
 
 AddRuleGroup::AddRuleGroup(QWidget *parent)
 	: QDialog(parent)
@@ -41,54 +42,44 @@ AddRuleGroup::AddRuleGroup(QWidget *parent)
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint);
 
-	foreach(RuleWidget* currentGroup, mainWindow.ui.tabRules->findChildren<RuleWidget*>())
+	Q_FOREACH(RuleWidget* currentGroup, mainWindow.ui.tabRules->findChildren<RuleWidget*>())
 	{
-		existingGroupsIDs<<currentGroup->getRuleGroupId();
-		existingGroups<<currentGroup->windowTitle();
+        ui.existingRulesList->addItem(currentGroup->windowTitle(),currentGroup->property("FileName").toString());
 	}
 
-	existingGroups.sort();
-	ui.groupName->setText(julyTr("RULE_GROUP","Group"));
-	ui.existingRulesList->addItems(existingGroups);
+    ui.groupName->setText(julyTr("RULE_GROUP","Group"));
 
-	ui.checkExistingRule->setEnabled(existingGroups.count());
-	ui.existingRulesList->setEnabled(existingGroups.count());
+    ui.checkExistingRule->setEnabled(ui.existingRulesList->count());
+    ui.existingRulesList->setEnabled(ui.existingRulesList->count());
 
+    setWindowTitle(julyTranslator.translateButton("ADD_RULES_GROUP","Add Rules Group"));
+
+    mainWindow.fixAllChildButtonsAndLabels(this);
 	julyTranslator.translateUi(this);
 
-	setWindowTitle(julyTranslator.translateButton("ADD_RULES_GROUP","Add Rules Group"));
-
-	mainWindow.fixAllChildButtonsAndLabels(this);
 
 	resize(width(),minimumSizeHint().height());
 	setFixedHeight(height());
-	onGroupContentChanged(true);
-	ui.groupID->setValue(baseValues.lastGroupID+1);
+    onGroupContentChanged(true);
 
-	bool haveTemplate=true;
-	int templateId=1;
-	while(haveTemplate)
-	{
-		QString templateIdStr=QString::number(templateId);
-		if(templateIdStr.length()==1)templateIdStr.prepend("00");
-		if(templateIdStr.length()==2)templateIdStr.prepend("0");
-		QString currentRule=":/Resources/Templates/"+templateIdStr+".qbtrule";
-		haveTemplate=QFile::exists(currentRule);
-		if(haveTemplate)
-		{
-			templateId++;
-			QByteArray currentRuleData;
-			QFile readRule(currentRule);
-			readRule.open(QIODevice::ReadOnly);
-			currentRuleData=readRule.readLine();
-			if(!currentRuleData.startsWith("Qt Bitcoin Trader Rules"))continue;
-
-			QStringList rulePair=QString(readRule.readAll()).split("==>");
-			if(rulePair.count()!=2||rulePair.first().isEmpty())continue;
-			templatesList<<currentRule;
-			ui.useRulesGroupTemplateList->addItem(rulePair.first());
-		}
-	}
+    bool haveTemplate=true;
+    int templateId=1;
+    while(haveTemplate)
+    {
+        QString templateIdStr=QString::number(templateId);
+        if(templateIdStr.length()==1)templateIdStr.prepend("00");
+        if(templateIdStr.length()==2)templateIdStr.prepend("0");
+        QString currentRule=":/Resources/Templates/"+templateIdStr+".JLR";
+        haveTemplate=QFile::exists(currentRule);
+        if(haveTemplate)
+        {
+            templateId++;
+            QSettings loadScript(currentRule,QSettings::IniFormat);
+            QString currentName=loadScript.value("JLRuleGroup/Name").toString();
+            if(currentName!="")ui.useRulesGroupTemplateList->addItem(currentName,currentRule);
+        }
+    }
+    ui.checkUseTemplate->setEnabled(ui.useRulesGroupTemplateList->count());
 }
 
 AddRuleGroup::~AddRuleGroup()
@@ -112,40 +103,34 @@ void AddRuleGroup::onGroupContentChanged(bool on)
 	checkValidButton();
 }
 
-bool AddRuleGroup::loadGroupFromFile(QString fileName)
-{
-	QByteArray rulesData;
-	QFile validateRule(fileName);
-	if(validateRule.open(QIODevice::ReadOnly))rulesData=validateRule.readAll();
-	if(rulesData.startsWith("Qt Bitcoin Trader Rules\n"))rulesData.remove(0,23);
-	else return false;
-	groupsList=QString(rulesData).split("\n");
-	return true;
-}
-
 void AddRuleGroup::on_ruleOpen_clicked()
 {
-	QString lastRulesDir=mainWindow.iniSettings->value("UI/LastRulesPath",QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)).toString();
+    QString lastRulesDir=mainWindow.iniSettings->value("UI/LastRulesPath",baseValues.desktopLocation).toString();
+    if(!QFile::exists(lastRulesDir))lastRulesDir=baseValues.desktopLocation;
 
-	QString fileName=QFileDialog::getOpenFileName(this, julyTr("OPEN_GOUP","Open Rules Group"),lastRulesDir,"(*.qbtrule)");
-	if(fileName.isEmpty())
+    QString fileNameOpen=QFileDialog::getOpenFileName(this, julyTr("OPEN_GOUP","Open Rules Group"),lastRulesDir,"(*.JLR)");
+    if(fileNameOpen.isEmpty())
 	{
 		ui.checkEmptyRule->setChecked(true);
 		return;
 	}
 
-	if(!loadGroupFromFile(fileName))
-	{
-		ui.checkEmptyRule->setChecked(true);
-		return;
-	}
+    QString scriptNameFile=QSettings(fileName,QSettings::IniFormat).value("JLRuleGroup/Name","").toString();
+    {//Validate saved file
+        if(scriptNameFile.isEmpty())
+        {
+        QMessageBox::warning(this,windowTitle(),julyTr("OPEN_INVALID_SCRIPT","Invalid script \"%1\"").arg(fileName));
+        ui.checkEmptyRule->setChecked(true);
+        return;
+        }
+    }
 	
 #ifdef Q_OS_WIN
 	fileName.replace("/","\\");
 #endif
 
-	ui.rulesFile->setText(fileName);
-	mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileName).dir().path());
+    ui.rulesFile->setText(fileNameOpen);
+    mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileNameOpen).dir().path());
 	mainWindow.iniSettings->sync();
 
 
@@ -155,12 +140,51 @@ void AddRuleGroup::on_ruleOpen_clicked()
 
 void AddRuleGroup::on_buttonAddRule_clicked()
 {
-	groupName=ui.groupName->text();
-	if(ui.checkExistingRule->isChecked())copyFromExistingGroup=existingGroupsIDs.at(ui.existingRulesList->currentIndex());
-	if(ui.checkUseTemplate->isChecked())loadGroupFromFile(templatesList.at(ui.useRulesGroupTemplateList->currentIndex()));
-	else
-	if(!ui.checkUseFile->isChecked())groupsList.clear();
+    QString filePath;
+    groupName=ui.groupName->text();
+
+    if(ui.checkExistingRule->isChecked()&&ui.existingRulesList->currentIndex()>-1)
+        filePath=ui.existingRulesList->itemData(ui.existingRulesList->currentIndex()).toString();
+    else
+    if(ui.checkUseTemplate->isChecked()&&ui.useRulesGroupTemplateList->currentIndex()>-1)
+        filePath=ui.useRulesGroupTemplateList->itemData(ui.useRulesGroupTemplateList->currentIndex()).toString();
+    else
+    if(ui.checkUseFile->isChecked())filePath=ui.rulesFile->text();
+
+    QList<RuleHolder> holderList;
+
+    if(!filePath.isEmpty())
+    {
+        QSettings loadRules(filePath,QSettings::IniFormat);
+        QStringList rulesList=loadRules.childGroups();
+        Q_FOREACH(QString group, rulesList)
+        {
+            if(!group.startsWith("Rule_"))continue;
+            RuleHolder holder=RuleScriptParser::readHolderFromSettings(loadRules,group);
+            if(holder.isValid())holderList<<holder;
+        }
+    }
+
+    QString nameTemplate(baseValues.scriptFolder+"Rule_%1.JLR");
+    int ruleN=1;
+    while(QFile::exists(nameTemplate.arg(ruleN)))ruleN++;
+    filePath=nameTemplate.arg(ruleN);
+    QSettings saveScript(filePath,QSettings::IniFormat);
+    saveScript.beginGroup("JLRuleGroup");
+    saveScript.setValue("Version",baseValues.jlScriptVersion);
+    saveScript.setValue("Name",groupName);
+    saveScript.endGroup();
+
+    for(int n=0;n<holderList.count();n++)
+        RuleScriptParser::writeHolderToSettings(holderList[n],saveScript,"Rule_"+QString::number(n+101));
+
+    saveScript.sync();
+    if(!QFile::exists(filePath))QMessageBox::warning(this,windowTitle(),"Can't write file: "+filePath);
+    else
+    {
+    fileName=filePath;
 	accept();
+    }
 }
 
 void AddRuleGroup::on_groupName_textChanged(QString)
@@ -170,7 +194,7 @@ void AddRuleGroup::on_groupName_textChanged(QString)
 
 void AddRuleGroup::checkValidButton()
 {
-	bool isAbleToSave=!existingGroups.contains(":");
+    bool isAbleToSave=ui.groupName->text().length()>0;
 	if(isAbleToSave&&ui.checkUseFile->isChecked())
 	{
 		if(ui.rulesFile->text().length()<3)isAbleToSave=false;

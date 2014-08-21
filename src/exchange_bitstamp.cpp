@@ -73,8 +73,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	defaultCurrencyParams.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 
 	supportsLoginIndicator=true;
-	supportsAccountVolume=false;
-	supportsExchangeLag=false;
+    supportsAccountVolume=false;
 
 	moveToThread(this);
 	authRequestTime.restart();
@@ -85,9 +84,9 @@ Exchange_Bitstamp::~Exchange_Bitstamp()
 {
 }
 
-void Exchange_Bitstamp::filterAvailableUSDAmountValue(double *amount)
+void Exchange_Bitstamp::filterAvailableUSDAmountValue(qreal *amount)
 {
-	double decValue=mainWindow.getValidDoubleForPercision((*amount)*mainWindow.floatFee,baseValues.currentPair.priceDecimals,false);
+    qreal decValue=mainWindow.getValidDoubleForPercision((*amount)*mainWindow.floatFee,baseValues.currentPair.priceDecimals,false);
 	decValue+=qPow(0.1,qMax(baseValues.currentPair.priceDecimals,1));
 	*amount=mainWindow.getValidDoubleForPercision((*amount)-decValue,baseValues.currentPair.currBDecimals,false);
 }
@@ -159,23 +158,33 @@ void Exchange_Bitstamp::getHistory(bool force)
 	if(!isReplayPending(208))sendToApi(208,"user_transactions/",true,true);
 }
 
-void Exchange_Bitstamp::buy(double apiBtcToBuy, double apiPriceToBuy)
+void Exchange_Bitstamp::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
 {
 	if(tickerOnly)return;
-	QByteArray params="amount="+QByteArray::number(apiBtcToBuy,'f',baseValues.currentPair.currADecimals)+"&price="+QByteArray::number(apiPriceToBuy,'f',baseValues.currentPair.priceDecimals);
+
+    CurrencyPairItem pairItem;
+    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
+    if(pairItem.symbol.isEmpty())return;
+
+    QByteArray params="amount="+QByteArray::number(apiBtcToBuy,'f',pairItem.currADecimals)+"&price="+QByteArray::number(apiPriceToBuy,'f',pairItem.priceDecimals);
 	if(debugLevel)logThread->writeLog("Buy: "+params,2);
 	sendToApi(306,"buy/",true,true,params);
 }
 
-void Exchange_Bitstamp::sell(double apiBtcToSell, double apiPriceToSell)
+void Exchange_Bitstamp::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceToSell)
 {
 	if(tickerOnly)return;
-	QByteArray params="amount="+QByteArray::number(apiBtcToSell,'f',baseValues.currentPair.currADecimals)+"&price="+QByteArray::number(apiPriceToSell,'f',baseValues.currentPair.priceDecimals);
+
+    CurrencyPairItem pairItem;
+    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
+    if(pairItem.symbol.isEmpty())return;
+
+    QByteArray params="amount="+QByteArray::number(apiBtcToSell,'f',pairItem.currADecimals)+"&price="+QByteArray::number(apiPriceToSell,'f',pairItem.priceDecimals);
 	if(debugLevel)logThread->writeLog("Sell: "+params,2);
 	sendToApi(307,"sell/",true,true,params);
 }
 
-void Exchange_Bitstamp::cancelOrder(QByteArray order)
+void Exchange_Bitstamp::cancelOrder(QString, QByteArray order)
 {
 	if(tickerOnly)return;
 	cancelingOrderIDs<<order;
@@ -216,8 +225,10 @@ void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, boo
 	}
 }
 
-void Exchange_Bitstamp::depthUpdateOrder(double price, double amount, bool isAsk)
+void Exchange_Bitstamp::depthUpdateOrder(QString symbol, qreal price, qreal amount, bool isAsk)
 {
+    if(symbol!=baseValues.currentPair.symbol)return;
+
 	if(isAsk)
 	{
 		if(depthAsks==0)return;
@@ -238,21 +249,23 @@ void Exchange_Bitstamp::depthUpdateOrder(double price, double amount, bool isAsk
 	}
 }
 
-void Exchange_Bitstamp::depthSubmitOrder(QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk)
+void Exchange_Bitstamp::depthSubmitOrder(QString symbol, QMap<qreal,qreal> *currentMap ,qreal priceDouble, qreal amount, bool isAsk)
 {
+    if(symbol!=baseValues.currentPair.symbol)return;
+
 	if(priceDouble==0.0||amount==0.0)return;
 
 	if(isAsk)
 	{
 		(*currentMap)[priceDouble]=amount;
 		if(lastDepthAsksMap.value(priceDouble,0.0)!=amount)
-			depthUpdateOrder(priceDouble,amount,true);
+            depthUpdateOrder(symbol,priceDouble,amount,true);
 	}
 	else
 	{
 		(*currentMap)[priceDouble]=amount;
 		if(lastDepthBidsMap.value(priceDouble,0.0)!=amount)
-			depthUpdateOrder(priceDouble,amount,false);
+            depthUpdateOrder(symbol,priceDouble,amount,false);
 	}
 }
 
@@ -267,7 +280,9 @@ void Exchange_Bitstamp::reloadDepth()
 void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 {
 	if(debugLevel)logThread->writeLog("RCV: "+data);
-	bool success=!data.startsWith("{\"error\"")&&(data.startsWith("{")||data.startsWith("["))||data=="true"||data=="false";
+    if(data.size()&&data.at(0)==QLatin1Char('<'))return;
+
+    bool success=((!data.startsWith("{\"error\"")&&(data.startsWith("{")))||data.startsWith("["))||data=="true"||data=="false";
 	switch(reqType)
 	{
 	case 103: //ticker
@@ -278,34 +293,34 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				QByteArray tickerHigh=getMidData("\"high\": \"","\"",&data);
 				if(!tickerHigh.isEmpty())
 				{
-					double newTickerHigh=tickerHigh.toDouble();
-					if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(newTickerHigh);
+                    qreal newTickerHigh=tickerHigh.toDouble();
+                    if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(baseValues.currentPair.symbol,newTickerHigh);
 					lastTickerHigh=newTickerHigh;
 				}
 
 				QByteArray tickerLow=getMidData("\"low\": \"","\"",&data);
 				if(!tickerLow.isEmpty())
 				{
-					double newTickerLow=tickerLow.toDouble();
-					if(newTickerLow!=lastTickerLow)emit tickerLowChanged(newTickerLow);
+                    qreal newTickerLow=tickerLow.toDouble();
+                    if(newTickerLow!=lastTickerLow)emit tickerLowChanged(baseValues.currentPair.symbol,newTickerLow);
 					lastTickerLow=newTickerLow;
 				}
 
 				QByteArray tickerVolume=getMidData("\"volume\": \"","\"",&data);
 				if(!tickerVolume.isEmpty())
 				{
-					double newTickerVolume=tickerVolume.toDouble();
-					if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(newTickerVolume);
+                    qreal newTickerVolume=tickerVolume.toDouble();
+                    if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(baseValues.currentPair.symbol,newTickerVolume);
 					lastTickerVolume=newTickerVolume;
 				}
 
 				QByteArray tickerLast=getMidData("\"last\": \"","\"",&data);
 				if(!tickerLast.isEmpty()&&lastTickerDate<tickerTimestamp)
 				{
-					double newTickerLast=tickerLast.toDouble();
+                    qreal newTickerLast=tickerLast.toDouble();
 					if(newTickerLast>0.0)
 					{
-						emit tickerLastChanged(newTickerLast);
+						emit tickerLastChanged(baseValues.currentPair.symbol,newTickerLast);
 						lastTickerDate=tickerTimestamp;
 					}
 				}
@@ -314,16 +329,16 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray tickerSell=getMidData("\"bid\": \"","\"",&data);
 					if(!tickerSell.isEmpty())
 					{
-						double newTickerSell=tickerSell.toDouble();
-						if(newTickerSell!=lastTickerSell)emit tickerSellChanged(newTickerSell);
+                        qreal newTickerSell=tickerSell.toDouble();
+						if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
 						lastTickerSell=newTickerSell;
 					}
 
 					QByteArray tickerBuy=getMidData("\"ask\": \"","\"",&data);
 					if(!tickerBuy.isEmpty())
 					{
-						double newTickerBuy=tickerBuy.toDouble();
-						if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(newTickerBuy);
+                        qreal newTickerBuy=tickerBuy.toDouble();
+                        if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
 						lastTickerBuy=newTickerBuy;
 					}
 					lastBidAskTimestamp=tickerTimestamp;
@@ -347,7 +362,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 
 				for(int n=tradeList.count()-1;n>=0;n--)
 				{
-					QByteArray tradeData=tradeList.at(n).toAscii();
+					QByteArray tradeData=tradeList.at(n).toLatin1();
 					TradesItem newItem;
 					newItem.date=getMidData("\"date\": \"","\"",&tradeData).toUInt();
 					if(newItem.date<=lastTradesDate)continue;
@@ -360,16 +375,16 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 						if(lastTickerDate<newItem.date)
 						{
 						lastTickerDate=newItem.date;
-						emit tickerLastChanged(newItem.price);
+						emit tickerLastChanged(baseValues.currentPair.symbol,newItem.price);
 						}
 					}
-					newItem.symbol=baseValues.currentPair.currSymbol;
+					newItem.symbol=baseValues.currentPair.symbol;
 					//newItem.type=0;
 
 					if(newItem.isValid())(*newTradesItems)<<newItem;
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
 				}
-				if(newTradesItems->count())emit addLastTrades(newTradesItems);
+				if(newTradesItems->count())emit addLastTrades(baseValues.currentPair.symbol,newTradesItems);
 				else delete newTradesItems;
 			}
 			else if(debugLevel)logThread->writeLog("Invalid trades fetch data:"+data,2);
@@ -387,10 +402,10 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				depthBids=new QList<DepthItem>;
 
 				quint32 tickerTimestamp=getMidData("\"timestamp\": \"","\"",&data).toUInt();
-				QMap<double,double> currentAsksMap;
+                QMap<qreal,qreal> currentAsksMap;
 				QStringList asksList=QString(getMidData("\"asks\": [[","]]",&data)).split("], [");
-				double groupedPrice=0.0;
-				double groupedVolume=0.0;
+                qreal groupedPrice=0.0;
+                qreal groupedVolume=0.0;
 				int rowCounter=0;
 				bool updateTicker=tickerTimestamp>lastBidAskTimestamp;
 				if(updateTicker)lastBidAskTimestamp=tickerTimestamp;
@@ -398,17 +413,17 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=0;n<asksList.count();n++)
 				{
 					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
-					QByteArray currentRow=asksList.at(n).toAscii();
-					double priceDouble=getMidData("\"","\"",&currentRow).toDouble();
-					double amount=getMidData(", \"","\"",&currentRow).toDouble();
+					QByteArray currentRow=asksList.at(n).toLatin1();
+                    qreal priceDouble=getMidData("\"","\"",&currentRow).toDouble();
+                    qreal amount=getMidData(", \"","\"",&currentRow).toDouble();
 
-					if(n==0&&updateTicker)emit tickerBuyChanged(priceDouble);
+                    if(n==0&&updateTicker)emit tickerBuyChanged(baseValues.currentPair.symbol,priceDouble);
 
 					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==0)
 						{
-							emit depthFirstOrder(priceDouble,amount,true);
+							emit depthFirstOrder(baseValues.currentPair.symbol,priceDouble,amount,true);
 							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
 							groupedVolume=amount;
 						}
@@ -418,7 +433,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==asksList.count()-1)
 							{
-								depthSubmitOrder(&currentAsksMap,groupedPrice+baseValues.groupPriceValue,groupedVolume,true);
+                                depthSubmitOrder(baseValues.currentPair.symbol,
+                                            &currentAsksMap,groupedPrice+baseValues.groupPriceValue,groupedVolume,true);
 								rowCounter++;
 								groupedVolume=amount;
 								groupedPrice+=baseValues.groupPriceValue;
@@ -427,16 +443,18 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					}
 					else
 					{
-					depthSubmitOrder(&currentAsksMap,priceDouble,amount,true);
+                    depthSubmitOrder(baseValues.currentPair.symbol,
+                                     &currentAsksMap,priceDouble,amount,true);
 					rowCounter++;
 					}
 				}
-				QList<double> currentAsksList=lastDepthAsksMap.keys();
+                QList<qreal> currentAsksList=lastDepthAsksMap.keys();
 				for(int n=0;n<currentAsksList.count();n++)
-					if(currentAsksMap.value(currentAsksList.at(n),0)==0)depthUpdateOrder(currentAsksList.at(n),0.0,true);//Remove price
+                    if(currentAsksMap.value(currentAsksList.at(n),0)==0)depthUpdateOrder(baseValues.currentPair.symbol,
+                                                                                         currentAsksList.at(n),0.0,true);//Remove price
 				lastDepthAsksMap=currentAsksMap;
 
-				QMap<double,double> currentBidsMap;
+                QMap<qreal,qreal> currentBidsMap;
 				QStringList bidsList=QString(getMidData("\"bids\": [[","]]",&data)).split("], [");
 				groupedPrice=0.0;
 				groupedVolume=0.0;
@@ -444,17 +462,17 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=0;n<bidsList.count();n++)
 				{
 					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
-					QByteArray currentRow=bidsList.at(n).toAscii();
-					double priceDouble=getMidData("\"","\"",&currentRow).toDouble();
-					double amount=getMidData(", \"","\"",&currentRow).toDouble();
+					QByteArray currentRow=bidsList.at(n).toLatin1();
+                    qreal priceDouble=getMidData("\"","\"",&currentRow).toDouble();
+                    qreal amount=getMidData(", \"","\"",&currentRow).toDouble();
 
-					if(n==0&&updateTicker)emit tickerSellChanged(priceDouble);
+					if(n==0&&updateTicker)emit tickerSellChanged(baseValues.currentPair.symbol,priceDouble);
 
 					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==0)
 						{
-							emit depthFirstOrder(priceDouble,amount,false);
+							emit depthFirstOrder(baseValues.currentPair.symbol,priceDouble,amount,false);
 							groupedPrice=baseValues.groupPriceValue*(int)(priceDouble/baseValues.groupPriceValue);
 							groupedVolume=amount;
 						}
@@ -464,7 +482,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 							if(matchCurrentGroup)groupedVolume+=amount;
 							if(!matchCurrentGroup||n==bidsList.count()-1)
 							{
-								depthSubmitOrder(&currentBidsMap,groupedPrice-baseValues.groupPriceValue,groupedVolume,false);
+                                depthSubmitOrder(baseValues.currentPair.symbol,
+                                                 &currentBidsMap,groupedPrice-baseValues.groupPriceValue,groupedVolume,false);
 								rowCounter++;
 								groupedVolume=amount;
 								groupedPrice-=baseValues.groupPriceValue;
@@ -473,16 +492,18 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					}
 					else
 					{
-						depthSubmitOrder(&currentBidsMap,priceDouble,amount,false);
+                        depthSubmitOrder(baseValues.currentPair.symbol,
+                                         &currentBidsMap,priceDouble,amount,false);
 						rowCounter++;
 					}
 				}
-				QList<double> currentBidsList=lastDepthBidsMap.keys();
+                QList<qreal> currentBidsList=lastDepthBidsMap.keys();
 				for(int n=0;n<currentBidsList.count();n++)
-					if(currentBidsMap.value(currentBidsList.at(n),0)==0)depthUpdateOrder(currentBidsList.at(n),0.0,false);//Remove price
+                    if(currentBidsMap.value(currentBidsList.at(n),0)==0)depthUpdateOrder(baseValues.currentPair.symbol,
+                                                                                         currentBidsList.at(n),0.0,false);//Remove price
 				lastDepthBidsMap=currentBidsMap;
 
-				emit depthSubmitOrders(depthAsks, depthBids);
+				emit depthSubmitOrders(baseValues.currentPair.symbol,depthAsks, depthBids);
 				depthAsks=0;
 				depthBids=0;
 			}
@@ -497,34 +518,34 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				lastInfoReceived=true;
 				if(debugLevel)logThread->writeLog("Info: "+data);
 
-				double accFee=getMidData("\"fee\": \"","\"",&data).toDouble();
+                qreal accFee=getMidData("\"fee\": \"","\"",&data).toDouble();
 				if(accFee>0.0)
 				{
-					emit accFeeChanged(accFee);
+                    emit accFeeChanged(baseValues.currentPair.symbol,accFee);
 					accountFee=accFee;
 				}
 
 				QByteArray btcBalance=getMidData("\"btc_balance\": \"","\"",&data);
 				if(!btcBalance.isEmpty())
 				{
-					double newBtcBalance=btcBalance.toDouble();
-					if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(newBtcBalance);
+                    qreal newBtcBalance=btcBalance.toDouble();
+					if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbol,newBtcBalance);
 					lastBtcBalance=newBtcBalance;
 				}
 
 				QByteArray usdBalance=getMidData("\"usd_balance\": \"","\"",&data);
 				if(!usdBalance.isEmpty())
 				{
-					double newUsdBalance=usdBalance.toDouble();
-					if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(newUsdBalance);
+                    qreal newUsdBalance=usdBalance.toDouble();
+					if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbol,newUsdBalance);
 					lastUsdBalance=newUsdBalance;
 				}
 
 				QByteArray usdAvBalance=getMidData("\"usd_available\": \"","\"",&data);
 				if(!usdAvBalance.isEmpty())
 				{
-					double newAvUsdBalance=usdAvBalance.toDouble();
-					if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(newAvUsdBalance);
+                    qreal newAvUsdBalance=usdAvBalance.toDouble();
+					if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(baseValues.currentPair.symbol,newAvUsdBalance);
 					lastAvUsdBalance=newAvUsdBalance;
 				}
 				static bool balanceSent=false;
@@ -555,7 +576,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				for(int n=0;n<ordersList.count();n++)
 				{	
 					OrderItem currentOrder;
-					QByteArray currentOrderData=ordersList.at(n).toAscii();
+					QByteArray currentOrderData=ordersList.at(n).toLatin1();
 					currentOrder.oid=getMidData("\"id\": ",",",&currentOrderData);
 
 					QByteArray dateTimeData=getMidData("\"datetime\": \"","\"",&currentOrderData);
@@ -566,10 +587,10 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					currentOrder.status=1;
 					currentOrder.amount=getMidData("\"amount\": \"","\"",&currentOrderData).toDouble();
 					currentOrder.price=getMidData("\"price\": \"","\"",&currentOrderData).toDouble();
-					currentOrder.symbol=baseValues.currentPair.currSymbol;
+					currentOrder.symbol=baseValues.currentPair.symbol;
 					if(currentOrder.isValid())(*orders)<<currentOrder;
 				}
-				emit ordersChanged(orders);
+                emit orderBookChanged(baseValues.currentPair.symbol,orders);
 				lastInfoReceived=false;
 			}
 		}
@@ -580,7 +601,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 			if(!success)break;
 			if(!cancelingOrderIDs.isEmpty())
 			{
-			if(data=="true")emit orderCanceled(cancelingOrderIDs.first());
+			if(data=="true")emit orderCanceled(baseValues.currentPair.symbol,cancelingOrderIDs.first());
 			if(debugLevel)logThread->writeLog("Order canceled:"+cancelingOrderIDs.first(),2);
 			cancelingOrderIDs.removeFirst();
 			}
@@ -613,7 +634,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				{
 					HistoryItem currentHistoryItem;
 
-					QByteArray curLog(dataList.at(n).toAscii());
+					QByteArray curLog(dataList.at(n).toLatin1());
 					int logTypeInt=getMidData("\"type\": ",",",&curLog).toInt();
 					QByteArray btcAmount=getMidData("\"btc\": \"","\"",&curLog);
 					bool negativeAmount=btcAmount.startsWith("-");
@@ -663,7 +684,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 			}
 		}
 		else errorString=data;
-		if(debugLevel)logThread->writeLog("API Error: "+errorString.toAscii()+" ReqType:"+QByteArray::number(reqType),2);
+		if(debugLevel)logThread->writeLog("API Error: "+errorString.toLatin1()+" ReqType:"+QByteArray::number(reqType),2);
 		if(errorCount<3&&reqType<300&&errorString!="Invalid username and/or password")return;
 		if(errorString.isEmpty())return;
 		errorString.append("<br>"+QString::number(reqType));
@@ -676,6 +697,6 @@ void Exchange_Bitstamp::sslErrors(const QList<QSslError> &errors)
 {
 	QStringList errorList;
 	for(int n=0;n<errors.count();n++)errorList<<errors.at(n).errorString();
-	if(debugLevel)logThread->writeLog(errorList.join(" ").toAscii(),2);
+	if(debugLevel)logThread->writeLog(errorList.join(" ").toLatin1(),2);
 	emit showErrorMessage("SSL Error: "+errorList.join(" "));
 }

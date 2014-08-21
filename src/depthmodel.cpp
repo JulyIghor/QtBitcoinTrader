@@ -130,8 +130,8 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 	{
 		if(indexColumn==1)
 		{
-			double volume=volumeList.at(currentRow);
-			double smallValue=baseValues.currentPair.currAInfo.valueSmall;
+            qreal volume=volumeList.at(currentRow);
+            qreal smallValue=baseValues.currentPair.currAInfo.valueSmall;
 			if(volume<=smallValue)return baseValues.appTheme.gray; smallValue*=10.0;
 			if(volume<=smallValue)return baseValues.appTheme.black; smallValue*=10.0;
 			if(volume<=smallValue)return baseValues.appTheme.darkGreen; smallValue*=10.0;
@@ -141,7 +141,7 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 		return baseValues.appTheme.black;
 	}
 
-	double requestedPrice=priceList.at(currentRow);
+    qreal requestedPrice=priceList.at(currentRow);
 	if(requestedPrice<=0.0)return QVariant();
 
 	if(role==Qt::BackgroundRole)
@@ -209,11 +209,11 @@ void DepthModel::calculateSize()
 	if(!somethingChanged)return;
 	somethingChanged=true;
 
-	double maxPrice=0.0;
-	double maxVolume=0.0;
-	double maxTotal=0.0;
+    qreal maxPrice=0.0;
+    qreal maxVolume=0.0;
+    qreal maxTotal=0.0;
 
-	double totalSize=0.0;
+    qreal totalSize=0.0;
 	if(originalIsAsk)
 	{
 		for(int n=0;n<priceList.count();n++)
@@ -292,7 +292,7 @@ Qt::ItemFlags DepthModel::flags(const QModelIndex &index) const
 	if(!index.isValid())return 0;
 	if(grouped)
 	{
-		if(index.row()==1||groupedPrice==0.0&&priceList.isEmpty())return Qt::NoItemFlags;
+        if(index.row()==1||(groupedPrice==0.0&&priceList.isEmpty()))return Qt::NoItemFlags;
 	}
 	return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
 }
@@ -353,7 +353,7 @@ void DepthModel::setHorizontalHeaderLabels(QStringList list)
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 }
 
-void DepthModel::depthFirstOrder(double price, double volume)
+void DepthModel::depthFirstOrder(qreal price, qreal volume)
 {
 	if(!grouped)return;
 	if(price==groupedPrice&&groupedVolume==volume)return;
@@ -375,8 +375,8 @@ void DepthModel::depthUpdateOrders(QList<DepthItem> *items)
 
 void DepthModel::depthUpdateOrder(DepthItem item)
 {
-	double price=item.price;
-	double volume=item.volume;
+    qreal price=item.price;
+    qreal volume=item.volume;
 	if(price==0.0)return;
 	int currentIndex=qLowerBound(priceList.begin(),priceList.end(),price)-priceList.begin();
 	bool matchListRang=currentIndex>-1&&priceList.count()>currentIndex;
@@ -425,7 +425,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 	}
 }
 
-double DepthModel::rowPrice(int row)
+qreal DepthModel::rowPrice(int row)
 {
 	if(grouped&&row<2)
 	{
@@ -438,7 +438,7 @@ double DepthModel::rowPrice(int row)
 	return priceList.at(row);
 }
 
-double DepthModel::rowVolume(int row)
+qreal DepthModel::rowVolume(int row)
 {
 	if(grouped&&row<2)
 	{
@@ -451,7 +451,7 @@ double DepthModel::rowVolume(int row)
 	return volumeList.at(row);
 }
 
-double DepthModel::rowSize(int row)
+qreal DepthModel::rowSize(int row)
 {
 	if(grouped&&row<2)return 0.0;
 	row-=grouped;

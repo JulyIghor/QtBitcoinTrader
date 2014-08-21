@@ -44,16 +44,16 @@ struct TradesItem
 	QString dateStr;
 	QString timeStr;
 
-	double amount;
+    qreal amount;
 	QString amountStr;
 
-	double price;
+    qreal price;
 	QString priceStr;
 
-	double total;
+    qreal total;
 	QString totalStr;
 
-	QByteArray symbol;//Like a "BTCUSD" 6 symbols only
+    QString symbol;//Like a "BTCUSD" 6 symbols only
 
 	int orderType;//-1:Bid; 0:None; 1:Ask
 

@@ -56,7 +56,7 @@ void JulyLightChanges::changeTimerSlot()
 	parentSpinBox->setStyleSheet("");
 }
 
-void JulyLightChanges::valueChanged(double val)
+void JulyLightChanges::valueChanged(qreal val)
 {
 	changeTimer->stop();
 	if(lastValue<=val)

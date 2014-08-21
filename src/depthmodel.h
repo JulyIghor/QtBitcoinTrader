@@ -50,9 +50,9 @@ public:
 	void setAsk(bool on){isAsk=on;};
 	DepthModel(bool isAskData=true);
 	~DepthModel();
-	double rowPrice(int row);
-	double rowVolume(int row);
-	double rowSize(int row);
+	qreal rowPrice(int row);
+	qreal rowVolume(int row);
+	qreal rowSize(int row);
 
 	QModelIndex index(int row, int column, const QModelIndex &parent=QModelIndex()) const;
 	QModelIndex parent(const QModelIndex &index) const;
@@ -65,16 +65,16 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 	void depthUpdateOrders(QList<DepthItem> *items);
-	void depthFirstOrder(double price, double volume);
+	void depthFirstOrder(qreal price, qreal volume);
 
 private slots:
 	void delayedReloadVisibleItems();
 private:
-	void depthUpdateOrder(DepthItem item);
+    void depthUpdateOrder(DepthItem item);
 	bool originalIsAsk;
 	bool somethingChanged;
-	double groupedPrice;
-	double groupedVolume;
+	qreal groupedPrice;
+	qreal groupedVolume;
 
 	int widthPrice;
 	int widthVolume;
@@ -87,9 +87,9 @@ private:
 	int columnsCount;
 	QStringList headerLabels;
 	bool isAsk;
-	QList<double> volumeList;
-	QList<double> sizeList;
-	QList<double> priceList;
+	QList<qreal> volumeList;
+	QList<qreal> sizeList;
+	QList<qreal> priceList;
 	QStringList volumeListStr;
 	QStringList sizeListStr;
 	QStringList priceListStr;

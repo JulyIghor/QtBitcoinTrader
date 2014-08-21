@@ -52,7 +52,9 @@ private slots:
 	void resetDataSlot();
 	void addNewProfile();
 	void checkToEnableButton(QString);
-private: 
+    void on_descriptionGroupBox_toggled(bool arg1);
+
+private:
 	void accept();
 	Ui::PasswordDialog ui;
 };
