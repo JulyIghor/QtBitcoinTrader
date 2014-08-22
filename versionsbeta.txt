@@ -1,7 +1,7 @@
 MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTraderBeta
-MacChangeLog=Fixed minor bugs.<br>Removed Mt.Gox exchange<br>Added new currency pairs to BTC-e and BTC China.<br>Fixed rule bugs.<br>Ui improvements.<br>Added heartbleed OpenSSL bug information dialog.<br>New auto update engine.
-MacSignature=UfwJQ/mT8PRDF/VOUBfAdOzAPzlKIkQc/2pW1vDqLOlkrebBkn1nJgFhPnDQhsX91sh2z+mQ2MIXmiXf/uYAgIxbNqUEjNJ1lUU1g+6qN5NnDL9tIp2iS42SPhfxU0FWCgQUUZGzK3Y4oRuWfTBRuzaQAaHM5AAaO9jYfyyK7KHMKw0m7GDLtm1wXz7RPGKnPmyoECe0wRp9rK3Ps4fbT2L8sbORlE+ABXA0hSk3bjSwgHIuetOZKdBYfuoos3aFU006vyAIXuNM0cTk7V0REfUn4sHtiSystgnoDhgIdsm/95pKcgSAt4Th+GtkdBf6fl1bqGwTqMRG5LS5czR2lw==
-MacVer=1.0798
+MacChangeLog=Script Language released.<br>Rules updated and enhanced.<br>Sorry, but your old rules will not be saved.<br>Added both Qt4 and Qt5 compatibility.<br>A lot system, ui bugs fixed.<br>Added goc.io exchange<br>Fixed bugs while compiling on Windows.<br>OpenSSL updated to latest 1.0.1i
+MacSignature=OM2Bq+1sWzaAB0pPailhXMKR3zsG+h9fAy4yd153SWUtD/nFGetqIpBM9KkIZazblWyCvIt1eiHyh2SZwVmeS8J7wCGzcy9x9PpqrNmpjlcEHRqdpGmQGSE1QulYlWMnPgiPaOJsdiCGfo2q69UiomHPVu6xIvhuo2/uxmLwT2EDmr1Ltqbazllug5M2S/mK9sA68BNDi0ssKWUgwXrRNdvvEyl4hFP6aFemcMvNStGHb8RypcAo7LDeWy80gCfR3bIQ1cX4clJ1Y5d5HwpBxlyIE9DfXAXDk5eBTQ9VJE+t0BP3T39G7H+RdKQWRk7pWeLNaGQY+9EP0Mgilj3tjA==
+MacVer=1.0799
 SrcChangeLog=Script Language released.<br>Rules updated and enhanced.<br>Sorry, but your old rules will not be saved.<br>Added both Qt4 and Qt5 compatibility.<br>A lot system, ui bugs fixed.<br>Added goc.io exchange<br>Fixed bugs while compiling on Windows.<br>OpenSSL updated to latest 1.0.1i
 SrcVer=1.0799
 Win32Bin=http://master.dl.sourceforge.net/project/bitcointrader/Win32/Beta/QtBitcoinTrader.exe
