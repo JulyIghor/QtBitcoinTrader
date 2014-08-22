@@ -1,4 +1,4 @@
-MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTraderBeta
+MacBin=http://master.dl.sourceforge.net/project/bitcointrader/MacOS/QtBitcoinTraderBetaLastQt4Update
 MacChangeLog=Script Language released.<br>Rules updated and enhanced.<br>Sorry, but your old rules will not be saved.<br>Added both Qt4 and Qt5 compatibility.<br>A lot system, ui bugs fixed.<br>Added goc.io exchange<br>Fixed bugs while compiling on Windows.<br>OpenSSL updated to latest 1.0.1i
 MacSignature=OM2Bq+1sWzaAB0pPailhXMKR3zsG+h9fAy4yd153SWUtD/nFGetqIpBM9KkIZazblWyCvIt1eiHyh2SZwVmeS8J7wCGzcy9x9PpqrNmpjlcEHRqdpGmQGSE1QulYlWMnPgiPaOJsdiCGfo2q69UiomHPVu6xIvhuo2/uxmLwT2EDmr1Ltqbazllug5M2S/mK9sA68BNDi0ssKWUgwXrRNdvvEyl4hFP6aFemcMvNStGHb8RypcAo7LDeWy80gCfR3bIQ1cX4clJ1Y5d5HwpBxlyIE9DfXAXDk5eBTQ9VJE+t0BP3T39G7H+RdKQWRk7pWeLNaGQY+9EP0Mgilj3tjA==
 MacVer=1.0799
