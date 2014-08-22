@@ -44,6 +44,8 @@
 ScriptObject::ScriptObject(QString _scriptName) :
     QObject()
 {
+    haveTimer=false;
+    secondTimer=0;
     pendingStop=false;
     testResult=0;
     scriptName=_scriptName;
@@ -80,12 +82,19 @@ ScriptObject::ScriptObject(QString _scriptName) :
         addIndicator(spinBox,scriptName);
     }
     indicatorList<<"trader.on(\"AnyValue\").changed";
+    indicatorList<<"trader.on(\"Time\").changed";
+
+    functionsList<<"trader.get(\"Time\")";
 
     indicatorList.removeDuplicates();
     functionsList.removeDuplicates();
 
     connect(this,SIGNAL(setGroupEnabled(QString, bool)),baseValues.mainWindow_,SLOT(setGroupRunning(QString,bool)));
     connect(this,SIGNAL(startAppSignal(QString,QStringList)),baseValues.mainWindow_,SLOT(startApplication(QString,QStringList)));
+
+    secondTimer=new QTimer(this);
+    secondTimer->setSingleShot(true);
+    connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 }
 
 void ScriptObject::test(int val)
@@ -95,6 +104,7 @@ void ScriptObject::test(int val)
 
 qreal ScriptObject::get(QString indicator)
 {
+    if(indicator==QLatin1String("Time"))return getTimeT();
     if(indicator.length()>8&&indicator.startsWith(QLatin1String("Balance")))
     {
         indicator.remove(0,7);
@@ -159,6 +169,7 @@ void ScriptObject::groupStop()
 void ScriptObject::groupDone()
 {
     if(testMode)return;
+    pendingStop=true;
     emit setGroupDone(scriptName);
     setRunning(false);
 }
@@ -318,8 +329,16 @@ bool ScriptObject::groupIsRunning(QString name)
     return mainWindow.getIsGroupRunning(name);
 }
 
+void ScriptObject::secondSlot()
+{
+    emit valueChanged(baseValues.currentPair.symbol,QLatin1String("Time"),getTimeT());
+    if(testMode)return;
+    secondTimer->start(1000);
+}
+
 void ScriptObject::setRunning(bool on)
 {
+    if(!testMode&&!on){secondTimer->stop();}
     if(on==isRunningFlag)return;
     isRunningFlag=on;
     if(!isRunningFlag)if(engine){engine->deleteLater(); engine=0;}
@@ -346,14 +365,15 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
     engine->globalObject().setProperty("trader", scriptValue);
 
     bool anyValue=script.contains("trader.on(\"AnyValue\").changed()",Qt::CaseInsensitive);
+    haveTimer=script.contains("trader.on(\"Time\").changed()",Qt::CaseInsensitive);
     script=sourceToScript(script);
     pendingStop=false;
        QScriptValue handler=engine->evaluate(script);
 
+       if(haveTimer)secondSlot();
+
        if(pendingStop)
        {
-           pendingStop=false;
-           isRunningFlag=true;
            setRunning(false);
            return true;
        }
@@ -381,8 +401,6 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
         }
    if(testMode)
    {
-       pendingStop=false;
-       isRunningFlag=true;
        setRunning(false);
    }
    return true;

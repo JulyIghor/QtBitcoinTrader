@@ -52,6 +52,7 @@ struct RuleHolder
     int thanTypeIndex;
     int variableBFeeIndex;
     int variableBModeIndex;
+    int delaySeconds;
     qreal thanAmount;
     qreal thanPrice;
     qreal variableBExact;

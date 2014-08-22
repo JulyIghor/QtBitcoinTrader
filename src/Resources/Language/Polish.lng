@@ -454,3 +454,5 @@ String_YEARS_DIFFICULTY=%1 years
 String_100_YEARS_DIFFICULTY=More than 1000 years
 String_TO_CRACK_DIFFICULTY=%1 to crack
 String_SCRIPT_NAME=Script
+String_DELAY_SEC=Delay %1 sec
+Label_DELAY=Delay:

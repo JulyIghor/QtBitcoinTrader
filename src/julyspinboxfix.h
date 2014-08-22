@@ -49,7 +49,6 @@ private:
 	QDoubleSpinBox *parentSpinBox;
 private slots:
     void widthFix(QString);
-    void decimalsFix(double);
 };
 
 #endif // JULYSPINBOXFIX_H

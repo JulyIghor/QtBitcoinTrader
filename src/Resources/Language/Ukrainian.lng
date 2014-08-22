@@ -452,3 +452,5 @@ String_YEARS_DIFFICULTY=%1 років
 String_100_YEARS_DIFFICULTY=Більше 1000 років
 String_TO_CRACK_DIFFICULTY=%1 на взлом
 String_SCRIPT_NAME=Скрипт
+String_DELAY_SEC=Затримка %1 сек
+Label_DELAY=Затримка:

@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia
  win32 { LIBS += -lcrypt32 -leay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lz}
 !win32 { LIBS += -lcrypto -lz }
 
-CONFIG		+= qt #warn_off release
+CONFIG		+= qt warn_off release
 
 
 #

@@ -144,6 +144,8 @@ public:
 
     QList<CurrencyPairItem> currPairsList;
 private:
+    void setSpinValue(QDoubleSpinBox *spin, qreal val);
+    void setSpinValueP(QDoubleSpinBox *spin, qreal &val);
 	QWidget *windowWidget;
 	QMenu copyTableValuesMenu;
 	QTableView *lastCopyTable;
@@ -223,7 +225,7 @@ private:
 
 	void updateTrafficTotalValue();
 public slots:
-    void setRuleTabRunning(QString,bool,bool);
+    void setRuleTabRunning(QString,bool);
     void startApplication(QString,QStringList);
     void setGroupRunning(QString name, bool enabled);
     bool getIsGroupRunning(QString name);

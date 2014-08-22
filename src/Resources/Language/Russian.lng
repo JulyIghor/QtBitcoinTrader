@@ -243,7 +243,7 @@ String_AS_MARKET_LOW=Мин. цена
 String_AS_MARKET_SELL=Продажа
 String_AS_ORDERS_LAST_BUY=Последняя покупка
 String_AS_ORDERS_LAST_SELL=Последняя продажа
-String_AT=за %1
+String_AT=по %1
 String_AUTH_ERROR=%1 Ошибка
 String_BUY=купить
 String_CANCEL_ALL_ORDERS=Удалить все ордера
@@ -452,3 +452,5 @@ String_LANGUAGE_NAME=Русский
 String_LANGUAGE_AUTHOR=July IGHOR<br><a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Bitcoin donate:<br><a href="bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>
 String_LANGUAGE_LOCALE=uk_UA
 String_SCRIPT_NAME=Скрипт
+String_DELAY_SEC=Задержка %1 сек
+Label_DELAY=Задержка:

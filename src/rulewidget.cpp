@@ -68,6 +68,8 @@ RuleWidget::RuleWidget(QString fileName)
     mainWindow.setColumnResizeMode(ui.rulesTable,0,QHeaderView::ResizeToContents);
     mainWindow.setColumnResizeMode(ui.rulesTable,1,QHeaderView::Stretch);
 
+    connect(rulesModel,SIGNAL(ruleDone()),this,SLOT(ruleDone()));
+
 	connect(ui.rulesTable->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),this,SLOT(checkValidRulesButtons()));
 	ui.rulesTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.rulesTable, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(rulesMenuRequested(const QPoint&)));
@@ -112,6 +114,11 @@ RuleWidget::~RuleWidget()
 bool RuleWidget::isBeepOnDone()
 {
     return ui.ruleBeep->isChecked();
+}
+
+void RuleWidget::ruleDone()
+{
+    if(isBeepOnDone())mainWindow.beep();
 }
 
 void RuleWidget::updateStyleSheets()
@@ -252,9 +259,10 @@ void RuleWidget::ruleDisableEnableMenuFix()
 	bool ifSelectedOneRuleIsItEnabled=selectedRulesCount==1;
 	if(ifSelectedOneRuleIsItEnabled)
 	{
-        ifSelectedOneRuleIsItEnabled=rulesModel->getStateByRow(selectedRows.first().row())==1;
-		rulesEnableDisableMenu->actions().at(0)->setEnabled(!ifSelectedOneRuleIsItEnabled);
-		rulesEnableDisableMenu->actions().at(1)->setEnabled(ifSelectedOneRuleIsItEnabled);
+        int state=rulesModel->getStateByRow(selectedRows.first().row());
+        ifSelectedOneRuleIsItEnabled=state==1;
+        rulesEnableDisableMenu->actions().at(0)->setEnabled(!ifSelectedOneRuleIsItEnabled||state==3);
+        rulesEnableDisableMenu->actions().at(1)->setEnabled(ifSelectedOneRuleIsItEnabled||state==3);
 	}
 	else
 	{

@@ -64,6 +64,7 @@ bool RuleScriptParser::writeHolderToSettings(RuleHolder &holder, QSettings &sett
     settings.setValue("VariableBplusMinus",holder.variableBplusMinus);
     settings.setValue("VariableBSymbolCode",holder.variableBSymbolCode);
     settings.setValue("Description",holder.description);
+    settings.setValue("Delay",holder.delaySeconds);
     settings.endGroup();
     settings.sync();
     return true;
@@ -102,6 +103,7 @@ RuleHolder RuleScriptParser::readHolderFromSettings(QSettings &settings, QString
     holder.variableBplusMinus=settings.value("VariableBplusMinus","").toString();
     holder.variableBSymbolCode=settings.value("VariableBSymbolCode","").toString();
     holder.description=settings.value("Description","").toString();
+    holder.delaySeconds=settings.value("Delay",0).toInt();
     settings.endGroup();
     return holder;
 }
@@ -133,7 +135,6 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
                     executingCode+=" amount *= "+mainWindow.numFromDouble(amount)+";\n";
             }
             else executingCode+=" var amount = "+mainWindow.numFromDouble(amount)+";\n";
-            executingCode+=" trader.groupDone();\n";
 
             if(amount!=0.0)
             {
@@ -157,19 +158,19 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
             switch(holder.thanTypeIndex)
             {
             case 0: //Sell
-                executingCode+=" trade.sell(\""+holder.tradeSymbolCode+"\" , amount , price)";
+                executingCode+=" trader.sell(\""+holder.tradeSymbolCode+"\" , amount , price)";
                 break;
             case 1: //Buy
                 if(holder.thanAmountPercentChecked)
-                    executingCode+=" trade.buy(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
+                    executingCode+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
                 else
-                    executingCode+=" trade.buy(\""+holder.tradeSymbolCode+"\" , amount , price)";
+                    executingCode+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount , price)";
                 break;
             case 2: //Receive
-                executingCode+=" trade.sell(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
+                executingCode+=" trader.sell(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
                 break;
             case 3: //Spend
-                executingCode+=" trade.buy(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
+                executingCode+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
                 break;
             default: break;
             }
@@ -177,7 +178,6 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
         }
         else
         {
-            executingCode+=" trader.groupDone();\n";
             switch(holder.thanTypeIndex)
             {
             case 4: //Cancel all Orders
@@ -206,13 +206,35 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
                 break;
             }
         }
+        executingCode+=" trader.groupDone();\n";
     }
     else executingCode=" trader.test(1);\n trader.groupStop();\n";
 
-    if(holder.variableACode=="IMMEDIATELY")
+    bool execImmediately=holder.variableACode=="IMMEDIATELY";
+    bool haveDelay=holder.delaySeconds>0&&!testMode;
+
+    if(haveDelay)
     {
+        QString tValue="0"; if(execImmediately)tValue="trader.get(\"Time\")";
+        script="var delayDate="+tValue+";\n"
+               "trader.on(\"Time\").changed()\n"
+                "{\n";
+if(!execImmediately)
+        script+=" if(delayDate==0)return;\n";
+        script+=" if(value-delayDate>="+QString::number(holder.delaySeconds)+")//Seconds Delay\n"
+                " {\n"+executingCode+" }\n"
+                "}\n\n";
+        if(!execImmediately)
+            executingCode=" delayDate=trader.get(\"Time\");\n";
+    }
+
+    if(execImmediately)
+    {
+        if(!haveDelay)
+        {
         if(executingCode.startsWith(" "))executingCode.remove(0,1);
         script=executingCode.replace("\n ","\n");
+        }
     }
     else
     {
@@ -247,7 +269,7 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
         if(haveMoreThan)realtime=" if(value < "+indicatorBValue+")calcBaseVariable();\n";
     }
 
-    script="var baseVariable = calcBaseVariable();\n"
+    script+="var baseVariable = calcBaseVariable();\n"
     "function calcBaseVariable()\n"
     "{\n"
     " baseVariable = "+indicatorB+
@@ -255,8 +277,9 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
     "}\n\n"
     "trader.on(\""+holder.variableACode+"\").changed()\n"
     "{\n"
-    " if(symbol != \""+holder.valueASymbolCode+"\")return;\n"
-    +realtime+
+    " if(symbol != \""+holder.valueASymbolCode+"\")return;\n";
+    if(haveDelay)script+=" if(delayDate>0)return;\n";
+    script+=realtime+
     " if(value "+holder.comparationText+" baseVariable)\n"
     " {\n"+executingCode+
     " }\n";

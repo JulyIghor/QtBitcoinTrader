@@ -83,19 +83,21 @@ private:
     void swapRows(int,int);
     bool lastRuleGroupIsRunning;
     int runningCount;
-    void checkRuleGroupIsRunning(bool done);
+    void checkRuleGroupIsRunning();
     QString groupName;
     void setStateByName(QString, int);
     quint32 lastRuleId;
     QList<ScriptObject*> scriptList;
     QList<int> stateList;
     QList<bool> pauseList;
+    QList<quint32> doneList;
     int stateWidth;
     QStringList headerLabels;
     int columnsCount;
 signals:
+    void ruleDone();
     void groupDone();
-    void setRuleTabRunning(QString,bool,bool);
+    void setRuleTabRunning(QString,bool);
 	void rulesCountChanged();
 };
 

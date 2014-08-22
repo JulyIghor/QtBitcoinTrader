@@ -145,8 +145,8 @@ AddRuleDialog::AddRuleDialog(QWidget *parent) :
 
     setWindowTitle(julyTranslator.translateButton("ADD_RULES","Add Rule"));
 
-    mainWindow.fixAllChildButtonsAndLabels(this);
     julyTranslator.translateUi(this);
+    mainWindow.fixAllChildButtonsAndLabels(this);
 
     setMinimumWidth(mainWindow.minimumSizeHint().width());
     setMinimumHeight(300);
@@ -193,6 +193,8 @@ void AddRuleDialog::fillByHolder(RuleHolder &holder)
     setComboIndexByData(ui->valueBSymbol,holder.variableBSymbolCode);
 
     ui->descriptionText->setText(holder.description);
+
+    ui->delayValue->setValue(holder.delaySeconds);
 
     ui->buttonSaveRule->setVisible(true);
     ui->buttonAddRule->setVisible(false);
@@ -252,23 +254,32 @@ RuleHolder AddRuleDialog::getRuleHolder()
     holder.variableBplusMinus=ui->variableBplusMinus->currentText();
     holder.variableBSymbolCode=comboCurrentData(ui->valueBSymbol);
     holder.description=ui->descriptionText->text();
+    holder.delaySeconds=ui->delayValue->value();
     return holder;
 }
 
 void AddRuleDialog::reCacheCode()
 {
     QString descriptionText;
-    if(ui->variableA->currentIndex()==ui->variableA->count()-1)descriptionText=julyTr("RULE_IMMEDIATELY_EXECUTION","Execute immediately");
+    if(ui->delayValue->value()>0)
+    {
+        descriptionText=julyTr("DELAY_SEC","Delay %1 sec").arg(mainWindow.numFromDouble(ui->delayValue->value()))+" ";
+    }
+    if(ui->variableA->currentIndex()==ui->variableA->count()-1)
+    {
+        if(descriptionText.isEmpty())descriptionText=julyTr("RULE_IMMEDIATELY_EXECUTION","Execute immediately");
+        else descriptionText.remove(descriptionText.size()-1,1);
+    }
     else
     {
-        descriptionText=julyTr("WHEN","When")+" "+ui->variableA->currentText();
+        descriptionText+=julyTr("WHEN","When")+" "+ui->variableA->currentText();
         if(ui->valueASymbol->isVisible())descriptionText+=" ("+ui->valueASymbol->currentText()+")";
         descriptionText+=" "+ui->comparation->currentText()+" "+ui->variableB->currentText();
         if(ui->valueBSymbol->isVisible())descriptionText+=" ("+ui->valueBSymbol->currentText()+")";
 
         if(ui->variableBExact->value()!=0.0)
         {
-            descriptionText+=" "+ui->variableBplusMinus->currentText();
+            if(comboCurrentData(ui->variableB)!="EXACT")descriptionText+=" "+ui->variableBplusMinus->currentText();
             descriptionText+=" "+mainWindow.numFromDouble(ui->variableBExact->value());
             if(ui->variableBPercent->isChecked())descriptionText+="%";
         }
@@ -351,7 +362,6 @@ void AddRuleDialog::on_variableA_currentIndexChanged(int index)
     ui->comparation->setEnabled(!immediately);
     ui->valueALabel->setVisible(!immediately);
     ui->valueASymbol->setVisible(!immediately);
-
     fixSize();
 }
 

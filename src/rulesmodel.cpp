@@ -45,7 +45,7 @@ RulesModel::RulesModel(QString _gName)
     stateWidth=80;
 	isConcurrentMode=false;
     columnsCount=2;
-    connect(this,SIGNAL(setRuleTabRunning(QString,bool,bool)),baseValues_->mainWindow_,SLOT(setRuleTabRunning(QString,bool,bool)));
+    connect(this,SIGNAL(setRuleTabRunning(QString,bool)),baseValues_->mainWindow_,SLOT(setRuleTabRunning(QString,bool)));
 }
 
 RulesModel::~RulesModel()
@@ -81,17 +81,18 @@ void RulesModel::addRule(RuleHolder &holder, bool running)
     scriptList<<newScript;
     stateList<<0;
     pauseList<<false;
+    doneList<<time(NULL);
     endInsertRows();
 
     if(running)setRuleStateByRow(holderList.count()-1,1);
 }
 
-void RulesModel::checkRuleGroupIsRunning(bool done)
+void RulesModel::checkRuleGroupIsRunning()
 {
    if((runningCount>0)!=lastRuleGroupIsRunning)
    {
        lastRuleGroupIsRunning=runningCount>0;
-       emit setRuleTabRunning(groupName,lastRuleGroupIsRunning,done);
+       emit setRuleTabRunning(groupName,lastRuleGroupIsRunning);
    }
 
    if(!isConcurrentMode)
@@ -115,14 +116,14 @@ void RulesModel::runningChanged(bool on)
 
     if(on)runningCount++;else runningCount--;
     if(runningCount<0)runningCount=0;
-    checkRuleGroupIsRunning(false);
+    checkRuleGroupIsRunning();
 }
 
 void RulesModel::setGroupDone(QString name)
 {
     setStateByName(name,3);
     runningCount--;if(runningCount<0)runningCount=0;
-    checkRuleGroupIsRunning(true);
+    checkRuleGroupIsRunning();
 }
 
 void RulesModel::setStateByName(QString name, int newState)
@@ -130,8 +131,21 @@ void RulesModel::setStateByName(QString name, int newState)
     for(int n=0;n<scriptList.count();n++)
         if(scriptList.at(n)&&scriptList.at(n)->scriptName==name)
         {
+            if(stateList.at(n)==3&&newState==0)
+            {
+                if(time(NULL)-doneList.at(n)>1)stateList[n]=newState;
+            }
+            else
             stateList[n]=newState;
-            if(!baseValues.currentExchange_->multiCurrencyTradeSupport)pauseList[n]=holderList.at(n).valueASymbolCode!=baseValues.currentPair.symbol||holderList.at(n).valueBSymbolCode!=baseValues.currentPair.symbol;
+
+            if(newState==3)
+            {
+                emit ruleDone();
+                doneList[n]=time(NULL);
+            }
+
+            if(!baseValues.currentExchange_->multiCurrencyTradeSupport)
+                pauseList[n]=holderList.at(n).valueASymbolCode!=baseValues.currentPair.symbol||holderList.at(n).valueBSymbolCode!=baseValues.currentPair.symbol;
             emit dataChanged(index(n,0),index(n,columnsCount-1));
             return;
         }
@@ -194,6 +208,7 @@ void RulesModel::swapRows(int a, int b)
     stateList.swap(a,b);
     scriptList.swap(a,b);
     holderList.swap(a,b);
+    doneList.swap(a,b);
 }
 
 void RulesModel::setRuleStateByRow(int curRow, int state)
@@ -202,7 +217,6 @@ void RulesModel::setRuleStateByRow(int curRow, int state)
     if(state==0)
     {
     scriptList[curRow]->stopScript();
-    if(stateList[curRow]==3)return;
     stateList[curRow]=state;
     }
     else
@@ -262,6 +276,7 @@ void RulesModel::clear()
     scriptList.clear();
     stateList.clear();
     pauseList.clear();
+    doneList.clear();
     endResetModel();
 }
 
@@ -284,6 +299,7 @@ void RulesModel::removeRuleByRow(int row)
     scriptList.removeAt(row);
     stateList.removeAt(row);
     pauseList.removeAt(row);
+    doneList.removeAt(row);
 	endRemoveRows();
 }
 

@@ -49,20 +49,6 @@ JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox *parentSB, int minWid)
         widthFix(parentSB->text());
     }
     connect(parentSB,SIGNAL(valueChanged(QString)),this,SLOT(widthFix(QString)));
-    if(parentSB->isReadOnly())
-        connect(parentSB,SIGNAL(valueChanged(double)),this,SLOT(decimalsFix(double)));
-}
-
-void JulySpinBoxFix::decimalsFix(double val)
-{
-    QByteArray valueStr=QByteArray::number(val,'f',8);
-    int dotPos=valueStr.indexOf('.');
-    if(dotPos==-1){parentSpinBox->setDecimals(1);return;}
-    int lastZeroPos=valueStr.size()-1;
-    while(lastZeroPos>0&&valueStr.size()&&valueStr.at(lastZeroPos)=='0')lastZeroPos--;
-    lastZeroPos-=dotPos;
-    if(lastZeroPos<1)lastZeroPos=1;
-    parentSpinBox->setDecimals(lastZeroPos);
 }
 
 void JulySpinBoxFix::widthFix(QString text)

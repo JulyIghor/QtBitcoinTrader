@@ -41,6 +41,7 @@ class QDoubleSpinBox;
 #include <QString>
 class QScriptEngine;
 #include <QStringList>
+#include <QTimer>
 
 class ScriptObject : public QObject
 {
@@ -57,6 +58,8 @@ public:
     QStringList argumentsList;
     QStringList commandsList;
 private:
+    bool haveTimer;
+    QTimer *secondTimer;
     bool pendingStop;
     void setRunning(bool);
     bool isRunningFlag;
@@ -116,6 +119,7 @@ public slots:
     qreal get(QString indicator);
     qreal get(QString symbol, QString indicator);
 private slots:
+    void secondSlot();
     void indicatorValueChanged(double);
 signals:
     void startAppSignal(QString,QStringList);

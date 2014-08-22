@@ -40,6 +40,7 @@
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
 	: QSslSocket(parent)
 {
+	noReconnectCount=0;
     noReconnect=false;
 	secureConnection=secure;
 	isDataPending=false;
@@ -160,7 +161,7 @@ void JulyHttp::reconnectSocket(bool mastAbort)
 	{
 		if(secureConnection)connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
 		else connectToHost(hostName,80,QIODevice::ReadWrite);
-        waitForConnected((noReconnect?1000:baseValues.httpRequestTimeout));
+        waitForConnected(((noReconnect&&noReconnectCount++>5)?1000:baseValues.httpRequestTimeout));
 	}
 }
 
@@ -608,7 +609,7 @@ void JulyHttp::takeFirstRequest()
 
 void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 {
-    if(noReconnect){isDisabled=true;return;}
+    if((noReconnect&&noReconnectCount++>5)){isDisabled=true;return;}
 	if(socketError!=QAbstractSocket::RemoteHostClosedError&&socketError!=QAbstractSocket::UnfinishedSocketOperationError)setApiDown(true);
 
     if(debugLevel)logThread->writeLog("SocketError: "+errorString().toLatin1(),2);
@@ -647,7 +648,7 @@ void JulyHttp::sendPendingData()
 
 	if(state()!=QAbstractSocket::UnconnectedState)
 	{
-        if(state()==QAbstractSocket::ConnectingState||state()==QAbstractSocket::HostLookupState)waitForConnected((noReconnect?0:baseValues.httpRequestTimeout+1000));
+        if(state()==QAbstractSocket::ConnectingState||state()==QAbstractSocket::HostLookupState)waitForConnected(((noReconnect&&noReconnectCount++>5)?1000:baseValues.httpRequestTimeout+1000));
 	}
     if(!noReconnect)
     {
@@ -656,7 +657,7 @@ void JulyHttp::sendPendingData()
             setApiDown(true);
             if(debugLevel)logThread->writeLog("Socket state: "+errorString().toLatin1(),2);
             reconnectSocket(false);
-            if(state()==QAbstractSocket::ConnectingState)waitForConnected((noReconnect?0:baseValues.httpRequestTimeout)+1000);
+            if(state()==QAbstractSocket::ConnectingState)waitForConnected(baseValues.httpRequestTimeout+1000);
         }
         else reconnectSocket(false);
     }
@@ -665,7 +666,7 @@ void JulyHttp::sendPendingData()
 
 	if(currentPendingRequest==requestList.first().data)
 	{
-        if(requestTimeOut.elapsed()<(noReconnect?1000:baseValues.httpRequestTimeout))return;
+        if(requestTimeOut.elapsed()<((noReconnect&&noReconnectCount++>5)?1000:baseValues.httpRequestTimeout))return;
 		else
 		{
             if(debugLevel)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(baseValues.httpRequestTimeout).toLatin1(),2);

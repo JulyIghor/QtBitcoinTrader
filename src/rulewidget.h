@@ -62,6 +62,7 @@ private:
 	QString groupName;
     QString filePath;
 public slots:
+    void ruleDone();
 	void on_ruleUp_clicked();
 	void on_ruleDown_clicked();
 	void rulesMenuRequested(const QPoint&);
