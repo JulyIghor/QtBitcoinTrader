@@ -105,7 +105,7 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.07993";
+    appVerStr="1.07994";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 			QString langFile=settings.value("LanguageFile","").toString();
             if(langFile.isEmpty()||(!langFile.isEmpty()&&!QFile::exists(langFile)))langFile=baseValues.defaultLangFile;
 			julyTranslator.loadFromFile(langFile);
-
+			QTimer::singleShot(3600000,&a,SLOT(quit()));
 			UpdaterDialog updater(a.arguments().last()!="/checkupdate");
 			return a.exec();
 		}

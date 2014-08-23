@@ -47,15 +47,17 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	int updateCheckRetryCount=settings.value("UpdateCheckRetryCount",0).toInt();
 	settings.setValue("UpdateCheckRetryCount",updateCheckRetryCount);
-
-	bool useOldUpdateEngine=updateCheckRetryCount>3;
+	if(updateCheckRetryCount>10)
+	{
+		settings.setValue("UpdateCheckRetryCount",0);
+		updateCheckRetryCount=0;
+	}
 
 	downloaded100=false;
 	feedbackMessage=fbMess;
 	stateUpdate=0;
 	ui.setupUi(this);
 	setWindowFlags(Qt::WindowCloseButtonHint|Qt::WindowStaysOnTopHint);
-
 
 	Q_FOREACH(QGroupBox* groupBox, this->findChildren<QGroupBox*>())
 	{
@@ -74,21 +76,13 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 		}
 	}
 
-	if(useOldUpdateEngine)httpGet=new JulyHttp("raw.github.com",0,this,true,false);
-    else httpGet=new JulyHttp("qbtapi.centrabit.com",0,this,true,false);
+	if(updateCheckRetryCount>3)httpGet=new JulyHttp("api.qtbitcointrader.com",0,false,false,false);
+    else httpGet=new JulyHttp("qbtapi.centrabit.com",0,this,false,false);
     httpGet->noReconnect=true;
 	timeOutTimer=new QTimer(this);
 	connect(timeOutTimer,SIGNAL(timeout()),this,SLOT(exitSlot()));
 	connect(httpGet,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
-
-	if(useOldUpdateEngine)
-	{
-    if(baseValues.appVerIsBeta)httpGet->sendData(120,"GET /JulyIGHOR/QtBitcoinTrader/master/versionsbeta.txt");
-    else	httpGet->sendData(120,"GET /JulyIGHOR/QtBitcoinTrader/master/versions.txt");
-	}
-
-	if(!useOldUpdateEngine)
-	{
+	
 	QByteArray osString="Linux";
 
 #ifdef Q_OS_WIN
@@ -117,7 +111,6 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
     }
     reqStr.append("&MD5="+md5);
     httpGet->sendData(140,"POST /",reqStr);
-	}
 
 	timeOutTimer->start(60000);
 }
@@ -154,7 +147,6 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int reqType)
 #ifdef Q_OS_WIN
 		canAutoUpdate=true;
 #endif
-
         if(reqType==140)
 		{
 			updateVersion=getMidData("Version\":\"","\"",&dataReceived);

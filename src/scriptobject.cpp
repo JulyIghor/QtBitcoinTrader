@@ -64,7 +64,7 @@ ScriptObject::ScriptObject(QString _scriptName) :
 #else
        currentCommand=QString::fromLocal8Bit(staticMetaObject.method(n).name());
 #endif
-       if(currentCommand.startsWith(QLatin1String("get"))||commandsList.contains(currentCommand))continue;
+       if(currentCommand.startsWith(QLatin1String("get"))||currentCommand.startsWith(QLatin1String("test"))||commandsList.contains(currentCommand))continue;
        if(currentCommand==QLatin1String("groupDone"))continue;
 
        QList<QByteArray> parameters=staticMetaObject.method(n).parameterNames();

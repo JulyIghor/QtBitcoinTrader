@@ -1114,7 +1114,7 @@ void QtBitcoinTrader::checkUpdate()
 void QtBitcoinTrader::startApplication(QString name, QStringList params)
 {
 #ifdef Q_OS_MAC
-	if(name.contains(QLatin1Char('.')))
+	if(QFileInfo(name).fileName().contains(QLatin1Char('.')))
 	{
     params.prepend(name);
     name="open";
@@ -1600,7 +1600,7 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
     ui.sellTotalBtc->setValue(0.0);
     ui.buyPricePerCoin->setValue(100.0);
     ui.sellPricePerCoin->setValue(200.0);
-    setSpinValue(ui.tradesVolume5m,0.0);
+    ui.tradesVolume5m->setValue(0.0);
     setSpinValue(ui.ruleAmountToReceiveValue,0.0);
     setSpinValue(ui.ruleTotalToBuyValue,0.0);
     setSpinValue(ui.ruleAmountToReceiveBSValue,0.0);
