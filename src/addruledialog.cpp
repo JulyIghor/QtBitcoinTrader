@@ -216,7 +216,7 @@ void AddRuleDialog::setComboIndexByData(QComboBox *list, QString &data)
 void AddRuleDialog::setComboIndex(QComboBox *list, QString &text)
 {
     if(list==0)return;
-    int find=list->findData(text);
+    int find=list->findText(text);
     if(find<0)return;
     list->setCurrentIndex(find);
 }
