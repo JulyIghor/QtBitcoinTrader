@@ -216,29 +216,7 @@ void PasswordDialog::resetDataSlot()
 
 void PasswordDialog::checkToEnableButton(QString pass)
 {
-	if(pass.length()<8){ui.okButton->setEnabled(false);return;}
-
-	static QString allowedPassChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-	bool isValidPassword=pass.length()>14;
-	if(!isValidPassword)
-	{
-		bool containsLetter=false;
-		bool containsDigit=false;
-		bool containsSpec=false;
-		bool containsUpCase=false;
-		bool containsDownCase=false;
-		for(int n=0;n<pass.length();n++)
-		{
-			if(!containsLetter&&pass.at(n).isLetter())containsLetter=true;
-			if(!containsDigit&&pass.at(n).isDigit())containsDigit=true;
-			if(!containsSpec&&allowedPassChars.contains(pass.at(n)))containsSpec=true;
-			if(!containsUpCase&&pass.at(n).isLetter()&&pass.at(n).isUpper())containsUpCase=true;
-			if(!containsDownCase&&pass.at(n).isLetter()&&pass.at(n).isLower())containsDownCase=true;
-            if((containsLetter&&containsDigit&&containsSpec)||(containsLetter&&containsDigit&&containsUpCase&&containsDownCase))
-			{isValidPassword=true;break;}
-		}
-	}
-	ui.okButton->setEnabled(isValidPassword);
+	ui.okButton->setEnabled(pass.length());
 }
 
 void PasswordDialog::on_descriptionGroupBox_toggled(bool)

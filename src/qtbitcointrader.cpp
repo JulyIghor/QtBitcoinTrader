@@ -931,7 +931,7 @@ void QtBitcoinTrader::keyPressEvent(QKeyEvent *event)
 
 void QtBitcoinTrader::precentBidsChanged(qreal val)
 {
-    setSpinValue(ui.tradesBidsPrecent,val);
+    ui.tradesBidsPrecent->setValue(val);
 
 	static bool lastPrecentGrowing=false;
 	bool precentGrowing=tradesPrecentLast<val;
@@ -1114,8 +1114,11 @@ void QtBitcoinTrader::checkUpdate()
 void QtBitcoinTrader::startApplication(QString name, QStringList params)
 {
 #ifdef Q_OS_MAC
+	if(name.contains(QLatin1Char('.')))
+	{
     params.prepend(name);
     name="open";
+	}
 #endif
     QProcess::startDetached(name,params);
 }
@@ -1142,7 +1145,7 @@ void QtBitcoinTrader::resizeEvent(QResizeEvent *event)
 
 void QtBitcoinTrader::setLastTrades10MinVolume(qreal val)
 {
-    setSpinValue(ui.tradesVolume5m,val);
+    ui.tradesVolume5m->setValue(val);
 }
 
 void QtBitcoinTrader::availableAmountChanged(QString symbol, qreal val)
@@ -1593,10 +1596,10 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
     setSpinValue(ui.marketLow,0.0);
     setSpinValue(ui.marketLast,0.0);
     setSpinValue(ui.marketVolume,0.0);
-    setSpinValue(ui.buyTotalSpend,0.0);
-    setSpinValue(ui.sellTotalBtc,0.0);
-    setSpinValue(ui.buyPricePerCoin,100);
-    setSpinValue(ui.sellPricePerCoin,200);
+    ui.buyTotalSpend->setValue(0.0);
+    ui.sellTotalBtc->setValue(0.0);
+    ui.buyPricePerCoin->setValue(100.0);
+    ui.sellPricePerCoin->setValue(200.0);
     setSpinValue(ui.tradesVolume5m,0.0);
     setSpinValue(ui.ruleAmountToReceiveValue,0.0);
     setSpinValue(ui.ruleTotalToBuyValue,0.0);

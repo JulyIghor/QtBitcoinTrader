@@ -64,16 +64,7 @@
            </size>
           </property>
           <layout class="QGridLayout" name="gridLayout_10">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
+           <property name="margin">
             <number>0</number>
            </property>
            <property name="spacing">
@@ -775,22 +766,13 @@
         <item row="0" column="3" colspan="2">
          <widget class="QWidget" name="buyAmountPickerBack" native="true">
           <layout class="QGridLayout" name="gridLayout_7">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
            <property name="horizontalSpacing">
             <number>4</number>
            </property>
            <property name="verticalSpacing">
+            <number>0</number>
+           </property>
+           <property name="margin">
             <number>0</number>
            </property>
            <item row="0" column="1">
@@ -1591,16 +1573,7 @@
         <item row="4" column="3" rowspan="2" colspan="2">
          <widget class="QWidget" name="sellButtonBack" native="true">
           <layout class="QGridLayout" name="gridLayout_12">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
+           <property name="margin">
             <number>0</number>
            </property>
            <property name="spacing">
@@ -1739,22 +1712,13 @@
         <item row="0" column="3" colspan="2">
          <widget class="QWidget" name="sellAmountPickerBack" native="true">
           <layout class="QGridLayout" name="gridLayout_18">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
            <property name="horizontalSpacing">
             <number>4</number>
            </property>
            <property name="verticalSpacing">
+            <number>0</number>
+           </property>
+           <property name="margin">
             <number>0</number>
            </property>
            <item row="0" column="2">
@@ -2068,13 +2032,13 @@
    </item>
    <item row="0" column="0" colspan="5">
     <layout class="QGridLayout" name="gridLayout_22">
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
      <property name="horizontalSpacing">
       <number>6</number>
      </property>
      <property name="verticalSpacing">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
       <number>0</number>
      </property>
      <item row="0" column="5">
@@ -2311,16 +2275,7 @@
         </sizepolicy>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_15">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>0</number>
         </property>
         <item>
@@ -2347,23 +2302,14 @@
            <string>Exchange Account</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_19">
-           <property name="leftMargin">
-            <number>8</number>
-           </property>
-           <property name="topMargin">
-            <number>8</number>
-           </property>
-           <property name="rightMargin">
-            <number>8</number>
-           </property>
-           <property name="bottomMargin">
-            <number>8</number>
-           </property>
            <property name="horizontalSpacing">
             <number>0</number>
            </property>
            <property name="verticalSpacing">
             <number>4</number>
+           </property>
+           <property name="margin">
+            <number>8</number>
            </property>
            <item row="0" column="0">
             <widget class="QWidget" name="loginVolumeBack" native="true">
@@ -2731,7 +2677,7 @@
               <string>BalanceA</string>
              </property>
              <property name="accessibleName">
-              <string>BTC_BALANCE</string>
+              <string/>
              </property>
              <property name="accessibleDescription">
               <string>CAN_BE_ZERO</string>
@@ -2783,7 +2729,7 @@
               <string>BalanceB</string>
              </property>
              <property name="accessibleName">
-              <string>USD_BALANCE</string>
+              <string/>
              </property>
              <property name="accessibleDescription">
               <string>CAN_BE_ZERO</string>
@@ -2875,16 +2821,7 @@
            </sizepolicy>
           </property>
           <layout class="QGridLayout" name="gridLayout_30">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
+           <property name="margin">
             <number>0</number>
            </property>
            <property name="spacing">
@@ -2970,7 +2907,7 @@
                  </size>
                 </property>
                 <property name="accessibleName">
-                 <string>USD_BALANCE</string>
+                 <string/>
                 </property>
                 <property name="accessibleDescription">
                  <string>CAN_BE_ZERO</string>
@@ -3039,7 +2976,7 @@
                  </size>
                 </property>
                 <property name="accessibleName">
-                 <string>BTC_BALANCE</string>
+                 <string/>
                 </property>
                 <property name="accessibleDescription">
                  <string>CAN_BE_ZERO</string>
@@ -3130,7 +3067,7 @@
                  </size>
                 </property>
                 <property name="accessibleName">
-                 <string>USD_BALANCE</string>
+                 <string/>
                 </property>
                 <property name="accessibleDescription">
                  <string>CAN_BE_ZERO</string>
@@ -3225,7 +3162,7 @@
                  </size>
                 </property>
                 <property name="accessibleName">
-                 <string>BTC_BALANCE</string>
+                 <string/>
                 </property>
                 <property name="accessibleDescription">
                  <string>CAN_BE_ZERO</string>
@@ -3391,7 +3328,7 @@
              <string>BidPrice</string>
             </property>
             <property name="accessibleName">
-             <string>PRICE</string>
+             <string/>
             </property>
             <property name="accessibleDescription">
              <string>CAN_BE_ZERO</string>
@@ -3482,7 +3419,7 @@
              <string>AskPrice</string>
             </property>
             <property name="accessibleName">
-             <string>PRICE</string>
+             <string/>
             </property>
             <property name="accessibleDescription">
              <string>CAN_BE_ZERO</string>
@@ -3517,14 +3454,14 @@
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
           <property name="horizontalSpacing">
            <number>4</number>
           </property>
           <property name="verticalSpacing">
            <number>6</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
           </property>
           <item row="1" column="0">
            <widget class="QLabel" name="label_21">
@@ -3563,7 +3500,7 @@
              <string>HighPrice</string>
             </property>
             <property name="accessibleName">
-             <string>PRICE</string>
+             <string/>
             </property>
             <property name="accessibleDescription">
              <string>CAN_BE_ZERO</string>
@@ -3609,7 +3546,7 @@
              <string>LowPrice</string>
             </property>
             <property name="accessibleName">
-             <string>PRICE</string>
+             <string/>
             </property>
             <property name="accessibleDescription">
              <string>CAN_BE_ZERO</string>
@@ -3715,17 +3652,17 @@
           <property name="sizeConstraint">
            <enum>QLayout::SetMaximumSize</enum>
           </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
           <property name="horizontalSpacing">
            <number>4</number>
           </property>
           <property name="verticalSpacing">
            <number>6</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
           </property>
           <item row="1" column="0">
            <widget class="QLabel" name="marketVolumeLabel">
@@ -3789,6 +3726,9 @@
             <property name="whatsThis">
              <string>DayVolume</string>
             </property>
+            <property name="accessibleName">
+             <string/>
+            </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
             </property>
@@ -3836,7 +3776,7 @@
              <string>LastPrice</string>
             </property>
             <property name="accessibleName">
-             <string>PRICE</string>
+             <string/>
             </property>
             <property name="accessibleDescription">
              <string>CAN_BE_ZERO</string>
@@ -3967,16 +3907,7 @@
         <string>General</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
-        <property name="leftMargin">
-         <number>6</number>
-        </property>
-        <property name="topMargin">
-         <number>6</number>
-        </property>
-        <property name="rightMargin">
-         <number>6</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>6</number>
         </property>
         <property name="verticalSpacing">
@@ -4224,16 +4155,7 @@
         <string>Your Open Orders</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_20">
-        <property name="leftMargin">
-         <number>12</number>
-        </property>
-        <property name="topMargin">
-         <number>12</number>
-        </property>
-        <property name="rightMargin">
-         <number>12</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>12</number>
         </property>
         <property name="spacing">
@@ -4259,16 +4181,7 @@
              <property name="spacing">
               <number>4</number>
              </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
+             <property name="margin">
               <number>0</number>
              </property>
              <item>
@@ -4331,16 +4244,7 @@
              <property name="spacing">
               <number>4</number>
              </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
+             <property name="margin">
               <number>0</number>
              </property>
              <item>
@@ -4530,16 +4434,7 @@
         <item row="1" column="0" colspan="3">
          <widget class="QWidget" name="ordersTableFrame" native="true">
           <layout class="QGridLayout" name="gridLayout_15">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
+           <property name="margin">
             <number>0</number>
            </property>
            <property name="spacing">
@@ -4560,16 +4455,7 @@
               </size>
              </property>
              <layout class="QGridLayout" name="gridLayout_9">
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
+              <property name="margin">
                <number>0</number>
               </property>
               <item row="0" column="1">
@@ -4817,7 +4703,7 @@
         <string notr="true"/>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <property name="iconSize">
         <size>
@@ -4839,16 +4725,7 @@
          <item row="0" column="1">
           <widget class="QWidget" name="ordersLogInfoPanel" native="true">
            <layout class="QGridLayout" name="gridLayout_14">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
+            <property name="margin">
              <number>0</number>
             </property>
             <property name="spacing">
