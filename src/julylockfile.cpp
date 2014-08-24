@@ -35,16 +35,19 @@
 #include <QFile>
 #include <QDir>
 #include <QTime>
+#include <QTimer>
 
 JulyLockFile::JulyLockFile(QString imageName)
+    : QObject()
 {	
     qsrand(QTime::currentTime().msecsTo(QTime(23,59,59,999)));
     lockFile=new QFile;
     lockSocket=new QUdpSocket;
     isLockedFile=false;
-    quint16 lockPort=0;
+    lockPort=0;
 
     lockFilePath=QDir().tempPath()+"/Locked_"+QCryptographicHash::hash(imageName.toLatin1(),QCryptographicHash::Md5).toHex()+".lockfile";
+    if(QFile::exists(lockFilePath)&&QFileInfo(lockFilePath).lastModified().addSecs(240)<QDateTime::currentDateTime())QFile::remove(lockFilePath);
     lockFile->setFileName(lockFilePath);
     if(QFile::exists(lockFilePath))
     {
@@ -67,12 +70,10 @@ JulyLockFile::JulyLockFile(QString imageName)
         while(!lockSocket->bind(QHostAddress::LocalHost,++lockPort,QUdpSocket::DontShareAddress));
     }
 
-    if(lockFile->open(QIODevice::WriteOnly))
-    {
-        lockFile->write(QByteArray::number(lockPort));
-        lockFile->close();
-    }
-    else lockSocket->close();
+    QTimer *minuteTimer=new QTimer(this);
+    connect(minuteTimer,SIGNAL(timeout()),this,SLOT(updateLockFile()));
+    minuteTimer->start(60000);
+    updateLockFile();
     isLockedFile=lockSocket->state()!=QUdpSocket::BoundState;
 }
 
@@ -85,6 +86,16 @@ JulyLockFile::~JulyLockFile()
 	}
     if(lockFile)delete lockFile;
     if(lockSocket)delete lockSocket;
+}
+
+void JulyLockFile::updateLockFile()
+{
+    if(lockFile->open(QIODevice::WriteOnly))
+    {
+        lockFile->write(QByteArray::number(lockPort));
+        lockFile->close();
+    }
+    else lockSocket->close();
 }
 
 bool JulyLockFile::isLocked()

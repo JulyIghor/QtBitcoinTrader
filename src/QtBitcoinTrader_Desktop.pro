@@ -13,6 +13,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia
 
 CONFIG		+= qt warn_off release
 
+mac{
+LIBS += -framework CoreFoundation
+LIBS += -framework ApplicationServices
+}
 
 #
 # Headers

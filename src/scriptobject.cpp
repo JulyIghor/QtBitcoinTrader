@@ -146,11 +146,44 @@ void ScriptObject::playWav(QString fileName)
     mainWindow.playWav(fileName,false);
 }
 
-//void ScriptObject::say(QString text){mainWindow.sayText(text);}
-//void ScriptObject::say(QVariant text){say(text.toString());}
-//void ScriptObject::say(QVariant text1, QVariant text2){say(text1.toString()+" "+text2.toString());}
-//void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3){say(text1.toString()+" "+text2.toString()+" "+text3.toString());}
-//void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4){say(text1.toString()+" "+text2.toString()+" "+text3.toString()+" "+text4.toString());}
+void ScriptObject::say(QString text){if(!testMode)mainWindow.sayText(text);}
+void ScriptObject::say(double text){say(QVariantList()<<text);}
+void ScriptObject::say(int text){say(QVariantList()<<text);}
+void ScriptObject::say(QVariant text1){say(QVariantList()<<text1);}
+void ScriptObject::say(QVariant text1, QVariant text2){say(QVariantList()<<text1<<text2);}
+void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3){say(QVariantList()<<text1<<text2<<text3);}
+void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4){say(QVariantList()<<text1<<text2<<text3<<text4);}
+void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4, QVariant text5){say(QVariantList()<<text1<<text2<<text3<<text4<<text5);}
+void ScriptObject::say(QVariantList list)
+{
+    int detectDoublePoint=0;
+    if(detectDoublePoint==0)//If you reading this and know better solution, please tell me
+    {
+        bool decimalComma=QLocale().decimalPoint()==QChar(',');
+        if(!decimalComma)decimalComma=QLocale().country()==QLocale::Ukraine||QLocale().country()==QLocale::RussianFederation;
+        if(decimalComma)detectDoublePoint=2;
+        else detectDoublePoint=1;
+    }
+
+    QString text;
+    for(int n=0;n<list.count();n++)
+    {
+        if(list.at(n).type()==QMetaType::Double)
+        {
+            QString number=QString::number(list.at(n).toDouble(),'f',8);
+            int crop=number.size()-1;
+            while(crop>0&&number.at(crop)==QLatin1Char('0'))crop--;
+            if(crop>0&&number.at(crop)==QLatin1Char('.'))crop--;
+            if(crop>=0&&crop<number.size())number.resize(crop+1);
+            if(detectDoublePoint==2)number.replace(QLatin1Char('.'),QLatin1Char(','));
+            text+=number;
+        }
+        else
+        text+=list.at(n).toString();
+        if(n<list.count()-1)text+=QLatin1Char(' ');
+    }
+    say(text);
+}
 
 void ScriptObject::groupStart(QString name)
 {

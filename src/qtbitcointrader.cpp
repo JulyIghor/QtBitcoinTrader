@@ -69,6 +69,7 @@
 #include "orderstablecancelbutton.h"
 
 #ifdef Q_OS_WIN
+#include <sapi.h>
 #include "windows.h"
 #if QT_VERSION < 0x050000
 #include <QWindowsXPStyle>
@@ -79,6 +80,10 @@
 #include <QPlastiqueStyle>
 #else
 #include <QStyleFactory>
+#endif
+
+#ifdef Q_OS_MAC
+#include <ApplicationServices/ApplicationServices.h>
 #endif
 
 QtBitcoinTrader::QtBitcoinTrader()
@@ -434,14 +439,14 @@ QtBitcoinTrader::QtBitcoinTrader()
 		}
 	}
 
-	if(!baseValues.highResolutionDisplay)
-	{
-		WindowScrollBars *windScroll=new WindowScrollBars;
-		windScroll->setWidgetResizable(true);
-		windScroll->resize(qMin(defaultMinWidth,currScrRect.width()-40),qMin(defaultMinHeight,currScrRect.height()-80));
-		windScroll->setWidget(this);
-		windowWidget=windScroll;
-	}
+//    if(!baseValues.highResolutionDisplay)
+//	{
+//		WindowScrollBars *windScroll=new WindowScrollBars;
+//		windScroll->setWidgetResizable(true);
+//		windScroll->resize(qMin(defaultMinWidth,currScrRect.width()-40),qMin(defaultMinHeight,currScrRect.height()-80));
+//		windScroll->setWidget(this);
+//		windowWidget=windScroll;
+//	}
 
 	if(iniSettings->value("UI/SwapDepth",false).toBool())on_swapDepth_clicked();
 
@@ -1123,11 +1128,32 @@ void QtBitcoinTrader::startApplication(QString name, QStringList params)
     QProcess::startDetached(name,params);
 }
 
-void QtBitcoinTrader::sayText(QString)
+void QtBitcoinTrader::sayText(QString text)
 {
-//#ifdef Q_OS_MAC
-//    QProcess::startDetached("say",QStringList()<<text);
-//#endif
+#ifdef Q_OS_MAC
+    static SpeechChannel voiceChannel;
+    static bool once=true;
+    if(once)
+    {
+        once=false;
+        NewSpeechChannel((VoiceSpec*)NULL, &voiceChannel);
+    }
+    CFStringRef talkText=CFStringCreateWithCharacters(0,reinterpret_cast<const UniChar *>(text.unicode()), text.length());
+    SpeakCFString(voiceChannel, talkText, NULL);
+    CFRelease(talkText);
+#else
+#ifdef Q_OS_WIN
+	static ISpVoice *pVoice=NULL;
+	static HRESULT hr=CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
+	if(SUCCEEDED(hr))
+	{
+		pVoice->Speak(NULL,SPF_PURGEBEFORESPEAK,0);
+		pVoice->Speak(text.utf16(), SPF_ASYNC, NULL);
+	}
+#else
+	startApplication("say",text);
+#endif
+#endif
 }
 
 void WindowScrollBars::resizeEvent(QResizeEvent *event)

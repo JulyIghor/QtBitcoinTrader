@@ -239,9 +239,15 @@ if(!execImmediately)
     else
     {
     QString indicatorBValue;
-    QString indicatorB;
+	QString indicatorB;
+	QString realtime;
+	QString baseVariable;
+	QString ifLine;
 
-    if(holder.variableBCode=="EXACT")indicatorB=mainWindow.numFromDouble(holder.variableBExact)+";\n";
+    if(holder.variableBCode=="EXACT")
+	{
+		ifLine=" if(value "+holder.comparationText+" "+mainWindow.numFromDouble(holder.variableBExact)+")\n";
+	}
     else
     {
         indicatorBValue="trader.get(\""+holder.variableBSymbolCode+"\" , \""+holder.variableBCode+"\")";
@@ -256,31 +262,32 @@ if(!execImmediately)
             QString sign=(holder.variableBFeeIndex==1?"+":"-");
             indicatorB+=" baseVariable "+sign+"= baseVariable*trader.get(\""+holder.valueBSymbolCode+"\" , \"Fee\");\n";
         }
+
+		if(holder.variableBModeIndex==0)realtime=" calcBaseVariable();\n";
+		else
+			if(holder.variableBModeIndex==2)
+			{
+				bool haveLessThan=holder.comparationText.contains("<");
+				bool haveMoreThan=holder.comparationText.contains(">");
+				if(haveLessThan)realtime=" if(value > "+indicatorBValue+")calcBaseVariable();\n";
+				if(haveMoreThan)realtime=" if(value < "+indicatorBValue+")calcBaseVariable();\n";
+			}
+		ifLine=" if(value "+holder.comparationText+" baseVariable)\n";
+		script+="var baseVariable = calcBaseVariable();\n"
+			"function calcBaseVariable()\n"
+			"{\n"
+			" baseVariable = "+indicatorB+
+			" return baseVariable;\n"
+			"}\n\n";
     }
 
-    QString realtime;
-    if(holder.variableBModeIndex==0)realtime=" calcBaseVariable();\n";
-    else
-    if(holder.variableBModeIndex==2)
-    {
-        bool haveLessThan=holder.comparationText.contains("<");
-        bool haveMoreThan=holder.comparationText.contains(">");
-        if(haveLessThan)realtime=" if(value > "+indicatorBValue+")calcBaseVariable();\n";
-        if(haveMoreThan)realtime=" if(value < "+indicatorBValue+")calcBaseVariable();\n";
-    }
 
-    script+="var baseVariable = calcBaseVariable();\n"
-    "function calcBaseVariable()\n"
-    "{\n"
-    " baseVariable = "+indicatorB+
-    " return baseVariable;\n"
-    "}\n\n"
-    "trader.on(\""+holder.variableACode+"\").changed()\n"
+    script+="trader.on(\""+holder.variableACode+"\").changed()\n"
     "{\n"
     " if(symbol != \""+holder.valueASymbolCode+"\")return;\n";
     if(haveDelay)script+=" if(delayDate>0)return;\n";
     script+=realtime+
-    " if(value "+holder.comparationText+" baseVariable)\n"
+    ifLine+
     " {\n"+executingCode+
     " }\n";
     if(testMode)script+="else\n{ trader.test(2); trader.stopGroup(); }\n";

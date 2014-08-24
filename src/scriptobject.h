@@ -85,11 +85,15 @@ public slots:
     void beep();
     void playWav(QString filePath);
 
-    //void say(QString text);
-    //void say(QVariant);
-    //void say(QVariant,QVariant);
-    //void say(QVariant,QVariant,QVariant);
-    //void say(QVariant,QVariant,QVariant,QVariant);
+    void say(QString text);
+    void say(int);
+    void say(double);
+    void say(QVariant);
+    void say(QVariantList);
+    void say(QVariant,QVariant);
+    void say(QVariant,QVariant,QVariant);
+    void say(QVariant,QVariant,QVariant,QVariant);
+    void say(QVariant,QVariant,QVariant,QVariant,QVariant);
 
     void groupDone();
     void groupStart(QString name);

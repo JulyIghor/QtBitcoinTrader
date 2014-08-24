@@ -91,7 +91,7 @@ AddRuleDialog::AddRuleDialog(QWidget *parent) :
     ui->thanType->insertItem(ui->thanType->count(),julyTr("RULE_THAN_BEEP","Beep"),"BEEP");
     ui->thanType->insertItem(ui->thanType->count(),julyTr("RULE_THAN_PLAY","Play Sound"),"PLAY");
     ui->thanType->insertItem(ui->thanType->count(),julyTr("RULE_THAN_START_APP","Start Application"),"PROGRAM");
-    //ui->thanType->insertItem(ui->thanType->count(),julyTr("RULE_THAN_SAY_TEXT","Say Text"),"SAY");
+    ui->thanType->insertItem(ui->thanType->count(),julyTr("RULE_THAN_SAY_TEXT","Say Text"),"SAY");
 
     ui->variableBMode->setItemText(0,julyTr("RULE_TYPE_REALTIME","Realtime comparation"));
     ui->variableBMode->setItemText(1,julyTr("RULE_TYPE_SAVEONSTART","Fixed. Save base value once at rule starts"));
@@ -208,8 +208,12 @@ bool AddRuleDialog::isRuleEnabled()
 void AddRuleDialog::setComboIndexByData(QComboBox *list, QString &data)
 {
     if(list==0)return;
-    int find=list->findData(data);
-    if(find<0)return;
+	int find=list->findData(data);
+	if(find<0)
+	{
+		//qDebug()<<"Critical error. Can't find:"<<data;
+		return;
+	}
     list->setCurrentIndex(find);
 }
 
@@ -217,7 +221,11 @@ void AddRuleDialog::setComboIndex(QComboBox *list, QString &text)
 {
     if(list==0)return;
     int find=list->findText(text);
-    if(find<0)return;
+    if(find<0)
+	{
+		//qDebug()<<"Critical error. Can't find:"<<text;
+		return;
+	}
     list->setCurrentIndex(find);
 }
 
@@ -230,32 +238,32 @@ void AddRuleDialog::setComboIndex(QComboBox *list, int &row)
 
 RuleHolder AddRuleDialog::getRuleHolder()
 {
-    RuleHolder holder;
-    holder.thanAmountPercentChecked=ui->thanAmountPercent->isChecked();
-    holder.thanPricePercentChecked=ui->thanPricePercent->isChecked();
-    holder.variableBPercentChecked=ui->variableBPercent->isVisible()&&ui->variableBPercent->isChecked();
-    holder.thanAmountFeeIndex=ui->thanAmountFee->currentIndex();
-    holder.thanPriceFeeIndex=ui->thanPriceFee->currentIndex();
-    holder.thanTypeIndex=ui->thanType->currentIndex();
-    holder.variableBFeeIndex=!ui->variableBFee->isVisible()?-1:ui->variableBFee->currentIndex();
-    holder.variableBModeIndex=ui->variableBMode->currentIndex();
-    holder.thanAmount=ui->thanAmount->value();
-    holder.thanPrice=ui->thanPriceValue->value();
-    holder.variableBExact=ui->variableBExact->value();
-    holder.comparationText=ui->comparation->currentText();
-    holder.thanPricePlusMinusText=ui->thanPricePlusMinus->currentText();
-    holder.thanPriceTypeCode=comboCurrentData(ui->thanPriceType);
-    holder.thanText=ui->thanText->text();
-    holder.tradeSymbolCode=comboCurrentData(ui->thanSymbol);
-    holder.valueASymbolCode=comboCurrentData(ui->valueASymbol);
-    holder.valueBSymbolCode=comboCurrentData(ui->valueBSymbol);
-    holder.variableACode=comboCurrentData(ui->variableA);
-    holder.variableBCode=comboCurrentData(ui->variableB);
-    holder.variableBplusMinus=ui->variableBplusMinus->currentText();
-    holder.variableBSymbolCode=comboCurrentData(ui->valueBSymbol);
-    holder.description=ui->descriptionText->text();
-    holder.delaySeconds=ui->delayValue->value();
-    return holder;
+	if(!isVisible())return lastHolder;
+    lastHolder.thanAmountPercentChecked=ui->thanAmountPercent->isChecked();
+    lastHolder.thanPricePercentChecked=ui->thanPricePercent->isChecked();
+    lastHolder.variableBPercentChecked=ui->variableBPercent->isVisible()&&ui->variableBPercent->isChecked();
+    lastHolder.thanAmountFeeIndex=ui->thanAmountFee->currentIndex();
+    lastHolder.thanPriceFeeIndex=ui->thanPriceFee->currentIndex();
+    lastHolder.thanTypeIndex=ui->thanType->currentIndex();
+    lastHolder.variableBFeeIndex=!ui->variableBFee->isVisible()?-1:ui->variableBFee->currentIndex();
+    lastHolder.variableBModeIndex=ui->variableBMode->currentIndex();
+    lastHolder.thanAmount=ui->thanAmount->value();
+    lastHolder.thanPrice=ui->thanPriceValue->value();
+    lastHolder.variableBExact=ui->variableBExact->value();
+    lastHolder.comparationText=ui->comparation->currentText();
+    lastHolder.thanPricePlusMinusText=ui->thanPricePlusMinus->currentText();
+    lastHolder.thanPriceTypeCode=comboCurrentData(ui->thanPriceType);
+    lastHolder.thanText=ui->thanText->text();
+    lastHolder.tradeSymbolCode=comboCurrentData(ui->thanSymbol);
+    lastHolder.valueASymbolCode=comboCurrentData(ui->valueASymbol);
+    lastHolder.valueBSymbolCode=comboCurrentData(ui->valueBSymbol);
+    lastHolder.variableACode=comboCurrentData(ui->variableA);
+    lastHolder.variableBCode=comboCurrentData(ui->variableB);
+    lastHolder.variableBplusMinus=ui->variableBplusMinus->currentText();
+    lastHolder.variableBSymbolCode=comboCurrentData(ui->valueBSymbol);
+    lastHolder.description=ui->descriptionText->text();
+    lastHolder.delaySeconds=ui->delayValue->value();
+    return lastHolder;
 }
 
 void AddRuleDialog::reCacheCode()
@@ -403,7 +411,7 @@ void AddRuleDialog::on_thanType_currentIndexChanged(int index)
     bool name=currentThanType=="NAME";
     bool beep=currentThanType=="BEEP";
     bool wav=currentThanType=="PLAY";
-    bool say=false;//currentThanType=="SAY";
+    bool say=currentThanType=="SAY";
     bool program=currentThanType=="PROGRAM";
 
     ui->doubleValueFon->setVisible(!noParams&&trade);
@@ -423,8 +431,8 @@ void AddRuleDialog::on_thanType_currentIndexChanged(int index)
 
 void AddRuleDialog::on_playButton_clicked()
 {
-    //if(currentThanType=="SAY")mainWindow.sayText(thanText);
-    //else
+    if(currentThanType=="SAY")mainWindow.sayText(ui->thanText->text());
+    else
     if(currentThanType=="BEEP")mainWindow.beep();
     else
     if(currentThanType=="PLAY")mainWindow.playWav(ui->thanText->text());

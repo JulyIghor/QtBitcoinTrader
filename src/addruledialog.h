@@ -80,6 +80,7 @@ private slots:
     void on_valueASymbol_currentIndexChanged(int index);
 
 private:
+	RuleHolder lastHolder;
     QString comboData(QComboBox *list, int row);
     QString comboCurrentData(QComboBox *);
     void setComboIndex(QComboBox *list, int &row);
