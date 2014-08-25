@@ -1151,7 +1151,7 @@ void QtBitcoinTrader::sayText(QString text)
 		pVoice->Speak(text.utf16(), SPF_ASYNC, NULL);
 	}
 #else
-	startApplication("say",text);
+	startApplication("say",text.split(' '));
 #endif
 #endif
 }
