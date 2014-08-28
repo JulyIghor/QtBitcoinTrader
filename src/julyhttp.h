@@ -65,6 +65,8 @@ public:
 	~JulyHttp();
 
 private:
+    QByteArray outBuffer;
+    QByteArray contentTypeLine;
 	int noReconnectCount;
 	void addSpeedSize(qint64);
 	QMap<QByteArray,QByteArray> cookiesMap;

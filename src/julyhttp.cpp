@@ -65,8 +65,9 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 		else
 	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+baseValues.appVerStr+"\r\n");
 	httpHeader.append("Host: "+hostName+"\r\n");
+    httpHeader.append("Accept: */*\r\n");
 	if(baseValues.gzipEnabled)httpHeader.append("Accept-Encoding: gzip\r\n");
-	httpHeader.append("Content-Type: "+contentType+"\r\n");
+    contentTypeLine="Content-Type: "+contentType+"\r\n";
 	if(keepAlive)httpHeader.append("Connection: keep-alive\r\n");
 	else httpHeader.append("Connection: close\r\n");
 	apiDownState=false;
@@ -209,13 +210,21 @@ void JulyHttp::readSocket()
 		contentLength=0;
 	}
 
+    bool lineReaded=false;
 	while(readingHeader)
 	{
 		bool endFound=false;
-		QByteArray currentLine;
-		while(!endFound&&canReadLine())
-		{
-			currentLine=readLine();
+        QByteArray currentLine;
+        while(!endFound&&canReadLine())
+        {
+            lineReaded=true;
+            if(outBuffer.size())
+            {
+                currentLine=outBuffer+readLine();
+                outBuffer.clear();
+            }
+            else currentLine=readLine();
+            if(outBuffer.size()){currentLine.prepend(outBuffer);outBuffer.clear();}
 			if(currentLine=="\r\n"||
 			   currentLine=="\n"||
 			   currentLine.isEmpty())endFound=true;
@@ -270,8 +279,14 @@ void JulyHttp::readSocket()
 			}
 		}
 		if(!endFound)
-		{
-			retryRequest();
+        {
+            if(!lineReaded)
+            {
+                if(outBuffer.size()>30000)outBuffer.clear();
+                outBuffer.append(readAll());
+                return;
+            }
+            retryRequest();
 			return;
 		}
 		readingHeader=false;
@@ -388,7 +403,7 @@ void JulyHttp::readSocket()
 			if(contentGzipped)uncompress(&buffer);
 			bool apiMaybeDown=buffer[0]=='<';
 			setApiDown(apiMaybeDown);
-			if(debugLevel&&buffer.isEmpty())logThread->writeLog("Response is EMPTY",2);
+            if(debugLevel&&buffer.isEmpty())logThread->writeLog("Response is EMPTY",2);
             emit dataReceived(buffer,requestList.first().reqType);
 		}
 		waitingReplay=false;
@@ -484,6 +499,7 @@ void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray pos
 	if(!restSignLine.isEmpty())data->append(restKeyLine+restSignLine);
 	if(!postData.isEmpty())
 	{
+        data->append(contentTypeLine);
 		data->append("Content-Length: "+QByteArray::number(postData.size())+"\r\n\r\n");
 		data->append(postData);
 	}
