@@ -499,7 +499,7 @@ void JulyHttp::prepareData(int reqType, const QByteArray &method, QByteArray pos
 	if(!restSignLine.isEmpty())data->append(restKeyLine+restSignLine);
 	if(!postData.isEmpty())
 	{
-        data->append(contentTypeLine);
+        	data->append(contentTypeLine);
 		data->append("Content-Length: "+QByteArray::number(postData.size())+"\r\n\r\n");
 		data->append(postData);
 	}
@@ -559,6 +559,7 @@ void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postDa
 	if(!restSignLine.isEmpty())data->append(restKeyLine+restSignLine);
 	if(!postData.isEmpty())
 	{
+        	data->append(contentTypeLine);
 		data->append("Content-Length: "+QByteArray::number(postData.size())+"\r\n\r\n");
 		data->append(postData);
 	}
