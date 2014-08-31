@@ -546,7 +546,7 @@ void Exchange_GOCio::secondSlot()
 	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,baseValues.httpSplitPackets,"method=ActiveOrders&");
 	if(!isReplayPending(103))sendToApi(103,baseValues.currentPair.currRequestPair+"/ticker/",false,baseValues.httpSplitPackets);
 	if(!isReplayPending(109))sendToApi(109,baseValues.currentPair.currRequestPair+"/trades/",false,baseValues.httpSplitPackets);
-	if(depthEnabled&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
+	if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
 		emit depthRequested();
 		sendToApi(111,baseValues.currentPair.currRequestPair+"/depth/?"+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);

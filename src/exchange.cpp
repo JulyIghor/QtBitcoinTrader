@@ -46,7 +46,7 @@ Exchange::Exchange()
 	supportsExchangeVolume=true;
 	clearHistoryOnCurrencyChanged=false;
 	exchangeTickerSupportsHiLowPrices=true;
-	depthEnabled=true;
+	depthEnabledFlag=true;
 	balanceDisplayAvailableAmount=true;
 	minimumRequestIntervalAllowed=100;
 	decAmountFromOpenOrder=0.0;
@@ -66,6 +66,11 @@ Exchange::Exchange()
 Exchange::~Exchange()
 {
 	if(debugLevel)logThread->writeLogB(baseValues.exchangeName+" API Thread Deleted",2);
+}
+
+bool Exchange::isDepthEnabled()
+{
+	return depthEnabledFlag||baseValues.scriptsThatUseOrderBookCount;
 }
 
 QByteArray Exchange::getMidData(QString a, QString b,QByteArray *data)

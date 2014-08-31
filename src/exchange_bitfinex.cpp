@@ -126,7 +126,7 @@ void Exchange_Bitfinex::secondSlot()
 
 	//if(!tickerOnly&&!isReplayPending(210))sendToApi(210,"positions",true,baseValues.httpSplitPackets);
 
-	if(depthEnabled&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
+	if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
         emit depthRequested();
         sendToApi(111,"book/"+baseValues.currentPair.currRequestPair+"?limit_bids="+baseValues.depthCountLimitStr+"&limit_asks="+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);

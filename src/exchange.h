@@ -53,7 +53,8 @@ public:
 	bool exchangeDisplayOnlyCurrentPairOpenOrders;
 	bool clearHistoryOnCurrencyChanged;
 	bool exchangeTickerSupportsHiLowPrices;
-	bool depthEnabled;
+	bool isDepthEnabled();
+	bool depthEnabledFlag;
     virtual void filterAvailableUSDAmountValue(qreal *amount);
 
 	CurrencyPairItem defaultCurrencyParams;

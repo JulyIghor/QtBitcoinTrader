@@ -125,7 +125,7 @@ void Exchange_Bitstamp::secondSlot()
 	default: break;
 	}
 
-	if(depthEnabled)
+	if(isDepthEnabled())
 	{
 		if(forceDepthLoad||/*infoCounter==5&&*/!isReplayPending(111))
 		{

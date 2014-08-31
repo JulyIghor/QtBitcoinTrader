@@ -97,6 +97,7 @@ void selectSystemLanguage()
 void BaseValues::Construct()
 {
 	forceDotInSpinBoxes=true;
+	scriptsThatUseOrderBookCount=0;
 	trafficSpeed=0;
 	trafficTotal=0;
 	trafficTotalType=0;

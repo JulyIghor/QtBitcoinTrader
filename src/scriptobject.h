@@ -58,6 +58,8 @@ public:
     QStringList argumentsList;
     QStringList commandsList;
 private:
+	void deleteEngine();
+	bool scriptWantsOrderBookData;
     void initValueChanged(QString symbol, QString name, double val);
     void timerCreate(int milliseconds, QString &command, bool once);
     QMap<QTimer *,bool> timerMap;

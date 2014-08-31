@@ -135,7 +135,7 @@ void Exchange_BTCChina::secondSlot()
 	default: break;
 	}
 
-	if(depthEnabled&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
+	if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
 		if(!isReplayPending(111))
 		{

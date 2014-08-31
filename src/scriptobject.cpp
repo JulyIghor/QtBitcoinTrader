@@ -44,6 +44,7 @@
 ScriptObject::ScriptObject(QString _scriptName) :
     QObject()
 {
+	scriptWantsOrderBookData=false;
     haveTimer=false;
     secondTimer=0;
     pendingStop=false;
@@ -475,6 +476,18 @@ void ScriptObject::secondSlot()
     secondTimer->start(1000);
 }
 
+void ScriptObject::deleteEngine()
+{
+	if(!engine)return;
+	engine->deleteLater();
+	engine=0;
+	if(!testMode&&scriptWantsOrderBookData)
+	{
+		scriptWantsOrderBookData=false;
+		baseValues.scriptsThatUseOrderBookCount--;
+	}
+}
+
 void ScriptObject::setRunning(bool on)
 {
     if(!testMode&&!on){secondTimer->stop();}
@@ -485,8 +498,7 @@ void ScriptObject::setRunning(bool on)
         {
             qDeleteAll(timerMap.keys());
             timerMap.clear();
-            engine->deleteLater();
-            engine=0;
+            deleteEngine();
         }
     if(!testMode)emit runningChanged(isRunningFlag);
 }
@@ -508,15 +520,23 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
     {
         qDeleteAll(timerMap.keys());
         timerMap.clear();
-        engine->deleteLater();
+        deleteEngine();
     }
     engine=new QScriptEngine;
 
     QScriptValue scriptValue=engine->newQObject(this);
     engine->globalObject().setProperty("trader", scriptValue);
+		
+	bool anyValue=script.contains("trader.on(\"AnyValue\").changed()",Qt::CaseInsensitive)||script.contains("trader.on('AnyValue').changed()",Qt::CaseInsensitive);
+    haveTimer=script.contains("trader.on(\"Time\").changed()",Qt::CaseInsensitive)||script.contains("trader.on('Time').changed()",Qt::CaseInsensitive);
 
-    bool anyValue=script.contains("trader.on(\"AnyValue\").changed()",Qt::CaseInsensitive);
-    haveTimer=script.contains("trader.on(\"Time\").changed()",Qt::CaseInsensitive);
+	if(!testMode)
+	{
+		if(scriptWantsOrderBookData&&baseValues.scriptsThatUseOrderBookCount>0)baseValues.scriptsThatUseOrderBookCount--;
+		scriptWantsOrderBookData=script.contains("trader.get(\"Asks",Qt::CaseInsensitive)||script.contains("trader.get('Asks",Qt::CaseInsensitive)||script.contains("trader.get(\"Bids",Qt::CaseInsensitive)||script.contains("trader.get('Bids",Qt::CaseInsensitive);
+	}
+	else scriptWantsOrderBookData=false;
+
     script=sourceToScript(script);
     pendingStop=false;
        QScriptValue handler=engine->evaluate(script);
@@ -543,6 +563,7 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
         }
         else
         {
+			if(!testMode&&scriptWantsOrderBookData)baseValues.scriptsThatUseOrderBookCount++;
             bool scriptContainsBalance=script.contains("Balance",Qt::CaseInsensitive);
             Q_FOREACH(QDoubleSpinBox *spin, spinBoxList)
             {

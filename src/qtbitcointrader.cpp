@@ -1282,7 +1282,7 @@ void QtBitcoinTrader::secondSlot()
 
 	if(execCount==0||execCount==2||execCount==4)
 	{
-		if(currentExchange)currentExchange->depthEnabled=ui.tabDepth->isVisible()||depthAsksModel->rowCount()==0||depthBidsModel->rowCount()==0;
+		if(currentExchange)currentExchange->depthEnabledFlag=ui.tabDepth->isVisible()||depthAsksModel->rowCount()==0||depthBidsModel->rowCount()==0;
 		clearTimeOutedTrades();
 		setSoftLagValue(softLagTime.elapsed());
 	}

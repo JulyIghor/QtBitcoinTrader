@@ -120,6 +120,20 @@ ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFro
 
     on_limitRowsValue_valueChanged(ui->limitRowsValue->value());
 
+	//QStringList eventList;
+	//Q_FOREACH(QAction *currentAction,insertEventMenu.actions())
+	//	eventList<<currentAction->text();
+
+	//QStringList functionList;
+	//Q_FOREACH(QAction *currentAction,insertFunctionMenu.actions())
+	//	functionList<<currentAction->text();
+
+	//QStringList commandList;
+	//Q_FOREACH(QAction *currentAction,insertCommandMenu.actions())
+	//	commandList<<currentAction->text();
+
+	//qDebug()<<"Events:\n"<<eventList.join("\n")<<"\nFunctions:\n"<<functionList.join("\n")<<"\nCommands:\n"<<commandList.join("\n");
+
     languageChanged();
     currencyChanged();
 }

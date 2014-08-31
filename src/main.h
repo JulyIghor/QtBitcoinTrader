@@ -73,6 +73,8 @@ struct BaseValues
 {
 	void Construct();
 
+	int scriptsThatUseOrderBookCount;
+
     QString osStyle;
 	bool forceDotInSpinBoxes;
 
