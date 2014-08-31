@@ -64,7 +64,7 @@ bool RuleScriptParser::writeHolderToSettings(RuleHolder &holder, QSettings &sett
     settings.setValue("VariableBplusMinus",holder.variableBplusMinus);
     settings.setValue("VariableBSymbolCode",holder.variableBSymbolCode);
     settings.setValue("Description",holder.description);
-    settings.setValue("Delay",holder.delaySeconds);
+    settings.setValue("Delay",holder.delayMilliseconds);
     settings.endGroup();
     settings.sync();
     return true;
@@ -103,7 +103,7 @@ RuleHolder RuleScriptParser::readHolderFromSettings(QSettings &settings, QString
     holder.variableBplusMinus=settings.value("VariableBplusMinus","").toString();
     holder.variableBSymbolCode=settings.value("VariableBSymbolCode","").toString();
     holder.description=settings.value("Description","").toString();
-    holder.delaySeconds=settings.value("Delay",0).toInt();
+    holder.delayMilliseconds=mainWindow.getValidDoubleForPercision(settings.value("Delay",0.0).toReal(),3,false);
     settings.endGroup();
     return holder;
 }
@@ -204,6 +204,13 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
             case 11://Start app
                 executingCode+=" trader.startApp(\""+holder.thanText+"\");\n";
                 break;
+            case 12://Say text
+                {
+                QString sayText;
+                if(!holder.sayCode.isEmpty())sayText=", trader.get(\""+holder.sayCode+"\")";
+                executingCode+=" trader.say(\""+holder.thanText+"\""+sayText+");\n";
+                }
+                break;
             }
         }
         executingCode+=" trader.groupDone();\n";
@@ -211,21 +218,22 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
     else executingCode=" trader.test(1);\n trader.groupStop();\n";
 
     bool execImmediately=holder.variableACode=="IMMEDIATELY";
-    bool haveDelay=holder.delaySeconds>0&&!testMode;
+    bool haveDelay=holder.delayMilliseconds>0.0001&&!testMode;
 
     if(haveDelay)
     {
-        QString tValue="0"; if(execImmediately)tValue="trader.get(\"Time\")";
-        script="var delayDate="+tValue+";\n"
-               "trader.on(\"Time\").changed()\n"
-                "{\n";
-if(!execImmediately)
-        script+=" if(delayDate==0)return;\n";
-        script+=" if(value-delayDate>="+QString::number(holder.delaySeconds)+")//Seconds Delay\n"
-                " {\n"+executingCode+" }\n"
-                "}\n\n";
+        QString timerCode="trader.delay("+mainWindow.numFromDouble(holder.delayMilliseconds,3,0)+",\"executingCode()\");";
         if(!execImmediately)
-            executingCode=" delayDate=trader.get(\"Time\");\n";
+        script+="var triggered=false;\n\n";
+        script+="function executingCode()\n"
+               "{\n"+executingCode+"}\n\n";
+        if(execImmediately)script+=timerCode;
+        else
+        executingCode="  if(!triggered)\n"
+                "  {\n"
+                "  triggered=true;\n"
+                "  "+timerCode+"\n"
+                "  }\n";
     }
 
     if(execImmediately)
@@ -240,8 +248,7 @@ if(!execImmediately)
     {
     QString indicatorBValue;
 	QString indicatorB;
-	QString realtime;
-	QString baseVariable;
+    QString realtime;
 	QString ifLine;
 
     if(holder.variableBCode=="EXACT")
@@ -281,11 +288,9 @@ if(!execImmediately)
 			"}\n\n";
     }
 
-
     script+="trader.on(\""+holder.variableACode+"\").changed()\n"
     "{\n"
     " if(symbol != \""+holder.valueASymbolCode+"\")return;\n";
-    if(haveDelay)script+=" if(delayDate>0)return;\n";
     script+=realtime+
     ifLine+
     " {\n"+executingCode+

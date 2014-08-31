@@ -52,13 +52,10 @@ DebugViewer::DebugViewer()
 		baseValues.logThread_->deleteLater();
 		baseValues.logThread_=0;
 	}
-	
+
 	logThread=new LogThread(false);
-	connect(logThread,SIGNAL(sendLogSignal(QByteArray)),this,SLOT(sendLogSlot(QByteArray)));
-	debugLevel=2;
-	secondTimer.setParent(this);
-	connect(&secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
-	secondTimer.start(1000);
+    connect(logThread,SIGNAL(sendLogSignal(QByteArray)),this,SLOT(sendLogSlot(QByteArray)));
+    debugLevel=2;
 	show();
 }
 
@@ -112,29 +109,13 @@ void DebugViewer::sendLogSlot(QByteArray text)
 		if(filterData.at(n).startsWith("Cookie",Qt::CaseInsensitive))
 			filterData[n]="Cookie: THERE_WAS_A_COOKIE";
 
-	buffer.append(filterData.join("\r\n"));
-}
-
-void DebugViewer::secondSlot()
-{
-	static int counter=0;
-	if(++counter>4)counter=0;
-	if(counter!=4&&ui.radioDebug->isChecked())return;
-
-	if(buffer.isEmpty())return;
-	if(savingFile==false&&ui.checkEnabled->isChecked())
-	{
-		ui.debugText->setPlainText(ui.debugText->toPlainText()+"\n"+buffer);
-
-		ui.debugText->verticalScrollBar()->setValue(ui.debugText->verticalScrollBar()->maximum());
-	}
-	buffer.clear();
+    if(savingFile==false&&ui.checkEnabled->isChecked())
+        ui.debugText->appendPlainText(filterData.join("\n"));
 }
 
 void DebugViewer::on_radioDebug_toggled(bool debugEnabled)
 {
 	if(debugEnabled)debugLevel=1;
 	else debugLevel=2;
-	ui.debugText->setPlainText("");
-	buffer.clear();
+    ui.debugText->setPlainText("");
 }

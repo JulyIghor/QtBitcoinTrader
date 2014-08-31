@@ -35,6 +35,7 @@
 #include <QDialog>
 #include "ruleholder.h"
 #include <QComboBox>
+#include <QDoubleSpinBox>
 
 namespace Ui {
 class AddRuleDialog;
@@ -47,7 +48,7 @@ class AddRuleDialog : public QDialog
 public:
     bool isRuleEnabled();
     RuleHolder getRuleHolder();
-    void fillByHolder(RuleHolder &);
+    void fillByHolder(RuleHolder &,bool enabled);
     explicit AddRuleDialog(QWidget *parent = 0);
     ~AddRuleDialog();
 
@@ -79,7 +80,11 @@ private slots:
     void on_thanSymbol_currentIndexChanged(int index);
     void on_valueASymbol_currentIndexChanged(int index);
 
+    void on_sayCode_currentIndexChanged(int index);
+
 private:
+    bool ruleIsEnabled;
+    QList<QDoubleSpinBox*> usedSpinBoxes;
 	RuleHolder lastHolder;
     QString comboData(QComboBox *list, int row);
     QString comboCurrentData(QComboBox *);

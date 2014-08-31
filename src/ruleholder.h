@@ -52,7 +52,7 @@ struct RuleHolder
     int thanTypeIndex;
     int variableBFeeIndex;
     int variableBModeIndex;
-    int delaySeconds;
+    qreal delayMilliseconds;
     qreal thanAmount;
     qreal thanPrice;
     qreal variableBExact;
@@ -67,6 +67,7 @@ struct RuleHolder
     QString variableBCode;
     QString variableBplusMinus;
     QString variableBSymbolCode;
+    QString sayCode;
 };
 
 #endif // RULEHOLDER_H

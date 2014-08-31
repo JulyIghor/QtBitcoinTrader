@@ -41,6 +41,7 @@ class OrdersModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+    int getAsksCount();
 	int getRowNum(int row);
 	QByteArray getRowOid(int row);
 	quint32 getRowDate(int row);
@@ -81,6 +82,8 @@ public:
 	QList<OrderItem> orders;
 
 private:
+    int asksCount;
+
 	QHash<QByteArray,quint32> oidMapForCheckingDuplicates;
 	QStringList textStatusList;
 	QString textAsk;

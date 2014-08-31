@@ -54,6 +54,8 @@
 #include "percentpicker.h"
 #include <QScrollArea>
 #include "networkmenu.h"
+#include <time.h>
+#include <QElapsedTimer>
 
 class Exchange;
 
@@ -65,11 +67,22 @@ private:
 	void resizeEvent(QResizeEvent *);
 };
 
+struct GroupStateItem
+{
+    GroupStateItem(QString &newName, bool &newEnabled){enabled=newEnabled; name=newName; elapsed.restart();}
+    QString name;
+    bool enabled;
+    QElapsedTimer elapsed;
+};
+
 class QtBitcoinTrader : public QDialog
 {
 	Q_OBJECT
 
 public:
+    QStringList getRuleGroupsNames();
+    QStringList getScriptGroupsNames();
+    int getOpenOrdersCount(int all=0);
 	void fixTableViews(QWidget *wid);
     qreal getIndicatorValue(QString);
     QMap<QString,QDoubleSpinBox*> indicatorsMap;
@@ -93,7 +106,7 @@ public:
     qreal floatFeeDec;
     qreal floatFeeInc;
 
-    QString numFromDouble(const qreal &value, int maxDecimals=10);
+    QString numFromDouble(const qreal &value, int maxDecimals=10, int minDecimals=1);
 
 	void addPopupDialog(int);
 
@@ -143,7 +156,13 @@ public:
     void setColumnResizeMode(QTableView*,QHeaderView::ResizeMode);
 
     QList<CurrencyPairItem> currPairsList;
+    void clearPendingGroup(QString);
+
+    qreal getVolumeByPrice(QString symbol, qreal price, bool isAsk);
+    qreal getPriceByVolume(QString symbol, qreal size, bool isAsk);
 private:
+    QList<GroupStateItem> pendingGroupStates;
+
     void setSpinValue(QDoubleSpinBox *spin, qreal val);
     void setSpinValueP(QDoubleSpinBox *spin, qreal &val);
 	QWidget *windowWidget;
@@ -228,6 +247,7 @@ public slots:
     void setRuleTabRunning(QString,bool);
     void startApplication(QString,QStringList);
     void setGroupRunning(QString name, bool enabled);
+    void setGroupState(QString name, bool enabled);
     bool getIsGroupRunning(QString name);
 
     void reloadScripts();
@@ -410,6 +430,7 @@ signals:
 	void clearValues();
 private slots:
     void on_buttonAddScript_clicked();
+    void on_helpButton_clicked();
 };
 
 #endif // QTBITCOINTRADER_H

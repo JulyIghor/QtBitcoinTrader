@@ -38,8 +38,6 @@
 #include "julytranslator.h"
 #include "logthread.h"
 
-#define USE_QTMULTIMEDIA
-
 #define textFontWidth(text) baseValues_->fontMetrics_->width(text)
 #define debugLevel (baseValues_->debugLevel_)
 #define appDataDir (baseValues_->appDataDir_)
@@ -114,6 +112,7 @@ struct BaseValues
 	int httpRequestTimeout;
 	Exchange *currentExchange_;
     QString scriptFolder;
+    QString themeFolder;
     qreal jlScriptVersion;
 	QString exchangeName;
 	QString timeFormat;

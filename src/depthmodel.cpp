@@ -56,6 +56,24 @@ DepthModel::~DepthModel()
 
 }
 
+qreal DepthModel::getPriceByVolume(qreal amount)
+{
+    if(sizeList.count()==0)return 0.0;
+    int currentIndex=qUpperBound(sizeList.begin(),sizeList.end(),amount)-sizeList.begin();
+    if(currentIndex<0)return 0.0;
+    if(currentIndex>=sizeList.count())currentIndex=sizeList.count()-1;
+    return priceList.at(currentIndex)*(currentIndex==priceList.count()-1?-1:1);
+}
+
+qreal DepthModel::getVolumeByPrice(qreal price)
+{
+    if(priceList.count()==0)return 0.0;
+    int currentIndex=qUpperBound(priceList.begin(),priceList.end(),price)-priceList.begin();
+    if(currentIndex<0)return 0.0;
+    if(currentIndex>=priceList.count())currentIndex=priceList.count()-1;
+    return sizeList.at(currentIndex)*(currentIndex==priceList.count()-1?-1:1);
+}
+
 int DepthModel::rowCount(const QModelIndex &) const
 {
 	return priceList.count()+grouped;
@@ -214,6 +232,8 @@ void DepthModel::calculateSize()
     qreal maxTotal=0.0;
 
     qreal totalSize=0.0;
+    qreal totalPrice=0.0;
+
 	if(originalIsAsk)
 	{
 		for(int n=0;n<priceList.count();n++)
@@ -222,7 +242,10 @@ void DepthModel::calculateSize()
 			if(!originalIsAsk)currentRow=priceList.count()-currentRow-1;
 
 			totalSize+=volumeList.at(currentRow);
+            totalPrice+=volumeList.at(currentRow)*priceList.at(currentRow);
+
 			sizeList[currentRow]=totalSize;
+            sizePriceList[currentRow]=totalPrice;
 			sizeListStr[currentRow]=QString::number(totalSize,'f',baseValues.currentPair.currADecimals);
 
 			maxPrice=qMax(maxPrice,priceList.at(currentRow));
@@ -237,7 +260,9 @@ void DepthModel::calculateSize()
 			int currentRow=n;
 			if(originalIsAsk)currentRow=priceList.count()-currentRow-1;
 			totalSize+=volumeList.at(currentRow);
+            totalPrice+=volumeList.at(currentRow)*priceList.at(currentRow);
 			sizeList[currentRow]=totalSize;
+            sizePriceList[currentRow]=totalPrice;
 			sizeListStr[currentRow]=QString::number(totalSize,'f',baseValues.currentPair.currADecimals);
 
 			maxPrice=qMax(maxPrice,priceList.at(currentRow));
@@ -280,6 +305,7 @@ void DepthModel::clear()
 	priceList.clear();
 	volumeList.clear();
 	sizeList.clear();
+    sizePriceList.clear();
 	priceListStr.clear();
 	volumeListStr.clear();
 	sizeListStr.clear();
@@ -390,6 +416,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 			priceList.removeAt(currentIndex);
 			volumeList.removeAt(currentIndex);
 			sizeList.removeAt(currentIndex);
+            sizePriceList.removeAt(currentIndex);
 			priceListStr.removeAt(currentIndex);
 			volumeListStr.removeAt(currentIndex);
 			sizeListStr.removeAt(currentIndex);
@@ -404,6 +431,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 		directionList[currentIndex]=volumeList.at(currentIndex)<volume?1:-1;
 		volumeList[currentIndex]=volume;
 		sizeList[currentIndex]=0.0;
+        sizePriceList[currentIndex]=0.0;
 		priceListStr[currentIndex]=item.priceStr;
 		volumeListStr[currentIndex]=item.volumeStr;
 		sizeListStr[currentIndex]="0.0";
@@ -416,6 +444,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 		priceList.insert(currentIndex,price);
 		volumeList.insert(currentIndex,volume);
 		sizeList.insert(currentIndex,volume);
+        sizePriceList.insert(currentIndex,volume*price);
 		directionList.insert(currentIndex,0);
 		priceListStr.insert(currentIndex,item.priceStr);
 		volumeListStr.insert(currentIndex,item.volumeStr);

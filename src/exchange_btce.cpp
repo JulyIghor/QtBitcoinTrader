@@ -530,15 +530,14 @@ void Exchange_BTCe::secondSlot()
 	static int infoCounter=0;
 	if(lastHistory.isEmpty())getHistory(false);
 
-	if(!isReplayPending(202))sendToApi(202,"",true,baseValues.httpSplitPackets,"method=getInfo&");
-
-	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,baseValues.httpSplitPackets,"method=ActiveOrders&");
-	if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
-	if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
+    if(!isReplayPending(202))sendToApi(202,"",true,baseValues.httpSplitPackets,"method=getInfo&");
+    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,baseValues.httpSplitPackets,"method=ActiveOrders&");
+    if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
+    if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
 	if(depthEnabled&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
 		emit depthRequested();
-		sendToApi(111,"depth/"+baseValues.currentPair.currRequestPair+"?limit="+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);
+        sendToApi(111,"depth/"+baseValues.currentPair.currRequestPair+"?limit="+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);
 		forceDepthLoad=false;
 	}
 
@@ -557,8 +556,8 @@ void Exchange_BTCe::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(!isReplayPending(208))sendToApi(208,"",true,baseValues.httpSplitPackets,"method=TradeHistory&");
-	if(!isReplayPending(110))sendToApi(110,"info",false,baseValues.httpSplitPackets);
+    if(!isReplayPending(208))sendToApi(208,"",true,baseValues.httpSplitPackets,"method=TradeHistory&");
+    if(!isReplayPending(110))sendToApi(110,"info",false,baseValues.httpSplitPackets);
 	if(!baseValues.httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 }
 
@@ -570,15 +569,7 @@ void Exchange_BTCe::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-	QByteArray btcToBuy=QByteArray::number(apiBtcToBuy,'f',8);
-	int digitsToCut=baseValues.currentPair.currADecimals;
-	int dotPos=btcToBuy.indexOf('.');
-	if(dotPos>0)
-	{
-		int toCut=(btcToBuy.size()-dotPos-1)-digitsToCut;
-		if(toCut>0)btcToBuy.remove(btcToBuy.size()-toCut-1,toCut);
-	}
-    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy,'f',pairItem.priceDecimals)+"&amount="+btcToBuy+"&";
+    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=buy&rate="+mainWindow.numFromDouble(apiPriceToBuy,pairItem.priceDecimals,0).toLatin1()+"&amount="+mainWindow.numFromDouble(apiBtcToBuy,pairItem.currADecimals,0).toLatin1()+"&";
     if(debugLevel)logThread->writeLog("Buy: "+data,2);
 	sendToApi(306,"",true,true,data);
 }
@@ -591,14 +582,7 @@ void Exchange_BTCe::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceToSel
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-	QByteArray btcToSell=QByteArray::number(apiBtcToSell,'f',8);
-	int dotPos=btcToSell.indexOf('.');
-	if(dotPos>0)
-	{
-        int toCut=(btcToSell.size()-dotPos-1)-pairItem.currADecimals;
-		if(toCut>0)btcToSell.remove(btcToSell.size()-toCut-1,toCut);
-	}
-    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell,'f',pairItem.priceDecimals)+"&amount="+btcToSell+"&";
+    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=sell&rate="+mainWindow.numFromDouble(apiPriceToSell,pairItem.priceDecimals,0).toLatin1()+"&amount="+mainWindow.numFromDouble(apiBtcToSell,pairItem.currADecimals,0).toLatin1()+"&";
     if(debugLevel)logThread->writeLog("Sell: "+data,2);
 	sendToApi(307,"",true,true,data);
 }
@@ -628,7 +612,7 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 
 	if(auth)
 	{
-		QByteArray postData=commands+"nonce="+QByteArray::number(++privateNonce);
+        QByteArray postData=commands+"nonce="+QByteArray::number(++privateNonce);
 		if(sendNow)
 			julyHttp->sendData(reqType, "POST /tapi/"+method, postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
 		else

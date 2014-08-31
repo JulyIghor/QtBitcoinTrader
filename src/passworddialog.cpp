@@ -36,8 +36,8 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QCryptographicHash>
-//#include <QUrl>
 #include "logobutton.h"
+#include <QDebug>
 
 PasswordDialog::PasswordDialog(QWidget *parent)
 	: QDialog(parent)
@@ -67,9 +67,13 @@ PasswordDialog::PasswordDialog(QWidget *parent)
         logosMap.insert(n,":/Resources/Exchanges/Logos/"+currentLogo);
 	}
 
+    QStringList scriptsOldPlace=QDir(baseValues.scriptFolder).entryList(QStringList()<<"*.JLR"<<"*.JLS");
+    QStringList iniNames;
+
 	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
 	for(int n=0;n<settingsList.count();n++)
 	{
+        if(scriptsOldPlace.count())iniNames<<QFileInfo(settingsList.at(n)).completeBaseName();
 		QSettings settIni(appDataDir+settingsList.at(n),QSettings::IniFormat);
 
 		if(baseValues.appVerLastReal<1.0772)
@@ -121,6 +125,20 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;
 		if(firstUnlockedProfileIndex==-1&&!isProfLocked)firstUnlockedProfileIndex=n-1;
 	}
+
+    if(iniNames.count())
+    {
+        Q_FOREACH(QString scriptFolderName,iniNames)
+        {
+            scriptFolderName=baseValues.scriptFolder+scriptFolderName+"/";
+            QDir().mkpath(scriptFolderName);
+            Q_FOREACH(QString curScript,scriptsOldPlace)
+                QFile::copy(baseValues.scriptFolder+curScript,scriptFolderName+curScript);
+        }
+        Q_FOREACH(QString curScript, scriptsOldPlace)
+            QFile::remove(baseValues.scriptFolder+curScript);
+    }
+
 	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem(julyTr("DEFAULT_PROFILE_NAME","Default Profile"));
 	if(firstUnlockedProfileIndex!=-1&&lastProfileIndex==-1)lastProfileIndex=firstUnlockedProfileIndex;
     if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);

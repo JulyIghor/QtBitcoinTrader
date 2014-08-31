@@ -41,7 +41,6 @@ RulesModel::RulesModel(QString _gName)
     lastRuleGroupIsRunning=false;
     groupName=_gName;
     lastRuleId=qrand()%1000+1;
-	allDisabled=false;
     stateWidth=80;
 	isConcurrentMode=false;
     columnsCount=2;
@@ -70,13 +69,19 @@ void RulesModel::updateRule(int row, RuleHolder &holder,bool running)
     if(running)setRuleStateByRow(row,1);
 }
 
+void RulesModel::writeLogSlot(QString text)
+{
+	emit writeLog(text);
+}
+
 void RulesModel::addRule(RuleHolder &holder, bool running)
 {
     beginInsertRows(QModelIndex(), holderList.count(), holderList.count());
     holderList<<holder;
     ScriptObject *newScript=new ScriptObject(QString::number(lastRuleId++));
     connect(newScript,SIGNAL(runningChanged(bool)),this,SLOT(runningChanged(bool)));
-    connect(newScript,SIGNAL(setGroupDone(QString)),this,SLOT(setGroupDone(QString)));
+	connect(newScript,SIGNAL(setGroupDone(QString)),this,SLOT(setGroupDone(QString)));
+	connect(newScript,SIGNAL(writeLog(QString)),this,SLOT(writeLogSlot(QString)));
 
     scriptList<<newScript;
     stateList<<0;
@@ -157,11 +162,6 @@ int RulesModel::getStateByRow(int row)
     return stateList.at(row);
 }
 
-bool RulesModel::haveAnyTradingRules()
-{
-	return false;
-}
-
 bool RulesModel::haveWorkingRule()
 {
     return runningCount>0;
@@ -211,6 +211,29 @@ void RulesModel::swapRows(int a, int b)
     doneList.swap(a,b);
 }
 
+bool RulesModel::isRowPaused(int curRow)
+{
+    if(curRow<0||stateList.count()<=curRow)return false;
+    return pauseList.at(curRow);
+}
+
+bool RulesModel::testRuleByRow(int curRow, bool forceTest)
+{
+    if(curRow<0||stateList.count()<=curRow)return false;
+    if(stateList.at(curRow)==1&&!forceTest)return false;
+    if(!forceTest&&!isConcurrentMode)
+    {
+        for(int n=0;n<curRow;n++)
+            if(stateList.at(n)!=3&&stateList.at(n)!=0)
+                return false;
+    }
+    QString code=RuleScriptParser::holderToScript(holderList[curRow],true);
+    ScriptObject tempScript("Test");
+    tempScript.executeScript(code,true);
+    tempScript.stopScript();
+    return tempScript.testResult==1;
+}
+
 void RulesModel::setRuleStateByRow(int curRow, int state)
 {
     if(curRow<0||stateList.count()<=curRow)return;
@@ -223,6 +246,7 @@ void RulesModel::setRuleStateByRow(int curRow, int state)
     {
         if(isConcurrentMode)
         {
+            scriptList[curRow]->stopScript();
             scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
         }
         else
@@ -237,6 +261,7 @@ void RulesModel::setRuleStateByRow(int curRow, int state)
             }
             if(firstPending>-1)
             {
+                scriptList[curRow]->stopScript();
                 if(curRow<firstPending)
                     scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
                 else
@@ -245,6 +270,7 @@ void RulesModel::setRuleStateByRow(int curRow, int state)
             else
             if(firstWorking==-1)
             {
+                scriptList[curRow]->stopScript();
                 scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
             }
             else
@@ -253,9 +279,8 @@ void RulesModel::setRuleStateByRow(int curRow, int state)
                 {
                     scriptList[firstWorking]->stopScript();
                     stateList[firstWorking]=2;
-                    emit dataChanged(index(firstWorking,0),index(firstWorking,columnsCount-1));
-
                     scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
+                    emit dataChanged(index(firstWorking,0),index(firstWorking,columnsCount-1));
                 }
                 else
                 {
@@ -354,9 +379,8 @@ QVariant RulesModel::data(const QModelIndex &index, int role) const
 
 void RulesModel::disableAll()
 {
-    for(int n=0;n<holderList.count();n++)
+    for(int n=holderList.count()-1;n>=0;n--)
         setRuleStateByRow(n,0);
-	allDisabled=true;
 }
 
 void RulesModel::enableAll()

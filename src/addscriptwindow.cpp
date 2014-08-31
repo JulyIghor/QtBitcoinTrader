@@ -46,7 +46,22 @@ AddScriptWindow::AddScriptWindow(QWidget *parent) :
     Q_FOREACH(ScriptWidget* currentScript, mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
         ui->existingScriptList->addItem(currentScript->windowTitle(),currentScript->property("FileName"));
 
-    ui->scriptName->setText(julyTr("SCRIPT_NAME","Script"));
+
+    QString groupLabel=julyTr("SCRIPT_NAME","Script");
+    QString newGroupName=groupLabel;
+
+    int incr=0;
+    QStringList existingGroups=mainWindow.getScriptGroupsNames();
+    while(existingGroups.contains(newGroupName))
+    {
+        newGroupName=groupLabel;
+        if(incr>0)newGroupName+=" "+QString::number(incr);
+        incr++;
+    }
+
+    ui->scriptName->setText(newGroupName);
+
+
     ui->checkExistingScript->setEnabled(ui->existingScriptList->count());
     ui->existingScriptList->setEnabled(ui->existingScriptList->count());
 

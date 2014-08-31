@@ -47,10 +47,9 @@ public:
     void updateRule(int row, RuleHolder &holder, bool running=false);
     QList<RuleHolder> holderList;
     int getStateByRow(int row);
-	bool haveAnyTradingRules();
+    bool isRowPaused(int row);
 	void restoreRulesFromString(QString);
-	bool haveWorkingRule();
-	bool allDisabled;
+    bool haveWorkingRule();
 	bool isConcurrentMode;
     RulesModel(QString groupName);
 	~RulesModel();
@@ -62,6 +61,7 @@ public:
 	void moveRowDown(int row);
 
 	void setRuleStateByRow(int row, int state);
+    bool testRuleByRow(int row, bool forceTest=false);
     void clear();
 	void removeRuleByRow(int row);
 
@@ -77,6 +77,7 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 private slots:
+	void writeLogSlot(QString);
     void runningChanged(bool);
     void setGroupDone(QString);
 private:
@@ -95,6 +96,7 @@ private:
     QStringList headerLabels;
     int columnsCount;
 signals:
+	void writeLog(QString);
     void ruleDone();
     void groupDone();
     void setRuleTabRunning(QString,bool);

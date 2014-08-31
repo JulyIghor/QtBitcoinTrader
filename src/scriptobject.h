@@ -58,6 +58,10 @@ public:
     QStringList argumentsList;
     QStringList commandsList;
 private:
+    void initValueChanged(QString symbol, QString name, double val);
+    void timerCreate(int milliseconds, QString &command, bool once);
+    QMap<QTimer *,bool> timerMap;
+    qreal orderBookInfo(QString &symbol,qreal &value, bool isAsk, bool getPrice);
     bool haveTimer;
     QTimer *secondTimer;
     bool pendingStop;
@@ -74,6 +78,8 @@ private:
     bool testMode;
     QMap<QString,qreal> indicatorsMap;
 public slots:
+    void timer(qreal seconds, QString _command_);
+    void delay(qreal seconds, QString _command_);
     void log(QVariant);
     void log(QVariant,QVariant);
     void log(QVariant,QVariant,QVariant);
@@ -83,9 +89,9 @@ public slots:
     void test(int);
 
     void beep();
-    void playWav(QString filePath);
+    void playWav(QString _filePath_);
 
-    void say(QString text);
+    void say(QString _text_);
     void say(int);
     void say(double);
     void say(QVariant);
@@ -96,12 +102,12 @@ public slots:
     void say(QVariant,QVariant,QVariant,QVariant,QVariant);
 
     void groupDone();
-    void groupStart(QString name);
-    void groupStop(QString name);
+    void groupStart(QString _name_);
+    void groupStop(QString _name_);
     void groupStop();
-    bool groupIsRunning(QString name);
+    bool groupIsRunning(QString _name_);
 
-    void startApp(QString filePath);
+    void startApp(QString _filePath_);
     void startApp(QString,QStringList);
     void startApp(QString,QString);
     void startApp(QString,QString,QString);
@@ -119,10 +125,25 @@ public slots:
     void cancelAsks();
     void cancelBids();
 
+    int getOpenAsksCount();
+    int getOpenBidsCount();
+    int getOpenOrdersCount();
+
+    qreal getAsksVolByPrice(qreal price);
+    qreal getAsksPriceByVol(qreal volume);
+    qreal getAsksVolByPrice(QString symbol, qreal price);
+    qreal getAsksPriceByVol(QString symbol, qreal volume);
+
+    qreal getBidsVolByPrice(qreal price);
+    qreal getBidsPriceByVol(qreal volume);
+    qreal getBidsVolByPrice(QString symbol, qreal price);
+    qreal getBidsPriceByVol(QString symbol, qreal volume);
+
     quint32 getTimeT();
     qreal get(QString indicator);
     qreal get(QString symbol, QString indicator);
 private slots:
+    void timerOut();
     void secondSlot();
     void indicatorValueChanged(double);
 signals:

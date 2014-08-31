@@ -105,7 +105,7 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.07995";
+    appVerStr="1.07996";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -167,23 +167,16 @@ int main(int argc, char *argv[])
 	baseValues.Construct();
 
 	QApplication a(argc,argv);
+
 #ifdef Q_OS_WIN//DPI Fix
 	QFont font=a.font();
 	font.setPointSize(8);
 	a.setFont(font);
 #endif
 	a.setApplicationName("QtBitcoinTrader");
-	a.setApplicationVersion(baseValues.appVerStr);
+    a.setApplicationVersion(baseValues.appVerStr);
 
-	baseValues.appThemeLight.palette=a.palette();
-	baseValues.appThemeDark.palette=a.palette();
-
-	baseValues.appThemeLight.loadTheme("Light");
-	baseValues.appThemeDark.loadTheme("Dark");
-	baseValues.appTheme=baseValues.appThemeLight;
-
-	baseValues_->fontMetrics_=new QFontMetrics(a.font());
-
+    baseValues_->fontMetrics_=new QFontMetrics(a.font());
 
 #if QT_VERSION < 0x050000
     baseValues.tempLocation=QDesktopServices::storageLocation(QDesktopServices::TempLocation).replace('\\','/')+"/";
@@ -251,6 +244,21 @@ int main(int argc, char *argv[])
 	{
 		QFile::rename(appDataDir+"/Settings.set",appDataDir+"/QtBitcoinTrader.cfg");
 	}
+
+    if(QFile::exists(appDataDir+"Themes/"))
+    {
+        baseValues.themeFolder=appDataDir+"Themes/";
+        if(!QFile::exists(baseValues.themeFolder+"Dark.thm"))QFile::copy("://Resources/Themes/Dark.thm",baseValues.themeFolder+"Dark.thm");
+        if(!QFile::exists(baseValues.themeFolder+"Light.thm"))QFile::copy("://Resources/Themes/Light.thm",baseValues.themeFolder+"Light.thm");
+    }
+    else baseValues.themeFolder="://Resources/Themes/";
+
+    baseValues.appThemeLight.palette=a.palette();
+    baseValues.appThemeDark.palette=a.palette();
+
+    baseValues.appThemeLight.loadTheme("Light");
+    baseValues.appThemeDark.loadTheme("Dark");
+    baseValues.appTheme=baseValues.appThemeLight;
 
     if(argc>1)
 	{
@@ -458,8 +466,19 @@ int main(int argc, char *argv[])
 			if(enterPassword.exec()==QDialog::Rejected)return 0;
 			if(enterPassword.resetData)
 			{
-				if(QFile::exists(enterPassword.getIniFilePath()))
-					QFile::remove(enterPassword.getIniFilePath());
+                QString iniToRemove=enterPassword.getIniFilePath();
+                if(QFile::exists(iniToRemove))
+                {
+                    QFile::remove(iniToRemove);
+                    QString scriptFolder=baseValues.scriptFolder+"/"+QFileInfo(iniToRemove).completeBaseName()+"/";
+                    if(QFile::exists(scriptFolder))
+                    {
+                        QStringList filesToRemove=QDir(scriptFolder).entryList(QStringList()<<"*.JLS"<<"*.JLR");
+                        Q_FOREACH(QString curFile,filesToRemove)
+                            QFile::remove(scriptFolder+curFile);
+                        QDir().rmdir(scriptFolder);
+                    }
+                }
 				continue;
 			}
 			if(enterPassword.newProfile){showNewPasswordDialog=true;continue;}
@@ -486,7 +505,7 @@ int main(int argc, char *argv[])
 			}
 
 			if(!profileLocked)
-			{
+            {
 				QSettings settings(baseValues.iniFileName,QSettings::IniFormat);
 
 				QStringList decryptedList=QString(JulyAES256::decrypt(QByteArray::fromBase64(settings.value("EncryptedData/ApiKeySign","").toString().toLatin1()),tryPassword.toLatin1())).split("\r\n");
@@ -507,6 +526,8 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
+    baseValues.scriptFolder+=QFileInfo(baseValues.iniFileName).completeBaseName()+"/";
 
 	QSettings iniSettings(baseValues.iniFileName,QSettings::IniFormat);
 	if(iniSettings.value("Debug/LogEnabled",false).toBool())debugLevel=1;

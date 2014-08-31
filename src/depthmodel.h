@@ -67,6 +67,9 @@ public:
 	void depthUpdateOrders(QList<DepthItem> *items);
 	void depthFirstOrder(qreal price, qreal volume);
 
+    qreal getVolumeByPrice(qreal);
+    qreal getPriceByVolume(qreal);
+
 private slots:
 	void delayedReloadVisibleItems();
 private:
@@ -87,8 +90,9 @@ private:
 	int columnsCount;
 	QStringList headerLabels;
 	bool isAsk;
-	QList<qreal> volumeList;
-	QList<qreal> sizeList;
+    QList<qreal> volumeList;
+    QList<qreal> sizeList;
+    QList<qreal> sizePriceList;
 	QList<qreal> priceList;
 	QStringList volumeListStr;
 	QStringList sizeListStr;

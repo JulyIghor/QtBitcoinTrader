@@ -86,7 +86,7 @@ ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFro
     {
         QSettings loadScript(fileName,QSettings::IniFormat);
         loadScript.beginGroup("JLScript");
-        ui->limitRowsValue->setValue(loadScript.value("LogRowsCount",100).toInt());
+        ui->limitRowsValue->setValue(loadScript.value("LogRowsCount",20).toInt());
         ui->notes->setPlainText(loadScript.value("Notes","").toString());
         ui->sourceCode->setPlainText(loadScript.value("Data",ui->sourceCode->toPlainText()).toString());
         loadScript.sync();
@@ -289,7 +289,10 @@ void ScriptWidget::addFunctionClicked()
         insertFilePath(julyTr("PLAY_SOUND_WAV","Open WAV file"),"*.wav");
     }
     else
-    ui->sourceCode->insertPlainText(command);
+    {
+        if(!command.startsWith(QLatin1String("trader.get")))command=action->text()+QLatin1String(";");
+        ui->sourceCode->insertPlainText(command);
+    }
 }
 
 void ScriptWidget::addEventsClicked()
@@ -456,7 +459,6 @@ void ScriptWidget::on_buttonClear_clicked()
 void ScriptWidget::on_limitRowsValue_valueChanged(int val)
 {
     ui->consoleOutput->setMaximumBlockCount(val);
-
     QSettings(fileName,QSettings::IniFormat).setValue("JLScript/LogRowsCount",val);
 }
 
@@ -482,7 +484,7 @@ void ScriptWidget::on_scriptSave_clicked()
     QString lastDir=mainWindow.iniSettings->value("UI/LastRulesPath",baseValues.desktopLocation).toString();
     if(!QFile::exists(lastDir))lastDir=baseValues.desktopLocation;
 
-    QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_SCRIPT","Save Script"),lastDir+"/"+QString(scriptName).replace("/","_").replace("\\","").replace(":","").replace("?","")+".jls","(*.JLS)");
+    QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_SCRIPT","Save Script"),lastDir+"/"+QString(scriptName).replace("/","_").replace("\\","").replace(":","").replace("?","")+".JLS","JL Script (*.JLS)");
     if(fileName.isEmpty())return;
     mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileName).dir().path());
     mainWindow.iniSettings->sync();
@@ -519,9 +521,4 @@ void ScriptWidget::on_consoleOutput_textChanged()
 {
     bool haveLog=!ui->consoleOutput->toPlainText().isEmpty();
     ui->clearFon->setVisible(haveLog);
-}
-
-void ScriptWidget::on_helpButton_clicked()
-{
-    QDesktopServices::openUrl(QUrl("https://qbtapi.centrabit.com/?Object=Help&Method=JLScript&Locale="+QLocale().name()));
 }

@@ -4,6 +4,7 @@ TARGET 		= QtBitcoinTrader
 DEPENDPATH 	+= .
 INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
+INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
 QT		+= network script
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia

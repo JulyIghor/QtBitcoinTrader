@@ -329,7 +329,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 	baseValues.uiUpdateInterval=iniSettings->value("UI/UiUpdateInterval",100).toInt();
 	if(baseValues.uiUpdateInterval<1)baseValues.uiUpdateInterval=100;
 
-	baseValues.httpSplitPackets=iniSettings->value("Network/HttpSplitPackets",false).toBool();
+    baseValues.httpSplitPackets=true;//iniSettings->value("Network/HttpSplitPackets",false).toBool();
 
 	baseValues.customUserAgent=iniSettings->value("Network/UserAgent","").toString();
 	baseValues.customCookies=iniSettings->value("Network/Cookies","").toString();
@@ -639,6 +639,22 @@ void QtBitcoinTrader::setupClass()
         QTimer::singleShot(2000,this,SLOT(fixWindowMinimumSize()));
 }
 
+QStringList QtBitcoinTrader::getRuleGroupsNames()
+{
+    QStringList rezult;
+    Q_FOREACH(RuleWidget *ruleWidget, ui.tabRules->findChildren<RuleWidget*>())
+        if(ruleWidget)rezult<<ruleWidget->windowTitle();
+   return rezult;
+}
+
+QStringList QtBitcoinTrader::getScriptGroupsNames()
+{
+    QStringList rezult;
+    Q_FOREACH(ScriptWidget *scriptWidget, ui.tabRules->findChildren<ScriptWidget*>())
+        if(scriptWidget)rezult<<scriptWidget->windowTitle();
+    return rezult;
+}
+
 bool QtBitcoinTrader::getIsGroupRunning(QString name)
 {
     name=name.toLower();
@@ -652,16 +668,36 @@ bool QtBitcoinTrader::getIsGroupRunning(QString name)
     return false;
 }
 
-void QtBitcoinTrader::setGroupRunning(QString name, bool enabled)
+void QtBitcoinTrader::setGroupState(QString name, bool enabled)
 {
     name=name.toLower();
     Q_FOREACH(RuleWidget *ruleWidget, ui.tabRules->findChildren<RuleWidget*>())
         if(ruleWidget&&ruleWidget->windowTitle().toLower()==name)
-            enabled?ruleWidget->ruleEnableAll():ruleWidget->ruleDisableAll();
+        {
+            if(enabled)ruleWidget->ruleEnableAll();
+                  else ruleWidget->ruleDisableAll();
+        }
 
     Q_FOREACH(ScriptWidget *scriptWidget, ui.tabRules->findChildren<ScriptWidget*>())
         if(scriptWidget&&scriptWidget->windowTitle().toLower()==name)
             scriptWidget->setRunning(enabled);
+}
+
+void QtBitcoinTrader::clearPendingGroup(QString name)
+{
+    for(int n=pendingGroupStates.count()-1;n>=0;n--)
+        if(pendingGroupStates.at(n).name==name)
+            pendingGroupStates.removeAt(n);
+}
+
+void QtBitcoinTrader::setGroupRunning(QString name, bool enabled)
+{
+    if(enabled)pendingGroupStates<<GroupStateItem(name,enabled);
+    else
+    {
+        clearPendingGroup(name);
+        setGroupState(name,enabled);
+    }
 }
 
 void QtBitcoinTrader::on_buyPercentage_clicked()
@@ -713,6 +749,13 @@ void QtBitcoinTrader::tableCopyContextMenuRequested(QPoint point)
 	copyTableValuesMenu.actions().at(12)->setVisible(isOpenOrders);
 
 	copyTableValuesMenu.exec(lastCopyTable->viewport()->mapToGlobal(point));
+}
+
+int QtBitcoinTrader::getOpenOrdersCount(int all)//-1: asks, 0 all, 1: bids
+{
+    if(all==0)return ordersModel->rowCount();
+    if(all==-1)return ordersModel->getAsksCount();
+    return ordersModel->rowCount()-ordersModel->getAsksCount();
 }
 
 void QtBitcoinTrader::repeatSelectedOrderByType(int type, bool availableOnly)
@@ -1000,6 +1043,7 @@ qreal QtBitcoinTrader::getFeeForUSDDec(qreal usd)
 
 qreal QtBitcoinTrader::getValidDoubleForPercision(const qreal &val, const int &percision, bool roundUp)
 {
+    if(val<0.00000001)return 0.0;
 	int intVal=val;
 	int percisionValue=qPow(10,percision);
 	int intMultipled=(val-intVal)*percisionValue;
@@ -1151,7 +1195,7 @@ void QtBitcoinTrader::sayText(QString text)
 		pVoice->Speak(text.utf16(), SPF_ASYNC, NULL);
 	}
 #else
-	startApplication("say",text.split(' '));
+    startApplication("say",QStringList()<<text);
 #endif
 #endif
 }
@@ -1222,13 +1266,19 @@ void QtBitcoinTrader::depthRequestReceived()
 
 void QtBitcoinTrader::secondSlot()
 {
+    while(pendingGroupStates.count()&&pendingGroupStates.first().elapsed.elapsed()>=100)
+    {
+        setGroupState(pendingGroupStates.first().name,pendingGroupStates.first().enabled);
+        pendingGroupStates.removeFirst();
+    }
+
 	static QTimer secondTimer(this);
 	if(secondTimer.interval()==0)
 	{
 		secondTimer.setSingleShot(true);
 		connect(&secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 	}
-	static int execCount=0;
+    static int execCount=0;
 
 	if(execCount==0||execCount==2||execCount==4)
 	{
@@ -1940,13 +1990,15 @@ void QtBitcoinTrader::orderCanceled(QString symbol, QByteArray oid)
 	ordersModel->setOrderCanceled(oid);
 }
 
-QString QtBitcoinTrader::numFromDouble(const qreal &val, int maxDecimals)
+QString QtBitcoinTrader::numFromDouble(const qreal &val, int maxDecimals, int minDecimals)
 {
 	QString numberText=QString::number(val,'f',maxDecimals);
+    int dotPos=numberText.indexOf(QLatin1Char('.'));
+    if(dotPos<0)dotPos=0;
+    else dotPos+=minDecimals;
 	int curPos=numberText.size()-1;
-	while(curPos>0&&numberText.at(curPos)=='0')numberText.remove(curPos--,1);
-	if(numberText.size()&&numberText.at(numberText.size()-1)=='.')numberText.append(QLatin1String("0"));
-	if(curPos==-1)numberText.append(QLatin1String(".0"));
+    while(curPos>0&&numberText.at(curPos)=='0'&&(dotPos<curPos))numberText.remove(curPos--,1);
+    if(numberText.size()&&numberText.at(numberText.size()-1)==QLatin1Char('.'))numberText.remove(numberText.size()-1,1);
 	return numberText;
 }
 
@@ -2287,7 +2339,7 @@ void QtBitcoinTrader::sellBitcoinButton()
 	QMessageBox msgBox(windowWidget);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle(julyTr("MESSAGE_CONFIRM_SELL_TRANSACTION","Please confirm transaction"));
-	msgBox.setText(julyTr("MESSAGE_CONFIRM_SELL_TRANSACTION_TEXT","Are you sure to sell %1 at %2 ?<br><br>Note: If total orders amount of your Bitcoins exceeds your balance, %3 will remove this order immediately.").arg(baseValues.currentPair.currASign+" "+numFromDouble(sellTotalBtc,baseValues.currentPair.currADecimals)).arg(baseValues.currentPair.currBSign+" "+numFromDouble(sellPricePerCoin,baseValues.currentPair.currBDecimals)).arg(baseValues.exchangeName));
+    msgBox.setText(julyTr("MESSAGE_CONFIRM_SELL_TRANSACTION_TEXT","Are you sure to sell %1 at %2 ?<br><br>Note: If total orders amount of your Bitcoins exceeds your balance, %3 will remove this order immediately.").arg(baseValues.currentPair.currASign+" "+numFromDouble(sellTotalBtc,baseValues.currentPair.currADecimals,0)).arg(baseValues.currentPair.currBSign+" "+numFromDouble(sellPricePerCoin,baseValues.currentPair.priceDecimals,0)).arg(baseValues.exchangeName));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
@@ -2312,7 +2364,7 @@ void QtBitcoinTrader::on_buyTotalSpend_valueChanged(qreal val)
 
     qreal valueForResult=getFeeForUSDDec(val)/ui.buyPricePerCoin->value();
 	valueForResult=getValidDoubleForPercision(valueForResult,baseValues.currentPair.currADecimals,false);
-	ui.buyTotalBtcResult->setValue(valueForResult);
+    setSpinValue(ui.buyTotalBtcResult,valueForResult);
 
 	checkValidBuyButtons();
 }
@@ -2508,7 +2560,7 @@ void QtBitcoinTrader::buyBitcoinsButton()
 
     qreal btcToBuy=0.0;
     qreal priceToBuy=ui.buyPricePerCoin->value();
-	if(currentExchange->buySellAmountExcludedFee)btcToBuy=ui.buyTotalBtcResult->value();
+    if(currentExchange->buySellAmountExcludedFee&&floatFee!=0.0)btcToBuy=ui.buyTotalBtcResult->value();
 	else btcToBuy=ui.buyTotalBtc->value();
 
     //qreal amountWithoutFee=getAvailableUSD()/priceToBuy;
@@ -2519,7 +2571,7 @@ void QtBitcoinTrader::buyBitcoinsButton()
 	QMessageBox msgBox(windowWidget);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle(julyTr("MESSAGE_CONFIRM_BUY_TRANSACTION","Please confirm new order"));
-	msgBox.setText(julyTr("MESSAGE_CONFIRM_BUY_TRANSACTION_TEXT","Are you sure to buy %1 at %2 ?<br><br>Note: If total orders amount of your funds exceeds your balance, %3 will remove this order immediately.").arg(baseValues.currentPair.currASign+" "+numFromDouble(btcToBuy,baseValues.currentPair.currADecimals)).arg(baseValues.currentPair.currBSign+" "+numFromDouble(priceToBuy,baseValues.currentPair.currBDecimals)).arg(baseValues.exchangeName));
+    msgBox.setText(julyTr("MESSAGE_CONFIRM_BUY_TRANSACTION_TEXT","Are you sure to buy %1 at %2 ?<br><br>Note: If total orders amount of your funds exceeds your balance, %3 will remove this order immediately.").arg(baseValues.currentPair.currASign+" "+numFromDouble(btcToBuy,baseValues.currentPair.currADecimals,0)).arg(baseValues.currentPair.currBSign+" "+numFromDouble(priceToBuy,baseValues.currentPair.priceDecimals,0)).arg(baseValues.exchangeName));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
@@ -3326,4 +3378,26 @@ void QtBitcoinTrader::setSpinValueP(QDoubleSpinBox *spin, qreal &val)
 void QtBitcoinTrader::setSpinValue(QDoubleSpinBox *spin, qreal val)
 {
     setSpinValueP(spin,val);
+}
+
+qreal QtBitcoinTrader::getVolumeByPrice(QString symbol, qreal price, bool isAsk)
+{
+    if(symbol!=baseValues.currentPair.symbol)return 0.0;
+    return (isAsk?depthAsksModel:depthBidsModel)->getVolumeByPrice(price);
+}
+
+qreal QtBitcoinTrader::getPriceByVolume(QString symbol, qreal size, bool isAsk)
+{
+    if(symbol!=baseValues.currentPair.symbol)return 0.0;
+    return (isAsk?depthAsksModel:depthBidsModel)->getPriceByVolume(size);
+}
+
+void QtBitcoinTrader::on_helpButton_clicked()
+{
+    QString helpType="JLRule";
+    if(ui.rulesTabs->count())
+    {
+        if(qobject_cast<ScriptWidget *>(ui.rulesTabs->currentWidget()))helpType="JLScript";
+    }
+    QDesktopServices::openUrl(QUrl("https://qbtapi.centrabit.com/?Object=Help&Method="+helpType+"&Locale="+QLocale().name()));
 }

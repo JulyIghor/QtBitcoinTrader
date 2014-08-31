@@ -45,7 +45,7 @@ RuleHolder::RuleHolder()
     thanAmount=0.0;
     thanPrice=0.0;
     variableBExact=0.0;
-    delaySeconds=0;
+    delayMilliseconds=0.0;
 }
 
 bool RuleHolder::isValidComparation(QString &text)
@@ -73,9 +73,11 @@ bool RuleHolder::isValidCode(QString &code)
 
 bool RuleHolder::isValid()
 {
+	bool immediately=variableACode==QLatin1String("IMMEDIATELY");
+	bool exactB=variableBCode==QLatin1String("EXACT");
     return thanAmountFeeIndex>-1&&thanPriceFeeIndex>-1&&thanPriceFeeIndex>-1&&thanTypeIndex>-1&&
-            (thanTypeIndex>3||(thanAmount>0.0&&(thanPrice>0.0||variableBCode==QLatin1String("EXACT"))))&&
-            (variableACode==QLatin1String("IMMEDIATELY")||variableBExact!=0)&&
+            (thanTypeIndex>3||(thanAmount>0.0&&(thanPrice>0.0||!exactB)))&&
+            (immediately||!exactB||variableBExact!=0)&&
             (thanPriceTypeCode==QLatin1String("EXACT")?thanPrice>0.0:true)&&
             isValidComparation(comparationText)&&
             isValidPlusMinus(thanPricePlusMinusText)&&
@@ -86,5 +88,6 @@ bool RuleHolder::isValid()
             isValidCode(variableACode)&&
             isValidCode(variableBCode)&&
             isValidPlusMinus(variableBplusMinus)&&
-            isValidSymbol(variableBSymbolCode);
+            isValidSymbol(variableBSymbolCode)&&
+            delayMilliseconds>=0.0;
 }

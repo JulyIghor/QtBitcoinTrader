@@ -47,8 +47,7 @@ public:
 	void updateStyleSheets();
 	void saveRulesData();
 	bool haveWorkingRules();
-	bool haveAnyRules();
-	bool haveAnyTradingRules();
+    bool haveAnyRules();
     bool removeGroup();
     void languageChanged();
 	Ui::RuleWidget ui;
@@ -57,11 +56,15 @@ public:
 	~RuleWidget();
 
 private:
+    bool agreeRuleImmediately(QString);
 	QTime ordersCancelTime;
 	QMenu *rulesEnableDisableMenu;
 	QString groupName;
     QString filePath;
 public slots:
+	void writeLog(QString);
+	void on_limitRowsValue_valueChanged(int);
+	void on_buttonSave_clicked();
     void ruleDone();
 	void on_ruleUp_clicked();
 	void on_ruleDown_clicked();
@@ -69,9 +72,9 @@ public slots:
 	void ruleDisableEnableMenuFix();
 	void on_ruleConcurrentMode_toggled(bool);
 	void ruleEnableSelected();
-	void ruleDisableSelected();
-	void ruleEnableAll();
-	void ruleDisableAll();
+    void ruleDisableSelected();
+    void ruleEnableAll();
+    void ruleDisableAll();
 	void on_ruleAddButton_clicked();
 	void on_ruleEditButton_clicked();
 	void on_ruleRemoveAll_clicked();

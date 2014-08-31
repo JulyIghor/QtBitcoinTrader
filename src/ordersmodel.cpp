@@ -36,6 +36,7 @@
 OrdersModel::OrdersModel()
 	: QAbstractItemModel()
 {
+    asksCount=0;
 	checkDuplicatedOID=false;
 	haveOrders=false;
 	columnsCount=8;
@@ -66,6 +67,8 @@ void OrdersModel::clear()
 {
 	if(oidList.count()==0)return;
 
+    asksCount=0;
+
 	beginResetModel();
 	currentAsksPrices.clear();
 	currentBidsPrices.clear();
@@ -89,6 +92,11 @@ void OrdersModel::clear()
 	endResetModel();
 }
 
+int OrdersModel::getAsksCount()
+{
+    return asksCount;
+}
+
 void OrdersModel::orderBookChanged(QList<OrderItem> *ordersRcv)
 {
 	currentAsksPrices.clear();
@@ -102,6 +110,8 @@ void OrdersModel::orderBookChanged(QList<OrderItem> *ordersRcv)
 		return;
 	}
 
+    int newAsksCount=0;
+
 	QHash<QByteArray,bool> existingOids;
 
     qreal volumeTotal=0.0;
@@ -109,11 +119,14 @@ void OrdersModel::orderBookChanged(QList<OrderItem> *ordersRcv)
 
 	for(int n=0;n<ordersRcv->count();n++)
 	{
-		bool isAsk=ordersRcv->at(n).type;
+        bool isAsk=ordersRcv->at(n).type; if(isAsk)newAsksCount++;
         QString orderSymbol=ordersRcv->at(n).symbol;
 
-		if(orderSymbol.startsWith(baseValues.currentPair.currAStr)&&isAsk)volumeTotal+=ordersRcv->at(n).amount-currentExchange->decAmountFromOpenOrder;
-		if(orderSymbol.endsWith(baseValues.currentPair.currBStr)&&!isAsk)amountTotal+=(ordersRcv->at(n).amount-currentExchange->decAmountFromOpenOrder)*ordersRcv->at(n).price;
+        if(isAsk&&orderSymbol.startsWith(baseValues.currentPair.currAStr))
+            volumeTotal+=ordersRcv->at(n).amount-currentExchange->decAmountFromOpenOrder;
+
+        if(!isAsk&&orderSymbol.endsWith(baseValues.currentPair.currBStr))
+            amountTotal+=(ordersRcv->at(n).amount-currentExchange->decAmountFromOpenOrder)*ordersRcv->at(n).price;
 
 		if(ordersRcv->at(n).status>0&&orderSymbol==baseValues.currentPair.symbol)
 		{
@@ -184,6 +197,8 @@ void OrdersModel::orderBookChanged(QList<OrderItem> *ordersRcv)
 			endInsertRows();
 		}
 	}
+
+    asksCount=newAsksCount;
 
 	for(int n=oidList.count()-1;n>=0;n--)//Removing Order
 		if(existingOids.value(oidList.at(n),false)==false)

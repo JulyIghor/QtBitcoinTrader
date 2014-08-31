@@ -31,6 +31,7 @@
 
 #include "apptheme.h"
 #include <QSettings>
+#include "main.h"
 
 AppTheme::AppTheme()
 {
@@ -64,7 +65,7 @@ QColor AppTheme::getColor(QString str)
 
 void AppTheme::loadTheme(QString name)
 {
-	QSettings themeLoad("://Resources/Themes/"+name+".thm",QSettings::IniFormat);
+    QSettings themeLoad(baseValues.themeFolder+name+".thm",QSettings::IniFormat);
 
 	themeLoad.beginGroup("Normal");
 	QStringList colorList=themeLoad.childKeys();

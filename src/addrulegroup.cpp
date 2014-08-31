@@ -47,7 +47,19 @@ AddRuleGroup::AddRuleGroup(QWidget *parent)
         ui.existingRulesList->addItem(currentGroup->windowTitle(),currentGroup->property("FileName").toString());
 	}
 
-    ui.groupName->setText(julyTr("RULE_GROUP","Group"));
+    QString groupLabel=julyTr("RULE_GROUP","Group");
+    QString newGroupName=groupLabel;
+
+    int incr=0;
+    QStringList existingGroups=mainWindow.getRuleGroupsNames();
+    while(existingGroups.contains(newGroupName))
+    {
+        newGroupName=groupLabel;
+        if(incr>0)newGroupName+=" "+QString::number(incr);
+        incr++;
+    }
+
+    ui.groupName->setText(newGroupName);
 
     ui.checkExistingRule->setEnabled(ui.existingRulesList->count());
     ui.existingRulesList->setEnabled(ui.existingRulesList->count());
@@ -115,11 +127,11 @@ void AddRuleGroup::on_ruleOpen_clicked()
 		return;
 	}
 
-    QString scriptNameFile=QSettings(fileName,QSettings::IniFormat).value("JLRuleGroup/Name","").toString();
+    QString scriptNameFile=QSettings(fileNameOpen,QSettings::IniFormat).value("JLRuleGroup/Name","").toString();
     {//Validate saved file
         if(scriptNameFile.isEmpty())
         {
-        QMessageBox::warning(this,windowTitle(),julyTr("OPEN_INVALID_SCRIPT","Invalid script \"%1\"").arg(fileName));
+        QMessageBox::warning(this,windowTitle(),julyTr("OPEN_INVALID_SCRIPT","Invalid script \"%1\"").arg(fileNameOpen));
         ui.checkEmptyRule->setChecked(true);
         return;
         }
@@ -132,7 +144,6 @@ void AddRuleGroup::on_ruleOpen_clicked()
     ui.rulesFile->setText(fileNameOpen);
     mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileNameOpen).dir().path());
 	mainWindow.iniSettings->sync();
-
 
 	ui.groupNameGroupbox->setEnabled(groupsList.count()<=1);
 	if(groupsList.count()==1)ui.groupName->setText(groupsList.first().split("==>").first());

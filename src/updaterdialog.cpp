@@ -76,7 +76,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 		}
 	}
 
-	if(updateCheckRetryCount>3)httpGet=new JulyHttp("api.qtbitcointrader.com",0,false,false,false);
+    if(updateCheckRetryCount>3)httpGet=new JulyHttp("api.qtbitcointrader.com",0,this,false,false);
     else httpGet=new JulyHttp("qbtapi.centrabit.com",0,this,false,false);
     httpGet->noReconnect=true;
 	timeOutTimer=new QTimer(this);

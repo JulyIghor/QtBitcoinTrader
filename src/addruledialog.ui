@@ -7,12 +7,12 @@
     <x>0</x>
     <y>0</y>
     <width>1188</width>
-    <height>572</height>
+    <height>602</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1280</width>
+    <width>2048</width>
     <height>1280</height>
    </size>
   </property>
@@ -160,22 +160,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="ruleIsEnabled">
-       <property name="accessibleName">
-        <string>RULE_IS_ENABLED</string>
-       </property>
-       <property name="text">
-        <string>Rule is Enabled</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>
@@ -823,22 +807,45 @@
             </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <widget class="QToolButton" name="playButton">
+            <layout class="QGridLayout" name="gridLayout_11">
+             <item row="0" column="6">
+              <widget class="QPushButton" name="thanTextBrowse">
                <property name="text">
                 <string/>
                </property>
                <property name="icon">
                 <iconset resource="QtResource.qrc">
-                 <normaloff>:/Resources/Play.png</normaloff>:/Resources/Play.png</iconset>
+                 <normaloff>:/Resources/Open.png</normaloff>:/Resources/Open.png</iconset>
                </property>
               </widget>
              </item>
-             <item>
+             <item row="1" column="3">
+              <widget class="QComboBox" name="sayCode">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maxVisibleItems">
+                <number>30</number>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QLineEdit" name="thanText"/>
+             </item>
+             <item row="0" column="5">
+              <widget class="QToolButton" name="clearTextButton">
+               <property name="text">
+                <string>X</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
               <widget class="QLabel" name="nameLabel">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
@@ -849,26 +856,38 @@
                <property name="text">
                 <string>Name:</string>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="thanText"/>
-             </item>
-             <item>
-              <widget class="QToolButton" name="clearTextButton">
-               <property name="text">
-                <string>X</string>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="thanTextBrowse">
+             <item row="0" column="1">
+              <widget class="QToolButton" name="playButton">
                <property name="text">
                 <string/>
                </property>
                <property name="icon">
                 <iconset resource="QtResource.qrc">
-                 <normaloff>:/Resources/Open.png</normaloff>:/Resources/Open.png</iconset>
+                 <normaloff>:/Resources/Play.png</normaloff>:/Resources/Play.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="sayLabelPlus">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="accessibleName">
+                <string>+</string>
+               </property>
+               <property name="text">
+                <string>+</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>
@@ -1035,13 +1054,16 @@
               <string> sec</string>
              </property>
              <property name="decimals">
-              <number>0</number>
+              <number>3</number>
              </property>
              <property name="minimum">
               <double>0.000000000000000</double>
              </property>
              <property name="maximum">
               <double>10000000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
              </property>
             </widget>
            </item>

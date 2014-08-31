@@ -42,7 +42,8 @@
 RuleWidget::RuleWidget(QString fileName)
 	: QWidget()
 {
-    ui.setupUi(this);
+	ui.setupUi(this);
+	ui.rulesTabs->setCurrentIndex(0);
 
     filePath=fileName;
 
@@ -50,8 +51,10 @@ RuleWidget::RuleWidget(QString fileName)
 
     QSettings loadRule(fileName,QSettings::IniFormat);
     loadRule.beginGroup("JLRuleGroup");
-    groupName=loadRule.value("Name","Unknown").toString();
-    ui.ruleBeep->setChecked(loadRule.value("BeepOnDone",false).toBool());
+	groupName=loadRule.value("Name","Unknown").toString();
+    ui.limitRowsValue->setValue(loadRule.value("LogRowsCount",20).toInt());
+	ui.ruleBeep->setChecked(loadRule.value("BeepOnDone",false).toBool());
+	ui.notes->setPlainText(loadRule.value("Notes","").toString());
     loadRule.endGroup();
 
     ordersCancelTime=QTime(1,0,0,0);
@@ -60,9 +63,10 @@ RuleWidget::RuleWidget(QString fileName)
 	updateStyleSheets();
 
 	ui.rulesNoMessage->setVisible(true);
-	ui.rulesTable->setVisible(false);
+	ui.rulesTabs->setVisible(false);
 
     rulesModel=new RulesModel(groupName);
+	connect(rulesModel,SIGNAL(writeLog(QString)),this,SLOT(writeLog(QString)));
 	rulesModel->setParent(this);
 	ui.rulesTable->setModel(rulesModel);
     mainWindow.setColumnResizeMode(ui.rulesTable,0,QHeaderView::ResizeToContents);
@@ -81,9 +85,9 @@ RuleWidget::RuleWidget(QString fileName)
 	connect(rulesEnableDisableMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(ruleDisableSelected()));
 	rulesEnableDisableMenu->addSeparator();
 	rulesEnableDisableMenu->addAction("Enable All");
-	connect(rulesEnableDisableMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(ruleEnableAll()));
+    connect(rulesEnableDisableMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(ruleEnableAll()));
 	rulesEnableDisableMenu->addAction("Disable All");
-	connect(rulesEnableDisableMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(ruleDisableAll()));
+    connect(rulesEnableDisableMenu->actions().last(),SIGNAL(triggered(bool)),this,SLOT(ruleDisableAll()));
 	ui.ruleEnableDisable->setMenu(rulesEnableDisableMenu);
 	connect(rulesEnableDisableMenu,SIGNAL(aboutToShow()),this,SLOT(ruleDisableEnableMenuFix()));
 
@@ -109,6 +113,17 @@ RuleWidget::RuleWidget(QString fileName)
 RuleWidget::~RuleWidget()
 {
     if(!filePath.isEmpty())saveRulesData();
+}
+
+void RuleWidget::writeLog(QString text)
+{
+    text.prepend(QTime::currentTime().toString(baseValues.timeFormat)+"> ");
+    ui.consoleOutput->appendPlainText(text);
+}
+
+void RuleWidget::on_buttonSave_clicked()
+{
+	saveRulesData();
 }
 
 bool RuleWidget::isBeepOnDone()
@@ -138,6 +153,10 @@ void RuleWidget::languageChanged()
 {
 	julyTranslator.translateUi(this);
 
+	ui.rulesTabs->setTabText(0,julyTr("TAB_RULES_FOR_ORDERS","Rules"));
+	ui.rulesTabs->setTabText(1,julyTr("CONSOLE_OUT","Console output"));
+	ui.rulesTabs->setTabText(2,julyTr("SCRIPT_NOTES","Notes"));
+
     rulesModel->setHorizontalHeaderLabels(QStringList()<<julyTr("RULES_T_STATE","State")<<julyTr("RULES_T_DESCR","Description"));
             //Removed <<julyTr("RULES_T_ACTION","Action")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("RULES_T_PRICE","Price"));
 
@@ -149,13 +168,22 @@ void RuleWidget::languageChanged()
 	mainWindow.fixAllChildButtonsAndLabels(this);
 }
 
+void RuleWidget::on_limitRowsValue_valueChanged(int val)
+{
+	ui.consoleOutput->setMaximumBlockCount(val);
+	QSettings(filePath,QSettings::IniFormat).setValue("JLRuleGroup/LogRowsCount",val);
+}
+
 void RuleWidget::saveRulesData()
 {
+	ui.saveFon->setVisible(false);
     if(QFile::exists(filePath))QFile::remove(filePath);
     QSettings saveScript(filePath,QSettings::IniFormat);
     saveScript.beginGroup("JLRuleGroup");
-    saveScript.setValue("Version",baseValues.jlScriptVersion);
-    saveScript.setValue("Name",groupName);
+	saveScript.setValue("Version",baseValues.jlScriptVersion);
+	saveScript.setValue("Name",groupName);
+	saveScript.setValue("LogRowsCount",ui.limitRowsValue->value());
+	saveScript.setValue("Notes",ui.notes->toPlainText());
     saveScript.setValue("BeepOnDone",ui.ruleBeep->isChecked());
     saveScript.endGroup();
 
@@ -172,11 +200,10 @@ void RuleWidget::on_ruleAddButton_clicked()
 
     RuleHolder holder=ruleWindow.getRuleHolder();
     if(!holder.isValid())return;
-
     rulesModel->addRule(holder,ruleWindow.isRuleEnabled());
 
     ui.rulesNoMessage->setVisible(false);
-    ui.rulesTable->setVisible(true);
+    ui.rulesTabs->setVisible(true);
     checkValidRulesButtons();
     saveRulesData();
 }
@@ -195,7 +222,7 @@ void RuleWidget::on_ruleEditButton_clicked()
 
     AddRuleDialog ruleWindow(this);
     if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
-    ruleWindow.fillByHolder(rulesModel->holderList[curRow]);
+    ruleWindow.fillByHolder(rulesModel->holderList[curRow],rulesModel->getStateByRow(curRow)==1);
     if(ruleWindow.exec()==QDialog::Rejected)return;
 
     RuleHolder holder=ruleWindow.getRuleHolder();
@@ -283,11 +310,6 @@ bool RuleWidget::haveAnyRules()
 	return rulesModel->rowCount()>0;
 }
 
-bool RuleWidget::haveAnyTradingRules()
-{
-	return rulesModel->haveAnyTradingRules();
-}
-
 void RuleWidget::currencyChanged()
 {
     if(baseValues.currentExchange_->multiCurrencyTradeSupport)return;
@@ -302,12 +324,12 @@ void RuleWidget::checkValidRulesButtons()
 	rulesEnableDisableMenu->actions().at(0)->setEnabled(selectedCount);
 	rulesEnableDisableMenu->actions().at(1)->setEnabled(selectedCount);
 	ui.ruleEnableDisable->setEnabled(rulesModel->rowCount());
-	ui.ruleRemoveAll->setEnabled(rulesModel->rowCount());
-	ui.ruleConcurrentMode->setEnabled(rulesModel->rowCount()==0||rulesModel->allDisabled);
-	ui.ruleSequencialMode->setEnabled(rulesModel->rowCount()==0||rulesModel->allDisabled);
+    ui.ruleRemoveAll->setEnabled(rulesModel->rowCount());
+    ui.ruleConcurrentMode->setEnabled(rulesModel->rowCount()==0||!rulesModel->haveWorkingRule());
+    ui.ruleSequencialMode->setEnabled(ui.ruleConcurrentMode->isEnabled());
 
 	ui.rulesNoMessage->setVisible(rulesModel->rowCount()==0);
-	ui.rulesTable->setVisible(rulesModel->rowCount());
+	ui.rulesTabs->setVisible(rulesModel->rowCount());
 
 	ui.ruleUp->setEnabled(ui.ruleEditButton->isEnabled()&&rulesModel->rowCount()>1);
 	ui.ruleDown->setEnabled(ui.ruleEditButton->isEnabled()&&rulesModel->rowCount()>1);
@@ -334,11 +356,30 @@ void RuleWidget::on_ruleDown_clicked()
     ui.rulesTable->selectRow(curRow+1);
 }
 
+bool RuleWidget::agreeRuleImmediately(QString text)
+{
+    text.replace(QLatin1Char('<'),QLatin1String("&#60;"));
+    text.replace(QLatin1Char('='),QLatin1String("&#61;"));
+    text.replace(QLatin1Char('>'),QLatin1String("&#62;"));
+
+    QMessageBox msgBox(this);
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setWindowTitle(windowTitle());
+    msgBox.setText(julyTr("INVALID_RULE_CHECK","This rule will be executed instantly.<br>This means that you make a mistake.<br>Please check values you entered.")+"<br><br>\""+text+"\"");
+    msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setButtonText(QMessageBox::Ok,julyTr("RULE_ENABLE","Enable Rule"));
+    msgBox.setButtonText(QMessageBox::Cancel,julyTranslator.translateButton("TRCANCEL","Cancel"));
+    return msgBox.exec()==QMessageBox::Ok;
+}
+
 void RuleWidget::ruleEnableSelected()
 {
 	QModelIndexList selectedRows=ui.rulesTable->selectionModel()->selectedRows();
 	if(selectedRows.count()==0)return;
-	int curRow=selectedRows.first().row();
+    int curRow=selectedRows.first().row();
+    if(rulesModel->testRuleByRow(curRow))
+        if(!agreeRuleImmediately(rulesModel->holderList.at(curRow).description))return;
 	rulesModel->setRuleStateByRow(curRow,1);//Enable
 	checkValidRulesButtons();
 }
@@ -348,18 +389,31 @@ void RuleWidget::ruleDisableSelected()
 	QModelIndexList selectedRows=ui.rulesTable->selectionModel()->selectedRows();
 	if(selectedRows.count()==0)return;
 	int curRow=selectedRows.first().row();
+
+    if(!rulesModel->isConcurrentMode&&curRow<rulesModel->rowCount()-1&&rulesModel->getStateByRow(curRow+1)==1&&!rulesModel->isRowPaused(curRow))
+    {
+        if(rulesModel->testRuleByRow(curRow+1,true))
+            if(!agreeRuleImmediately(rulesModel->holderList.at(curRow+1).description))return;
+    }
 	rulesModel->setRuleStateByRow(curRow,0);//Disable
 	checkValidRulesButtons();
 }
 
 void RuleWidget::ruleEnableAll()
 {
-	rulesModel->enableAll();
+    for(int curRow=0;curRow<rulesModel->holderList.count();curRow++)
+    {
+        if(rulesModel->getStateByRow(curRow)==1)continue;
+        if(qobject_cast<QAction*>(sender())&&rulesModel->testRuleByRow(curRow))
+            if(!agreeRuleImmediately(rulesModel->holderList.at(curRow).description))continue;
+        rulesModel->setRuleStateByRow(curRow,1);
+    }
 	checkValidRulesButtons();
 }
 
 void RuleWidget::ruleDisableAll()
 {
+    mainWindow.clearPendingGroup(groupName);
 	rulesModel->disableAll();
 	checkValidRulesButtons();
 }
@@ -368,8 +422,8 @@ void RuleWidget::on_ruleSave_clicked()
 {
     QString lastRulesDir=mainWindow.iniSettings->value("UI/LastRulesPath",baseValues.desktopLocation).toString();
     if(!QFile::exists(lastRulesDir))lastRulesDir=baseValues.desktopLocation;
+    QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_GOUP","Save Rules Group"),lastRulesDir+"/"+QString(groupName).replace("/","_").replace("\\","").replace(":","").replace("?","")+".JLR","JL Ruels (*.JLR)");
 
-    QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_GOUP","Save Rules Group"),lastRulesDir+"/"+groupName+".JLR","(*.JLR)");
 	if(fileName.isEmpty())return;
 	mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileName).dir().path());
 	mainWindow.iniSettings->sync();

@@ -75,8 +75,6 @@ private slots:
     void on_scriptSave_clicked();
     void on_consoleOutput_textChanged();
 
-    void on_helpButton_clicked();
-
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 

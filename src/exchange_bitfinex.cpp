@@ -116,28 +116,27 @@ void Exchange_Bitfinex::clearValues()
 
 void Exchange_Bitfinex::secondSlot()
 {
-	static int infoCounter=0;
-
+    static int infoCounter=0;
 	if(infoCounter%2&&!isReplayPending(202))
 	{
-		sendToApi(202,"balances",true,baseValues.httpSplitPackets);
+        sendToApi(202,"balances",true,baseValues.httpSplitPackets);
 	}
 
-	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"orders",true,baseValues.httpSplitPackets);
+    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"orders",true,baseValues.httpSplitPackets);
 
 	//if(!tickerOnly&&!isReplayPending(210))sendToApi(210,"positions",true,baseValues.httpSplitPackets);
 
 	if(depthEnabled&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
-		emit depthRequested();
-		sendToApi(111,"book/"+baseValues.currentPair.currRequestPair+"?limit_bids="+baseValues.depthCountLimitStr+"&limit_asks="+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);
+        emit depthRequested();
+        sendToApi(111,"book/"+baseValues.currentPair.currRequestPair+"?limit_bids="+baseValues.depthCountLimitStr+"&limit_asks="+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);
 		forceDepthLoad=false;
 	}
-	if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
+    if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
 
-	if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair+"?timestamp="+lastTradesDateCache+"&limit_trades=200"/*astTradesDateCache*/,false,baseValues.httpSplitPackets);
-	if(lastHistory.isEmpty())
-		if(!isReplayPending(208))sendToApi(208,"mytrades",true,baseValues.httpSplitPackets,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 200");
+    if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair+"?timestamp="+lastTradesDateCache+"&limit_trades=200"/*astTradesDateCache*/,false,baseValues.httpSplitPackets);
+    if(lastHistory.isEmpty())
+        if(!isReplayPending(208))sendToApi(208,"mytrades",true,baseValues.httpSplitPackets,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 200");
 	if(!baseValues.httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
 
 	if(++infoCounter>9)
@@ -159,7 +158,7 @@ void Exchange_Bitfinex::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(!isReplayPending(208))sendToApi(208,"mytrades",true,true,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 100");
+    if(!isReplayPending(208))sendToApi(208,"mytrades",true,true,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 100");
 }
 
 void Exchange_Bitfinex::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
@@ -173,7 +172,11 @@ void Exchange_Bitfinex::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToB
 	QByteArray orderType="limit";
     if(pairItem.currRequestSecond=="exchange")
 		orderType.prepend("exchange ");
-    QByteArray params=", \"symbol\": \""+pairItem.currRequestPair+"\", \"amount\": \""+QByteArray::number(apiBtcToBuy,'f',pairItem.currADecimals)+"\", \"price\": \""+QByteArray::number(apiPriceToBuy,'f',pairItem.currBDecimals)+"\", \"exchange\": \"all\", \"side\": \"buy\", \"type\": \""+orderType+"\"";
+    QByteArray params=", \"symbol\": \""+pairItem.currRequestPair+"\", \"amount\": \"";
+    params+=mainWindow.numFromDouble(apiBtcToBuy,pairItem.currADecimals);
+    params+="\", \"price\": \"";
+    params+=mainWindow.numFromDouble(apiPriceToBuy,pairItem.currBDecimals);
+    params+="\", \"exchange\": \"all\", \"side\": \"buy\", \"type\": \""+orderType+"\"";
 	if(debugLevel)logThread->writeLog("Buy: "+params,2);
 	sendToApi(306,"order/new",true,true,params);
 }
@@ -189,7 +192,11 @@ void Exchange_Bitfinex::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceT
 	QByteArray orderType="limit";
     if(pairItem.currRequestSecond=="exchange")
 		orderType.prepend("exchange ");
-    QByteArray params=", \"symbol\": \""+pairItem.currRequestPair+"\", \"amount\": \""+QByteArray::number(apiBtcToSell,'f',pairItem.currADecimals)+"\", \"price\": \""+QByteArray::number(apiPriceToSell,'f',pairItem.currBDecimals)+"\", \"exchange\": \"all\", \"side\": \"sell\", \"type\": \""+orderType+"\"";
+    QByteArray params=", \"symbol\": \""+pairItem.currRequestPair+"\", \"amount\": \"";
+    params+=mainWindow.numFromDouble(apiBtcToSell,pairItem.currADecimals);
+    params+="\", \"price\": \"";
+    params+=mainWindow.numFromDouble(apiPriceToSell,pairItem.currBDecimals);
+    params+="\", \"exchange\": \"all\", \"side\": \"sell\", \"type\": \""+orderType+"\"";
 	if(debugLevel)logThread->writeLog("Sell: "+params,2);
 	sendToApi(307,"order/new",true,true,params);
 }
@@ -220,7 +227,7 @@ void Exchange_Bitfinex::sendToApi(int reqType, QByteArray method, bool auth, boo
 		postData.append(commands);
 		postData.append("}");
 		QByteArray payload=postData.toBase64();
-		QByteArray forHash=hmacSha384(privateRestSign,payload).toHex();
+        QByteArray forHash=hmacSha384(privateRestSign,payload).toHex();
 		if(sendNow)
 		julyHttp->sendData(reqType, "POST /v1/"+method,postData, "X-BFX-PAYLOAD: "+payload+"\r\nX-BFX-SIGNATURE: "+forHash+"\r\n");
 		else
@@ -670,7 +677,6 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 							historyLastTimestamp=currentTimeStamp;
 							firstTimestampReceived=true;
 						}
-
 
 					if(logType=="Sell")currentHistoryItem.type=1;
 					else 
