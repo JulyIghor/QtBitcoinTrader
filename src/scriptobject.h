@@ -59,8 +59,7 @@ public:
     QStringList commandsList;
 private:
 	void deleteEngine();
-	bool scriptWantsOrderBookData;
-    void initValueChanged(QString symbol, QString name, double val);
+    bool scriptWantsOrderBookData;
     void timerCreate(int milliseconds, QString &command, bool once);
     QMap<QTimer *,bool> timerMap;
     qreal orderBookInfo(QString &symbol,qreal &value, bool isAsk, bool getPrice);
@@ -80,6 +79,8 @@ private:
     bool testMode;
     QMap<QString,qreal> indicatorsMap;
 public slots:
+    void sendEvent(QString symbol, QString name, qreal value);
+    void sendEvent(QString name, qreal value);
     void timer(qreal seconds, QString _command_);
     void delay(qreal seconds, QString _command_);
     void log(QVariant);
@@ -145,10 +146,12 @@ public slots:
     qreal get(QString indicator);
     qreal get(QString symbol, QString indicator);
 private slots:
+    void initValueChanged(QString symbol, QString name, double val);
     void timerOut();
     void secondSlot();
     void indicatorValueChanged(double);
 signals:
+    void eventSignal(QString symbol, QString name, qreal value);
     void startAppSignal(QString,QStringList);
     void setGroupEnabled(QString name, bool enabled);
     void setGroupDone(QString);

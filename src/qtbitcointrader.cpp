@@ -2369,6 +2369,11 @@ void QtBitcoinTrader::on_buyTotalSpend_valueChanged(qreal val)
 	checkValidBuyButtons();
 }
 
+void QtBitcoinTrader::sendIndicatorEvent(QString symbol, QString name, double val)
+{
+    emit indicatorEventSignal(symbol,name,val);
+}
+
 void QtBitcoinTrader::on_buyTotalBtc_valueChanged(double)
 {
 	if(buyLockTotalBtc)

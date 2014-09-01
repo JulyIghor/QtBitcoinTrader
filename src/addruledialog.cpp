@@ -44,6 +44,7 @@ AddRuleDialog::AddRuleDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddRuleDialog)
 {
+    pendingFix=true;
     ruleIsEnabled=false;
     ui->setupUi(this);
     ui->buttonSaveRule->setVisible(false);
@@ -151,13 +152,9 @@ AddRuleDialog::AddRuleDialog(QWidget *parent) :
     setWindowTitle(julyTranslator.translateButton("ADD_RULE","Add Rule"));
 
     julyTranslator.translateUi(this);
-    mainWindow.fixAllChildButtonsAndLabels(this);
 
-    setMinimumWidth(mainWindow.minimumSizeHint().width());
-    setMinimumHeight(300);
-    fixSize();
     QTimer::singleShot(200,this,SLOT(reCacheCode()));
-    QTimer::singleShot(201,this,SLOT(fixSize()));
+    QTimer::singleShot(201,this,SLOT(fixSizeWindow()));
 }
 
 AddRuleDialog::~AddRuleDialog()
@@ -368,13 +365,27 @@ void AddRuleDialog::reCacheCode()
     ui->scriptCodePreview->setPlainText(RuleScriptParser::holderToScript(holder));
 }
 
-void AddRuleDialog::fixSize()
+void AddRuleDialog::fixSizeWindow()
 {
+    fixSize(true);
+    fixSize(false);
+}
+
+void AddRuleDialog::fixSize(bool fitToWindow)
+{
+    if(fitToWindow)
+    {
+        mainWindow.fixAllChildButtonsAndLabels(this);
+        setMinimumWidth(mainWindow.minimumSizeHint().width());
+        setMinimumHeight(300);
+    }
     QSize preferedSize=minimumSizeHint();
+    if(pendingFix){pendingFix=false;fitToWindow=true;}
+    int minWidth=fitToWindow?(mainWindow.width()-20):0;
     if(ui->scriptCodeGroupbox->isVisible())
-        resize(qMax(preferedSize.width(),mainWindow.width()-20),height());
+        resize(qMax(preferedSize.width(),minWidth),height());
     else
-    resize(qMax(preferedSize.width(),mainWindow.width()-20),qMax(preferedSize.height(),250));
+    resize(qMax(preferedSize.width(),minWidth),qMax(preferedSize.height(),250));
 }
 
 void AddRuleDialog::on_variableA_currentIndexChanged(int index)

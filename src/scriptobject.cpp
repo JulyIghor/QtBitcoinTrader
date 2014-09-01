@@ -79,7 +79,7 @@ ScriptObject::ScriptObject(QString _scriptName) :
     {
         QString scriptName=spinBox->whatsThis();
         if(scriptName.isEmpty())continue;
-        indicatorsMap[scriptName]=spinBox->value();
+        indicatorsMap[baseValues.currentPair.symbol+"_"+scriptName]=spinBox->value();
         addIndicator(spinBox,scriptName);
     }
     indicatorList<<"trader.on(\"AnyValue\").changed";
@@ -102,11 +102,25 @@ ScriptObject::ScriptObject(QString _scriptName) :
     connect(this,SIGNAL(setGroupEnabled(QString, bool)),baseValues.mainWindow_,SLOT(setGroupRunning(QString,bool)));
     connect(this,SIGNAL(startAppSignal(QString,QStringList)),baseValues.mainWindow_,SLOT(startApplication(QString,QStringList)));
 
+    connect(baseValues.mainWindow_,SIGNAL(indicatorEventSignal(QString,QString,double)),this,SLOT(initValueChanged(QString,QString,double)));
+    connect(this,SIGNAL(eventSignal(QString,QString,qreal)),baseValues.mainWindow_,SLOT(sendIndicatorEvent(QString,QString,qreal)));
+
     secondTimer=new QTimer(this);
     secondTimer->setSingleShot(true);
     connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 }
 
+void ScriptObject::sendEvent(QString name, qreal value)
+{
+    if(testMode)return;
+    emit eventSignal(baseValues.currentPair.symbol,name,value);
+}
+
+void ScriptObject::sendEvent(QString symbol, QString name, qreal value)
+{
+    if(testMode)return;
+    emit eventSignal(symbol,name,value);
+}
 
 int ScriptObject::getOpenAsksCount()
 {
@@ -168,7 +182,7 @@ qreal ScriptObject::get(QString indicator)
         else
         if(baseValues.currentPair.currBStr==indicator.toUpper())indicator=QLatin1String("BalanceB");
     }
-    return indicatorsMap.value(indicator);
+    return indicatorsMap.value(baseValues.currentPair.symbol+"_"+indicator,0.0);
 }
 
 void ScriptObject::timerCreate(int milliseconds, QString &command, bool once)
@@ -324,7 +338,7 @@ void ScriptObject::addIndicator(QDoubleSpinBox *spinBox, QString value)
     indicatorList<<"trader.on(\""+value+"\").changed";
     spinBox->setProperty("ScriptName",value);
     spinBoxList<<spinBox;
-    indicatorsMap.insert(value,spinBox->value());
+    indicatorsMap.insert(baseValues.currentPair.symbol+"_"+value,spinBox->value());
     functionsList<<"trader.get(\""+value+"\")";
 }
 
@@ -441,7 +455,7 @@ void ScriptObject::log(QVariant arg1)
 
 void ScriptObject::initValueChanged(QString symbol, QString scriptNameInd, double val)
 {
-    indicatorsMap[scriptNameInd]=val;
+    indicatorsMap[symbol+"_"+scriptNameInd]=val;
     if(engine==0)return;
     if(scriptNameInd==QLatin1String("BalanceA"))scriptNameInd=QLatin1String("Balance")+baseValues.currentPair.currAStr;
     else

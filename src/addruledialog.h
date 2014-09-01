@@ -14,7 +14,7 @@
 //  the two.
 //
 //  You must obey the GNU General Public License in all respects for all
-//  of the code used other than OpenSSL. If you modify file(s) with this
+//  of the code used other than OfixSize()penSSL. If you modify file(s) with this
 //  exception, you may extend this exception to your version of the
 //  file(s), but you are not obligated to do so. If you do not wish to do
 //  so, delete this exception statement from your version. If you delete
@@ -54,7 +54,7 @@ public:
 
 private slots:
     void reCacheCode();
-    void fixSize();
+    void fixSizeWindow();
     void on_variableA_currentIndexChanged(int index);
     void on_variableB_currentIndexChanged(int index);
     void on_thanAmountPercent_toggled(bool checked);
@@ -83,6 +83,8 @@ private slots:
     void on_sayCode_currentIndexChanged(int index);
 
 private:
+    void fixSize(bool fitToWindow=false);
+    bool pendingFix;
     bool ruleIsEnabled;
     QList<QDoubleSpinBox*> usedSpinBoxes;
 	RuleHolder lastHolder;

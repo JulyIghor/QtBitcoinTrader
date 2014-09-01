@@ -106,7 +106,7 @@ public:
     qreal floatFeeDec;
     qreal floatFeeInc;
 
-    QString numFromDouble(const qreal &value, int maxDecimals=10, int minDecimals=1);
+    QString numFromDouble(const qreal &val, int maxDecimals=10, int minDecimals=1);
 
 	void addPopupDialog(int);
 
@@ -244,6 +244,8 @@ private:
 
 	void updateTrafficTotalValue();
 public slots:
+    void sendIndicatorEvent(QString symbol, QString name, qreal value);
+
     void setRuleTabRunning(QString,bool);
     void startApplication(QString,QStringList);
     void setGroupRunning(QString name, bool enabled);
@@ -420,6 +422,7 @@ public slots:
 	void on_sellTotalBtcHalfIn_clicked();
     void on_sellTotalBtc_valueChanged(double);
 signals:
+    void indicatorEventSignal(QString symbol, QString name, double value);
 	void themeChanged();
 	void reloadDepth();
     void cancelOrderByOid(QString,QByteArray);

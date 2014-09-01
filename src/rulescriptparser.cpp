@@ -116,11 +116,22 @@ RuleHolder RuleScriptParser::readHolderFromFile(QString &file, QString section)
 
 QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
 {
-    QString script;
+    bool execImmediately=holder.variableACode=="IMMEDIATELY";
 
-    QString executingCode;
+    QString script="function executeRule()\n{\n";
+    if(!execImmediately)script="var executed=false;\n"+script+" executed=true;\n";
     if(!testMode)
     {
+        if(holder.isTradingRule())
+        {
+            script+=
+            " if(trader.get(\"ApiLag\")>10)\n"
+            " {\n"
+            " trader.log(\"Api lag is to high\");\n"
+            " trader.delay(1,\"executeRule()\");\n"
+            " return;\n"
+            " }\n\n";
+        }
         if(holder.thanTypeIndex<4)
         {
             qreal amount=holder.thanAmount;
@@ -128,121 +139,106 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
             {
                 amount/=100.0;
                 if(holder.thanTypeIndex==0)
-                    executingCode+=" var amount = trader.get(\"Balance\",\""+baseValues.currentPair.currAStr+"\");\n";
+                    script+=" var amount = trader.get(\"Balance\",\""+baseValues.currentPair.currAStr+"\");\n";
                 else
-                    executingCode+=" var amount = trader.get(\"Balance\",\""+baseValues.currentPair.currBStr+"\");\n";
+                    script+=" var amount = trader.get(\"Balance\",\""+baseValues.currentPair.currBStr+"\");\n";
                 if(amount!=0.0&&amount!=1.0)
-                    executingCode+=" amount *= "+mainWindow.numFromDouble(amount)+";\n";
+                    script+=" amount *= "+mainWindow.numFromDouble(amount)+";\n";
             }
-            else executingCode+=" var amount = "+mainWindow.numFromDouble(amount)+";\n";
+            else script+=" var amount = "+mainWindow.numFromDouble(amount)+";\n";
 
             if(amount!=0.0)
             {
-                if(holder.thanAmountFeeIndex==1)executingCode+=" amount *= (1.0 + trader.get(\"Fee\") / 100.0);\n";
-                if(holder.thanAmountFeeIndex==2)executingCode+=" amount *= (1.0 - trader.get(\"Fee\") / 100.0);\n";
+                if(holder.thanAmountFeeIndex==1)script+=" amount *= (1.0 + trader.get(\"Fee\") / 100.0);\n";
+                if(holder.thanAmountFeeIndex==2)script+=" amount *= (1.0 - trader.get(\"Fee\") / 100.0);\n";
             }
-            if(!executingCode.isEmpty())executingCode+="\n";
+            if(!script.isEmpty())script+="\n";
 
-            if(holder.thanPriceTypeCode=="EXACT")executingCode+=" var price = "+mainWindow.numFromDouble(holder.thanPrice)+";\n";
+            if(holder.thanPriceTypeCode=="EXACT")script+=" var price = "+mainWindow.numFromDouble(holder.thanPrice)+";\n";
             else
             {
-                executingCode+=" var price = trader.get(\""+holder.tradeSymbolCode+"\" , \""+holder.thanPriceTypeCode+"\");\n";
+                script+=" var price = trader.get(\""+holder.tradeSymbolCode+"\" , \""+holder.thanPriceTypeCode+"\");\n";
 
-                if(holder.thanPricePercentChecked)executingCode+=" price "+holder.thanPricePlusMinusText+"= price * "+mainWindow.numFromDouble(holder.thanPrice/100.0)+";\n";
-                else if(holder.thanPrice!=0.0)executingCode+=" price "+holder.thanPricePlusMinusText+"= "+mainWindow.numFromDouble(holder.thanPrice)+";\n";
+                if(holder.thanPricePercentChecked)script+=" price "+holder.thanPricePlusMinusText+"= price * "+mainWindow.numFromDouble(holder.thanPrice/100.0)+";\n";
+                else if(holder.thanPrice!=0.0)script+=" price "+holder.thanPricePlusMinusText+"= "+mainWindow.numFromDouble(holder.thanPrice)+";\n";
 
-                if(holder.thanPriceFeeIndex==1)executingCode+=" price *= ( 1.0 + trader.get(\"Fee\") / 100.0 );\n";
-                if(holder.thanPriceFeeIndex==2)executingCode+=" price *= ( 1.0 - trader.get(\"Fee\") / 100.0 );\n";
+                if(holder.thanPriceFeeIndex==1)script+=" price *= ( 1.0 + trader.get(\"Fee\") / 100.0 );\n";
+                if(holder.thanPriceFeeIndex==2)script+=" price *= ( 1.0 - trader.get(\"Fee\") / 100.0 );\n";
             }
-            if(!executingCode.isEmpty())executingCode+="\n";
+            if(!script.isEmpty())script+="\n";
             switch(holder.thanTypeIndex)
             {
             case 0: //Sell
-                executingCode+=" trader.sell(\""+holder.tradeSymbolCode+"\" , amount , price)";
+                script+=" trader.sell(\""+holder.tradeSymbolCode+"\" , amount , price)";
                 break;
             case 1: //Buy
                 if(holder.thanAmountPercentChecked)
-                    executingCode+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
+                    script+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
                 else
-                    executingCode+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount , price)";
+                    script+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount , price)";
                 break;
             case 2: //Receive
-                executingCode+=" trader.sell(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
+                script+=" trader.sell(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
                 break;
             case 3: //Spend
-                executingCode+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
+                script+=" trader.buy(\""+holder.tradeSymbolCode+"\" , amount / price , price)";
                 break;
             default: break;
             }
-            if(!executingCode.isEmpty())executingCode+=";\n";
+            if(!script.isEmpty())script+=";\n";
         }
         else
         {
             switch(holder.thanTypeIndex)
             {
             case 4: //Cancel all Orders
-                executingCode+=" trader.cancelOrders();\n";
+                script+=" trader.cancelOrders();\n";
                 break;
             case 5: //Cancel Asks
-                executingCode+=" trader.cancelAsks();\n";
+                script+=" trader.cancelAsks();\n";
                 break;
             case 6: //Cancel Bids
-                executingCode+=" trader.cancelBids();\n";
+                script+=" trader.cancelBids();\n";
                 break;
             case 7://Start group
-                executingCode+=" trader.groupStart(\""+holder.thanText+"\");\n";
+                script+=" trader.groupStart(\""+holder.thanText+"\");\n";
                 break;
             case 8://Stop group
-                executingCode+=" trader.groupStop(\""+holder.thanText+"\");\n";
+                script+=" trader.groupStop(\""+holder.thanText+"\");\n";
                 break;
             case 9://Beep
-                executingCode+=" trader.beep();\n";
+                script+=" trader.beep();\n";
                 break;
             case 10://Play Sound
-                executingCode+=" trader.playWav(\""+holder.thanText+"\");\n";
+                script+=" trader.playWav(\""+holder.thanText+"\");\n";
                 break;
             case 11://Start app
-                executingCode+=" trader.startApp(\""+holder.thanText+"\");\n";
+                script+=" trader.startApp(\""+holder.thanText+"\");\n";
                 break;
             case 12://Say text
                 {
                 QString sayText;
                 if(!holder.sayCode.isEmpty())sayText=", trader.get(\""+holder.sayCode+"\")";
-                executingCode+=" trader.say(\""+holder.thanText+"\""+sayText+");\n";
+                script+=" trader.say(\""+holder.thanText+"\""+sayText+");\n";
                 }
                 break;
             }
         }
-        executingCode+=" trader.groupDone();\n";
+        script+=" trader.groupDone();\n";
     }
-    else executingCode=" trader.test(1);\n trader.groupStop();\n";
+    else script+=" trader.test(1);\n trader.groupStop();\n";
+    script+="}";
 
-    bool execImmediately=holder.variableACode=="IMMEDIATELY";
     bool haveDelay=holder.delayMilliseconds>0.0001&&!testMode;
 
-    if(haveDelay)
-    {
-        QString timerCode="trader.delay("+mainWindow.numFromDouble(holder.delayMilliseconds,3,0)+",\"executingCode()\");";
-        if(!execImmediately)
-        script+="var triggered=false;\n\n";
-        script+="function executingCode()\n"
-               "{\n"+executingCode+"}\n\n";
-        if(execImmediately)script+=timerCode;
-        else
-        executingCode="  if(!triggered)\n"
-                "  {\n"
-                "  triggered=true;\n"
-                "  "+timerCode+"\n"
-                "  }\n";
-    }
+    QString executeRuleLine;
+
+    if(haveDelay)executeRuleLine="trader.delay("+mainWindow.numFromDouble(holder.delayMilliseconds,3,0)+",\"executeRule()\");";
+            else executeRuleLine="executeRule();";
 
     if(execImmediately)
     {
-        if(!haveDelay)
-        {
-        if(executingCode.startsWith(" "))executingCode.remove(0,1);
-        script=executingCode.replace("\n ","\n");
-        }
+        script+="\n"+executeRuleLine;
     }
     else
     {
@@ -253,7 +249,7 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
 
     if(holder.variableBCode=="EXACT")
 	{
-		ifLine=" if(value "+holder.comparationText+" "+mainWindow.numFromDouble(holder.variableBExact)+")\n";
+        ifLine=" if(value "+holder.comparationText+" "+mainWindow.numFromDouble(holder.variableBExact)+") ";
 	}
     else
     {
@@ -279,24 +275,23 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
 				if(haveLessThan)realtime=" if(value > "+indicatorBValue+")calcBaseVariable();\n";
 				if(haveMoreThan)realtime=" if(value < "+indicatorBValue+")calcBaseVariable();\n";
 			}
-		ifLine=" if(value "+holder.comparationText+" baseVariable)\n";
-		script+="var baseVariable = calcBaseVariable();\n"
+        ifLine=" if(value "+holder.comparationText+" baseVariable) ";
+        script+="\n\nvar baseVariable = calcBaseVariable();\n"
 			"function calcBaseVariable()\n"
 			"{\n"
 			" baseVariable = "+indicatorB+
 			" return baseVariable;\n"
-			"}\n\n";
+            "}";
     }
 
-    script+="trader.on(\""+holder.variableACode+"\").changed()\n"
+    script+="\n\ntrader.on(\""+holder.variableACode+"\").changed()\n"
     "{\n"
+    " if(executed)return;\n"
     " if(symbol != \""+holder.valueASymbolCode+"\")return;\n";
     script+=realtime+
-    ifLine+
-    " {\n"+executingCode+
-    " }\n";
-    if(testMode)script+="else\n{ trader.test(2); trader.stopGroup(); }\n";
-    script+="}\n";
+    ifLine+" "+executeRuleLine;
+    if(testMode)script+="\n else { trader.test(2); trader.stopGroup(); }\n";
+    script+="\n}\n";
     }
     return script;
 }

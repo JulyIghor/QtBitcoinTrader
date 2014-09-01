@@ -71,23 +71,29 @@ bool RuleHolder::isValidCode(QString &code)
     return code==QLatin1String("EXACT")||code==QLatin1String("IMMEDIATELY")||mainWindow.indicatorsMap.value(code,0)!=0;
 }
 
+bool RuleHolder::isTradingRule()
+{
+    return thanTypeIndex<=6;
+}
+
 bool RuleHolder::isValid()
 {
 	bool immediately=variableACode==QLatin1String("IMMEDIATELY");
 	bool exactB=variableBCode==QLatin1String("EXACT");
-    return thanAmountFeeIndex>-1&&thanPriceFeeIndex>-1&&thanPriceFeeIndex>-1&&thanTypeIndex>-1&&
-            (thanTypeIndex>3||(thanAmount>0.0&&(thanPrice>0.0||!exactB)))&&
-            (immediately||!exactB||variableBExact!=0)&&
-            (thanPriceTypeCode==QLatin1String("EXACT")?thanPrice>0.0:true)&&
-            isValidComparation(comparationText)&&
-            isValidPlusMinus(thanPricePlusMinusText)&&
-            isValidCode(thanPriceTypeCode)&&
-            isValidSymbol(tradeSymbolCode)&&
-            isValidSymbol(valueASymbolCode)&&
-            isValidSymbol(valueBSymbolCode)&&
-            isValidCode(variableACode)&&
-            isValidCode(variableBCode)&&
-            isValidPlusMinus(variableBplusMinus)&&
-            isValidSymbol(variableBSymbolCode)&&
-            delayMilliseconds>=0.0;
+    if(thanAmountFeeIndex<0||thanPriceFeeIndex<0||thanPriceFeeIndex<0||thanTypeIndex<0)return false;
+    if(thanTypeIndex>3||thanAmount>0.0);else return false;
+    if(immediately||!exactB||variableBExact!=0);else return false;
+    if(thanPriceTypeCode==QLatin1String("EXACT")?thanPrice>0.0:true);else return false;
+    if(!isValidComparation(comparationText))return false;
+    if(!isValidPlusMinus(thanPricePlusMinusText))return false;
+    if(!isValidCode(thanPriceTypeCode))return false;
+    if(!isValidSymbol(tradeSymbolCode))return false;
+    if(!isValidSymbol(valueASymbolCode))return false;
+    if(!isValidSymbol(valueBSymbolCode))return false;
+    if(!isValidCode(variableACode))return false;
+    if(!isValidCode(variableBCode))return false;
+    if(!isValidPlusMinus(variableBplusMinus))return false;
+    if(!isValidSymbol(variableBSymbolCode))return false;
+    if(delayMilliseconds<0.0)return false;
+    return true;
 }
