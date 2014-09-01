@@ -74,11 +74,11 @@ ScriptObject::ScriptObject(QString _scriptName) :
        addCommand(currentCommand,parameters);
     }
 
+
     Q_FOREACH(QDoubleSpinBox* spinBox, mainWindow.indicatorsMap.values())
     {
         QString scriptName=spinBox->whatsThis();
         if(scriptName.isEmpty())continue;
-        connect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
         indicatorsMap[scriptName]=spinBox->value();
         addIndicator(spinBox,scriptName);
     }
@@ -479,6 +479,10 @@ void ScriptObject::secondSlot()
 void ScriptObject::deleteEngine()
 {
 	if(!engine)return;
+    if(!testMode)
+        Q_FOREACH(QDoubleSpinBox *spinBox, spinBoxList)
+            disconnect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
+
 	engine->deleteLater();
 	engine=0;
 	if(!testMode&&scriptWantsOrderBookData)
@@ -565,12 +569,19 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
         {
 			if(!testMode&&scriptWantsOrderBookData)baseValues.scriptsThatUseOrderBookCount++;
             bool scriptContainsBalance=script.contains("Balance",Qt::CaseInsensitive);
-            Q_FOREACH(QDoubleSpinBox *spin, spinBoxList)
+            Q_FOREACH(QDoubleSpinBox *spinBox, spinBoxList)
             {
-            QString spinProperty=spin->property("ScriptName").toString();
-            if((!spinProperty.contains("BALANCE",Qt::CaseInsensitive)||!scriptContainsBalance)
-              &&!anyValue&&!script.contains("name==\""+spinProperty+"\"",Qt::CaseInsensitive))continue;
-            initValueChanged(baseValues.currentPair.symbol,spinProperty,spin->value());
+            QString spinProperty=spinBox->property("ScriptName").toString();
+            bool needConnect=anyValue;
+            if(!needConnect&&spinProperty.contains("BALANCE",Qt::CaseInsensitive)&&scriptContainsBalance)needConnect=true;
+            if(!needConnect)needConnect=script.contains(spinProperty,Qt::CaseInsensitive);
+            if(!needConnect)
+            {
+                if(!testMode)disconnect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
+                continue;
+            }
+            if(!testMode)connect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
+            initValueChanged(baseValues.currentPair.symbol,spinProperty,spinBox->value());
             }
         }
    if(testMode)
