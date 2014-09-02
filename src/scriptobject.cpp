@@ -44,7 +44,7 @@
 ScriptObject::ScriptObject(QString _scriptName) :
     QObject()
 {
-	scriptWantsOrderBookData=false;
+    scriptWantsOrderBookData=false;
     haveTimer=false;
     secondTimer=0;
     pendingStop=false;
@@ -168,21 +168,7 @@ qreal ScriptObject::orderBookInfo(QString &symbol,qreal &value, bool isAsk, bool
 
 qreal ScriptObject::get(QString indicator)
 {
-    QString indicatorLower=indicator.toLower();
-
-    if(indicatorLower==QLatin1String("time"))return getTimeT();
-    if(indicatorLower==QLatin1String("openorderscount"))return getOpenOrdersCount();
-    if(indicatorLower==QLatin1String("openaskscount"))return getOpenAsksCount();
-    if(indicatorLower==QLatin1String("openbidscount"))return getOpenBidsCount();
-
-    if(indicator.length()>8&&indicatorLower.startsWith(QLatin1String("balance")))
-    {
-        indicator.remove(0,7);
-        if(baseValues.currentPair.currAStr==indicator.toUpper())indicator=QLatin1String("BalanceA");
-        else
-        if(baseValues.currentPair.currBStr==indicator.toUpper())indicator=QLatin1String("BalanceB");
-    }
-    return indicatorsMap.value(baseValues.currentPair.symbol+"_"+indicator,0.0);
+    return get(baseValues.currentPair.symbol,indicator);
 }
 
 void ScriptObject::timerCreate(int milliseconds, QString &command, bool once)
@@ -226,8 +212,15 @@ void ScriptObject::timerOut()
 
 qreal ScriptObject::get(QString symbol, QString indicator)
 {
-    Q_UNUSED(symbol);
-    return get(indicator);
+    QString indicatorLower=indicator.toLower();
+    if(indicatorLower==QLatin1String("time"))return getTimeT();
+    if(indicatorLower==QLatin1String("openorderscount"))return getOpenOrdersCount();
+    if(indicatorLower==QLatin1String("openaskscount"))return getOpenAsksCount();
+    if(indicatorLower==QLatin1String("openbidscount"))return getOpenBidsCount();
+
+    if(indicator.length()>=8&&indicatorLower.startsWith(QLatin1String("balance")))symbol.clear();
+    else if(!symbol.isEmpty())symbol.append("_");
+    return indicatorsMap.value(symbol+indicator,0.0);
 }
 
 void ScriptObject::startApp(QString name){startApp(name,QStringList());}
@@ -263,6 +256,7 @@ void ScriptObject::say(QVariant text1, QVariant text2){say(QVariantList()<<text1
 void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3){say(QVariantList()<<text1<<text2<<text3);}
 void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4){say(QVariantList()<<text1<<text2<<text3<<text4);}
 void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4, QVariant text5){say(QVariantList()<<text1<<text2<<text3<<text4<<text5);}
+void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4, QVariant text5, QVariant text6){say(QVariantList()<<text1<<text2<<text3<<text4<<text5<<text6);}
 void ScriptObject::say(QVariantList list)
 {
     int detectDoublePoint=0;
@@ -278,7 +272,11 @@ void ScriptObject::say(QVariantList list)
     for(int n=0;n<list.count();n++)
     {
         if(list.at(n).type()==QVariant::Double)
-            text+=mainWindow.numFromDouble(list.at(n).toDouble(),10,0);
+        {
+            QString number=mainWindow.numFromDouble(list.at(n).toDouble(),10,0);
+            if(detectDoublePoint==2)number.replace(QLatin1Char('.'),QLatin1Char(','));
+            text+=number;
+        }
         else
         text+=list.at(n).toString();
         if(n<list.count()-1)text+=QLatin1Char(' ');
@@ -428,6 +426,8 @@ void ScriptObject::logClear()
 void ScriptObject::log(QVariant arg1, QVariant arg2){log(QVariantList()<<arg1<<arg2);}
 void ScriptObject::log(QVariant arg1, QVariant arg2, QVariant arg3){log(QVariantList()<<arg1<<arg2<<arg3);}
 void ScriptObject::log(QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4){log(QVariantList()<<arg1<<arg2<<arg3<<arg4);}
+void ScriptObject::log(QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5){log(QVariantList()<<arg1<<arg2<<arg3<<arg4<<arg5);}
+void ScriptObject::log(QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6){log(QVariantList()<<arg1<<arg2<<arg3<<arg4<<arg5<<arg6);}
 void ScriptObject::log(QVariantList list)
 {
     if(testMode)return;
@@ -449,14 +449,27 @@ void ScriptObject::log(QVariant arg1)
     else emit writeLog(arg1.toString());
 }
 
-void ScriptObject::initValueChanged(QString symbol, QString scriptNameInd, double val)
+void ScriptObject::initValueChangedPrivate(QString &symbol, QString &scriptNameInd, double &val, bool forceEmit)
 {
-    indicatorsMap[symbol+"_"+scriptNameInd]=val;
-    if(engine==0)return;
+    QString prependName;
     if(scriptNameInd==QLatin1String("BalanceA"))scriptNameInd=QLatin1String("Balance")+baseValues.currentPair.currAStr;
     else
     if(scriptNameInd==QLatin1String("BalanceB"))scriptNameInd=QLatin1String("Balance")+baseValues.currentPair.currBStr;
+    else
+    if(!symbol.isEmpty())prependName=symbol+"_";
+
+    if(val<0.00000001&&scriptNameInd.endsWith(QLatin1String("price"),Qt::CaseInsensitive))return;
+
+    if(!forceEmit&&!testMode&&indicatorsMap.value(prependName+scriptNameInd,-2508.1987)==val)return;
+
+    indicatorsMap[prependName+scriptNameInd]=val;
+    if(engine==0)return;
     emit valueChanged(symbol,scriptNameInd,val);
+}
+
+void ScriptObject::initValueChanged(QString symbol, QString scriptNameInd, double val)
+{
+    initValueChangedPrivate(symbol,scriptNameInd,val,false);
 }
 
 void ScriptObject::indicatorValueChanged(double val)
@@ -488,18 +501,18 @@ void ScriptObject::secondSlot()
 
 void ScriptObject::deleteEngine()
 {
-	if(!engine)return;
+    if(!engine)return;
     if(!testMode)
         Q_FOREACH(QDoubleSpinBox *spinBox, spinBoxList)
             disconnect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
 
-	engine->deleteLater();
-	engine=0;
-	if(!testMode&&scriptWantsOrderBookData)
-	{
-		scriptWantsOrderBookData=false;
-		baseValues.scriptsThatUseOrderBookCount--;
-	}
+    engine->deleteLater();
+    engine=0;
+    if(!testMode&&scriptWantsOrderBookData)
+    {
+        scriptWantsOrderBookData=false;
+        baseValues.scriptsThatUseOrderBookCount--;
+    }
 }
 
 void ScriptObject::setRunning(bool on)
@@ -540,16 +553,16 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
 
     QScriptValue scriptValue=engine->newQObject(this);
     engine->globalObject().setProperty("trader", scriptValue);
-		
-	bool anyValue=script.contains("trader.on(\"AnyValue\").changed()",Qt::CaseInsensitive)||script.contains("trader.on('AnyValue').changed()",Qt::CaseInsensitive);
+
+    bool anyValue=script.contains("trader.on(\"AnyValue\").changed()",Qt::CaseInsensitive)||script.contains("trader.on('AnyValue').changed()",Qt::CaseInsensitive);
     haveTimer=script.contains("trader.on(\"Time\").changed()",Qt::CaseInsensitive)||script.contains("trader.on('Time').changed()",Qt::CaseInsensitive);
 
-	if(!testMode)
-	{
-		if(scriptWantsOrderBookData&&baseValues.scriptsThatUseOrderBookCount>0)baseValues.scriptsThatUseOrderBookCount--;
-		scriptWantsOrderBookData=script.contains("trader.get(\"Asks",Qt::CaseInsensitive)||script.contains("trader.get('Asks",Qt::CaseInsensitive)||script.contains("trader.get(\"Bids",Qt::CaseInsensitive)||script.contains("trader.get('Bids",Qt::CaseInsensitive);
-	}
-	else scriptWantsOrderBookData=false;
+    if(!testMode)
+    {
+        if(scriptWantsOrderBookData&&baseValues.scriptsThatUseOrderBookCount>0)baseValues.scriptsThatUseOrderBookCount--;
+        scriptWantsOrderBookData=script.contains("trader.get(\"Asks",Qt::CaseInsensitive)||script.contains("trader.get('Asks",Qt::CaseInsensitive)||script.contains("trader.get(\"Bids",Qt::CaseInsensitive)||script.contains("trader.get('Bids",Qt::CaseInsensitive);
+    }
+    else scriptWantsOrderBookData=false;
 
     script=sourceToScript(script);
     pendingStop=false;
@@ -577,7 +590,7 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
         }
         else
         {
-			if(!testMode&&scriptWantsOrderBookData)baseValues.scriptsThatUseOrderBookCount++;
+            if(!testMode&&scriptWantsOrderBookData)baseValues.scriptsThatUseOrderBookCount++;
             bool scriptContainsBalance=script.contains("Balance",Qt::CaseInsensitive);
             Q_FOREACH(QDoubleSpinBox *spinBox, spinBoxList)
             {
@@ -590,8 +603,9 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
                 if(!testMode)disconnect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
                 continue;
             }
+            double spinValue=spinBox->value();
+            initValueChangedPrivate(baseValues.currentPair.symbol,spinProperty,spinValue,testMode);
             if(!testMode)connect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
-            initValueChanged(baseValues.currentPair.symbol,spinProperty,spinBox->value());
             }
         }
    if(testMode)

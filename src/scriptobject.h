@@ -58,6 +58,7 @@ public:
     QStringList argumentsList;
     QStringList commandsList;
 private:
+    void initValueChangedPrivate(QString &symbol, QString &scriptNameInd, double &val, bool forceEmit=false);
 	void deleteEngine();
     bool scriptWantsOrderBookData;
     void timerCreate(int milliseconds, QString &command, bool once);
@@ -87,6 +88,8 @@ public slots:
     void log(QVariant,QVariant);
     void log(QVariant,QVariant,QVariant);
     void log(QVariant,QVariant,QVariant,QVariant);
+    void log(QVariant,QVariant,QVariant,QVariant,QVariant);
+    void log(QVariant,QVariant,QVariant,QVariant,QVariant,QVariant);
     void log(QVariantList);
     void logClear();
     void test(int);
@@ -103,6 +106,7 @@ public slots:
     void say(QVariant,QVariant,QVariant);
     void say(QVariant,QVariant,QVariant,QVariant);
     void say(QVariant,QVariant,QVariant,QVariant,QVariant);
+    void say(QVariant,QVariant,QVariant,QVariant,QVariant,QVariant);
 
     void groupDone();
     void groupStart(QString _name_);

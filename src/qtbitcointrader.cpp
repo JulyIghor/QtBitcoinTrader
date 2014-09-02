@@ -1546,6 +1546,7 @@ void QtBitcoinTrader::fixDecimals(QWidget *par)
 {
     Q_FOREACH(QDoubleSpinBox* spinBox, par->findChildren<QDoubleSpinBox*>())
 	{
+        if(!spinBox->whatsThis().isEmpty())continue;
 		if(spinBox->accessibleName().startsWith("BTC"))
 		{
 			if(spinBox->accessibleName().endsWith("BALANCE"))spinBox->setDecimals(baseValues.currentPair.currABalanceDecimals);
@@ -1620,8 +1621,6 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
 
 	bool currencyBChanged=nextCurrencyPair.currBStr!=baseValues.currentPair.currBStr;
 
-	baseValues.currentPair=nextCurrencyPair;
-
 	if(fastChange)
 	{
         setSpinValue(ui.accountBTC,0.0);
@@ -1689,16 +1688,16 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
 	QString buyGroupboxText=julyTr("GROUPBOX_BUY","Buy %1");
 	bool buyGroupboxCase=false; if(buyGroupboxText.length()>2)buyGroupboxCase=buyGroupboxText.at(2).isUpper();
 
-	if(buyGroupboxCase)buyGroupboxText=buyGroupboxText.arg(baseValues.currentPair.currAName.toUpper());
-	else buyGroupboxText=buyGroupboxText.arg(baseValues.currentPair.currAName);
+    if(buyGroupboxCase)buyGroupboxText=buyGroupboxText.arg(nextCurrencyPair.currAName.toUpper());
+    else buyGroupboxText=buyGroupboxText.arg(nextCurrencyPair.currAName);
 
 	ui.buyGroupbox->setTitle(buyGroupboxText);
 
 	QString sellGroupboxText=julyTr("GROUPBOX_SELL","Sell %1");
 	bool sellGroupboxCase=true; if(sellGroupboxText.length()>2)sellGroupboxCase=sellGroupboxText.at(2).isUpper();
 
-	if(sellGroupboxCase)sellGroupboxText=sellGroupboxText.arg(baseValues.currentPair.currAName.toUpper());
-	else sellGroupboxText=sellGroupboxText.arg(baseValues.currentPair.currAName);
+    if(sellGroupboxCase)sellGroupboxText=sellGroupboxText.arg(nextCurrencyPair.currAName.toUpper());
+    else sellGroupboxText=sellGroupboxText.arg(nextCurrencyPair.currAName);
 
 	ui.sellGroupBox->setTitle(sellGroupboxText);
 
@@ -1725,6 +1724,8 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
 
 	depthAsksModel->fixTitleWidths();
 	depthBidsModel->fixTitleWidths();
+
+    baseValues.currentPair=nextCurrencyPair;
 
 	calcOrdersTotalValues();
 
@@ -3355,6 +3356,7 @@ void QtBitcoinTrader::setRuleTabRunning(QString name, bool on)
 
 void QtBitcoinTrader::setSpinValueP(QDoubleSpinBox *spin, qreal &val)
 {
+    spin->blockSignals(true);
     if(val<0.00000001)
         spin->setDecimals(1);
     else
@@ -3376,6 +3378,7 @@ void QtBitcoinTrader::setSpinValueP(QDoubleSpinBox *spin, qreal &val)
         spin->setDecimals(lastZeroPos);
         }
     }
+    spin->blockSignals(false);
     spin->setMaximum(val);
     spin->setValue(val);
 }
