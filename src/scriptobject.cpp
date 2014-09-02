@@ -278,15 +278,7 @@ void ScriptObject::say(QVariantList list)
     for(int n=0;n<list.count();n++)
     {
         if(list.at(n).type()==QVariant::Double)
-        {
-            QString number=QString::number(list.at(n).toDouble(),'f',8);
-            int crop=number.size()-1;
-            while(crop>0&&number.at(crop)==QLatin1Char('0'))crop--;
-            if(crop>0&&number.at(crop)==QLatin1Char('.'))crop--;
-            if(crop>=0&&crop<number.size())number.resize(crop+1);
-            if(detectDoublePoint==2)number.replace(QLatin1Char('.'),QLatin1Char(','));
-            text+=number;
-        }
+            text+=mainWindow.numFromDouble(list.at(n).toDouble(),10,0);
         else
         text+=list.at(n).toString();
         if(n<list.count()-1)text+=QLatin1Char(' ');
@@ -376,6 +368,8 @@ void ScriptObject::sell(double amount, double price)
 
 void ScriptObject::buy(QString symbol, double amount, double price)
 {
+    if(symbol.isEmpty())symbol=baseValues.currentPair.symbol;
+    else
     symbol=symbol.toUpper();
     if(!testMode)mainWindow.apiBuySend(symbol,amount,price);
     log(symbol+": Buy "+mainWindow.numFromDouble(amount,10,0)+" at "+mainWindow.numFromDouble(price,10,0));
@@ -383,6 +377,8 @@ void ScriptObject::buy(QString symbol, double amount, double price)
 
 void ScriptObject::sell(QString symbol, double amount, double price)
 {
+    if(symbol.isEmpty())symbol=baseValues.currentPair.symbol;
+    else
     symbol=symbol.toUpper();
     if(!testMode)mainWindow.apiSellSend(symbol,amount,price);
     log(symbol+": Sell "+mainWindow.numFromDouble(amount,10,0)+" at "+mainWindow.numFromDouble(price,10,0));
