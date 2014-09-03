@@ -309,7 +309,7 @@ void NewPasswordDialog::updateIniFileName()
 	baseValues.iniFileName=appDataDir+"QtBitcoinTrader.ini";
 	else
 	{
-        baseValues.iniFileName=exchangeName+"_"+ui.profileNameEdit->text().toLatin1()+".ini";
+        baseValues.iniFileName=exchangeName+"_"+ui.profileNameEdit->text()+".ini";
 		baseValues.iniFileName.replace(' ','_');
 		baseValues.iniFileName.prepend(appDataDir);
 	}

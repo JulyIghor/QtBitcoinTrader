@@ -46,7 +46,7 @@ JulyLockFile::JulyLockFile(QString imageName)
     isLockedFile=false;
     lockPort=0;
 
-    lockFilePath=QDir().tempPath()+"/Locked_"+QCryptographicHash::hash(imageName.toLatin1(),QCryptographicHash::Md5).toHex()+".lockfile";
+    lockFilePath=QDir().tempPath()+"/Locked_"+QCryptographicHash::hash(imageName.toUtf8(),QCryptographicHash::Md5).toHex()+".lockfile";
     if(QFile::exists(lockFilePath)&&QFileInfo(lockFilePath).lastModified().addSecs(240)<QDateTime::currentDateTime())QFile::remove(lockFilePath);
     lockFile->setFileName(lockFilePath);
     if(QFile::exists(lockFilePath))

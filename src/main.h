@@ -121,7 +121,7 @@ struct BaseValues
 	QString dateTimeFormat;
 	QString defaultLangFile;
 	JulyTranslator julyTranslator_;
-	QByteArray appDataDir_;
+	QString appDataDir_;
 	QByteArray appVerStr;
 	LogThread *logThread_;
 	QByteArray restKey;

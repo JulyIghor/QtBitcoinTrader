@@ -177,7 +177,7 @@ PasswordDialog::~PasswordDialog()
 
 QString PasswordDialog::lockFilePath(QString name)
 {
-    return baseValues.tempLocation+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(appDataDir+"/"+QFileInfo(name).fileName().toLatin1(),QCryptographicHash::Sha1).toHex());
+    return baseValues.tempLocation+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(QString(appDataDir+"/"+QFileInfo(name).fileName()).toUtf8(),QCryptographicHash::Sha1).toHex());
 }
 
 bool PasswordDialog::isProfileLocked(QString name)
