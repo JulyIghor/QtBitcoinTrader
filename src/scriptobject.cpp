@@ -619,6 +619,9 @@ QString ScriptObject::sourceToScript(QString text)
 {
     if(text.isEmpty())return text;
 
+    text.replace("\" ,","\",");
+    text.replace("' ,","',");
+
     text.replace("trader.get(\"Balance\",\"","trader.get(\"Balance",Qt::CaseInsensitive);
     text.replace("trader.on(\"Balance\",\"","trader.on(\"Balance",Qt::CaseInsensitive);
 
@@ -629,6 +632,15 @@ QString ScriptObject::sourceToScript(QString text)
 
     while(replaceString("trader.on('","trader['valueChanged(QString,QString,double)'].connect(function(symbol,name,value){if(name=='",text,true));
     while(replaceString("trader.on(\"","trader['valueChanged(QString,QString,double)'].connect(function(symbol,name,value){if(name==\"",text,true));
+
+    text.replace("trader.get(\"AsksPrice\",","trader.getAsksPriceByVol(",Qt::CaseInsensitive);
+    text.replace("trader.get(\"AsksVolume\",","trader.getAsksVolByPrice(",Qt::CaseInsensitive);
+    text.replace("trader.get(\"BidsPrice\",","trader.getBidsPriceByVol(",Qt::CaseInsensitive);
+    text.replace("trader.get(\"BidsVolume\",","trader.getBidsVolByPrice(",Qt::CaseInsensitive);
+    text.replace("trader.get('AsksPrice',","trader.getAsksPriceByVol(",Qt::CaseInsensitive);
+    text.replace("trader.get('AsksVolume',","trader.getAsksVolByPrice(",Qt::CaseInsensitive);
+    text.replace("trader.get('BidsPrice',","trader.getBidsPriceByVol(",Qt::CaseInsensitive);
+    text.replace("trader.get('BidsVolume',","trader.getBidsVolByPrice(",Qt::CaseInsensitive);
 
     return text;
 }
