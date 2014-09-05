@@ -482,6 +482,8 @@ QtBitcoinTrader::QtBitcoinTrader()
     networkMenu=new NetworkMenu(ui.networkMenu);
 	reloadLanguageList();
 
+	volumeAmountChanged(0.0,0.0);
+
 	connect(&julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
 
 	if(checkForUpdates)QProcess::startDetached(QApplication::applicationFilePath(),QStringList("/checkupdate"));
@@ -1594,7 +1596,15 @@ void QtBitcoinTrader::setCurrencyPairsList(QList<CurrencyPairItem> *currPairs)
 	int indexCurrency=-1;
 	for(int n=0;n<currPairsList.count();n++)
 	{
-        baseValues.currencyPairMap.insert(currPairsList.at(n).symbol,currPairsList.at(n));
+		if(currPairsList.at(n).currRequestSecond.isEmpty())
+			baseValues.currencyPairMap[currPairsList.at(n).symbol]=currPairsList.at(n);
+		else
+		{
+			baseValues.currencyPairMap[currPairsList.at(n).symbol+currPairsList.at(n).currRequestSecond]=currPairsList.at(n);
+			if(currPairsList.at(n).currRequestSecond=="exchange")
+				baseValues.currencyPairMap[currPairsList.at(n).symbol]=currPairsList.at(n);
+
+		}
 		if(currPairsList.at(n).name==savedCurrency)indexCurrency=n;
 		currencyItems<<currPairsList.at(n).name;
 	}
@@ -1623,8 +1633,14 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
 
 	if(fastChange)
 	{
+		baseValues.currentPair=nextCurrencyPair;
+
         setSpinValue(ui.accountBTC,0.0);
         setSpinValue(ui.accountUSD,0.0);
+
+		Q_FOREACH(RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())currentGroup->currencyChanged();
+		Q_FOREACH(ScriptWidget* currentGroup, ui.tabRules->findChildren<ScriptWidget*>())currentGroup->currencyChanged();
+
 		return;
 	}
 
@@ -1736,8 +1752,7 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
     setSpinValue(ui.ordersLastBuyPrice,0.0);
     setSpinValue(ui.ordersLastSellPrice,0.0);
 
-    Q_FOREACH(RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())currentGroup->currencyChanged();
-    Q_FOREACH(ScriptWidget* currentGroup, ui.tabRules->findChildren<ScriptWidget*>())currentGroup->currencyChanged();
+	fixDecimals(this);
 
 	emit getHistory(true);
 }
@@ -2348,7 +2363,7 @@ void QtBitcoinTrader::sellBitcoinButton()
 	if(msgBox.exec()!=QMessageBox::Yes)return;
 	}
 
-    apiSellSend(baseValues.currentPair.symbol,sellTotalBtc,sellPricePerCoin);
+    apiSellSend(baseValues.currentPair.symbolSecond(),sellTotalBtc,sellPricePerCoin);
 }
 
 void QtBitcoinTrader::on_buyTotalSpend_valueChanged(qreal val)
@@ -2585,7 +2600,7 @@ void QtBitcoinTrader::buyBitcoinsButton()
 	if(msgBox.exec()!=QMessageBox::Yes)return;
 	}
 	
-    apiBuySend(baseValues.currentPair.symbol,btcToBuy,priceToBuy);
+    apiBuySend(baseValues.currentPair.symbolSecond(),btcToBuy,priceToBuy);
 }
 
 void QtBitcoinTrader::playWav(QString wav, bool noBlink)
@@ -3275,7 +3290,7 @@ qreal QtBitcoinTrader::getAvailableUSDtoBTC(qreal priceToBuy)
 
 void QtBitcoinTrader::apiSellSend(QString symbol, qreal btc, qreal price)
 {
-    if(symbol==baseValues.currentPair.symbol)
+    if(symbol==baseValues.currentPair.symbolSecond())
     {
     emit apiSell(symbol,btc,price);
     }
@@ -3283,7 +3298,7 @@ void QtBitcoinTrader::apiSellSend(QString symbol, qreal btc, qreal price)
 
 void QtBitcoinTrader::apiBuySend(QString symbol, qreal btc, qreal price)
 {
-    if(symbol==baseValues.currentPair.symbol)
+    if(symbol==baseValues.currentPair.symbolSecond())
     {
     emit apiBuy(symbol,btc,price);
     }

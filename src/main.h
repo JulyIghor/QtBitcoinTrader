@@ -31,8 +31,6 @@
 
 #ifndef MAIN_H
 #define MAIN_H
-//#include <QDebug>////////////
-//#define showDebug(text) qDebug()<<QTime::currentTime().toString(localTimeFormat)+"> "+text//////////
 #include "qtextstream.h"
 #include <QFontMetrics>
 #include "julytranslator.h"

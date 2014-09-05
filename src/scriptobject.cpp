@@ -83,7 +83,9 @@ ScriptObject::ScriptObject(QString _scriptName) :
         addIndicator(spinBox,scriptName);
     }
     indicatorList<<"trader.on(\"AnyValue\").changed";
-    indicatorList<<"trader.on(\"Time\").changed";
+	indicatorList<<"trader.on(\"Time\").changed";
+	indicatorList<<"trader.on(\"LastTrade\").changed";
+	indicatorList<<"trader.on(\"MyLastTrade\").changed";
 
     functionsList<<"trader.get(\"Time\")";
 
@@ -161,7 +163,8 @@ qreal ScriptObject::orderBookInfo(QString &symbol,qreal &value, bool isAsk, bool
     if(result<0.0)
     {
         result=-result;
-        writeLog("Warning! OrderBook info is out of range. OrderBook information is limited to rows count limit.");
+        if(!testMode)
+			writeLog("Warning! OrderBook info is out of range. OrderBook information is limited to rows count limit.");
     }
     return result;
 }

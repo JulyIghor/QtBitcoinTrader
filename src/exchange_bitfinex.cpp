@@ -307,29 +307,6 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 		if(!success)break;
 			if(data.startsWith("{\"mid\":"))
 			{
-				//QByteArray tickerHigh=getMidData("high\":{\"value\":\"","",&data);
-				//if(!tickerHigh.isEmpty())
-				//{
-                //	qreal newTickerHigh=tickerHigh.toDouble();
-                //	if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(baseValues.currentPair.currSymbol,newTickerHigh);
-				//	lastTickerHigh=newTickerHigh;
-				//}
-
-				//QByteArray tickerLow=getMidData("low\":{\"value\":\"","",&data);
-				//if(!tickerLow.isEmpty())
-				//{
-                //	qreal newTickerLow=tickerLow.toDouble();
-                //	if(newTickerLow!=lastTickerLow)emit tickerLowChanged(baseValues.currentPair.currSymbol,newTickerLow);
-				//	lastTickerLow=newTickerLow;
-				//}
-
-				//QByteArray tickerVolume=getMidData("vol\":{\"value\":\"","",&data);
-				//if(!tickerVolume.isEmpty())
-				//{
-                //	qreal newTickerVolume=tickerVolume.toDouble();
-                //	if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(baseValues.currentPair.currSymbol,newTickerVolume);
-				//	lastTickerVolume=newTickerVolume;
-				//}
 			QByteArray tickerSell=getMidData("bid\":\"","\"",&data);
 			if(!tickerSell.isEmpty())
 			{

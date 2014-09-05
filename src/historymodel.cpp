@@ -92,6 +92,12 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 		if(n!=histList->count()-1)(*histList)[n].displayFullDate=histList->at(n).dateInt!=histList->at(n+1).dateInt;
 
 		itemsList<<histList->at(n);
+		static quint32 lastTransactionID=0;
+		if(lastTransactionID<itemsList.last().dateInt)
+		{
+			lastTransactionID=itemsList.last().dateInt;
+			mainWindow.sendIndicatorEvent(itemsList.last().symbol, QLatin1String("MyLastTrade"), itemsList.last().volume);
+		}
 	}
 	delete histList;
 	if(maxListDate>lastDate)lastDate=maxListDate;
