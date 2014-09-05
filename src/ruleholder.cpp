@@ -68,7 +68,11 @@ bool RuleHolder::isValidPlusMinus(QString &plusMinus)
 
 bool RuleHolder::isValidCode(QString &code)
 {
-    return code==QLatin1String("EXACT")||code==QLatin1String("IMMEDIATELY")||mainWindow.indicatorsMap.value(code,0)!=0;
+    return code==QLatin1String("EXACT")||
+           code==QLatin1String("IMMEDIATELY")||
+           code==QLatin1String("LastTrade")||
+           code==QLatin1String("MyLastTrade")||
+           mainWindow.indicatorsMap.value(code,0)!=0;
 }
 
 bool RuleHolder::isTradingRule()
@@ -78,7 +82,7 @@ bool RuleHolder::isTradingRule()
 
 bool RuleHolder::isValid()
 {
-	bool immediately=variableACode==QLatin1String("IMMEDIATELY");
+    bool immediately=variableACode==QLatin1String("IMMEDIATELY")||variableACode==QLatin1String("LastTrade")||variableACode==QLatin1String("MyLastTrade");
 	bool exactB=variableBCode==QLatin1String("EXACT");
     if(thanAmountFeeIndex<0||thanPriceFeeIndex<0||thanPriceFeeIndex<0||thanTypeIndex<0)return false;
     if(thanTypeIndex>3||thanAmount>0.0);else return false;

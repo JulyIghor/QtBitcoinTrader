@@ -346,10 +346,10 @@ void TradesModel::addNewTrades(QList<TradesItem> *newItems)
 
 	(*newItems)[n].backGray=backSwitcher;
 	verifedItems<<newItems->at(n);
-	static quint32 lastDateID=0;
-	if(lastDateID<verifedItems.last().date)
+    static QMap<QString,quint32> lastDateMap;
+    if(lastDateMap.value(verifedItems.last().symbol,0UL)<verifedItems.last().date)
 	{
-		lastDateID=verifedItems.last().date;
+        lastDateMap[verifedItems.last().symbol]=verifedItems.last().date;
 		mainWindow.sendIndicatorEvent(verifedItems.last().symbol, QLatin1String("LastTrade"), verifedItems.last().amount);
 	}
 

@@ -74,6 +74,10 @@ AddRuleDialog::AddRuleDialog(QWidget *parent) :
         usedSpinBoxes<<spinBox;
     }
     ui->variableA->insertItem(ui->variableA->count(),julyTr("RULE_IMMEDIATELY_EXECUTION","Execute Immediately"),"IMMEDIATELY");
+
+    ui->variableA->insertItem(ui->variableB->count(),julyTr("RULE_MY_LASTTRADE_CHANGED","My order sold or bought"),"MyLastTrade");
+    ui->variableA->insertItem(ui->variableB->count(),julyTr("RULE_LASTTRADE_CHANGED","Market order sold or bought"),"LastTrade");
+
     ui->variableB->insertItem(ui->variableB->count(),julyTr("RULE_EXACT_VALUE","Exact value"),"EXACT");
     ui->thanPriceType->insertItem(ui->thanPriceType->count(),julyTr("RULE_EXACT_VALUE","Exact value"),"EXACT");
 
@@ -284,32 +288,39 @@ void AddRuleDialog::reCacheCode()
     if(ui->delayValue->value()>0)
         descriptionText=julyTr("DELAY_SEC","Delay %1 sec").arg(mainWindow.numFromDouble(ui->delayValue->value()))+" ";
 
-    if(ui->variableA->currentIndex()==ui->variableA->count()-1)
+    QString currentAType=comboCurrentData(ui->variableA);
+
+    if(currentAType==QLatin1String("IMMEDIATELY"))
     {
         if(descriptionText.isEmpty())descriptionText=julyTr("RULE_IMMEDIATELY_EXECUTION","Execute immediately");
         else descriptionText.remove(descriptionText.size()-1,1);
     }
     else
     {
+        bool requiresBaseValue=currentAType!=QLatin1String("MyLastTrade")&&currentAType!=QLatin1String("LastTrade");
         descriptionText+=julyTr("WHEN","When")+" "+ui->variableA->currentText();
         if(ui->valueASymbol->isVisible())descriptionText+=" ("+ui->valueASymbol->currentText()+")";
-        descriptionText+=" "+ui->comparation->currentText()+" "+ui->variableB->currentText();
-        if(ui->valueBSymbol->isVisible())descriptionText+=" ("+ui->valueBSymbol->currentText()+")";
 
-        bool bExact=comboCurrentData(ui->variableB)=="EXACT";
-        if(ui->variableBExact->value()!=0.0||bExact)
+        if(requiresBaseValue)
         {
-            if(!bExact)descriptionText+=" "+ui->variableBplusMinus->currentText();
-            descriptionText+=" "+mainWindow.numFromDouble(ui->variableBExact->value(),10,0);
-            if(ui->variableBPercent->isChecked())descriptionText+="%";
+            descriptionText+=" "+ui->comparation->currentText()+" "+ui->variableB->currentText();
+            if(ui->valueBSymbol->isVisible())descriptionText+=" ("+ui->valueBSymbol->currentText()+")";
+
+            bool bExact=comboCurrentData(ui->variableB)=="EXACT";
+            if(ui->variableBExact->value()!=0.0||bExact)
+            {
+                if(!bExact)descriptionText+=" "+ui->variableBplusMinus->currentText();
+                descriptionText+=" "+mainWindow.numFromDouble(ui->variableBExact->value(),10,0);
+                if(ui->variableBPercent->isChecked())descriptionText+="%";
+            }
+            if(ui->variableBFee->currentIndex()>0)
+            {
+                if(ui->variableBFee->currentIndex()==1)descriptionText+=" + ";
+                else descriptionText+=" - ";
+                descriptionText+=julyTr("LOG_FEE","fee");
+            }
+            if(ui->variableBMode->isVisible())descriptionText+=" ("+ui->variableBMode->currentText()+")";
         }
-        if(ui->variableBFee->currentIndex()>0)
-        {
-            if(ui->variableBFee->currentIndex()==1)descriptionText+=" + ";
-            else descriptionText+=" - ";
-            descriptionText+=julyTr("LOG_FEE","fee");
-        }
-        if(ui->variableBMode->isVisible())descriptionText+=" ("+ui->variableBMode->currentText()+")";
     }
     descriptionText+=" "+julyTr("THEN","then")+" "+ui->thanType->currentText();
 
@@ -388,11 +399,16 @@ void AddRuleDialog::fixSize(bool fitToWindow)
     resize(qMax(preferedSize.width(),minWidth),qMax(preferedSize.height(),250));
 }
 
-void AddRuleDialog::on_variableA_currentIndexChanged(int index)
+void AddRuleDialog::on_variableA_currentIndexChanged(int)
 {
-    bool immediately=index==ui->variableA->count()-1;
-    ui->whenValueGroupBox->setEnabled(!immediately);
-    ui->comparation->setEnabled(!immediately);
+    QString variableAType=comboCurrentData(ui->variableA);
+
+    bool immediately=variableAType==QLatin1String("IMMEDIATELY");
+    bool tradeEvent=variableAType==QLatin1String("MyLastTrade")||variableAType==QLatin1String("LastTrade");
+
+    ui->whenValueGroupBox->setEnabled(!immediately&&!tradeEvent);
+    ui->comparation->setEnabled(!immediately&&!tradeEvent);
+
     ui->valueALabel->setVisible(!immediately);
     ui->valueASymbol->setVisible(!immediately);
     fixSize();

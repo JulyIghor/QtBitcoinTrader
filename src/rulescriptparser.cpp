@@ -116,7 +116,8 @@ RuleHolder RuleScriptParser::readHolderFromFile(QString &file, QString section)
 
 QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
 {
-    bool execImmediately=holder.variableACode=="IMMEDIATELY";
+    bool execImmediately=holder.variableACode==QLatin1String("IMMEDIATELY");
+    bool eventIsTrade=holder.variableACode==QLatin1String("LastTrade")||holder.variableACode==QLatin1String("MyLastTrade");
 
     QString script="function executeRule()\n{\n";
     if(!execImmediately)script="var executed=false;\n"+script+" executed=true;\n";
@@ -233,8 +234,8 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
 
     QString executeRuleLine;
 
-    if(haveDelay)executeRuleLine="trader.delay("+mainWindow.numFromDouble(holder.delayMilliseconds,3,0)+",\"executeRule()\");";
-            else executeRuleLine="executeRule();";
+    if(haveDelay)executeRuleLine=" trader.delay("+mainWindow.numFromDouble(holder.delayMilliseconds,3,0)+",\"executeRule()\");";
+            else executeRuleLine=" executeRule();";
 
     if(execImmediately)
     {
@@ -247,49 +248,59 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
     QString realtime;
 	QString ifLine;
 
-    if(holder.variableBCode=="EXACT")
-	{
-        ifLine=" if(value "+holder.comparationText+" "+mainWindow.numFromDouble(holder.variableBExact)+") ";
-	}
-    else
+    if(!eventIsTrade)
     {
-        indicatorBValue="trader.get(\""+holder.variableBSymbolCode+"\" , \""+holder.variableBCode+"\")";
-        indicatorB=indicatorBValue+";\n";
-        if(holder.variableBPercentChecked)
-            indicatorB+=" baseVariable "+holder.variableBplusMinus+"= baseVariable*"+mainWindow.numFromDouble(holder.variableBExact/100.0)+";\n";
-        else
-            if(holder.variableBExact!=0.0)indicatorB+=" baseVariable "+holder.variableBplusMinus+"= "+mainWindow.numFromDouble(holder.variableBExact)+";\n";
-
-        if(holder.variableBFeeIndex>0)
+        if(holder.variableBCode=="EXACT")
         {
-            QString sign=(holder.variableBFeeIndex==1?"+":"-");
-            indicatorB+=" baseVariable "+sign+"= baseVariable*trader.get(\""+holder.valueBSymbolCode+"\" , \"Fee\");\n";
+            ifLine=" if(value "+holder.comparationText+" "+mainWindow.numFromDouble(holder.variableBExact)+")";
         }
+        else
+        {
+            indicatorBValue="trader.get(\""+holder.variableBSymbolCode+"\" , \""+holder.variableBCode+"\")";
+            indicatorB=indicatorBValue+";\n";
+            if(holder.variableBPercentChecked)
+                indicatorB+=" baseVariable "+holder.variableBplusMinus+"= baseVariable*"+mainWindow.numFromDouble(holder.variableBExact/100.0)+";\n";
+            else
+                if(holder.variableBExact!=0.0)indicatorB+=" baseVariable "+holder.variableBplusMinus+"= "+mainWindow.numFromDouble(holder.variableBExact)+";\n";
 
-		if(holder.variableBModeIndex==0)realtime=" calcBaseVariable();\n";
-		else
-			if(holder.variableBModeIndex==2)
-			{
-				bool haveLessThan=holder.comparationText.contains("<");
-				bool haveMoreThan=holder.comparationText.contains(">");
-				if(haveLessThan)realtime=" if(value > "+indicatorBValue+")calcBaseVariable();\n";
-				if(haveMoreThan)realtime=" if(value < "+indicatorBValue+")calcBaseVariable();\n";
-			}
-        ifLine=" if(value "+holder.comparationText+" baseVariable) ";
-        script+="\n\nvar baseVariable = calcBaseVariable();\n"
-			"function calcBaseVariable()\n"
-			"{\n"
-			" baseVariable = "+indicatorB+
-			" return baseVariable;\n"
-            "}";
+            if(holder.variableBFeeIndex>0)
+            {
+                QString sign=(holder.variableBFeeIndex==1?"+":"-");
+                indicatorB+=" baseVariable "+sign+"= baseVariable*trader.get(\""+holder.valueBSymbolCode+"\" , \"Fee\");\n";
+            }
+
+            if(holder.variableBModeIndex==0)realtime=" calcBaseVariable();\n";
+            else
+                if(holder.variableBModeIndex==2)
+                {
+                    bool haveLessThan=holder.comparationText.contains("<");
+                    bool haveMoreThan=holder.comparationText.contains(">");
+                    if(haveLessThan)realtime=" if(value > "+indicatorBValue+")calcBaseVariable();\n";
+                    if(haveMoreThan)realtime=" if(value < "+indicatorBValue+")calcBaseVariable();\n";
+                }
+            ifLine=" if(value "+holder.comparationText+" baseVariable)";
+            script+="\n\nvar baseVariable = calcBaseVariable();\n"
+                    "function calcBaseVariable()\n"
+                    "{\n"
+                    " baseVariable = "+indicatorB+
+                    " return baseVariable;\n"
+                    "}";
+        }
     }
 
-    script+="\n\ntrader.on(\""+holder.variableACode+"\").changed()\n"
+    QString eventName=holder.variableACode;
+    if(!eventIsTrade&&eventName.startsWith(QLatin1String("Balance"),Qt::CaseInsensitive))
+    {
+        if(eventName.endsWith("A",Qt::CaseInsensitive))eventName="Balance\",\""+holder.valueASymbolCode.left(3);
+        else
+        if(eventName.endsWith("B",Qt::CaseInsensitive))eventName="Balance\",\""+holder.valueASymbolCode.right(3);
+    }
+    script+="\n\ntrader.on(\""+eventName+"\").changed()\n"
     "{\n"
     " if(executed)return;\n"
     " if(symbol != \""+holder.valueASymbolCode+"\")return;\n";
     script+=realtime+
-    ifLine+" "+executeRuleLine;
+    ifLine+executeRuleLine;
     if(testMode)script+="\n else { trader.test(2); trader.stopGroup(); }\n";
     script+="\n}\n";
     }

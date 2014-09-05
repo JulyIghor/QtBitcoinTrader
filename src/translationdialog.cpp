@@ -91,7 +91,7 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 		}
 		setTabOrder(lastWidget,ui.searchLineEdit);
 
-        resize(640,640);
+        resize(800,640);
         fixLayout();
 	if(baseValues.mainWindow_)mainWindow.addPopupDialog(1);
 
