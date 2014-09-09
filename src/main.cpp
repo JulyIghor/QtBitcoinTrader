@@ -61,6 +61,10 @@
 #include <QStandardPaths>
 #endif
 
+#ifdef STATIC_QT5_BUILD
+#include <QtPlugin>
+#endif
+
 BaseValues *baseValues_;
 
 void selectSystemLanguage()
@@ -147,7 +151,6 @@ void BaseValues::Construct()
 
 	httpRequestInterval=400;
 	httpRequestTimeout=5000;
-	httpSplitPackets=true;
 	httpRetryCount=5;
 	apiDownCount=0;
 	groupPriceValue=0.0;
@@ -158,6 +161,10 @@ void BaseValues::Construct()
 
 int main(int argc, char *argv[])
 {
+#ifdef STATIC_QT5_BUILD
+    Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin)
+#endif
+
     JulyLockFile *julyLock=0;
 #if QT_VERSION < 0x050000
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
@@ -292,10 +299,7 @@ int main(int argc, char *argv[])
 		QNetworkProxy proxy;
 		QSettings settingsMain(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 
-		bool plastiqueStyle=false;
-#ifndef Q_OS_WIN
-		plastiqueStyle=true;
-#endif
+		bool plastiqueStyle=true;
 		plastiqueStyle=settingsMain.value("PlastiqueStyle",plastiqueStyle).toBool();
 		settingsMain.setValue("PlastiqueStyle",plastiqueStyle);
         if(plastiqueStyle)

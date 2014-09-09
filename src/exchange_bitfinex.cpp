@@ -118,26 +118,24 @@ void Exchange_Bitfinex::secondSlot()
 {
     static int infoCounter=0;
 	if(infoCounter%2&&!isReplayPending(202))
-	{
-        sendToApi(202,"balances",true,baseValues.httpSplitPackets);
-	}
+        sendToApi(202,"balances",true,true);
 
-    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"orders",true,baseValues.httpSplitPackets);
+    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"orders",true,true);
 
-	//if(!tickerOnly&&!isReplayPending(210))sendToApi(210,"positions",true,baseValues.httpSplitPackets);
+	//if(!tickerOnly&&!isReplayPending(210))sendToApi(210,"positions",true,true);
 
 	if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
         emit depthRequested();
-        sendToApi(111,"book/"+baseValues.currentPair.currRequestPair+"?limit_bids="+baseValues.depthCountLimitStr+"&limit_asks="+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);
+        sendToApi(111,"book/"+baseValues.currentPair.currRequestPair+"?limit_bids="+baseValues.depthCountLimitStr+"&limit_asks="+baseValues.depthCountLimitStr,false,true);
 		forceDepthLoad=false;
 	}
-    if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
+    if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,true);
 
-    if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair+"?timestamp="+lastTradesDateCache+"&limit_trades=200"/*astTradesDateCache*/,false,baseValues.httpSplitPackets);
+    if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair+"?timestamp="+lastTradesDateCache+"&limit_trades=200"/*astTradesDateCache*/,false,true);
     if(lastHistory.isEmpty())
-        if(!isReplayPending(208))sendToApi(208,"mytrades",true,baseValues.httpSplitPackets,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 200");
-	if(!baseValues.httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
+        if(!isReplayPending(208))sendToApi(208,"mytrades",true,true,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 200");
+	if(!true&&julyHttp)julyHttp->prepareDataSend();
 
 	if(++infoCounter>9)
 	{

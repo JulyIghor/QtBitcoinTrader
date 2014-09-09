@@ -210,7 +210,7 @@ void ScriptObject::timerOut()
     }
     if(command.isEmpty())return;
     if(engine==0)return;
-    engine->evaluate(command);
+    engine->evaluate(command.replace("\\","\\\\"));
 }
 
 qreal ScriptObject::get(QString symbol, QString indicator)
@@ -624,6 +624,7 @@ QString ScriptObject::sourceToScript(QString text)
 
     text.replace("\" ,","\",");
     text.replace("' ,","',");
+	text.replace("\\","\\\\");
 
     text.replace("trader.get(\"Balance\",\"","trader.get(\"Balance",Qt::CaseInsensitive);
     text.replace("trader.on(\"Balance\",\"","trader.on(\"Balance",Qt::CaseInsensitive);

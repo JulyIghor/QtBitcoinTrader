@@ -530,18 +530,18 @@ void Exchange_BTCe::secondSlot()
 	static int infoCounter=0;
 	if(lastHistory.isEmpty())getHistory(false);
 
-    if(!isReplayPending(202))sendToApi(202,"",true,baseValues.httpSplitPackets,"method=getInfo&");
-    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,baseValues.httpSplitPackets,"method=ActiveOrders&");
-    if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
-    if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair,false,baseValues.httpSplitPackets);
+    if(!isReplayPending(202))sendToApi(202,"",true,true,"method=getInfo&");
+    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,true,"method=ActiveOrders&");
+    if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,true);
+    if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair,false,true);
 	if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
 		emit depthRequested();
-        sendToApi(111,"depth/"+baseValues.currentPair.currRequestPair+"?limit="+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);
+        sendToApi(111,"depth/"+baseValues.currentPair.currRequestPair+"?limit="+baseValues.depthCountLimitStr,false,true);
 		forceDepthLoad=false;
 	}
 
-	if(!baseValues.httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
+	if(!true&&julyHttp)julyHttp->prepareDataSend();
 
 	if(++infoCounter>9)
 	{
@@ -556,9 +556,9 @@ void Exchange_BTCe::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-    if(!isReplayPending(208))sendToApi(208,"",true,baseValues.httpSplitPackets,"method=TradeHistory&");
-    if(!isReplayPending(110))sendToApi(110,"info",false,baseValues.httpSplitPackets);
-	if(!baseValues.httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
+    if(!isReplayPending(208))sendToApi(208,"",true,true,"method=TradeHistory&");
+    if(!isReplayPending(110))sendToApi(110,"info",false,true);
+	if(!true&&julyHttp)julyHttp->prepareDataSend();
 }
 
 void Exchange_BTCe::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)

@@ -107,7 +107,6 @@ struct BaseValues
 	QByteArray depthCountLimitStr;
 	int depthCountLimit;
 	int httpRetryCount;
-	bool httpSplitPackets;
 	int httpRequestInterval;
 	int httpRequestTimeout;
 	Exchange *currentExchange_;

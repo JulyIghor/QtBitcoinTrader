@@ -51,8 +51,6 @@ public:
 
 private:
     void setDiffBar(int);
-	//QMap<int,bool> clientIdVisibleMap;
-	//QMap<int,QString> getApiUrlMap;
 	qint32 exchangeNum;
 	QString exchangeName;
 	bool clientIdEnabled;

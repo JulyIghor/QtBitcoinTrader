@@ -190,7 +190,7 @@ void Exchange_BTCChina::getHistory(bool force)
 
 QByteArray Exchange_BTCChina::numForBuySellFromDouble(qreal val, int maxDecimals)
 {
-    val=mainWindow.getValidDoubleForPercision(val,maxDecimals,false);
+    val=mainWindow.getValidDoubleForPercision(val,maxDecimals,true);
 	QByteArray numberText=QByteArray::number(val,'f',maxDecimals);
 	int curPos=numberText.size()-1;
 	while(curPos>0&&numberText.at(curPos)=='0')numberText.remove(curPos--,1);

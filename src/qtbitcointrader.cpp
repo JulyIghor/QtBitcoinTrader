@@ -69,7 +69,11 @@
 #include "orderstablecancelbutton.h"
 
 #ifdef Q_OS_WIN
+
+#ifdef SAPI_ENABLED
 #include <sapi.h>
+#endif
+
 #include "windows.h"
 #if QT_VERSION < 0x050000
 #include <QWindowsXPStyle>
@@ -328,9 +332,7 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	baseValues.uiUpdateInterval=iniSettings->value("UI/UiUpdateInterval",100).toInt();
 	if(baseValues.uiUpdateInterval<1)baseValues.uiUpdateInterval=100;
-
-    baseValues.httpSplitPackets=true;//iniSettings->value("Network/HttpSplitPackets",false).toBool();
-
+	
 	baseValues.customUserAgent=iniSettings->value("Network/UserAgent","").toString();
 	baseValues.customCookies=iniSettings->value("Network/Cookies","").toString();
 
@@ -367,7 +369,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(baseValues.appVerLastReal<1.0763)
 	{
 		baseValues.httpRequestInterval=500;
-		baseValues.httpSplitPackets=false;
 		settingsMain.remove("HttpConnectionsCount");
 		settingsMain.remove("HttpSwapSocketAfterPacketsCount");
 		settingsMain.remove("HttpRequestsInterval");
@@ -377,7 +378,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 		settingsMain.remove("LogEnabled");
 		settingsMain.remove("RowHeight");
 		settingsMain.remove("ApiDownCount");
-		settingsMain.remove("Network/HttpSplitPackets");
 		QStringList oldKeys=iniSettings->childKeys();
 		for(int n=0;n<oldKeys.count();n++)iniSettings->remove(oldKeys.at(n));
 
@@ -393,7 +393,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 
 	iniSettings->setValue("Network/HttpRequestsInterval",baseValues.httpRequestInterval);
 	iniSettings->setValue("Network/HttpRequestsTimeout",baseValues.httpRequestTimeout);
-	iniSettings->setValue("Network/HttpSplitPackets",baseValues.httpSplitPackets);
 	iniSettings->setValue("Network/HttpRetryCount",baseValues.httpRetryCount);
 	iniSettings->setValue("UI/UiUpdateInterval",baseValues.uiUpdateInterval);
 	iniSettings->setValue("UI/DepthAutoResizeColumns",ui.depthAutoResize->isChecked());
@@ -514,6 +513,7 @@ void QtBitcoinTrader::fixTableViews(QWidget *wid)
 		tables->verticalHeader()->setDefaultSectionSize(defaultHeightForRow);
 	}
 }
+
 qreal QtBitcoinTrader::getIndicatorValue(QString name)
 {
     QDoubleSpinBox *spin=indicatorsMap.value(name,0);
@@ -1176,6 +1176,7 @@ void QtBitcoinTrader::startApplication(QString name, QStringList params)
 
 void QtBitcoinTrader::sayText(QString text)
 {
+    Q_UNUSED(text)
 #ifdef Q_OS_MAC
     static SpeechChannel voiceChannel;
     static bool once=true;
@@ -1189,13 +1190,15 @@ void QtBitcoinTrader::sayText(QString text)
     CFRelease(talkText);
 #else
 #ifdef Q_OS_WIN
+#ifdef SAPI_ENABLED
 	static ISpVoice *pVoice=NULL;
 	static HRESULT hr=CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
 	if(SUCCEEDED(hr))
 	{
 		pVoice->Speak(NULL,SPF_PURGEBEFORESPEAK,0);
-		pVoice->Speak(text.utf16(), SPF_ASYNC, NULL);
+        pVoice->Speak((LPCWSTR)text.utf16(), SPF_ASYNC, NULL);
 	}
+#endif
 #else
     startApplication("say",QStringList()<<text);
 #endif
@@ -2605,7 +2608,21 @@ void QtBitcoinTrader::buyBitcoinsButton()
 
 void QtBitcoinTrader::playWav(QString wav, bool noBlink)
 {
-	QSound::play(wav);
+#ifdef Q_OS_WIN
+	PlaySound((LPCWSTR)wav.utf16(), NULL, SND_ASYNC);
+#else
+	static QSound *sound=0;
+	if(sound==0)sound=new QSound("",this);
+	sound->stop();
+	sound->play(wav);
+	bool isValidSound=!sound->isFinished();
+	if(!isValidSound)
+	{
+		sound->deleteLater();
+		sound=0;
+		QApplication::beep();
+	}
+#endif
 	if(!noBlink)blinkWindow();
 }
 
@@ -2618,7 +2635,7 @@ void QtBitcoinTrader::beep(bool noBlink)
         QFile::copy(":/Resources/Sound/800.wav",fileName);
     }
     if(!QFile::exists(fileName))QApplication::beep();
-    else QSound::play(fileName);
+    else playWav(fileName,noBlink);
 
 	if(!noBlink)blinkWindow();
 }
@@ -2632,7 +2649,7 @@ void QtBitcoinTrader::blinkWindow()
 		flashInfo.cbSize=sizeof(FLASHWINFO);
         flashInfo.hwnd=(HWND)windowWidget->winId();
 		flashInfo.dwFlags=FLASHW_ALL;
-		flashInfo.uCount=20;
+		flashInfo.uCount=10;
 		flashInfo.dwTimeout=400;
 		::FlashWindowEx(&flashInfo);
 	}
@@ -3085,7 +3102,7 @@ void QtBitcoinTrader::on_rulesTabs_tabCloseRequested(int tab)
 		msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
 		if(msgBox.exec()!=QMessageBox::Yes)return;
 	}
-    bool removed=false;
+    bool removed=false; Q_UNUSED(removed);
     if(currentGroup)
     {
         removed=currentGroup->removeGroup();
@@ -3265,6 +3282,8 @@ qreal QtBitcoinTrader::getAvailableBTC()
 
 qreal QtBitcoinTrader::getAvailableUSD()
 {
+    if(floatFee==0.0)return ui.accountUSD->value();
+
     qreal amountToReturn=0.0;
 	if(currentExchange->balanceDisplayAvailableAmount)amountToReturn=ui.accountUSD->value();
 	else amountToReturn=ui.accountUSD->value()-ui.ordersTotalUSD->value();
@@ -3280,12 +3299,14 @@ qreal QtBitcoinTrader::getAvailableUSD()
 
 qreal QtBitcoinTrader::getAvailableUSDtoBTC(qreal priceToBuy)
 {
-    qreal avUSD=getAvailableUSD();
-    qreal decValue=0.0;
-	if(currentExchange->calculatingFeeMode==1)decValue=qPow(0.1,qMax(baseValues.currentPair.currADecimals,1));else
-	if(currentExchange->calculatingFeeMode==2)decValue=2.0*qPow(0.1,qMax(baseValues.currentPair.currADecimals,1));
-
-	return getValidDoubleForPercision(avUSD/priceToBuy-decValue,baseValues.currentPair.currADecimals,false);
+    double avUSD=getAvailableUSD();
+    double decValue=0.0;
+    if(floatFee>0.0)
+    {
+    if(currentExchange->calculatingFeeMode==1)decValue=qPow(0.1,qMax(baseValues.currentPair.currADecimals,1));else
+    if(currentExchange->calculatingFeeMode==2)decValue=2.0*qPow(0.1,qMax(baseValues.currentPair.currADecimals,1));
+    }
+    return getValidDoubleForPercision(avUSD/priceToBuy-decValue,baseValues.currentPair.currADecimals,false);
 }
 
 void QtBitcoinTrader::apiSellSend(QString symbol, qreal btc, qreal price)

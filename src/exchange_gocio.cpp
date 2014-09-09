@@ -541,19 +541,19 @@ void Exchange_GOCio::secondSlot()
 	static int infoCounter=0;
 	if(lastHistory.isEmpty())getHistory(false);
 
-	if(!isReplayPending(202))sendToApi(202,"",true,baseValues.httpSplitPackets,"method=getInfo&");
+	if(!isReplayPending(202))sendToApi(202,"",true,true,"method=getInfo&");
 
-	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,baseValues.httpSplitPackets,"method=ActiveOrders&");
-	if(!isReplayPending(103))sendToApi(103,baseValues.currentPair.currRequestPair+"/ticker/",false,baseValues.httpSplitPackets);
-	if(!isReplayPending(109))sendToApi(109,baseValues.currentPair.currRequestPair+"/trades/",false,baseValues.httpSplitPackets);
+	if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,true,"method=ActiveOrders&");
+	if(!isReplayPending(103))sendToApi(103,baseValues.currentPair.currRequestPair+"/ticker/",false,true);
+	if(!isReplayPending(109))sendToApi(109,baseValues.currentPair.currRequestPair+"/trades/",false,true);
 	if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
 	{
 		emit depthRequested();
-		sendToApi(111,baseValues.currentPair.currRequestPair+"/depth/?"+baseValues.depthCountLimitStr,false,baseValues.httpSplitPackets);
+		sendToApi(111,baseValues.currentPair.currRequestPair+"/depth/?"+baseValues.depthCountLimitStr,false,true);
 		forceDepthLoad=false;
 	}
 
-	if(!baseValues.httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
+	if(!true&&julyHttp)julyHttp->prepareDataSend();
 
 	if(++infoCounter>9)
 	{
@@ -568,8 +568,8 @@ void Exchange_GOCio::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(!isReplayPending(208))sendToApi(208,"",true,baseValues.httpSplitPackets,"method=TradeHistory&since="+lastDate+"&");
-	if(!baseValues.httpSplitPackets&&julyHttp)julyHttp->prepareDataSend();
+	if(!isReplayPending(208))sendToApi(208,"",true,true,"method=TradeHistory&since="+lastDate+"&");
+	if(!true&&julyHttp)julyHttp->prepareDataSend();
 }
 
 void Exchange_GOCio::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)

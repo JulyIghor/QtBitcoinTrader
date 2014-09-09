@@ -56,7 +56,15 @@ TranslationAbout::TranslationAbout(QWidget *par)
 		ui.LogoGroupBox->setLayout(groupboxLayout);
 		LogoButton *logoButton=new LogoButton;
 		groupboxLayout->addWidget(logoButton);
-	}
+    }
+#ifdef Q_OS_WIN
+    resize(700,height());
+    resize(width(),minimumSizeHint().height()+20);
+#else
+    resize(800,height());
+    resize(width(),minimumSizeHint().height()+60);
+#endif
+	setMinimumSize(size());
 }
 
 TranslationAbout::~TranslationAbout()

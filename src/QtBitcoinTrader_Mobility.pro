@@ -1,18 +1,30 @@
 TEMPLATE	= app
 LANGUAGE        = C++
-TARGET 		= QtBitcoinTrader
 DEPENDPATH 	+= .
 INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
-INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
-QT		+= network script
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia
+CONFIG	+= qt #warn_off release
 
- win32 { LIBS += -lcrypt32 -leay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lz}
+ win32 { TARGET = ../Bin/QtBitcoinTrader }
+!win32 { TARGET = QtBitcoinTrader }
+
+QT  += network script
+greaterThan(QT_MAJOR_VERSION, 4):
+{
+QT += widgets
+!win32 { QT += multimedia }
+}
+
+exists("sapi.h"){ DEFINES += SAPI_ENABLED }
+
+build_pass:CONFIG(static, static|shared)
+{
+   win32 { DEFINES += STATIC_QT5_BUILD }
+}
+
+ win32 { LIBS += -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lzlib}
 !win32 { LIBS += -lcrypto -lz }
-
-CONFIG		+= qt warn_off release
 
 mac{
 LIBS += -framework CoreFoundation
