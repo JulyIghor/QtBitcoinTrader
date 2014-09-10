@@ -1047,7 +1047,7 @@ qreal QtBitcoinTrader::getValidDoubleForPercision(const qreal &val, const int &p
 {
     if(val<0.00000001)return 0.0;
 	int intVal=val;
-	int percisionValue=qPow(10,percision);
+    int percisionValue=qFloor(qPow(10,percision));
 	int intMultipled=(val-intVal)*percisionValue;
 	if(roundUp)intMultipled++;
     return (qreal)intMultipled/percisionValue+intVal;
@@ -2614,14 +2614,7 @@ void QtBitcoinTrader::playWav(QString wav, bool noBlink)
 	static QSound *sound=0;
 	if(sound==0)sound=new QSound("",this);
 	sound->stop();
-	sound->play(wav);
-	bool isValidSound=!sound->isFinished();
-	if(!isValidSound)
-	{
-		sound->deleteLater();
-		sound=0;
-		QApplication::beep();
-	}
+    sound->play(wav);
 #endif
 	if(!noBlink)blinkWindow();
 }
