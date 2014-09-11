@@ -455,3 +455,6 @@ String_SCRIPT_NAME=Скрипт
 String_DELAY_SEC=Задержка %1 сек
 Label_DELAY=Задержка:
 String_INDICATOR_APILAG=API лаг
+String_RULE_MY_LASTTRADE_CHANGED=Мой любой ордер выполнен
+String_RULE_LASTTRADE_CHANGED=Любой ордер маркета выполнен
+Label_AMOUNT=Объем:

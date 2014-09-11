@@ -455,3 +455,6 @@ String_LANGUAGE_NAME=Türkçe
 String_LANGUAGE_AUTHOR=Altan CAN<br><a href="mailto:altancan73@gmail.com">altancan73@gmail.com</a> - Bağış:<br>BTC:<a href="Bitcoin:1JThpNkCni1krZSyoFsspmVKKkPkdkEcDQ">1JThpNkCni1krZSyoFsspmVKKkPkdkEcDQ</a><br>LTC:<a href="LTC:LbhKxmE4oxEcj85EjLywGZ4mV9tLvHVSK3">LbhKxmE4oxEcj85EjLywGZ4mV9tLvHVSK3</a>
 String_LANGUAGE_LOCALE=tr_TR
 String_INDICATOR_APILAG=Api Lag
+String_RULE_MY_LASTTRADE_CHANGED=My order sold or bought
+String_RULE_LASTTRADE_CHANGED=Market order sold or bought
+Label_AMOUNT=Hacim:

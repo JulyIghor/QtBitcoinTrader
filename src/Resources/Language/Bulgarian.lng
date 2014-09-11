@@ -455,3 +455,6 @@ String_LANGUAGE_NAME=Български
 String_LANGUAGE_AUTHOR=Strannik <a href="mailto:rus_70@mail.bg">rus_70@mail.bg</a><br>Donate Bitcoin:<br><a href="bitcoin:1EMwTpfzsR6xyYBrMB7o4T2bM5pKbeVzFN">1EMwTpfzsR6xyYBrMB7o4T2bM5pKbeVzFN</a>
 String_LANGUAGE_LOCALE=bg_BG
 String_INDICATOR_APILAG=API лаг
+String_RULE_MY_LASTTRADE_CHANGED=My order sold or bought
+String_RULE_LASTTRADE_CHANGED=Market order sold or bought
+Label_AMOUNT=Обем:

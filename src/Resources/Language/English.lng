@@ -456,3 +456,6 @@ String_SCRIPT_NAME=Script
 String_DELAY_SEC=Delay %1 sec
 Label_DELAY=Delay:
 String_INDICATOR_APILAG=Api Lag
+String_RULE_MY_LASTTRADE_CHANGED=My order sold or bought
+String_RULE_LASTTRADE_CHANGED=Market order sold or bought
+Label_AMOUNT=Amount:

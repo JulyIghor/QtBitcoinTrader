@@ -455,3 +455,6 @@ String_LANGUAGE_NAME=简体中文
 String_LANGUAGE_AUTHOR=Li Ming <a href="mailto:274153705@qq.com">274153705@qq.com</a><br>捐赠 LTC: <a href="litecoin:Lfjfcj1weTFVW5grxaLLY4RrzYb4UE8aPP">Lfjfcj1weTFVW5grxaLLY4RrzYb4UE8aPP</a>
 String_LANGUAGE_LOCALE=zh_CN
 String_INDICATOR_APILAG=API 延时
+String_RULE_MY_LASTTRADE_CHANGED=My order sold or bought
+String_RULE_LASTTRADE_CHANGED=Market order sold or bought
+Label_AMOUNT=合计:
