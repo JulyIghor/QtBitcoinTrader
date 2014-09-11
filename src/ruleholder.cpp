@@ -50,7 +50,7 @@ RuleHolder::RuleHolder()
 
 bool RuleHolder::isValidComparation(QString &text)
 {
-    return text==QLatin1String("=")||text==QLatin1String("<")||text==QLatin1String(">")||text==QLatin1String("<=")||text==QLatin1String(">=");
+    return text==QLatin1String("=")||text==QLatin1String("<")||text==QLatin1String(">")||text==QLatin1String("<=")||text==QLatin1String(">=")||text==QLatin1String("!=")||text==QLatin1String("==")||text==QLatin1String("<>");
 }
 
 bool RuleHolder::isValidSymbol(QString &symbol)

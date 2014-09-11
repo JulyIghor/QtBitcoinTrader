@@ -248,11 +248,16 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
     QString realtime;
 	QString ifLine;
 
+	QString comparationText=holder.comparationText;
+	if(comparationText==QLatin1String("="))comparationText=QLatin1String("==");
+	else
+	if(comparationText==QLatin1String("<>"))comparationText=QLatin1String("!=");
+
     if(!eventIsTrade)
     {
         if(holder.variableBCode=="EXACT")
         {
-            ifLine=" if(value "+holder.comparationText+" "+mainWindow.numFromDouble(holder.variableBExact)+")";
+            ifLine=" if(value "+comparationText+" "+mainWindow.numFromDouble(holder.variableBExact)+")";
         }
         else
         {
@@ -273,12 +278,12 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
             else
                 if(holder.variableBModeIndex==2)
                 {
-                    bool haveLessThan=holder.comparationText.contains("<");
-                    bool haveMoreThan=holder.comparationText.contains(">");
+                    bool haveLessThan=comparationText.contains("<");
+                    bool haveMoreThan=comparationText.contains(">");
                     if(haveLessThan)realtime=" if(value > "+indicatorBValue+")calcBaseVariable();\n";
                     if(haveMoreThan)realtime=" if(value < "+indicatorBValue+")calcBaseVariable();\n";
                 }
-            ifLine=" if(value "+holder.comparationText+" baseVariable)";
+            ifLine=" if(value "+comparationText+" baseVariable)";
             script+="\n\nvar baseVariable = calcBaseVariable();\n"
                     "function calcBaseVariable()\n"
                     "{\n"
