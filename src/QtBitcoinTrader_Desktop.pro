@@ -5,25 +5,22 @@ INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
 
-CONFIG	+= qt #warn_off release
+CONFIG	+= qt warn_off release
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
 !win32 { TARGET = QtBitcoinTrader }
 
 QT  += network script
-greaterThan(QT_MAJOR_VERSION, 4):
-{
+greaterThan(QT_MAJOR_VERSION, 4): {
 QT += widgets
 !win32 { QT += multimedia }
 }
 
 exists("sapi.h"){ DEFINES += SAPI_ENABLED }
 
-build_pass:CONFIG(static, static|shared)
-{
+build_pass:CONFIG(static, static|shared){
 CONFIG	+= warn_off release
-  greaterThan(QT_MAJOR_VERSION, 4):
-  {
+  greaterThan(QT_MAJOR_VERSION, 4):{
    QTPLUGIN.mediaservice=-
    QTPLUGIN.playlistformats=-
    QTPLUGIN.position=-

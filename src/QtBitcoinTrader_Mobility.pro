@@ -4,23 +4,37 @@ DEPENDPATH 	+= .
 INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
-CONFIG	+= qt #warn_off release
+
+CONFIG	+= qt warn_off release
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
 !win32 { TARGET = QtBitcoinTrader }
 
 QT  += network script
-greaterThan(QT_MAJOR_VERSION, 4):
-{
+greaterThan(QT_MAJOR_VERSION, 4): {
 QT += widgets
 !win32 { QT += multimedia }
 }
 
 exists("sapi.h"){ DEFINES += SAPI_ENABLED }
 
-build_pass:CONFIG(static, static|shared)
-{
+build_pass:CONFIG(static, static|shared){
+CONFIG	+= warn_off release
+  greaterThan(QT_MAJOR_VERSION, 4):{
+   QTPLUGIN.mediaservice=-
+   QTPLUGIN.playlistformats=-
+   QTPLUGIN.position=-
+   QTPLUGIN.printsupport=-
+   QTPLUGIN.bearer=-
+   QTPLUGIN.accessible=-
+   QTPLUGIN.sensors=-
+   QTPLUGIN.sqldrivers=-
+   QTPLUGIN.qmltooling=-
+   QTPLUGIN.designer=-
+   QTPLUGIN.iconengines=-
+   QTPLUGIN.imageformats=-
    win32 { DEFINES += STATIC_QT5_BUILD }
+  }
 }
 
  win32 { LIBS += -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lzlib}
