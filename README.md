@@ -4,19 +4,12 @@ This software helps you to open and to cancel orders very fast with real time da
 
 Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
 
-I want to develop this Trader App so that it can be configured for any rule
-and strategy. If you want to help me, then
-donate Bitcoins to `1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc`
-
 For any questions please use contact form at http://centrabit.com
 Or send e-mail directly to julyighor@gmail.com
 
-Next ToDo:
-- Add realtime charts
-- Make rules more advanced
-
 ## Download binaries
 
+* https://centrabit.com/?m0prm=6 `Official download page`
 * https://sourceforge.net/projects/bitcointrader/  `Win32`,`Mac`
 * http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml `Win32`
 * http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml `Mac`
@@ -24,8 +17,9 @@ Next ToDo:
 * http://packages.altlinux.org/en/Sisyphus/srpms/QtBitcoinTrader `Alt Linux`
 
 ## Demos
-* http://www.youtube.com/watch?v=C--P258DQkk
-
+* https://www.youtube.com/watch?v=C--P258DQkk
+* https://www.youtube.com/watch?v=7hliVz6Gr9Q
+* 
 ## Forums
 
 * https://bitcointalk.org/index.php?topic=201062 `ENG`
