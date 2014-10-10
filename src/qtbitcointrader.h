@@ -80,6 +80,8 @@ class QtBitcoinTrader : public QDialog
 	Q_OBJECT
 
 public:
+	void addRuleByHolder(RuleHolder &holder, bool isEnabled, QString titleName, QString fileName);
+
     QStringList getRuleGroupsNames();
     QStringList getScriptGroupsNames();
     int getOpenOrdersCount(int all=0);
@@ -100,13 +102,10 @@ public:
     qreal getAvailableUSDtoBTC(qreal price);
 
     qreal getFeeForUSDDec(qreal usd);
-    qreal getValidDoubleForPercision(const qreal &val, const int &percision, bool roundUp=true);
 
     qreal floatFee;
     qreal floatFeeDec;
     qreal floatFeeInc;
-
-    QString numFromDouble(const qreal &val, int maxDecimals=10, int minDecimals=1);
 
 	void addPopupDialog(int);
 

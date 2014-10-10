@@ -55,8 +55,8 @@ Exchange_GOCio::Exchange_GOCio(QByteArray pRestSign, QByteArray pRestKey)
 	julyHttp=0;
 	isApiDown=false;
 	tickerOnly=false;
-	privateRestSign=pRestSign;
-	privateRestKey=pRestKey;
+	setApiKeySecret(pRestKey,pRestSign);
+
 	moveToThread(this);
 
 	currencyMapFile="GOCio";
@@ -580,15 +580,7 @@ void Exchange_GOCio::buy(QString symbol, double apiBtcToBuy, double apiPriceToBu
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-	QByteArray btcToBuy=QByteArray::number(apiBtcToBuy,'f',8);
-    int digitsToCut=pairItem.currADecimals;
-	int dotPos=btcToBuy.indexOf('.');
-	if(dotPos>0)
-	{
-		int toCut=(btcToBuy.size()-dotPos-1)-digitsToCut;
-		if(toCut>0)btcToBuy.remove(btcToBuy.size()-toCut-1,toCut);
-	}
-    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=buy&rate="+QByteArray::number(apiPriceToBuy,'f',pairItem.priceDecimals)+"&amount="+btcToBuy+"&";
+    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=buy&rate="+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals)+"&amount="+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals)+"&";
 	if(debugLevel)logThread->writeLog("Buy: "+data,2);
 	sendToApi(306,"",true,true,data);
 }
@@ -601,14 +593,7 @@ void Exchange_GOCio::sell(QString symbol, double apiBtcToSell, double apiPriceTo
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-	QByteArray btcToSell=QByteArray::number(apiBtcToSell,'f',8);
-	int dotPos=btcToSell.indexOf('.');
-	if(dotPos>0)
-	{
-        int toCut=(btcToSell.size()-dotPos-1)-pairItem.currADecimals;
-		if(toCut>0)btcToSell.remove(btcToSell.size()-toCut-1,toCut);
-	}
-    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell,'f',pairItem.priceDecimals)+"&amount="+btcToSell+"&";
+    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=sell&rate="+QByteArray::number(apiPriceToSell,'f',pairItem.priceDecimals)+"&amount="+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals)+"&";
 	if(debugLevel)logThread->writeLog("Sell: "+data,2);
 	sendToApi(307,"",true,true,data);
 }
@@ -627,7 +612,7 @@ void Exchange_GOCio::sendToApi(int reqType, QByteArray method, bool auth, bool s
 {
 	if(julyHttp==0)
 	{ 
-		julyHttp=new JulyHttp("goc.io","Key: "+privateRestKey+"\r\n",this);
+		julyHttp=new JulyHttp("goc.io","Key: "+getApiKey()+"\r\n",this);
 		connect(julyHttp,SIGNAL(anyDataReceived()),baseValues_->mainWindow_,SLOT(anyDataReceived()));
 		connect(julyHttp,SIGNAL(apiDown(bool)),baseValues_->mainWindow_,SLOT(setApiDown(bool)));
 		connect(julyHttp,SIGNAL(setDataPending(bool)),baseValues_->mainWindow_,SLOT(setDataPending(bool)));
@@ -640,9 +625,9 @@ void Exchange_GOCio::sendToApi(int reqType, QByteArray method, bool auth, bool s
 	{
 		QByteArray postData=commands+"nonce="+QByteArray::number(++privateNonce);
 		if(sendNow)
-			julyHttp->sendData(reqType, "POST /api/"+method, postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
+			julyHttp->sendData(reqType, "POST /api/"+method, postData, "Sign: "+hmacSha512(getApiSign(),postData).toHex()+"\r\n");
 		else
-			julyHttp->prepareData(reqType, "POST /api/"+method, postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
+			julyHttp->prepareData(reqType, "POST /api/"+method, postData, "Sign: "+hmacSha512(getApiSign(),postData).toHex()+"\r\n");
 	}
 	else
 	{

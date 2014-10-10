@@ -60,8 +60,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	forceDepthLoad=false;
 	julyHttp=0;
 	tickerOnly=false;
-	privateRestSign=pRestSign;
-	privateRestKey=pRestKey.split(':').last();
+	setApiKeySecret(pRestKey.split(':').last(),pRestSign);
 	privateClientId=pRestKey.split(':').first();
 
 	currencyMapFile="Bitstamp";
@@ -86,9 +85,9 @@ Exchange_Bitstamp::~Exchange_Bitstamp()
 
 void Exchange_Bitstamp::filterAvailableUSDAmountValue(qreal *amount)
 {
-    qreal decValue=mainWindow.getValidDoubleForPercision((*amount)*mainWindow.floatFee,baseValues.currentPair.priceDecimals,false);
+    qreal decValue=cutDoubleDecimalsCopy((*amount)*mainWindow.floatFee,baseValues.currentPair.priceDecimals,false);
 	decValue+=qPow(0.1,qMax(baseValues.currentPair.priceDecimals,1));
-	*amount=mainWindow.getValidDoubleForPercision((*amount)-decValue,baseValues.currentPair.currBDecimals,false);
+    *amount=cutDoubleDecimalsCopy((*amount)-decValue,baseValues.currentPair.currBDecimals,false);
 }
 
 void Exchange_Bitstamp::clearVariables()
@@ -166,7 +165,7 @@ void Exchange_Bitstamp::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToB
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray params="amount="+QByteArray::number(apiBtcToBuy,'f',pairItem.currADecimals)+"&price="+QByteArray::number(apiPriceToBuy,'f',pairItem.priceDecimals);
+    QByteArray params="amount="+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals)+"&price="+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals);
 	if(debugLevel)logThread->writeLog("Buy: "+params,2);
 	sendToApi(306,"buy/",true,true,params);
 }
@@ -179,7 +178,7 @@ void Exchange_Bitstamp::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceT
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray params="amount="+QByteArray::number(apiBtcToSell,'f',pairItem.currADecimals)+"&price="+QByteArray::number(apiPriceToSell,'f',pairItem.priceDecimals);
+    QByteArray params="amount="+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals)+"&price="+byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals);
 	if(debugLevel)logThread->writeLog("Sell: "+params,2);
 	sendToApi(307,"sell/",true,true,params);
 }
@@ -208,7 +207,7 @@ void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, boo
 	if(auth)
 	{
 		QByteArray postData=QByteArray::number(++privateNonce);
-		postData="key="+privateRestKey+"&signature="+hmacSha256(privateRestSign,QByteArray(postData+privateClientId+privateRestKey)).toHex().toUpper()+"&nonce="+postData;
+		postData="key="+getApiKey()+"&signature="+hmacSha256(getApiSign(),QByteArray(postData+privateClientId+getApiKey())).toHex().toUpper()+"&nonce="+postData;
 		if(!commands.isEmpty())postData.append("&"+commands);
 		if(sendNow)
 		julyHttp->sendData(reqType, "POST /api/"+method,postData);

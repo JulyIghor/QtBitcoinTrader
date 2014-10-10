@@ -111,6 +111,7 @@ GroupBox_NETWORK=Мрежа
 GroupBox_RULES_GROUP_CONTENT=Съдържание на група правила
 GroupBox_RULES_SCRIPT_CONTENT=Съдържание на скрипт
 GroupBox_RULE_GROUP_NAME=Име на група
+Label_GROUP_NAME=Име на група:
 GroupBox_SCRIPT_CODE=Код на скрипт
 GroupBox_SCRIPT_NAME=Име на скрипт
 GroupBox_SELECT_YOUR_EXCHANGE=Избери на борса

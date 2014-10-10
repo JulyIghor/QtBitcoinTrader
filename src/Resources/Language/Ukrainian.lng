@@ -98,6 +98,7 @@ GroupBox_MAKE_YOUR_TRANSLATION=Зробіть свій переклад
 GroupBox_MARKET_GROUPBOX=Поточні ціни маркету
 GroupBox_NETWORK=Мережа
 GroupBox_RULE_GROUP_NAME=Назва групи
+Label_GROUP_NAME=Назва групи:
 GroupBox_RULES_GROUP_CONTENT=Заповнити групу даними
 GroupBox_TR00014=Лаг
 GroupBox_TR00018=Відкриті ордери

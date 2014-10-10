@@ -32,6 +32,7 @@
 #include "depthmodel.h"
 #include "main.h"
 #include <QTimer>
+#include "julymath.h"
 
 DepthModel::DepthModel(bool isAskData)
 	: QAbstractItemModel()
@@ -115,11 +116,11 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 		switch(indexColumn)
 		{
 		case 0: //Price
-				firstRowText=mainWindow.numFromDouble(groupedPrice);
+                firstRowText=textFromDouble(groupedPrice);
 				if(role==Qt::ToolTipRole)firstRowText.prepend(baseValues.currentPair.currBSign);	
 				break; 
 		case 1: //Volume
-				firstRowText=QString::number(groupedVolume,'f',baseValues.currentPair.currADecimals);  
+                firstRowText=textFromDouble(groupedVolume,baseValues.currentPair.currADecimals);
 				if(role==Qt::ToolTipRole)firstRowText.prepend(baseValues.currentPair.currASign);
 				break;
 		}
@@ -246,7 +247,7 @@ void DepthModel::calculateSize()
 
 			sizeList[currentRow]=totalSize;
             sizePriceList[currentRow]=totalPrice;
-			sizeListStr[currentRow]=QString::number(totalSize,'f',baseValues.currentPair.currADecimals);
+            sizeListStr[currentRow]=textFromDouble(totalSize,baseValues.currentPair.currADecimals);
 
 			maxPrice=qMax(maxPrice,priceList.at(currentRow));
 			maxVolume=qMax(maxVolume,volumeList.at(currentRow));
@@ -263,7 +264,7 @@ void DepthModel::calculateSize()
             totalPrice+=volumeList.at(currentRow)*priceList.at(currentRow);
 			sizeList[currentRow]=totalSize;
             sizePriceList[currentRow]=totalPrice;
-			sizeListStr[currentRow]=QString::number(totalSize,'f',baseValues.currentPair.currADecimals);
+            sizeListStr[currentRow]=textFromDouble(totalSize,baseValues.currentPair.currADecimals);
 
 			maxPrice=qMax(maxPrice,priceList.at(currentRow));
 			maxVolume=qMax(maxVolume,volumeList.at(currentRow));
@@ -271,9 +272,9 @@ void DepthModel::calculateSize()
 		}
 	}
 
-	widthPrice=10+textFontWidth(mainWindow.numFromDouble(maxPrice,baseValues.currentPair.priceDecimals));
-	widthVolume=10+textFontWidth(QString::number(maxVolume,'f',baseValues.currentPair.currADecimals));
-	widthSize=10+textFontWidth(QString::number(maxTotal,'f',baseValues.currentPair.currADecimals));
+    widthPrice=10+textFontWidth(textFromDouble(maxPrice,baseValues.currentPair.priceDecimals));
+    widthVolume=10+textFontWidth(textFromDouble(maxVolume,baseValues.currentPair.currADecimals));
+    widthSize=10+textFontWidth(textFromDouble(maxTotal,baseValues.currentPair.currADecimals));
 	
 	widthPrice=qMax(widthPrice,widthPriceTitle);
 	widthVolume=qMax(widthVolume,widthVolumeTitle);

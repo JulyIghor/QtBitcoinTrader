@@ -100,6 +100,7 @@ GroupBox_MARKET_GROUPBOX=Rynek
 GroupBox_NETWORK=Sieć
 GroupBox_RULES_GROUP_CONTENT=Zawartość reguł grup 
 GroupBox_RULE_GROUP_NAME=Nazwa grupy
+Label_GROUP_NAME=Nazwa grupy:
 GroupBox_TR00014=Lag
 GroupBox_TR00018=Twoje otwarte pozycje
 GroupBox_TR00038=Utwórz następne zlecenie sprzedaży

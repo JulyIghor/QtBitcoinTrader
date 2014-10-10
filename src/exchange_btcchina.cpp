@@ -48,8 +48,7 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	julyHttpAuth=0;
 	julyHttpPublic=0;
 	tickerOnly=false;
-	privateRestSign=pRestSign;
-	privateRestKey=pRestKey;
+	setApiKeySecret(pRestKey,pRestSign);
 
 	currencyMapFile="BTCChina";
 	baseValues.currentPair.name="BTC/CNY";
@@ -187,17 +186,6 @@ void Exchange_BTCChina::getHistory(bool force)
 	}
 }
 
-
-QByteArray Exchange_BTCChina::numForBuySellFromDouble(qreal val, int maxDecimals)
-{
-    val=mainWindow.getValidDoubleForPercision(val,maxDecimals,true);
-	QByteArray numberText=QByteArray::number(val,'f',maxDecimals);
-	int curPos=numberText.size()-1;
-	while(curPos>0&&numberText.at(curPos)=='0')numberText.remove(curPos--,1);
-	if(numberText.size()&&numberText.at(numberText.size()-1)=='.')numberText.remove(numberText.size()-1,1);
-	return numberText;
-}
-
 void Exchange_BTCChina::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
 {
 	if(tickerOnly)return;
@@ -206,7 +194,7 @@ void Exchange_BTCChina::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToB
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray data=numForBuySellFromDouble(apiPriceToBuy,pairItem.priceDecimals)+","+numForBuySellFromDouble(apiBtcToBuy,pairItem.currADecimals)+",\""+pairItem.currRequestPair+"\"";
+    QByteArray data=byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals)+","+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals)+",\""+pairItem.currRequestPair+"\"";
 	if(debugLevel)logThread->writeLog("Buy: "+data,2);
 	sendToApi(306,"buyOrder2",true,true,data);
 }
@@ -219,7 +207,7 @@ void Exchange_BTCChina::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceT
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray data=numForBuySellFromDouble(apiPriceToSell,pairItem.priceDecimals)+","+numForBuySellFromDouble(apiBtcToSell,baseValues.currentPair.currADecimals)+",\""+pairItem.currRequestPair+"\"";
+    QByteArray data=byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals)+","+byteArrayFromDouble(apiBtcToSell,baseValues.currentPair.currADecimals)+",\""+pairItem.currRequestPair+"\"";
 	if(debugLevel)logThread->writeLog("Sell: "+data,2);
 	sendToApi(307,"sellOrder2",true,true,data);
 }
@@ -283,9 +271,9 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 
 		QByteArray tonce=QByteArray::number(newTonce)+tonceCounterData;
 
-		QByteArray signatureString="tonce="+tonce+"&accesskey="+privateRestKey+"&requestmethod=post&id=1&method="+method+"&params="+signatureParams;
+		QByteArray signatureString="tonce="+tonce+"&accesskey="+getApiKey()+"&requestmethod=post&id=1&method="+method+"&params="+signatureParams;
 
-		signatureString=privateRestKey+":"+hmacSha1(privateRestSign,signatureString).toHex();
+		signatureString=getApiKey()+":"+hmacSha1(getApiSign(),signatureString).toHex();
 
 		if(debugLevel&&reqType>299)logThread->writeLog(postData);
 

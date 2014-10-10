@@ -92,6 +92,7 @@ GroupBox_MAKE_YOUR_TRANSLATION=Maak uw vertaling
 GroupBox_MARKET_GROUPBOX=Markt
 GroupBox_RULES_GROUP_CONTENT=Regel groep inhoud
 GroupBox_RULE_GROUP_NAME=Groep naam
+Label_GROUP_NAME=Groep naam:
 GroupBox_TR00014=Vertraging
 GroupBox_TR00018=Uw open orders
 GroupBox_TR00038=Koop dan verkoop(Winst)

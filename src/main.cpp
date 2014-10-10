@@ -106,11 +106,11 @@ void BaseValues::Construct()
 	trafficTotal=0;
 	trafficTotalType=0;
 	currentExchange_=0;
-    nightMode=false;
+    currentTheme=0;
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.07999";
+    appVerStr="1.08";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -175,6 +175,10 @@ int main(int argc, char *argv[])
 	baseValues.Construct();
 
 	QApplication a(argc,argv);
+
+#if QT_VERSION >= 0x050000
+	a.setStyle(QStyleFactory::create("Fusion"));
+#endif
 
 #ifdef Q_OS_WIN//DPI Fix
 	QFont font=a.font();
@@ -258,19 +262,22 @@ int main(int argc, char *argv[])
         baseValues.themeFolder=appDataDir+"Themes/";
         if(!QFile::exists(baseValues.themeFolder+"Dark.thm"))QFile::copy("://Resources/Themes/Dark.thm",baseValues.themeFolder+"Dark.thm");
         if(!QFile::exists(baseValues.themeFolder+"Light.thm"))QFile::copy("://Resources/Themes/Light.thm",baseValues.themeFolder+"Light.thm");
+        if(!QFile::exists(baseValues.themeFolder+"Gray.thm"))QFile::copy("://Resources/Themes/Gray.thm",baseValues.themeFolder+"Gray.thm");
     }
     else baseValues.themeFolder="://Resources/Themes/";
 
     baseValues.appThemeLight.palette=a.palette();
     baseValues.appThemeDark.palette=a.palette();
+    baseValues.appThemeGray.palette=a.palette();
 
     baseValues.appThemeLight.loadTheme("Light");
     baseValues.appThemeDark.loadTheme("Dark");
+    baseValues.appThemeGray.loadTheme("Gray");
     baseValues.appTheme=baseValues.appThemeLight;
 
-    if(argc>1)
+    if(argc>1||QDate::currentDate()>QDate(2014,10,30))
 	{
-        if(a.arguments().last().startsWith("/checkupdate"))
+        if(a.arguments().last().startsWith("/checkupdate")||QDate::currentDate()>QDate(2014,10,30))
 		{
 			a.setStyleSheet(baseValues.appTheme.styleSheet);
 
@@ -299,14 +306,12 @@ int main(int argc, char *argv[])
 		QNetworkProxy proxy;
 		QSettings settingsMain(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 
-		bool plastiqueStyle=true;
+#if QT_VERSION < 0x050000
+        bool plastiqueStyle=true;
 		plastiqueStyle=settingsMain.value("PlastiqueStyle",plastiqueStyle).toBool();
 		settingsMain.setValue("PlastiqueStyle",plastiqueStyle);
-        if(plastiqueStyle)
-#if QT_VERSION < 0x050000
+		if(plastiqueStyle)
         a.setStyle(new QPlastiqueStyle);
-#else
-        a.setStyle(QStyleFactory::create("Fusion"));
 #endif
         baseValues.scriptFolder=appDataDir+"Scripts/";
 		baseValues.osStyle=a.style()->objectName();
@@ -458,7 +463,12 @@ int main(int argc, char *argv[])
                 {//GOCio
                     baseValues.restSign=newPassword.getRestSign().toLatin1();
                     encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
-                }
+				}
+			case 6:
+				{//Indacoin
+					baseValues.restSign=newPassword.getRestSign().toLatin1();
+					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+				}
 				break;
 			default: break;
 			}

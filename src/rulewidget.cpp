@@ -48,6 +48,7 @@ RuleWidget::RuleWidget(QString fileName)
     filePath=fileName;
 
     setProperty("FileName",filePath);
+    setProperty("GroupType","Rule");
 
     QSettings loadRule(fileName,QSettings::IniFormat);
     loadRule.beginGroup("JLRuleGroup");
@@ -192,6 +193,16 @@ void RuleWidget::saveRulesData()
     saveScript.sync();
 }
 
+void RuleWidget::addRuleByHolder(RuleHolder &holder, bool isEnabled)
+{
+	rulesModel->addRule(holder,isEnabled);
+
+	ui.rulesNoMessage->setVisible(false);
+	ui.rulesTabs->setVisible(true);
+	checkValidRulesButtons();
+	saveRulesData();
+}
+
 void RuleWidget::on_ruleAddButton_clicked()
 {
     AddRuleDialog ruleWindow(this);
@@ -200,12 +211,8 @@ void RuleWidget::on_ruleAddButton_clicked()
 
     RuleHolder holder=ruleWindow.getRuleHolder();
     if(!holder.isValid())return;
-    rulesModel->addRule(holder,ruleWindow.isRuleEnabled());
 
-    ui.rulesNoMessage->setVisible(false);
-    ui.rulesTabs->setVisible(true);
-    checkValidRulesButtons();
-    saveRulesData();
+    mainWindow.addRuleByHolder(holder,ruleWindow.isRuleEnabled(),ruleWindow.getGroupName(),"");
 }
 
 void RuleWidget::on_ruleConcurrentMode_toggled(bool on)
@@ -228,11 +235,16 @@ void RuleWidget::on_ruleEditButton_clicked()
     RuleHolder holder=ruleWindow.getRuleHolder();
     if(!holder.isValid())return;
 
+    if(ruleWindow.saveClicked)
+    {
     rulesModel->setRuleStateByRow(curRow,0);
     rulesModel->updateRule(curRow,holder,ruleWindow.isRuleEnabled());
 
 	checkValidRulesButtons();
 	saveRulesData();
+    }
+    else
+    mainWindow.addRuleByHolder(holder,ruleWindow.isRuleEnabled(),ruleWindow.getGroupName(),"");
 }
 
 void RuleWidget::on_ruleRemoveAll_clicked()
@@ -287,7 +299,7 @@ void RuleWidget::ruleDisableEnableMenuFix()
 	if(ifSelectedOneRuleIsItEnabled)
 	{
         int state=rulesModel->getStateByRow(selectedRows.first().row());
-        ifSelectedOneRuleIsItEnabled=state==1;
+        ifSelectedOneRuleIsItEnabled=state==1||state==2;
         rulesEnableDisableMenu->actions().at(0)->setEnabled(!ifSelectedOneRuleIsItEnabled||state==3);
         rulesEnableDisableMenu->actions().at(1)->setEnabled(ifSelectedOneRuleIsItEnabled||state==3);
 	}

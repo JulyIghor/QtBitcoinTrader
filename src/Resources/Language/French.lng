@@ -100,6 +100,7 @@ GroupBox_MARKET_GROUPBOX=Marché
 GroupBox_NETWORK=Réseau
 GroupBox_RULES_GROUP_CONTENT=Contenu du groupe de règles
 GroupBox_RULE_GROUP_NAME=Nom du groupe
+Label_GROUP_NAME=Nom du groupe:
 GroupBox_TR00014=Actualisation
 GroupBox_TR00018=Vos ordres ouverts
 GroupBox_TR00038=Générer un ordre de vente ultérieur

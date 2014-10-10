@@ -55,8 +55,8 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	julyHttp=0;
 	isApiDown=false;
 	tickerOnly=false;
-	privateRestSign=pRestSign;
-	privateRestKey=pRestKey;
+	setApiKeySecret(pRestKey,pRestSign);
+
 	moveToThread(this);
 
 	currencyMapFile="BTCe";
@@ -569,7 +569,7 @@ void Exchange_BTCe::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=buy&rate="+mainWindow.numFromDouble(apiPriceToBuy,pairItem.priceDecimals,0).toLatin1()+"&amount="+mainWindow.numFromDouble(apiBtcToBuy,pairItem.currADecimals,0).toLatin1()+"&";
+    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=buy&rate="+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals)+"&amount="+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals)+"&";
     if(debugLevel)logThread->writeLog("Buy: "+data,2);
 	sendToApi(306,"",true,true,data);
 }
@@ -582,7 +582,7 @@ void Exchange_BTCe::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceToSel
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=sell&rate="+mainWindow.numFromDouble(apiPriceToSell,pairItem.priceDecimals,0).toLatin1()+"&amount="+mainWindow.numFromDouble(apiBtcToSell,pairItem.currADecimals,0).toLatin1()+"&";
+    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=sell&rate="+byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals)+"&amount="+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals)+"&";
     if(debugLevel)logThread->writeLog("Sell: "+data,2);
 	sendToApi(307,"",true,true,data);
 }
@@ -601,7 +601,7 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 {
 	if(julyHttp==0)
 	{ 
-		julyHttp=new JulyHttp("btc-e.com","Key: "+privateRestKey+"\r\n",this);
+		julyHttp=new JulyHttp("btc-e.com","Key: "+getApiKey()+"\r\n",this);
 		connect(julyHttp,SIGNAL(anyDataReceived()),baseValues_->mainWindow_,SLOT(anyDataReceived()));
 		connect(julyHttp,SIGNAL(apiDown(bool)),baseValues_->mainWindow_,SLOT(setApiDown(bool)));
 		connect(julyHttp,SIGNAL(setDataPending(bool)),baseValues_->mainWindow_,SLOT(setDataPending(bool)));
@@ -611,12 +611,12 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
 	}
 
 	if(auth)
-	{
+    {
         QByteArray postData=commands+"nonce="+QByteArray::number(++privateNonce);
 		if(sendNow)
-			julyHttp->sendData(reqType, "POST /tapi/"+method, postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
+			julyHttp->sendData(reqType, "POST /tapi/"+method, postData, "Sign: "+hmacSha512(getApiSign(),postData).toHex()+"\r\n");
 		else
-			julyHttp->prepareData(reqType, "POST /tapi/"+method, postData, "Sign: "+hmacSha512(privateRestSign,postData).toHex()+"\r\n");
+			julyHttp->prepareData(reqType, "POST /tapi/"+method, postData, "Sign: "+hmacSha512(getApiSign(),postData).toHex()+"\r\n");
 	}
 	else
 	{

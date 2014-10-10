@@ -67,6 +67,9 @@
 #include "scriptwidget.h"
 #include "thisfeatureunderdevelopment.h"
 #include "orderstablecancelbutton.h"
+#include "rulescriptparser.h"
+#include "exchange_indacoin.h"
+#include "julymath.h"
 
 #ifdef Q_OS_WIN
 
@@ -447,6 +450,15 @@ QtBitcoinTrader::QtBitcoinTrader()
 //		windowWidget=windScroll;
 //	}
 
+    setSpinValue(ui.accountBTC,0.0);
+    setSpinValue(ui.accountUSD,0.0);
+    setSpinValue(ui.marketBid,0.0);
+    setSpinValue(ui.marketAsk,0.0);
+    setSpinValue(ui.marketHigh,0.0);
+    setSpinValue(ui.marketLow,0.0);
+    setSpinValue(ui.marketLast,0.0);
+    setSpinValue(ui.marketVolume,0.0);
+
 	if(iniSettings->value("UI/SwapDepth",false).toBool())on_swapDepth_clicked();
 
    ui.depthLag->setValue(0.0);
@@ -552,9 +564,12 @@ void QtBitcoinTrader::setupClass()
 	case 2: currentExchange=new Exchange_Bitstamp(baseValues.restSign,baseValues.restKey);break;//Bitstamp
 	case 3: currentExchange=new Exchange_BTCChina(baseValues.restSign,baseValues.restKey);break;//BTC China
 	case 4: currentExchange=new Exchange_Bitfinex(baseValues.restSign,baseValues.restKey);break;//Bitfinex
-    case 5: currentExchange=new Exchange_GOCio(baseValues.restSign,baseValues.restKey);break;//GOCio
+	case 5: currentExchange=new Exchange_GOCio(baseValues.restSign,baseValues.restKey);break;//GOCio
+	case 6: currentExchange=new Exchange_Indacoin(baseValues.restSign,baseValues.restKey);break;//Indacoin
 	default: return;
 	}
+	baseValues.restSign.clear();
+
 	currentExchange->setupApi(this,false);
 	setApiDown(false);
 
@@ -618,6 +633,7 @@ void QtBitcoinTrader::setupClass()
 		loadWindowState(windowWidget,"Window");
 
 		if(baseValues.httpRequestInterval<currentExchange->minimumRequestIntervalAllowed)baseValues.httpRequestInterval=currentExchange->minimumRequestIntervalAllowed;
+		if(baseValues.httpRequestTimeout<currentExchange->minimumRequestTimeoutAllowed)baseValues.httpRequestTimeout=currentExchange->minimumRequestTimeoutAllowed;
 
 		iniSettings->sync();
 
@@ -631,14 +647,59 @@ void QtBitcoinTrader::setupClass()
 		ui.buyPercentage->setMaximumWidth(ui.buyPercentage->height());
 		ui.sellPercentage->setMaximumWidth(ui.sellPercentage->height());
 
-		if(iniSettings->value("UI/NightMode",false).toBool())
-			on_buttonNight_clicked();
+        int nextTheme=iniSettings->value("UI/NightMode",0).toInt();
+        if(nextTheme==1)on_buttonNight_clicked();
+        else if(nextTheme==2)
+        {
+            baseValues.currentTheme=1;
+            on_buttonNight_clicked();
+        }
 
 		languageChanged();
 
         reloadScripts();
 
         QTimer::singleShot(2000,this,SLOT(fixWindowMinimumSize()));
+}
+
+void QtBitcoinTrader::addRuleByHolder(RuleHolder &holder, bool isEnabled, QString titleName, QString fileName)
+{
+	int findNameTab=-1;
+	int findFileTab=-1;
+
+	for(int n=0;n<ui.rulesTabs->count();n++)
+	{
+		QWidget *currentWidget=ui.rulesTabs->widget(n);
+		if(currentWidget->windowTitle()==titleName)findNameTab=n;
+		if(currentWidget->property("FileName").toString()==fileName)findFileTab=n;
+		if(findFileTab>-1)break;
+	}
+
+	if(findFileTab==-1)findFileTab=findNameTab;
+
+	if(findFileTab>-1)
+    {
+        QWidget *currentWidget=ui.rulesTabs->widget(findFileTab);
+        if(currentWidget->property("GroupType").toString()==QLatin1String("Rule"))
+            ((RuleWidget*)currentWidget)->addRuleByHolder(holder,isEnabled);
+		else
+        if(currentWidget->property("GroupType").toString()==QLatin1String("Script"))
+            ((ScriptWidget*)currentWidget)->replaceScript(RuleScriptParser::holderToScript(holder,false));
+	}
+	else
+	{
+	QString nameTemplate(baseValues.scriptFolder+"Script_%1.JLS");
+	int ruleN=1;
+	while(QFile::exists(nameTemplate.arg(ruleN)))ruleN++;
+	fileName=nameTemplate.arg(ruleN);
+
+	ScriptWidget *newRule=new ScriptWidget(titleName,fileName);
+	findFileTab=ui.rulesTabs->count();
+	ui.rulesTabs->insertTab(findFileTab,newRule,newRule->windowTitle());
+    newRule->replaceScript(RuleScriptParser::holderToScript(holder,false));
+	}
+	if(findFileTab>-1&&findFileTab<ui.rulesTabs->count())
+		ui.rulesTabs->setCurrentIndex(findFileTab);
 }
 
 QStringList QtBitcoinTrader::getRuleGroupsNames()
@@ -1036,21 +1097,11 @@ void QtBitcoinTrader::anyDataReceived()
 
 qreal QtBitcoinTrader::getFeeForUSDDec(qreal usd)
 {
-    qreal result=getValidDoubleForPercision(usd,baseValues.currentPair.currBDecimals,false);
-    qreal calcFee=getValidDoubleForPercision(result,baseValues.currentPair.priceDecimals,true)*floatFee;
-	calcFee=getValidDoubleForPercision(calcFee,baseValues.currentPair.priceDecimals,true);
+    qreal result=cutDoubleDecimalsCopy(usd,baseValues.currentPair.currBDecimals,false);
+    qreal calcFee=cutDoubleDecimalsCopy(result,baseValues.currentPair.priceDecimals,true)*floatFee;
+    calcFee=cutDoubleDecimalsCopy(calcFee,baseValues.currentPair.priceDecimals,true);
 	result=result-calcFee;
 	return result;
-}
-
-qreal QtBitcoinTrader::getValidDoubleForPercision(const qreal &val, const int &percision, bool roundUp)
-{
-    if(val<0.00000001)return 0.0;
-	int intVal=val;
-    int percisionValue=qFloor(qPow(10,percision));
-	int intMultipled=(val-intVal)*percisionValue;
-	if(roundUp)intMultipled++;
-    return (qreal)intMultipled/percisionValue+intVal;
 }
 
 void QtBitcoinTrader::addPopupDialog(int val)
@@ -1254,7 +1305,7 @@ void QtBitcoinTrader::clearTimeOutedTrades()
 {
 	if(tradesModel->rowCount()==0)return;
 	int lastSliderValue=ui.tableTrades->verticalScrollBar()->value();
-	tradesModel->removeDataOlderThen(QDateTime::currentDateTime().addSecs(-600).toTime_t());
+    tradesModel->removeDataOlderThen(QDateTime::currentDateTime().addSecs(-600).toTime_t());
 	ui.tableTrades->verticalScrollBar()->setValue(qMin(lastSliderValue,ui.tableTrades->verticalScrollBar()->maximum()));
 }
 
@@ -2009,18 +2060,6 @@ void QtBitcoinTrader::orderCanceled(QString symbol, QByteArray oid)
 	ordersModel->setOrderCanceled(oid);
 }
 
-QString QtBitcoinTrader::numFromDouble(const qreal &val, int maxDecimals, int minDecimals)
-{
-	QString numberText=QString::number(val,'f',maxDecimals);
-    int dotPos=numberText.indexOf(QLatin1Char('.'));
-    if(dotPos<0)dotPos=0;
-    else dotPos+=minDecimals;
-	int curPos=numberText.size()-1;
-    while(curPos>0&&numberText.at(curPos)=='0'&&(dotPos<curPos))numberText.remove(curPos--,1);
-    if(numberText.size()&&numberText.at(numberText.size()-1)==QLatin1Char('.'))numberText.remove(numberText.size()-1,1);
-	return numberText;
-}
-
 void QtBitcoinTrader::orderBookChanged(QString symbol, QList<OrderItem> *orders)
 {
     if(symbol!=baseValues.currentPair.symbol){delete orders; return;}
@@ -2176,22 +2215,28 @@ void QtBitcoinTrader::cancelOrderByXButton()
 
 void QtBitcoinTrader::on_buttonNight_clicked()
 {
-	baseValues.nightMode=!baseValues.nightMode;
+    baseValues.currentTheme++;
+    if(baseValues.currentTheme>2)baseValues.currentTheme=0;
 
-	if(baseValues.nightMode)
+    if(baseValues.currentTheme==1)
 	{
         baseValues.appTheme=baseValues.appThemeDark;
 #if QT_VERSION < 0x050000
         qApp->setStyle(new QPlastiqueStyle);
-#else
-        qApp->setStyle(QStyleFactory::create("Fusion"));
 #endif
-	}
-	else
-	{
-		baseValues.appTheme=baseValues.appThemeLight;
-		qApp->setStyle(baseValues.osStyle);
-	}
+    }
+    else
+    if(baseValues.currentTheme==2)
+    {
+        baseValues.appTheme=baseValues.appThemeGray;
+        qApp->setStyle(baseValues.osStyle);
+    }
+    else
+    if(baseValues.currentTheme==0)
+    {
+        baseValues.appTheme=baseValues.appThemeLight;
+        qApp->setStyle(baseValues.osStyle);
+    }
 
 	qApp->setPalette(baseValues.appTheme.palette);
 	qApp->setStyleSheet(baseValues.appTheme.styleSheet);
@@ -2210,10 +2255,10 @@ void QtBitcoinTrader::on_buttonNight_clicked()
 
     Q_FOREACH(RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())currentGroup->updateStyleSheets();
 
-	if(!baseValues.nightMode)
-		ui.buttonNight->setIcon(QIcon("://Resources/Night.png"));
-	else
-		ui.buttonNight->setIcon(QIcon("://Resources/Day.png"));
+    if(baseValues.currentTheme==2)ui.buttonNight->setIcon(QIcon("://Resources/Day.png"));
+    else
+    if(baseValues.currentTheme==0)ui.buttonNight->setIcon(QIcon("://Resources/Night.png"));
+    else ui.buttonNight->setIcon(QIcon("://Resources/Gray.png"));
 
 	if(swapedDepth)
 	{
@@ -2226,7 +2271,7 @@ void QtBitcoinTrader::on_buttonNight_clicked()
         ui.bidsLabel->setStyleSheet("color: "+baseValues.appTheme.blue.name());
 	}
 
-	iniSettings->setValue("UI/NightMode",baseValues.nightMode);
+    iniSettings->setValue("UI/NightMode",baseValues.currentTheme);
 
 	emit themeChanged();
 }
@@ -2358,7 +2403,7 @@ void QtBitcoinTrader::sellBitcoinButton()
 	QMessageBox msgBox(windowWidget);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle(julyTr("MESSAGE_CONFIRM_SELL_TRANSACTION","Please confirm transaction"));
-    msgBox.setText(julyTr("MESSAGE_CONFIRM_SELL_TRANSACTION_TEXT","Are you sure to sell %1 at %2 ?<br><br>Note: If total orders amount of your Bitcoins exceeds your balance, %3 will remove this order immediately.").arg(baseValues.currentPair.currASign+" "+numFromDouble(sellTotalBtc,baseValues.currentPair.currADecimals,0)).arg(baseValues.currentPair.currBSign+" "+numFromDouble(sellPricePerCoin,baseValues.currentPair.priceDecimals,0)).arg(baseValues.exchangeName));
+    msgBox.setText(julyTr("MESSAGE_CONFIRM_SELL_TRANSACTION_TEXT","Are you sure to sell %1 at %2 ?<br><br>Note: If total orders amount of your Bitcoins exceeds your balance, %3 will remove this order immediately.").arg(baseValues.currentPair.currASign+" "+textFromDouble(sellTotalBtc,baseValues.currentPair.currADecimals)).arg(baseValues.currentPair.currBSign+" "+textFromDouble(sellPricePerCoin,baseValues.currentPair.priceDecimals)).arg(baseValues.exchangeName));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
@@ -2381,8 +2426,9 @@ void QtBitcoinTrader::on_buyTotalSpend_valueChanged(qreal val)
 	if(!buyLockTotalBtcSelf)ui.buyTotalBtc->setValue(val/ui.buyPricePerCoin->value());
 	buyLockTotalBtc=false;
 
-    qreal valueForResult=getFeeForUSDDec(val)/ui.buyPricePerCoin->value();
-	valueForResult=getValidDoubleForPercision(valueForResult,baseValues.currentPair.currADecimals,false);
+    qreal valueForResult=val/ui.buyPricePerCoin->value();
+    valueForResult*=floatFeeDec;
+    valueForResult=cutDoubleDecimalsCopy(valueForResult,baseValues.currentPair.currADecimals,false);
     setSpinValue(ui.buyTotalBtcResult,valueForResult);
 
 	checkValidBuyButtons();
@@ -2588,14 +2634,14 @@ void QtBitcoinTrader::buyBitcoinsButton()
 	else btcToBuy=ui.buyTotalBtc->value();
 
     //qreal amountWithoutFee=getAvailableUSD()/priceToBuy;
-	//amountWithoutFee=getValidDoubleForPercision(amountWithoutFee,baseValues.currentPair.currADecimals,false);
+    //amountWithoutFee=cutDoubleDecimalsCopy(amountWithoutFee,baseValues.currentPair.currADecimals,false);
 
 	if(ui.confirmOpenOrder->isChecked())
 	{
 	QMessageBox msgBox(windowWidget);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle(julyTr("MESSAGE_CONFIRM_BUY_TRANSACTION","Please confirm new order"));
-    msgBox.setText(julyTr("MESSAGE_CONFIRM_BUY_TRANSACTION_TEXT","Are you sure to buy %1 at %2 ?<br><br>Note: If total orders amount of your funds exceeds your balance, %3 will remove this order immediately.").arg(baseValues.currentPair.currASign+" "+numFromDouble(btcToBuy,baseValues.currentPair.currADecimals,0)).arg(baseValues.currentPair.currBSign+" "+numFromDouble(priceToBuy,baseValues.currentPair.priceDecimals,0)).arg(baseValues.exchangeName));
+    msgBox.setText(julyTr("MESSAGE_CONFIRM_BUY_TRANSACTION_TEXT","Are you sure to buy %1 at %2 ?<br><br>Note: If total orders amount of your funds exceeds your balance, %3 will remove this order immediately.").arg(baseValues.currentPair.currASign+" "+textFromDouble(btcToBuy,baseValues.currentPair.currADecimals)).arg(baseValues.currentPair.currBSign+" "+textFromDouble(priceToBuy,baseValues.currentPair.priceDecimals)).arg(baseValues.exchangeName));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
@@ -2735,7 +2781,7 @@ void QtBitcoinTrader::on_marketLast_valueChanged(qreal val)
 		default: break;
 		}
 		static QString titleText;
-		titleText=baseValues.currentPair.currBSign+" "+numFromDouble(val)+" "+directionChar+" "+windowTitleP;
+        titleText=baseValues.currentPair.currBSign+" "+textFromDouble(val)+" "+directionChar+" "+windowTitleP;
 		if(windowWidget->isVisible())windowWidget->setWindowTitle(titleText);
 		if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip(titleText);
 	}
@@ -3281,7 +3327,7 @@ qreal QtBitcoinTrader::getAvailableUSD()
 	if(currentExchange->balanceDisplayAvailableAmount)amountToReturn=ui.accountUSD->value();
 	else amountToReturn=ui.accountUSD->value()-ui.ordersTotalUSD->value();
 	
-	amountToReturn=getValidDoubleForPercision(amountToReturn,baseValues.currentPair.currBDecimals,false);
+    amountToReturn=cutDoubleDecimalsCopy(amountToReturn,baseValues.currentPair.currBDecimals,false);
 
 	if(currentExchange->exchangeSupportsAvailableAmount)amountToReturn=qMin(availableAmount,amountToReturn);
 	
@@ -3299,7 +3345,7 @@ qreal QtBitcoinTrader::getAvailableUSDtoBTC(qreal priceToBuy)
     if(currentExchange->calculatingFeeMode==1)decValue=qPow(0.1,qMax(baseValues.currentPair.currADecimals,1));else
     if(currentExchange->calculatingFeeMode==2)decValue=2.0*qPow(0.1,qMax(baseValues.currentPair.currADecimals,1));
     }
-    return getValidDoubleForPercision(avUSD/priceToBuy-decValue,baseValues.currentPair.currADecimals,false);
+    return cutDoubleDecimalsCopy(avUSD/priceToBuy-decValue,baseValues.currentPair.currADecimals,false);
 }
 
 void QtBitcoinTrader::apiSellSend(QString symbol, qreal btc, qreal price)
@@ -3390,22 +3436,10 @@ void QtBitcoinTrader::setSpinValueP(QDoubleSpinBox *spin, qreal &val)
         spin->setDecimals(1);
     else
     {
-        QByteArray valueStr=QByteArray::number(val,'f',8);
+        QByteArray valueStr=byteArrayFromDouble(val);
         int dotPos=valueStr.indexOf('.');
         if(dotPos==-1)spin->setDecimals(1);
-        else
-        {
-        int lastZeroPos=valueStr.size()-1;
-        if(lastZeroPos-dotPos>8)
-        {
-            lastZeroPos=dotPos+8;
-            valueStr.resize(lastZeroPos+1);
-        }
-        while(lastZeroPos>0&&valueStr.size()&&valueStr.at(lastZeroPos)=='0')lastZeroPos--;
-        lastZeroPos-=dotPos;
-        if(lastZeroPos<1)lastZeroPos=1;
-        spin->setDecimals(lastZeroPos);
-        }
+        else spin->setDecimals(valueStr.size()-dotPos-1);
     }
     spin->blockSignals(false);
     spin->setMaximum(val);

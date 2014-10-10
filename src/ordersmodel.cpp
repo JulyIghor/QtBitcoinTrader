@@ -36,6 +36,9 @@
 OrdersModel::OrdersModel()
 	: QAbstractItemModel()
 {
+    lastOrdersCount=0;
+    lastAsksCount=0;
+    lastBidsCount=0;
     asksCount=0;
 	checkDuplicatedOID=false;
 	haveOrders=false;
@@ -65,7 +68,13 @@ int OrdersModel::columnCount(const QModelIndex &) const
 
 void OrdersModel::clear()
 {
-	if(oidList.count()==0)return;
+    if(oidList.count()==0)
+    {
+        ordersCountChanged();
+        ordersAsksCountChanged();
+        ordersBidsCountChanged();
+        return;
+    }
 
     asksCount=0;
 
@@ -90,6 +99,11 @@ void OrdersModel::clear()
 
 	emit volumeAmountChanged(0.0, 0.0);
 	endResetModel();
+
+
+    ordersCountChanged();
+    ordersAsksCountChanged();
+    ordersBidsCountChanged();
 }
 
 int OrdersModel::getAsksCount()
@@ -103,10 +117,14 @@ void OrdersModel::orderBookChanged(QList<OrderItem> *ordersRcv)
 	currentBidsPrices.clear();
 
 	if(ordersRcv->count()==0)
-	{
+    {
 		delete ordersRcv;
 		emit volumeAmountChanged(0.0,0.0);
 		clear();
+
+        ordersCountChanged();
+        ordersAsksCountChanged();
+        ordersBidsCountChanged();
 		return;
 	}
 
@@ -230,6 +248,38 @@ void OrdersModel::orderBookChanged(QList<OrderItem> *ordersRcv)
 	countWidth=qMax(textFontWidth(QString::number(oidList.count()+1))+6,defaultHeightForRow);
 	emit volumeAmountChanged(volumeTotal, amountTotal);
 	emit dataChanged(index(0,0),index(oidList.count()-1,columnsCount-1));
+
+    ordersCountChanged();
+    ordersAsksCountChanged();
+    ordersBidsCountChanged();
+}
+
+void OrdersModel::ordersCountChanged()
+{
+    if(oidList.count()!=lastOrdersCount)
+    {
+        lastOrdersCount=oidList.count();
+        mainWindow.sendIndicatorEvent(baseValues.currentPair.symbol,"OpenOrdersCount",lastOrdersCount);
+    }
+}
+
+void OrdersModel::ordersAsksCountChanged()
+{
+    if(asksCount!=lastAsksCount)
+    {
+        lastAsksCount=asksCount;
+        mainWindow.sendIndicatorEvent(baseValues.currentPair.symbol,"OpenAsksCount",asksCount);
+    }
+}
+
+void OrdersModel::ordersBidsCountChanged()
+{
+    int openBidsCount=oidList.count()-asksCount;
+    if(openBidsCount!=lastBidsCount)
+    {
+        lastBidsCount=openBidsCount;
+        mainWindow.sendIndicatorEvent(baseValues.currentPair.symbol,"OpenBidsCount",lastBidsCount);
+    }
 }
 
 QVariant OrdersModel::data(const QModelIndex &index, int role) const

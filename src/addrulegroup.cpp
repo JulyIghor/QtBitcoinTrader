@@ -43,9 +43,7 @@ AddRuleGroup::AddRuleGroup(QWidget *parent)
 	setWindowFlags(Qt::WindowCloseButtonHint);
 
 	Q_FOREACH(RuleWidget* currentGroup, mainWindow.ui.tabRules->findChildren<RuleWidget*>())
-	{
         ui.existingRulesList->addItem(currentGroup->windowTitle(),currentGroup->property("FileName").toString());
-	}
 
     QString groupLabel=julyTr("RULE_GROUP","Group");
     QString newGroupName=groupLabel;

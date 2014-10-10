@@ -186,7 +186,7 @@ void JulyHttp::saveCookies()
 	Q_FOREACH(QByteArray name, cookiesMap.keys())
 	{
 		if(cookiesCount>0)cookieLine.append("; ");
-		cookieLine.append(name+": "+cookiesMap.value(name));
+		cookieLine.append(name+"="+cookiesMap.value(name));
 		cookiesCount++;
 	}
 	if(!cookieLine.isEmpty()){cookieLine.prepend("Cookie: ");cookieLine.append("\r\n");}
@@ -700,7 +700,7 @@ void JulyHttp::sendPendingData()
 	clearRequest();
 
 	requestTimeOut.restart();
-	if(debugLevel&&currentPendingRequest)logThread->writeLog("SND: "+QByteArray(*currentPendingRequest).replace(baseValues.restKey,"REST_KEY").replace(baseValues.restSign,"REST_SIGN"));
+	if(debugLevel&&currentPendingRequest)logThread->writeLog("SND: "+QByteArray(*currentPendingRequest).replace(baseValues.restKey,"REST_KEY"));
 
 	if(currentPendingRequest)
 	{

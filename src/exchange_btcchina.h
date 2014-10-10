@@ -58,8 +58,7 @@ private:
 	QByteArray historyLastID;
 	QByteArray lastFetchTid;
 	QByteArray historyLastTradesRequest;
-	QByteArray getMidData(QString a, QString b,QByteArray *data);
-	QByteArray numForBuySellFromDouble(qreal val, int maxDecimals);
+    QByteArray getMidData(QString a, QString b,QByteArray *data);
 
 	QList<DepthItem> *depthAsks;
 	QList<DepthItem> *depthBids;

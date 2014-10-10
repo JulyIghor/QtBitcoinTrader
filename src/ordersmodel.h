@@ -82,6 +82,14 @@ public:
 	QList<OrderItem> orders;
 
 private:
+    void ordersCountChanged();
+    void ordersAsksCountChanged();
+    void ordersBidsCountChanged();
+
+    int lastOrdersCount;
+    int lastAsksCount;
+    int lastBidsCount;
+
     int asksCount;
 
 	QHash<QByteArray,quint32> oidMapForCheckingDuplicates;

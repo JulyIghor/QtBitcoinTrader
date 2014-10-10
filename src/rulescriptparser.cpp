@@ -32,6 +32,7 @@
 #include "rulescriptparser.h"
 #include "main.h"
 #include <QSettings>
+#include "julymath.h"
 
 RuleScriptParser::RuleScriptParser()
 {
@@ -103,7 +104,7 @@ RuleHolder RuleScriptParser::readHolderFromSettings(QSettings &settings, QString
     holder.variableBplusMinus=settings.value("VariableBplusMinus","").toString();
     holder.variableBSymbolCode=settings.value("VariableBSymbolCode","").toString();
     holder.description=settings.value("Description","").toString();
-    holder.delayMilliseconds=mainWindow.getValidDoubleForPercision(settings.value("Delay",0.0).toReal(),3,false);
+    holder.delayMilliseconds=cutDoubleDecimalsCopy(settings.value("Delay",0.0).toReal(),3,false);
     settings.endGroup();
     return holder;
 }
@@ -144,9 +145,9 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
                 else
                     script+=" var amount = trader.get(\"Balance\",\""+baseValues.currentPair.currBStr+"\");\n";
                 if(amount!=0.0&&amount!=1.0)
-                    script+=" amount *= "+mainWindow.numFromDouble(amount)+";\n";
+                    script+=" amount *= "+textFromDouble(amount)+";\n";
             }
-            else script+=" var amount = "+mainWindow.numFromDouble(amount)+";\n";
+            else script+=" var amount = "+textFromDouble(amount)+";\n";
 
             if(amount!=0.0)
             {
@@ -155,13 +156,13 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
             }
             if(!script.isEmpty())script+="\n";
 
-            if(holder.thanPriceTypeCode=="EXACT")script+=" var price = "+mainWindow.numFromDouble(holder.thanPrice)+";\n";
+            if(holder.thanPriceTypeCode=="EXACT")script+=" var price = "+textFromDouble(holder.thanPrice)+";\n";
             else
             {
                 script+=" var price = trader.get(\""+holder.tradeSymbolCode+"\" , \""+holder.thanPriceTypeCode+"\");\n";
 
-                if(holder.thanPricePercentChecked)script+=" price "+holder.thanPricePlusMinusText+"= price * "+mainWindow.numFromDouble(holder.thanPrice/100.0)+";\n";
-                else if(holder.thanPrice!=0.0)script+=" price "+holder.thanPricePlusMinusText+"= "+mainWindow.numFromDouble(holder.thanPrice)+";\n";
+                if(holder.thanPricePercentChecked)script+=" price "+holder.thanPricePlusMinusText+"= price * "+textFromDouble(holder.thanPrice/100.0)+";\n";
+                else if(holder.thanPrice!=0.0)script+=" price "+holder.thanPricePlusMinusText+"= "+textFromDouble(holder.thanPrice)+";\n";
 
                 if(holder.thanPriceFeeIndex==1)script+=" price *= ( 1.0 + trader.get(\"Fee\") / 100.0 );\n";
                 if(holder.thanPriceFeeIndex==2)script+=" price *= ( 1.0 - trader.get(\"Fee\") / 100.0 );\n";
@@ -234,7 +235,7 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
 
     QString executeRuleLine;
 
-    if(haveDelay)executeRuleLine=" trader.delay("+mainWindow.numFromDouble(holder.delayMilliseconds,3,0)+",\"executeRule()\");";
+    if(haveDelay)executeRuleLine=" trader.delay("+textFromDouble(holder.delayMilliseconds,3,0)+",\"executeRule()\");";
             else executeRuleLine=" executeRule();";
 
     if(execImmediately)
@@ -257,16 +258,16 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
     {
         if(holder.variableBCode=="EXACT")
         {
-            ifLine=" if(value "+comparationText+" "+mainWindow.numFromDouble(holder.variableBExact)+")";
+            ifLine=" if(value "+comparationText+" "+textFromDouble(holder.variableBExact)+")";
         }
         else
         {
             indicatorBValue="trader.get(\""+holder.variableBSymbolCode+"\" , \""+holder.variableBCode+"\")";
             indicatorB=indicatorBValue+";\n";
             if(holder.variableBPercentChecked)
-                indicatorB+=" baseVariable "+holder.variableBplusMinus+"= baseVariable*"+mainWindow.numFromDouble(holder.variableBExact/100.0)+";\n";
+                indicatorB+=" baseVariable "+holder.variableBplusMinus+"= baseVariable*"+textFromDouble(holder.variableBExact/100.0)+";\n";
             else
-                if(holder.variableBExact!=0.0)indicatorB+=" baseVariable "+holder.variableBplusMinus+"= "+mainWindow.numFromDouble(holder.variableBExact)+";\n";
+                if(holder.variableBExact!=0.0)indicatorB+=" baseVariable "+holder.variableBplusMinus+"= "+textFromDouble(holder.variableBExact)+";\n";
 
             if(holder.variableBFeeIndex>0)
             {

@@ -100,6 +100,7 @@ GroupBox_MARKET_GROUPBOX=Mercato
 GroupBox_NETWORK=Network Rete
 GroupBox_RULES_GROUP_CONTENT=Gruppo di regole
 GroupBox_RULE_GROUP_NAME=Nome gruppo
+Label_GROUP_NAME=Nome gruppo:
 GroupBox_TR00014=Latenza
 GroupBox_TR00018=I tuoi ordini aperti
 GroupBox_TR00038=Genera un susseguente ordine di vendita

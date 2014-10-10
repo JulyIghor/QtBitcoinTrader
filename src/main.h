@@ -83,7 +83,7 @@ struct BaseValues
 	CurrencyPairItem currentPair;
     QMap<QString,CurrencyPairItem> currencyPairMap;
 
-    bool nightMode;
+    int currentTheme;
 	
 	QByteArray upArrow;
 	QByteArray downArrow;
@@ -93,8 +93,9 @@ struct BaseValues
 	QString customUserAgent;
 	QString customCookies;
 	bool gzipEnabled;
-	AppTheme appThemeLight;
-	AppTheme appThemeDark;
+    AppTheme appThemeLight;
+    AppTheme appThemeDark;
+    AppTheme appThemeGray;
 	AppTheme appTheme;
 	int debugLevel_;//0: Disabled; 1: Debug; 2: Log
 	bool supportsUtfUI;

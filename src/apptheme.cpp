@@ -129,5 +129,16 @@ void AppTheme::loadTheme(QString name)
 
 	palette.setColor(QPalette::Text,black);
 
-	styleSheet="QHeaderView::section {color: "+black.name()+";} QToolButton {color: "+black.name()+";} QPushButton {color: "+black.name()+";} QGroupBox {background: rgba(255,255,255,60); color: "+black.name()+"; border: 1px solid "+gray.name()+";border-radius: 3px;margin-top: 7px;} QGroupBox:title {color: "+black.name()+"; background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 "+white.name()+", stop: 1 transparent); border-radius: 2px; padding: 1 4px; top: -7; left: 7px;} QLabel {color: "+black.name()+";} QTabBar::tab {color: "+black.name()+";} QRadioButton {color: "+black.name()+";} QDoubleSpinBox {background: "+white.name()+";} QTextEdit {background: "+white.name()+";} QPlainTextEdit {background: "+white.name()+";} QCheckBox {color: "+black.name()+";} QLineEdit {color: "+black.name()+"; background: "+white.name()+"; border: 1px solid "+gray.name()+";}";
+	styleSheet="QHeaderView::section {color: "+black.name()+";}"
+		"QToolButton {color: "+black.name()+";}"
+		"QPushButton {color: "+black.name()+";}"
+		"QGroupBox {background: rgba(255,255,255,60); color: "+black.name()+"; border: 1px solid "+gray.name()+";border-radius: 3px;margin-top: 8px;}"
+		"QGroupBox:title {subcontrol-origin: margin; position: relative; left: 6px; color: "+black.name()+"; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 transparent, stop: 0.45 "+white.name()+", stop: 0.5 "+white.name()+", stop: 0.55 "+white.name()+", stop: 1.0 transparent);  padding-left: 2px;} QLabel {color: "+black.name()+";}"
+		"QTabBar::tab {color: "+black.name()+";}"
+		"QRadioButton {color: "+black.name()+";}"
+		"QDoubleSpinBox {background: "+white.name()+";}"
+		"QTextEdit {background: "+white.name()+";}"
+		"QPlainTextEdit {background: "+white.name()+";}"
+		"QCheckBox {color: "+black.name()+";}"
+		"QLineEdit {color: "+black.name()+"; background: "+white.name()+"; border: 1px solid "+gray.name()+";}";
 }

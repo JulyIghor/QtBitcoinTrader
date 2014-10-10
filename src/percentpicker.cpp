@@ -41,7 +41,8 @@ PercentPicker::PercentPicker(QDoubleSpinBox *_spinBox, qreal _maxValue)
     setAttribute(Qt::WA_DeleteOnClose,true);
     setFixedSize(minimumSizeHint().width(),200);
     ui.verticalSlider->setValue(spinBox->value()*100.0/maxValue);
-    ui.verticalSlider->setFocus();
+    ui.spinBox->setFocus();
+    ui.spinBox->selectAll();
 }
 
 PercentPicker::~PercentPicker()
@@ -52,6 +53,13 @@ PercentPicker::~PercentPicker()
 void PercentPicker::mouseReleaseEvent(QMouseEvent *event)
 {
 	event->ignore();
+}
+
+void PercentPicker::keyPressEvent(QKeyEvent *event)
+{
+    event->accept();
+    if(event->key()==Qt::Key_Return||event->key()==Qt::Key_Enter||event->key()==Qt::Key_Escape)
+        close();
 }
 
 void PercentPicker::on_percentTo1_clicked()

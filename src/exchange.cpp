@@ -49,6 +49,7 @@ Exchange::Exchange()
 	depthEnabledFlag=true;
 	balanceDisplayAvailableAmount=true;
 	minimumRequestIntervalAllowed=100;
+	minimumRequestTimeoutAllowed=2000;
 	decAmountFromOpenOrder=0.0;
 	buySellAmountExcludedFee=false;
 	calculatingFeeMode=0;
@@ -228,11 +229,33 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 	start();
 }
 
+void Exchange::setApiKeySecret(QByteArray key, QByteArray secret)
+{
+	if(!apiKeyChars.isEmpty()||!apiKeyChars.isEmpty())return;
+
+	privateKey=key;
+
+	for(int n=secret.size()-1;n>=0;n--)
+		apiSignChars<<new char(secret[n]);
+}
+
+QByteArray &Exchange::getApiKey()
+{
+	return privateKey;
+}
+
+QByteArray Exchange::getApiSign()
+{
+	QByteArray result;
+	for(int n=apiSignChars.size()-1;n>=0;n--)
+		result+=*(apiSignChars[n]);
+	return result;
+}
+
 void Exchange::clearValues()
 {
 
 }
-
 
 void Exchange::getHistory(bool)
 {

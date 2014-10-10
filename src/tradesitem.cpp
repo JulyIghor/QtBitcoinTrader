@@ -31,6 +31,7 @@
 
 #include "tradesitem.h"
 #include "main.h"
+#include "julymath.h"
 
 TradesItem::TradesItem()
 {
@@ -49,9 +50,9 @@ void TradesItem::cacheStrings()
 	QDateTime itemDate=QDateTime::fromTime_t(date);
 	timeStr=itemDate.toString(baseValues.timeFormat);
 	dateStr=itemDate.toString(baseValues.dateTimeFormat);
-	if(price>0.0)priceStr=mainWindow.numFromDouble(price);
-	if(amount>0.0)amountStr=mainWindow.numFromDouble(amount);
-	if(amount>0.0&&price>0.0)totalStr=QString::number(price*amount,'f',baseValues.currentPair.currBDecimals);
+    if(price>0.0)priceStr=textFromDouble(price);
+    if(amount>0.0)amountStr=textFromDouble(amount);
+    if(amount>0.0&&price>0.0)totalStr=textFromDouble(price*amount,baseValues.currentPair.currBDecimals);
 }
 
 bool TradesItem::isValid()

@@ -100,6 +100,7 @@ GroupBox_MARKET_GROUPBOX=Mercado
 GroupBox_NETWORK=Red
 GroupBox_RULES_GROUP_CONTENT=Contenido del grupo de Reglas
 GroupBox_RULE_GROUP_NAME=Nombre del Grupo
+Label_GROUP_NAME=Nombre del Grupo:
 GroupBox_TR00014=Retraso
 GroupBox_TR00018=Mis Órdenes Abiertas
 GroupBox_TR00038=Generar orden de venta subsiguiente

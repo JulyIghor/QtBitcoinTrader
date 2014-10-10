@@ -111,6 +111,7 @@ GroupBox_NETWORK=全网
 GroupBox_RULES_GROUP_CONTENT=分组内的触发器内容
 GroupBox_RULES_SCRIPT_CONTENT=脚本内容
 GroupBox_RULE_GROUP_NAME=分组名字
+Label_GROUP_NAME=分组名字:
 GroupBox_SCRIPT_CODE=脚本代码
 GroupBox_SCRIPT_NAME=脚本名称
 GroupBox_SELECT_YOUR_EXCHANGE=选择交易所

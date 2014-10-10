@@ -38,6 +38,7 @@
 #include <QDoubleSpinBox>
 #include "ui_percentpicker.h"
 #include <QMouseEvent>
+#include <QKeyEvent>
 
 class PercentPicker : public QMenu
 {
@@ -48,6 +49,7 @@ public:
 	~PercentPicker();
 	void setValue(int val){ui.verticalSlider->setValue(val);}
 private:
+    void keyPressEvent(QKeyEvent *event);
 	void mouseReleaseEvent(QMouseEvent *);
     QDoubleSpinBox *spinBox;
 	qreal maxValue;

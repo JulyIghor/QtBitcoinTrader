@@ -39,11 +39,13 @@
 #include "exchange.h"
 #include <QMessageBox>
 #include "scriptobject.h"
+#include "julymath.h"
 
-AddRuleDialog::AddRuleDialog(QWidget *parent) :
-    QDialog(parent),
+AddRuleDialog::AddRuleDialog(QWidget *par) :
+    QDialog(par),
     ui(new Ui::AddRuleDialog)
 {
+    saveClicked=false;
     pendingFix=true;
     ruleIsEnabled=false;
     ui->setupUi(this);
@@ -157,6 +159,28 @@ AddRuleDialog::AddRuleDialog(QWidget *parent) :
 
     julyTranslator.translateUi(this);
 
+    int selectedRow=-1;
+    RuleWidget *parentRuleWidget=(RuleWidget*)par;
+    ScriptWidget *parentScriptWidget=(ScriptWidget*)par;
+
+	Q_FOREACH(RuleWidget* currentGroup, mainWindow.ui.tabRules->findChildren<RuleWidget*>())
+	{
+        if(currentGroup==0)continue;
+        if(currentGroup==parentRuleWidget)selectedRow=ui->groupName->count();
+		ui->groupName->addItem(currentGroup->windowTitle(),currentGroup->property("FileName").toString());
+	}
+
+	Q_FOREACH(ScriptWidget* currentGroup, mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
+	{
+        if(currentGroup==0)continue;
+        if(currentGroup==parentScriptWidget)selectedRow=ui->groupName->count();
+		ui->groupName->addItem(currentGroup->windowTitle(),currentGroup->property("FileName").toString());
+	}
+
+	if(selectedRow>-1)ui->groupName->setCurrentIndex(selectedRow);
+	else
+	ui->groupName->addItem(getFreeGroupName(),"");
+
     QTimer::singleShot(200,this,SLOT(reCacheCode()));
     QTimer::singleShot(201,this,SLOT(fixSizeWindow()));
 }
@@ -164,6 +188,28 @@ AddRuleDialog::AddRuleDialog(QWidget *parent) :
 AddRuleDialog::~AddRuleDialog()
 {
     delete ui;
+}
+
+QString AddRuleDialog::getGroupName()
+{
+	return ui->groupName->currentText();
+}
+
+QString AddRuleDialog::getFreeGroupName()
+{
+	QString groupLabel=julyTr("RULE_GROUP","Group");
+	QString newGroupName=groupLabel;
+
+	int incr=0;
+	QStringList existingGroups=mainWindow.getRuleGroupsNames();
+	existingGroups<<mainWindow.getScriptGroupsNames();
+	while(existingGroups.contains(newGroupName))
+	{
+		newGroupName=groupLabel;
+		if(incr>0)newGroupName+=" "+QString::number(incr);
+		incr++;
+	}
+	return newGroupName;
 }
 
 void AddRuleDialog::fillByHolder(RuleHolder &holder, bool running)
@@ -208,7 +254,6 @@ void AddRuleDialog::fillByHolder(RuleHolder &holder, bool running)
     ui->delayValue->setValue(holder.delayMilliseconds);
 
     ui->buttonSaveRule->setVisible(true);
-    ui->buttonAddRule->setVisible(false);
 
     ruleIsEnabled=running;
 }
@@ -286,7 +331,7 @@ void AddRuleDialog::reCacheCode()
 {
     QString descriptionText;
     if(ui->delayValue->value()>0)
-        descriptionText=julyTr("DELAY_SEC","Delay %1 sec").arg(mainWindow.numFromDouble(ui->delayValue->value()))+" ";
+        descriptionText=julyTr("DELAY_SEC","Delay %1 sec").arg(textFromDouble(ui->delayValue->value()))+" ";
 
     QString currentAType=comboCurrentData(ui->variableA);
 
@@ -310,7 +355,7 @@ void AddRuleDialog::reCacheCode()
             if(ui->variableBExact->value()!=0.0||bExact)
             {
                 if(!bExact)descriptionText+=" "+ui->variableBplusMinus->currentText();
-                descriptionText+=" "+mainWindow.numFromDouble(ui->variableBExact->value(),10,0);
+                descriptionText+=" "+textFromDouble(ui->variableBExact->value(),8,0);
                 if(ui->variableBPercent->isChecked())descriptionText+="%";
             }
             if(ui->variableBFee->currentIndex()>0)
@@ -331,7 +376,7 @@ void AddRuleDialog::reCacheCode()
         pairItem=baseValues.currencyPairMap.value(comboCurrentData(ui->valueBSymbol),pairItem);
         if(!pairItem.symbol.isEmpty())sign=pairItem.currASign;
 
-        descriptionText+=" "+sign+mainWindow.numFromDouble(ui->thanAmount->value(),10,0);
+        descriptionText+=" "+sign+textFromDouble(ui->thanAmount->value(),8,0);
         if(ui->thanAmountPercent->isChecked())descriptionText+="%";
 
         if(ui->thanAmountFee->currentIndex()>0)
@@ -356,7 +401,7 @@ void AddRuleDialog::reCacheCode()
             pairItem=baseValues.currencyPairMap.value(comboCurrentData(ui->thanSymbol),pairItem);
             if(!pairItem.symbol.isEmpty())sign=pairItem.currBSign;
 
-            atPrice+=" "+sign+mainWindow.numFromDouble(ui->thanPriceValue->value(),10,0);
+            atPrice+=" "+sign+textFromDouble(ui->thanPriceValue->value(),8,0);
         }
 
         if(ui->thanPriceFee->currentIndex()>0)
@@ -492,7 +537,7 @@ void AddRuleDialog::on_playButton_clicked()
                         else detectDoublePoint=1;
                     }
 
-                    QString number=QString::number(spin->value(),'f',8);
+                    QString number=textFromDouble(spin->value(),8,0);
                     int crop=number.size()-1;
                     while(crop>0&&number.at(crop)==QLatin1Char('0'))crop--;
                     if(crop>0&&number.at(crop)==QLatin1Char('.'))crop--;
@@ -670,6 +715,7 @@ void AddRuleDialog::on_buttonAddRule_clicked()
     if(!holder.isValid())
     {
         QMessageBox::warning(this,windowTitle(),julyTr("INVALID_RULE_VALUES","Values you entered is invalid"));
+        saveClicked=false;
         return;
     }
 
@@ -689,6 +735,7 @@ void AddRuleDialog::on_buttonAddRule_clicked()
         if(comboCurrentData(ui->valueASymbol)!=currentSymbol||comboCurrentData(ui->valueBSymbol)!=currentSymbol||comboCurrentData(ui->thanSymbol)!=currentSymbol)
         {
             QMessageBox::warning(this,windowTitle(),julyTr("RULE_MULTITRADE_NOTSUPPORTED","Warning. Multi currency trading is not supported yet.\nRule will works only with the same currency pair as current.\nSet up all symbols as current main currency."));
+            saveClicked=false;
             return;
         }
     }
@@ -697,6 +744,7 @@ void AddRuleDialog::on_buttonAddRule_clicked()
 
 void AddRuleDialog::on_buttonSaveRule_clicked()
 {
+    saveClicked=true;
     on_buttonAddRule_clicked();
 }
 

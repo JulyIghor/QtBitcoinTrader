@@ -45,8 +45,9 @@ Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
 	lastTradesDate=0;
 	tickerLastDate=0;
 	baseValues.exchangeName="Bitfinex";
-	privateRestSign=pRestSign;
-	privateRestKey=pRestKey;
+
+	setApiKeySecret(pRestKey,pRestSign);
+
 	depthAsks=0;
 	depthBids=0;
 	forceDepthLoad=false;
@@ -171,9 +172,9 @@ void Exchange_Bitfinex::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToB
     if(pairItem.currRequestSecond=="exchange")
 		orderType.prepend("exchange ");
     QByteArray params=", \"symbol\": \""+pairItem.currRequestPair+"\", \"amount\": \"";
-    params+=mainWindow.numFromDouble(apiBtcToBuy,pairItem.currADecimals);
+    params+=textFromDouble(apiBtcToBuy,pairItem.currADecimals);
     params+="\", \"price\": \"";
-    params+=mainWindow.numFromDouble(apiPriceToBuy,pairItem.currBDecimals);
+    params+=textFromDouble(apiPriceToBuy,pairItem.currBDecimals);
     params+="\", \"exchange\": \"all\", \"side\": \"buy\", \"type\": \""+orderType+"\"";
 	if(debugLevel)logThread->writeLog("Buy: "+params,2);
 	sendToApi(306,"order/new",true,true,params);
@@ -191,9 +192,9 @@ void Exchange_Bitfinex::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceT
     if(pairItem.currRequestSecond=="exchange")
 		orderType.prepend("exchange ");
     QByteArray params=", \"symbol\": \""+pairItem.currRequestPair+"\", \"amount\": \"";
-    params+=mainWindow.numFromDouble(apiBtcToSell,pairItem.currADecimals);
+    params+=textFromDouble(apiBtcToSell,pairItem.currADecimals);
     params+="\", \"price\": \"";
-    params+=mainWindow.numFromDouble(apiPriceToSell,pairItem.currBDecimals);
+    params+=textFromDouble(apiPriceToSell,pairItem.currBDecimals);
     params+="\", \"exchange\": \"all\", \"side\": \"sell\", \"type\": \""+orderType+"\"";
 	if(debugLevel)logThread->writeLog("Sell: "+params,2);
 	sendToApi(307,"order/new",true,true,params);
@@ -210,7 +211,7 @@ void Exchange_Bitfinex::sendToApi(int reqType, QByteArray method, bool auth, boo
 {
 	if(julyHttp==0)
 	{ 
-		julyHttp=new JulyHttp("api.bitfinex.com","X-BFX-APIKEY: "+privateRestKey+"\r\n",this);
+		julyHttp=new JulyHttp("api.bitfinex.com","X-BFX-APIKEY: "+getApiKey()+"\r\n",this);
 		connect(julyHttp,SIGNAL(anyDataReceived()),baseValues_->mainWindow_,SLOT(anyDataReceived()));
 		connect(julyHttp,SIGNAL(setDataPending(bool)),baseValues_->mainWindow_,SLOT(setDataPending(bool)));
 		connect(julyHttp,SIGNAL(apiDown(bool)),baseValues_->mainWindow_,SLOT(setApiDown(bool)));
@@ -225,7 +226,7 @@ void Exchange_Bitfinex::sendToApi(int reqType, QByteArray method, bool auth, boo
 		postData.append(commands);
 		postData.append("}");
 		QByteArray payload=postData.toBase64();
-        QByteArray forHash=hmacSha384(privateRestSign,payload).toHex();
+        QByteArray forHash=hmacSha384(getApiSign(),payload).toHex();
 		if(sendNow)
 		julyHttp->sendData(reqType, "POST /v1/"+method,postData, "X-BFX-PAYLOAD: "+payload+"\r\nX-BFX-SIGNATURE: "+forHash+"\r\n");
 		else

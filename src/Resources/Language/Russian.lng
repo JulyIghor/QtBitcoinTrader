@@ -110,6 +110,7 @@ GroupBox_NETWORK=Сеть
 GroupBox_RULES_GROUP_CONTENT=Заполнить группу данными
 GroupBox_RULES_SCRIPT_CONTENT=Контент скрипта
 GroupBox_RULE_GROUP_NAME=Название группы
+Label_GROUP_NAME=Название группы:
 GroupBox_SCRIPT_CODE=Код скрипта
 GroupBox_SCRIPT_NAME=Имя скрипта
 GroupBox_SELECT_YOUR_EXCHANGE=Выберите биржу

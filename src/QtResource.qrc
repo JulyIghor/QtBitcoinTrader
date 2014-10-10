@@ -15,6 +15,8 @@
         <file>Resources/Exchanges/Logos/BTCChina_Big.png</file>
         <file>Resources/Exchanges/Logos/GOCio_Big.png</file>
         <file>Resources/Exchanges/Logos/BTC-e_Big.png</file>
+        <file>Resources/Exchanges/Logos/Indacoin.png</file>
+        <file>Resources/Exchanges/Logos/Indacoin_Big.png</file>
         <file>Resources/Open.png</file>
         <file>Resources/Save.png</file>
         <file>Resources/Themes/Dark.thm</file>
@@ -42,6 +44,7 @@
         <file>Resources/Exchanges/List.ini</file>
         <file>Resources/Exchanges/BTCe.ini</file>
         <file>Resources/Exchanges/Bitfinex.ini</file>
+        <file>Resources/Exchanges/Indacoin.ini</file>
         <file>Resources/Exchanges/BTCChina.ini</file>
         <file>Resources/Exchanges/Bitstamp.ini</file>
         <file>Resources/Exchanges/GOCio.ini</file>
@@ -92,5 +95,7 @@
         <file>Resources/Language/Czech.lng</file>
         <file>Resources/Language/Turkish.lng</file>
         <file>Resources/Language/LangList.ini</file>
+        <file>Resources/Themes/Gray.thm</file>
+        <file>Resources/Gray.png</file>
     </qresource>
 </RCC>

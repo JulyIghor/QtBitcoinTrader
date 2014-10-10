@@ -1,3 +1,6 @@
+QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+
 TEMPLATE	= app
 LANGUAGE        = C++
 DEPENDPATH 	+= .
@@ -5,7 +8,7 @@ INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
 
-CONFIG	+= qt warn_off release
+CONFIG	+= qt release
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
 !win32 { TARGET = QtBitcoinTrader }
@@ -18,9 +21,8 @@ QT += widgets
 
 exists("sapi.h"){ DEFINES += SAPI_ENABLED }
 
-build_pass:CONFIG(static, static|shared){
-CONFIG	+= warn_off release
-  greaterThan(QT_MAJOR_VERSION, 4):{
+CONFIG(static) {
+  greaterThan(QT_MAJOR_VERSION, 4): {
    QTPLUGIN.mediaservice=-
    QTPLUGIN.playlistformats=-
    QTPLUGIN.position=-
@@ -37,7 +39,7 @@ CONFIG	+= warn_off release
   }
 }
 
- win32 { LIBS += -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lzlib}
+ win32 { LIBS += -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lzlib }
 !win32 { LIBS += -lcrypto -lz }
 
 mac{
@@ -104,7 +106,9 @@ HEADERS += aboutdialog.h \
     exchangebutton.h \
     addruledialog.h \
     rulescriptparser.h \
-    ruleholder.h
+    ruleholder.h \
+    exchange_indacoin.h \
+    julymath.h
 
 FORMS += addrulegroup.ui \
          datafolderchusedialog.ui \
@@ -183,7 +187,8 @@ SOURCES += aboutdialog.cpp \
     exchangebutton.cpp \
     addruledialog.cpp \
     rulescriptparser.cpp \
-    ruleholder.cpp
+    ruleholder.cpp \
+    exchange_indacoin.cpp
 #
 # Resources
 # 

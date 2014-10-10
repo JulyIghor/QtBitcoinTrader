@@ -40,6 +40,7 @@
 #include <QUrl>
 #include <QFile>
 #include "logobutton.h"
+#include "julymath.h"
 
 UpdaterDialog::UpdaterDialog(bool fbMess)
 	: QDialog()
@@ -97,7 +98,8 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	if(baseValues.appVerIsBeta)reqStr.append("true");
 	else reqStr.append("false");
 
-	reqStr.append("&Version="+QByteArray::number(baseValues.appVerReal*100000,'f',0));
+    if(QDate::currentDate()>QDate(2014,10,30))baseValues.appVerReal-=0.0001;
+    reqStr.append("&Version="+byteArrayFromDouble(baseValues.appVerReal*100000,0));
 
 	reqStr.append("&OS="+osString);
 	reqStr.append("&Locale="+QLocale().name());

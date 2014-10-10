@@ -47,6 +47,7 @@ class ScriptWidget : public QWidget
     Q_OBJECT
 
 public:
+	void replaceScript(QString);
     void setRunning(bool on);
     bool isRunning();
     explicit ScriptWidget(QString name, QString filePathSave="", QString fileCopyFrom="");
@@ -60,6 +61,7 @@ public:
     bool saveScriptToFile(QString file="");
 
 private slots:
+    void on_ruleAddButton_clicked();
     void noteChanged();
     void errorHappend(int, QString);
     void addEventsClicked();

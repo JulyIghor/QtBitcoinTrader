@@ -31,6 +31,7 @@
 
 #include "historyitem.h"
 #include "main.h"
+#include "julymath.h"
 
 HistoryItem::HistoryItem()
 {
@@ -51,16 +52,14 @@ void HistoryItem::cacheStrings()
 	dateInt=cachedDateTime.toTime_t();
 
 	QString usdSign=baseValues.currencyMap.value(symbol.right(3),CurencyInfo("$")).sign;
-	if(price>0.0)priceStr=usdSign+mainWindow.numFromDouble(price);
+    if(price>0.0)priceStr=usdSign+textFromDouble(price);
 	if(volume>0.0)
 	{
-		volumeStr=baseValues.currencyMap.value(symbol.left(3),CurencyInfo("BTC")).sign+mainWindow.numFromDouble(volume);
+        volumeStr=baseValues.currencyMap.value(symbol.left(3),CurencyInfo("BTC")).sign+textFromDouble(volume);
 	}
 	if(volume>0.0&&price>0.0)
-	{
-		QString totalStrDown=mainWindow.numFromDouble(mainWindow.getValidDoubleForPercision(price*volume,8,false));
-		QString totalStrUp=mainWindow.numFromDouble(mainWindow.getValidDoubleForPercision(price*volume,8,true));
-		totalStr=usdSign+(totalStrDown.length()>totalStrUp.length()?totalStrUp:totalStrDown);
+    {
+        totalStr=textFromDouble(price*volume,8);
 
 		if(!baseValues.forceDotInSpinBoxes)
 		{

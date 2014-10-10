@@ -41,6 +41,7 @@
 #include <QToolButton>
 #include <QDesktopServices>
 #include <QUrl>
+#include "addruledialog.h"
 
 ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFrom) :
     QWidget(),
@@ -54,6 +55,7 @@ ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFro
     setAttribute(Qt::WA_DeleteOnClose,true);
 
     setProperty("FileName",fileName);
+    setProperty("GroupType","Script");
 
     scriptName=gName;
 
@@ -309,6 +311,12 @@ void ScriptWidget::addFunctionClicked()
     }
 }
 
+void ScriptWidget::replaceScript(QString code)
+{
+	setRunning(false);
+	ui->sourceCode->setPlainText(code);
+}
+
 void ScriptWidget::addEventsClicked()
 {
     QAction *action=qobject_cast<QAction*>(sender());
@@ -535,4 +543,17 @@ void ScriptWidget::on_consoleOutput_textChanged()
 {
     bool haveLog=!ui->consoleOutput->toPlainText().isEmpty();
     ui->clearFon->setVisible(haveLog);
+}
+
+void ScriptWidget::on_ruleAddButton_clicked()
+{
+    AddRuleDialog ruleWindow(this);
+    if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
+    if(ruleWindow.exec()==QDialog::Rejected)return;
+
+    RuleHolder holder=ruleWindow.getRuleHolder();
+    if(!holder.isValid())return;
+
+    mainWindow.addRuleByHolder(holder,ruleWindow.isRuleEnabled(),ruleWindow.getGroupName(),"");
+    writeConsole("Script replaced by Rule: \""+holder.description+"\"");
 }

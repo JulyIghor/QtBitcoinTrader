@@ -171,6 +171,9 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
@@ -178,6 +181,38 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="groupNameLabel">
+       <property name="accessibleName">
+        <string>GROUP_NAME</string>
+       </property>
+       <property name="text">
+        <string>Group Name:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="groupName">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToContents</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -1196,12 +1231,12 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1160</x>
-     <y>55</y>
+     <x>1169</x>
+     <y>49</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1127</x>
-     <y>54</y>
+     <x>1144</x>
+     <y>50</y>
     </hint>
    </hints>
   </connection>
@@ -1212,12 +1247,12 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1074</x>
-     <y>354</y>
+     <x>1123</x>
+     <y>277</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1041</x>
-     <y>353</y>
+     <x>1098</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>
@@ -1228,8 +1263,8 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>148</x>
-     <y>410</y>
+     <x>167</x>
+     <y>317</y>
     </hint>
     <hint type="destinationlabel">
      <x>92</x>
@@ -1244,8 +1279,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>736</x>
-     <y>595</y>
+     <x>712</x>
+     <y>592</y>
     </hint>
     <hint type="destinationlabel">
      <x>703</x>

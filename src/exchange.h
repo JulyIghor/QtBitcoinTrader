@@ -42,6 +42,7 @@
 #include "julyhttp.h"
 #include "orderitem.h"
 #include "tradesitem.h"
+#include "julymath.h"
 
 struct DepthItem;
 
@@ -60,6 +61,7 @@ public:
 	CurrencyPairItem defaultCurrencyParams;
 	bool balanceDisplayAvailableAmount;
 	int minimumRequestIntervalAllowed;
+	int minimumRequestTimeoutAllowed;
     qreal decAmountFromOpenOrder;
 	int calculatingFeeMode;//0: direct multiply; 1: rounded by decimals
 	bool buySellAmountExcludedFee;
@@ -97,8 +99,12 @@ public:
 	bool orderBookItemIsDedicatedOrder;
 
 	QTimer *secondTimer;
-	QByteArray privateRestSign;
-	QByteArray privateRestKey;
+
+	void setApiKeySecret(QByteArray key, QByteArray secret);
+
+	QByteArray &getApiKey();
+    QByteArray getApiSign();
+
 	virtual void clearVariables();
 	void translateUnicodeStr(QString *str);
 	void translateUnicodeOne(QByteArray *str);
@@ -108,6 +114,11 @@ public:
 	~Exchange();
 
 private:
+	QByteArray privateKey;
+
+	QList<char*> apiKeyChars;
+	QList<char*> apiSignChars;
+
 	void run();
 
 signals:

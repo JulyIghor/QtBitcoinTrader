@@ -92,6 +92,7 @@ GroupBox_MAKE_YOUR_TRANSLATION=Vytvořte váš překlad
 GroupBox_MARKET_GROUPBOX=Obchod
 GroupBox_RULES_GROUP_CONTENT=Obsah skupiny pravidel
 GroupBox_RULE_GROUP_NAME=Jméno skupiny
+Label_GROUP_NAME=Jméno skupiny:
 GroupBox_TR00014=Zpoždění
 GroupBox_TR00018=Vaše otevřené objednávky
 GroupBox_TR00038=Nastavit následnou prodejní objednávku

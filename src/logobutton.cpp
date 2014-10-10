@@ -63,7 +63,7 @@ void LogoButton::themeChanged()
 	static QPixmap logoNight(":/Resources/CentrabitNight.png");
 	logoSize=logoDay.size();
 
-	if(baseValues.nightMode)
+    if(baseValues.currentTheme==1)
 		ui.logo->setPixmap(logoNight);
 	else
 		ui.logo->setPixmap(logoDay);

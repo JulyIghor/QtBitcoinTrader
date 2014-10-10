@@ -292,6 +292,7 @@ Label_REMOVE_RULES=Remove:
 CheckBox_CONFIRM_ORDER_CHECK=Confirm open order
 Button_ADD_RULES_GROUP=Add rules group
 GroupBox_RULE_GROUP_NAME=Group Name
+Label_GROUP_NAME=Group Name:
 Label_SHORT_NAME=Short name
 GroupBox_RULES_GROUP_CONTENT=Rules group content
 CheckBox_CREATE_EMPTY_RULES_GROUP=Create empty rules group

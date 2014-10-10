@@ -56,18 +56,21 @@ FeaturedExchangesDialog::FeaturedExchangesDialog()
     httpGet->noReconnect=true;
     httpGet->sendData(145,"GET /?Object=General&Method=FeaturedExchanges");
 
+	QElapsedTimer elapsedRequest;
+	elapsedRequest.restart();
     int counter=0;
-    while(cacheData.isEmpty()&&counter++<30)
+    while(cacheData.isEmpty()&&counter++<30&&elapsedRequest.elapsed()<3000)
     {
         QEventLoop loop;
         QTimer::singleShot(100,&loop,SLOT(quit()));
         loop.exec();
-    }
+	}
     delete httpGet;
     featuredExchangesList=QString(mainWindow.getMidData("Exchanges\":[","]",&cacheData)).split(",");
 
     cacheData.clear();
     }
+
     for(int n=featuredExchangesList.count()-1;n>=0;n--)
     {
         if(featuredExchangesList.at(n).isEmpty())featuredExchangesList.removeAt(n);

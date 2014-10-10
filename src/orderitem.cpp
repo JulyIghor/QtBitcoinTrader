@@ -31,6 +31,7 @@
 
 #include "orderitem.h"
 #include "main.h"
+#include "julymath.h"
 
 bool OrderItem::isValid()
 {
@@ -39,10 +40,10 @@ bool OrderItem::isValid()
 	{
 		dateStr=QDateTime::fromTime_t(date).toString(baseValues.dateTimeFormat);
 		QString priceSign=baseValues.currencyMap.value(symbol.right(3),CurencyInfo("$")).sign;
-		amountStr=baseValues.currencyMap.value(symbol.left(3),CurencyInfo("$")).sign+mainWindow.numFromDouble(amount);
-		priceStr=priceSign+mainWindow.numFromDouble(price);
+        amountStr=baseValues.currencyMap.value(symbol.left(3),CurencyInfo("$")).sign+textFromDouble(amount);
+        priceStr=priceSign+textFromDouble(price);
 		total=price*amount;
-		totalStr=priceSign+mainWindow.numFromDouble(total,baseValues.currentPair.currBDecimals);
+        totalStr=priceSign+textFromDouble(total,baseValues.currentPair.currBDecimals);
 	}
 	return isVal;
 }

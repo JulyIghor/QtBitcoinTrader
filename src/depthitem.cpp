@@ -31,14 +31,15 @@
 
 #include "depthitem.h"
 #include "main.h"
+#include "julymath.h"
 
 bool DepthItem::isValid()
 {
 	bool valid=price>=0.0&&volume>=0.0;
 	if(valid)
 	{
-		priceStr=mainWindow.numFromDouble(price);
-		volumeStr=QString::number(volume,'f',baseValues.currentPair.currADecimals);
+        priceStr=textFromDouble(price,baseValues.currentPair.priceDecimals);
+        volumeStr=textFromDouble(volume,baseValues.currentPair.currADecimals,baseValues.currentPair.currADecimals);
 	}
 	return valid;
 }

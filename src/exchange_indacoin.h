@@ -29,59 +29,64 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef RULEWIDGET_H
-#define RULEWIDGET_H
+#ifndef EXCHANGE_INDACOIN_H
+#define EXCHANGE_INDACOIN_H
 
-#include <QWidget>
-#include "ui_rulewidget.h"
-#include "rulesmodel.h"
-#include <QTime>
+#include "exchange.h"
 
-class RuleWidget : public QWidget
+class Exchange_Indacoin : public Exchange
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	void addRuleByHolder(RuleHolder &holder, bool isEnabled);
-    bool isBeepOnDone();
-    void currencyChanged();
-	void updateStyleSheets();
-	void saveRulesData();
-	bool haveWorkingRules();
-    bool haveAnyRules();
-    bool removeGroup();
-    void languageChanged();
-	Ui::RuleWidget ui;
-	RulesModel *rulesModel;
-    RuleWidget(QString filePath);
-	~RuleWidget();
+    Exchange_Indacoin(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_Indacoin();
 
 private:
-    bool agreeRuleImmediately(QString);
-	QTime ordersCancelTime;
-	QMenu *rulesEnableDisableMenu;
-	QString groupName;
-    QString filePath;
+    QByteArray ecdsaSha1(QByteArray shaKey, QByteArray &shaSign);
+
+    bool isApiDown;
+    bool isFirstAccInfo;
+    bool isFirstTicker;
+    bool isReplayPending(int);
+    bool tickerOnly;
+
+    int apiDownCounter;
+    int lastOpenedOrders;
+
+    JulyHttp *julyHttp;
+
+    qint64 lastFetchTid;
+    qint64 lastFetchDate;
+
+    QList<DepthItem> *depthAsks;
+    QList<DepthItem> *depthBids;
+    QList<QByteArray> cancelingOrderIDs;
+
+    QMap<qreal,qreal> lastDepthAsksMap;
+    QMap<qreal,qreal> lastDepthBidsMap;
+
+    QTime authRequestTime;
+
+    quint32 lastPriceDate;
+    quint32 lastTickerDate;
+    quint32 privateNonce;
+
+    void clearVariables();
+    void depthSubmitOrder(QString,QMap<qreal,qreal> *currentMap ,qreal priceDouble, qreal amount, bool isAsk);
+    void depthUpdateOrder(QString, qreal,qreal,bool);
+    void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
+private slots:
+    void reloadDepth();
+    void sslErrors(const QList<QSslError> &);
+    void dataReceivedAuth(QByteArray,int);
+    void secondSlot();
 public slots:
-	void writeLog(QString);
-	void on_limitRowsValue_valueChanged(int);
-	void on_buttonSave_clicked();
-    void ruleDone();
-	void on_ruleUp_clicked();
-	void on_ruleDown_clicked();
-	void rulesMenuRequested(const QPoint&);
-	void ruleDisableEnableMenuFix();
-	void on_ruleConcurrentMode_toggled(bool);
-	void ruleEnableSelected();
-    void ruleDisableSelected();
-    void ruleEnableAll();
-    void ruleDisableAll();
-	void on_ruleAddButton_clicked();
-	void on_ruleEditButton_clicked();
-	void on_ruleRemoveAll_clicked();
-	void checkValidRulesButtons();
-	void on_ruleRemove_clicked();
-	void on_ruleSave_clicked();
+    void clearValues();
+    void getHistory(bool);
+    void buy(QString, qreal, qreal);
+    void sell(QString, qreal, qreal);
+    void cancelOrder(QString, QByteArray);
 };
 
-#endif // RULEWIDGET_H
+#endif // EXCHANGE_INDACOIN_H

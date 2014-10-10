@@ -84,8 +84,11 @@ ScriptObject::ScriptObject(QString _scriptName) :
     }
     indicatorList<<"trader.on(\"AnyValue\").changed";
 	indicatorList<<"trader.on(\"Time\").changed";
-	indicatorList<<"trader.on(\"LastTrade\").changed";
-	indicatorList<<"trader.on(\"MyLastTrade\").changed";
+    indicatorList<<"trader.on(\"LastTrade\").changed";
+    indicatorList<<"trader.on(\"MyLastTrade\").changed";
+    indicatorList<<"trader.on(\"OpenOrdersCount\").changed";
+    indicatorList<<"trader.on(\"OpenAsksCount\").changed";
+    indicatorList<<"trader.on(\"OpenBidsCount\").changed";
 
     functionsList<<"trader.get(\"Time\")";
 
@@ -164,7 +167,7 @@ qreal ScriptObject::orderBookInfo(QString &symbol,qreal &value, bool isAsk, bool
     {
         result=-result;
         if(!testMode)
-			writeLog("Warning! OrderBook info is out of range. OrderBook information is limited to rows count limit.");
+            emit writeLog("Warning! OrderBook info is out of range. OrderBook information is limited to rows count limit.");
     }
     return result;
 }
@@ -178,7 +181,7 @@ void ScriptObject::timerCreate(int milliseconds, QString &command, bool once)
 {
     if(testMode)return;
     if(engine==0||command.isEmpty())return;
-    if(milliseconds<0){writeLog("Timer have less than 0 interval");return;}
+    if(milliseconds<0){emit writeLog("Timer have less than 0 interval");return;}
     QTimer *newTimer=new QTimer(this);
     timerMap.insert(newTimer,true);
     newTimer->setSingleShot(once);
@@ -276,7 +279,7 @@ void ScriptObject::say(QVariantList list)
     {
         if(list.at(n).type()==QVariant::Double)
         {
-            QString number=mainWindow.numFromDouble(list.at(n).toDouble(),10,0);
+            QString number=textFromDouble(list.at(n).toDouble(),8,0);
             if(detectDoublePoint==2)number.replace(QLatin1Char('.'),QLatin1Char(','));
             text+=number;
         }
@@ -292,8 +295,6 @@ void ScriptObject::groupStart(QString name)
     if(testMode)return;
     if(name.isEmpty())name=scriptName;
     log("Start group: \""+name+"\"");
-    if(name==scriptName)setRunning(true);
-    else
     emit setGroupEnabled(name, true);
 }
 
@@ -373,7 +374,7 @@ void ScriptObject::buy(QString symbol, double amount, double price)
     else
     symbol=symbol.toUpper();
     if(!testMode)mainWindow.apiBuySend(symbol,amount,price);
-    log(symbol+": Buy "+mainWindow.numFromDouble(amount,10,0)+" at "+mainWindow.numFromDouble(price,10,0));
+    log(symbol+": Buy "+textFromDouble(amount,8,0)+" at "+textFromDouble(price,8,0));
 }
 
 void ScriptObject::sell(QString symbol, double amount, double price)
@@ -382,7 +383,7 @@ void ScriptObject::sell(QString symbol, double amount, double price)
     else
     symbol=symbol.toUpper();
     if(!testMode)mainWindow.apiSellSend(symbol,amount,price);
-    log(symbol+": Sell "+mainWindow.numFromDouble(amount,10,0)+" at "+mainWindow.numFromDouble(price,10,0));
+    log(symbol+": Sell "+textFromDouble(amount,8,0)+" at "+textFromDouble(price,8,0));
 }
 
 void ScriptObject::cancelOrders()
@@ -439,7 +440,7 @@ void ScriptObject::log(QVariantList list)
     {
         if(n!=0)logText.append(QLatin1Char(' '));
         if(list.at(n).type()==QVariant::Double)
-            logText.append(mainWindow.numFromDouble(list.at(n).toDouble(),10,0));
+            logText.append(textFromDouble(list.at(n).toDouble(),8,0));
         else
             logText.append(list.at(n).toString());
     }
@@ -448,7 +449,7 @@ void ScriptObject::log(QVariantList list)
 void ScriptObject::log(QVariant arg1)
 {
     if(testMode)return;
-    if(arg1.type()==QVariant::Double)emit writeLog(mainWindow.numFromDouble(arg1.toDouble(),10,0));
+    if(arg1.type()==QVariant::Double)emit writeLog(textFromDouble(arg1.toDouble(),8,0));
     else emit writeLog(arg1.toString());
 }
 
