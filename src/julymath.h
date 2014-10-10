@@ -32,7 +32,7 @@
 #ifndef JULYMATH_H
 #define JULYMATH_H
 
-#include <QtMath>
+#include "qmath.h"
 
 static QByteArray byteArrayFromDouble(const qreal &value, int maxDecimals=8, int minDecimals=1);
 static QString textFromDouble(const qreal &value, int maxDecimals=8, int minDecimals=1);
