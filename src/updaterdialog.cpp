@@ -98,7 +98,6 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 	if(baseValues.appVerIsBeta)reqStr.append("true");
 	else reqStr.append("false");
 
-    if(QDate::currentDate()>QDate(2014,10,30))baseValues.appVerReal-=0.0001;
     reqStr.append("&Version="+byteArrayFromDouble(baseValues.appVerReal*100000,0));
 
 	reqStr.append("&OS="+osString);

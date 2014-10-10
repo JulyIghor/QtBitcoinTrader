@@ -275,9 +275,9 @@ int main(int argc, char *argv[])
     baseValues.appThemeGray.loadTheme("Gray");
     baseValues.appTheme=baseValues.appThemeLight;
 
-    if(argc>1||QDate::currentDate()>QDate(2014,10,30))
+    if(argc>1)
 	{
-        if(a.arguments().last().startsWith("/checkupdate")||QDate::currentDate()>QDate(2014,10,30))
+        if(a.arguments().last().startsWith("/checkupdate"))
 		{
 			a.setStyleSheet(baseValues.appTheme.styleSheet);
 
