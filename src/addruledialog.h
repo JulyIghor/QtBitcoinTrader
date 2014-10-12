@@ -52,7 +52,7 @@ public:
     bool isRuleEnabled();
     RuleHolder getRuleHolder();
     void fillByHolder(RuleHolder &,bool enabled);
-    explicit AddRuleDialog(QWidget *parent = 0);
+    explicit AddRuleDialog(QString groupName, QWidget *parent = 0);
     ~AddRuleDialog();
 
 private slots:
@@ -86,6 +86,7 @@ private slots:
     void on_sayCode_currentIndexChanged(int index);
 
 private:
+    QString groupName;
 	QString getFreeGroupName();
     void fixSize(bool fitToWindow=false);
     bool pendingFix;

@@ -41,10 +41,11 @@
 #include "scriptobject.h"
 #include "julymath.h"
 
-AddRuleDialog::AddRuleDialog(QWidget *par) :
+AddRuleDialog::AddRuleDialog(QString grName, QWidget *par) :
     QDialog(par),
     ui(new Ui::AddRuleDialog)
 {
+    groupName=grName;
     saveClicked=false;
     pendingFix=true;
     ruleIsEnabled=false;
@@ -311,7 +312,11 @@ RuleHolder AddRuleDialog::getRuleHolder()
     lastHolder.comparationText=ui->comparation->currentText();
     lastHolder.thanPricePlusMinusText=ui->thanPricePlusMinus->currentText();
     lastHolder.thanPriceTypeCode=comboCurrentData(ui->thanPriceType);
-    lastHolder.thanText=ui->thanText->text();
+
+    QString grName=ui->thanText->text();
+    if(grName.isEmpty())grName=groupName;
+    lastHolder.thanText=grName;
+
     lastHolder.tradeSymbolCode=comboCurrentData(ui->thanSymbol);
     lastHolder.valueASymbolCode=comboCurrentData(ui->valueASymbol);
     lastHolder.valueBSymbolCode=comboCurrentData(ui->valueBSymbol);
@@ -413,7 +418,9 @@ void AddRuleDialog::reCacheCode()
 
         descriptionText+=" "+julyTr("AT","at %1").arg(atPrice);
     }
-    if(ui->thanText->isVisible())descriptionText+=" ("+ui->thanText->text()+")";
+    QString grName=ui->thanText->text();
+    if(grName.isEmpty())grName=groupName;
+    if(ui->thanText->isVisible())descriptionText+=" ("+grName+")";
 
     ui->descriptionText->setText(descriptionText);
 

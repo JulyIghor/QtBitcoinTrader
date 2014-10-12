@@ -110,13 +110,13 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.08";
+    appVerStr="1.0801";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
 		if(appVerStr.size()==7)appVerStr.remove(6,1);
 		appVerStr.insert(4,".");
-		if(appVerStr.at(appVerStr.size()-1)!='0')appVerIsBeta=true;
+        //if(appVerStr.at(appVerStr.size()-1)!='0')appVerIsBeta=true;
 	}
 	appVerLastReal=appVerReal;
 

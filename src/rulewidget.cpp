@@ -205,7 +205,7 @@ void RuleWidget::addRuleByHolder(RuleHolder &holder, bool isEnabled)
 
 void RuleWidget::on_ruleAddButton_clicked()
 {
-    AddRuleDialog ruleWindow(this);
+    AddRuleDialog ruleWindow(groupName,this);
     if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
     if(ruleWindow.exec()==QDialog::Rejected)return;
 
@@ -227,7 +227,7 @@ void RuleWidget::on_ruleEditButton_clicked()
 	int curRow=selectedRows.first().row();
 	if(curRow<0)return;
 
-    AddRuleDialog ruleWindow(this);
+    AddRuleDialog ruleWindow(groupName,this);
     if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
     ruleWindow.fillByHolder(rulesModel->holderList[curRow],rulesModel->getStateByRow(curRow)==1);
     if(ruleWindow.exec()==QDialog::Rejected)return;
@@ -412,6 +412,11 @@ void RuleWidget::ruleDisableSelected()
 }
 
 void RuleWidget::ruleEnableAll()
+{
+    QTimer::singleShot(100,this,SLOT(ruleEnableAllSlot()));
+}
+
+void RuleWidget::ruleEnableAllSlot()
 {
     for(int curRow=0;curRow<rulesModel->holderList.count();curRow++)
     {

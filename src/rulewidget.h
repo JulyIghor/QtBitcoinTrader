@@ -62,6 +62,8 @@ private:
 	QMenu *rulesEnableDisableMenu;
 	QString groupName;
     QString filePath;
+private slots:
+    void ruleEnableAllSlot();
 public slots:
 	void writeLog(QString);
 	void on_limitRowsValue_valueChanged(int);

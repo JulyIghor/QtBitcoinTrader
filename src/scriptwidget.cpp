@@ -547,7 +547,7 @@ void ScriptWidget::on_consoleOutput_textChanged()
 
 void ScriptWidget::on_ruleAddButton_clicked()
 {
-    AddRuleDialog ruleWindow(this);
+    AddRuleDialog ruleWindow(scriptName,this);
     if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
     if(ruleWindow.exec()==QDialog::Rejected)return;
 
