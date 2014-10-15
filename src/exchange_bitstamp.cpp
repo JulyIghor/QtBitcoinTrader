@@ -165,7 +165,7 @@ void Exchange_Bitstamp::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToB
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray params="amount="+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals)+"&price="+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals);
+    QByteArray params="amount="+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals,0)+"&price="+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals,0);
 	if(debugLevel)logThread->writeLog("Buy: "+params,2);
 	sendToApi(306,"buy/",true,true,params);
 }
@@ -178,7 +178,7 @@ void Exchange_Bitstamp::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceT
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray params="amount="+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals)+"&price="+byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals);
+    QByteArray params="amount="+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals,0)+"&price="+byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals,0);
 	if(debugLevel)logThread->writeLog("Sell: "+params,2);
 	sendToApi(307,"sell/",true,true,params);
 }

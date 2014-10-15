@@ -569,7 +569,7 @@ void Exchange_BTCe::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=buy&rate="+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals)+"&amount="+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals)+"&";
+    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=buy&rate="+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals,0)+"&amount="+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals,0)+"&";
     if(debugLevel)logThread->writeLog("Buy: "+data,2);
 	sendToApi(306,"",true,true,data);
 }
@@ -582,7 +582,7 @@ void Exchange_BTCe::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceToSel
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=sell&rate="+byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals)+"&amount="+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals)+"&";
+    QByteArray data="method=Trade&pair="+pairItem.currRequestPair+"&type=sell&rate="+byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals,0)+"&amount="+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals,0)+"&";
     if(debugLevel)logThread->writeLog("Sell: "+data,2);
 	sendToApi(307,"",true,true,data);
 }

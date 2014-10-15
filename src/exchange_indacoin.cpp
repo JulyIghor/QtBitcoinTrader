@@ -605,7 +605,7 @@ void Exchange_Indacoin::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToB
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray data="pair:'"+pairItem.currRequestPair.toUpper()+"',price:'"+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals)+"',amount:'"+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals)+"'";
+    QByteArray data="pair:'"+pairItem.currRequestPair.toUpper()+"',price:'"+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals,0)+"',amount:'"+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals,0)+"'";
     if(debugLevel)logThread->writeLog("Buy: "+data,2);
     sendToApi(306,"buyorder",true,true,data);
 }
@@ -618,7 +618,7 @@ void Exchange_Indacoin::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceT
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
 
-    QByteArray data="pair:'"+pairItem.currRequestPair.toUpper()+"',price:'"+QByteArray::number(apiPriceToSell,'f',pairItem.priceDecimals)+"',amount:'"+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals)+"'";
+    QByteArray data="pair:'"+pairItem.currRequestPair.toUpper()+"',price:'"+byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals,0)+"',amount:'"+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals,0)+"'";
     if(debugLevel)logThread->writeLog("Sell: "+data,2);
     sendToApi(307,"sellorder",true,true,data);
 }

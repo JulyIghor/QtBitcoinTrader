@@ -37,6 +37,16 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#ifdef Q_OS_WIN
+#include <WinSock2.h>
+#else
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <net/if.h>
+#endif
+
+
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
 	: QSslSocket(parent)
 {
@@ -129,7 +139,6 @@ void JulyHttp::setupSocket()
 	}
 
 	setPeerVerifyMode(QSslSocket::VerifyPeer);
-    setSocketOption(QAbstractSocket::KeepAliveOption,1);
 	connect(this,SIGNAL(readyRead()),SLOT(readSocket()));
 	connect(this,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(errorSlot(QAbstractSocket::SocketError)));
 	connect(this,SIGNAL(sslErrors(const QList<QSslError> &)),this,SLOT(sslErrorsSlot(const QList<QSslError> &)));
@@ -163,6 +172,15 @@ void JulyHttp::reconnectSocket(bool mastAbort)
 		if(secureConnection)connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
 		else connectToHost(hostName,80,QIODevice::ReadWrite);
         waitForConnected(((noReconnect&&noReconnectCount++>5)?1000:baseValues.httpRequestTimeout));
+
+#ifdef Q_OS_WIN
+		setsockopt(this->socketDescriptor(),SOL_SOCKET,SO_RCVTIMEO,(const char*)&baseValues.httpRequestTimeout,sizeof(int));
+#else
+        struct timeval vtime;
+        vtime.tv_sec=baseValues.httpRequestTimeout/1000;
+        vtime.tv_usec=baseValues.httpRequestTimeout*1000-vtime.tv_sec*1000000;
+        setsockopt(this->socketDescriptor(),SOL_SOCKET,SO_RCVTIMEO,&vtime,sizeof(struct timeval));
+#endif
 	}
 }
 
