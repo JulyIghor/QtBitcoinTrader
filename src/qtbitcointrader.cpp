@@ -1251,7 +1251,7 @@ void QtBitcoinTrader::sayText(QString text)
 	}
 #endif
 #else
-    startApplication("./say",QStringList()<<text);
+    QProccess::startDetached(appDir+"/say",QStringList()<<text);
 #endif
 #endif
 }
