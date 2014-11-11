@@ -236,7 +236,7 @@ void ScriptObject::startApp(QString name, QString arg1, QString arg2, QString ar
 void ScriptObject::startApp(QString name, QString arg1, QString arg2, QString arg3, QString arg4){startApp(name,QStringList()<<arg1<<arg2<<arg3<<arg4);}
 void ScriptObject::startApp(QString name, QStringList list)
 {
-    emit startAppSignal(name,list);
+    if(!testMode)emit startAppSignal(name,list);
     if(list.count())name+=" "+list.join(" ");
     writeLog(julyTr("START_APPLICATION","Start application: %1").arg(name));
 }
