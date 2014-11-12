@@ -1222,6 +1222,7 @@ void QtBitcoinTrader::startApplication(QString name, QStringList params)
     name="open";
 	}
 #endif
+    if(debugLevel)logThread->writeLog("StartAPP: "+name.toLatin1()+" "+params.join(" ").toLatin1(),2);
     QProcess::startDetached(name,params);
 }
 
@@ -1251,7 +1252,8 @@ void QtBitcoinTrader::sayText(QString text)
 	}
 #endif
 #else
-    QProccess::startDetached(appDir+"/say",QStringList()<<text);
+    if(debugLevel)logThread->writeLog("StartAPP: "+appDir.toLatin1()+"say "+text.toLatin1(),2);
+    QProccess::startDetached(appDir+"say",QStringList()<<text);
 #endif
 #endif
 }
