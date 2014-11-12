@@ -1253,7 +1253,7 @@ void QtBitcoinTrader::sayText(QString text)
 #endif
 #else
     if(debugLevel)logThread->writeLog("StartAPP: "+appDir.toLatin1()+"say "+text.toLatin1(),2);
-    QProccess::startDetached(appDir+"say",QStringList()<<text);
+    QProcess::startDetached(appDir+"say",QStringList()<<text);
 #endif
 #endif
 }
