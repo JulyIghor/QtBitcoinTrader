@@ -132,7 +132,7 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget *par) :
 
     Q_FOREACH(QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())new JulySpinBoxFix(spinBox);
 
-    QString baseSymbol=baseValues.currentPair.symbol;
+    QString baseSymbol=baseValues.currentPair.symbolSecond();
     Q_FOREACH(QComboBox *comboBox, findChildren<QComboBox*>())
     {
         if(comboBox->accessibleName()!="SYMBOL")continue;
@@ -140,7 +140,7 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget *par) :
         int selectedRow=-1;
         for(int n=0;n<mainWindow.currPairsList.count();n++)
         {
-            QString curSymbol=mainWindow.currPairsList.at(n).symbol;
+            QString curSymbol=mainWindow.currPairsList.at(n).symbolSecond();
             if(curSymbol==baseSymbol)selectedRow=n;
             //else if(!currentExchange->multiCurrencyTradeSupport)continue;
             comboBox->insertItem(comboBox->count(),mainWindow.currPairsList.at(n).name,curSymbol);
@@ -379,7 +379,7 @@ void AddRuleDialog::reCacheCode()
         QString sign;
         CurrencyPairItem pairItem;
         pairItem=baseValues.currencyPairMap.value(comboCurrentData(ui->valueBSymbol),pairItem);
-        if(!pairItem.symbol.isEmpty())sign=pairItem.currASign;
+        if(!pairItem.symbolSecond().isEmpty())sign=pairItem.currASign;
 
         descriptionText+=" "+sign+textFromDouble(ui->thanAmount->value(),8,0);
         if(ui->thanAmountPercent->isChecked())descriptionText+="%";
@@ -404,7 +404,7 @@ void AddRuleDialog::reCacheCode()
             QString sign;
             CurrencyPairItem pairItem;
             pairItem=baseValues.currencyPairMap.value(comboCurrentData(ui->thanSymbol),pairItem);
-            if(!pairItem.symbol.isEmpty())sign=pairItem.currBSign;
+            if(!pairItem.symbolSecond().isEmpty())sign=pairItem.currBSign;
 
             atPrice+=" "+sign+textFromDouble(ui->thanPriceValue->value(),8,0);
         }
@@ -738,7 +738,7 @@ void AddRuleDialog::on_buttonAddRule_clicked()
 
     if(!baseValues.currentExchange_->multiCurrencyTradeSupport)
     {
-        QString currentSymbol=baseValues.currentPair.symbol;
+        QString currentSymbol=baseValues.currentPair.symbolSecond();
         if(comboCurrentData(ui->valueASymbol)!=currentSymbol||comboCurrentData(ui->valueBSymbol)!=currentSymbol||comboCurrentData(ui->thanSymbol)!=currentSymbol)
         {
             QMessageBox::warning(this,windowTitle(),julyTr("RULE_MULTITRADE_NOTSUPPORTED","Warning. Multi currency trading is not supported yet.\nRule will works only with the same currency pair as current.\nSet up all symbols as current main currency."));
@@ -757,7 +757,8 @@ void AddRuleDialog::on_buttonSaveRule_clicked()
 
 void AddRuleDialog::on_fillFromBuyPanel_clicked()
 {
-    setComboIndexByData(ui->thanSymbol,baseValues.currentPair.symbol);
+    QString tempSymbol=baseValues.currentPair.symbolSecond();
+    setComboIndexByData(ui->thanSymbol,tempSymbol);
     ui->thanPricePercent->setChecked(false);
     ui->thanPriceFee->setCurrentIndex(0);
     ui->thanType->setCurrentIndex(1);
@@ -768,7 +769,8 @@ void AddRuleDialog::on_fillFromBuyPanel_clicked()
 
 void AddRuleDialog::on_fillFromSellPanel_clicked()
 {
-    setComboIndexByData(ui->thanSymbol,baseValues.currentPair.symbol);
+    QString tempSymbol=baseValues.currentPair.symbolSecond();
+    setComboIndexByData(ui->thanSymbol,tempSymbol);
     ui->thanPricePercent->setChecked(false);
     ui->thanPriceFee->setCurrentIndex(0);
     ui->thanType->setCurrentIndex(0);
@@ -783,7 +785,7 @@ void AddRuleDialog::on_valueBSymbol_currentIndexChanged(int index)
 
     CurrencyPairItem pairItem;
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
-    if(pairItem.symbol.isEmpty())return;
+    if(pairItem.symbolSecond().isEmpty())return;
 
     for(int n=0;n<ui->variableB->count();n++)
     {
@@ -803,7 +805,7 @@ void AddRuleDialog::on_thanSymbol_currentIndexChanged(int index)
 
     CurrencyPairItem pairItem;
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
-    if(pairItem.symbol.isEmpty())return;
+    if(pairItem.symbolSecond().isEmpty())return;
 
     ui->thanType->setItemText(0,julyTr("RULE_THAN_SELL","Sell %1").arg(pairItem.currAStr));
     ui->thanType->setItemText(1,julyTr("RULE_THAN_BUY","Buy %1").arg(pairItem.currAStr));
@@ -817,7 +819,7 @@ void AddRuleDialog::on_valueASymbol_currentIndexChanged(int index)
 
     CurrencyPairItem pairItem;
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
-    if(pairItem.symbol.isEmpty())return;
+    if(pairItem.symbolSecond().isEmpty())return;
 
     for(int n=0;n<ui->variableA->count();n++)
     {

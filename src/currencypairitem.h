@@ -47,7 +47,7 @@ struct CurrencyPairItem
 	CurencyInfo currBInfo;
 
     QString symbol;
-	QString symbolSecond(){return symbol+currRequestSecond;}
+    QString symbolSecond() const {return symbol+currRequestSecond;}
 	QByteArray currRequestPair;
 	QByteArray currRequestSecond;
 

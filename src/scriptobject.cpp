@@ -79,7 +79,7 @@ ScriptObject::ScriptObject(QString _scriptName) :
     {
         QString scriptName=spinBox->whatsThis();
         if(scriptName.isEmpty())continue;
-        indicatorsMap[baseValues.currentPair.symbol+"_"+scriptName]=spinBox->value();
+        indicatorsMap[baseValues.currentPair.symbolSecond()+"_"+scriptName]=spinBox->value();
         addIndicator(spinBox,scriptName);
     }
     indicatorList<<"trader.on(\"AnyValue\").changed";
@@ -118,7 +118,7 @@ ScriptObject::ScriptObject(QString _scriptName) :
 void ScriptObject::sendEvent(QString name, qreal value)
 {
     if(testMode)return;
-    emit eventSignal(baseValues.currentPair.symbol,name,value);
+    emit eventSignal(baseValues.currentPair.symbolSecond(),name,value);
 }
 
 void ScriptObject::sendEvent(QString symbol, QString name, qreal value)
@@ -147,10 +147,10 @@ void ScriptObject::test(int val)
     testResult=val;
 }
 
-qreal ScriptObject::getAsksVolByPrice(qreal volume){return getAsksVolByPrice(baseValues.currentPair.symbol,volume);}
-qreal ScriptObject::getAsksPriceByVol(qreal price){return getAsksPriceByVol(baseValues.currentPair.symbol,price);}
-qreal ScriptObject::getBidsVolByPrice(qreal volume){return getBidsVolByPrice(baseValues.currentPair.symbol,volume);}
-qreal ScriptObject::getBidsPriceByVol(qreal price){return getBidsPriceByVol(baseValues.currentPair.symbol,price);}
+qreal ScriptObject::getAsksVolByPrice(qreal volume){return getAsksVolByPrice(baseValues.currentPair.symbolSecond(),volume);}
+qreal ScriptObject::getAsksPriceByVol(qreal price){return getAsksPriceByVol(baseValues.currentPair.symbolSecond(),price);}
+qreal ScriptObject::getBidsVolByPrice(qreal volume){return getBidsVolByPrice(baseValues.currentPair.symbolSecond(),volume);}
+qreal ScriptObject::getBidsPriceByVol(qreal price){return getBidsPriceByVol(baseValues.currentPair.symbolSecond(),price);}
 
 qreal ScriptObject::getAsksPriceByVol(QString symbol, qreal price){return orderBookInfo(symbol,price,true,true);}
 qreal ScriptObject::getAsksVolByPrice(QString symbol, qreal volume){return orderBookInfo(symbol,volume,true,false);}
@@ -174,7 +174,7 @@ qreal ScriptObject::orderBookInfo(QString &symbol,qreal &value, bool isAsk, bool
 
 qreal ScriptObject::get(QString indicator)
 {
-    return get(baseValues.currentPair.symbol,indicator);
+    return get(baseValues.currentPair.symbolSecond(),indicator);
 }
 
 void ScriptObject::timerCreate(int milliseconds, QString &command, bool once)
@@ -236,7 +236,7 @@ void ScriptObject::startApp(QString name, QString arg1, QString arg2, QString ar
 void ScriptObject::startApp(QString name, QString arg1, QString arg2, QString arg3, QString arg4){startApp(name,QStringList()<<arg1<<arg2<<arg3<<arg4);}
 void ScriptObject::startApp(QString name, QStringList list)
 {
-    if(!testMode)emit startAppSignal(name,list);
+    emit startAppSignal(name,list);
     if(list.count())name+=" "+list.join(" ");
     writeLog(julyTr("START_APPLICATION","Start application: %1").arg(name));
 }
@@ -332,7 +332,7 @@ void ScriptObject::addIndicator(QDoubleSpinBox *spinBox, QString value)
     indicatorList<<"trader.on(\""+value+"\").changed";
     spinBox->setProperty("ScriptName",value);
     spinBoxList<<spinBox;
-    indicatorsMap.insert(baseValues.currentPair.symbol+"_"+value,spinBox->value());
+    indicatorsMap.insert(baseValues.currentPair.symbolSecond()+"_"+value,spinBox->value());
     functionsList<<"trader.get(\""+value+"\")";
 }
 
@@ -370,7 +370,7 @@ void ScriptObject::sell(double amount, double price)
 
 void ScriptObject::buy(QString symbol, double amount, double price)
 {
-    if(symbol.isEmpty())symbol=baseValues.currentPair.symbol;
+    if(symbol.isEmpty())symbol=baseValues.currentPair.symbolSecond();
     else
     symbol=symbol.toUpper();
     if(!testMode)mainWindow.apiBuySend(symbol,amount,price);
@@ -379,7 +379,7 @@ void ScriptObject::buy(QString symbol, double amount, double price)
 
 void ScriptObject::sell(QString symbol, double amount, double price)
 {
-    if(symbol.isEmpty())symbol=baseValues.currentPair.symbol;
+    if(symbol.isEmpty())symbol=baseValues.currentPair.symbolSecond();
     else
     symbol=symbol.toUpper();
     if(!testMode)mainWindow.apiSellSend(symbol,amount,price);
@@ -449,7 +449,20 @@ void ScriptObject::log(QVariantList list)
 void ScriptObject::log(QVariant arg1)
 {
     if(testMode)return;
-    if(arg1.type()==QVariant::Double)emit writeLog(textFromDouble(arg1.toDouble(),8,0));
+    if(arg1.type()==QVariant::Double)
+    {
+        QString result;
+        bool ok;
+        qreal doubleVal=arg1.toDouble(&ok);
+        if(ok)result=textFromDouble(doubleVal,8,0);
+        else
+        {
+            quint64 uLongVal=arg1.toULongLong(&ok);
+            if(ok)result=QString::number(uLongVal);
+            else result=arg1.toString();
+        }
+        emit writeLog(result);
+    }
     else emit writeLog(arg1.toString());
 }
 
@@ -482,7 +495,7 @@ void ScriptObject::indicatorValueChanged(double val)
     QObject *senderObject=sender();if(senderObject==0)return;
     QString scriptNameInd=senderObject->property("ScriptName").toString();
     if(scriptNameInd.isEmpty())return;
-    initValueChanged(baseValues.currentPair.symbol,scriptNameInd,val);
+    initValueChanged(baseValues.currentPair.symbolSecond(),scriptNameInd,val);
 }
 
 quint32 ScriptObject::getTimeT()
@@ -498,7 +511,7 @@ bool ScriptObject::groupIsRunning(QString name)
 
 void ScriptObject::secondSlot()
 {
-    emit valueChanged(baseValues.currentPair.symbol,QLatin1String("Time"),getTimeT());
+    emit valueChanged(baseValues.currentPair.symbolSecond(),QLatin1String("Time"),getTimeT());
     if(testMode)return;
     secondTimer->start(1000);
 }
@@ -608,7 +621,8 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
                 continue;
             }
             double spinValue=spinBox->value();
-            initValueChangedPrivate(baseValues.currentPair.symbol,spinProperty,spinValue,testMode);
+            QString symbolTemp=baseValues.currentPair.symbolSecond();
+            initValueChangedPrivate(symbolTemp,spinProperty,spinValue,testMode);
             if(!testMode)connect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
             }
         }
