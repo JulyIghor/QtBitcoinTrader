@@ -57,12 +57,32 @@ DepthModel::~DepthModel()
 
 }
 
+qreal &DepthModel::sizeListAt(int row)
+{
+    if(!originalIsAsk)return sizeList[sizeList.count()-row-1];
+    return sizeList[row];
+}
+
+qreal DepthModel::sizeListGet(int row) const
+{
+    if(!originalIsAsk)return sizeList[sizeList.count()-row-1];
+    return sizeList[row];
+}
+
+void DepthModel::sizeListRemoveAt(int row)
+{
+    if(!originalIsAsk)sizeList.removeAt(sizeList.count()-row-1);
+    else
+    sizeList.removeAt(row);
+}
+
 qreal DepthModel::getPriceByVolume(qreal amount)
 {
     if(sizeList.count()==0)return 0.0;
     int currentIndex=qUpperBound(sizeList.begin(),sizeList.end(),amount)-sizeList.begin();
     if(currentIndex<0)return 0.0;
     if(currentIndex>=sizeList.count())currentIndex=sizeList.count()-1;
+    if(!originalIsAsk)currentIndex=priceList.count()-currentIndex-1;
     return priceList.at(currentIndex)*(currentIndex==priceList.count()-1?-1:1);
 }
 
@@ -72,7 +92,7 @@ qreal DepthModel::getVolumeByPrice(qreal price)
     int currentIndex=qUpperBound(priceList.begin(),priceList.end(),price)-priceList.begin();
     if(currentIndex<0)return 0.0;
     if(currentIndex>=priceList.count())currentIndex=priceList.count()-1;
-    return sizeList.at(currentIndex)*(currentIndex==priceList.count()-1?-1:1);
+    return sizeListAt(currentIndex)*(currentIndex==priceList.count()-1?-1:1);
 }
 
 int DepthModel::rowCount(const QModelIndex &) const
@@ -202,7 +222,7 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 		}
 	case 3:
 		{//Size
-		if(sizeList.at(currentRow)<=0.0)return QVariant();
+        if(sizeListGet(currentRow)<=0.0)return QVariant();
 		if(role==Qt::ToolTipRole)baseValues.currentPair.currASign+sizeListStr.at(currentRow);
 		return sizeListStr.at(currentRow);
 		}
@@ -245,13 +265,13 @@ void DepthModel::calculateSize()
 			totalSize+=volumeList.at(currentRow);
             totalPrice+=volumeList.at(currentRow)*priceList.at(currentRow);
 
-			sizeList[currentRow]=totalSize;
+            sizeListAt(currentRow)=totalSize;
             sizePriceList[currentRow]=totalPrice;
             sizeListStr[currentRow]=textFromDouble(totalSize,baseValues.currentPair.currADecimals);
 
 			maxPrice=qMax(maxPrice,priceList.at(currentRow));
 			maxVolume=qMax(maxVolume,volumeList.at(currentRow));
-			maxTotal=qMax(maxTotal,sizeList.at(currentRow));
+            maxTotal=qMax(maxTotal,sizeListAt(currentRow));
 		}
 	}
 	else
@@ -262,13 +282,13 @@ void DepthModel::calculateSize()
 			if(originalIsAsk)currentRow=priceList.count()-currentRow-1;
 			totalSize+=volumeList.at(currentRow);
             totalPrice+=volumeList.at(currentRow)*priceList.at(currentRow);
-			sizeList[currentRow]=totalSize;
+            sizeListAt(currentRow)=totalSize;
             sizePriceList[currentRow]=totalPrice;
             sizeListStr[currentRow]=textFromDouble(totalSize,baseValues.currentPair.currADecimals);
 
 			maxPrice=qMax(maxPrice,priceList.at(currentRow));
 			maxVolume=qMax(maxVolume,volumeList.at(currentRow));
-			maxTotal=qMax(maxTotal,sizeList.at(currentRow));
+            maxTotal=qMax(maxTotal,sizeListAt(currentRow));
 		}
 	}
 
@@ -416,7 +436,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 			directionList.removeAt(currentIndex);
 			priceList.removeAt(currentIndex);
 			volumeList.removeAt(currentIndex);
-			sizeList.removeAt(currentIndex);
+            sizeListRemoveAt(currentIndex);
             sizePriceList.removeAt(currentIndex);
 			priceListStr.removeAt(currentIndex);
 			volumeListStr.removeAt(currentIndex);
@@ -431,7 +451,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 		if(volumeList.at(currentIndex)==volume)return;
 		directionList[currentIndex]=volumeList.at(currentIndex)<volume?1:-1;
 		volumeList[currentIndex]=volume;
-		sizeList[currentIndex]=0.0;
+        sizeListAt(currentIndex)=0.0;
         sizePriceList[currentIndex]=0.0;
 		priceListStr[currentIndex]=item.priceStr;
 		volumeListStr[currentIndex]=item.volumeStr;
@@ -487,6 +507,6 @@ qreal DepthModel::rowSize(int row)
 	row-=grouped;
 	if(!originalIsAsk)row=priceList.count()-row-1;
 	if(row<0||row>=priceList.count())return 0.0;
-	return sizeList.at(row);
+    return sizeListAt(row);
 }
 

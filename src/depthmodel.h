@@ -92,14 +92,15 @@ private:
 	bool isAsk;
     QList<qreal> volumeList;
     QList<qreal> sizeList;
+    qreal &sizeListAt(int);
+    qreal sizeListGet(int) const;
+    void sizeListRemoveAt(int);
     QList<qreal> sizePriceList;
 	QList<qreal> priceList;
 	QStringList volumeListStr;
 	QStringList sizeListStr;
 	QStringList priceListStr;
 	QList<int> directionList;
-
-protected:
 };
 
 #endif // DEPTHMODEL_H
