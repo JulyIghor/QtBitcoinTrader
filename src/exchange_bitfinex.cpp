@@ -118,19 +118,19 @@ void Exchange_Bitfinex::clearValues()
 void Exchange_Bitfinex::secondSlot()
 {
     static int infoCounter=0;
-	if(infoCounter%2&&!isReplayPending(202))
+    if(infoCounter%2&&!isReplayPending(202))
         sendToApi(202,"balances",true,true);
 
     if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"orders",true,true);
 
-	//if(!tickerOnly&&!isReplayPending(210))sendToApi(210,"positions",true,true);
+    //if(!tickerOnly&&!isReplayPending(210))sendToApi(210,"positions",true,true);
 
-	if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
-	{
+    if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
+    {
         emit depthRequested();
         sendToApi(111,"book/"+baseValues.currentPair.currRequestPair+"?limit_bids="+baseValues.depthCountLimitStr+"&limit_asks="+baseValues.depthCountLimitStr,false,true);
-		forceDepthLoad=false;
-	}
+        forceDepthLoad=false;
+    }
     if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,true);
 
     if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair+"?timestamp="+lastTradesDateCache+"&limit_trades=200"/*astTradesDateCache*/,false,true);
@@ -165,7 +165,7 @@ void Exchange_Bitfinex::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToB
 	if(tickerOnly)return;
     
     CurrencyPairItem pairItem;
-    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
+    pairItem=baseValues.currencyPairMap.value(symbol.toUpper(),pairItem);
     if(pairItem.symbol.isEmpty())return;
 
 	QByteArray orderType="limit";
@@ -185,7 +185,7 @@ void Exchange_Bitfinex::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceT
 	if(tickerOnly)return;
 
     CurrencyPairItem pairItem;
-    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
+    pairItem=baseValues.currencyPairMap.value(symbol.toUpper(),pairItem);
     if(pairItem.symbol.isEmpty())return;
 
 	QByteArray orderType="limit";

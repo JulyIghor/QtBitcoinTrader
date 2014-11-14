@@ -1654,7 +1654,7 @@ void QtBitcoinTrader::setCurrencyPairsList(QList<CurrencyPairItem> *currPairs)
 			baseValues.currencyPairMap[currPairsList.at(n).symbol]=currPairsList.at(n);
 		else
 		{
-			baseValues.currencyPairMap[currPairsList.at(n).symbol+currPairsList.at(n).currRequestSecond]=currPairsList.at(n);
+            baseValues.currencyPairMap[currPairsList.at(n).symbol+currPairsList.at(n).currRequestSecond.toUpper()]=currPairsList.at(n);
 			if(currPairsList.at(n).currRequestSecond=="exchange")
 				baseValues.currencyPairMap[currPairsList.at(n).symbol]=currPairsList.at(n);
 
@@ -3350,7 +3350,7 @@ qreal QtBitcoinTrader::getAvailableUSDtoBTC(qreal priceToBuy)
 
 void QtBitcoinTrader::apiSellSend(QString symbol, qreal btc, qreal price)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))
     {
     emit apiSell(symbol,btc,price);
     }
@@ -3358,7 +3358,7 @@ void QtBitcoinTrader::apiSellSend(QString symbol, qreal btc, qreal price)
 
 void QtBitcoinTrader::apiBuySend(QString symbol, qreal btc, qreal price)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))
     {
     emit apiBuy(symbol,btc,price);
     }
@@ -3366,32 +3366,32 @@ void QtBitcoinTrader::apiBuySend(QString symbol, qreal btc, qreal price)
 
 void QtBitcoinTrader::accFeeChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))setSpinValue(ui.accountFee,val);
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.accountFee,val);
 }
 
 void QtBitcoinTrader::accBtcBalanceChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))setSpinValue(ui.accountBTC,val);
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.accountBTC,val);
 }
 
 void QtBitcoinTrader::accUsdBalanceChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))setSpinValue(ui.accountUSD,val);
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.accountUSD,val);
 }
 
 void QtBitcoinTrader::tickerHighChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))setSpinValue(ui.marketHigh,val);
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.marketHigh,val);
 }
 
 void QtBitcoinTrader::tickerLowChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))setSpinValue(ui.marketLow,val);
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.marketLow,val);
 }
 
 void QtBitcoinTrader::tickerBuyChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))
     {
         if(val==0.0)val=ui.marketLast->value();
         if(val==0.0)val=ui.marketBid->value();
@@ -3401,12 +3401,12 @@ void QtBitcoinTrader::tickerBuyChanged(QString symbol, double val)
 
 void QtBitcoinTrader::tickerLastChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))setSpinValue(ui.marketLast,val);
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.marketLast,val);
 }
 
 void QtBitcoinTrader::tickerSellChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))
     {
         if(val==0.0)val=ui.marketLast->value();
         if(val==0.0)val=ui.marketAsk->value();
@@ -3416,7 +3416,7 @@ void QtBitcoinTrader::tickerSellChanged(QString symbol, double val)
 
 void QtBitcoinTrader::tickerVolumeChanged(QString symbol, double val)
 {
-    if(baseValues.currentPair.symbolSecond().startsWith(symbol))setSpinValue(ui.marketVolume,val);
+    if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.marketVolume,val);
 }
 
 void QtBitcoinTrader::setRuleTabRunning(QString name, bool on)
