@@ -145,7 +145,7 @@ void Exchange_BTCChina::secondSlot()
 
 	if(!isReplayPending(103))sendToApi(103,"ticker?market="+baseValues.currentPair.currRequestPair,false,true);//
 
-    if((infoCounter==1||infoCounter==3)&&!isReplayPending(109))
+    if(infoCounter==3&&!isReplayPending(109))
 	{
 		if(!lastFetchTid.isEmpty())historyLastTradesRequest="historydata?market="+baseValues.currentPair.currRequestPair+"&since="+lastFetchTid;
 		else "historydata?market="+baseValues.currentPair.currRequestPair;
@@ -690,105 +690,110 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 		if(!success)break;
 		if(data.startsWith("{\"result\":{\"transaction"))
 		{
-			if(lastHistory!=data)
-			{
-				lastHistory=data;
+            if(lastHistory!=data)
+            {
+                lastHistory=data;
 
-				QList<HistoryItem> *historyItems=new QList<HistoryItem>;
+                QList<HistoryItem> *historyItems=new QList<HistoryItem>;
                 QStringList dataList=QString(data).split("},{");
-
                 QByteArray newHistoryLastDate;
-				for(int n=0;n<dataList.count();n++)
-				{
-					QByteArray curLog(dataList.at(n).toLatin1());
-					curLog.append("}");
+                QByteArray newHistoryLastId;
 
-					QByteArray currentOrderDate=getMidData("date\":",",",&curLog);
+                for(int n=0;n<dataList.count();n++)
+                {
+                    QByteArray curLog(dataList.at(n).toLatin1());
+                    curLog.append("}");
 
+                    QByteArray currentOrderDate=getMidData("date\":",",",&curLog);
                     if(!historyLastDate.isEmpty()&&currentOrderDate<historyLastDate)break;
                     if(n==0)newHistoryLastDate=QByteArray::number(currentOrderDate.toUInt()-1);
 
-					QByteArray transactionType=getMidData("type\":\"","\"",&curLog).replace("money","cny");
+                    QByteArray currentOrderID=getMidData("id\":",",",&curLog);
+                    if(!historyLastID.isEmpty()&&currentOrderID<=historyLastID)break;
+                    if(n==0)newHistoryLastId=currentOrderID;
 
-					HistoryItem currentHistoryItem;
+                    QByteArray transactionType=getMidData("type\":\"","\"",&curLog).replace("money","cny");
 
-					if(transactionType.startsWith("sell"))currentHistoryItem.type=1;
-					if(transactionType.startsWith("buy"))currentHistoryItem.type=2;
-					if(transactionType.startsWith("fund"))currentHistoryItem.type=4;
-					if(transactionType.startsWith("withdraw"))currentHistoryItem.type=5;
+                    HistoryItem currentHistoryItem;
 
-					if(currentHistoryItem.type==0)continue;
+                    if(transactionType.startsWith("sell"))currentHistoryItem.type=1;
+                    if(transactionType.startsWith("buy"))currentHistoryItem.type=2;
+                    if(transactionType.startsWith("fund"))currentHistoryItem.type=4;
+                    if(transactionType.startsWith("withdraw"))currentHistoryItem.type=5;
 
-					QByteArray currencyA=transactionType.right(3).toUpper();
+                    if(currentHistoryItem.type==0)continue;
+
+                    QByteArray currencyA=transactionType.right(3).toUpper();
 
                     qreal btcAmount=getMidData("btc_amount\":\"","\"",&curLog).toDouble();
-					if(btcAmount<0.0)btcAmount=-btcAmount;
+                    if(btcAmount<0.0)btcAmount=-btcAmount;
 
                     qreal cnyAmount=getMidData("cny_amount\":\"","\"",&curLog).toDouble();
-					if(cnyAmount<0.0)cnyAmount=-cnyAmount;
+                    if(cnyAmount<0.0)cnyAmount=-cnyAmount;
 
                     qreal ltcAmount=getMidData("ltc_amount\":\"","\"",&curLog).toDouble();
-					if(ltcAmount<0.0)ltcAmount=-ltcAmount;
+                    if(ltcAmount<0.0)ltcAmount=-ltcAmount;
 
-					QByteArray currencyB;
-					if(currencyA=="BTC")
-					{
-						currentHistoryItem.volume=btcAmount;
-						if(cnyAmount!=0.0)
-						{
-							currentHistoryItem.price=cnyAmount/btcAmount;
-							currencyB="CNY";
-						}
-						else
-						if(ltcAmount!=0.0)
-						{
-							currentHistoryItem.price=ltcAmount/btcAmount;
-							currencyB="LTC";
-						}
-					}
+                    QByteArray currencyB;
+                    if(currencyA=="BTC")
+                    {
+                        currentHistoryItem.volume=btcAmount;
+                        if(cnyAmount!=0.0)
+                        {
+                            currentHistoryItem.price=cnyAmount/btcAmount;
+                            currencyB="CNY";
+                        }
+                        else
+                        if(ltcAmount!=0.0)
+                        {
+                            currentHistoryItem.price=ltcAmount/btcAmount;
+                            currencyB="LTC";
+                        }
+                    }
 
-					if(currencyA=="CNY")
-					{
-						currentHistoryItem.volume=cnyAmount;
-						if(btcAmount!=0.0)
-						{
-							currentHistoryItem.price=btcAmount/cnyAmount;
-							currencyB="BTC";
-						}
-						else
-						if(ltcAmount!=0.0)
-						{
-							currentHistoryItem.price=ltcAmount/cnyAmount;
-							currencyB="LTC";
-						}
-					}
+                    if(currencyA=="CNY")
+                    {
+                        currentHistoryItem.volume=cnyAmount;
+                        if(btcAmount!=0.0)
+                        {
+                            currentHistoryItem.price=btcAmount/cnyAmount;
+                            currencyB="BTC";
+                        }
+                        else
+                        if(ltcAmount!=0.0)
+                        {
+                            currentHistoryItem.price=ltcAmount/cnyAmount;
+                            currencyB="LTC";
+                        }
+                    }
 
-					if(currencyA=="LTC")
-					{
-						currentHistoryItem.volume=ltcAmount;
-						if(btcAmount!=0.0)
-						{
-							currentHistoryItem.price=btcAmount/ltcAmount;
-							currencyB="BTC";
-						}
-						else
-						if(cnyAmount!=0.0)
-						{
-							currentHistoryItem.price=cnyAmount/ltcAmount;
-							currencyB="CNY";
-						}
-					}
-					if(currencyB.isEmpty())currencyB="CNY";
+                    if(currencyA=="LTC")
+                    {
+                        currentHistoryItem.volume=ltcAmount;
+                        if(btcAmount!=0.0)
+                        {
+                            currentHistoryItem.price=btcAmount/ltcAmount;
+                            currencyB="BTC";
+                        }
+                        else
+                        if(cnyAmount!=0.0)
+                        {
+                            currentHistoryItem.price=cnyAmount/ltcAmount;
+                            currencyB="CNY";
+                        }
+                    }
+                    if(currencyB.isEmpty())currencyB="CNY";
 
-					currentHistoryItem.symbol=currencyA+currencyB;
+                    currentHistoryItem.symbol=currencyA+currencyB;
 
-					currentHistoryItem.dateTimeInt=currentOrderDate.toUInt();
+                    currentHistoryItem.dateTimeInt=currentOrderDate.toUInt();
 
-					if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
+                    if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
                 }
                 if(!newHistoryLastDate.isEmpty())historyLastDate=newHistoryLastDate;
-				emit historyChanged(historyItems);
-			}
+                if(!newHistoryLastId.isEmpty())historyLastID=newHistoryLastId;
+                emit historyChanged(historyItems);
+            }
 		}
 	default: break;
 	}

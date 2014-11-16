@@ -54,8 +54,8 @@ private:
 	JulyHttp *julyHttpAuth;
 	JulyHttp *julyHttpPublic;
 
-	QByteArray historyLastDate;
-    //QByteArray historyLastID;
+    QByteArray historyLastDate;
+    QByteArray historyLastID;
 	QByteArray lastFetchTid;
 	QByteArray historyLastTradesRequest;
     QByteArray getMidData(QString a, QString b,QByteArray *data);
