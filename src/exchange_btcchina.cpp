@@ -86,8 +86,7 @@ void Exchange_BTCChina::clearVariables()
 	Exchange::clearVariables();
 	secondPart=0;
 	apiDownCounter=0;
-	historyLastDate.clear();
-	historyLastID.clear();
+    historyLastDate.clear();
 	lastHistory.clear();
 	lastOrders.clear();
 	historyLastTradesRequest="historydata?market="+baseValues.currentPair.currRequestPair;
@@ -128,7 +127,7 @@ void Exchange_BTCChina::secondSlot()
 				if(historyLastDate.isEmpty())
 					sendToApi(208,"getTransactions",true,true,"\"all\",100");
 				else
-					sendToApi(208,"getTransactions",true,true,"\"all\",1000,0,"+historyLastDate);
+                    sendToApi(208,"getTransactions",true,true,"\"all\",1000,0,"+historyLastDate);
 			}
 			break;
 	default: break;
@@ -146,11 +145,11 @@ void Exchange_BTCChina::secondSlot()
 
 	if(!isReplayPending(103))sendToApi(103,"ticker?market="+baseValues.currentPair.currRequestPair,false,true);//
 
-	if(infoCounter==3&&!isReplayPending(109))
+    if((infoCounter==1||infoCounter==3)&&!isReplayPending(109))
 	{
 		if(!lastFetchTid.isEmpty())historyLastTradesRequest="historydata?market="+baseValues.currentPair.currRequestPair+"&since="+lastFetchTid;
 		else "historydata?market="+baseValues.currentPair.currRequestPair;
-		sendToApi(109,historyLastTradesRequest,false,true);
+        sendToApi(109,historyLastTradesRequest,false,true);
 	}
 
 	if(infoCounter++==3)
@@ -182,7 +181,7 @@ void Exchange_BTCChina::getHistory(bool force)
 		if(historyLastDate.isEmpty())
 			sendToApi(208,"getTransactions",true,true,"\"all\",100");
 		else
-			sendToApi(208,"getTransactions",true,true,"\"all\",1000,0,"+historyLastDate);
+            sendToApi(208,"getTransactions",true,true,"\"all\",1000,0,"+historyLastDate);
 	}
 }
 
@@ -450,12 +449,12 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					if(newItem.isValid())(*newTradesItems)<<newItem;
 					else if(debugLevel)logThread->writeLog("Invalid trades fetch data line:"+tradeData,2);
 
-					if(n==tradeList.count()-1&&!nextFetchTid.isEmpty())lastFetchTid=nextFetchTid;
+                    if(n==tradeList.count()-1&&!nextFetchTid.isEmpty())lastFetchTid=nextFetchTid;
 				}
                 if(newTradesItems->count())emit addLastTrades(baseValues.currentPair.symbol,newTradesItems);
 				else delete newTradesItems;
 			}
-			else if(debugLevel)logThread->writeLog("Invalid trades fetch data:"+data,2);
+            else if(debugLevel)logThread->writeLog("Invalid trades fetch data:"+data,2);
 		}
 		break;
 	case 111: //bc/orderbook
@@ -696,26 +695,18 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 				lastHistory=data;
 
 				QList<HistoryItem> *historyItems=new QList<HistoryItem>;
-				QStringList dataList=QString(data).split("},{");
+                QStringList dataList=QString(data).split("},{");
+
+                QByteArray newHistoryLastDate;
 				for(int n=0;n<dataList.count();n++)
 				{
 					QByteArray curLog(dataList.at(n).toLatin1());
 					curLog.append("}");
 
-					if(n==0)
-					{
-						QByteArray currentOrderID=getMidData("id\":",",",&curLog);
-						if(!historyLastID.isEmpty()&&currentOrderID>historyLastID)break;
-						historyLastID=currentOrderID;
-					}
-
 					QByteArray currentOrderDate=getMidData("date\":",",",&curLog);
 
-					if(n==0)
-					{
-						if(!historyLastDate.isEmpty()&&currentOrderDate>historyLastDate)break;
-						historyLastDate=QByteArray::number(currentOrderDate.toUInt()-1);
-					}
+                    if(!historyLastDate.isEmpty()&&currentOrderDate<historyLastDate)break;
+                    if(n==0)newHistoryLastDate=QByteArray::number(currentOrderDate.toUInt()-1);
 
 					QByteArray transactionType=getMidData("type\":\"","\"",&curLog).replace("money","cny");
 
@@ -794,7 +785,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					currentHistoryItem.dateTimeInt=currentOrderDate.toUInt();
 
 					if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
-				}
+                }
+                if(!newHistoryLastDate.isEmpty())historyLastDate=newHistoryLastDate;
 				emit historyChanged(historyItems);
 			}
 		}
