@@ -215,6 +215,8 @@ void Exchange_BTCChina::cancelOrder(QString symbol, QByteArray order)
 {
 	if(tickerOnly)return;
 
+    if(symbol.isEmpty())symbol=baseValues.currentPair.symbol;
+
     CurrencyPairItem pairItem;
     pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
     if(pairItem.symbol.isEmpty())return;
