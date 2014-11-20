@@ -432,42 +432,42 @@ int main(int argc, char *argv[])
 			case 0:
                 {//Secret Exchange
                 baseValues.restSign=newPassword.getRestSign().toLatin1();
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+                encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
 			case 1:
 				{//BTC-e
 				baseValues.restSign=newPassword.getRestSign().toLatin1();
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+                encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
 			case 2:
 				{//Bitstamp
 				baseValues.restSign=newPassword.getRestSign().toLatin1();
-				encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+                encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
 			case 3:
 				{//BTC China
 					baseValues.restSign=newPassword.getRestSign().toLatin1();
-					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+                    encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
 			case 4:
 				{//Bitfinex
 					baseValues.restSign=newPassword.getRestSign().toLatin1();
-					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+                    encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
                 break;
             case 5:
                 {//GOCio
                     baseValues.restSign=newPassword.getRestSign().toLatin1();
-                    encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+                    encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 			case 6:
 				{//Indacoin
 					baseValues.restSign=newPassword.getRestSign().toLatin1();
-					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+                    encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
 			default: break;
@@ -536,7 +536,7 @@ int main(int argc, char *argv[])
 					baseValues.restSign=QByteArray::fromBase64(decryptedList.at(2).toLatin1());
 					if(decryptedList.count()==3)
 					{
-						decryptedList<<QUuid::createUuid().toByteArray();
+                        decryptedList<<QUuid::createUuid().toString().toLatin1();
 						settings.setValue("EncryptedData/ApiKeySign",QString(JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+decryptedList.at(1).toLatin1()+"\r\n"+decryptedList.at(2).toLatin1()+"\r\n"+decryptedList.at(3).toLatin1(),tryPassword.toUtf8()).toBase64()));
 						settings.sync();
 					}
