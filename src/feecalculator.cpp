@@ -52,7 +52,7 @@ FeeCalculator::FeeCalculator()
 	ui.feeValue->setValue(mainWindow.ui.accountFee->value());
 
 	ui.buyPrice->setValue(mainWindow.ui.marketBid->value());
-	qreal btcVal=mainWindow.getAvailableUSD()/ui.buyPrice->value();
+	double btcVal=mainWindow.getAvailableUSD()/ui.buyPrice->value();
 	if(btcVal<baseValues.currentPair.tradeVolumeMin)btcVal=baseValues.currentPair.tradeVolumeMin;
 	ui.buyTotalBtc->setValue(btcVal);
 
@@ -115,7 +115,7 @@ void FeeCalculator::setZeroProfitPrice()
 	ui.sellPrice->setValue(ui.buyPrice->value()*mainWindow.floatFeeInc*mainWindow.floatFeeInc);
 }
 
-void FeeCalculator::profitLossChanged(qreal val)
+void FeeCalculator::profitLossChanged(double val)
 {
 	if(val<0)
 		ui.profitLoss->setStyleSheet("QDoubleSpinBox {background: "+baseValues.appTheme.lightRed.name()+";}");
@@ -164,7 +164,7 @@ void FeeCalculator::buyTotalPaidChanged(double)
 	buyPaidLocked=false;
 }
 
-void FeeCalculator::buyBtcReceivedChanged(qreal val)
+void FeeCalculator::buyBtcReceivedChanged(double val)
 {
 	ui.sellAmount->setValue(val*ui.sellPrice->value());
 	ui.sellFiatReceived->setValue(ui.sellAmount->value()-ui.sellFee->value());
