@@ -247,7 +247,7 @@ void JulyHttp::readSocket()
 			   currentLine=="\n"||
 			   currentLine.isEmpty())endFound=true;
 			else
-			{
+            {
 				QString currentLineLow=currentLine.toLower();
 				if(currentLineLow.startsWith("http/1.1 "))
 				{
@@ -417,7 +417,7 @@ void JulyHttp::readSocket()
 	if(allDataReaded)
 	{
 		if(!buffer.isEmpty()&&requestList.count())
-		{
+        {
 			if(contentGzipped)uncompress(&buffer);
 			bool apiMaybeDown=buffer[0]=='<';
 			setApiDown(apiMaybeDown);

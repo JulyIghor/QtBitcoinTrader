@@ -164,8 +164,8 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 		case 1: return baseValues.appTheme.gray; break;
 		case 2:
 			{
-            qreal amount=itemsList.at(currentRow).amount;
-            qreal smallValue=baseValues.currentPair.currAInfo.valueSmall;
+            double amount=itemsList.at(currentRow).amount;
+            double smallValue=baseValues.currentPair.currAInfo.valueSmall;
 			if(amount<=smallValue)return baseValues.appTheme.gray; smallValue*=10.0;
 			if(amount<=smallValue)return baseValues.appTheme.black; smallValue*=10.0;
 			if(amount<=smallValue)return baseValues.appTheme.darkGreen; smallValue*=10.0;
@@ -185,7 +185,7 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 		return baseValues.appTheme.black;
 	}
 
-    qreal requestedPrice=itemsList.at(currentRow).price;
+    double requestedPrice=itemsList.at(currentRow).price;
 	if(requestedPrice<=0.0)return QVariant();
 
 	switch(indexColumn)
@@ -276,8 +276,8 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
 
 void TradesModel::updateTotalBTC()
 {
-    qreal summ=0.0;
-    qreal bidsSumm=0.0;
+    double summ=0.0;
+    double bidsSumm=0.0;
 	for(int n=0;n<itemsList.count();n++)
 	{
 		summ+=itemsList.at(n).amount;
@@ -367,14 +367,14 @@ void TradesModel::addNewTrades(QList<TradesItem> *newItems)
 	delete newItems;
 }
 
-qreal TradesModel::getRowPrice(int row)
+double TradesModel::getRowPrice(int row)
 {
 	row=itemsList.count()-row-1;
 	if(row<0||row>=itemsList.count())return 0.0;
 	return itemsList.at(row).price;
 }
 
-qreal TradesModel::getRowVolume(int row)
+double TradesModel::getRowVolume(int row)
 {
 	row=itemsList.count()-row-1;
 	if(row<0||row>=itemsList.count())return 0.0;

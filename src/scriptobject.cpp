@@ -74,7 +74,6 @@ ScriptObject::ScriptObject(QString _scriptName) :
        addCommand(currentCommand,parameters);
     }
 
-
     Q_FOREACH(QDoubleSpinBox* spinBox, mainWindow.indicatorsMap.values())
     {
         QString scriptName=spinBox->whatsThis();
@@ -108,20 +107,20 @@ ScriptObject::ScriptObject(QString _scriptName) :
     connect(this,SIGNAL(startAppSignal(QString,QStringList)),baseValues.mainWindow_,SLOT(startApplication(QString,QStringList)));
 
     connect(baseValues.mainWindow_,SIGNAL(indicatorEventSignal(QString,QString,double)),this,SLOT(initValueChanged(QString,QString,double)));
-    connect(this,SIGNAL(eventSignal(QString,QString,qreal)),baseValues.mainWindow_,SLOT(sendIndicatorEvent(QString,QString,qreal)));
+    connect(this,SIGNAL(eventSignal(QString,QString,double)),baseValues.mainWindow_,SLOT(sendIndicatorEvent(QString,QString,double)));
 
     secondTimer=new QTimer(this);
     secondTimer->setSingleShot(true);
     connect(secondTimer,SIGNAL(timeout()),this,SLOT(secondSlot()));
 }
 
-void ScriptObject::sendEvent(QString name, qreal value)
+void ScriptObject::sendEvent(QString name, double value)
 {
     if(testMode)return;
     emit eventSignal(baseValues.currentPair.symbolSecond(),name,value);
 }
 
-void ScriptObject::sendEvent(QString symbol, QString name, qreal value)
+void ScriptObject::sendEvent(QString symbol, QString name, double value)
 {
     if(testMode)return;
     emit eventSignal(symbol,name,value);
@@ -147,20 +146,20 @@ void ScriptObject::test(int val)
     testResult=val;
 }
 
-qreal ScriptObject::getAsksVolByPrice(qreal volume){return getAsksVolByPrice(baseValues.currentPair.symbolSecond(),volume);}
-qreal ScriptObject::getAsksPriceByVol(qreal price){return getAsksPriceByVol(baseValues.currentPair.symbolSecond(),price);}
-qreal ScriptObject::getBidsVolByPrice(qreal volume){return getBidsVolByPrice(baseValues.currentPair.symbolSecond(),volume);}
-qreal ScriptObject::getBidsPriceByVol(qreal price){return getBidsPriceByVol(baseValues.currentPair.symbolSecond(),price);}
+double ScriptObject::getAsksVolByPrice(double volume){return getAsksVolByPrice(baseValues.currentPair.symbolSecond(),volume);}
+double ScriptObject::getAsksPriceByVol(double price){return getAsksPriceByVol(baseValues.currentPair.symbolSecond(),price);}
+double ScriptObject::getBidsVolByPrice(double volume){return getBidsVolByPrice(baseValues.currentPair.symbolSecond(),volume);}
+double ScriptObject::getBidsPriceByVol(double price){return getBidsPriceByVol(baseValues.currentPair.symbolSecond(),price);}
 
-qreal ScriptObject::getAsksPriceByVol(QString symbol, qreal price){return orderBookInfo(symbol,price,true,true);}
-qreal ScriptObject::getAsksVolByPrice(QString symbol, qreal volume){return orderBookInfo(symbol,volume,true,false);}
-qreal ScriptObject::getBidsPriceByVol(QString symbol, qreal price){return orderBookInfo(symbol,price,false,true);}
-qreal ScriptObject::getBidsVolByPrice(QString symbol, qreal volume){return orderBookInfo(symbol,volume,false,false);}
+double ScriptObject::getAsksPriceByVol(QString symbol, double price){return orderBookInfo(symbol,price,true,true);}
+double ScriptObject::getAsksVolByPrice(QString symbol, double volume){return orderBookInfo(symbol,volume,true,false);}
+double ScriptObject::getBidsPriceByVol(QString symbol, double price){return orderBookInfo(symbol,price,false,true);}
+double ScriptObject::getBidsVolByPrice(QString symbol, double volume){return orderBookInfo(symbol,volume,false,false);}
 
 
-qreal ScriptObject::orderBookInfo(QString &symbol,qreal &value, bool isAsk, bool getPrice)
+double ScriptObject::orderBookInfo(QString &symbol,double &value, bool isAsk, bool getPrice)
 {
-    qreal result=0.0;
+    double result=0.0;
     if(getPrice)result=mainWindow.getPriceByVolume(symbol,value,isAsk);
     else result=mainWindow.getVolumeByPrice(symbol,value,isAsk);
     if(result<0.0)
@@ -172,7 +171,7 @@ qreal ScriptObject::orderBookInfo(QString &symbol,qreal &value, bool isAsk, bool
     return result;
 }
 
-qreal ScriptObject::get(QString indicator)
+double ScriptObject::get(QString indicator)
 {
     return get(baseValues.currentPair.symbolSecond(),indicator);
 }
@@ -191,12 +190,12 @@ void ScriptObject::timerCreate(int milliseconds, QString &command, bool once)
     newTimer->start(milliseconds);
 }
 
-void ScriptObject::delay(qreal seconds, QString command)
+void ScriptObject::delay(double seconds, QString command)
 {
     timerCreate(seconds*1000,command,true);
 }
 
-void ScriptObject::timer(qreal seconds, QString command)
+void ScriptObject::timer(double seconds, QString command)
 {
     timerCreate(seconds*1000,command,false);
 }
@@ -216,7 +215,7 @@ void ScriptObject::timerOut()
     engine->evaluate(command.replace("\\","\\\\"));
 }
 
-qreal ScriptObject::get(QString symbol, QString indicator)
+double ScriptObject::get(QString symbol, QString indicator)
 {
     QString indicatorLower=indicator.toLower();
     if(indicatorLower==QLatin1String("time"))return getTimeT();
@@ -453,7 +452,7 @@ void ScriptObject::log(QVariant arg1)
     {
         QString result;
         bool ok;
-        qreal doubleVal=arg1.toDouble(&ok);
+        double doubleVal=arg1.toDouble(&ok);
         if(ok)result=textFromDouble(doubleVal,8,0);
         else
         {

@@ -45,14 +45,14 @@ class PercentPicker : public QMenu
 	Q_OBJECT
 
 public:
-    PercentPicker(QDoubleSpinBox *spinBox, qreal maxValue);
+    PercentPicker(QDoubleSpinBox *spinBox, double maxValue);
 	~PercentPicker();
 	void setValue(int val){ui.verticalSlider->setValue(val);}
 private:
     void keyPressEvent(QKeyEvent *event);
 	void mouseReleaseEvent(QMouseEvent *);
     QDoubleSpinBox *spinBox;
-	qreal maxValue;
+	double maxValue;
 	Ui::PercentPicker ui;
 private slots:
 	void on_percentTo1_clicked();

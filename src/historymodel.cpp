@@ -105,14 +105,14 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
 	endInsertRows();
 }
 
-qreal HistoryModel::getRowPrice(int row)
+double HistoryModel::getRowPrice(int row)
 {
 	row=itemsList.count()-row-1;
 	if(row<0||row>=itemsList.count())return 0.0;
 	return itemsList.at(row).price;
 }
 
-qreal HistoryModel::getRowVolume(int row)
+double HistoryModel::getRowVolume(int row)
 {
 	row=itemsList.count()-row-1;
 	if(row<0||row>=itemsList.count())return 0.0;

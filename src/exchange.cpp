@@ -150,7 +150,7 @@ void Exchange::clearVariables()
 	lastFee=0.0;
 }
 
-void Exchange::filterAvailableUSDAmountValue(qreal *)
+void Exchange::filterAvailableUSDAmountValue(double *)
 {
 
 }
@@ -189,8 +189,8 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 	tickerOnly=tickOnly;
 	if(!tickerOnly)
 	{
-        connect(mainClass,SIGNAL(apiBuy(QString, qreal, qreal)),this,SLOT(buy(QString, qreal, qreal)));
-        connect(mainClass,SIGNAL(apiSell(QString, qreal, qreal)),this,SLOT(sell(QString, qreal, qreal)));
+        connect(mainClass,SIGNAL(apiBuy(QString, double, double)),this,SLOT(buy(QString, double, double)));
+        connect(mainClass,SIGNAL(apiSell(QString, double, double)),this,SLOT(sell(QString, double, double)));
         connect(mainClass,SIGNAL(cancelOrderByOid(QString, QByteArray)),this,SLOT(cancelOrder(QString, QByteArray)));
         connect(mainClass,SIGNAL(getHistory(bool)),this,SLOT(getHistory(bool)));
 
@@ -203,7 +203,7 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 	connect(this,SIGNAL(depthRequested()),mainClass,SLOT(depthRequested()));
 	connect(this,SIGNAL(depthRequestReceived()),mainClass,SLOT(depthRequestReceived()));
     connect(this,SIGNAL(depthSubmitOrders(QString, QList<DepthItem> *, QList<DepthItem> *)),mainClass,SLOT(depthSubmitOrders(QString, QList<DepthItem> *, QList<DepthItem> *)));
-    connect(this,SIGNAL(depthFirstOrder(QString, qreal,qreal,bool)),mainClass,SLOT(depthFirstOrder(QString, qreal,qreal,bool)));
+    connect(this,SIGNAL(depthFirstOrder(QString, double,double,bool)),mainClass,SLOT(depthFirstOrder(QString, double,double,bool)));
 	connect(this,SIGNAL(showErrorMessage(QString)),mainClass,SLOT(showErrorMessage(QString)));
 
     connect(this,SIGNAL(availableAmountChanged(QString, double)),mainClass,SLOT(availableAmountChanged(QString, double)));
@@ -261,11 +261,11 @@ void Exchange::getHistory(bool)
 {
 }
 
-void Exchange::buy(QString, qreal, qreal)
+void Exchange::buy(QString, double, double)
 {
 }
 
-void Exchange::sell(QString, qreal, qreal)
+void Exchange::sell(QString, double, double)
 {
 }
 

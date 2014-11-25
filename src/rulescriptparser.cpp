@@ -136,7 +136,7 @@ QString RuleScriptParser::holderToScript(RuleHolder &holder, bool testMode)
         }
         if(holder.thanTypeIndex<4)
         {
-            qreal amount=holder.thanAmount;
+            double amount=holder.thanAmount;
             if(holder.thanAmountPercentChecked)
             {
                 amount/=100.0;

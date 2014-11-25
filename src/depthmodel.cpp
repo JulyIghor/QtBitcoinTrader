@@ -57,13 +57,13 @@ DepthModel::~DepthModel()
 
 }
 
-qreal &DepthModel::sizeListAt(int row)
+double &DepthModel::sizeListAt(int row)
 {
     if(!originalIsAsk)return sizeList[sizeList.count()-row-1];
     return sizeList[row];
 }
 
-qreal DepthModel::sizeListGet(int row) const
+double DepthModel::sizeListGet(int row) const
 {
     if(!originalIsAsk)return sizeList[sizeList.count()-row-1];
     return sizeList[row];
@@ -76,7 +76,7 @@ void DepthModel::sizeListRemoveAt(int row)
     sizeList.removeAt(row);
 }
 
-qreal DepthModel::getPriceByVolume(qreal amount)
+double DepthModel::getPriceByVolume(double amount)
 {
     if(sizeList.count()==0)return 0.0;
     int currentIndex=qUpperBound(sizeList.begin(),sizeList.end(),amount)-sizeList.begin();
@@ -86,7 +86,7 @@ qreal DepthModel::getPriceByVolume(qreal amount)
     return priceList.at(currentIndex)*(currentIndex==priceList.count()-1?-1:1);
 }
 
-qreal DepthModel::getVolumeByPrice(qreal price)
+double DepthModel::getVolumeByPrice(double price)
 {
     if(priceList.count()==0)return 0.0;
     int currentIndex=qUpperBound(priceList.begin(),priceList.end(),price)-priceList.begin();
@@ -169,8 +169,8 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 	{
 		if(indexColumn==1)
 		{
-            qreal volume=volumeList.at(currentRow);
-            qreal smallValue=baseValues.currentPair.currAInfo.valueSmall;
+            double volume=volumeList.at(currentRow);
+            double smallValue=baseValues.currentPair.currAInfo.valueSmall;
 			if(volume<=smallValue)return baseValues.appTheme.gray; smallValue*=10.0;
 			if(volume<=smallValue)return baseValues.appTheme.black; smallValue*=10.0;
 			if(volume<=smallValue)return baseValues.appTheme.darkGreen; smallValue*=10.0;
@@ -180,7 +180,7 @@ QVariant DepthModel::data(const QModelIndex &index, int role) const
 		return baseValues.appTheme.black;
 	}
 
-    qreal requestedPrice=priceList.at(currentRow);
+    double requestedPrice=priceList.at(currentRow);
 	if(requestedPrice<=0.0)return QVariant();
 
 	if(role==Qt::BackgroundRole)
@@ -248,12 +248,12 @@ void DepthModel::calculateSize()
 	if(!somethingChanged)return;
 	somethingChanged=true;
 
-    qreal maxPrice=0.0;
-    qreal maxVolume=0.0;
-    qreal maxTotal=0.0;
+    double maxPrice=0.0;
+    double maxVolume=0.0;
+    double maxTotal=0.0;
 
-    qreal totalSize=0.0;
-    qreal totalPrice=0.0;
+    double totalSize=0.0;
+    double totalPrice=0.0;
 
 	if(originalIsAsk)
 	{
@@ -400,7 +400,7 @@ void DepthModel::setHorizontalHeaderLabels(QStringList list)
 	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
 }
 
-void DepthModel::depthFirstOrder(qreal price, qreal volume)
+void DepthModel::depthFirstOrder(double price, double volume)
 {
 	if(!grouped)return;
 	if(price==groupedPrice&&groupedVolume==volume)return;
@@ -422,8 +422,8 @@ void DepthModel::depthUpdateOrders(QList<DepthItem> *items)
 
 void DepthModel::depthUpdateOrder(DepthItem item)
 {
-    qreal price=item.price;
-    qreal volume=item.volume;
+    double price=item.price;
+    double volume=item.volume;
 	if(price==0.0)return;
 	int currentIndex=qLowerBound(priceList.begin(),priceList.end(),price)-priceList.begin();
 	bool matchListRang=currentIndex>-1&&priceList.count()>currentIndex;
@@ -475,7 +475,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 	}
 }
 
-qreal DepthModel::rowPrice(int row)
+double DepthModel::rowPrice(int row)
 {
 	if(grouped&&row<2)
 	{
@@ -488,7 +488,7 @@ qreal DepthModel::rowPrice(int row)
 	return priceList.at(row);
 }
 
-qreal DepthModel::rowVolume(int row)
+double DepthModel::rowVolume(int row)
 {
 	if(grouped&&row<2)
 	{
@@ -501,7 +501,7 @@ qreal DepthModel::rowVolume(int row)
 	return volumeList.at(row);
 }
 
-qreal DepthModel::rowSize(int row)
+double DepthModel::rowSize(int row)
 {
 	if(grouped&&row<2)return 0.0;
 	row-=grouped;

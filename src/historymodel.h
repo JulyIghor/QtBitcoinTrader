@@ -43,8 +43,8 @@ class HistoryModel : public QAbstractItemModel
 public:
 	HistoryModel();
 	~HistoryModel();
-    qreal getRowPrice(int);
-    qreal getRowVolume(int);
+    double getRowPrice(int);
+    double getRowVolume(int);
 	int getRowType(int);
 	void clear();
 
@@ -72,8 +72,8 @@ private:
 	QList<HistoryItem> itemsList;
 	//typesList; 0=General, 1=Buy, 2=Sell, 3=Widthdraw, 4=Found
 signals:
-    void accLastSellChanged(QString,qreal);
-    void accLastBuyChanged(QString,qreal);
+    void accLastSellChanged(QString,double);
+    void accLastBuyChanged(QString,double);
 };
 
 #endif // HISTORYMODEL_H

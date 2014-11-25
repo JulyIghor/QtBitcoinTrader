@@ -41,16 +41,16 @@ class JulySpinBoxPicker : public QLabel
 	Q_OBJECT
 
 public:
-	JulySpinBoxPicker(QDoubleSpinBox *parent, qreal *forceMinimumValue=0, qreal internalMinimumValue=0);
+	JulySpinBoxPicker(QDoubleSpinBox *parent, double *forceMinimumValue=0, double internalMinimumValue=0);
 	~JulySpinBoxPicker();
 
 private:
-	qreal *forceMinimumValue;
-	qreal internalMinimumValue;
-	qreal maximumValue;
+	double *forceMinimumValue;
+	double internalMinimumValue;
+	double maximumValue;
 	int scrollDirection;
 	void setIcon(int);
-	qreal minimumValue;
+	double minimumValue;
 	bool j_debugMode;
 	QRect currentScreenRect;
 	QPoint j_cursorLastPos;

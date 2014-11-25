@@ -56,29 +56,29 @@ public:
 	bool exchangeTickerSupportsHiLowPrices;
 	bool isDepthEnabled();
 	bool depthEnabledFlag;
-    virtual void filterAvailableUSDAmountValue(qreal *amount);
+    virtual void filterAvailableUSDAmountValue(double *amount);
 
 	CurrencyPairItem defaultCurrencyParams;
 	bool balanceDisplayAvailableAmount;
 	int minimumRequestIntervalAllowed;
 	int minimumRequestTimeoutAllowed;
-    qreal decAmountFromOpenOrder;
+    double decAmountFromOpenOrder;
 	int calculatingFeeMode;//0: direct multiply; 1: rounded by decimals
 	bool buySellAmountExcludedFee;
 
 	CurrencyPairItem currencyPairInfo;
-    qreal lastTickerLast;
-    qreal lastTickerHigh;
-    qreal lastTickerLow;
-    qreal lastTickerSell;
-    qreal lastTickerBuy;
-    qreal lastTickerVolume;
+    double lastTickerLast;
+    double lastTickerHigh;
+    double lastTickerLow;
+    double lastTickerSell;
+    double lastTickerBuy;
+    double lastTickerVolume;
 
-    qreal lastBtcBalance;
-    qreal lastUsdBalance;
-    qreal lastAvUsdBalance;
-    qreal lastVolume;
-    qreal lastFee;
+    double lastBtcBalance;
+    double lastUsdBalance;
+    double lastAvUsdBalance;
+    double lastVolume;
+    double lastFee;
 
 	QByteArray lastDepthData;
 	QByteArray lastHistory;
@@ -127,7 +127,7 @@ signals:
     void availableAmountChanged(QString,double);
 	void depthRequested();
 	void depthRequestReceived();
-    void depthFirstOrder(QString,qreal,qreal,bool);
+    void depthFirstOrder(QString,double,double,bool);
 
     void depthSubmitOrders(QString,QList<DepthItem> *asks, QList<DepthItem> *bids);
 
@@ -164,8 +164,8 @@ public slots:
 	virtual void reloadDepth();
 	virtual void clearValues();
 	virtual void getHistory(bool);
-    virtual void buy(QString, qreal, qreal);
-    virtual void sell(QString, qreal, qreal);
+    virtual void buy(QString, double, double);
+    virtual void sell(QString, double, double);
     virtual void cancelOrder(QString, QByteArray);
 };
 

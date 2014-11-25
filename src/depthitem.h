@@ -36,8 +36,8 @@
 
 struct DepthItem 
 {
-	qreal price;
-	qreal volume;
+	double price;
+	double volume;
 	QString priceStr;
 	QString volumeStr;
 	bool isValid();

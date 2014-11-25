@@ -132,8 +132,8 @@ void OrdersModel::orderBookChanged(QList<OrderItem> *ordersRcv)
 
 	QHash<QByteArray,bool> existingOids;
 
-    qreal volumeTotal=0.0;
-    qreal amountTotal=0.0;
+    double volumeTotal=0.0;
+    double amountTotal=0.0;
 
 	for(int n=0;n<ordersRcv->count();n++)
 	{
@@ -526,6 +526,6 @@ quint32 OrdersModel::getRowDate(int row){if(row<0||row>=dateList.count())return 
 QByteArray OrdersModel::getRowOid(int row){if(row<0||row>=oidList.count())return 0; return oidList.at(getRowNum(row));}
 int OrdersModel::getRowType(int row){if(row<0||row>=typesList.count())return 0; return typesList.at(getRowNum(row))?1:0;}
 int OrdersModel::getRowStatus(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(getRowNum(row));}
-qreal OrdersModel::getRowPrice(int row){if(row<0||row>=priceList.count())return 0.0;return priceList.at(getRowNum(row));}
-qreal OrdersModel::getRowVolume(int row){if(row<0||row>=amountList.count())return 0.0;return amountList.at(getRowNum(row));}
-qreal OrdersModel::getRowTotal(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(getRowNum(row));}
+double OrdersModel::getRowPrice(int row){if(row<0||row>=priceList.count())return 0.0;return priceList.at(getRowNum(row));}
+double OrdersModel::getRowVolume(int row){if(row<0||row>=amountList.count())return 0.0;return amountList.at(getRowNum(row));}
+double OrdersModel::getRowTotal(int row){if(row<0||row>=statusList.count())return 0; return statusList.at(getRowNum(row));}

@@ -123,7 +123,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray tickerHigh=getMidData("high\":",",\"",&data);
 			if(!tickerHigh.isEmpty())
 			{
-                qreal newTickerHigh=tickerHigh.toDouble();
+                double newTickerHigh=tickerHigh.toDouble();
                 if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(baseValues.currentPair.symbol,newTickerHigh);
 				lastTickerHigh=newTickerHigh;
 			}
@@ -131,7 +131,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray tickerLow=getMidData("\"low\":",",\"",&data);
 			if(!tickerLow.isEmpty())
 			{
-                qreal newTickerLow=tickerLow.toDouble();
+                double newTickerLow=tickerLow.toDouble();
                 if(newTickerLow!=lastTickerLow)emit tickerLowChanged(baseValues.currentPair.symbol,newTickerLow);
 				lastTickerLow=newTickerLow;
 			}
@@ -139,7 +139,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray tickerSell=getMidData("\"sell\":",",\"",&data);
 			if(!tickerSell.isEmpty())
 			{
-                qreal newTickerSell=tickerSell.toDouble();
+                double newTickerSell=tickerSell.toDouble();
                 if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
 				lastTickerSell=newTickerSell;
 			}
@@ -147,7 +147,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray tickerBuy=getMidData("\"buy\":",",\"",&data);
 			if(!tickerBuy.isEmpty())
 			{
-                qreal newTickerBuy=tickerBuy.toDouble();
+                double newTickerBuy=tickerBuy.toDouble();
                 if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
@@ -155,7 +155,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray tickerVolume=getMidData("\"vol_cur\":",",\"",&data);
 			if(!tickerVolume.isEmpty())
 			{
-                qreal newTickerVolume=tickerVolume.toDouble();
+                double newTickerVolume=tickerVolume.toDouble();
                 if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(baseValues.currentPair.symbol,newTickerVolume);
 				lastTickerVolume=newTickerVolume;
 			}
@@ -165,7 +165,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			{
 				lastTickerDate=newTickerDate;
 				QByteArray tickerLast=getMidData("\"last\":",",\"",&data);
-                qreal tickerLastDouble=tickerLast.toDouble();
+                double tickerLastDouble=tickerLast.toDouble();
                 if(tickerLastDouble>0.0)emit tickerLastChanged(baseValues.currentPair.symbol,tickerLastDouble);
 			}
 
@@ -216,7 +216,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			{
 				if(!feeList.at(n).startsWith(baseValues.currentPair.currRequestPair))continue;
 				QByteArray currentFeeData=feeList.at(n).toLatin1()+",";
-                qreal newFee=getMidData("fee\":",",",&currentFeeData).toDouble();
+                double newFee=getMidData("fee\":",",",&currentFeeData).toDouble();
                 if(newFee!=lastFee)emit accFeeChanged(baseValues.currentPair.symbol,newFee);
 				lastFee=newFee;
 			}
@@ -233,10 +233,10 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				depthAsks=new QList<DepthItem>;
 				depthBids=new QList<DepthItem>;
 
-                QMap<qreal,qreal> currentAsksMap;
+                QMap<double,double> currentAsksMap;
 				QStringList asksList=QString(getMidData("asks\":[[","]]",&data)).split("],[");
-                qreal groupedPrice=0.0;
-                qreal groupedVolume=0.0;
+                double groupedPrice=0.0;
+                double groupedVolume=0.0;
 				int rowCounter=0;
 
 				for(int n=0;n<asksList.count();n++)
@@ -244,8 +244,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
 					QStringList currentPair=asksList.at(n).split(",");
 					if(currentPair.count()!=2)continue;
-                    qreal priceDouble=currentPair.first().toDouble();
-                    qreal amount=currentPair.last().toDouble();
+                    double priceDouble=currentPair.first().toDouble();
+                    double amount=currentPair.last().toDouble();
 
 					if(baseValues.groupPriceValue>0.0)
 					{
@@ -276,13 +276,13 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 						rowCounter++;
 					}
 				}
-                QList<qreal> currentAsksList=lastDepthAsksMap.keys();
+                QList<double> currentAsksList=lastDepthAsksMap.keys();
 				for(int n=0;n<currentAsksList.count();n++)
                     if(currentAsksMap.value(currentAsksList.at(n),0)==0)depthUpdateOrder(baseValues.currentPair.symbol,
                                                                                          currentAsksList.at(n),0.0,true);
 				lastDepthAsksMap=currentAsksMap;
 
-                QMap<qreal,qreal> currentBidsMap;
+                QMap<double,double> currentBidsMap;
 				QStringList bidsList=QString(getMidData("bids\":[[","]]",&data)).split("],[");
 				groupedPrice=0.0;
 				groupedVolume=0.0;
@@ -293,8 +293,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
 					QStringList currentPair=bidsList.at(n).split(",");
 					if(currentPair.count()!=2)continue;
-                    qreal priceDouble=currentPair.first().toDouble();
-                    qreal amount=currentPair.last().toDouble();
+                    double priceDouble=currentPair.first().toDouble();
+                    double amount=currentPair.last().toDouble();
 					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==0)
@@ -324,7 +324,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 						rowCounter++;
 					}
 				}
-                QList<qreal> currentBidsList=lastDepthBidsMap.keys();
+                QList<double> currentBidsList=lastDepthBidsMap.keys();
 				for(int n=0;n<currentBidsList.count();n++)
                     if(currentBidsMap.value(currentBidsList.at(n),0)==0)depthUpdateOrder(baseValues.currentPair.symbol,
                                                                                          currentBidsList.at(n),0.0,false);
@@ -344,7 +344,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray btcBalance=getMidData(baseValues.currentPair.currAStrLow+"\":",",",&fundsData);
 			if(!btcBalance.isEmpty())
 			{
-                qreal newBtcBalance=btcBalance.toDouble();
+                double newBtcBalance=btcBalance.toDouble();
                 if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbol,newBtcBalance);
 				lastBtcBalance=newBtcBalance;
 			}
@@ -352,7 +352,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray usdBalance=getMidData("\""+baseValues.currentPair.currBStrLow+"\":",",",&fundsData);
 			if(!usdBalance.isEmpty())
 			{
-                qreal newUsdBalance=usdBalance.toDouble();
+                double newUsdBalance=usdBalance.toDouble();
                 if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbol,newUsdBalance);
 				lastUsdBalance=newUsdBalance;
 			}
@@ -475,7 +475,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 	else errorCount=0;
 }
 
-void Exchange_BTCe::depthUpdateOrder(QString symbol, qreal price, qreal amount, bool isAsk)
+void Exchange_BTCe::depthUpdateOrder(QString symbol, double price, double amount, bool isAsk)
 {
     if(symbol!=baseValues.currentPair.symbol)return;
 
@@ -499,7 +499,7 @@ void Exchange_BTCe::depthUpdateOrder(QString symbol, qreal price, qreal amount, 
 	}
 }
 
-void Exchange_BTCe::depthSubmitOrder(QString symbol, QMap<qreal,qreal> *currentMap ,qreal priceDouble, qreal amount, bool isAsk)
+void Exchange_BTCe::depthSubmitOrder(QString symbol, QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk)
 {
     if(symbol!=baseValues.currentPair.symbol)return;
 
@@ -561,7 +561,7 @@ void Exchange_BTCe::getHistory(bool force)
 	if(!true&&julyHttp)julyHttp->prepareDataSend();
 }
 
-void Exchange_BTCe::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
+void Exchange_BTCe::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
 
@@ -574,7 +574,7 @@ void Exchange_BTCe::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
 	sendToApi(306,"",true,true,data);
 }
 
-void Exchange_BTCe::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceToSell)
+void Exchange_BTCe::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
 

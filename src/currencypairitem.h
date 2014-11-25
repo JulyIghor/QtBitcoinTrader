@@ -59,10 +59,10 @@ struct CurrencyPairItem
     QString currBStrLow;
     QString currBSign;
 
-    qreal priceMin;//qPow(0.1,priceDecimals);
-    //qreal priceMax;
-    qreal tradePriceMin;
-    qreal tradeVolumeMin;
+    double priceMin;//qPow(0.1,priceDecimals);
+    //double priceMax;
+    double tradePriceMin;
+    double tradeVolumeMin;
 
 	int priceDecimals;
 	int currADecimals;

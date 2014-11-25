@@ -53,10 +53,10 @@ struct RuleHolder
     int thanTypeIndex;
     int variableBFeeIndex;
     int variableBModeIndex;
-    qreal delayMilliseconds;
-    qreal thanAmount;
-    qreal thanPrice;
-    qreal variableBExact;
+    double delayMilliseconds;
+    double thanAmount;
+    double thanPrice;
+    double variableBExact;
     QString comparationText;
     QString thanPricePlusMinusText;
     QString thanPriceTypeCode;

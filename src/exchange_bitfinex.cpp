@@ -160,7 +160,7 @@ void Exchange_Bitfinex::getHistory(bool force)
     if(!isReplayPending(208))sendToApi(208,"mytrades",true,true,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 100");
 }
 
-void Exchange_Bitfinex::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToBuy)
+void Exchange_Bitfinex::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
 {
 	if(tickerOnly)return;
     
@@ -180,7 +180,7 @@ void Exchange_Bitfinex::buy(QString symbol, qreal apiBtcToBuy, qreal apiPriceToB
 	sendToApi(306,"order/new",true,true,params);
 }
 
-void Exchange_Bitfinex::sell(QString symbol, qreal apiBtcToSell, qreal apiPriceToSell)
+void Exchange_Bitfinex::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
 {
 	if(tickerOnly)return;
 
@@ -241,7 +241,7 @@ void Exchange_Bitfinex::sendToApi(int reqType, QByteArray method, bool auth, boo
 	}
 }
 
-void Exchange_Bitfinex::depthUpdateOrder(QString symbol, qreal price, qreal amount, bool isAsk)
+void Exchange_Bitfinex::depthUpdateOrder(QString symbol, double price, double amount, bool isAsk)
 {
     if(symbol!=baseValues.currentPair.symbol)return;
 
@@ -263,7 +263,7 @@ void Exchange_Bitfinex::depthUpdateOrder(QString symbol, qreal price, qreal amou
 	}
 }
 
-void Exchange_Bitfinex::depthSubmitOrder(QString symbol, QMap<qreal,qreal> *currentMap ,qreal priceDouble, qreal amount, bool isAsk)
+void Exchange_Bitfinex::depthSubmitOrder(QString symbol, QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk)
 {
     if(symbol!=baseValues.currentPair.symbol)return;
 
@@ -309,7 +309,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray tickerSell=getMidData("bid\":\"","\"",&data);
 			if(!tickerSell.isEmpty())
 			{
-                qreal newTickerSell=tickerSell.toDouble();
+                double newTickerSell=tickerSell.toDouble();
                 if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
 				lastTickerSell=newTickerSell;
 			}
@@ -317,7 +317,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 			QByteArray tickerBuy=getMidData("ask\":\"","\"",&data);
 			if(!tickerBuy.isEmpty())
 			{
-                qreal newTickerBuy=tickerBuy.toDouble();
+                double newTickerBuy=tickerBuy.toDouble();
                 if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
@@ -325,7 +325,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 			if(tickerLastDate<tickerNow)
 			{
 				QByteArray tickerLast=getMidData("last_price\":\"","\"",&data);
-                qreal newTickerLast=tickerLast.toDouble();
+                double newTickerLast=tickerLast.toDouble();
 				if(newTickerLast>0.0)
 				{
                     emit tickerLastChanged(baseValues.currentPair.symbol,newTickerLast);
@@ -385,18 +385,18 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 				depthAsks=new QList<DepthItem>;
 				depthBids=new QList<DepthItem>;
 
-                QMap<qreal,qreal> currentAsksMap;
+                QMap<double,double> currentAsksMap;
 
 				QStringList asksList=QString(getMidData("asks\":[{","}]",&data)).split("},{");
-                qreal groupedPrice=0.0;
-                qreal groupedVolume=0.0;
+                double groupedPrice=0.0;
+                double groupedVolume=0.0;
 				int rowCounter=0;
 				for(int n=0;n<asksList.count();n++)
 				{
 					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
 					QByteArray currentRow=asksList.at(n).toLatin1();
-                    qreal priceDouble=getMidData("price\":\"","\"",&currentRow).toDouble();
-                    qreal amount=getMidData("amount\":\"","\"",&currentRow).toDouble();
+                    double priceDouble=getMidData("price\":\"","\"",&currentRow).toDouble();
+                    double amount=getMidData("amount\":\"","\"",&currentRow).toDouble();
                     if(n==0)emit tickerBuyChanged(baseValues.currentPair.symbol,priceDouble);
 
 					if(baseValues.groupPriceValue>0.0)
@@ -428,13 +428,13 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 					rowCounter++;
 					}
 				}
-                QList<qreal> currentAsksList=lastDepthAsksMap.keys();
+                QList<double> currentAsksList=lastDepthAsksMap.keys();
 				for(int n=0;n<currentAsksList.count();n++)
                     if(currentAsksMap.value(currentAsksList.at(n),0)==0)depthUpdateOrder(baseValues.currentPair.symbol,
                                                                                          currentAsksList.at(n),0.0,true);//Remove price
 				lastDepthAsksMap=currentAsksMap;
 
-                QMap<qreal,qreal> currentBidsMap;
+                QMap<double,double> currentBidsMap;
 				QStringList bidsList=QString(getMidData("bids\":[{","}]",&data)).split("},{");
 				groupedPrice=0.0;
 				groupedVolume=0.0;
@@ -443,8 +443,8 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 				{
 					if(baseValues.depthCountLimit&&rowCounter>=baseValues.depthCountLimit)break;
 					QByteArray currentRow=bidsList.at(n).toLatin1();
-                    qreal priceDouble=getMidData("price\":\"","\"",&currentRow).toDouble();
-                    qreal amount=getMidData("amount\":\"","\"",&currentRow).toDouble();
+                    double priceDouble=getMidData("price\":\"","\"",&currentRow).toDouble();
+                    double amount=getMidData("amount\":\"","\"",&currentRow).toDouble();
                     if(n==0)emit tickerSellChanged(baseValues.currentPair.symbol,priceDouble);
 
 					if(baseValues.groupPriceValue>0.0)
@@ -476,7 +476,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 						rowCounter++;
 					}
 				}
-                QList<qreal> currentBidsList=lastDepthBidsMap.keys();
+                QList<double> currentBidsList=lastDepthBidsMap.keys();
 				for(int n=0;n<currentBidsList.count();n++)
                     if(currentBidsMap.value(currentBidsList.at(n),0)==0)depthUpdateOrder(baseValues.currentPair.symbol,
                                                                                          currentBidsList.at(n),0.0,false);//Remove price
@@ -530,21 +530,21 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 
 				if(!btcBalance.isEmpty())
 				{
-                    qreal newBtcBalance=btcBalance.toDouble();
+                    double newBtcBalance=btcBalance.toDouble();
                     if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbol,newBtcBalance);
 					lastBtcBalance=newBtcBalance;
 				}
 
 				if(!usdBalance.isEmpty())
 				{
-                    qreal newUsdBalance=usdBalance.toDouble();
+                    double newUsdBalance=usdBalance.toDouble();
                     if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbol,newUsdBalance);
 					lastUsdBalance=newUsdBalance;
 				}
 
 				if(!usdAvBalance.isEmpty())
 				{
-                    qreal newAvUsdBalance=usdAvBalance.toDouble();
+                    double newAvUsdBalance=usdAvBalance.toDouble();
                     if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(baseValues.currentPair.symbol,newAvUsdBalance);
 					lastAvUsdBalance=newAvUsdBalance;
 				}
@@ -552,7 +552,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 				//QByteArray tradeFee=getMidData("Trade_Fee\":","}",&data);
 				//if(!tradeFee.isEmpty())
 				//{
-                //	qreal newFee=tradeFee.toDouble();
+                //	double newFee=tradeFee.toDouble();
                 //	if(newFee!=lastFee)emit accFeeChanged(baseValues.currentPair.currSymbol,newFee);
 				//	lastFee=newFee;
 				//}

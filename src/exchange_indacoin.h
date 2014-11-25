@@ -63,8 +63,8 @@ private:
     QList<DepthItem> *depthBids;
     QList<QByteArray> cancelingOrderIDs;
 
-    QMap<qreal,qreal> lastDepthAsksMap;
-    QMap<qreal,qreal> lastDepthBidsMap;
+    QMap<double,double> lastDepthAsksMap;
+    QMap<double,double> lastDepthBidsMap;
 
     QTime authRequestTime;
 
@@ -73,8 +73,8 @@ private:
     quint32 privateNonce;
 
     void clearVariables();
-    void depthSubmitOrder(QString,QMap<qreal,qreal> *currentMap ,qreal priceDouble, qreal amount, bool isAsk);
-    void depthUpdateOrder(QString, qreal,qreal,bool);
+    void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double,double,bool);
     void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 private slots:
     void reloadDepth();
@@ -84,8 +84,8 @@ private slots:
 public slots:
     void clearValues();
     void getHistory(bool);
-    void buy(QString, qreal, qreal);
-    void sell(QString, qreal, qreal);
+    void buy(QString, double, double);
+    void sell(QString, double, double);
     void cancelOrder(QString, QByteArray);
 };
 

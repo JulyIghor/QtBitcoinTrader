@@ -46,13 +46,13 @@ public:
 	QString timeStr;
 	QString description;
 
-    qreal volume;
+    double volume;
 	QString volumeStr;
 
-    qreal price;
+    double price;
 	QString priceStr;
 
-    qreal total;
+    double total;
 	QString totalStr;
 
     QString symbol;

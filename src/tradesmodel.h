@@ -44,8 +44,8 @@ public:
 	TradesModel();
 	~TradesModel();
 	void updateTotalBTC();
-	qreal getRowPrice(int);
-	qreal getRowVolume(int);
+	double getRowPrice(int);
+	double getRowVolume(int);
 	int getRowType(int);
 	void clear();
 	void removeDataOlderThen(quint32);
@@ -64,13 +64,13 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
-	qreal lastPrecentBids;
+	double lastPrecentBids;
 	quint32 lastRemoveDate;
 	void removeFirst();
 	QString textBid;
 	QString textAsk;
 	
-	qreal lastPrice;
+	double lastPrice;
 	int columnsCount;
 	int dateWidth;
 	int typeWidth;

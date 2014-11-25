@@ -47,12 +47,12 @@ public:
 	quint32 getRowDate(int row);
 	int getRowType(int row);
 	int getRowStatus(int row);
-    qreal getRowPrice(int row);
-    qreal getRowVolume(int row);
-    qreal getRowTotal(int row);
+    double getRowPrice(int row);
+    double getRowVolume(int row);
+    double getRowTotal(int row);
 
-    QMap<qreal,bool> currentAsksPrices;
-    QMap<qreal,bool> currentBidsPrices;
+    QMap<double,bool> currentAsksPrices;
+    QMap<double,bool> currentBidsPrices;
 
 	bool checkDuplicatedOID;
     void ordersCancelAll(QString pair=0);
@@ -116,13 +116,13 @@ private:
 
 	QList<int> statusList;
 
-    QList<qreal> amountList;
+    QList<double> amountList;
 	QStringList amountStrList;
 
-    QList<qreal> priceList;
+    QList<double> priceList;
 	QStringList priceStrList;
 
-    QList<qreal> totalList;
+    QList<double> totalList;
 	QStringList totalStrList;
 
 	QStringList symbolList;
@@ -130,7 +130,7 @@ private:
 signals:
 	void cancelOrder(QString, QByteArray);
 	void ordersIsAvailable();
-    void volumeAmountChanged(qreal, qreal);
+    void volumeAmountChanged(double, double);
 };
 
 #endif // ORDERSMODEL_H

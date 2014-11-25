@@ -101,7 +101,7 @@ struct BaseValues
 	bool supportsUtfUI;
 	bool highResolutionDisplay;
 	int defaultHeightForRow_;
-    qreal groupPriceValue;
+    double groupPriceValue;
 	QFontMetrics *fontMetrics_;
 	int apiDownCount;
 	int uiUpdateInterval;
@@ -113,7 +113,7 @@ struct BaseValues
 	Exchange *currentExchange_;
     QString scriptFolder;
     QString themeFolder;
-    qreal jlScriptVersion;
+    double jlScriptVersion;
 	QString exchangeName;
 	QString timeFormat;
 	QString dateTimeFormat;
@@ -130,8 +130,8 @@ struct BaseValues
 	QString iniFileName;
     QString desktopLocation;
     QString tempLocation;
-    qreal appVerReal;
-    qreal appVerLastReal;
+    double appVerReal;
+    double appVerLastReal;
 	bool appVerIsBeta;
     QMap<QString,QString> currencyMapSign;
     QMap<QString,CurencyInfo> currencyMap;

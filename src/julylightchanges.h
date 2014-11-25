@@ -44,7 +44,7 @@ public:
 	JulyLightChanges(QDoubleSpinBox *parent);
 	~JulyLightChanges();
 private:
-	qreal lastValue;
+	double lastValue;
 	QDoubleSpinBox *parentSpinBox;
 	QTimer *changeTimer;
 private slots:

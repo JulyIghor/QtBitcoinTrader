@@ -31,7 +31,7 @@
 
 #include "percentpicker.h"
 
-PercentPicker::PercentPicker(QDoubleSpinBox *_spinBox, qreal _maxValue)
+PercentPicker::PercentPicker(QDoubleSpinBox *_spinBox, double _maxValue)
     : QMenu()
 {
     maxValue=_maxValue;
@@ -81,5 +81,5 @@ void PercentPicker::on_verticalSlider_valueChanged(int val)
 {
 	if(val==1)ui.percentTo1->setText("100%");else
 	if(val==100)ui.percentTo1->setText("1%");
-	if(isVisible())spinBox->setValue((qreal)val*maxValue/100.0);
+	if(isVisible())spinBox->setValue((double)val*maxValue/100.0);
 }

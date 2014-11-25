@@ -39,12 +39,12 @@ class Exchange_Bitstamp : public Exchange
 	Q_OBJECT
 
 public:
-	void filterAvailableUSDAmountValue(qreal *amount);
+	void filterAvailableUSDAmountValue(double *amount);
 	Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey);
 	~Exchange_Bitstamp();
 
 private:
-	qreal accountFee;
+	double accountFee;
 	bool isFirstTicker;
 	bool isReplayPending(int);
 	bool lastInfoReceived;
@@ -61,8 +61,8 @@ private:
 	QList<DepthItem> *depthBids;
 	QList<QByteArray> cancelingOrderIDs;
 
-	QMap<qreal,qreal> lastDepthAsksMap;
-	QMap<qreal,qreal> lastDepthBidsMap;
+	QMap<double,double> lastDepthAsksMap;
+	QMap<double,double> lastDepthBidsMap;
 	QString apiLogin;
 
 	QTime authRequestTime;
@@ -74,8 +74,8 @@ private:
 	quint32 privateNonce;
 
 	void clearVariables();
-    void depthSubmitOrder(QString,QMap<qreal,qreal> *,qreal,qreal,bool);
-    void depthUpdateOrder(QString, qreal,qreal,bool);
+    void depthSubmitOrder(QString,QMap<double,double> *,double,double,bool);
+    void depthUpdateOrder(QString, double,double,bool);
 	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 
 private slots:
@@ -86,8 +86,8 @@ private slots:
 public slots:
 	void clearValues();
 	void getHistory(bool);
-    void buy(QString, qreal, qreal);
-    void sell(QString, qreal, qreal);
+    void buy(QString, double, double);
+    void sell(QString, double, double);
     void cancelOrder(QString, QByteArray);
 };
 

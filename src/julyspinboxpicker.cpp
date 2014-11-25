@@ -37,7 +37,7 @@
 #include <QtCore/qmath.h>
 #include "main.h"
 
-JulySpinBoxPicker::JulySpinBoxPicker(QDoubleSpinBox *parent, qreal *forceMinValue, qreal intMinV)
+JulySpinBoxPicker::JulySpinBoxPicker(QDoubleSpinBox *parent, double *forceMinValue, double intMinV)
 	: QLabel()
 {
 	internalMinimumValue=intMinV;
@@ -139,7 +139,7 @@ void JulySpinBoxPicker::mouseMoveEvent(QMouseEvent *event)
 				t_deltaY=tempValue;
 			}
 
-			qreal valueToChange=t_deltaX;
+			double valueToChange=t_deltaX;
 			if(QApplication::keyboardModifiers()==Qt::NoModifier)valueToChange/=100.0;
 			valueToChange*=maximumValue;
 

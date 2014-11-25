@@ -86,7 +86,7 @@ public:
     QStringList getScriptGroupsNames();
     int getOpenOrdersCount(int all=0);
 	void fixTableViews(QWidget *wid);
-    qreal getIndicatorValue(QString);
+    double getIndicatorValue(QString);
     QMap<QString,QDoubleSpinBox*> indicatorsMap;
 
 	bool feeCalculatorSingleInstance;
@@ -94,18 +94,18 @@ public:
 
     NetworkMenu *networkMenu;
 
-    qreal meridianPrice;
-    qreal availableAmount;
+    double meridianPrice;
+    double availableAmount;
 	int exchangeId;
-    qreal getAvailableBTC();
-    qreal getAvailableUSD();
-    qreal getAvailableUSDtoBTC(qreal price);
+    double getAvailableBTC();
+    double getAvailableUSD();
+    double getAvailableUSDtoBTC(double price);
 
-    qreal getFeeForUSDDec(qreal usd);
+    double getFeeForUSDDec(double usd);
 
-    qreal floatFee;
-    qreal floatFeeDec;
-    qreal floatFeeInc;
+    double floatFee;
+    double floatFeeDec;
+    double floatFeeInc;
 
 	void addPopupDialog(int);
 
@@ -133,8 +133,8 @@ public:
 	void playWav(QString, bool noBlink=false);
 	void blinkWindow();
 
-    void apiSellSend(QString symbol, qreal btc, qreal price);
-    void apiBuySend(QString symbol, qreal btc, qreal price);
+    void apiSellSend(QString symbol, double btc, double price);
+    void apiBuySend(QString symbol, double btc, double price);
 
 	QTime lastRuleExecutedTime;
 
@@ -157,13 +157,13 @@ public:
     QList<CurrencyPairItem> currPairsList;
     void clearPendingGroup(QString);
 
-    qreal getVolumeByPrice(QString symbol, qreal price, bool isAsk);
-    qreal getPriceByVolume(QString symbol, qreal size, bool isAsk);
+    double getVolumeByPrice(QString symbol, double price, bool isAsk);
+    double getPriceByVolume(QString symbol, double size, bool isAsk);
 private:
     QList<GroupStateItem> pendingGroupStates;
 
-    void setSpinValue(QDoubleSpinBox *spin, qreal val);
-    void setSpinValueP(QDoubleSpinBox *spin, qreal &val);
+    void setSpinValue(QDoubleSpinBox *spin, double val);
+    void setSpinValueP(QDoubleSpinBox *spin, double &val);
 	QWidget *windowWidget;
 	QMenu copyTableValuesMenu;
 	QTableView *lastCopyTable;
@@ -235,15 +235,15 @@ private:
 	void saveWindowState(QWidget *, QString name);
 	void loadWindowState(QWidget *, QString name);
 	void depthSelectOrder(QModelIndex, bool isSel, int type=0);
-    qreal tradesPrecentLast;
+    double tradesPrecentLast;
 
 	void repeatOrderFromTrades(int type,int row);
-    void repeatOrderFromValues(int type,qreal price, qreal amount, bool availableOnly=true);
+    void repeatOrderFromValues(int type,double price, double amount, bool availableOnly=true);
 	void repeatSelectedOrderByType(int type, bool availableOnly=true);
 
 	void updateTrafficTotalValue();
 public slots:
-    void sendIndicatorEvent(QString symbol, QString name, qreal value);
+    void sendIndicatorEvent(QString symbol, QString name, double value);
 
     void setRuleTabRunning(QString,bool);
     void startApplication(QString,QStringList);
@@ -286,7 +286,7 @@ public slots:
 	void on_swapDepth_clicked();
 	void checkValidOrdersButtons();
     void cancelOrder(QString, QByteArray);
-    void volumeAmountChanged(qreal,qreal);
+    void volumeAmountChanged(double,double);
     void setLastTrades10MinVolume(double);
 	void on_depthAutoResize_toggled(bool);
 	void on_depthComboBoxLimitRows_currentIndexChanged(int);
@@ -297,7 +297,7 @@ public slots:
 	void tradesDoubleClicked(QModelIndex);
 	void setDataPending(bool);
 	void anyDataReceived();
-    void depthFirstOrder(QString,qreal,qreal,bool);
+    void depthFirstOrder(QString,double,double,bool);
     void depthSubmitOrders(QString,QList<DepthItem> *, QList<DepthItem> *);
 	void showErrorMessage(QString);
 	void exitApp();
@@ -342,8 +342,8 @@ public slots:
 	void updateLogTable();
 	void historyChanged(QList<HistoryItem>*);
 
-    void accLastSellChanged(QString,qreal);
-    void accLastBuyChanged(QString,qreal);
+    void accLastSellChanged(QString,double);
+    void accLastBuyChanged(QString,double);
 
     void orderCanceled(QString,QByteArray);
 	void ordersIsAvailable();
@@ -425,8 +425,8 @@ signals:
 	void themeChanged();
 	void reloadDepth();
     void cancelOrderByOid(QString,QByteArray);
-    void apiSell(QString symbol,qreal btc, qreal price);
-    void apiBuy(QString symbol,qreal btc, qreal price);
+    void apiSell(QString symbol,double btc, double price);
+    void apiBuy(QString symbol,double btc, double price);
 	void getHistory(bool);
 	void quit();
 	void clearValues();
