@@ -8,7 +8,7 @@ INCLUDEPATH 	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
 
-CONFIG	+= qt # release
+CONFIG	+= qt release
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
 !win32 { TARGET = QtBitcoinTrader }
@@ -108,7 +108,8 @@ HEADERS += aboutdialog.h \
     rulescriptparser.h \
     ruleholder.h \
     exchange_indacoin.h \
-    julymath.h
+    julymath.h \
+           exchange_bitcurex.h
 
 FORMS += addrulegroup.ui \
          datafolderchusedialog.ui \
@@ -188,7 +189,8 @@ SOURCES += aboutdialog.cpp \
     addruledialog.cpp \
     rulescriptparser.cpp \
     ruleholder.cpp \
-    exchange_indacoin.cpp
+    exchange_indacoin.cpp \
+           exchange_bitcurex.cpp
 #
 # Resources
 # 

@@ -56,7 +56,7 @@ bool RuleHolder::isValidComparation(QString &text)
 bool RuleHolder::isValidSymbol(QString &symbol)
 {
     CurrencyPairItem pairItem;
-    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
+    pairItem=baseValues.currencyPairMap.value(symbol.toUpper(),pairItem);
     if(pairItem.symbol.isEmpty())return false;
     return true;
 }

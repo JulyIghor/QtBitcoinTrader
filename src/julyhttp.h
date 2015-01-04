@@ -64,7 +64,9 @@ public:
 	JulyHttp(const QString &hostName, const QByteArray &restKeyLine, QObject *parent, const bool &secure=true, const bool &keepAlive=true, const QByteArray &contentType="application/x-www-form-urlencoded");
 	~JulyHttp();
 
+    void setPortForced(quint16 port){forcedPort=port;}
 private:
+    quint16 forcedPort;
     QByteArray outBuffer;
     QByteArray contentTypeLine;
 	int noReconnectCount;

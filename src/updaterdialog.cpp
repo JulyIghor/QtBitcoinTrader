@@ -188,7 +188,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int reqType)
 		updateLink=versionsMap.value(os+"Bin");
 		}
 
-		if(updateVersion.toDouble()<=baseValues.appVerReal)
+        if(updateVersion.toDouble()<=baseValues.appVerReal)
 		{
 			if(feedbackMessage)
 			{

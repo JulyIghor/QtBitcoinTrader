@@ -174,9 +174,9 @@ void Exchange_Bitfinex::buy(QString symbol, double apiBtcToBuy, double apiPriceT
     QByteArray params=", \"symbol\": \""+pairItem.currRequestPair+"\", \"amount\": \"";
     params+=textFromDouble(apiBtcToBuy,pairItem.currADecimals);
     params+="\", \"price\": \"";
-    params+=textFromDouble(apiPriceToBuy,pairItem.currBDecimals);
+    params+=textFromDouble(apiPriceToBuy,pairItem.priceDecimals);
     params+="\", \"exchange\": \"all\", \"side\": \"buy\", \"type\": \""+orderType+"\"";
-	if(debugLevel)logThread->writeLog("Buy: "+params,2);
+    if(debugLevel)logThread->writeLog("Buy: "+params,1);
 	sendToApi(306,"order/new",true,true,params);
 }
 
@@ -194,16 +194,16 @@ void Exchange_Bitfinex::sell(QString symbol, double apiBtcToSell, double apiPric
     QByteArray params=", \"symbol\": \""+pairItem.currRequestPair+"\", \"amount\": \"";
     params+=textFromDouble(apiBtcToSell,pairItem.currADecimals);
     params+="\", \"price\": \"";
-    params+=textFromDouble(apiPriceToSell,pairItem.currBDecimals);
+    params+=textFromDouble(apiPriceToSell,pairItem.priceDecimals);
     params+="\", \"exchange\": \"all\", \"side\": \"sell\", \"type\": \""+orderType+"\"";
-	if(debugLevel)logThread->writeLog("Sell: "+params,2);
+    if(debugLevel)logThread->writeLog("Sell: "+params,1);
 	sendToApi(307,"order/new",true,true,params);
 }
 
 void Exchange_Bitfinex::cancelOrder(QString, QByteArray order)
 {
 	if(tickerOnly)return;
-	if(debugLevel)logThread->writeLog("Cancel order: "+order,2);
+    if(debugLevel)logThread->writeLog("Cancel order: "+order,1);
 	sendToApi(305,"order/cancel",true,true,", \"order_id\": "+order);
 }
 

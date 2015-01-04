@@ -480,6 +480,7 @@ void ScriptObject::initValueChangedPrivate(QString &symbol, QString &scriptNameI
 
     indicatorsMap[prependName+scriptNameInd]=val;
     if(engine==0)return;
+    if(val<0.00000001&&scriptNameInd.contains(QLatin1String("price"),Qt::CaseInsensitive))return;
     emit valueChanged(symbol,scriptNameInd,val);
 }
 
@@ -639,6 +640,7 @@ QString ScriptObject::sourceToScript(QString text)
     text.replace("\" ,","\",");
     text.replace("' ,","',");
 	text.replace("\\","\\\\");
+    text.replace(", \"",",\"");
 
     text.replace("trader.get(\"Balance\",\"","trader.get(\"Balance",Qt::CaseInsensitive);
     text.replace("trader.on(\"Balance\",\"","trader.on(\"Balance",Qt::CaseInsensitive);

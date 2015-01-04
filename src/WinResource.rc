@@ -1,8 +1,8 @@
 IDI_ICON1 ICON "Icon.ico"
 
 1 VERSIONINFO
- FILEVERSION 1,0,8,02
- PRODUCTVERSION 1,0,8,02
+ FILEVERSION 1,0,8,03
+ PRODUCTVERSION 1,0,8,03
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
@@ -10,12 +10,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Centrabit"
             VALUE "FileDescription", "Qt Bitcoin Trader"
-            VALUE "FileVersion", "1.08.02"
+            VALUE "FileVersion", "1.08.03"
             VALUE "InternalName", "Qt Bitcoin Trader"
             VALUE "LegalCopyright", "Copyright (C) 2014 Centrabit"
             VALUE "OriginalFilename", "QtBitcoinTrader.exe"
             VALUE "ProductName", "Qt Bitcoin Trader Application"
-            VALUE "ProductVersion", "1.08.02"
+            VALUE "ProductVersion", "1.08.03"
         END
     END
 	BLOCK "VarFileInfo"

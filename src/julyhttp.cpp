@@ -50,6 +50,7 @@
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
 	: QSslSocket(parent)
 {
+    forcedPort=0U;
 	noReconnectCount=0;
     noReconnect=false;
 	secureConnection=secure;
@@ -168,9 +169,9 @@ void JulyHttp::reconnectSocket(bool mastAbort)
     if(isDisabled)return;
 	if(mastAbort)abortSocket();
 	if(state()==QAbstractSocket::UnconnectedState)
-	{
-		if(secureConnection)connectToHostEncrypted(hostName, 443, QIODevice::ReadWrite);
-		else connectToHost(hostName,80,QIODevice::ReadWrite);
+    {
+        if(secureConnection)connectToHostEncrypted(hostName, forcedPort?forcedPort:443, QIODevice::ReadWrite);
+        else connectToHost(hostName,forcedPort?forcedPort:80,QIODevice::ReadWrite);
         waitForConnected(((noReconnect&&noReconnectCount++>5)?1000:baseValues.httpRequestTimeout));
 
 #ifdef Q_OS_WIN

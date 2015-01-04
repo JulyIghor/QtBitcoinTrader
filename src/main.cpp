@@ -110,7 +110,7 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.0802";
+    appVerStr="1.0803";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -468,6 +468,12 @@ int main(int argc, char *argv[])
 				{//Indacoin
 					baseValues.restSign=newPassword.getRestSign().toLatin1();
                     encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
+				}
+				break;
+			case 7:
+				{//BitCurex
+					baseValues.restSign=newPassword.getRestSign().toLatin1();
+					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
 			default: break;
