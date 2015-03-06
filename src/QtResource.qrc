@@ -8,6 +8,7 @@
         <file>Resources/Exchanges/Logos/Unknown.png</file>
         <file>Resources/Exchanges/Logos/Bitfinex.png</file>
         <file>Resources/Exchanges/Logos/BTCChina.png</file>
+        <file>Resources/Exchanges/Logos/LakeBTC.png</file>
         <file>Resources/Exchanges/Logos/GOCio.png</file>
         <file>Resources/Exchanges/Logos/BTC-e.png</file>
         <file>Resources/Exchanges/Logos/Bitstamp_Big.png</file>
@@ -19,6 +20,7 @@
         <file>Resources/Exchanges/Logos/Indacoin_Big.png</file>
         <file>Resources/Exchanges/Logos/BitCurex.png</file>
         <file>Resources/Exchanges/Logos/BitCurex_Big.png</file>
+        <file>Resources/Exchanges/Logos/LakeBTC_Big.png</file>
         <file>Resources/Open.png</file>
         <file>Resources/Save.png</file>
         <file>Resources/Themes/Dark.thm</file>
@@ -51,6 +53,7 @@
         <file>Resources/Exchanges/Bitstamp.ini</file>
         <file>Resources/Exchanges/BitCurex.ini</file>
         <file>Resources/Exchanges/GOCio.ini</file>
+        <file>Resources/Exchanges/LakeBTC.ini</file>
         <file>Resources/CurrencySign/AUD.png</file>
         <file>Resources/CurrencySign/BTC.png</file>
         <file>Resources/CurrencySign/LTC.png</file>

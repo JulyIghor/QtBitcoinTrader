@@ -476,6 +476,12 @@ int main(int argc, char *argv[])
 					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
+			case 8:
+				{//LakeBTC
+					baseValues.restSign=newPassword.getRestSign().toLatin1();
+					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toByteArray(),tryPassword.toUtf8());
+				}
+			break;
 			default: break;
 			}
 			settings.setValue("EncryptedData/ApiKeySign",QString(encryptedData.toBase64()));
