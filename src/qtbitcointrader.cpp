@@ -58,6 +58,7 @@
 #include "exchange_bitfinex.h"
 #include "exchange_gocio.h"
 #include "exchange_bitcurex.h"
+#include "exchange_lakebtc.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
 #include "debugviewer.h"
@@ -568,6 +569,7 @@ void QtBitcoinTrader::setupClass()
 	case 5: currentExchange=new Exchange_GOCio(baseValues.restSign,baseValues.restKey);break;//GOCio
 	case 6: currentExchange=new Exchange_Indacoin(baseValues.restSign,baseValues.restKey);break;//Indacoin
 	case 7: currentExchange=new Exchange_BitCurex(baseValues.restSign,baseValues.restKey);break;//BitCurex
+        case 8: currentExchange=new Exchange_LakeBTC(baseValues.restSign,baseValues.restKey);break;//LakeBTC
 	default: return;
 	}
 	baseValues.restSign.clear();

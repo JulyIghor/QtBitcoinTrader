@@ -63,6 +63,7 @@ HEADERS += aboutdialog.h \
            exchange_bitstamp.h \
            exchange_btcchina.h \
            exchange_btce.h \
+           exchange_lakebtc.h \
            feecalculator.h \
            historyitem.h \
            historymodel.h \
@@ -145,6 +146,7 @@ SOURCES += aboutdialog.cpp \
            exchange_bitstamp.cpp \
            exchange_btcchina.cpp \
            exchange_btce.cpp \
+           exchange_lakebtc.cpp \
            feecalculator.cpp \
            historyitem.cpp \
            historymodel.cpp \
