@@ -64,7 +64,7 @@ TimeSync* TimeSync::global()
 
 quint32 TimeSync::getTimeT()
 {
-    return QDateTime::currentDateTime().addSecs(TimeSync::global()->timeShift).toTime_t();
+    return QDateTime::currentDateTime().addSecs(TimeSync::global()->timeShift.load()).toTime_t();
 }
 
 void TimeSync::runThread()
