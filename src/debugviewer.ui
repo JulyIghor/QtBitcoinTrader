@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DebugViewer</class>
+ <widget class="QWidget" name="DebugViewer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>609</width>
+    <height>412</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Qt Bitcoin Trader [DEBUG VIEWER]</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="3">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>401</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="1">
+    <widget class="QRadioButton" name="radioLog">
+     <property name="text">
+      <string>Log</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="5">
+    <widget class="QPushButton" name="buttonClearLog">
+     <property name="text">
+      <string>Clear</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QRadioButton" name="radioDebug">
+     <property name="text">
+      <string>Debug</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="checkEnabled">
+     <property name="text">
+      <string>Enabled</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="6">
+    <widget class="QPlainTextEdit" name="debugText">
+     <property name="undoRedoEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="maximumBlockCount">
+      <number>10000</number>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QPushButton" name="buttonSaveAs">
+     <property name="text">
+      <string>Save As..</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonClearLog</sender>
+   <signal>clicked()</signal>
+   <receiver>debugText</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>564</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>543</x>
+     <y>311</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

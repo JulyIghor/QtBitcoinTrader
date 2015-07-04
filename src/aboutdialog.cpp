@@ -1,50 +1,95 @@
-// Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
-// If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
-// Or send e-mail directly to julyighor@gmail.com
+//  This file is part of Qt Bitcion Trader
+//      https://github.com/JulyIGHOR/QtBitcoinTrader
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
-// You may use, distribute and copy the Qt Bitcion Trader under the terms of
-// GNU General Public License version 3
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  In addition, as a special exception, the copyright holders give
+//  permission to link the code of portions of this program with the
+//  OpenSSL library under certain conditions as described in each
+//  individual source file, and distribute linked combinations including
+//  the two.
+//
+//  You must obey the GNU General Public License in all respects for all
+//  of the code used other than OpenSSL. If you modify file(s) with this
+//  exception, you may extend this exception to your version of the
+//  file(s), but you are not obligated to do so. If you do not wish to do
+//  so, delete this exception statement from your version. If you delete
+//  this exception statement from all source files in the program, then
+//  also delete it here.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "aboutdialog.h"
 #include "main.h"
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include "translationdialog.h"
+#include "logobutton.h"
 
-TranslationAbout::TranslationAbout(QWidget *)
+TranslationAbout::TranslationAbout(QWidget *par)
 	: QDialog()
 {
 	ui.setupUi(this);
-	setWindowFlags(Qt::WindowCloseButtonHint);
+    ui.buttonCheckUpdates->setVisible(false);
+    setWindowTitle("Qt Bitcon Trader v"+baseValues.appVerStr);
+	setWindowFlags(Qt::WindowCloseButtonHint|par->windowFlags());
 	setWindowModality(Qt::ApplicationModal);
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	//setFixedSize(size());
+	ui.aboutTextLabel->setStyleSheet("QLabel {color: "+baseValues.appTheme.black.name()+"; border: 1px solid "+baseValues.appTheme.gray.name()+"; background: "+baseValues.appTheme.white.name()+"; padding:6px}");
+	ui.translationAuthor->setStyleSheet(ui.aboutTextLabel->styleSheet());
 
+	ui.label_info->setText("Centrabit AG, Zug\nreg. CHE-114.254.375\nVersion: "+baseValues.appVerStr);
+
+	QLayout *groupboxLayout=ui.LogoGroupBox->layout();
+	if(groupboxLayout==0)
+	{
+		groupboxLayout=new QGridLayout;
+		groupboxLayout->setContentsMargins(0,0,0,0);
+		groupboxLayout->setSpacing(0);
+		ui.LogoGroupBox->setLayout(groupboxLayout);
+		LogoButton *logoButton=new LogoButton;
+		groupboxLayout->addWidget(logoButton);
+    }
 #ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())
-		QtWin::extendFrameIntoClientArea(this);
+    resize(420,height());
+    resize(width(),minimumSizeHint().height()+20);
+#else
+    resize(500,height());
+    resize(width(),minimumSizeHint().height()+60);
 #endif
-
-	julyTranslator->translateUi(this);
-	ui.languageField->setText(julyTr("LANGUAGE_NAME","Invalid Language"));
-	ui.translationAuthor->setText(julyTr("LANGUAGE_AUTHOR","Invalid About"));
-	ui.aboutBitcoinTraderGroupBox->setTitle(julyTr("ABOUT_QT_BITCOIN_TRADER","About %1").arg(windowTitle()));
-	ui.aboutTextLabel->setText(julyTr("ABOUT_QT_BITCOIN_TRADER_TEXT","Qt Bitcoin Trader is a free Open Source project<br>developed on C++ Qt and OpenSSL.<br>If you want to help make project better please donate: %1<br>Feel free to send me recommendations and fixes to: %2").arg("<a href=\"bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc\">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>").arg("<a href=\"mailto:julyighor@gmail.com\">julyighor@gmail.com</a>"));
-	if(mainWindow_)mainWindow.addPopupDialog(1);
+	setMinimumSize(size());
 }
 
 TranslationAbout::~TranslationAbout()
 {
-	if(mainWindow_)mainWindow.addPopupDialog(-1);
+}
+
+void TranslationAbout::showWindow()
+{
+    julyTranslator.translateUi(this);
+    setWindowTitle("Qt Bitcon Trader v"+baseValues.appVerStr);
+	ui.languageField->setText(julyTr("LANGUAGE_NAME","Invalid Language"));
+	ui.translationAuthor->setText(julyTr("LANGUAGE_AUTHOR","Invalid About"));
+    ui.aboutBitcoinTraderGroupBox->setTitle(julyTr("ABOUT_QT_BITCOIN_TRADER","About %1").arg("Qt Bitcon Trader"));
+	ui.aboutTextLabel->setText(julyTr("ABOUT_QT_BITCOIN_TRADER_TEXT","Qt Bitcoin Trader is a free Open Source project<br>developed on C++ Qt and OpenSSL.<br>If you want to help make project better please donate.<br>Feel free to send me recommendations and fixes to: %1").arg("<a href=\"mailto:julyighor@gmail.com\">julyighor@gmail.com</a>"));
+    show();
 }
 
 void TranslationAbout::createTranslation()
 {
 	accept();
-	(new TranslationDialog)->show();
+	TranslationDialog *translationDialog=new TranslationDialog;
+	translationDialog->setWindowFlags(windowFlags());
+	translationDialog->show();
 }
 
 void TranslationAbout::buttonCheckUpdates()

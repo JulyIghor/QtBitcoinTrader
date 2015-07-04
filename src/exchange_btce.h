@@ -1,120 +1,89 @@
-// Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
-// If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
-// Or send e-mail directly to julyighor@gmail.com
+//  This file is part of Qt Bitcion Trader
+//      https://github.com/JulyIGHOR/QtBitcoinTrader
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
-// You may use, distribute and copy the Qt Bitcion Trader under the terms of
-// GNU General Public License version 3
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  In addition, as a special exception, the copyright holders give
+//  permission to link the code of portions of this program with the
+//  OpenSSL library under certain conditions as described in each
+//  individual source file, and distribute linked combinations including
+//  the two.
+//
+//  You must obey the GNU General Public License in all respects for all
+//  of the code used other than OpenSSL. If you modify file(s) with this
+//  exception, you may extend this exception to your version of the
+//  file(s), but you are not obligated to do so. If you do not wish to do
+//  so, delete this exception statement from your version. If you delete
+//  this exception statement from all source files in the program, then
+//  also delete it here.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef EXCHANGE_BTCE_H
 #define EXCHANGE_BTCE_H
 
-#include <QThread>
-#include <QHttp>
-#include <QNetworkAccessManager>
-#include <QTimer>
-#include <QTime>
-#include "qtbitcointrader.h"
+#include "exchange.h"
 
-class Exchange_BTCe : public QThread
+class Exchange_BTCe : public Exchange
 {
 	Q_OBJECT
 
 public:
-	void setupApi(QtBitcoinTrader *, bool tickerOnly=false);
 	Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey);
 	~Exchange_BTCe();
 
 private:
-	QHttp *httpAuth;
+	bool isApiDown;
+	bool isFirstAccInfo;
+	bool isFirstTicker;
+	bool isReplayPending(int);
+    bool tickerOnly;
+
+	int apiDownCounter;
+	int lastOpenedOrders;
+
+	JulyHttp *julyHttp;
 
 	qint64 lastFetchTid;
-	bool tickerOnly;
-	bool isApiDown;
-	QByteArray lastHistory;
-	QByteArray lastOrders;
-	bool isFirstTicker;
-	bool isFirstAccInfo;
 
-	double lastTickerHigh;
-	double lastTickerLow;
-	double lastTickerSell;
-	double lastTickerLast;
-	double lastTickerBuy;
-	double lastTickerVolume;
+	QList<DepthItem> *depthAsks;
+	QList<DepthItem> *depthBids;
 
-	double lastBtcBalance;
-	double lastUsdBalance;
-	double lastVolume;
-	double lastFee;
+	QMap<double,double> lastDepthAsksMap;
+	QMap<double,double> lastDepthBidsMap;
 
-	QByteArray getMidData(QString a, QString b,QByteArray *data);
-	QTime softLagTime;
 	QTime authRequestTime;
-	int apiDownCounter;
-	int secondPart;
-	QByteArray privateRestSign;
-	QByteArray privateRestKey;
+
+	quint32 lastPriceDate;
+	quint32 lastTickerDate;
 	quint32 privateNonce;
+    quint32 lastHistoryId;
 
-	QMap<QNetworkReply*,int> noAuthRequestMap;
-	QMap<QNetworkReply*,qint32> noAuthTimeStampMap;
-
-	int vipRequestCount;
-	QMap<int,int> authRequestMap;
-	QMap<int,qint32> authTimeStampMap;
-
-	void removePendingId(int);
-	void removeReplay(QNetworkReply*);
-	bool isReplayPending(int);
-
-	void sendToApi(int reqType, QByteArray method, bool auth=false, QByteArray commands=0, bool incNonce=true);
-	QTimer *secondTimer;
-	int lastOpenedOrders;
-	void run();
-signals:
-	void addLastTrade(double,qint64,double,QByteArray,bool);
-
-	void ordersChanged(QString);
-	void identificationRequired(QString);
-
-	void ordersLogChanged(QString);
-
-	void accLastSellChanged(QByteArray,double);
-	void accLastBuyChanged(QByteArray,double);
-
-	void ordersIsEmpty();
-	void orderCanceled(QByteArray);
-
-	void firstTicker();
-	void tickerHighChanged(double);
-	void tickerLowChanged(double);
-	void tickerSellChanged(double);
-	void tickerLastChanged(double);
-	void tickerBuyChanged(double);
-	void tickerVolumeChanged(double);
-
-	void firstAccInfo();
-	void accFeeChanged(double);
-	void accBtcBalanceChanged(double);
-	void accUsdBalanceChanged(double);
-	void apiDownChanged(bool);
-	void apiLagChanged(double);
-	void softLagChanged(int);
+	void clearVariables();
+	void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double,double,bool);
+	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
 private slots:
-	void httpDoneAuth(int,bool);
+	void reloadDepth();
 	void sslErrors(const QList<QSslError> &);
-	void requestFinished(QNetworkReply *);
-	void sslErrorsSlot(QNetworkReply *, const QList<QSslError> &);
+	void dataReceivedAuth(QByteArray,int);
 	void secondSlot();
 public slots:
 	void clearValues();
-	void reloadOrders();
 	void getHistory(bool);
-	void buy(double, double);
-	void sell(double, double);
-	void cancelOrder(QByteArray);
+	void buy(QString, double, double);
+	void sell(QString, double, double);
+	void cancelOrder(QString, QByteArray);
 };
 
 #endif // EXCHANGE_BTCE_H

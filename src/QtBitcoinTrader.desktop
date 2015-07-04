@@ -1,8 +1,6 @@
 [Desktop Entry]
 Name=QtBitcoinTrader
-GenericName=Mt.Gox and BTC-e Bitcoin Trading Client
-GenericName[ru]=Торговый клиент для Mt.Gox и BTC-e
-GenericName[uk]=Торговий клієнт для Mt.Gox і BTC-e
+GenericName=Secure Multi Trading Client
 Exec=QtBitcoinTrader
 Icon=QtBitcoinTrader
 Terminal=false

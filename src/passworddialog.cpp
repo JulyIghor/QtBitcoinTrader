@@ -1,23 +1,42 @@
-// Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
-// If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
-// Or send e-mail directly to julyighor@gmail.com
+//  This file is part of Qt Bitcion Trader
+//      https://github.com/JulyIGHOR/QtBitcoinTrader
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
-// You may use, distribute and copy the Qt Bitcion Trader under the terms of
-// GNU General Public License version 3
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  In addition, as a special exception, the copyright holders give
+//  permission to link the code of portions of this program with the
+//  OpenSSL library under certain conditions as described in each
+//  individual source file, and distribute linked combinations including
+//  the two.
+//
+//  You must obey the GNU General Public License in all respects for all
+//  of the code used other than OpenSSL. If you modify file(s) with this
+//  exception, you may extend this exception to your version of the
+//  file(s), but you are not obligated to do so. If you do not wish to do
+//  so, delete this exception statement from your version. If you delete
+//  this exception statement from all source files in the program, then
+//  also delete it here.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "passworddialog.h"
 #include "main.h"
-
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include <QDir>
 #include <QSettings>
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QCryptographicHash>
+#include "logobutton.h"
 
 PasswordDialog::PasswordDialog(QWidget *parent)
 	: QDialog(parent)
@@ -25,48 +44,134 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	resetData=false;
 	newProfile=false;
 	ui.setupUi(this);
-    setWindowTitle(windowTitle()+" v"+appVerStr);
+    setWindowTitle(windowTitle()+" v"+baseValues.appVerStr);
 	setWindowFlags(Qt::WindowCloseButtonHint);
-	ui.updateCheckBox->setStyleSheet("QCheckBox {background: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 0.7, stop: 0 #fff, stop: 1 transparent)}");
 	ui.okButton->setEnabled(false);
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
-#endif
-	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
-	ui.updateCheckBox->setChecked(settings.value("CheckForUpdates",true).toBool());
-	QString lastProfile=settings.value("LastProfile","").toString();
+
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
+    QString lastProfile=settings.value("LastProfile","").toString();
 	int lastProfileIndex=-1;
 	int firstUnlockedProfileIndex=-1;
+
+	QMap<int,QString> logosMap;
+	QSettings listSettings(":/Resources/Exchanges/List.ini",QSettings::IniFormat);
+	QStringList exchangesList=listSettings.childGroups();
+	for(int n=0;n<exchangesList.count();n++)
+	{
+		QString currentLogo=listSettings.value(exchangesList.at(n)+"/Logo").toString();
+		if(currentLogo.isEmpty())continue;
+        logosMap.insert(n,":/Resources/Exchanges/Logos/"+currentLogo);
+	}
+
+    QStringList scriptsOldPlace=QDir(baseValues.scriptFolder).entryList(QStringList()<<"*.JLR"<<"*.JLS");
+    QStringList iniNames;
+
 	QStringList settingsList=QDir(appDataDir,"*.ini").entryList();
 	for(int n=0;n<settingsList.count();n++)
 	{
-		ui.profileComboBox->addItem(QSettings(appDataDir+settingsList.at(n),QSettings::IniFormat).value("ProfileName",QFileInfo(settingsList.at(n)).completeBaseName()).toString(),settingsList.at(n));
+        if(scriptsOldPlace.count())iniNames<<QFileInfo(settingsList.at(n)).completeBaseName();
+		QSettings settIni(appDataDir+settingsList.at(n),QSettings::IniFormat);
+
+		if(baseValues.appVerLastReal<1.0772)
+		{
+			QString cryptedData=settIni.value("CryptedData","").toString();
+			if(!cryptedData.isEmpty())settIni.setValue("EncryptedData/ApiKeySign",cryptedData);
+
+			QString profileNameOld=settIni.value("ProfileName","").toString();
+			if(!profileNameOld.isEmpty())
+			{
+				settIni.remove("ProfileName");
+				settIni.setValue("Profile/Name",profileNameOld);
+			}
+			QString profileExchangeIdOld=settIni.value("ExchangeId","").toString();
+			if(!profileExchangeIdOld.isEmpty())
+			{
+				settIni.remove("ExchangeId");
+				settIni.setValue("Profile/ExchangeId",profileExchangeIdOld);
+			}
+			settIni.sync();
+		}
+
+		if(settIni.value("EncryptedData/ApiKeySign","").toString().isEmpty())
+		{
+			QFile::remove(appDataDir+settingsList.at(n));
+			continue;
+		}
+		int currentProfileExchangeId=settIni.value("Profile/ExchangeId",0).toInt();
+
+		if(baseValues.appVerLastReal<1.0775)
+		{
+			if(currentProfileExchangeId==2)
+			{
+				QFile::remove(appDataDir+settingsList.at(n));
+				static bool haveBitstampProfile=false;
+				if(!haveBitstampProfile)
+				{
+					haveBitstampProfile=true;
+					QMessageBox::warning(0,windowTitle(),"From now Bitstamp support API keys with permissions. To ensure the security of your Bitstamp account you must create new API keys and add a new profile of Bitstamp to the Qt Bitcoin Trader.");
+				}
+				continue;
+			}
+		}
+		QString currentLogo=logosMap.value(currentProfileExchangeId);
+		if(!QFile::exists(currentLogo))currentLogo=":/Resources/Exchanges/Logos/Unknown.png";
+        ui.profileComboBox->addItem(QIcon(currentLogo),settIni.value("Profile/Name",QFileInfo(settingsList.at(n)).fileName()).toString(),settingsList.at(n));
 		bool isProfLocked=isProfileLocked(settingsList.at(n));
 
 		if(!isProfLocked&&lastProfileIndex==-1&&lastProfile==settingsList.at(n))lastProfileIndex=n;
-		if(firstUnlockedProfileIndex==-1&&!isProfLocked)firstUnlockedProfileIndex=n;
+		if(firstUnlockedProfileIndex==-1&&!isProfLocked)firstUnlockedProfileIndex=n-1;
 	}
+
+    if(iniNames.count())
+    {
+        Q_FOREACH(QString scriptFolderName,iniNames)
+        {
+            scriptFolderName=baseValues.scriptFolder+scriptFolderName+"/";
+            QDir().mkpath(scriptFolderName);
+            Q_FOREACH(QString curScript,scriptsOldPlace)
+                QFile::copy(baseValues.scriptFolder+curScript,scriptFolderName+curScript);
+        }
+        Q_FOREACH(QString curScript, scriptsOldPlace)
+            QFile::remove(baseValues.scriptFolder+curScript);
+    }
+
 	if(ui.profileComboBox->count()==0)ui.profileComboBox->addItem(julyTr("DEFAULT_PROFILE_NAME","Default Profile"));
 	if(firstUnlockedProfileIndex!=-1&&lastProfileIndex==-1)lastProfileIndex=firstUnlockedProfileIndex;
-	if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);
+    if(lastProfileIndex>-1)ui.profileComboBox->setCurrentIndex(lastProfileIndex);
 
-	julyTranslator->translateUi(this);
+    ui.label_info->setText("Centrabit AG, Zug\nreg. CHE-114.254.375\nVersion: "+baseValues.appVerStr);
+
+	julyTranslator.translateUi(this);
 
 	foreach(QCheckBox* checkBoxes, findChildren<QCheckBox*>())
-		checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),QFontMetrics(checkBoxes->font()).width(checkBoxes->text())+20));
-	QSize minSizeHint=minimumSizeHint();
-	if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
+        checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(),textFontWidth(checkBoxes->text())+20));
+
+
+	QLayout *groupboxLayout=ui.LogoGroupBox->layout();
+	if(groupboxLayout==0)
+	{
+		groupboxLayout=new QGridLayout;
+		groupboxLayout->setContentsMargins(0,0,0,0);
+		groupboxLayout->setSpacing(0);
+		ui.LogoGroupBox->setLayout(groupboxLayout);
+		LogoButton *logoButton=new LogoButton;
+		groupboxLayout->addWidget(logoButton);
+	}
+
+    QSize minSizeHint=minimumSizeHint();
+    if(mainWindow.isValidSize(&minSizeHint))setFixedSize(minimumSizeHint());
+
+    if(settings.value("HidePasswordDescription",false).toBool())
+        ui.descriptionGroupBox->setChecked(false);
 }
 
 PasswordDialog::~PasswordDialog()
 {
-	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
-	settings.setValue("CheckForUpdates",ui.updateCheckBox->isChecked());
 }
 
 QString PasswordDialog::lockFilePath(QString name)
 {
-	return QDesktopServices::storageLocation(QDesktopServices::TempLocation)+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(appDataDir+"/"+QFileInfo(name).fileName().toAscii(),QCryptographicHash::Sha1).toHex());
+    return baseValues.tempLocation+"/QtBitcoinTrader_lock_"+QString(QCryptographicHash::hash(QString(appDataDir+"/"+QFileInfo(name).fileName()).toUtf8(),QCryptographicHash::Sha1).toHex());
 }
 
 bool PasswordDialog::isProfileLocked(QString name)
@@ -81,9 +186,9 @@ bool PasswordDialog::isProfileLocked(QString name)
 
 void PasswordDialog::accept()
 {
-	QSettings settings(appDataDir+"/Settings.set",QSettings::IniFormat);
+	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 	int currIndex=ui.profileComboBox->currentIndex();
-	if(currIndex>-1)settings.setValue("LastProfile",ui.profileComboBox->itemData(currIndex).toString());
+	if(currIndex>=0)settings.setValue("LastProfile",ui.profileComboBox->itemData(currIndex).toString());
 	QDialog::accept();
 }
 
@@ -123,27 +228,16 @@ void PasswordDialog::resetDataSlot()
 
 void PasswordDialog::checkToEnableButton(QString pass)
 {
-	if(pass.length()<8){ui.okButton->setEnabled(false);return;}
+	ui.okButton->setEnabled(pass.length());
+}
 
-	static QString allowedPassChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-	bool isValidPassword=pass.length()>14;
-	if(!isValidPassword)
-	{
-		bool containsLetter=false;
-		bool containsDigit=false;
-		bool containsSpec=false;
-		bool containsUpCase=false;
-		bool containsDownCase=false;
-		for(int n=0;n<pass.length();n++)
-		{
-			if(!containsLetter&&pass.at(n).isLetter())containsLetter=true;
-			if(!containsDigit&&pass.at(n).isDigit())containsDigit=true;
-			if(!containsSpec&&allowedPassChars.contains(pass.at(n)))containsSpec=true;
-			if(!containsUpCase&&pass.at(n).isLetter()&&pass.at(n).isUpper())containsUpCase=true;
-			if(!containsDownCase&&pass.at(n).isLetter()&&pass.at(n).isLower())containsDownCase=true;
-			if(containsLetter&&containsDigit&&containsSpec||containsLetter&&containsDigit&&containsUpCase&&containsDownCase)
-			{isValidPassword=true;break;}
-		}
-	}
-	ui.okButton->setEnabled(isValidPassword);
+void PasswordDialog::on_descriptionGroupBox_toggled(bool)
+{
+    ui.descriptionGroupBox->setVisible(false);
+
+    QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
+    settings.setValue("HidePasswordDescription",true);
+
+    QSize minSizeHint=minimumSizeHint();
+    setFixedHeight(minSizeHint.height());
 }

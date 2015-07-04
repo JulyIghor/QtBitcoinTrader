@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FeaturedExchangesDialog</class>
+ <widget class="QDialog" name="FeaturedExchangesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>130</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Featured Exchanges</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="3">
+    <widget class="QPushButton" name="okButton">
+     <property name="accessibleName">
+      <string>OK</string>
+     </property>
+     <property name="text">
+      <string>OK</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="otherExchangesButton">
+     <property name="accessibleName">
+      <string>OTHER_EXCHANGES</string>
+     </property>
+     <property name="text">
+      <string>Other Exchanges</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupBoxExchange">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="accessibleName">
+      <string>SELECT_YOUR_EXCHANGE</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="title">
+      <string>Select your exchange</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayoutExchange">
+      <property name="margin">
+       <number>15</number>
+      </property>
+      <property name="spacing">
+       <number>10</number>
+      </property>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>otherExchangesButton</tabstop>
+  <tabstop>okButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

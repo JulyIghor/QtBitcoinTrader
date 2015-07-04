@@ -1,122 +1,103 @@
-// Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
-// If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
-// Or send e-mail directly to julyighor@gmail.com
+//  This file is part of Qt Bitcion Trader
+//      https://github.com/JulyIGHOR/QtBitcoinTrader
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
-// You may use, distribute and copy the Qt Bitcion Trader under the terms of
-// GNU General Public License version 3
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  In addition, as a special exception, the copyright holders give
+//  permission to link the code of portions of this program with the
+//  OpenSSL library under certain conditions as described in each
+//  individual source file, and distribute linked combinations including
+//  the two.
+//
+//  You must obey the GNU General Public License in all respects for all
+//  of the code used other than OpenSSL. If you modify file(s) with this
+//  exception, you may extend this exception to your version of the
+//  file(s), but you are not obligated to do so. If you do not wish to do
+//  so, delete this exception statement from your version. If you delete
+//  this exception statement from all source files in the program, then
+//  also delete it here.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ruleholder.h"
 #include "main.h"
 
-RuleHolder::RuleHolder(int moreLessEqual, double price, double bitcoins, uint guid, bool isBuy, double sellPrice, int rulePriceTp)
+RuleHolder::RuleHolder()
 {
-	invalidHolder=false;
-	rulePriceType=rulePriceTp;
-	rulePrice=sellPrice;
-	ruleCheckPrice=price;
-	ruleGuid=guid;
-	ruleMoreLessEqual=moreLessEqual;
-	ruleBtc=bitcoins;
-	buying=isBuy;
-	waitingGoodLag=false;
+    thanAmountPercentChecked=false;
+    thanPricePercentChecked=false;
+    variableBPercentChecked=false;
+    thanAmountFeeIndex=-1;
+    thanPriceFeeIndex=-1;
+    thanTypeIndex=-1;
+    variableBFeeIndex=-1;
+    variableBModeIndex=-1;
+    thanAmount=0.0;
+    thanPrice=0.0;
+    variableBExact=0.0;
+    delayMilliseconds=0.0;
 }
 
-bool RuleHolder::isAchieved(double price)
+bool RuleHolder::isValidComparation(QString &text)
 {
-	if(rulePriceType!=8&&rulePriceType!=9&&price<minTradePrice)return false;
-	if(waitingGoodLag)return true;
-	if(ruleMoreLessEqual==-1&&ruleCheckPrice>price)return true;
-	if(ruleMoreLessEqual==1&&ruleCheckPrice<price)return true;
-	if(ruleMoreLessEqual==0&&ruleCheckPrice==price)return true;
-	return false;
+    return text==QLatin1String("=")||text==QLatin1String("<")||text==QLatin1String(">")||text==QLatin1String("<=")||text==QLatin1String(">=")||text==QLatin1String("!=")||text==QLatin1String("==")||text==QLatin1String("<>");
 }
 
-void RuleHolder::startWaitingLowLag()
+bool RuleHolder::isValidSymbol(QString &symbol)
 {
-	waitingGoodLag=true;
+    CurrencyPairItem pairItem;
+    pairItem=baseValues.currencyPairMap.value(symbol.toUpper(),pairItem);
+    if(pairItem.symbol.isEmpty())return false;
+    return true;
 }
 
-bool RuleHolder::isBuying()
+bool RuleHolder::isValidPlusMinus(QString &plusMinus)
 {
-	return buying;
+    return plusMinus==QLatin1String("+")||plusMinus==QLatin1String("-");
 }
 
-QString RuleHolder::getDescriptionString()
+bool RuleHolder::isValidCode(QString &code)
 {
-		QString priceStr=mainWindow.numFromDouble(ruleCheckPrice);
-		if(rulePriceType==8)priceStr.prepend(currencyASign+" ");
-		else priceStr.prepend(currencyBSign+" ");
-
-		if(ruleMoreLessEqual==1)
-		{
-			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_MORE","If market last price goes more than %1").arg(priceStr);
-			if(rulePriceType==2)return julyTr("IF_MARKET_BUY_MORE","If market buy price goes more than %1").arg(priceStr);
-			if(rulePriceType==3)return julyTr("IF_MARKET_SELL_MORE","If market sell price goes more than %1").arg(priceStr);
-			if(rulePriceType==4)return julyTr("IF_MARKET_HIGH_MORE","If market high price goes more than %1").arg(priceStr);
-			if(rulePriceType==5)return julyTr("IF_MARKET_LOW_MORE","If market low price goes more than %1").arg(priceStr);
-			if(rulePriceType==6)return julyTr("IF_MARKET_LAST_BUY_MORE","If orders last buy price goes more than %1").arg(priceStr);
-			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_MORE","If orders last sell price goes more than %1").arg(priceStr);
-			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_MORE","If %1 balance goes more than %2").arg(QString(currencyAStr)).arg(priceStr);
-			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_MORE","If %1 balance goes more than %2").arg(QString(currencyBStr)).arg(priceStr);
-		}
-		if(ruleMoreLessEqual==-1)
-		{
-			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_LESS","If market last price goes less than %1").arg(priceStr);
-			if(rulePriceType==2)return julyTr("IF_MARKET_BUY_LESS","If market buy price goes less than %1").arg(priceStr);
-			if(rulePriceType==3)return julyTr("IF_MARKET_SELL_LESS","If market sell price goes less than %1").arg(priceStr);
-			if(rulePriceType==4)return julyTr("IF_MARKET_HIGH_LESS","If market high price goes less than %1").arg(priceStr);
-			if(rulePriceType==5)return julyTr("IF_MARKET_LOW_LESS","If market low price goes less than %1").arg(priceStr);
-			if(rulePriceType==6)return julyTr("IF_MARKET_LAST_BUY_LESS","If orders last buy price goes less than %1").arg(priceStr);
-			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_LESS","If orders last sell price goes less than %1").arg(priceStr);
-			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_LESS","If %1 balance goes less than %2").arg(QString(currencyAStr)).arg(priceStr);
-			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_LESS","If %1 balance goes less than %2").arg(QString(currencyBStr)).arg(priceStr);
-		}
-		if(ruleMoreLessEqual==0)
-		{
-			if(rulePriceType==1)return julyTr("IF_MARKET_LAST_EQUAL","If market last price equal to %1").arg(priceStr);
-			if(rulePriceType==2)return julyTr("IF_MARKET_BUY_EQUAL","If market buy price equal to %1").arg(priceStr);
-			if(rulePriceType==3)return julyTr("IF_MARKET_SELL_EQUAL","If market sell price equal to %1").arg(priceStr);
-			if(rulePriceType==4)return julyTr("IF_MARKET_HIGH_EQUAL","If market high price equal to %1").arg(priceStr);
-			if(rulePriceType==5)return julyTr("IF_MARKET_LOW_EQUAL","If market low price equal to %1").arg(priceStr);
-			if(rulePriceType==6)return julyTr("IF_MARKET_LAST_BUY_EQUAL","If orders last buy price equal to %1").arg(priceStr);
-			if(rulePriceType==7)return julyTr("IF_MARKET_LAST_SELL_EQUAL","If orders last sell price equal to %1").arg(priceStr);
-			if(rulePriceType==8)return julyTr("IF_BALANCE_GOES_EQUAL","If %1 balance equal to %2").arg(QString(currencyAStr)).arg(priceStr);
-			if(rulePriceType==9)return julyTr("IF_BALANCE_GOES_EQUAL","If %1 balance equal to %2").arg(QString(currencyBStr)).arg(priceStr);
-		}
-		return priceStr;
+    return code==QLatin1String("EXACT")||
+           code==QLatin1String("IMMEDIATELY")||
+           code==QLatin1String("LastTrade")||
+           code==QLatin1String("MyLastTrade")||
+           mainWindow.indicatorsMap.value(code,0)!=0;
 }
 
-QString RuleHolder::getSellOrBuyString()
+bool RuleHolder::isTradingRule()
 {
-	if(ruleBtc==-5.0)return julyTr("CANCEL_ALL_ORDERS","Cancel All Orders");
-	if(buying)return julyTr("ORDER_TYPE_BID","Buy");
-	return julyTr("ORDER_TYPE_ASK","Sell");
+    return thanTypeIndex<=6;
 }
 
-QString RuleHolder::getBitcoinsString()
+bool RuleHolder::isValid()
 {
-	if(ruleBtc==-1.0)return julyTr("SELL_ALL_BTC","Sell All my BTC");
-	if(ruleBtc==-2.0)return julyTr("SELL_HALF_BTC","Sell Half my BTC");
-	if(ruleBtc==-3.0)return julyTr("SPEND_ALL_FUNDS","Spend All my Funds");
-	if(ruleBtc==-4.0)return julyTr("SPEND_HALF_FUNDS","Spend Half my Funds");
-	if(ruleBtc==-5.0)return julyTr("NOT_USED","Not Used");
-
-	return currencyASign+" "+mainWindow.numFromDouble(ruleBtc);
+    bool immediately=variableACode==QLatin1String("IMMEDIATELY")||variableACode==QLatin1String("LastTrade")||variableACode==QLatin1String("MyLastTrade");
+	bool exactB=variableBCode==QLatin1String("EXACT");
+    if(thanAmountFeeIndex<0||thanPriceFeeIndex<0||thanPriceFeeIndex<0||thanTypeIndex<0)return false;
+    if(thanTypeIndex>3||thanAmount>0.0);else return false;
+    if(immediately||!exactB||variableBExact!=0);else return false;
+    if(thanPriceTypeCode==QLatin1String("EXACT")?thanPrice>0.0:true);else return false;
+    if(!isValidComparation(comparationText))return false;
+    if(!isValidPlusMinus(thanPricePlusMinusText))return false;
+    if(!isValidCode(thanPriceTypeCode))return false;
+    if(!isValidSymbol(tradeSymbolCode))return false;
+    if(!isValidSymbol(valueASymbolCode))return false;
+    if(!isValidSymbol(valueBSymbolCode))return false;
+    if(!isValidCode(variableACode))return false;
+    if(!isValidCode(variableBCode))return false;
+    if(!isValidPlusMinus(variableBplusMinus))return false;
+    if(!isValidSymbol(variableBSymbolCode))return false;
+    if(delayMilliseconds<0.0)return false;
+    return true;
 }
-
-QString RuleHolder::getPriceText()
-{
-	if(ruleBtc==-5.0)return julyTr("NOT_USED","Not Used");;
-
-	if(rulePrice==-1.0)return julyTr("AS_MARKET_LAST","Market Last");
-	if(rulePrice==-2.0)return julyTr("AS_MARKET_BUY","Market Buy");
-	if(rulePrice==-3.0)return julyTr("AS_MARKET_SELL","Market Sell");
-	if(rulePrice==-4.0)return julyTr("AS_MARKET_HIGH","Market High");
-	if(rulePrice==-5.0)return julyTr("AS_MARKET_LOW","Market Low");
-	if(rulePrice==-6.0)return julyTr("AS_ORDERS_LAST_BUY","Orders Last Buy");
-	if(rulePrice==-7.0)return julyTr("AS_ORDERS_LAST_SELL","Orders Last Sell");
-	return currencyBSign+" "+mainWindow.numFromDouble(rulePrice);
-}
-

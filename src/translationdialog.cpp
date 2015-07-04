@@ -1,17 +1,36 @@
-// Copyright (C) 2013 July IGHOR.
-// I want to create Bitcoin Trader application that can be configured for any rule and strategy.
-// If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
-// For any questions please use contact form https://sourceforge.net/projects/bitcointrader/
-// Or send e-mail directly to julyighor@gmail.com
+//  This file is part of Qt Bitcion Trader
+//      https://github.com/JulyIGHOR/QtBitcoinTrader
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
-// You may use, distribute and copy the Qt Bitcion Trader under the terms of
-// GNU General Public License version 3
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  In addition, as a special exception, the copyright holders give
+//  permission to link the code of portions of this program with the
+//  OpenSSL library under certain conditions as described in each
+//  individual source file, and distribute linked combinations including
+//  the two.
+//
+//  You must obey the GNU General Public License in all respects for all
+//  of the code used other than OpenSSL. If you modify file(s) with this
+//  exception, you may extend this exception to your version of the
+//  file(s), but you are not obligated to do so. If you do not wish to do
+//  so, delete this exception statement from your version. If you delete
+//  this exception statement from all source files in the program, then
+//  also delete it here.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "translationdialog.h"
 #include "main.h"
-#ifdef Q_OS_WIN
-#include "qtwin.h"
-#endif
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDesktopServices>
@@ -26,13 +45,9 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	//setFixedSize(size());
 
-#ifdef Q_OS_WIN
-	if(QtWin::isCompositionEnabled())QtWin::extendFrameIntoClientArea(this);
-#endif
+	julyTranslator.translateUi(this);
 
-	julyTranslator->translateUi(this);
-
-	ui.deleteTranslationButton->setEnabled(!julyTranslator->lastFile().startsWith(":/Resource"));
+	ui.deleteTranslationButton->setEnabled(!julyTranslator.lastFile().startsWith(":/Resource"));
 
 	ui.languageName->setText(julyTr("LANGUAGE_NAME","Invalid"));
 	authorAbout=new TranslationLine;
@@ -46,12 +61,12 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 	JulyTranslator defaultTranslation;
 	defaultTranslation.loadFromFile(":/Resources/Language/English.lng");
 
-	fillLayoutByMap(&(julyTranslator->labelMap),"Label_",&(defaultTranslation.labelMap));
-	fillLayoutByMap(&(julyTranslator->groupBoxMap),"GroupBox_",&(defaultTranslation.groupBoxMap));
-	fillLayoutByMap(&(julyTranslator->checkBoxMap),"CheckBox_",&(defaultTranslation.checkBoxMap));
-	fillLayoutByMap(&(julyTranslator->buttonMap),"Button_",&(defaultTranslation.buttonMap));
-	fillLayoutByMap(&(julyTranslator->spinBoxMap),"SpinBox_",&(defaultTranslation.spinBoxMap));
-	fillLayoutByMap(&(julyTranslator->stringMap),"String_",&(defaultTranslation.stringMap));
+	fillLayoutByMap(&(julyTranslator.labelMap),"Label_",&(defaultTranslation.labelMap));
+	fillLayoutByMap(&(julyTranslator.groupBoxMap),"GroupBox_",&(defaultTranslation.groupBoxMap));
+	fillLayoutByMap(&(julyTranslator.checkBoxMap),"CheckBox_",&(defaultTranslation.checkBoxMap));
+	fillLayoutByMap(&(julyTranslator.buttonMap),"Button_",&(defaultTranslation.buttonMap));
+	fillLayoutByMap(&(julyTranslator.spinBoxMap),"SpinBox_",&(defaultTranslation.spinBoxMap));
+	fillLayoutByMap(&(julyTranslator.stringMap),"String_",&(defaultTranslation.stringMap));
 
 	setTabOrder(ui.languageName,authorAbout);
 
@@ -76,9 +91,9 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 		}
 		setTabOrder(lastWidget,ui.searchLineEdit);
 
-        resize(640,640);
+        resize(800,640);
         fixLayout();
-	if(mainWindow_)mainWindow.addPopupDialog(1);
+	if(baseValues.mainWindow_)mainWindow.addPopupDialog(1);
 
     QTimer::singleShot(100,this,SLOT(fixLayout()));
 }
@@ -86,7 +101,7 @@ TranslationDialog::TranslationDialog(QWidget *parent)
 TranslationDialog::~TranslationDialog()
 {
 	if(gridLayout)delete gridLayout;
-	if(mainWindow_)mainWindow.addPopupDialog(-1);
+	if(baseValues.mainWindow_)mainWindow.addPopupDialog(-1);
 }
 
 void TranslationDialog::fixLayout()
@@ -112,9 +127,9 @@ void TranslationDialog::deleteTranslationButton()
 	msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
 	msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
 	if(msgBox.exec()!=QMessageBox::Yes)return;
-	if(QFile::exists(julyTranslator->lastFile()))QFile::remove(julyTranslator->lastFile());
-	ui.deleteTranslationButton->setEnabled(QFile::exists(julyTranslator->lastFile()));
-	mainWindow.reloadLanguageList();
+	if(QFile::exists(julyTranslator.lastFile()))QFile::remove(julyTranslator.lastFile());
+	ui.deleteTranslationButton->setEnabled(QFile::exists(julyTranslator.lastFile()));
+    mainWindow.reloadLanguage();
 	close();
 }
 
@@ -126,8 +141,10 @@ void TranslationDialog::fillLayoutByMap(QMap<QString,QString>* cMap, QString sub
 	{
 		if(currentIdList.at(n).startsWith("LANGUAGE_"))continue;
 		TranslationLine *newEdit=new TranslationLine;
-		newEdit->setToolTip(subName+currentIdList.at(n));
-		newEdit->setDefaultText(dMap->value(currentIdList.at(n),""));
+		QString defText=dMap->value(currentIdList.at(n),"");
+		newEdit->setDefaultText(defText);
+		newEdit->setToolTip(defText.replace("<br>","\n"));
+		newEdit->setWindowTitle(subName+currentIdList.at(n));
 		newEdit->setItemText(cMap->value(currentIdList.at(n),""));
 		connect(newEdit,SIGNAL(lineTextChanged()),this,SLOT(lineTextChanged()));
 		lineEdits<<newEdit;
@@ -152,7 +169,7 @@ void TranslationDialog::applyButton()
 			QMessageBox::warning(this,windowTitle(),julyTr("LANGUAGE_NOT_APPROVED","Please fill empty fields"));
 			return;
 		}
-		resultList<<lineEdits.at(n)->toolTip()+"="+curText;
+		resultList<<lineEdits.at(n)->windowTitle()+"="+curText;
 	}
 	resultList<<"String_LANGUAGE_NAME="+ui.languageName->text();
 	resultList<<"String_LANGUAGE_AUTHOR="+authorAbout->getValidText();
@@ -163,7 +180,7 @@ void TranslationDialog::applyButton()
 	writeFile.write(resultList.join("\r\n").toUtf8());
 	writeFile.close();
 
-	if(mainWindow_)mainWindow.reloadLanguageList(appDataDir+"Language/Custom.lng");
+    if(baseValues.mainWindow_)mainWindow.reloadLanguage(appDataDir+"Language/Custom.lng");
 	ui.buttonSaveAs->setEnabled(true);
 	ui.buttonApply->setEnabled(false);
 	ui.deleteTranslationButton->setEnabled(QFile::exists(appDataDir+"Language/Custom.lng"));
@@ -174,10 +191,10 @@ void TranslationDialog::saveAsButton()
 	applyButton();
 	if(ui.buttonSaveAs->isEnabled()==false)return;
 
-	QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_TRANSLATION","Save Translation"),QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)+"/"+ui.languageName->text().replace("/","_").replace("\\","").replace(":","").replace("?","")+".lng","(*.lng)");
+    QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_TRANSLATION","Save Translation"),baseValues.desktopLocation+"/"+ui.languageName->text().replace("/","_").replace("\\","").replace(":","").replace("?","")+".lng","(*.lng)");
 	if(fileName.isEmpty())return;
 	if(QFile::exists(fileName))QFile::remove(fileName);
-	QFile::copy(julyTranslator->lastFile(),fileName);
+	QFile::copy(julyTranslator.lastFile(),fileName);
 }
 
 void TranslationDialog::searchLang(QString filterText)
