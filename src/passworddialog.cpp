@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -49,8 +49,6 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 	ui.okButton->setEnabled(false);
 
 	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
-	ui.updateCheckBox->setChecked(settings.value("CheckForUpdates",true).toBool());
-
     QString lastProfile=settings.value("LastProfile","").toString();
 	int lastProfileIndex=-1;
 	int firstUnlockedProfileIndex=-1;
@@ -169,8 +167,6 @@ PasswordDialog::PasswordDialog(QWidget *parent)
 
 PasswordDialog::~PasswordDialog()
 {
-	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
-	settings.setValue("CheckForUpdates",ui.updateCheckBox->isChecked());
 }
 
 QString PasswordDialog::lockFilePath(QString name)

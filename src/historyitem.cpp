@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -46,20 +46,31 @@ HistoryItem::HistoryItem()
 void HistoryItem::cacheStrings()
 {
 	QDateTime cachedDateTime=QDateTime::fromTime_t(dateTimeInt);
-	dateTimeStr=cachedDateTime.toString(baseValues.dateTimeFormat);
-	timeStr=cachedDateTime.toString(baseValues.timeFormat);
-	cachedDateTime.setTime(QTime(0,0,0,0));
+
+    if(baseValues_->use24HourTimeFormat){
+        timeStr=cachedDateTime.toString(baseValues.timeFormat);
+        dateTimeStr=cachedDateTime.toString(baseValues.dateTimeFormat);
+    } else {
+        QString mmssTemp=cachedDateTime.toString("mm:ss");
+        QString hTemp=cachedDateTime.toString("H");
+        qint16 hTempInt=hTemp.toInt();
+        if(hTempInt<=12)timeStr=hTemp+':'+mmssTemp+" am";
+        else timeStr=QString::number(hTempInt-12)+':'+mmssTemp+" pm";
+        dateTimeStr=cachedDateTime.toString("dd.MM.yyyy")+' '+timeStr;
+    }
+
+    cachedDateTime.setTime(QTime(0,0,0,0));
 	dateInt=cachedDateTime.toTime_t();
 
 	QString usdSign=baseValues.currencyMap.value(symbol.right(3),CurencyInfo("$")).sign;
-    if(price>0.0)priceStr=usdSign+textFromDouble(price);
+    if(price>0.0)priceStr=usdSign+textFromDouble(price,baseValues.decimalsPriceMyTransactions);
 	if(volume>0.0)
 	{
-        volumeStr=baseValues.currencyMap.value(symbol.left(3),CurencyInfo("BTC")).sign+textFromDouble(volume);
+        volumeStr=baseValues.currencyMap.value(symbol.left(3),CurencyInfo("BTC")).sign+textFromDouble(volume,baseValues.decimalsAmountMyTransactions);
 	}
 	if(volume>0.0&&price>0.0)
     {
-        totalStr=textFromDouble(price*volume,8);
+        totalStr=textFromDouble(price*volume,baseValues.decimalsTotalMyTransactions);
 
 		if(!baseValues.forceDotInSpinBoxes)
 		{

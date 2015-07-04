@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -117,6 +117,7 @@ struct BaseValues
 	QString exchangeName;
 	QString timeFormat;
 	QString dateTimeFormat;
+    bool use24HourTimeFormat;
 	QString defaultLangFile;
 	JulyTranslator julyTranslator_;
 	QString appDataDir_;
@@ -135,6 +136,16 @@ struct BaseValues
 	bool appVerIsBeta;
     QMap<QString,QString> currencyMapSign;
     QMap<QString,CurencyInfo> currencyMap;
+
+    int decimalsAmountMyTransactions;
+    int decimalsPriceMyTransactions;
+    int decimalsTotalMyTransactions;
+    int decimalsAmountOrderBook;
+    int decimalsPriceOrderBook;
+    int decimalsTotalOrderBook;
+    int decimalsAmountLastTrades;
+    int decimalsPriceLastTrades;
+    int decimalsTotalLastTrades;
 };
 
 #define baseValues (*baseValues_)

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@
 #include <QDesktopWidget>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QDockWidget>
 #include "exchange.h"
 #include "addscriptwindow.h"
 #include "aboutdialog.h"
@@ -57,20 +58,27 @@
 #include "exchange_btcchina.h"
 #include "exchange_bitfinex.h"
 #include "exchange_gocio.h"
+#include "exchange_indacoin.h"
 #include "exchange_bitcurex.h"
+#include "exchange_bitmarket.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
 #include "debugviewer.h"
 #include "addrulegroup.h"
 #include "percentpicker.h"
 #include "logobutton.h"
-#include <QSound>
 #include "scriptwidget.h"
 #include "thisfeatureunderdevelopment.h"
 #include "orderstablecancelbutton.h"
 #include "rulescriptparser.h"
-#include "exchange_indacoin.h"
 #include "julymath.h"
+#include "platform/sound.h"
+#include "dock/dock_host.h"
+#include "config/config_manager.h"
+#include "config/config_manager_dialog.h"
+#include "utils/utils.h"
+#include "settingsdialog.h"
+#include "indicatorengine.h"
 
 #ifdef Q_OS_WIN
 
@@ -94,8 +102,12 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
-QtBitcoinTrader::QtBitcoinTrader()
-	: QDialog()
+static const int ContentMargin = 4;
+
+QtBitcoinTrader::QtBitcoinTrader() :
+    QMainWindow     (),
+    configDialog    (NULL),
+    dockHost        (new DockHost(NULL))
 {
 	windowWidget=this;
 	lastRuleExecutedTime=QTime(1,0,0,0);
@@ -116,11 +128,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	isValidSoftLag=true;
 
 	trayIcon=0;
-	isDetachedLog=false;
-	isDetachedTrades=false;
-	isDetachedRules=false;
-	isDetachedDepth=false;
-	isDetachedCharts=false;
 
 	lastLoadedCurrency=-1;
 	profitSellThanBuyUnlocked=true;
@@ -145,6 +152,8 @@ QtBitcoinTrader::QtBitcoinTrader()
 	buyLockTotalBtc=false;
 	buyLockPricePerCoin=false;
 
+    currentPopupDialogs=0;
+
     ui.setupUi(this);
     setSpinValue(ui.accountFee,0.0);
 	ui.accountLoginLabel->setStyleSheet("background: "+baseValues.appTheme.white.name());
@@ -156,10 +165,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	baseValues.groupPriceValue=iniSettings->value("UI/DepthGroupByPrice",0.0).toDouble();
 	if(baseValues.groupPriceValue<0.0)baseValues.groupPriceValue=0.0;
 	iniSettings->setValue("UI/DepthGroupByPrice",baseValues.groupPriceValue);
-
-	windowWidget->setAttribute(Qt::WA_QuitOnClose,true);
-
-	windowWidget->setWindowFlags(Qt::Window);
 
 	ui.ordersTableFrame->setVisible(false);
 
@@ -237,10 +242,13 @@ QtBitcoinTrader::QtBitcoinTrader()
    setColumnResizeMode(ui.depthBidsTable,4,QHeaderView::Stretch);
 	ui.depthBidsTable->horizontalHeader()->setMinimumSectionSize(0);
 
-	ui.minimizeOnCloseCheckBox->setChecked(iniSettings->value("UI/CloseToTray",false).toBool());
+    closeToTray=iniSettings->value("UI/CloseToTray",false).toBool();
+#ifdef Q_OS_MAC
+    closeToTray=false;
+#endif
 
-	ui.confirmOpenOrder->setChecked(iniSettings->value("UI/ConfirmOpenOrder",true).toBool());
-	iniSettings->setValue("UI/ConfirmOpenOrder",ui.confirmOpenOrder->isChecked());
+    confirmOpenOrder=iniSettings->value("UI/ConfirmOpenOrder",true).toBool();
+    iniSettings->setValue("UI/ConfirmOpenOrder",confirmOpenOrder);
 
 	checkValidOrdersButtons();
 
@@ -248,12 +256,11 @@ QtBitcoinTrader::QtBitcoinTrader()
 	new JulyLightChanges(ui.marketVolume);
 	new JulyLightChanges(ui.marketBid);
 	new JulyLightChanges(ui.marketAsk);
-	new JulyLightChanges(ui.marketBid);
 	new JulyLightChanges(ui.marketHigh);
 	new JulyLightChanges(ui.marketLow);
-	new JulyLightChanges(ui.accountBTC);
+    new JulyLightChanges(ui.marketLast);
+    new JulyLightChanges(ui.accountBTC);
 	new JulyLightChanges(ui.accountUSD);
-	new JulyLightChanges(ui.marketLast);
 	new JulyLightChanges(ui.ordersLastSellPrice);
 	new JulyLightChanges(ui.ordersLastBuyPrice);
 	new JulyLightChanges(ui.tradesVolume5m);
@@ -442,15 +449,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 		}
 	}
 
-//    if(!baseValues.highResolutionDisplay)
-//	{
-//		WindowScrollBars *windScroll=new WindowScrollBars;
-//		windScroll->setWidgetResizable(true);
-//		windScroll->resize(qMin(defaultMinWidth,currScrRect.width()-40),qMin(defaultMinHeight,currScrRect.height()-80));
-//		windScroll->setWidget(this);
-//		windowWidget=windScroll;
-//	}
-
     setSpinValue(ui.accountBTC,0.0);
     setSpinValue(ui.accountUSD,0.0);
     setSpinValue(ui.marketBid,0.0);
@@ -463,19 +461,6 @@ QtBitcoinTrader::QtBitcoinTrader()
 	if(iniSettings->value("UI/SwapDepth",false).toBool())on_swapDepth_clicked();
 
    ui.depthLag->setValue(0.0);
-
-	ui.tabOrdersLogOnTop->setVisible(false);
-	ui.tabRulesOnTop->setVisible(false);
-	ui.tabTradesOnTop->setVisible(false);
-	ui.tabChartsOnTop->setVisible(false);
-	ui.tabDepthOnTop->setVisible(false);
-
-	ui.tabOrdersLog->installEventFilter(this);
-	ui.tabRules->installEventFilter(this);
-	ui.tabLastTrades->installEventFilter(this);
-	ui.tabCharts->installEventFilter(this);
-	ui.tabDepth->installEventFilter(this);
-	ui.balanceTotalWidget->installEventFilter(this);
 
 	copyTableValuesMenu.addAction("Copy selected Rows",this,SLOT(copySelectedRow()));
 	copyTableValuesMenu.addSeparator();
@@ -491,20 +476,38 @@ QtBitcoinTrader::QtBitcoinTrader()
 	copyTableValuesMenu.addAction("Cancel Order",this,SLOT(on_ordersCancelSelected_clicked()));
 	copyTableValuesMenu.addAction("Cancel All Orders",this,SLOT(on_ordersCancelAllButton_clicked()));
 
+    createActions();
+    createMenu();
+
     networkMenu=new NetworkMenu(ui.networkMenu);
-	reloadLanguageList();
+    reloadLanguage();
 
 	volumeAmountChanged(0.0,0.0);
 
 	connect(&julyTranslator,SIGNAL(languageChanged()),this,SLOT(languageChanged()));
 
 	if(checkForUpdates)QProcess::startDetached(QApplication::applicationFilePath(),QStringList("/checkupdate"));
-	if(ui.langComboBox->count()==0)fixAllChildButtonsAndLabels(this);
 
     connect(networkMenu,SIGNAL(trafficTotalToZero_clicked()),this,SLOT(trafficTotalToZero_clicked()));
 	iniSettings->sync();
 
 	secondSlot();
+
+    setContentsMargins(ContentMargin, ContentMargin, ContentMargin, ContentMargin);
+    dockHost->setParent(this);
+    initDocks();
+    moveWidgetsToDocks();
+    ui.menubar->setFixedHeight(ui.menubar->height()+2);
+
+    connect(::config, &ConfigManager::onChanged, this, &QtBitcoinTrader::onConfigChanged);
+    connect(::config, &ConfigManager::onError, this, &QtBitcoinTrader::onConfigError);
+    initConfigMenu();
+
+    chartsView=new ChartsView();
+    connect(tradesModel,SIGNAL(addChartsTrades(QList<TradesItem> *)),chartsView->chartsModel,SLOT(addLastTrades(QList<TradesItem> *)));
+    connect(this,SIGNAL(clearCharts()),chartsView->chartsModel,SLOT(clearCharts()));
+    connect(this,SIGNAL(addBound(double,bool)),chartsView->chartsModel,SLOT(addBound(double,bool)));
+    ui.chartsLayout->addWidget(chartsView);
 }
 
 QtBitcoinTrader::~QtBitcoinTrader()
@@ -554,11 +557,9 @@ void QtBitcoinTrader::setColumnResizeMode(QTableView *table,QHeaderView::ResizeM
 
 void QtBitcoinTrader::setupClass()
 {
-#ifdef Q_OS_MAC
-    ui.minimizeOnCloseCheckBox->setVisible(false);
-#endif
+    ::config->load("");
 
-	switch(exchangeId)
+    switch(exchangeId)
 	{
     case 0: QCoreApplication::quit(); return; break;//Secret Excange
 	case 1: currentExchange=new Exchange_BTCe(baseValues.restSign,baseValues.restKey);break;//BTC-E
@@ -568,6 +569,7 @@ void QtBitcoinTrader::setupClass()
 	case 5: currentExchange=new Exchange_GOCio(baseValues.restSign,baseValues.restKey);break;//GOCio
 	case 6: currentExchange=new Exchange_Indacoin(baseValues.restSign,baseValues.restKey);break;//Indacoin
 	case 7: currentExchange=new Exchange_BitCurex(baseValues.restSign,baseValues.restKey);break;//BitCurex
+	case 8: currentExchange=new Exchange_BitMarket(baseValues.restSign,baseValues.restKey);break;//BitMarket
 	default: return;
 	}
 	baseValues.restSign.clear();
@@ -610,6 +612,8 @@ void QtBitcoinTrader::setupClass()
 	if(!currentExchange->supportsLoginIndicator)
 	{
         ui.loginVolumeBack->setVisible(false);
+        QSize sz = ui.widgetAccount->maximumSize();
+        ui.widgetAccount->setMaximumSize(QSize(200, sz.height()));
 	}
 	else
 		if(currentExchange->supportsLoginIndicator&&!currentExchange->supportsAccountVolume)
@@ -621,18 +625,7 @@ void QtBitcoinTrader::setupClass()
 
 		ordersModel->checkDuplicatedOID=currentExchange->checkDuplicatedOID;
 
-		if(iniSettings->value("UI/DetachedLog",isDetachedLog).toBool())detachLog();
-		if(iniSettings->value("UI/DetachedRules",isDetachedRules).toBool())detachRules();
-		if(iniSettings->value("UI/DetachedTrades",isDetachedRules).toBool())detachTrades();
-		if(iniSettings->value("UI/DetachedDepth",isDetachedDepth).toBool())detachDepth();
-		if(iniSettings->value("UI/DetachedCharts",isDetachedRules).toBool())detachCharts();
-
-		int savedTab=iniSettings->value("UI/TradesCurrentTab",0).toInt();
-		if(savedTab<ui.tabWidget->count())ui.tabWidget->setCurrentIndex(savedTab);
-
 		ui.widgetStaysOnTop->setChecked(iniSettings->value("UI/WindowOnTop",false).toBool());
-
-		loadWindowState(windowWidget,"Window");
 
 		if(baseValues.httpRequestInterval<currentExchange->minimumRequestIntervalAllowed)baseValues.httpRequestInterval=currentExchange->minimumRequestIntervalAllowed;
 		if(baseValues.httpRequestTimeout<currentExchange->minimumRequestTimeoutAllowed)baseValues.httpRequestTimeout=currentExchange->minimumRequestTimeoutAllowed;
@@ -642,7 +635,7 @@ void QtBitcoinTrader::setupClass()
 		if(!ui.widgetStaysOnTop->isChecked())
 			on_widgetStaysOnTop_toggled(ui.widgetStaysOnTop->isChecked());
 
-		ui.chartsLayout->addWidget(new ThisFeatureUnderDevelopment(this));
+		//ui.chartsLayout->addWidget(new ThisFeatureUnderDevelopment(this));
 
 		on_currencyComboBox_currentIndexChanged(ui.currencyComboBox->currentIndex());
 
@@ -662,6 +655,8 @@ void QtBitcoinTrader::setupClass()
         reloadScripts();
 
         QTimer::singleShot(2000,this,SLOT(fixWindowMinimumSize()));
+
+        IndicatorEngine::global();
 }
 
 void QtBitcoinTrader::addRuleByHolder(RuleHolder &holder, bool isEnabled, QString titleName, QString fileName)
@@ -1108,9 +1103,7 @@ double QtBitcoinTrader::getFeeForUSDDec(double usd)
 
 void QtBitcoinTrader::addPopupDialog(int val)
 {
-	static int currentPopupDialogs=0;
 	currentPopupDialogs+=val;
-	ui.aboutTranslationButton->setEnabled(currentPopupDialogs==0);
 	ui.buttonNewWindow->setEnabled(currentPopupDialogs==0);
 }
 
@@ -1121,20 +1114,16 @@ void QtBitcoinTrader::buttonMinimizeToTray()
 		trayIcon=new QSystemTrayIcon(QIcon(":/Resources/QtBitcoinTrader.png"),this);
 		trayIcon->setToolTip(windowTitle());
 		connect(trayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(trayActivated(QSystemTrayIcon::ActivationReason)));
-		trayMenu=new QMenu;
+        trayMenu=new QMenu;
 		trayIcon->setContextMenu(trayMenu);
 		trayMenu->addAction(QIcon(":/Resources/exit.png"),"Exit");
 		trayMenu->actions().last()->setWhatsThis("EXIT");
-		connect(trayMenu->actions().first(),SIGNAL(triggered(bool)),this,SLOT(exitApp()));
+        connect(trayMenu->actions().first(),SIGNAL(triggered(bool)),this,SLOT(exitApp()));
 	}
 	trayIcon->show();
 	trayIcon->showMessage(windowTitleP,windowTitle());
     windowWidget->hide();
-	if(ui.tabOrdersLog->parent()==0)ui.tabOrdersLog->hide();
-	if(ui.tabLastTrades->parent()==0)ui.tabLastTrades->hide();
-	if(ui.tabRules->parent()==0)ui.tabRules->hide();
-	if(ui.tabDepth->parent()==0)ui.tabDepth->hide();
-	if(ui.tabCharts->parent()==0)ui.tabCharts->hide();
+    dockHost->setFloatingVisible(false);
 }
 
 void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason reazon)
@@ -1149,65 +1138,11 @@ void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason reazon)
 		return;
 	}
     windowWidget->show();
-	if(ui.tabOrdersLog->parent()==0)ui.tabOrdersLog->show();
-	if(ui.tabLastTrades->parent()==0)ui.tabLastTrades->show();
-	if(ui.tabRules->parent()==0)ui.tabRules->show();
-	if(ui.tabDepth->parent()==0)ui.tabDepth->show();
-	if(ui.tabCharts->parent()==0)ui.tabCharts->show();
+    dockHost->setFloatingVisible(true);
+
 	trayIcon->hide();
 	delete trayMenu; trayMenu=0;
 	delete trayIcon; trayIcon=0;
-}
-
-void QtBitcoinTrader::on_tabOrdersLogOnTop_toggled(bool on)
-{
-	if(!isDetachedLog)return;
-	ui.tabOrdersLog->hide();
-	if(on)ui.tabOrdersLog->setWindowFlags(Qt::Window|Qt::WindowStaysOnTopHint);
-	else  ui.tabOrdersLog->setWindowFlags(Qt::Window);
-	ui.tabOrdersLog->show();
-}
-
-void QtBitcoinTrader::on_tabRulesOnTop_toggled(bool on)
-{
-	if(!isDetachedRules)return;
-	ui.tabRules->hide();
-	if(on)ui.tabRules->setWindowFlags(Qt::Window|Qt::WindowStaysOnTopHint);
-	else  ui.tabRules->setWindowFlags(Qt::Window);
-	ui.tabRules->show();
-}
-
-void QtBitcoinTrader::on_tabTradesOnTop_toggled(bool on)
-{
-	if(!isDetachedTrades)return;
-	ui.tabLastTrades->hide();
-	if(on)ui.tabLastTrades->setWindowFlags(Qt::Window|Qt::WindowStaysOnTopHint);
-	else  ui.tabLastTrades->setWindowFlags(Qt::Window);
-	ui.tabLastTrades->show();
-}
-
-void QtBitcoinTrader::on_tabDepthOnTop_toggled(bool on)
-{
-	if(!isDetachedDepth)return;
-	ui.tabDepth->hide();
-	if(on)ui.tabDepth->setWindowFlags(Qt::Window|Qt::WindowStaysOnTopHint);
-	else  ui.tabDepth->setWindowFlags(Qt::Window);
-	ui.tabDepth->show();
-}
-
-void QtBitcoinTrader::on_tabChartsOnTop_toggled(bool on)
-{
-	if(!isDetachedCharts)return;
-	ui.tabCharts->hide();
-	if(on)ui.tabCharts->setWindowFlags(Qt::Window|Qt::WindowStaysOnTopHint);
-	else  ui.tabCharts->setWindowFlags(Qt::Window);
-	ui.tabCharts->show();
-}
-
-bool QtBitcoinTrader::isValidGeometry(QRect *geo, int yMargin)
-{
-	QRect allDesktopsRect=QApplication::desktop()->geometry();
-	return geo->width()>100&&geo->height()>100&&allDesktopsRect.contains(QPoint(geo->topLeft().x(),geo->topLeft().y()-yMargin),true)&&allDesktopsRect.contains(geo->bottomRight(),true);
 }
 
 void QtBitcoinTrader::checkUpdate()
@@ -1258,10 +1193,6 @@ void QtBitcoinTrader::sayText(QString text)
 #endif
 }
 
-void WindowScrollBars::resizeEvent(QResizeEvent *event)
-{
-	mainWindow.resizeEvent(event);
-}
 
 void QtBitcoinTrader::resizeEvent(QResizeEvent *event)
 {
@@ -1307,7 +1238,7 @@ void QtBitcoinTrader::clearTimeOutedTrades()
 {
 	if(tradesModel->rowCount()==0)return;
 	int lastSliderValue=ui.tableTrades->verticalScrollBar()->value();
-    tradesModel->removeDataOlderThen(QDateTime::currentDateTime().addSecs(-600).toTime_t());
+    tradesModel->removeDataOlderThen(TimeSync::getTimeT()-600);
 	ui.tableTrades->verticalScrollBar()->setValue(qMin(lastSliderValue,ui.tableTrades->verticalScrollBar()->maximum()));
 }
 
@@ -1506,46 +1437,16 @@ void QtBitcoinTrader::makeRitchValue(QString *text)
 	text->prepend(buff);
 }
 
-void QtBitcoinTrader::reloadLanguageList(QString preferedLangFile)
+void QtBitcoinTrader::reloadLanguage(QString preferedLangFile)
 {
-	if(preferedLangFile.isEmpty())preferedLangFile=julyTranslator.lastFile();
-	if(!QFile::exists(preferedLangFile))preferedLangFile.clear();
-	constructorFinished=false;
-	ui.langComboBox->clear();
+    constructorFinished=false;
+    if(preferedLangFile.isEmpty())preferedLangFile=julyTranslator.lastFile();
+    if(!QFile::exists(preferedLangFile))preferedLangFile.clear();
+    if(preferedLangFile.isEmpty())preferedLangFile=baseValues.defaultLangFile;
+    julyTranslator.loadFromFile(preferedLangFile);
+    constructorFinished=true;
 
-	QStringList langList;
-	QFile resLanguage(":/Resources/Language/LangList.ini");
-	resLanguage.open(QIODevice::ReadOnly);
-	QStringList resourceLanguages=QString(resLanguage.readAll().replace("\r","")).split("\n");
-	for(int n=0;n<resourceLanguages.count();n++)if(!resourceLanguages.at(n).isEmpty())langList<<":/Resources/Language/"+resourceLanguages.at(n);
-	QStringList folderLangList=QDir(appDataDir+"Language","*.lng").entryList();
-	folderLangList.sort();
-	for(int n=0;n<folderLangList.count();n++)langList<<appDataDir+"Language/"+folderLangList.at(n);
-	int selectedLangId=-1;
-    if(preferedLangFile.isEmpty()||(!preferedLangFile.isEmpty()&&!QFile::exists(preferedLangFile)))preferedLangFile=baseValues.defaultLangFile;
-	for(int n=0;n<langList.count();n++)
-	{
-		JulyTranslator translateName;
-		translateName.loadFromFile(langList.at(n));
-		QString langName=translateName.translateString("LANGUAGE_NAME","");
-		if(langName.isEmpty())continue;
-		if(preferedLangFile==langList.at(n))selectedLangId=n;
-		ui.langComboBox->insertItem(ui.langComboBox->count(),langName,langList.at(n));
-	}
-	if(selectedLangId>-1)ui.langComboBox->setCurrentIndex(selectedLangId);
-	julyTranslator.loadFromFile(preferedLangFile);
-	constructorFinished=true;
-	languageChanged();
-}
-
-void QtBitcoinTrader::languageComboBoxChanged(int val)
-{
-	if(val<0||!constructorFinished)return;
-	QString loadFromFile=ui.langComboBox->itemData(val,Qt::UserRole).toString();
-	if(loadFromFile.isEmpty())return;
-	julyTranslator.loadFromFile(loadFromFile);
-	QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
-	settings.setValue("LanguageFile",loadFromFile);
+    languageChanged();
 }
 
 void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
@@ -1567,29 +1468,22 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
 
 	fixDecimals(this);
 
-    Q_FOREACH(QGroupBox* groupBox, par->findChildren<QGroupBox*>())
+    Q_FOREACH(QWidget* widget, par->findChildren<QWidget*>())
 	{
-		if(groupBox->accessibleName()=="LOGOBUTTON")
+        if(widget->accessibleName()=="LOGOBUTTON")
 		{
-			QLayout *groupboxLayout=groupBox->layout();
-			if(groupboxLayout==0)
+            QLayout* layout = widget->layout();
+            if(layout == NULL)
 			{
-				groupboxLayout=new QGridLayout;
-				groupboxLayout->setContentsMargins(0,0,0,0);
-				groupboxLayout->setSpacing(0);
-				groupBox->setLayout(groupboxLayout);
-				LogoButton *logoButton=new LogoButton;
-				connect(this,SIGNAL(themeChanged()),logoButton,SLOT(themeChanged()));
-				groupboxLayout->addWidget(logoButton);
+                layout = new QGridLayout();
+                layout->setContentsMargins(0,0,0,0);
+                layout->setSpacing(0);
+                widget->setLayout(layout);
+                LogoButton* logoButton = new LogoButton;
+                connect(this, SIGNAL(themeChanged()), logoButton, SLOT(themeChanged()));
+                layout->addWidget(logoButton);
 			}
 		}
-		else
-			if(groupBox->maximumWidth()>1000)
-			{
-				int minWidth=qMax(groupBox->minimumSizeHint().width(),textFontWidth(groupBox->title())+20);
-                if(groupBox->accessibleDescription()=="FIXED")groupBox->setMaximumWidth(minWidth);
-				else groupBox->setMinimumWidth(minWidth);
-			}
 	}
 
 	QSize minSizeHint=par->minimumSizeHint();
@@ -1597,7 +1491,7 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget *par)
 	{
 	par->setMinimumSize(par->minimumSizeHint());
 	if(par->width()<par->minimumSizeHint().width())par->resize(par->minimumSizeHint().width(),par->height());
-	}
+    }
 }
 
 void QtBitcoinTrader::fixDecimals(QWidget *par)
@@ -1703,46 +1597,11 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
 	fillAllUsdLabels(this,nextCurrencyPair.currBStr);
 	fillAllBtcLabels(this,nextCurrencyPair.currAStr);
 
-	if(isDetachedLog)
-	{
-		fillAllUsdLabels(ui.tabOrdersLog,nextCurrencyPair.currBStr);
-		fillAllBtcLabels(ui.tabOrdersLog,nextCurrencyPair.currAStr);
-	}
-
-
-	if(isDetachedRules)
-	{
-		fillAllUsdLabels(ui.tabRules,nextCurrencyPair.currBStr);
-		fillAllBtcLabels(ui.tabRules,nextCurrencyPair.currAStr);
-	}
-
-	if(isDetachedTrades)
-	{
-		fillAllUsdLabels(ui.tabLastTrades,nextCurrencyPair.currBStr);
-		fillAllBtcLabels(ui.tabLastTrades,nextCurrencyPair.currAStr);
-	}
-
-	if(isDetachedDepth)
-	{
-		fillAllUsdLabels(ui.tabDepth,nextCurrencyPair.currBStr);
-		fillAllBtcLabels(ui.tabDepth,nextCurrencyPair.currAStr);
-	}
-
-	if(isDetachedCharts)
-	{
-		fillAllUsdLabels(ui.tabCharts,nextCurrencyPair.currBStr);
-		fillAllBtcLabels(ui.tabCharts,nextCurrencyPair.currAStr);
-	}
+    // TODO: ?? fillAll Usd/Btc for float
 	
 	iniSettings->setValue("Profile/Currency",ui.currencyComboBox->currentText());
     if(currencyAChanged)setSpinValue(ui.accountBTC,0.0);
     if(currencyBChanged)setSpinValue(ui.accountUSD,0.0);
-    setSpinValue(ui.marketBid,0.0);
-    setSpinValue(ui.marketAsk,0.0);
-    setSpinValue(ui.marketHigh,0.0);
-    setSpinValue(ui.marketLow,0.0);
-    setSpinValue(ui.marketLast,0.0);
-    setSpinValue(ui.marketVolume,0.0);
     ui.buyTotalSpend->setValue(0.0);
     ui.sellTotalBtc->setValue(0.0);
     ui.buyPricePerCoin->setValue(100.0);
@@ -1763,7 +1622,7 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
     if(buyGroupboxCase)buyGroupboxText=buyGroupboxText.arg(nextCurrencyPair.currAName.toUpper());
     else buyGroupboxText=buyGroupboxText.arg(nextCurrencyPair.currAName);
 
-	ui.buyGroupbox->setTitle(buyGroupboxText);
+    ui.widgetBuy->parentWidget()->setWindowTitle(buyGroupboxText);
 
 	QString sellGroupboxText=julyTr("GROUPBOX_SELL","Sell %1");
 	bool sellGroupboxCase=true; if(sellGroupboxText.length()>2)sellGroupboxCase=sellGroupboxText.at(2).isUpper();
@@ -1771,7 +1630,7 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
     if(sellGroupboxCase)sellGroupboxText=sellGroupboxText.arg(nextCurrencyPair.currAName.toUpper());
     else sellGroupboxText=sellGroupboxText.arg(nextCurrencyPair.currAName);
 
-	ui.sellGroupBox->setTitle(sellGroupboxText);
+    ui.widgetSell->parentWidget()->setWindowTitle(sellGroupboxText);
 
 	if(currentExchange->clearHistoryOnCurrencyChanged)
 	{
@@ -1803,7 +1662,7 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
 
 	ui.filterOrdersCurrency->setCurrentIndex(val);
 
-	currencyChangedDate=static_cast<quint32>(time(NULL));
+    currencyChangedDate=TimeSync::getTimeT();
 
     setSpinValue(ui.ordersLastBuyPrice,0.0);
     setSpinValue(ui.ordersLastSellPrice,0.0);
@@ -1811,6 +1670,15 @@ void QtBitcoinTrader::on_currencyComboBox_currentIndexChanged(int val)
 	fixDecimals(this);
 
 	emit getHistory(true);
+    emit clearCharts();
+    chartsView->clearCharts();
+
+    setSpinValue(ui.marketHigh,IndicatorEngine::getValue(baseValues.exchangeName+'_'+baseValues.currentPair.symbol+"_High"));
+    setSpinValue(ui.marketLow,IndicatorEngine::getValue(baseValues.exchangeName+'_'+baseValues.currentPair.symbol+"_Low"));
+    setSpinValue(ui.marketLast,IndicatorEngine::getValue(baseValues.exchangeName+'_'+baseValues.currentPair.symbol+"_Last"));
+    setSpinValue(ui.marketVolume,IndicatorEngine::getValue(baseValues.exchangeName+'_'+baseValues.currentPair.symbol+"_Volume"));
+    setSpinValue(ui.marketAsk,IndicatorEngine::getValue(baseValues.exchangeName+'_'+baseValues.currentPair.symbol+"_Buy"));
+    setSpinValue(ui.marketBid,IndicatorEngine::getValue(baseValues.exchangeName+'_'+baseValues.currentPair.symbol+"_Sell"));
 }
 
 void QtBitcoinTrader::clearDepth()
@@ -2004,9 +1872,24 @@ QByteArray QtBitcoinTrader::getMidData(QString a, QString b,QByteArray *data)
 	return rez;
 }
 
+static void adjustDockMinSize(QWidget* widget)
+{
+    QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
+    int minHint = widget->minimumSizeHint().width();
+    int textWidth = textFontWidth(dock->windowTitle());
+    static const int TitleExtra = 50; // left padding + undock/close buttons
+    int minWidth = qMax(minHint, textWidth + TitleExtra);
+    widget->setMinimumWidth(minWidth);
+    widget->setMaximumWidth(minWidth + 100);
+}
+
 void QtBitcoinTrader::fixWindowMinimumSize()
 {
-	static QTime lastFixedTime;
+    static QTime lastFixedTime;
+    if (lastFixedTime.elapsed() == 0) {
+        lastFixedTime.restart();
+        return;
+    }
 	if(lastFixedTime.elapsed()<500)return;
 
 	ui.depthAsksTable->setMinimumWidth(ui.depthAsksTable->columnWidth(1)+ui.depthAsksTable->columnWidth(2)+ui.depthAsksTable->columnWidth(3)+20);
@@ -2014,13 +1897,16 @@ void QtBitcoinTrader::fixWindowMinimumSize()
 	ui.depthBidsTable->setMinimumWidth(ui.depthBidsTable->columnWidth(0)+ui.depthBidsTable->columnWidth(1)+ui.depthBidsTable->columnWidth(2)+20);
 	ui.depthBidsTable->horizontalScrollBar()->setValue(0);
 
-    ui.marketGroupBox->setMinimumWidth(ui.marketGroupBox->minimumSizeHint().width());
-	ui.buyThenSellGroupBox->setMinimumWidth(ui.buyThenSellGroupBox->minimumSizeHint().width());
-	ui.sellThenBuyGroupBox->setMinimumWidth(ui.sellThenBuyGroupBox->minimumSizeHint().width());
-	ui.groupBoxAccount->setMinimumWidth(ui.groupBoxAccount->minimumSizeHint().width());
+    adjustDockMinSize(ui.widgetTotalAtLast);
+    adjustDockMinSize(ui.widgetTotalAtBuySell);
+
+    ui.widgetMarket->setMinimumWidth(ui.widgetMarket->minimumSizeHint().width());
+    ui.widgetBuyThenSell->setMinimumWidth(ui.widgetBuyThenSell->minimumSizeHint().width());
+    ui.widgetSellThenBuy->setMinimumWidth(ui.widgetSellThenBuy->minimumSizeHint().width());
+    ui.widgetAccount->setMinimumWidth(ui.widgetAccount->minimumSizeHint().width());
 	QSize minSizeHint=minimumSizeHint();
 	if(isValidSize(&minSizeHint))setMinimumSize(minSizeHint);
-	lastFixedTime.restart();
+    lastFixedTime.restart();
 }
 
 void QtBitcoinTrader::updateLogTable()
@@ -2276,6 +2162,8 @@ void QtBitcoinTrader::on_buttonNight_clicked()
     iniSettings->setValue("UI/NightMode",baseValues.currentTheme);
 
 	emit themeChanged();
+
+    chartsView->refreshCharts();
 }
 
 void QtBitcoinTrader::on_calcButton_clicked()
@@ -2286,8 +2174,8 @@ void QtBitcoinTrader::on_calcButton_clicked()
 
 void QtBitcoinTrader::checkValidSellButtons()
 {
-	ui.sellThenBuyGroupBox->setEnabled(ui.sellTotalBtc->value()>=baseValues.currentPair.tradeVolumeMin);
-	ui.sellBitcoinsButton->setEnabled(ui.sellThenBuyGroupBox->isEnabled()&&/*ui.sellTotalBtc->value()<=getAvailableBTC()&&*/ui.sellTotalBtc->value()>0.0);
+    ui.widgetSellThenBuy->setEnabled(ui.sellTotalBtc->value()>=baseValues.currentPair.tradeVolumeMin);
+    ui.sellBitcoinsButton->setEnabled(ui.widgetSellThenBuy->isEnabled()&&/*ui.sellTotalBtc->value()<=getAvailableBTC()&&*/ui.sellTotalBtc->value()>0.0);
 }
 
 void QtBitcoinTrader::on_sellPricePerCoinAsMarketLastPrice_clicked()
@@ -2400,7 +2288,7 @@ void QtBitcoinTrader::sellBitcoinButton()
 	if(ui.sellBitcoinsButton->isEnabled()==false)return;
     double sellTotalBtc=ui.sellTotalBtc->value();
     double sellPricePerCoin=ui.sellPricePerCoin->value();
-	if(ui.confirmOpenOrder->isChecked())
+    if(confirmOpenOrder)
     {
 	QMessageBox msgBox(windowWidget);
 	msgBox.setIcon(QMessageBox::Question);
@@ -2475,8 +2363,8 @@ void QtBitcoinTrader::on_buyPricePerCoin_valueChanged(double)
 
 void QtBitcoinTrader::checkValidBuyButtons()
 {
-	ui.buyThenSellGroupBox->setEnabled(ui.buyTotalBtc->value()>=baseValues.currentPair.tradeVolumeMin);
-	ui.buyBitcoinsButton->setEnabled(ui.buyThenSellGroupBox->isEnabled()&&/*ui.buyTotalSpend->value()<=getAvailableUSD()&&*/ui.buyTotalSpend->value()>0.0);
+    ui.widgetBuyThenSell->setEnabled(ui.buyTotalBtc->value()>=baseValues.currentPair.tradeVolumeMin);
+    ui.buyBitcoinsButton->setEnabled(ui.widgetBuyThenSell->isEnabled()&&/*ui.buyTotalSpend->value()<=getAvailableUSD()&&*/ui.buyTotalSpend->value()>0.0);
 }
 
 void QtBitcoinTrader::checkValidOrdersButtons()
@@ -2520,109 +2408,67 @@ void QtBitcoinTrader::on_buyPriceAsMarketLastPrice_clicked()
 	ui.buyPricePerCoin->setValue(ui.marketLast->value());
 }
 
-bool QtBitcoinTrader::windowCloseRequested()
+bool QtBitcoinTrader::confirmExitApp()
 {
-	if(ui.minimizeOnCloseCheckBox->isChecked())
-	{
-		buttonMinimizeToTray();
-		return true;
-	}
-	bool haveWorkingRules=false;
+    if (hasWorkingRules()) {
+        return executeConfirmExitDialog();
+    } else {
+        return true;
+    }
+}
 
-    Q_FOREACH(RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())
-		if(currentGroup)
-		{
-			if(!haveWorkingRules&&currentGroup->haveWorkingRules())haveWorkingRules=true;
-			currentGroup->saveRulesData();
-		}
-
-    Q_FOREACH(ScriptWidget* currentGroup, ui.tabRules->findChildren<ScriptWidget*>())
-        if(currentGroup)
-        {
-            if(!haveWorkingRules&&currentGroup->isRunning())haveWorkingRules=true;
-            currentGroup->saveScriptToFile();
+bool QtBitcoinTrader::hasWorkingRules()
+{
+    Q_FOREACH(RuleWidget* group, ui.tabRules->findChildren<RuleWidget*>()) {
+        if(group) {
+            if(group->haveWorkingRules()) return true;
         }
+    }
 
-		if(haveWorkingRules)
-		{
-			QMessageBox msgBox(windowWidget);
-			msgBox.setIcon(QMessageBox::Question);
-			msgBox.setWindowTitle("Qt Bitcoin Trader");
-			msgBox.setText(julyTr("CONFIRM_EXIT","Are you sure to close Application?<br>Active rules works only while application is running."));
-			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-			msgBox.setDefaultButton(QMessageBox::Yes);
-			msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
-			msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
-			if(msgBox.exec()!=QMessageBox::Yes)return true;
-		}
+    Q_FOREACH(ScriptWidget* group, ui.tabRules->findChildren<ScriptWidget*>()) {
+        if(group) {
+            if(group->isRunning()) return true;
+        }
+    }
 
-		exitApp();
-		return false;
+    return false;
 }
 
-void WindowScrollBars::closeEvent(QCloseEvent *event)
+bool QtBitcoinTrader::executeConfirmExitDialog()
 {
-	mainWindow.closeEvent(event);
+    QMessageBox msgBox(windowWidget);
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setWindowTitle("Qt Bitcoin Trader");
+    msgBox.setText(julyTr("CONFIRM_EXIT","Are you sure to close Application?<br>Active rules works only while application is running."));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::Yes);
+    msgBox.setButtonText(QMessageBox::Yes,julyTr("YES","Yes"));
+    msgBox.setButtonText(QMessageBox::No,julyTr("NO","No"));
+    return msgBox.exec() == QMessageBox::Yes;
 }
 
-void WindowScrollBars::keyPressEvent(QKeyEvent *event)
+void QtBitcoinTrader::closeEvent(QCloseEvent* event)
 {
-	mainWindow.keyPressEvent(event);
+    if(closeToTray)
+    {
+        buttonMinimizeToTray();
+        event->ignore();
+    } else if (confirmExitApp()){
+        exitApp();
+        event->accept();
+    }
 }
 
-void QtBitcoinTrader::closeEvent(QCloseEvent *event)
+void QtBitcoinTrader::changeEvent(QEvent *event)
 {
-	if(windowCloseRequested())event->ignore();
-	else event->accept();
-}
-
-void QtBitcoinTrader::saveWindowState(QWidget *par, QString name)
-{
-	bool windowMaximized=par->windowState()==Qt::WindowMaximized;
-	iniSettings->setValue("UI/"+name+"Maximized",windowMaximized);
-	if(windowMaximized)iniSettings->setValue("UI/"+name+"Geometry",rectInRect(par->geometry(),par->minimumSizeHint()));
-	else	   iniSettings->setValue("UI/"+name+"Geometry",QRect(par->x(),par->y(),par->width(),par->height()));
-}
-
-void QtBitcoinTrader::loadWindowState(QWidget *par, QString name)
-{
-	QRect savedGeometry=iniSettings->value("UI/"+name+"Geometry",par->geometry()).toRect();
-	if(isValidGeometry(&savedGeometry,0))
-	{
-		par->resize(savedGeometry.size());
-		par->move(savedGeometry.topLeft());
-	}
-	if(iniSettings->value("UI/"+name+"Maximized",false).toBool())par->setWindowState(Qt::WindowMaximized);
-}
-
-void QtBitcoinTrader::saveDetachedWindowsSettings(bool force)
-{
-	if(!force)
-	{
-	iniSettings->setValue("UI/DetachedLog",isDetachedLog);
-	iniSettings->setValue("UI/DetachedRules",isDetachedRules);
-	iniSettings->setValue("UI/DetachedTrades",isDetachedTrades);
-	iniSettings->setValue("UI/DetachedDepth",isDetachedDepth);
-	iniSettings->setValue("UI/DetachedCharts",isDetachedCharts);
-	}
-	if(isDetachedLog)saveWindowState(ui.tabOrdersLog,"DetachedLog");
-	if(isDetachedRules)saveWindowState(ui.tabRules,"DetachedRules");
-	if(isDetachedTrades)saveWindowState(ui.tabLastTrades,"DetachedTrades");
-	if(isDetachedDepth)saveWindowState(ui.tabDepth,"DetachedDepth");
-	if(isDetachedCharts)saveWindowState(ui.tabCharts,"DetachedCharts");
-
-	iniSettings->setValue("UI/TabLogOrdersOnTop",ui.tabOrdersLogOnTop->isChecked());
-	iniSettings->setValue("UI/TabRulesOnTop",ui.tabRulesOnTop->isChecked());
-	iniSettings->setValue("UI/TabTradesOnTop",ui.tabTradesOnTop->isChecked());
-	iniSettings->setValue("UI/TabDepthOnTop",ui.tabDepthOnTop->isChecked());
-	iniSettings->setValue("UI/TabChartsOnTop",ui.tabChartsOnTop->isChecked());
-
-	iniSettings->sync();
-}
-
-QRect QtBitcoinTrader::rectInRect(QRect aRect, QSize bSize)
-{
-	return QRect(aRect.x()+(aRect.width()-bSize.width())/2.0,aRect.y()+(aRect.height()-bSize.height())/2.0,bSize.width(),qMax(bSize.height(),300));
+    if (event->type() == QEvent::WindowStateChange) {
+        QWindowStateChangeEvent* stateChangeEvent = static_cast<QWindowStateChangeEvent*>(event);
+        if (stateChangeEvent) {
+            if (stateChangeEvent->oldState() == Qt::WindowMaximized && windowState() == Qt::WindowNoState) {
+                adjustWidgetGeometry(this);
+            }
+        }
+    }
 }
 
 void QtBitcoinTrader::buyBitcoinsButton()
@@ -2638,7 +2484,7 @@ void QtBitcoinTrader::buyBitcoinsButton()
     //double amountWithoutFee=getAvailableUSD()/priceToBuy;
     //amountWithoutFee=cutDoubleDecimalsCopy(amountWithoutFee,baseValues.currentPair.currADecimals,false);
 
-	if(ui.confirmOpenOrder->isChecked())
+    if(confirmOpenOrder)
 	{
 	QMessageBox msgBox(windowWidget);
 	msgBox.setIcon(QMessageBox::Question);
@@ -2654,16 +2500,9 @@ void QtBitcoinTrader::buyBitcoinsButton()
     apiBuySend(baseValues.currentPair.symbolSecond(),btcToBuy,priceToBuy);
 }
 
-void QtBitcoinTrader::playWav(QString wav, bool noBlink)
+void QtBitcoinTrader::playWav(const QString& wav, bool noBlink)
 {
-#ifdef Q_OS_WIN
-	PlaySound((LPCWSTR)wav.utf16(), NULL, SND_ASYNC);
-#else
-	static QSound *sound=0;
-	if(sound==0)sound=new QSound("",this);
-	sound->stop();
-    sound->play(wav);
-#endif
+    Platform::playSound(wav);
 	if(!noBlink)blinkWindow();
 }
 
@@ -2753,12 +2592,16 @@ void QtBitcoinTrader::on_marketBid_valueChanged(double val)
 {
 	ruleTotalToBuyBSValueChanged();
 	meridianPrice=(val+ui.marketAsk->value())/2;
+
+    if(val>0.000000001)emit addBound(val,false);
 }
 
 void QtBitcoinTrader::on_marketAsk_valueChanged(double val)
 {
 	ruleAmountToReceiveBSValueChanged();
 	meridianPrice=(val+ui.marketBid->value())/2;
+
+    if(val>0.000000001)emit addBound(val,true);
 }
 
 void QtBitcoinTrader::on_marketLast_valueChanged(double val)
@@ -2787,168 +2630,6 @@ void QtBitcoinTrader::on_marketLast_valueChanged(double val)
 		if(windowWidget->isVisible())windowWidget->setWindowTitle(titleText);
 		if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip(titleText);
 	}
-}
-
-void QtBitcoinTrader::checkIsTabWidgetVisible()
-{
-	bool isTabWidgetVisible=ui.tabWidget->count();
-	static bool lastTabWidgetVisible=isTabWidgetVisible;
-	if(isTabWidgetVisible!=lastTabWidgetVisible)
-	{
-	ui.tabWidget->setVisible(isTabWidgetVisible);
-	ui.centerLayout->setHorizontalSpacing(isTabWidgetVisible?6:0);
-	ui.groupOrders->setMaximumWidth(isTabWidgetVisible?600:16777215);
-	lastTabWidgetVisible=isTabWidgetVisible;
-	}
-	fixWindowMinimumSize();
-}
-
-void QtBitcoinTrader::detachLog()
-{
-	ui.tabOrdersLog->setParent(0);
-	ui.tabOrdersLog->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
-	ui.detachOrdersLog->setVisible(false);
-	ui.tabOrdersLogOnTop->setVisible(true);
-	loadWindowState(ui.tabOrdersLog,"DetachedLog");
-	ui.tabOrdersLogOnTop->setChecked(iniSettings->value("UI/TabLogOrdersOnTop",false).toBool());
-	isDetachedLog=true;
-	on_tabOrdersLogOnTop_toggled(ui.tabOrdersLogOnTop->isChecked());
-	checkIsTabWidgetVisible();
-}
-
-void QtBitcoinTrader::detachRules()
-{
-	ui.tabRules->setParent(0);
-	ui.tabRules->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
-	ui.detachRules->setVisible(false);
-	ui.tabRulesOnTop->setVisible(true);
-	loadWindowState(ui.tabRules,"DetachedRules");
-	ui.tabRulesOnTop->setChecked(iniSettings->value("UI/TabRulesOnTop",false).toBool());
-	isDetachedRules=true;
-	on_tabRulesOnTop_toggled(ui.tabRulesOnTop->isChecked());
-	checkIsTabWidgetVisible();
-}
-
-void QtBitcoinTrader::detachTrades()
-{
-	ui.tabLastTrades->setParent(0);
-	ui.tabLastTrades->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
-	ui.detachTrades->setVisible(false);
-	ui.tabTradesOnTop->setVisible(true);
-	loadWindowState(ui.tabLastTrades,"DetachedTrades");
-	ui.tabTradesOnTop->setChecked(iniSettings->value("UI/TabTradesOnTop",false).toBool());
-	isDetachedTrades=true;
-	on_tabTradesOnTop_toggled(ui.tabTradesOnTop->isChecked());
-	checkIsTabWidgetVisible();
-}
-
-void QtBitcoinTrader::detachDepth()
-{
-	ui.tabDepth->setParent(0);
-	ui.tabDepth->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
-	ui.detachDepth->setVisible(false);
-	ui.tabDepthOnTop->setVisible(true);
-	loadWindowState(ui.tabDepth,"DetachedDepth");
-	ui.tabDepthOnTop->setChecked(iniSettings->value("UI/TabDepthOnTop",false).toBool());
-	isDetachedDepth=true;
-	on_tabDepthOnTop_toggled(ui.tabDepthOnTop->isChecked());
-	checkIsTabWidgetVisible();
-	depthAsksLastScrollValue=-1;
-	depthBidsLastScrollValue=-1;
-}
-
-void QtBitcoinTrader::detachCharts()
-{
-	ui.tabCharts->setParent(0);
-	ui.tabCharts->move(mapToGlobal(ui.tabWidget->geometry().topLeft()));
-	ui.detachCharts->setVisible(false);
-	ui.tabChartsOnTop->setVisible(true);
-	loadWindowState(ui.tabCharts,"DetachedCharts");
-	ui.tabChartsOnTop->setChecked(iniSettings->value("UI/TabChartsOnTop",false).toBool());
-	isDetachedCharts=true;
-	on_tabChartsOnTop_toggled(ui.tabChartsOnTop->isChecked());
-	checkIsTabWidgetVisible();
-}
-
-void QtBitcoinTrader::attachLog()
-{
-	saveDetachedWindowsSettings(true);
-	ui.tabOrdersLogOnTop->setVisible(false);
-	ui.detachOrdersLog->setVisible(true);
-	ui.tabWidget->insertTab(0,ui.tabOrdersLog,ui.tabOrdersLog->accessibleName());
-	checkIsTabWidgetVisible();
-	ui.tabWidget->setCurrentWidget(ui.tabOrdersLog);
-	isDetachedLog=false;
-}
-
-void QtBitcoinTrader::attachRules()
-{
-	saveDetachedWindowsSettings(true);
-	ui.tabRulesOnTop->setVisible(false);
-	ui.detachRules->setVisible(true);
-	ui.tabWidget->insertTab(isDetachedLog?0:1,ui.tabRules,ui.tabRules->accessibleName());
-	checkIsTabWidgetVisible();
-	ui.tabWidget->setCurrentWidget(ui.tabRules);
-	isDetachedRules=false;
-}
-
-void QtBitcoinTrader::attachDepth()
-{
-	saveDetachedWindowsSettings(true);
-	ui.tabDepthOnTop->setVisible(false);
-	ui.detachDepth->setVisible(true);
-
-	int newTabPos=2;
-	if(isDetachedLog&&isDetachedRules)newTabPos=0;
-	else if(isDetachedLog||isDetachedRules)newTabPos=1;
-
-	ui.tabWidget->insertTab(newTabPos,ui.tabDepth,ui.tabDepth->accessibleName());
-	checkIsTabWidgetVisible();
-	ui.tabWidget->setCurrentWidget(ui.tabDepth);
-	isDetachedDepth=false;
-	depthAsksLastScrollValue=-1;
-	depthBidsLastScrollValue=-1;
-}
-
-void QtBitcoinTrader::attachTrades()
-{
-	saveDetachedWindowsSettings(true);
-	ui.tabTradesOnTop->setVisible(false);
-	ui.detachTrades->setVisible(true);
-
-	int newTabPos=3;
-	if(isDetachedLog&&isDetachedRules&&isDetachedDepth)newTabPos=0;
-    else if((isDetachedLog&&isDetachedRules)||(isDetachedRules&&isDetachedDepth)||(isDetachedLog&&isDetachedDepth))newTabPos=1;
-	else if(isDetachedLog||isDetachedRules||isDetachedDepth)newTabPos=2;
-
-	ui.tabWidget->insertTab(newTabPos,ui.tabLastTrades,ui.tabLastTrades->accessibleName());
-	checkIsTabWidgetVisible();
-	ui.tabWidget->setCurrentWidget(ui.tabLastTrades);
-	isDetachedTrades=false;
-}
-
-void QtBitcoinTrader::attachCharts()
-{
-	saveDetachedWindowsSettings(true);
-	ui.tabChartsOnTop->setVisible(false);
-	ui.detachCharts->setVisible(true);
-	int newTabPos=4;
-	if(isDetachedLog&&isDetachedRules&&isDetachedTrades&&isDetachedDepth)newTabPos=0;
-    else if((isDetachedLog&&isDetachedRules&&isDetachedDepth)||
-            (isDetachedLog&&isDetachedRules&&isDetachedTrades)||
-            (isDetachedLog&&isDetachedDepth&&isDetachedTrades)||
-            (isDetachedRules&&isDetachedDepth&&isDetachedTrades))newTabPos=1;
-    else if((isDetachedLog&&isDetachedRules)||
-        (isDetachedLog&&isDetachedDepth)||
-        (isDetachedLog&&isDetachedTrades)||
-        (isDetachedRules&&isDetachedDepth)||
-        (isDetachedRules&&isDetachedTrades)||
-        (isDetachedDepth&&isDetachedTrades))newTabPos=2;
-	else if(isDetachedLog||isDetachedRules||isDetachedDepth||isDetachedTrades)newTabPos=3;
-	ui.tabWidget->insertTab(newTabPos,ui.tabCharts,ui.tabCharts->accessibleName());
-	checkIsTabWidgetVisible();
-	ui.tabWidget->setCurrentWidget(ui.tabCharts);
-	isDetachedCharts=false;
 }
 
 void QtBitcoinTrader::historyDoubleClicked(QModelIndex index)
@@ -3023,9 +2704,44 @@ void QtBitcoinTrader::depthSelectBuyOrder(QModelIndex index)
 	depthSelectOrder(index,false);
 }
 
-void QtBitcoinTrader::aboutTranslationButton()
+void QtBitcoinTrader::translateTab(QWidget* tab)
 {
-	(new TranslationAbout(windowWidget))->showWindow();
+    QDockWidget* dock = static_cast<QDockWidget*>(tab->parentWidget());
+    if (dock) {
+        QString key = tab->accessibleName();
+        QString defaultValue = dock->windowTitle();
+        QString s = julyTr(key, defaultValue);
+        if (dock->isFloating()) {
+            s += " [" + profileName + "]";
+        }
+        tab->parentWidget()->setWindowTitle(s);
+        if (dock->isFloating()) {
+            julyTranslator.translateUi(tab);
+            fixAllChildButtonsAndLabels(tab);
+        }
+    }
+}
+
+void QtBitcoinTrader::lockLogo(bool lock)
+{
+    if (lock) {
+        dockLogo->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    } else {
+        dockLogo->setFeatures(QDockWidget::DockWidgetMovable);
+    }
+    dockLogo->setAllowedAreas(Qt::AllDockWidgetAreas);
+}
+
+void QtBitcoinTrader::initConfigMenu()
+{
+    menuConfig->clear();
+    menuConfig->addAction(actionConfigManager);
+    menuConfig->addSeparator();
+
+    Q_FOREACH(QString name, ::config->getConfigNames()) {
+        QAction* action = menuConfig->addAction(name);
+        connect(action, &QAction::triggered, this, &QtBitcoinTrader::onMenuConfigTriggered);
+    }
 }
 
 void QtBitcoinTrader::languageChanged()
@@ -3049,34 +2765,17 @@ void QtBitcoinTrader::languageChanged()
 	depthBidsModel->setHorizontalHeaderLabels(depthHeaderLabels);
 	depthAsksModel->setHorizontalHeaderLabels(depthHeaderLabels);
 
-	ui.tabOrdersLog->setAccessibleName(julyTr("TAB_ORDERS_LOG","Orders Log"));
-	ui.tabOrdersLog->setWindowTitle(ui.tabOrdersLog->accessibleName()+" ["+profileName+"]");
-	if(isDetachedLog){julyTranslator.translateUi(ui.tabOrdersLog);fixAllChildButtonsAndLabels(ui.tabOrdersLog);}
+    translateTab(ui.tabOrdersLog);
+    translateTab(ui.tabRules);
+    translateTab(ui.tabLastTrades);
+    translateTab(ui.tabDepth);
+    translateTab(ui.tabCharts);
 
-	ui.tabRules->setAccessibleName(julyTr("TAB_RULES_FOR_ORDERS","Rules for creating Orders"));
-	ui.tabRules->setWindowTitle(ui.tabRules->accessibleName()+" ["+profileName+"]");
-	if(isDetachedRules){julyTranslator.translateUi(ui.tabRules);fixAllChildButtonsAndLabels(ui.tabRules);}
-
-	ui.tabLastTrades->setAccessibleName(julyTr("TAB_LAST_TRADES","Last Trades"));
-	ui.tabLastTrades->setWindowTitle(ui.tabLastTrades->accessibleName()+" ["+profileName+"]");
-	if(isDetachedTrades){julyTranslator.translateUi(ui.tabLastTrades);fixAllChildButtonsAndLabels(ui.tabLastTrades);}
-
-	ui.tabDepth->setAccessibleName(julyTr("TAB_DEPTH","Depth"));
-	ui.tabDepth->setWindowTitle(ui.tabDepth->accessibleName()+" ["+profileName+"]");
-	if(isDetachedDepth){julyTranslator.translateUi(ui.tabDepth);fixAllChildButtonsAndLabels(ui.tabDepth);}
-
-	ui.tabCharts->setAccessibleName(julyTr("TAB_CHARTS","Charts"));
-	ui.tabCharts->setWindowTitle(ui.tabCharts->accessibleName()+" ["+profileName+"]");
-	if(isDetachedCharts){julyTranslator.translateUi(ui.tabCharts);fixAllChildButtonsAndLabels(ui.tabCharts);}
-
-	ui.groupBoxAccount->setTitle(julyTr("ACCOUNT_GROUPBOX","%1 Account").arg(baseValues.exchangeName));
-
-	for(int n=0;n<ui.tabWidget->count();n++)
-		ui.tabWidget->setTabText(n,ui.tabWidget->widget(n)->accessibleName());
+    ui.widgetAccount->parentWidget()->setWindowTitle(julyTr("ACCOUNT_GROUPBOX","%1 Account").arg(baseValues.exchangeName));
 
 	QString curCurrencyName=baseValues.currencyMap.value(baseValues.currentPair.currAStr,CurencyInfo("BITCOINS")).name;
-	ui.buyGroupbox->setTitle(julyTr("GROUPBOX_BUY","Buy %1").arg(curCurrencyName));
-	ui.sellGroupBox->setTitle(julyTr("GROUPBOX_SELL","Sell %1").arg(curCurrencyName));
+    ui.widgetBuy->parentWidget()->setWindowTitle(julyTr("GROUPBOX_BUY","Buy %1").arg(curCurrencyName));
+    ui.widgetSell->parentWidget()->setWindowTitle(julyTr("GROUPBOX_SELL","Sell %1").arg(curCurrencyName));
 
     Q_FOREACH(QToolButton* toolButton, findChildren<QToolButton*>())
 		if(toolButton->accessibleDescription()=="TOGGLE_SOUND")
@@ -3099,13 +2798,6 @@ void QtBitcoinTrader::languageChanged()
 	copyTableValuesMenu.actions().at(11)->setText(julyTr("CANCEL_ORDER","Cancel selected Orders"));
 	copyTableValuesMenu.actions().at(12)->setText(julyTranslator.translateCheckBox("TR00075","Cancel All Orders"));
 
-	QString staysOnTopText=julyTranslator.translateButton("STAYS_ON_TOP","Stay on top");
-	ui.widgetStaysOnTop->setToolTip(staysOnTopText);
-	ui.tabRulesOnTop->setToolTip(staysOnTopText);
-	ui.tabDepthOnTop->setToolTip(staysOnTopText);
-	ui.tabTradesOnTop->setToolTip(staysOnTopText);
-	ui.tabChartsOnTop->setToolTip(staysOnTopText);
-
 	ui.tradesBidsPrecent->setToolTip(julyTr("10_MIN_BIDS_VOLUME","(10 min Bids Volume)/(10 min Asks Volume)*100"));
 
     Q_FOREACH(RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())
@@ -3115,6 +2807,20 @@ void QtBitcoinTrader::languageChanged()
         if(currentGroup)currentGroup->languageChanged();
 
 	fixAllChildButtonsAndLabels(this);
+
+    actionLockDocks->setText(julyTr("LOCK_DOCKS", "&Lock Docks"));
+    actionExit->setText(julyTr("EXIT", "E&xit"));
+    actionAbout->setText(julyTr("ABOUT", "&About"));
+    actionAboutQt->setText(julyTr("ABOUT_QT", "&About Qt"));
+    actionConfigManager->setText(julyTr("CONFIG_MANAGER", "&Save..."));
+    actionSettings->setText(julyTr("CONFIG_SETTINGS", "Se&ttings"));
+    menuFile->setTitle("&QtBitcoinTrader");
+    menuView->setTitle(julyTr("MENU_VIEW", "&View"));
+    menuConfig->setTitle(julyTr("MENU_CONFIG", "&Interface"));
+    menuHelp->setTitle(julyTr("MENU_HELP", "&Help"));
+    if(configDialog)configDialog->setWindowTitle(julyTr("CONFIG_MANAGER_TITLE","Config Manager"));
+    ::config->translateDefaultNames();
+    if(configDialog)::config->onChanged();
 
     QTimer::singleShot(100,this,SLOT(fixWindowMinimumSize()));
 	//emit clearValues();
@@ -3158,39 +2864,6 @@ void QtBitcoinTrader::on_rulesTabs_tabCloseRequested(int tab)
 
 	ui.rulesTabs->setVisible(ui.rulesTabs->count());
     ui.rulesNoMessage->setVisible(!ui.rulesTabs->isVisible());
-}
-
-bool QtBitcoinTrader::eventFilter(QObject *obj, QEvent *event)
-{
-	if(obj!=this&&obj!=windowWidget)
-	{
-		if(event->type()==QEvent::Close)
-		{
-			if(obj==ui.tabOrdersLog)QTimer::singleShot(50,this,SLOT(attachLog()));
-			else
-			if(obj==ui.tabRules)QTimer::singleShot(50,this,SLOT(attachRules()));
-			else
-			if(obj==ui.tabLastTrades)QTimer::singleShot(50,this,SLOT(attachTrades()));
-			else
-			if(obj==ui.tabDepth)QTimer::singleShot(50,this,SLOT(attachDepth()));
-			else
-			if(obj==ui.tabCharts)QTimer::singleShot(50,this,SLOT(attachCharts()));
-		}
-		else
-		if(event->type()==QEvent::Resize)
-		{
-			if(obj==ui.balanceTotalWidget)
-			{
-				int sizeParent=ui.balanceTotalWidget->width();
-				int sizeA=ui.totalAtBuySellGroupBox->minimumWidth();
-				int sizeB=ui.totalAtLastGroupBox->minimumWidth();
-
-				ui.totalAtBuySellGroupBox->setVisible(sizeParent>=sizeA);
-				ui.totalAtLastGroupBox->setVisible(sizeParent>=sizeA+sizeB+ui.balanceTotalWidget->layout()->spacing());
-			}
-		}
-	}
-	return QObject::eventFilter(obj, event);
 }
 
 void QtBitcoinTrader::on_widgetStaysOnTop_toggled(bool on)
@@ -3237,17 +2910,26 @@ void QtBitcoinTrader::depthSubmitOrders(QString symbol,QList<DepthItem> *asks, Q
     ui.depthBidsTable->resizeColumnToContents(3);
 }
 
-void QtBitcoinTrader::exitApp()
+void QtBitcoinTrader::saveAppState()
 {
-	if(trayIcon)trayIcon->hide();
+    Q_FOREACH(RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())
+        if(currentGroup)
+        {
+            currentGroup->saveRulesData();
+        }
+
+    Q_FOREACH(ScriptWidget* currentGroup, ui.tabRules->findChildren<ScriptWidget*>())
+        if(currentGroup)
+        {
+            currentGroup->saveScriptToFile();
+        }
+
+    if(trayIcon)trayIcon->hide();
 	//saveRulesData();////
 
-	saveDetachedWindowsSettings();
+    iniSettings->setValue("UI/ConfirmOpenOrder",confirmOpenOrder);
 
-	iniSettings->setValue("UI/ConfirmOpenOrder",ui.confirmOpenOrder->isChecked());
-
-	iniSettings->setValue("UI/TradesCurrentTab",ui.tabWidget->currentIndex());
-	iniSettings->setValue("UI/CloseToTray",ui.minimizeOnCloseCheckBox->isChecked());
+    iniSettings->setValue("UI/CloseToTray",closeToTray);
 
 	iniSettings->setValue("UI/WindowOnTop",ui.widgetStaysOnTop->isChecked());
 
@@ -3264,10 +2946,7 @@ void QtBitcoinTrader::exitApp()
 	}
 	iniSettings->setValue("UI/FeeCalcSingleInstance",feeCalculatorSingleInstance);
 
-	saveWindowState(windowWidget,"Window");
 	iniSettings->sync();
-
-	emit quit();
 }
 
 void QtBitcoinTrader::on_depthComboBoxLimitRows_currentIndexChanged(int val)
@@ -3289,7 +2968,7 @@ void QtBitcoinTrader::on_comboBoxGroupByPrice_currentIndexChanged(int val)
 
 void QtBitcoinTrader::on_depthAutoResize_toggled(bool on)
 {
-	if(on)
+    if(on)
 	{
 	ui.depthAsksTable->horizontalHeader()->showSection(0);
 	ui.depthBidsTable->horizontalHeader()->showSection(4);
@@ -3312,7 +2991,7 @@ void QtBitcoinTrader::on_depthAutoResize_toggled(bool on)
     setColumnResizeMode(ui.depthBidsTable,QHeaderView::Interactive);
 	ui.depthAsksTable->horizontalHeader()->hideSection(0);
 	ui.depthBidsTable->horizontalHeader()->hideSection(4);
-	}
+    }
 }
 
 double QtBitcoinTrader::getAvailableBTC()
@@ -3381,17 +3060,17 @@ void QtBitcoinTrader::accUsdBalanceChanged(QString symbol, double val)
     if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.accountUSD,val);
 }
 
-void QtBitcoinTrader::tickerHighChanged(QString symbol, double val)
+void QtBitcoinTrader::indicatorHighChanged(QString symbol, double val)
 {
     if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.marketHigh,val);
 }
 
-void QtBitcoinTrader::tickerLowChanged(QString symbol, double val)
+void QtBitcoinTrader::indicatorLowChanged(QString symbol, double val)
 {
     if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.marketLow,val);
 }
 
-void QtBitcoinTrader::tickerBuyChanged(QString symbol, double val)
+void QtBitcoinTrader::indicatorBuyChanged(QString symbol, double val)
 {
     if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))
     {
@@ -3401,12 +3080,12 @@ void QtBitcoinTrader::tickerBuyChanged(QString symbol, double val)
     }
 }
 
-void QtBitcoinTrader::tickerLastChanged(QString symbol, double val)
+void QtBitcoinTrader::indicatorLastChanged(QString symbol, double val)
 {
     if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.marketLast,val);
 }
 
-void QtBitcoinTrader::tickerSellChanged(QString symbol, double val)
+void QtBitcoinTrader::indicatorSellChanged(QString symbol, double val)
 {
     if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))
     {
@@ -3416,7 +3095,7 @@ void QtBitcoinTrader::tickerSellChanged(QString symbol, double val)
     }
 }
 
-void QtBitcoinTrader::tickerVolumeChanged(QString symbol, double val)
+void QtBitcoinTrader::indicatorVolumeChanged(QString symbol, double val)
 {
     if(baseValues.currentPair.symbolSecond().startsWith(symbol,Qt::CaseInsensitive))setSpinValue(ui.marketVolume,val);
 }
@@ -3473,4 +3152,203 @@ void QtBitcoinTrader::on_helpButton_clicked()
         if(qobject_cast<ScriptWidget *>(ui.rulesTabs->currentWidget()))helpType="JLScript";
     }
     QDesktopServices::openUrl(QUrl("https://qbtapi.centrabit.com/?Object=Help&Method="+helpType+"&Locale="+QLocale().name()));
+}
+
+void QtBitcoinTrader::initDocks()
+{
+    setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
+    setDockOptions(QMainWindow::AnimatedDocks | QMainWindow::AllowNestedDocks | QMainWindow::AllowTabbedDocks);
+}
+
+void QtBitcoinTrader::createActions()
+{
+    //actionTest = new QAction("&Test", this);
+    //connect(actionTest, SIGNAL(triggered()), this, SLOT(onActionTest()));
+
+    actionLockDocks = new QAction("&Lock Docks", this);
+    actionLockDocks->setCheckable(true);
+    connect(actionLockDocks, SIGNAL(triggered(bool)), this, SLOT(onActionLockDocks(bool)));
+
+    actionExit = new QAction("E&xit", this);
+    actionExit->setShortcut(QKeySequence::Quit);
+    connect(actionExit, SIGNAL(triggered()), this, SLOT(exitApp()));
+
+    actionAbout = new QAction("&About", this);
+    connect(actionAbout, SIGNAL(triggered()), this, SLOT(onActionAbout()));
+
+    actionAboutQt = new QAction("&About Qt", this);
+    connect(actionAboutQt, SIGNAL(triggered()), this, SLOT(onActionAboutQt()));
+
+    actionConfigManager = new QAction("&Save...", this);
+    connect(actionConfigManager, &QAction::triggered, this, &QtBitcoinTrader::onActionConfigManager);
+
+    actionSettings = new QAction("Se&ttings", this);
+    connect(actionSettings, &QAction::triggered, this, &QtBitcoinTrader::onActionSettings);
+}
+
+void QtBitcoinTrader::createMenu()
+{
+    menuFile = menuBar()->addMenu("&QtBitcoinTrader");
+    //menuFile->addAction(actionTest);
+    menuFile->addSeparator();
+    menuFile->addAction(actionSettings);
+    menuFile->addSeparator();
+    menuFile->addAction(actionExit);
+
+    menuView = menuBar()->addMenu("&View");
+    menuView->addAction(actionLockDocks);
+    menuView->addSeparator();
+
+    menuConfig = menuBar()->addMenu("&Config");
+
+    menuHelp = menuBar()->addMenu("&Help");
+    menuHelp->addAction(actionAbout);
+    menuHelp->addAction(actionAboutQt);
+}
+
+QDockWidget* QtBitcoinTrader::createDock(QWidget* widget, const QString& title)
+{
+    widget->setProperty("IsDockable", true);
+    QDockWidget* dock = dockHost->createDock(this, widget, title);
+    if (widget != ui.widgetLogo) {
+        menuView->addAction(dock->toggleViewAction());
+    }
+    return dock;
+}
+
+void QtBitcoinTrader::moveWidgetsToDocks()
+{
+    // Top
+    Qt::DockWidgetArea area = Qt::TopDockWidgetArea;
+    addDockWidget(area, createDock(ui.widgetAccount, "Exchange Account"));
+    addDockWidget(area, createDock(ui.widgetBalance, "Balance"));
+    addDockWidget(area, createDock(ui.widgetTotalAtLast, "Total at Last Price"));
+    addDockWidget(area, createDock(ui.widgetTotalAtBuySell, "Total at Buy/Sell Price"));
+
+    QWidget* titleNULL = new QWidget();
+    QDockWidget* dockNULL = new QDockWidget();
+    dockNULL->setObjectName("dockNULL");
+    dockNULL->setTitleBarWidget(titleNULL);
+    dockNULL->setMinimumSize(0,1);
+    addDockWidget(area, dockNULL);
+
+    addDockWidget(area, createDock(ui.widgetMarket, "Market"));
+    addDockWidget(area, createDock(ui.widgetNetwork, "Network"));
+
+    // Bottom
+    QDockWidget* dockBuy = createDock(ui.widgetBuy, "Buy Bitcoin");
+    QDockWidget* dockBuySell = createDock(ui.widgetBuyThenSell, "Generate subsequent sell order");
+    QDockWidget* dockSell = createDock(ui.widgetSell, "Sell Bitcoin");
+    QDockWidget* dockSellBuy = createDock(ui.widgetSellThenBuy, "Generate subsequent buy order");
+    QDockWidget* dockGeneral = createDock(ui.widgetSellBuy, "General");
+    dockLogo = createDock(ui.widgetLogo, "Powered By");
+    dockLogo->setMinimumSize(170,70);
+
+    QWidget* titleBottomNULL = new QWidget();
+    QDockWidget* dockHSpacer = new QDockWidget();
+    dockHSpacer->setObjectName("dockHSpacer");
+    dockHSpacer->setMinimumSize(0,1);
+    dockHSpacer->setTitleBarWidget(titleBottomNULL);
+
+    addDockWidget(Qt::BottomDockWidgetArea, dockBuy);
+    splitDockWidget(dockBuy, dockSell, Qt::Horizontal);
+    splitDockWidget(dockSell, dockHSpacer, Qt::Horizontal);
+    splitDockWidget(dockHSpacer, dockGeneral, Qt::Horizontal);
+    splitDockWidget(dockBuy, dockBuySell, Qt::Vertical);
+    splitDockWidget(dockSell, dockSellBuy, Qt::Vertical);
+    splitDockWidget(dockGeneral, dockLogo, Qt::Vertical);
+
+    // Left
+    QDockWidget* dockGroupOrders = createDock(ui.groupOrders, "Your Open Orders");
+    addDockWidget(Qt::LeftDockWidgetArea, dockGroupOrders);
+
+    // lock Logo
+    lockLogo(false);
+
+    // tabs
+    QDockWidget* dockOrdersLog = createDock(ui.tabOrdersLog, "Orders Log");
+    QDockWidget* dockRules = createDock(ui.tabRules, "Rules");
+    QDockWidget* dockDepth = createDock(ui.tabDepth, "Order Book");
+    QDockWidget* dockLastTrades = createDock(ui.tabLastTrades, "Trades");
+    QDockWidget* dockCharts = createDock(ui.tabCharts, "Charts");
+    dockCharts->setMinimumSize(400,200);
+    //addDockWidget(Qt::RightDockWidgetArea, dockOrdersLog);
+    splitDockWidget(dockGroupOrders, dockOrdersLog, Qt::Horizontal);
+    tabifyDockWidget(dockOrdersLog, dockRules);
+    tabifyDockWidget(dockOrdersLog, dockDepth);
+    tabifyDockWidget(dockOrdersLog, dockLastTrades);
+    tabifyDockWidget(dockOrdersLog, dockCharts);
+    delete ui.tabWidget;
+
+    // Central
+    QDockWidget* centralDock = new QDockWidget(this);
+    centralDock->setFixedWidth(0);
+    setCentralWidget(centralDock);
+    //ui.centralwidget->setFixedWidth(0);
+}
+
+void QtBitcoinTrader::onActionTest()
+{
+    //
+}
+
+void QtBitcoinTrader::onActionAbout()
+{
+    (new TranslationAbout(windowWidget))->showWindow();
+}
+
+void QtBitcoinTrader::onActionAboutQt()
+{
+    QApplication::aboutQt();
+}
+
+void QtBitcoinTrader::onActionLockDocks(bool checked)
+{
+    dockHost->lockDocks(checked);
+    lockLogo(checked);
+}
+
+void QtBitcoinTrader::onActionConfigManager()
+{
+    if (!configDialog) {
+        configDialog = new ConfigManagerDialog(this);
+    }
+    julyTranslator.translateUi(configDialog);
+    configDialog->setWindowTitle(julyTr("CONFIG_MANAGER_TITLE","Config Manager"));
+    configDialog->setWindowFlags (configDialog->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    configDialog->show();
+}
+
+void QtBitcoinTrader::onActionSettings()
+{
+    SettingsDialog settingsDialog;
+    if(currentPopupDialogs!=0)settingsDialog.disableTranslateButton();
+    settingsDialog.exec();
+}
+
+void QtBitcoinTrader::onMenuConfigTriggered()
+{
+    QAction* action = static_cast<QAction*>(sender());
+    QString name = action->text();
+
+    ::config->load(name);
+}
+
+void QtBitcoinTrader::onConfigChanged()
+{
+    initConfigMenu();
+}
+
+void QtBitcoinTrader::onConfigError(const QString& error)
+{
+    qDebug() << error;
+}
+
+void QtBitcoinTrader::exitApp()
+{
+    if(trayIcon)trayIcon->hide();
+    if(trayMenu)delete trayMenu;
+    saveAppState();
+    ::config->save("");
+    QCoreApplication::quit();
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>443</width>
     <height>450</height>
    </rect>
   </property>
@@ -20,118 +20,50 @@
    <string>Qt Bitcoin Trader</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="1" rowspan="3">
-    <widget class="QGroupBox" name="createTranslationGroupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="accessibleName">
-      <string>TR00117</string>
-     </property>
-     <property name="title">
-      <string>Create translation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0" colspan="3">
-       <widget class="QLabel" name="translateLabel1">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="accessibleName">
-         <string>TR00118</string>
-        </property>
-        <property name="text">
-         <string>If you want to translate Qt Bitcoin Trader to your native language.&lt;br&gt;
-Or if you want to fix errors in existing translation.&lt;br&gt;Please follow instructions.</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByMouse</set>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="3">
-       <widget class="QLabel" name="translateLabel3">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="accessibleName">
-         <string>TR00120</string>
-        </property>
-        <property name="text">
-         <string>And after verification your translation will be added&lt;br&gt;to next version of Qt Bitcoin Trader.</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="3">
-       <widget class="QLabel" name="translateLabel2">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="accessibleName">
-         <string>TR00119</string>
-        </property>
-        <property name="text">
-         <string>1) Press &amp;quot;Create translation button&amp;quot;&lt;br&gt;
-2) Make your changes for all fields. You can use Html formatting&lt;br&gt;
-3) Press &amp;quot;Apply&amp;quot; button and varify that all text fits good&lt;br&gt;
-4) Press &amp;quot;Save As&amp;quot; button and safe language file&lt;br&gt;
-5) Send language file to &lt;a href=&quot;mailto:julyighor@gmail.com&quot;&gt; julyighor@gmail.com&lt;/a&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="openExternalLinks">
-         <bool>true</bool>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="3">
-       <widget class="QPushButton" name="createTranslationButton">
-        <property name="accessibleName">
-         <string>TR00121</string>
-        </property>
-        <property name="text">
-         <string>Create translation</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+   <item row="3" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="buttonCheckUpdates">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="accessibleName">
+        <string>CHECK_FOR_UPDATE</string>
+       </property>
+       <property name="text">
+        <string>Check for Updates</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>289</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okButton">
+       <property name="accessibleName">
+        <string>TRCLOSE</string>
+       </property>
+       <property name="text">
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item row="0" column="0">
+   <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="aboutBitcoinTraderGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -182,7 +114,7 @@ Feel free to send me recommendations and fixes to: &lt;a href=&quot;mailto:julyi
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QGroupBox" name="LogoGroupBox">
@@ -239,7 +171,7 @@ Version: 1.07.98</string>
      </item>
     </layout>
    </item>
-   <item row="2" column="0">
+   <item row="2" column="0" colspan="2">
     <widget class="QGroupBox" name="aboutTranslationGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -330,70 +262,11 @@ Version: 1.07.98</string>
      </layout>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="buttonCheckUpdates">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="accessibleName">
-        <string>CHECK_FOR_UPDATE</string>
-       </property>
-       <property name="text">
-        <string>Check for Updates</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>289</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="okButton">
-       <property name="accessibleName">
-        <string>TRCLOSE</string>
-       </property>
-       <property name="text">
-        <string>OK</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections>
-  <connection>
-   <sender>createTranslationButton</sender>
-   <signal>clicked()</signal>
-   <receiver>TranslationAbout</receiver>
-   <slot>createTranslation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>566</x>
-     <y>291</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>430</x>
-     <y>319</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>okButton</sender>
    <signal>clicked()</signal>
@@ -401,8 +274,8 @@ Version: 1.07.98</string>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>675</x>
-     <y>331</y>
+     <x>432</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>417</x>
@@ -417,8 +290,8 @@ Version: 1.07.98</string>
    <slot>buttonCheckUpdates()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>60</x>
-     <y>323</y>
+     <x>70</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>59</x>

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -48,11 +48,22 @@ TradesItem::TradesItem()
 void TradesItem::cacheStrings()
 {
 	QDateTime itemDate=QDateTime::fromTime_t(date);
-	timeStr=itemDate.toString(baseValues.timeFormat);
-	dateStr=itemDate.toString(baseValues.dateTimeFormat);
-    if(price>0.0)priceStr=textFromDouble(price);
-    if(amount>0.0)amountStr=textFromDouble(amount);
-    if(amount>0.0&&price>0.0)totalStr=textFromDouble(price*amount,baseValues.currentPair.currBDecimals);
+
+    if(baseValues_->use24HourTimeFormat){
+        timeStr=itemDate.toString(baseValues.timeFormat);
+        dateStr=itemDate.toString(baseValues.dateTimeFormat);
+    } else {
+        QString mmssTemp=itemDate.toString("mm:ss");
+        QString hTemp=itemDate.toString("H");
+        qint16 hTempInt=hTemp.toInt();
+        if(hTempInt<=12)timeStr=hTemp+':'+mmssTemp+" am";
+        else timeStr=QString::number(hTempInt-12)+':'+mmssTemp+" pm";
+        dateStr=itemDate.toString("dd.MM.yyyy")+' '+timeStr;
+    }
+
+    if(price>0.0)priceStr=textFromDouble(price,baseValues.decimalsPriceLastTrades);
+    if(amount>0.0)amountStr=textFromDouble(amount,baseValues.decimalsAmountLastTrades);
+    if(amount>0.0&&price>0.0)totalStr=textFromDouble(price*amount,qMin(baseValues.currentPair.currBDecimals,baseValues.decimalsTotalLastTrades));
 }
 
 bool TradesItem::isValid()

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ void RulesModel::addRule(RuleHolder &holder, bool running)
     scriptList<<newScript;
     stateList<<0;
     pauseList<<false;
-    doneList<<time(NULL);
+    doneList<<TimeSync::getTimeT();
     endInsertRows();
 
     if(running)setRuleStateByRow(holderList.count()-1,1);
@@ -138,7 +138,7 @@ void RulesModel::setStateByName(QString name, int newState)
         {
             if(stateList.at(n)==3&&newState==0)
             {
-                if(time(NULL)-doneList.at(n)>1)stateList[n]=newState;
+                if(TimeSync::getTimeT()-doneList.at(n)>1)stateList[n]=newState;
             }
             else
             stateList[n]=newState;
@@ -146,7 +146,7 @@ void RulesModel::setStateByName(QString name, int newState)
             if(newState==3)
             {
                 emit ruleDone();
-                doneList[n]=time(NULL);
+                doneList[n]=TimeSync::getTimeT();
             }
 
             if(!baseValues.currentExchange_->multiCurrencyTradeSupport)

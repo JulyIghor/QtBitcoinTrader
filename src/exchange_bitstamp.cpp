@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@
 
 #include "exchange_bitstamp.h"
 #include <openssl/hmac.h>
-#include "main.h"
-#include <QDateTime>
 
 Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
@@ -45,8 +43,6 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 	isLastTradesTypeSupported=false;
 	exchangeSupportsAvailableAmount=true;
 	lastBidAskTimestamp=0;
-	lastTradesDate=0;
-	lastTickerDate=0;
 	baseValues.exchangeName="Bitstamp";
 	baseValues.currentPair.name="BTC/USD";
 	baseValues.currentPair.setSymbol("BTCUSD");
@@ -76,7 +72,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 
 	moveToThread(this);
 	authRequestTime.restart();
-	privateNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
+    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
 }
 
 Exchange_Bitstamp::~Exchange_Bitstamp()
@@ -102,7 +98,8 @@ void Exchange_Bitstamp::clearVariables()
 	reloadDepth();
 	lastInfoReceived=false;
 	lastBidAskTimestamp=0;
-	lastTradesDate=QDateTime::currentDateTime().addSecs(-600).toTime_t();
+    lastTradesDate=TimeSync::getTimeT()-600;
+	lastTickerDate=0;
 }
 
 void Exchange_Bitstamp::clearValues()
@@ -137,7 +134,7 @@ void Exchange_Bitstamp::secondSlot()
 	if(++infoCounter>4)
 	{
 		infoCounter=0;
-		quint32 syncNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
+        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
 		if(privateNonce<syncNonce)privateNonce=syncNonce;
 	}
 
@@ -293,7 +290,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				if(!tickerHigh.isEmpty())
 				{
                     double newTickerHigh=tickerHigh.toDouble();
-                    if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(baseValues.currentPair.symbol,newTickerHigh);
+                    if(newTickerHigh!=lastTickerHigh)
+                        IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"High",newTickerHigh);
 					lastTickerHigh=newTickerHigh;
 				}
 
@@ -301,7 +299,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				if(!tickerLow.isEmpty())
 				{
                     double newTickerLow=tickerLow.toDouble();
-                    if(newTickerLow!=lastTickerLow)emit tickerLowChanged(baseValues.currentPair.symbol,newTickerLow);
+                    if(newTickerLow!=lastTickerLow)
+                        IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Low",newTickerLow);
 					lastTickerLow=newTickerLow;
 				}
 
@@ -309,7 +308,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				if(!tickerVolume.isEmpty())
 				{
                     double newTickerVolume=tickerVolume.toDouble();
-                    if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(baseValues.currentPair.symbol,newTickerVolume);
+                    if(newTickerVolume!=lastTickerVolume)
+                        IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Volume",newTickerVolume);
 					lastTickerVolume=newTickerVolume;
 				}
 
@@ -319,7 +319,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                     double newTickerLast=tickerLast.toDouble();
 					if(newTickerLast>0.0)
 					{
-						emit tickerLastChanged(baseValues.currentPair.symbol,newTickerLast);
+                        IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newTickerLast);
 						lastTickerDate=tickerTimestamp;
 					}
 				}
@@ -329,7 +329,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					if(!tickerSell.isEmpty())
 					{
                         double newTickerSell=tickerSell.toDouble();
-						if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
+                        if(newTickerSell!=lastTickerSell)
+                            IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",newTickerSell);
 						lastTickerSell=newTickerSell;
 					}
 
@@ -337,7 +338,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					if(!tickerBuy.isEmpty())
 					{
                         double newTickerBuy=tickerBuy.toDouble();
-                        if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
+                        if(newTickerBuy!=lastTickerBuy)
+                            IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",newTickerBuy);
 						lastTickerBuy=newTickerBuy;
 					}
 					lastBidAskTimestamp=tickerTimestamp;
@@ -374,7 +376,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 						if(lastTickerDate<newItem.date)
 						{
 						lastTickerDate=newItem.date;
-						emit tickerLastChanged(baseValues.currentPair.symbol,newItem.price);
+                        IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newItem.price);
 						}
 					}
 					newItem.symbol=baseValues.currentPair.symbol;
@@ -416,7 +418,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                     double priceDouble=getMidData("\"","\"",&currentRow).toDouble();
                     double amount=getMidData(", \"","\"",&currentRow).toDouble();
 
-                    if(n==0&&updateTicker)emit tickerBuyChanged(baseValues.currentPair.symbol,priceDouble);
+                    if(n==0&&updateTicker)
+                        IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",priceDouble);
 
 					if(baseValues.groupPriceValue>0.0)
 					{
@@ -465,7 +468,8 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                     double priceDouble=getMidData("\"","\"",&currentRow).toDouble();
                     double amount=getMidData(", \"","\"",&currentRow).toDouble();
 
-					if(n==0&&updateTicker)emit tickerSellChanged(baseValues.currentPair.symbol,priceDouble);
+                    if(n==0&&updateTicker)
+                        IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",priceDouble);
 
 					if(baseValues.groupPriceValue>0.0)
 					{

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume=false;
 
 	authRequestTime.restart();
-	privateNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
+    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
 }
 
 Exchange_Bitfinex::~Exchange_Bitfinex()
@@ -107,6 +107,7 @@ void Exchange_Bitfinex::clearVariables()
 	tickerLastDate=0;
 	lastTradesDate=0;
 	lastTradesDateCache="0";
+	lastHistoryId=0;
 }
 
 void Exchange_Bitfinex::clearValues()
@@ -117,31 +118,42 @@ void Exchange_Bitfinex::clearValues()
 
 void Exchange_Bitfinex::secondSlot()
 {
-    static int infoCounter=0;
-    if(infoCounter%2&&!isReplayPending(202))
-        sendToApi(202,"balances",true,true);
-
-    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"orders",true,true);
-
-    //if(!tickerOnly&&!isReplayPending(210))sendToApi(210,"positions",true,true);
-
-    if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
+    static int sendCounter=0;
+    switch(sendCounter)
     {
-        emit depthRequested();
-        sendToApi(111,"book/"+baseValues.currentPair.currRequestPair+"?limit_bids="+baseValues.depthCountLimitStr+"&limit_asks="+baseValues.depthCountLimitStr,false,true);
-        forceDepthLoad=false;
+    case 0:
+        if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,true);
+        break;
+    case 1:
+        if(!isReplayPending(202))sendToApi(202,"balances",true,true);
+        break;
+    case 2:
+        if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair+"?timestamp="+lastTradesDateCache+"&limit_trades=200"/*astTradesDateCache*/,false,true);
+        break;
+    case 3:
+        if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"orders",true,true);
+        break;
+    case 4:
+        if(isDepthEnabled()&&(forceDepthLoad||!isReplayPending(111)))
+        {
+            emit depthRequested();
+            sendToApi(111,"book/"+baseValues.currentPair.currRequestPair+"?limit_bids="+baseValues.depthCountLimitStr+"&limit_asks="+baseValues.depthCountLimitStr,false,true);
+            forceDepthLoad=false;
+        }
+        break;
+    case 5:
+        if(lastHistory.isEmpty())
+            if(!isReplayPending(208))sendToApi(208,"mytrades",true,true,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 200");
+        break;
+    default: break;
     }
-    if((infoCounter==1)&&!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,true);
+    if(sendCounter++>=5)sendCounter=0;
 
-    if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair+"?timestamp="+lastTradesDateCache+"&limit_trades=200"/*astTradesDateCache*/,false,true);
-    if(lastHistory.isEmpty())
-        if(!isReplayPending(208))sendToApi(208,"mytrades",true,true,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 200");
-	if(!true&&julyHttp)julyHttp->prepareDataSend();
-
+    static int infoCounter=0;
 	if(++infoCounter>9)
 	{
 		infoCounter=0;
-		quint32 syncNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
+        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
 		if(privateNonce<syncNonce)privateNonce=syncNonce;
 	}
 	Exchange::secondSlot();
@@ -310,7 +322,8 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerSell.isEmpty())
 			{
                 double newTickerSell=tickerSell.toDouble();
-                if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
+                if(newTickerSell!=lastTickerSell)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",newTickerSell);
 				lastTickerSell=newTickerSell;
 			}
 
@@ -318,7 +331,8 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerBuy.isEmpty())
 			{
                 double newTickerBuy=tickerBuy.toDouble();
-                if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
+                if(newTickerBuy!=lastTickerBuy)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
 			quint32 tickerNow=getMidData("timestamp\":\"",".",&data).toUInt();
@@ -328,7 +342,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 double newTickerLast=tickerLast.toDouble();
 				if(newTickerLast>0.0)
 				{
-                    emit tickerLastChanged(baseValues.currentPair.symbol,newTickerLast);
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newTickerLast);
 					tickerLastDate=tickerNow;
 				}
 			}
@@ -363,7 +377,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 
 				if(n==0)
 				{
-                    emit tickerLastChanged(baseValues.currentPair.symbol,newItem.price);
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newItem.price);
 					tickerLastDate=currentTradeDate;
 					lastTradesDate=currentTradeDate;
 					lastTradesDateCache=QByteArray::number(tickerLastDate+1);
@@ -397,7 +411,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray currentRow=asksList.at(n).toLatin1();
                     double priceDouble=getMidData("price\":\"","\"",&currentRow).toDouble();
                     double amount=getMidData("amount\":\"","\"",&currentRow).toDouble();
-                    if(n==0)emit tickerBuyChanged(baseValues.currentPair.symbol,priceDouble);
+                    if(n==0)IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",priceDouble);
 
 					if(baseValues.groupPriceValue>0.0)
 					{
@@ -445,7 +459,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray currentRow=bidsList.at(n).toLatin1();
                     double priceDouble=getMidData("price\":\"","\"",&currentRow).toDouble();
                     double amount=getMidData("amount\":\"","\"",&currentRow).toDouble();
-                    if(n==0)emit tickerSellChanged(baseValues.currentPair.symbol,priceDouble);
+                    if(n==0)IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",priceDouble);
 
 					if(baseValues.groupPriceValue>0.0)
 					{
@@ -640,11 +654,17 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 				QList<HistoryItem> *historyItems=new QList<HistoryItem>;
 				bool firstTimestampReceived=false;
 				QStringList dataList=QString(data).split("},{");
+                quint32 currentId;
+                quint32 maxId=0;
 				for(int n=0;n<dataList.count();n++)
 				{
-					HistoryItem currentHistoryItem;
+                    QByteArray curLog(dataList.at(n).toLatin1());
 
-					QByteArray curLog(dataList.at(n).toLatin1());
+                    currentId=getMidData("order_id\":","}",&curLog).toUInt();
+                    if(currentId<=lastHistoryId)break;
+                    if(n==0)maxId=currentId;
+
+					HistoryItem currentHistoryItem;
 					QByteArray logType=getMidData("\"type\":\"","\"",&curLog);
 					QByteArray currentTimeStamp=getMidData("\"timestamp\":\"",".",&curLog);
 					if(n==0||!firstTimestampReceived)
@@ -676,6 +696,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 						}
 					}
 				}
+                if(maxId>lastHistoryId)lastHistoryId=maxId;
 				emit historyChanged(historyItems);
 			}
 		}

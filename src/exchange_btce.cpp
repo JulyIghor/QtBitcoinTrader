@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@
 #include "exchange_btce.h"
 #include <openssl/hmac.h>
 #include "main.h"
-#include <QDateTime>
 
 Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey) 
 	: Exchange()
@@ -43,12 +42,10 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	baseValues.currentPair.setSymbol("BTCUSD");
 	baseValues.currentPair.currRequestPair="btc_usd";
 	baseValues.currentPair.priceDecimals=3;
-	minimumRequestIntervalAllowed=600;
+    minimumRequestIntervalAllowed=500;
 	baseValues.currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 	baseValues.currentPair.tradeVolumeMin=0.01;
 	baseValues.currentPair.tradePriceMin=0.1;
-	lastTickerDate=0;
-	lastFetchTid=0;
 	depthAsks=0;
 	depthBids=0;
 	forceDepthLoad=false;
@@ -57,7 +54,7 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 	tickerOnly=false;
 	setApiKeySecret(pRestKey,pRestSign);
 
-	moveToThread(this);
+    moveToThread(this);
 
 	currencyMapFile="BTCe";
 	defaultCurrencyParams.currADecimals=8;
@@ -71,7 +68,8 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume=false;
 
 	authRequestTime.restart();
-	privateNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
+    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
+    lastHistoryId=0;
 }
 
 Exchange_BTCe::~Exchange_BTCe()
@@ -88,8 +86,9 @@ void Exchange_BTCe::clearVariables()
 	lastHistory.clear();
 	lastOrders.clear();
 	reloadDepth();
-	lastFetchTid=QDateTime::currentDateTime().addSecs(-600).toTime_t();
+    lastFetchTid=TimeSync::getTimeT()-600;
 	lastFetchTid=-lastFetchTid;
+	lastTickerDate=0;
 }
 
 void Exchange_BTCe::clearValues()
@@ -124,7 +123,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerHigh.isEmpty())
 			{
                 double newTickerHigh=tickerHigh.toDouble();
-                if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(baseValues.currentPair.symbol,newTickerHigh);
+                if(newTickerHigh!=lastTickerHigh)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"High",newTickerHigh);
 				lastTickerHigh=newTickerHigh;
 			}
 
@@ -132,7 +132,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerLow.isEmpty())
 			{
                 double newTickerLow=tickerLow.toDouble();
-                if(newTickerLow!=lastTickerLow)emit tickerLowChanged(baseValues.currentPair.symbol,newTickerLow);
+                if(newTickerLow!=lastTickerLow)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Low",newTickerLow);
 				lastTickerLow=newTickerLow;
 			}
 
@@ -140,7 +141,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerSell.isEmpty())
 			{
                 double newTickerSell=tickerSell.toDouble();
-                if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
+                if(newTickerSell!=lastTickerSell)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",newTickerSell);
 				lastTickerSell=newTickerSell;
 			}
 
@@ -148,7 +150,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerBuy.isEmpty())
 			{
                 double newTickerBuy=tickerBuy.toDouble();
-                if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
+                if(newTickerBuy!=lastTickerBuy)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
 
@@ -156,7 +159,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerVolume.isEmpty())
 			{
                 double newTickerVolume=tickerVolume.toDouble();
-                if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(baseValues.currentPair.symbol,newTickerVolume);
+                if(newTickerVolume!=lastTickerVolume)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Volume",newTickerVolume);
 				lastTickerVolume=newTickerVolume;
 			}
 
@@ -166,7 +170,8 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				lastTickerDate=newTickerDate;
 				QByteArray tickerLast=getMidData("\"last\":",",\"",&data);
                 double tickerLastDouble=tickerLast.toDouble();
-                if(tickerLastDouble>0.0)emit tickerLastChanged(baseValues.currentPair.symbol,tickerLastDouble);
+                if(tickerLastDouble>0.0)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",tickerLastDouble);
 			}
 
 			if(isFirstTicker)
@@ -196,7 +201,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				if(n==0&&lastTickerDate<newItem.date)
 				{
 					lastTickerDate=newItem.date;
-                    emit tickerLastChanged(baseValues.currentPair.symbol,newItem.price);
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newItem.price);
 				}
 				newItem.amount=getMidData("\"amount\":",",\"",&tradeData).toDouble();
 				newItem.symbol=currentRequestSymbol;
@@ -419,10 +424,10 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 		break;//order/cancel
 	case 306: if(debugLevel)logThread->writeLog("Buy OK: "+data,2);break;//order/buy
 	case 307: if(debugLevel)logThread->writeLog("Sell OK: "+data,2);break;//order/sell
-	case 208: ///history
-		{
+    case 208: ///history
+        {
 		bool isEmptyOrders=!success&&errorString==QLatin1String("no trades");if(isEmptyOrders)success=true;
-		if(lastHistory!=data)
+        if(lastHistory!=data)
 		{
 			lastHistory=data;
 			if(!success)break;
@@ -434,11 +439,17 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 			if(dataList.count())dataList.removeFirst();
 			if(dataList.count()==0)return;
 			newLog.clear();
+            quint32 currentId;
+            quint32 maxId=0;
 			for(int n=0;n<dataList.count();n++)
 			{
-				HistoryItem currentHistoryItem;
+                QByteArray curLog(dataList.at(n).toLatin1());
 
-				QByteArray curLog(dataList.at(n).toLatin1());
+                currentId=getMidData("order_id\":",",\"",&curLog).toUInt();
+                if(currentId<=lastHistoryId)break;
+                if(n==0)maxId=currentId;
+
+				HistoryItem currentHistoryItem;
 				QByteArray logType=getMidData("type\":\"","\",\"",&curLog);
 				if(logType=="sell")currentHistoryItem.type=1;
 				else 
@@ -446,7 +457,6 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 				
 				if(currentHistoryItem.type)
 				{
-					QStringList currencyPair;
 					if(currentHistoryItem.type==1||currentHistoryItem.type==2)
 						currentHistoryItem.symbol=getMidData("pair\":\"","\",\"",&curLog).toUpper().replace("_","");
 					currentHistoryItem.dateTimeInt=getMidData("timestamp\":","}",&curLog).toUInt();
@@ -455,6 +465,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
 					if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 				}
 			}
+            if(maxId>lastHistoryId)lastHistoryId=maxId;
 			emit historyChanged(historyItems);
 		}
 		break;//money/wallet/history
@@ -527,26 +538,41 @@ bool Exchange_BTCe::isReplayPending(int reqType)
 
 void Exchange_BTCe::secondSlot()
 {
-	static int infoCounter=0;
-	if(lastHistory.isEmpty())getHistory(false);
+    static int sendCounter=0;
+    switch(sendCounter)
+    {
+    case 0:
+        if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,true);
+        break;
+    case 1:
+        if(!isReplayPending(202))sendToApi(202,"",true,true,"method=getInfo&");
+        break;
+    case 2:
+        if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair,false,true);
+        break;
+    case 3:
+        if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,true,"method=ActiveOrders&");
+        break;
+    case 4:
+        if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
+        {
+            emit depthRequested();
+            sendToApi(111,"depth/"+baseValues.currentPair.currRequestPair+"?limit="+baseValues.depthCountLimitStr,false,true);
+            forceDepthLoad=false;
+        }
+        break;
+    case 5:
+        if(lastHistory.isEmpty())getHistory(false);
+        break;
+    default: break;
+    }
+    if(sendCounter++>=5)sendCounter=0;
 
-    if(!isReplayPending(202))sendToApi(202,"",true,true,"method=getInfo&");
-    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"",true,true,"method=ActiveOrders&");
-    if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,true);
-    if(!isReplayPending(109))sendToApi(109,"trades/"+baseValues.currentPair.currRequestPair,false,true);
-	if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
-	{
-		emit depthRequested();
-        sendToApi(111,"depth/"+baseValues.currentPair.currRequestPair+"?limit="+baseValues.depthCountLimitStr,false,true);
-		forceDepthLoad=false;
-	}
-
-	if(!true&&julyHttp)julyHttp->prepareDataSend();
-
+    static int infoCounter=0;
 	if(++infoCounter>9)
 	{
 		infoCounter=0;
-		quint32 syncNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
+        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
 		if(privateNonce<syncNonce)privateNonce=syncNonce;
 	}
 	Exchange::secondSlot();
@@ -558,7 +584,6 @@ void Exchange_BTCe::getHistory(bool force)
 	if(force)lastHistory.clear();
     if(!isReplayPending(208))sendToApi(208,"",true,true,"method=TradeHistory&");
     if(!isReplayPending(110))sendToApi(110,"info",false,true);
-	if(!true&&julyHttp)julyHttp->prepareDataSend();
 }
 
 void Exchange_BTCe::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)

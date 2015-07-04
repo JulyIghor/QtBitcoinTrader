@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@
 
 #include "exchange_bitcurex.h"
 #include <openssl/hmac.h>
-#include "main.h"
-#include <QDateTime>
 
 Exchange_BitCurex::Exchange_BitCurex(QByteArray pRestSign, QByteArray pRestKey) 
 	: Exchange()
@@ -44,7 +42,7 @@ Exchange_BitCurex::Exchange_BitCurex(QByteArray pRestSign, QByteArray pRestKey)
     baseValues.currentPair.setSymbol("BTCPLN");
     baseValues.currentPair.currRequestPair="btc_pln";
     baseValues.currentPair.priceDecimals=5;
-	minimumRequestIntervalAllowed=600;
+    minimumRequestIntervalAllowed=500;
 	baseValues.currentPair.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 	baseValues.currentPair.tradeVolumeMin=0.01;
 	baseValues.currentPair.tradePriceMin=0.1;
@@ -70,7 +68,7 @@ Exchange_BitCurex::Exchange_BitCurex(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume=false;
 
 	authRequestTime.restart();
-    privateNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
+    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
 }
 
 Exchange_BitCurex::~Exchange_BitCurex()
@@ -88,7 +86,7 @@ void Exchange_BitCurex::clearVariables()
 	lastOrders.clear();
 	reloadDepth();
     lastFetchTid=0;
-    startTradesDate=QDateTime::currentDateTime().addSecs(-600).toTime_t();
+    startTradesDate=TimeSync::getTimeT()-600;
     lastTradesDate=0;
     lastHistoryId=0;
 }
@@ -124,7 +122,8 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerHigh.isEmpty())
 			{
                 double newTickerHigh=tickerHigh.toDouble();
-                if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(baseValues.currentPair.symbol,newTickerHigh);
+                if(newTickerHigh!=lastTickerHigh)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"High",newTickerHigh);
 				lastTickerHigh=newTickerHigh;
 			}
 
@@ -132,7 +131,8 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerLow.isEmpty())
 			{
                 double newTickerLow=tickerLow.toDouble();
-                if(newTickerLow!=lastTickerLow)emit tickerLowChanged(baseValues.currentPair.symbol,newTickerLow);
+                if(newTickerLow!=lastTickerLow)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Low",newTickerLow);
 				lastTickerLow=newTickerLow;
 			}
 
@@ -140,7 +140,8 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerSell.isEmpty())
             {
                 double newTickerSell=tickerSell.toDouble();
-                if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
+                if(newTickerSell!=lastTickerSell)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",newTickerSell);
 				lastTickerSell=newTickerSell;
 			}
 
@@ -148,7 +149,8 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerBuy.isEmpty())
             {
                 double newTickerBuy=tickerBuy.toDouble();
-                if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
+                if(newTickerBuy!=lastTickerBuy)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
 
@@ -156,7 +158,8 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerVolume.isEmpty())
 			{
                 double newTickerVolume=tickerVolume.toDouble();
-                if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(baseValues.currentPair.symbol,newTickerVolume);
+                if(newTickerVolume!=lastTickerVolume)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Volume",newTickerVolume);
 				lastTickerVolume=newTickerVolume;
 			}
 
@@ -164,7 +167,8 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
             if(!tickerLast.isEmpty())
             {
                 double newTickerLast=tickerLast.toDouble();
-                if(newTickerLast!=lastTickerLast)emit tickerLastChanged(baseValues.currentPair.symbol,newTickerLast);
+                if(newTickerLast!=lastTickerLast)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newTickerLast);
                 lastTickerLast=newTickerLast;
             }
 
@@ -206,7 +210,7 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
             if(newItem.price>0&&lastTradesDate<newItem.date)
             {
                 lastTradesDate=newItem.date;
-                emit tickerLastChanged(baseValues.currentPair.symbol,newItem.price);
+                IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newItem.price);
                 lastTickerLast=newItem.price;
             }
             if(newTradesItems->count())emit addLastTrades(baseValues.currentPair.symbol,newTradesItems);
@@ -517,26 +521,41 @@ bool Exchange_BitCurex::isReplayPending(int reqType)
 
 void Exchange_BitCurex::secondSlot()
 {
-	static int infoCounter=0;
-	if(lastHistory.isEmpty())getHistory(false);
-
-    if(!isReplayPending(202))sendToApi(202,"balance/",true,"nonce="+QByteArray::number(++privateNonce));
-    if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"offers/",true,"nonce="+QByteArray::number(++privateNonce));
-    if(!isReplayPending(103))sendToApi(103,baseValues.currentPair.currBStrLow.toLatin1()+"/ticker",false);
-    if(!isReplayPending(109))sendToApi(109,baseValues.currentPair.currBStrLow.toLatin1()+'/'+QByteArray::number(lastTradesDate)+"/trades",false);
-    if(isDepthEnabled()&&(forceDepthLoad||/*infoCounter==3&&*/!isReplayPending(111)))
+    static int sendCounter=0;
+    switch(sendCounter)
     {
-        emit depthRequested();
-        sendToApi(111,baseValues.currentPair.currBStrLow.toLatin1()+"/"+baseValues.depthCountLimitStr+"/orderbook",false);
-        forceDepthLoad=false;
+    case 0:
+        if(!isReplayPending(103))sendToApi(103,baseValues.currentPair.currBStrLow.toLatin1()+"/ticker",false);
+        break;
+    case 1:
+        if(!isReplayPending(202))sendToApi(202,"balance/",true,"nonce="+QByteArray::number(++privateNonce));
+        break;
+    case 2:
+        if(!isReplayPending(109))sendToApi(109,baseValues.currentPair.currBStrLow.toLatin1()+'/'+QByteArray::number(lastTradesDate)+"/trades",false);
+        break;
+    case 3:
+        if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"offers/",true,"nonce="+QByteArray::number(++privateNonce));
+        break;
+    case 4:
+        if(isDepthEnabled()&&(forceDepthLoad||!isReplayPending(111)))
+        {
+            emit depthRequested();
+            sendToApi(111,baseValues.currentPair.currBStrLow.toLatin1()+"/"+baseValues.depthCountLimitStr+"/orderbook",false);
+            forceDepthLoad=false;
+        }
+        break;
+    case 5:
+        if(lastHistory.isEmpty())getHistory(false);
+        break;
+    default: break;
     }
+    if(sendCounter++>=5)sendCounter=0;
 
-	if(!true&&julyHttp)julyHttp->prepareDataSend();
-
+    static int infoCounter=0;
 	if(++infoCounter>9)
 	{
 		infoCounter=0;
-        quint32 syncNonce=(static_cast<quint32>(time(NULL))-1371854884)*10;
+        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
         if(privateNonce<syncNonce)privateNonce=syncNonce;
 	}
 	Exchange::secondSlot();
@@ -547,7 +566,6 @@ void Exchange_BitCurex::getHistory(bool force)
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
     if(!isReplayPending(208))sendToApi(208,"trades/"+baseValues.currentPair.currBStrLow.toLatin1()+"/"+QByteArray::number(lastHistoryId)+"/",true,"market="+baseValues.currentPair.currBStrLow.toLatin1()+"&nonce="+QByteArray::number(++privateNonce)+"&txid="+QByteArray::number(lastHistoryId));
-	if(!true&&julyHttp)julyHttp->prepareDataSend();
 }
 
 void Exchange_BitCurex::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
@@ -595,7 +613,7 @@ void Exchange_BitCurex::sendToApi(int reqType, QByteArray method, bool auth, QBy
 {
 	if(julyHttp==0)
 	{ 
-        julyHttp=new JulyHttp("api.bitcurex.com","Key: "+getApiKey()+"\r\n",this);
+        julyHttp=new JulyHttp("api.bitcurex.com","Key: "+getApiKey()+"\r\n",this,true);
 		connect(julyHttp,SIGNAL(anyDataReceived()),baseValues_->mainWindow_,SLOT(anyDataReceived()));
 		connect(julyHttp,SIGNAL(apiDown(bool)),baseValues_->mainWindow_,SLOT(setApiDown(bool)));
 		connect(julyHttp,SIGNAL(setDataPending(bool)),baseValues_->mainWindow_,SLOT(setDataPending(bool)));
@@ -620,7 +638,7 @@ void Exchange_BitCurex::sendToApi(int reqType, QByteArray method, bool auth, QBy
         }
 	}
 	else
-	{
+    {
         julyHttp->sendData(reqType, "GET /v2/"+method);
 	}
 }

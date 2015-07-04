@@ -1,14 +1,19 @@
+equals(QT_MAJOR_VERSION, 4): {
+error("Qt 4 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt 5 and C++11");
+}
+
 QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 
 TEMPLATE	= app
-LANGUAGE        = C++
-DEPENDPATH 	+= .
-INCLUDEPATH 	+= .
+LANGUAGE	= C++
+DEPENDPATH	+= .
+INCLUDEPATH	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
 
 CONFIG	+= qt release
+CONFIG	+= c++11
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
 !win32 { TARGET = QtBitcoinTrader }
@@ -39,7 +44,7 @@ CONFIG(static) {
   }
 }
 
- win32 { LIBS += -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lzlib }
+win32 { LIBS += -lcrypt32 -leay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lz -lws2_32 -lwinmm }
 !win32 { LIBS += -lcrypto -lz }
 
 mac{
@@ -93,23 +98,40 @@ HEADERS += aboutdialog.h \
            updaterdialog.h \
            apptheme.h \
            logobutton.h \
-    networkmenu.h \
-    julybuttonmenu.h \
-    scriptwidget.h \
-    scriptobject.h \
-    addscriptwindow.h \
-    julylockfile.h \
-    exchange_gocio.h \
-    featuredexchangesdialog.h \
-    allexchangesdialog.h \
-    allexchangesmodel.h \
-    exchangebutton.h \
-    addruledialog.h \
-    rulescriptparser.h \
-    ruleholder.h \
-    exchange_indacoin.h \
-    julymath.h \
-           exchange_bitcurex.h
+           networkmenu.h \
+           julybuttonmenu.h \
+           scriptwidget.h \
+           scriptobject.h \
+           addscriptwindow.h \
+           julylockfile.h \
+           exchange_gocio.h \
+           featuredexchangesdialog.h \
+           allexchangesdialog.h \
+           allexchangesmodel.h \
+           exchangebutton.h \
+           addruledialog.h \
+           rulescriptparser.h \
+           ruleholder.h \
+           exchange_indacoin.h \
+           julymath.h \
+           exchange_bitcurex.h \
+           exchange_bitmarket.h \
+           platform/sound.h \
+           platform/socket.h \
+           config/config_manager.h \
+           config/config_manager_dialog.h \
+           utils/utils.h \
+           dock/dock_host.h \
+           chartsview.h \
+           chartsmodel.h \
+           settingsdialog.h \
+           settingsgeneral.h \
+           settingsnetworkproxy.h \
+           settingsdialoglistelement.h \
+           settingsdecimals.h \
+    timesync.h \
+    translationmessage.h \
+    indicatorengine.h
 
 FORMS += addrulegroup.ui \
          datafolderchusedialog.ui \
@@ -125,13 +147,21 @@ FORMS += addrulegroup.ui \
          translationdialog.ui \
          updaterdialog.ui \
          logobutton.ui \
-    networkmenu.ui \
-    scriptwidget.ui \
-    addscriptwindow.ui \
-    featuredexchangesdialog.ui \
-    allexchangesdialog.ui \
-    exchangebutton.ui \
-    addruledialog.ui
+         networkmenu.ui \
+         scriptwidget.ui \
+         addscriptwindow.ui \
+         featuredexchangesdialog.ui \
+         allexchangesdialog.ui \
+         exchangebutton.ui \
+         addruledialog.ui \
+         config/config_manager_dialog.ui \
+         chartsview.ui \
+         settingsdialog.ui \
+         settingsgeneral.ui \
+         settingsnetworkproxy.ui \
+         settingsdialoglistelement.ui \
+         settingsdecimals.ui \
+    translationmessage.ui
 
 SOURCES += aboutdialog.cpp \
            addrulegroup.cpp \
@@ -175,22 +205,40 @@ SOURCES += aboutdialog.cpp \
            updaterdialog.cpp \
            apptheme.cpp \
            logobutton.cpp \
-    networkmenu.cpp \
-    julybuttonmenu.cpp \
-    scriptwidget.cpp \
-    scriptobject.cpp \
-    addscriptwindow.cpp \
-    julylockfile.cpp \
-    exchange_gocio.cpp \
-    featuredexchangesdialog.cpp \
-    allexchangesdialog.cpp \
-    allexchangesmodel.cpp \
-    exchangebutton.cpp \
-    addruledialog.cpp \
-    rulescriptparser.cpp \
-    ruleholder.cpp \
-    exchange_indacoin.cpp \
-           exchange_bitcurex.cpp
+           networkmenu.cpp \
+           julybuttonmenu.cpp \
+           scriptwidget.cpp \
+           scriptobject.cpp \
+           addscriptwindow.cpp \
+           julylockfile.cpp \
+           exchange_gocio.cpp \
+           featuredexchangesdialog.cpp \
+           allexchangesdialog.cpp \
+           allexchangesmodel.cpp \
+           exchangebutton.cpp \
+           addruledialog.cpp \
+           rulescriptparser.cpp \
+           ruleholder.cpp \
+           exchange_indacoin.cpp \
+           exchange_bitcurex.cpp \
+           exchange_bitmarket.cpp \
+           platform/sound.cpp \
+           platform/socket.cpp \
+           config/config_manager.cpp \
+           config/config_manager_dialog.cpp \
+           utils/utils.cpp \
+           dock/dock_host.cpp \
+           chartsview.cpp \
+           chartsmodel.cpp \
+           settingsdialog.cpp \
+           settingsgeneral.cpp \
+           settingsnetworkproxy.cpp \
+           settingsdialoglistelement.cpp \
+           settingsdecimals.cpp \
+    timesync.cpp \
+    translationmessage.cpp \
+    indicatorengine.cpp
+
 #
 # Resources
 # 

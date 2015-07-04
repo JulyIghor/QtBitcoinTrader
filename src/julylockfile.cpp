@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,24 +30,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "julylockfile.h"
+#include "main.h"
 #include <QCryptographicHash>
 #include <QUdpSocket>
 #include <QFile>
 #include <QDir>
 #include <QTime>
 #include <QTimer>
+#include "timesync.h"
 
 JulyLockFile::JulyLockFile(QString imageName)
     : QObject()
 {	
-    qsrand(QTime::currentTime().msecsTo(QTime(23,59,59,999)));
+    qsrand(QDateTime::fromTime_t(TimeSync::getTimeT()).time().msecsTo(QTime(23,59,59,999)));
     lockFile=new QFile;
     lockSocket=new QUdpSocket;
     isLockedFile=false;
     lockPort=0;
 
     lockFilePath=QDir().tempPath()+"/Locked_"+QCryptographicHash::hash(imageName.toUtf8(),QCryptographicHash::Md5).toHex()+".lockfile";
-    if(QFile::exists(lockFilePath)&&QFileInfo(lockFilePath).lastModified().addSecs(240)<QDateTime::currentDateTime())QFile::remove(lockFilePath);
+    if(QFile::exists(lockFilePath)&&QFileInfo(lockFilePath).lastModified().addSecs(240).toTime_t()<TimeSync::getTimeT())QFile::remove(lockFilePath);
     lockFile->setFileName(lockFilePath);
     if(QFile::exists(lockFilePath))
     {

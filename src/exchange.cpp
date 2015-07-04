@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -216,12 +216,6 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
     connect(this,SIGNAL(accBtcBalanceChanged(QString, double)),mainClass,SLOT(accBtcBalanceChanged(QString, double)));
     connect(this,SIGNAL(accUsdBalanceChanged(QString, double)),mainClass,SLOT(accUsdBalanceChanged(QString, double)));
 
-    connect(this,SIGNAL(tickerHighChanged(QString, double)),mainClass,SLOT(tickerHighChanged(QString, double)));
-    connect(this,SIGNAL(tickerLowChanged(QString, double)),mainClass,SLOT(tickerLowChanged(QString, double)));
-    connect(this,SIGNAL(tickerSellChanged(QString, double)),mainClass,SLOT(tickerSellChanged(QString, double)));
-    connect(this,SIGNAL(tickerLastChanged(QString, double)),mainClass,SLOT(tickerLastChanged(QString, double)));
-    connect(this,SIGNAL(tickerBuyChanged(QString, double)),mainClass,SLOT(tickerBuyChanged(QString, double)));
-    connect(this,SIGNAL(tickerVolumeChanged(QString, double)),mainClass,SLOT(tickerVolumeChanged(QString, double)));
     connect(this,SIGNAL(loginChanged(QString)),mainClass,SLOT(loginChanged(QString)));
 
     connect(this,SIGNAL(addLastTrades(QString, QList<TradesItem> *)),mainClass,SLOT(addLastTrades(QString, QList<TradesItem> *)));

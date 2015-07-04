@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -500,7 +500,7 @@ void ScriptObject::indicatorValueChanged(double val)
 
 quint32 ScriptObject::getTimeT()
 {
-    return time(NULL);
+    return TimeSync::getTimeT();
 }
 
 bool ScriptObject::groupIsRunning(QString name)
@@ -640,13 +640,14 @@ QString ScriptObject::sourceToScript(QString text)
     text.replace("\" ,","\",");
     text.replace("' ,","',");
 	text.replace("\\","\\\\");
-    text.replace(", \"",",\"");
+	text.replace(", \"",",\"");
+	text.replace(", '",",'");
 
-    text.replace("trader.get(\"Balance\",\"","trader.get(\"Balance",Qt::CaseInsensitive);
-    text.replace("trader.on(\"Balance\",\"","trader.on(\"Balance",Qt::CaseInsensitive);
+    text.replace("trader.get(\"Balance\",","trader.get(\"Balance\"+",Qt::CaseInsensitive);
+    text.replace("trader.on(\"Balance\",","trader.on(\"Balance\"+",Qt::CaseInsensitive);
 
-    text.replace("trader.get('Balance'',\"","trader.get('Balance",Qt::CaseInsensitive);
-    text.replace("trader.on('Balance'',\"","trader.on('Balance",Qt::CaseInsensitive);
+    text.replace("trader.get('Balance'',","trader.get('Balance'+",Qt::CaseInsensitive);
+    text.replace("trader.on('Balance'',","trader.on('Balance'+",Qt::CaseInsensitive);
 
     text.replace(").changed()",")",Qt::CaseInsensitive);
 

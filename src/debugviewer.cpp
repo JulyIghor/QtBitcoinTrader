@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSysInfo>
+#include "timesync.h"
 
 DebugViewer::DebugViewer()
 	: QWidget()
@@ -73,7 +74,7 @@ DebugViewer::~DebugViewer()
 void DebugViewer::on_buttonSaveAs_clicked()
 {
 	savingFile=true;
-	QString fileName=QFileDialog::getSaveFileName(this, "Save Debug Information",QDateTime::currentDateTimeUtc().toString("yyyy-MM-dd HH.mm.ss")+".log","Log file (*.log)");
+    QString fileName=QFileDialog::getSaveFileName(this, "Save Debug Information",QDateTime::fromTime_t(TimeSync::getTimeT()).toUTC().toString("yyyy-MM-dd HH.mm.ss")+".log","Log file (*.log)");
 	if(fileName.isEmpty()){savingFile=false;return;}
 	
 	QFile writeLog(fileName);

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -267,7 +267,7 @@ void DepthModel::calculateSize()
 
             sizeListAt(currentRow)=totalSize;
             sizePriceList[currentRow]=totalPrice;
-            sizeListStr[currentRow]=textFromDouble(totalSize,baseValues.currentPair.currADecimals);
+            sizeListStr[currentRow]=textFromDouble(totalSize,qMin(baseValues.currentPair.currADecimals,baseValues.decimalsTotalOrderBook));
 
 			maxPrice=qMax(maxPrice,priceList.at(currentRow));
 			maxVolume=qMax(maxVolume,volumeList.at(currentRow));
@@ -284,7 +284,7 @@ void DepthModel::calculateSize()
             totalPrice+=volumeList.at(currentRow)*priceList.at(currentRow);
             sizeListAt(currentRow)=totalSize;
             sizePriceList[currentRow]=totalPrice;
-            sizeListStr[currentRow]=textFromDouble(totalSize,baseValues.currentPair.currADecimals);
+            sizeListStr[currentRow]=textFromDouble(totalSize,qMin(baseValues.currentPair.currADecimals,baseValues.decimalsTotalOrderBook));
 
 			maxPrice=qMax(maxPrice,priceList.at(currentRow));
 			maxVolume=qMax(maxVolume,volumeList.at(currentRow));

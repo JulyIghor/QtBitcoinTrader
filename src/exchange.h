@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,8 @@
 #include "orderitem.h"
 #include "tradesitem.h"
 #include "julymath.h"
+#include "timesync.h"
+#include "indicatorengine.h"
 
 struct DepthItem;
 
@@ -142,12 +144,6 @@ signals:
     void orderCanceled(QString,QByteArray);
 
 	void firstTicker();
-    void tickerHighChanged(QString,double);
-    void tickerLowChanged(QString,double);
-    void tickerSellChanged(QString,double);
-    void tickerLastChanged(QString,double);
-    void tickerBuyChanged(QString,double);
-    void tickerVolumeChanged(QString,double);
 
     void accVolumeChanged(double);
     void accFeeChanged(QString,double);

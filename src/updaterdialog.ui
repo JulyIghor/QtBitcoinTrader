@@ -35,6 +35,22 @@
       <string>Automatic download and Installation</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
+      <item row="2" column="0">
+       <widget class="QLabel" name="againAutoUpdateLabel">
+        <property name="accessibleName">
+         <string>UPDATER_AGAIN_AUTO_UPDATE</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Don't ask again and automatically install updates:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_2">
         <property name="accessibleName">
@@ -72,6 +88,13 @@ Download file will be validated by RSA2048 protected checksum.</string>
         </property>
         <property name="text">
          <string>Install</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="againAutoUpdateCheckBox">
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>

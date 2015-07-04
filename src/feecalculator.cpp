@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 #include "main.h"
 #include "julyspinboxfix.h"
 #include "julyspinboxpicker.h"
+#include "indicatorengine.h"
 
 FeeCalculator::FeeCalculator()
 	: QDialog()
@@ -51,7 +52,7 @@ FeeCalculator::FeeCalculator()
 
 	ui.feeValue->setValue(mainWindow.ui.accountFee->value());
 
-	ui.buyPrice->setValue(mainWindow.ui.marketBid->value());
+    ui.buyPrice->setValue(IndicatorEngine::getValue(baseValues.exchangeName+'_'+baseValues.currentPair.symbol+"_Sell"));
 	double btcVal=mainWindow.getAvailableUSD()/ui.buyPrice->value();
 	if(btcVal<baseValues.currentPair.tradeVolumeMin)btcVal=baseValues.currentPair.tradeVolumeMin;
 	ui.buyTotalBtc->setValue(btcVal);

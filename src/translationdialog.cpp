@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ void TranslationDialog::deleteTranslationButton()
 	if(msgBox.exec()!=QMessageBox::Yes)return;
 	if(QFile::exists(julyTranslator.lastFile()))QFile::remove(julyTranslator.lastFile());
 	ui.deleteTranslationButton->setEnabled(QFile::exists(julyTranslator.lastFile()));
-	mainWindow.reloadLanguageList();
+    mainWindow.reloadLanguage();
 	close();
 }
 
@@ -180,7 +180,7 @@ void TranslationDialog::applyButton()
 	writeFile.write(resultList.join("\r\n").toUtf8());
 	writeFile.close();
 
-	if(baseValues.mainWindow_)mainWindow.reloadLanguageList(appDataDir+"Language/Custom.lng");
+    if(baseValues.mainWindow_)mainWindow.reloadLanguage(appDataDir+"Language/Custom.lng");
 	ui.buttonSaveAs->setEnabled(true);
 	ui.buttonApply->setEnabled(false);
 	ui.deleteTranslationButton->setEnabled(QFile::exists(appDataDir+"Language/Custom.lng"));

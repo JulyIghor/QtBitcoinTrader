@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -38,8 +38,10 @@ bool DepthItem::isValid()
 	bool valid=price>=0.0&&volume>=0.0;
 	if(valid)
 	{
-        priceStr=textFromDouble(price,baseValues.currentPair.priceDecimals);
-        volumeStr=textFromDouble(volume,baseValues.currentPair.currADecimals,baseValues.currentPair.currADecimals);
+        priceStr=textFromDouble(price,qMin(baseValues.currentPair.priceDecimals,baseValues.decimalsPriceOrderBook));
+
+        int decimals=qMin(baseValues.currentPair.currADecimals,baseValues.decimalsAmountOrderBook);
+        volumeStr=textFromDouble(volume,decimals,decimals);
 	}
 	return valid;
 }

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@ TranslationAbout::TranslationAbout(QWidget *par)
 	: QDialog()
 {
 	ui.setupUi(this);
+    ui.buttonCheckUpdates->setVisible(false);
+    setWindowTitle("Qt Bitcon Trader v"+baseValues.appVerStr);
 	setWindowFlags(Qt::WindowCloseButtonHint|par->windowFlags());
 	setWindowModality(Qt::ApplicationModal);
 	setAttribute(Qt::WA_DeleteOnClose,true);
@@ -58,10 +60,10 @@ TranslationAbout::TranslationAbout(QWidget *par)
 		groupboxLayout->addWidget(logoButton);
     }
 #ifdef Q_OS_WIN
-    resize(700,height());
+    resize(420,height());
     resize(width(),minimumSizeHint().height()+20);
 #else
-    resize(800,height());
+    resize(500,height());
     resize(width(),minimumSizeHint().height()+60);
 #endif
 	setMinimumSize(size());
@@ -69,18 +71,17 @@ TranslationAbout::TranslationAbout(QWidget *par)
 
 TranslationAbout::~TranslationAbout()
 {
-	if(baseValues.mainWindow_)mainWindow.addPopupDialog(-1);
 }
 
 void TranslationAbout::showWindow()
 {
-	julyTranslator.translateUi(this);
+    julyTranslator.translateUi(this);
+    setWindowTitle("Qt Bitcon Trader v"+baseValues.appVerStr);
 	ui.languageField->setText(julyTr("LANGUAGE_NAME","Invalid Language"));
 	ui.translationAuthor->setText(julyTr("LANGUAGE_AUTHOR","Invalid About"));
-	ui.aboutBitcoinTraderGroupBox->setTitle(julyTr("ABOUT_QT_BITCOIN_TRADER","About %1").arg(windowTitle()));
+    ui.aboutBitcoinTraderGroupBox->setTitle(julyTr("ABOUT_QT_BITCOIN_TRADER","About %1").arg("Qt Bitcon Trader"));
 	ui.aboutTextLabel->setText(julyTr("ABOUT_QT_BITCOIN_TRADER_TEXT","Qt Bitcoin Trader is a free Open Source project<br>developed on C++ Qt and OpenSSL.<br>If you want to help make project better please donate.<br>Feel free to send me recommendations and fixes to: %1").arg("<a href=\"mailto:julyighor@gmail.com\">julyighor@gmail.com</a>"));
-	if(baseValues.mainWindow_)mainWindow.addPopupDialog(1);
-	show();
+    show();
 }
 
 void TranslationAbout::createTranslation()

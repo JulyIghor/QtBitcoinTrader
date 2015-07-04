@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,9 @@
 #include "julylockfile.h"
 #include "featuredexchangesdialog.h"
 #include "allexchangesdialog.h"
+#include "config/config_manager.h"
+#include "utils/utils.h"
+#include "timesync.h"
 
 #if QT_VERSION < 0x050000
 #include <QPlastiqueStyle>
@@ -110,13 +113,12 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.0803";
+    appVerStr="1.1";
 	appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
 		if(appVerStr.size()==7)appVerStr.remove(6,1);
 		appVerStr.insert(4,".");
-        //if(appVerStr.at(appVerStr.size()-1)!='0')appVerIsBeta=true;
 	}
 	appVerLastReal=appVerReal;
 
@@ -156,7 +158,7 @@ void BaseValues::Construct()
 	groupPriceValue=0.0;
 	defaultHeightForRow_=22;
 
-	selectSystemLanguage();
+    selectSystemLanguage();
 }
 
 int main(int argc, char *argv[])
@@ -175,6 +177,8 @@ int main(int argc, char *argv[])
 	baseValues.Construct();
 
 	QApplication a(argc,argv);
+
+    TimeSync::global();
 
 #if QT_VERSION >= 0x050000
 	a.setStyle(QStyleFactory::create("Fusion"));
@@ -306,6 +310,9 @@ int main(int argc, char *argv[])
 		QNetworkProxy proxy;
 		QSettings settingsMain(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
 
+        baseValues_->appVerIsBeta=settingsMain.value("CheckForUpdatesBeta",false).toBool();
+        baseValues_->use24HourTimeFormat=settingsMain.value("Use24HourTimeFormat",true).toBool();
+
 #if QT_VERSION < 0x050000
         bool plastiqueStyle=true;
 		plastiqueStyle=settingsMain.value("PlastiqueStyle",plastiqueStyle).toBool();
@@ -353,6 +360,27 @@ int main(int argc, char *argv[])
 			}
 			QNetworkProxy::setApplicationProxy(proxy);
 		}
+
+        settingsMain.beginGroup("Decimals");
+        baseValues.decimalsAmountMyTransactions=settingsMain.value("AmountMyTransactions",8).toInt();
+        baseValues.decimalsPriceMyTransactions=settingsMain.value("PriceMyTransactions",8).toInt();
+        baseValues.decimalsTotalMyTransactions=settingsMain.value("TotalMyTransactions",8).toInt();
+        baseValues.decimalsAmountOrderBook=settingsMain.value("AmountOrderBook",8).toInt();
+        baseValues.decimalsPriceOrderBook=settingsMain.value("PriceOrderBook",8).toInt();
+        baseValues.decimalsTotalOrderBook=settingsMain.value("TotalOrderBook",8).toInt();
+        baseValues.decimalsAmountLastTrades=settingsMain.value("AmountLastTrades",8).toInt();
+        baseValues.decimalsPriceLastTrades=settingsMain.value("PriceLastTrades",8).toInt();
+        baseValues.decimalsTotalLastTrades=settingsMain.value("TotalLastTrades",8).toInt();
+        /*baseValues.decimalsAmountMyTransactions=settingsMain.value("AmountMyTransactions",baseValues.currentPair.currADecimals).toInt();
+        baseValues.decimalsPriceMyTransactions=settingsMain.value("PriceMyTransactions",8).toInt();
+        baseValues.decimalsTotalMyTransactions=settingsMain.value("TotalMyTransactions",baseValues.currentPair.currADecimals).toInt();
+        baseValues.decimalsAmountOrderBook=settingsMain.value("AmountOrderBook",baseValues.currentPair.currADecimals).toInt();
+        baseValues.decimalsPriceOrderBook=settingsMain.value("PriceOrderBook",baseValues.currentPair.priceDecimals).toInt();
+        baseValues.decimalsTotalOrderBook=settingsMain.value("TotalOrderBook",baseValues.currentPair.currADecimals).toInt();
+        baseValues.decimalsAmountLastTrades=settingsMain.value("AmountLastTrades",baseValues.currentPair.currADecimals).toInt();
+        baseValues.decimalsPriceLastTrades=settingsMain.value("PriceLastTrades",baseValues.currentPair.priceDecimals).toInt();
+        baseValues.decimalsTotalLastTrades=settingsMain.value("TotalLastTrades",baseValues.currentPair.currADecimals).toInt();*/
+        settingsMain.endGroup();
 
 	baseValues.logFileName=QLatin1String("QtBitcoinTrader.log");
 	baseValues.iniFileName=QLatin1String("QtBitcoinTrader.ini");
@@ -464,6 +492,7 @@ int main(int argc, char *argv[])
                     baseValues.restSign=newPassword.getRestSign().toLatin1();
                     encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
+				break;
 			case 6:
 				{//Indacoin
 					baseValues.restSign=newPassword.getRestSign().toLatin1();
@@ -476,7 +505,14 @@ int main(int argc, char *argv[])
 					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
-			default: break;
+			case 8:
+				{//BitMarket
+					baseValues.restSign=newPassword.getRestSign().toLatin1();
+					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
+				}
+				break;
+			default:
+				break;
 			}
 			settings.setValue("EncryptedData/ApiKeySign",QString(encryptedData.toBase64()));
 			settings.setValue("Profile/Name",newPassword.selectedProfileName());
@@ -568,13 +604,14 @@ int main(int argc, char *argv[])
 		baseValues.logThread_=new LogThread;
 		logThread->writeLog("Proxy settings: "+proxy.hostName().toUtf8()+":"+QByteArray::number(proxy.port())+" "+proxy.user().toUtf8());
 	}
-	a.setQuitOnLastWindowClosed(false);
-	baseValues.mainWindow_=new QtBitcoinTrader;
-	QObject::connect(baseValues.mainWindow_,SIGNAL(quit()),&a,SLOT(quit()));
+	::config = new ConfigManager(slash(appDataDir, "QtBitcoinTrader.ws.cfg"), &a);
+    baseValues.mainWindow_=new QtBitcoinTrader;
 	}
 	mainWindow.setupClass();
 	a.exec();
 
     if(julyLock)delete julyLock;
+
+    //delete baseValues.mainWindow_;
 	return 0;
 }

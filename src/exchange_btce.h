@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ private:
 	bool isFirstAccInfo;
 	bool isFirstTicker;
 	bool isReplayPending(int);
-	bool tickerOnly;
+    bool tickerOnly;
 
 	int apiDownCounter;
 	int lastOpenedOrders;
@@ -67,6 +67,7 @@ private:
 	quint32 lastPriceDate;
 	quint32 lastTickerDate;
 	quint32 privateNonce;
+    quint32 lastHistoryId;
 
 	void clearVariables();
 	void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);

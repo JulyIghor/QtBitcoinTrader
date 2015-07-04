@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -140,5 +140,9 @@ void AppTheme::loadTheme(QString name)
 		"QTextEdit {background: "+white.name()+";}"
 		"QPlainTextEdit {background: "+white.name()+";}"
 		"QCheckBox {color: "+black.name()+";}"
-		"QLineEdit {color: "+black.name()+"; background: "+white.name()+"; border: 1px solid "+gray.name()+";}";
+        "QLineEdit {color: "+black.name()+"; background: "+white.name()+"; border: 1px solid "+gray.name()+";}"
+        "*[IsDockable] {background: rgba(255,255,255,40); border: 1px solid " + gray.name() + "; border-radius: 3px;margin-top:2px}"
+        "QDockWidget::title {background: rgba(255,255,255,100); border: 1px solid " + gray.name() + "; border-radius: 2px; padding:3px; text-align: left center;}"
+        "QDockWidget::close-button {top:2px;right:3px}"
+        "QDockWidget::float-button {top:2px;right:18px}";
 }

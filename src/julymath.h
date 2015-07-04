@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -34,42 +34,42 @@
 
 #include "qmath.h"
 
-static QByteArray byteArrayFromDouble(const qreal &value, int maxDecimals=8, int minDecimals=1);
-static QString textFromDouble(const qreal &value, int maxDecimals=8, int minDecimals=1);
+static QByteArray byteArrayFromDouble(const double &value, int maxDecimals=8, int minDecimals=1);
+static QString textFromDouble(const double &value, int maxDecimals=8, int minDecimals=1);
 
-static qreal &cutDoubleDecimals(qreal &val, int maxDecimals=8, bool roundUp=false);
-static qreal cutDoubleDecimalsCopy(const qreal &val, int maxDecimals=8, bool roundUp=false);
+static double &cutDoubleDecimals(double &val, int maxDecimals=8, bool roundUp=false);
+static double cutDoubleDecimalsCopy(const double &val, int maxDecimals=8, bool roundUp=false);
 
-static bool validDouble(const qreal &value, int decimals=8);
-static int decimalsForDouble(const qreal &value);
-static bool compareDoubles(qreal &valueA, qreal &valueB, int decimals=8);
+static bool validDouble(const double &value, int decimals=8);
+static int decimalsForDouble(const double &value);
+static bool compareDoubles(double &valueA, double &valueB, int decimals=8);
 
-static bool compareDoubles(qreal &valueA, qreal &valueB, int decimals)
+static bool compareDoubles(double &valueA, double &valueB, int decimals)
 {
     return qPow(0.1,qMin(8,decimals)+1)>qAbs(cutDoubleDecimalsCopy(valueA,decimals)-cutDoubleDecimalsCopy(valueB,decimals));
 }
 
-static qreal &cutDoubleDecimals(qreal &val, int decimals, bool roundUp)
+static double &cutDoubleDecimals(double &val, int decimals, bool roundUp)
 {
     if(!validDouble(val,decimals)){val=0.0;return val;}
     if(decimals>8)decimals=8;
-    qreal zeros=qPow(10,decimals);
-    qreal intPart=floor(val);
+    double zeros=qPow(10,decimals);
+    double intPart=floor(val);
     val=floor((val-intPart)*zeros+(roundUp?0.5:0.0))/zeros+intPart;
     return val;
 }
 
-static qreal cutDoubleDecimalsCopy(const qreal &val, int decimals, bool roundUp)
+static double cutDoubleDecimalsCopy(const double &val, int decimals, bool roundUp)
 {
     if(!validDouble(val,decimals))return 0.0;
     if(decimals>8)decimals=8;
-    qreal zeros=qPow(10,decimals);
-    qreal intPart=floor(val);
+    double zeros=qPow(10,decimals);
+    double intPart=floor(val);
     intPart=floor((val-intPart)*zeros+(roundUp?0.5:0.0))/zeros+intPart;
     return intPart;
 }
 
-static int decimalsForDouble(const qreal &val)
+static int decimalsForDouble(const double &val)
 {
     if(val>999999999999999.9)return 0;
     if(val>99999999999999.99)return 1;
@@ -90,7 +90,7 @@ static int decimalsForDouble(const qreal &val)
     return 16;
 }
 
-static bool validDouble(const qreal &val, int decimals)
+static bool validDouble(const double &val, int decimals)
 {
     if(val<0.00000001)return false;
     switch(decimals)
@@ -115,7 +115,7 @@ static bool validDouble(const qreal &val, int decimals)
     return true;
 }
 
-static QByteArray byteArrayFromDouble(const qreal &val, int maxDecimals, int minDecimals)
+static QByteArray byteArrayFromDouble(const double &val, int maxDecimals, int minDecimals)
 {
     maxDecimals=qMin(maxDecimals,decimalsForDouble(val));
     if(minDecimals>maxDecimals)minDecimals=maxDecimals;
@@ -143,9 +143,10 @@ static QByteArray byteArrayFromDouble(const qreal &val, int maxDecimals, int min
     return numberText;
 }
 
-static QString textFromDouble(const qreal &val, int maxDecimals, int minDecimals)
+static QString textFromDouble(const double &val, int maxDecimals, int minDecimals)
 {
-    maxDecimals=qMin(maxDecimals,decimalsForDouble(val));
+    double value=val+0.0000000025;
+    maxDecimals=qMin(maxDecimals,decimalsForDouble(value));
     if(minDecimals>maxDecimals)minDecimals=maxDecimals;
     if(!validDouble(val,maxDecimals))return QLatin1String("0");
     if(maxDecimals>8)maxDecimals=8;

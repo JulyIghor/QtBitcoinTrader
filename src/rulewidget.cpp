@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ RuleWidget::~RuleWidget()
 
 void RuleWidget::writeLog(QString text)
 {
-    text.prepend(QTime::currentTime().toString(baseValues.timeFormat)+"> ");
+    text.prepend(QDateTime::fromTime_t(TimeSync::getTimeT()).time().toString(baseValues.timeFormat)+"> ");
     ui.consoleOutput->appendPlainText(text);
 }
 
@@ -205,7 +205,7 @@ void RuleWidget::addRuleByHolder(RuleHolder &holder, bool isEnabled)
 
 void RuleWidget::on_ruleAddButton_clicked()
 {
-    AddRuleDialog ruleWindow(groupName,this);
+    AddRuleDialog ruleWindow(groupName,0);
     if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
     if(ruleWindow.exec()==QDialog::Rejected)return;
 
@@ -227,7 +227,7 @@ void RuleWidget::on_ruleEditButton_clicked()
 	int curRow=selectedRows.first().row();
 	if(curRow<0)return;
 
-    AddRuleDialog ruleWindow(groupName,this);
+    AddRuleDialog ruleWindow(groupName,baseValues.mainWindow_);
     if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
     ruleWindow.fillByHolder(rulesModel->holderList[curRow],rulesModel->getStateByRow(curRow)==1);
     if(ruleWindow.exec()==QDialog::Rejected)return;
@@ -249,7 +249,7 @@ void RuleWidget::on_ruleEditButton_clicked()
 
 void RuleWidget::on_ruleRemoveAll_clicked()
 {
-	QMessageBox msgBox(this);
+	QMessageBox msgBox(baseValues.mainWindow_);
 	msgBox.setIcon(QMessageBox::Question);
     msgBox.setWindowTitle(julyTr("APPLICATION_TITLE",windowTitle()));
 	msgBox.setText(julyTr("RULE_CONFIRM_REMOVE_ALL","Are you sure to remove all rules?"));
@@ -266,7 +266,7 @@ void RuleWidget::on_ruleRemoveAll_clicked()
 
 void RuleWidget::on_ruleRemove_clicked()
 {
-	QMessageBox msgBox(this);
+	QMessageBox msgBox(baseValues.mainWindow_);
 	msgBox.setIcon(QMessageBox::Question);
     msgBox.setWindowTitle(julyTr("APPLICATION_TITLE",windowTitle()));
 	msgBox.setText(julyTr("RULE_CONFIRM_REMOVE","Are you sure to remove this rule?"));
@@ -374,7 +374,7 @@ bool RuleWidget::agreeRuleImmediately(QString text)
     text.replace(QLatin1Char('='),QLatin1String("&#61;"));
     text.replace(QLatin1Char('>'),QLatin1String("&#62;"));
 
-    QMessageBox msgBox(this);
+    QMessageBox msgBox(baseValues.mainWindow_);
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setWindowTitle(windowTitle());
     msgBox.setText(julyTr("INVALID_RULE_CHECK","This rule will be executed instantly.<br>This means that you make a mistake.<br>Please check values you entered.")+"<br><br>\""+text+"\"");
@@ -439,7 +439,7 @@ void RuleWidget::on_ruleSave_clicked()
 {
     QString lastRulesDir=mainWindow.iniSettings->value("UI/LastRulesPath",baseValues.desktopLocation).toString();
     if(!QFile::exists(lastRulesDir))lastRulesDir=baseValues.desktopLocation;
-    QString fileName=QFileDialog::getSaveFileName(this, julyTr("SAVE_GOUP","Save Rules Group"),lastRulesDir+"/"+QString(groupName).replace("/","_").replace("\\","").replace(":","").replace("?","")+".JLR","JL Ruels (*.JLR)");
+    QString fileName=QFileDialog::getSaveFileName(baseValues.mainWindow_, julyTr("SAVE_GOUP","Save Rules Group"),lastRulesDir+"/"+QString(groupName).replace("/","_").replace("\\","").replace(":","").replace("?","")+".JLR","JL Ruels (*.JLR)");
 
 	if(fileName.isEmpty())return;
 	mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileName).dir().path());
@@ -458,7 +458,7 @@ void RuleWidget::on_ruleSave_clicked()
 
     if(!QFile::exists(fileName))
     {
-        QMessageBox::warning(this,windowTitle(),"Can not write file");
+        QMessageBox::warning(baseValues.mainWindow_,windowTitle(),"Can not write file");
         return;
     }
 }

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 #ifndef QTBITCOINTRADER_H
 #define QTBITCOINTRADER_H
 
-#include <QDialog>
+#include <QMainWindow>
 
 #include "ui_qtbitcointrader.h"
 #include "depthmodel.h"
@@ -56,16 +56,13 @@
 #include "networkmenu.h"
 #include <time.h>
 #include <QElapsedTimer>
+#include "chartsview.h"
 
 class Exchange;
-
-class WindowScrollBars : public QScrollArea
-{
-private:
-	void closeEvent(QCloseEvent *);
-	void keyPressEvent(QKeyEvent *);
-	void resizeEvent(QResizeEvent *);
-};
+class QDockWidget;
+class ConfigManager;
+class ConfigManagerDialog;
+class DockHost;
 
 struct GroupStateItem
 {
@@ -75,7 +72,7 @@ struct GroupStateItem
     QElapsedTimer elapsed;
 };
 
-class QtBitcoinTrader : public QDialog
+class QtBitcoinTrader : public QMainWindow
 {
 	Q_OBJECT
 
@@ -111,7 +108,7 @@ public:
 
 	void setupClass();
 	bool isValidSize(QSize *sizeV){if(sizeV->width()<3||sizeV->width()>2000||sizeV->height()<3||sizeV->height()>2000)return false; return true;}
-	void reloadLanguageList(QString preferedLangFile="");
+    void reloadLanguage(QString preferedLangFile="");
 	void fixAllChildButtonsAndLabels(QWidget *par);
 	void fixDecimals(QWidget *par);
 	void fillAllBtcLabels(QWidget *par, QString curName);
@@ -130,20 +127,25 @@ public:
 	QSettings *iniSettings;
 	bool isValidSoftLag;
 	void beep(bool noBlink=false);
-	void playWav(QString, bool noBlink=false);
+    void playWav(const QString&, bool noBlink=false);
 	void blinkWindow();
 
+    bool confirmOpenOrder;
     void apiSellSend(QString symbol, double btc, double price);
     void apiBuySend(QString symbol, double btc, double price);
 
 	QTime lastRuleExecutedTime;
 
-	QSortFilterProxyModel *ordersSortModel;
+    bool confirmExitApp();
+    bool hasWorkingRules();
+    bool executeConfirmExitDialog();
+
+    QSortFilterProxyModel *ordersSortModel;
 	bool currentlyAddingOrders;
-	bool windowCloseRequested();
 	void keyPressEvent(QKeyEvent *event);
 	void closeEvent(QCloseEvent *event);
-	void resizeEvent(QResizeEvent *event);
+    void changeEvent(QEvent* event);
+    void resizeEvent(QResizeEvent *event);
 
 	bool isDetachedLog;
 	bool isDetachedTrades;
@@ -159,6 +161,10 @@ public:
 
     double getVolumeByPrice(QString symbol, double price, bool isAsk);
     double getPriceByVolume(QString symbol, double size, bool isAsk);
+
+    bool closeToTray;
+
+    ChartsView *chartsView;
 private:
     QList<GroupStateItem> pendingGroupStates;
 
@@ -189,7 +195,6 @@ private:
 	int depthBidsLastScrollValue;
 
 	QMenu *trayMenu;
-	void saveDetachedWindowsSettings(bool force=false);
 	QString windowTitleP;
 	QSystemTrayIcon *trayIcon;
 	QString profileName;
@@ -199,7 +204,7 @@ private:
     int lastLoadedCurrency;
 
 	bool constructorFinished;
-	void reject(){};
+    void reject(){}
 	QString clearData(QString data);
 
 	QString appDir;
@@ -225,23 +230,20 @@ private:
 
 	void translateUnicodeStr(QString *str);
 
-	bool eventFilter(QObject *obj, QEvent *event);
-
 	void checkIsTabWidgetVisible();
 
 	void clearTimeOutedTrades();
-	bool isValidGeometry(QRect *geo, int yMargin=20);
-	QRect rectInRect(QRect aRect, QSize bSize);
-	void saveWindowState(QWidget *, QString name);
-	void loadWindowState(QWidget *, QString name);
 	void depthSelectOrder(QModelIndex, bool isSel, int type=0);
-    double tradesPrecentLast;
+	double tradesPrecentLast;
 
 	void repeatOrderFromTrades(int type,int row);
-    void repeatOrderFromValues(int type,double price, double amount, bool availableOnly=true);
+	void repeatOrderFromValues(int type,double price, double amount, bool availableOnly=true);
 	void repeatSelectedOrderByType(int type, bool availableOnly=true);
 
 	void updateTrafficTotalValue();
+
+    qint16 currentPopupDialogs;
+
 public slots:
     void sendIndicatorEvent(QString symbol, QString name, double value);
 
@@ -300,34 +302,17 @@ public slots:
     void depthFirstOrder(QString,double,double,bool);
     void depthSubmitOrders(QString,QList<DepthItem> *, QList<DepthItem> *);
 	void showErrorMessage(QString);
-	void exitApp();
+    void saveAppState();
 	void on_widgetStaysOnTop_toggled(bool);
 	void setSoftLagValue(int);
 	void trayActivated(QSystemTrayIcon::ActivationReason);
 	void buttonMinimizeToTray();
-	void on_tabOrdersLogOnTop_toggled(bool);
-	void on_tabRulesOnTop_toggled(bool);
-	void on_tabTradesOnTop_toggled(bool);
-	void on_tabChartsOnTop_toggled(bool);
-	void on_tabDepthOnTop_toggled(bool);
 
 	void secondSlot();
 	void setTradesScrollBarValue(int);
 	void tabTradesIndexChanged(int);
 	void tabTradesScrollUp();
     void addLastTrades(QString symbol, QList<TradesItem> *newItems);
-
-	void detachLog();
-	void detachTrades();
-	void detachRules();
-	void detachCharts();
-	void detachDepth();
-
-	void attachLog();
-	void attachTrades();
-	void attachRules();
-	void attachCharts();
-	void attachDepth();
 
     void sayText(QString);
 
@@ -352,8 +337,6 @@ public slots:
 
 	void fixWindowMinimumSize();
 
-	void languageComboBoxChanged(int);
-
 	void languageChanged();
 	void on_zeroSellThanBuyProfit_clicked();
 	void on_zeroBuyThanSellProfit_clicked();
@@ -368,8 +351,6 @@ public slots:
 
 	void buttonNewWindow();
 
-	void aboutTranslationButton();
-
 	void on_currencyComboBox_currentIndexChanged(int);
 
 	void on_calcButton_clicked();
@@ -380,12 +361,12 @@ public slots:
     void accBtcBalanceChanged(QString, double);
     void accUsdBalanceChanged(QString, double);
 
-    void tickerHighChanged(QString, double);
-    void tickerLowChanged(QString, double);
-    void tickerSellChanged(QString, double);
-    void tickerLastChanged(QString, double);
-    void tickerBuyChanged(QString, double);
-    void tickerVolumeChanged(QString, double);
+    void indicatorHighChanged(QString, double);
+    void indicatorLowChanged(QString, double);
+    void indicatorSellChanged(QString, double);
+    void indicatorLastChanged(QString, double);
+    void indicatorBuyChanged(QString, double);
+    void indicatorVolumeChanged(QString, double);
 
 	
     void on_accountUSD_valueChanged(double);
@@ -428,11 +409,50 @@ signals:
     void apiSell(QString symbol,double btc, double price);
     void apiBuy(QString symbol,double btc, double price);
 	void getHistory(bool);
-	void quit();
 	void clearValues();
+    void clearCharts();
+    void addBound(double,bool);
 private slots:
     void on_buttonAddScript_clicked();
     void on_helpButton_clicked();
+
+private:
+    void initDocks();
+    void createActions();
+    void createMenu();
+    QDockWidget* createDock(QWidget* widget, const QString& title);
+    void moveWidgetsToDocks();
+    void translateTab(QWidget* tab);
+    void lockLogo(bool lock);
+    void initConfigMenu();
+
+private slots:
+    void onActionTest();
+    void onActionAbout();
+    void onActionAboutQt();
+    void onActionLockDocks(bool checked);
+    void onActionConfigManager();
+    void onActionSettings();
+    void onMenuConfigTriggered();
+    void onConfigChanged();
+    void onConfigError(const QString& error);
+    void exitApp();
+
+private:
+    QAction*    actionTest;
+    QAction*    actionExit;
+    QAction*    actionAbout;
+    QAction*    actionAboutQt;
+    QAction*    actionLockDocks;
+    QAction*    actionConfigManager;
+    QAction*    actionSettings;
+    QMenu*      menuFile;
+    QMenu*      menuView;
+    QMenu*      menuConfig;
+    QMenu*      menuHelp;
+    ConfigManagerDialog*    configDialog;
+    DockHost*   dockHost;
+    QDockWidget*    dockLogo;
 };
 
 #endif // QTBITCOINTRADER_H

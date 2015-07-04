@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -303,7 +303,7 @@ void TradesModel::setHorizontalHeaderLabels(QStringList list)
 
 	textAsk=julyTr("ORDER_TYPE_ASK","ask");
 	textBid=julyTr("ORDER_TYPE_BID","bid");
-	dateWidth=qMax(qMax(textFontWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(baseValues.dateTimeFormat)),textFontWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(baseValues.dateTimeFormat))),textFontWidth(list.at(0)))+10;
+    dateWidth=qMax(qMax(textFontWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(baseValues.dateTimeFormat)),textFontWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(baseValues.dateTimeFormat))),textFontWidth(list.at(0)))+10;
 	typeWidth=qMax(qMax(textFontWidth(textAsk),textFontWidth(textBid)),textFontWidth(list.at(2)))+10;
 
 	headerLabels=list;
@@ -364,7 +364,7 @@ void TradesModel::addNewTrades(QList<TradesItem> *newItems)
 	endInsertRows();
 	}
 
-	delete newItems;
+	emit addChartsTrades(newItems);
 }
 
 double TradesModel::getRowPrice(int row)

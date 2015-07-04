@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <QFile>
 #include <QApplication>
 #include "main.h"
+#include "timesync.h"
 
 LogThread::LogThread(bool wrf)
 	: QThread()
@@ -65,7 +66,7 @@ void LogThread::writeLog(QByteArray data, int dbLvl)
 
 void LogThread::writeLogSlot(QByteArray data, int dbLvl)
 {
-	data="------------------\r\n"+QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1()+QByteArray::number(dbLvl)+"\r\n"+data+"\r\n------------------\r\n\r\n";
+    data="------------------\r\n"+QDateTime::fromTime_t(TimeSync::getTimeT()).toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1()+QByteArray::number(dbLvl)+"\r\n"+data+"\r\n------------------\r\n\r\n";
 	if(writeFile)
 	{
 		QFile logFile(baseValues.logFileName);

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2014 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -252,8 +252,8 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 		QByteArray appendedHeader;
 
 		static int tonceCounter=0;		
-		static quint32 lastTonce=static_cast<quint32>(time(NULL));
-		quint32 newTonce=static_cast<quint32>(time(NULL));
+        static quint32 lastTonce=TimeSync::getTimeT();
+        quint32 newTonce=TimeSync::getTimeT();
 
 		if(lastTonce!=newTonce)
 		{
@@ -377,7 +377,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerHigh.isEmpty())
 			{
                 double newTickerHigh=tickerHigh.toDouble();
-                if(newTickerHigh!=lastTickerHigh)emit tickerHighChanged(baseValues.currentPair.symbol,newTickerHigh);
+                if(newTickerHigh!=lastTickerHigh)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"High",newTickerHigh);
 				lastTickerHigh=newTickerHigh;
 			}
 
@@ -385,7 +386,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerLow.isEmpty())
 			{
                 double newTickerLow=tickerLow.toDouble();
-                if(newTickerLow!=lastTickerLow)emit tickerLowChanged(baseValues.currentPair.symbol,newTickerLow);
+                if(newTickerLow!=lastTickerLow)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Low",newTickerLow);
 				lastTickerLow=newTickerLow;
 			}
 
@@ -393,7 +395,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerVolume.isEmpty())
 			{
                 double newTickerVolume=tickerVolume.toDouble();
-                if(newTickerVolume!=lastTickerVolume)emit tickerVolumeChanged(baseValues.currentPair.symbol,newTickerVolume);
+                if(newTickerVolume!=lastTickerVolume)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Volume",newTickerVolume);
 				lastTickerVolume=newTickerVolume;
 			}
 
@@ -401,7 +404,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerLast.isEmpty())
 			{
                 double newTickerLast=tickerLast.toDouble();
-                if(newTickerLast!=lastTickerLast)emit tickerLastChanged(baseValues.currentPair.symbol,newTickerLast);
+                if(newTickerLast!=lastTickerLast)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newTickerLast);
 				lastTickerLast=newTickerLast;
 			}
 
@@ -409,7 +413,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerSell.isEmpty())
 			{
                 double newTickerSell=tickerSell.toDouble();
-                if(newTickerSell!=lastTickerSell)emit tickerSellChanged(baseValues.currentPair.symbol,newTickerSell);
+                if(newTickerSell!=lastTickerSell)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",newTickerSell);
 				lastTickerSell=newTickerSell;
 			}
 
@@ -417,7 +422,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 			if(!tickerBuy.isEmpty())
 			{
                 double newTickerBuy=tickerBuy.toDouble();
-                if(newTickerBuy!=lastTickerBuy)emit tickerBuyChanged(baseValues.currentPair.symbol,newTickerBuy);
+                if(newTickerBuy!=lastTickerBuy)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
 
@@ -487,7 +493,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray currentRow=bidsList.at(n).toLatin1()+"}";
                     double priceDouble=getMidData("price\":",",",&currentRow).toDouble();
                     double amount=getMidData("amount\":","}",&currentRow).toDouble();
-                    if(n==0)emit tickerSellChanged(baseValues.currentPair.symbol,priceDouble);
+                    if(n==0)IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",priceDouble);
 					if(baseValues.groupPriceValue>0.0)
 					{
 						if(n==0)
@@ -535,7 +541,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 					QByteArray currentRow=asksList.at(n).toLatin1()+"}";
                     double priceDouble=getMidData("price\":",",",&currentRow).toDouble();
                     double amount=getMidData("amount\":","}",&currentRow).toDouble();
-                    if(n==0)emit tickerBuyChanged(baseValues.currentPair.symbol,priceDouble);
+                    if(n==0)IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",priceDouble);
 
 					if(priceDouble>99999)break;
 
