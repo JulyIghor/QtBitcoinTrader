@@ -545,21 +545,21 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 				if(!btcBalance.isEmpty())
 				{
                     double newBtcBalance=btcBalance.toDouble();
-                    if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbol,newBtcBalance);
+                    if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbolSecond(),newBtcBalance);
 					lastBtcBalance=newBtcBalance;
 				}
 
 				if(!usdBalance.isEmpty())
 				{
                     double newUsdBalance=usdBalance.toDouble();
-                    if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbol,newUsdBalance);
+                    if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbolSecond(),newUsdBalance);
 					lastUsdBalance=newUsdBalance;
 				}
 
 				if(!usdAvBalance.isEmpty())
 				{
                     double newAvUsdBalance=usdAvBalance.toDouble();
-                    if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(baseValues.currentPair.symbol,newAvUsdBalance);
+                    if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(baseValues.currentPair.symbolSecond(),newAvUsdBalance);
 					lastAvUsdBalance=newAvUsdBalance;
 				}
 
@@ -658,7 +658,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 quint32 maxId=0;
 				for(int n=0;n<dataList.count();n++)
 				{
-                    QByteArray curLog(dataList.at(n).toLatin1());
+                    QByteArray curLog(dataList.at(n).toLatin1()+"}");
 
                     currentId=getMidData("order_id\":","}",&curLog).toUInt();
                     if(currentId<=lastHistoryId)break;
