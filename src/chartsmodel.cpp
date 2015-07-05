@@ -298,15 +298,15 @@ void ChartsModel::prepareBound()
 {
     if(priceInit){
         qint16 graphBoundX;
-        if(iBoundsSellFirst>0&&iBoundsSellFirst<=boundsSellDate.count()){
+        if(iBoundsSellFirst>0&&iBoundsSellFirst<=boundsSellPrice.count()){
             graphBoundsSellX.append(1);
             graphBoundsSellY.append(qRound(priceYScale*(boundsSellPrice[iBoundsSellFirst-1]-priceMin)));
         }
-        if(iBoundsBuyFirst>0&&iBoundsBuyFirst<=boundsBuyDate.count()){
+        if(iBoundsBuyFirst>0&&iBoundsBuyFirst<=boundsBuyPrice.count()){
             graphBoundsBuyX.append(1);
             graphBoundsBuyY.append(qRound(priceYScale*(boundsBuyPrice[iBoundsBuyFirst-1]-priceMin)));
         }
-        for(qint32 i=iBoundsSellFirst;i<boundsSellDate.count();i++){
+        for(qint32 i=iBoundsSellFirst;i<boundsSellPrice.count();i++){
             graphBoundX=qRound(graphXScale*(boundsSellDate[i]-graphFirstDate));
             if(graphBoundsSellY.count()){
                 graphBoundsSellX.append(graphBoundX);
@@ -315,7 +315,7 @@ void ChartsModel::prepareBound()
             graphBoundsSellX.append(graphBoundX);
             graphBoundsSellY.append(qRound(priceYScale*(boundsSellPrice[i]-priceMin)));
         }
-        for(qint32 i=iBoundsBuyFirst;i<boundsBuyDate.count();i++){
+        for(qint32 i=iBoundsBuyFirst;i<boundsBuyPrice.count();i++){
             graphBoundX=qRound(graphXScale*(boundsBuyDate[i]-graphFirstDate));
             if(graphBoundsBuyY.count()){
                 graphBoundsBuyX.append(graphBoundX);
