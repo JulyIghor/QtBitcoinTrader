@@ -1,6 +1,6 @@
 ## Qt Bitcoin Trader
 
-This software helps you open and cancel Mt.Gox orders very fast. Real time data monitoring.
+This software helps you open and cancel orders very fast. Real time data monitoring.
 
 Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
 
@@ -11,6 +11,10 @@ If you want to help me, than donate to `1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc`
 Next ToDo:
 - Add realtime charts
 - Make rules more advanced
+
+## Official website
+
+* https://centrabit.com/?m0prm=6
 
 ## Download binaries
 
