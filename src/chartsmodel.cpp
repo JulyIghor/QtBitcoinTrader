@@ -304,7 +304,7 @@ void ChartsModel::prepareBound()
         }
         if(iBoundsBuyFirst>0&&iBoundsBuyFirst<=boundsBuyDate.count()){
             graphBoundsBuyX.append(1);
-            graphBoundsBuyY.append(qRound(priceYScale*(boundsBuyPrice[iBoundsSellFirst-1]-priceMin)));
+            graphBoundsBuyY.append(qRound(priceYScale*(boundsBuyPrice[iBoundsBuyFirst-1]-priceMin)));
         }
         for(qint32 i=iBoundsSellFirst;i<boundsSellDate.count();i++){
             graphBoundX=qRound(graphXScale*(boundsSellDate[i]-graphFirstDate));
