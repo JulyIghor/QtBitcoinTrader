@@ -84,7 +84,7 @@ bool RuleHolder::isValid()
 {
     bool immediately=variableACode==QLatin1String("IMMEDIATELY")||variableACode==QLatin1String("LastTrade")||variableACode==QLatin1String("MyLastTrade");
 	bool exactB=variableBCode==QLatin1String("EXACT");
-    if(thanAmountFeeIndex<0||thanPriceFeeIndex<0||thanPriceFeeIndex<0||thanTypeIndex<0)return false;
+    if(thanAmountFeeIndex<0||thanPriceFeeIndex<0||thanTypeIndex<0)return false;
     if(thanTypeIndex>3||thanAmount>0.0);else return false;
     if(immediately||!exactB||variableBExact!=0);else return false;
     if(thanPriceTypeCode==QLatin1String("EXACT")?thanPrice>0.0:true);else return false;
