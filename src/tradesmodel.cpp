@@ -191,10 +191,11 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 	switch(indexColumn)
 	{
 	case 1:
-		 {//Date
+		{//Date
 			if(role==Qt::ToolTipRole||itemsList.at(currentRow).displayFullDate)return itemsList.at(currentRow).dateStr;
-			return itemsList.at(currentRow).timeStr; break;
-		 }
+			return itemsList.at(currentRow).timeStr;
+		}
+		break;
 	case 2:
 		{//Volume
 			if(itemsList.at(currentRow).amount<=0.0)return QVariant();
