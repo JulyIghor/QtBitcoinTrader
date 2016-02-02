@@ -61,6 +61,7 @@
 #include "exchange_indacoin.h"
 #include "exchange_bitcurex.h"
 #include "exchange_bitmarket.h"
+#include "exchange_zaif.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
 #include "debugviewer.h"
@@ -570,6 +571,7 @@ void QtBitcoinTrader::setupClass()
 	case 6: currentExchange=new Exchange_Indacoin(baseValues.restSign,baseValues.restKey);break;//Indacoin
 	case 7: currentExchange=new Exchange_BitCurex(baseValues.restSign,baseValues.restKey);break;//BitCurex
 	case 8: currentExchange=new Exchange_BitMarket(baseValues.restSign,baseValues.restKey);break;//BitMarket
+	case 9: currentExchange=new Exchange_Zaif(baseValues.restSign,baseValues.restKey);break;//Zaif
 	default: return;
 	}
 	baseValues.restSign.clear();
