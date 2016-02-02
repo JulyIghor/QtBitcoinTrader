@@ -21,6 +21,7 @@
         <file>Resources/Exchanges/Logos/BitCurex_Big.png</file>
         <file>Resources/Exchanges/Logos/BitMarket.png</file>
         <file>Resources/Exchanges/Logos/BitMarket_Big.png</file>
+        <file>Resources/Exchanges/Logos/Zaif.png</file>
         <file>Resources/Open.png</file>
         <file>Resources/Save.png</file>
         <file>Resources/Themes/Dark.thm</file>
@@ -54,6 +55,7 @@
         <file>Resources/Exchanges/GOCio.ini</file>
         <file>Resources/Exchanges/BitCurex.ini</file>
         <file>Resources/Exchanges/BitMarket.ini</file>
+        <file>Resources/Exchanges/Zaif.ini</file>
         <file>Resources/CurrencySign/AUD.png</file>
         <file>Resources/CurrencySign/BTC.png</file>
         <file>Resources/CurrencySign/LTC.png</file>

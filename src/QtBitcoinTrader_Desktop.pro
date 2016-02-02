@@ -116,6 +116,7 @@ HEADERS += aboutdialog.h \
            julymath.h \
            exchange_bitcurex.h \
            exchange_bitmarket.h \
+           exchange_zaif.h \
            platform/sound.h \
            platform/socket.h \
            config/config_manager.h \
@@ -222,6 +223,7 @@ SOURCES += aboutdialog.cpp \
            exchange_indacoin.cpp \
            exchange_bitcurex.cpp \
            exchange_bitmarket.cpp \
+           exchange_zaif.cpp \
            platform/sound.cpp \
            platform/socket.cpp \
            config/config_manager.cpp \
