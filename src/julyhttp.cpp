@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@
 JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *parent, const bool &secure, const bool &keepAlive, const QByteArray &contentType)
 	: QSslSocket(parent)
 {
+    destroyClass=false;
+    noReconnect=false;
     forcedPort=0U;
 	noReconnectCount=0;
     noReconnect=false;
@@ -72,9 +74,9 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	hostName=hostN;
 	httpHeader.append(" HTTP/1.1\r\n");
 	if(baseValues.customUserAgent.length()>0)
-	httpHeader.append("User-Agent: "+baseValues.customUserAgent+"\r\n");
+    httpHeader.append("User-Agent: "+baseValues.customUserAgent+"\r\n");
 		else
-	httpHeader.append("User-Agent: Qt Bitcoin Trader v"+baseValues.appVerStr+"\r\n");
+    httpHeader.append("User-Agent: Qt Bitcoin Trader v"+baseValues.appVerStr+"\r\n");
 	httpHeader.append("Host: "+hostName+"\r\n");
     httpHeader.append("Accept: */*\r\n");
 	if(baseValues.gzipEnabled)httpHeader.append("Accept-Encoding: gzip\r\n");
@@ -99,7 +101,7 @@ JulyHttp::JulyHttp(const QString &hostN, const QByteArray &restLine, QObject *pa
 	saveCookies();
 
 	QTimer *secondTimer=new QTimer(this);
-	connect(secondTimer,SIGNAL(timeout()),this,SLOT(sendPendingData()));
+    connect(secondTimer,SIGNAL(timeout()),this,SLOT(sendPendingData()));
 	secondTimer->start(300);
 }
 
@@ -111,7 +113,7 @@ JulyHttp::~JulyHttp()
 void JulyHttp::setupSocket()
 {
 	static QList<QSslCertificate> certs;
-	if(certs.count()==0)
+    if(certs.count()==0)
 	{
 		QFile readCerts(":/Resources/CertBase.cer");
 		if(readCerts.open(QIODevice::ReadOnly))
@@ -131,13 +133,9 @@ void JulyHttp::setupSocket()
 			else certData.clear();
 			}while(certData.size());
 		}
-	}
+    }
 
-	if(certs.count())
-	{
-	addCaCertificates(certs);
-	addDefaultCaCertificates(certs);
-	}
+    setCaCertificates(certs);
 
 	setPeerVerifyMode(QSslSocket::VerifyPeer);
 	connect(this,SIGNAL(readyRead()),SLOT(readSocket()));
@@ -154,20 +152,21 @@ void JulyHttp::clearPendingData()
 void JulyHttp::reConnect(bool mastAbort)
 {
 	if(isDisabled)return;
-	reconnectSocket(mastAbort);
+    reconnectSocket(mastAbort);
 }
 
 void JulyHttp::abortSocket()
 {
-	blockSignals(true);
-	abort();
-	blockSignals(false);
+    blockSignals(true);
+    abort();
+    blockSignals(false);
 }
 
 void JulyHttp::reconnectSocket(bool mastAbort)
 {
+    if(destroyClass)return;//{qDebug("delete reconnectSocket1"); delete this; qDebug("delete reconnectSocket2");}
     if(isDisabled)return;
-	if(mastAbort)abortSocket();
+    if(mastAbort)abortSocket();
 	if(state()==QAbstractSocket::UnconnectedState)
     {
         if(secureConnection)connectToHostEncrypted(hostName, forcedPort?forcedPort:443, QIODevice::ReadWrite);
@@ -182,7 +181,7 @@ void JulyHttp::reconnectSocket(bool mastAbort)
         vtime.tv_usec=baseValues.httpRequestTimeout*1000-vtime.tv_sec*1000000;
         setsockopt(this->socketDescriptor(),SOL_SOCKET,SO_RCVTIMEO,&vtime,sizeof(struct timeval));
 #endif
-	}
+    }
 }
 
 void JulyHttp::setApiDown(bool httpError)
@@ -437,8 +436,8 @@ void JulyHttp::readSocket()
 			if(debugLevel)logThread->writeLog("HTTP: connection closed");
 			reConnect(true);
 		}
-		sendPendingData();
-	}
+        sendPendingData();
+    }
 }
 
 void JulyHttp::uncompress(QByteArray *data)
@@ -500,7 +499,7 @@ void JulyHttp::retryRequest()
 		if(debugLevel)logThread->writeLog("Warning: Request resent due timeout",2);
 		requestList[0].retryCount--;
 	}
-	sendPendingData();
+    sendPendingData();
 }
 
 void JulyHttp::clearRequest()
@@ -612,7 +611,7 @@ void JulyHttp::sendData(int reqType, const QByteArray &method, QByteArray postDa
 	}
 
 	reqTypePending[reqType]=reqTypePending.value(reqType,0)+1;
-	sendPendingData();
+    sendPendingData();
 }
 
 void JulyHttp::takeRequestAt(int pos)
@@ -666,8 +665,8 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
 
         mutex.unlock();
 
-		reconnectSocket(false);
-	}
+        reconnectSocket(false);
+    }
 }
 
 bool JulyHttp::isSocketConnected()
@@ -680,12 +679,12 @@ void JulyHttp::sendPendingData()
 	if(isDisabled)return;
 	if(requestList.count()==0)return;
 
-	if(!isSocketConnected())reconnectSocket(false);
+    if(!isSocketConnected())reconnectSocket(false);
 
 	if(state()!=QAbstractSocket::UnconnectedState)
-	{
+    {
         if(state()==QAbstractSocket::ConnectingState||state()==QAbstractSocket::HostLookupState)waitForConnected(((noReconnect&&noReconnectCount++>5)?1000:baseValues.httpRequestTimeout+1000));
-	}
+    }
     if(!noReconnect)
     {
         if(!isSocketConnected())
@@ -706,7 +705,7 @@ void JulyHttp::sendPendingData()
 		else
 		{
             if(debugLevel)logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(baseValues.httpRequestTimeout).toLatin1(),2);
-			reconnectSocket(true);
+            reconnectSocket(true);
 			setApiDown(true);
 			if(requestList.first().retryCount>0){retryRequest();return;}
 		}

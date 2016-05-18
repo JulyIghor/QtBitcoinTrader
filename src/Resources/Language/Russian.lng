@@ -513,12 +513,21 @@ Label_SETTINGS_PORT=Порт:
 Label_SETTINGS_USER=Пользователь:
 Label_SETTINGS_PASSWORD=Пароль:
 GroupBox_SETTINGS_API=API
-Label_SETTINGS_DOWN_COUNT=Down count Max:
+Label_SETTINGS_DOWN_COUNT=Количество API запросов без ответа:
 Label_SETTINGS_RETRY_COUNT=Количество повторов:
 Label_SETTINGS_INTERVAL=Интервал между пакетами:
 Label_SETTINGS_TIMEOUT=Время ожидания:
 GroupBox_SETTINGS_TIME=Время
 Label_SETTINGS_USE_24HOUR_TIME_FORMAT=Использовать 24-часовой формат времени:
 Label_SETTINGS_TIME_SYNC=Синхронизация времени:
+Label_SETTINGS_TYPE=Тип
+Label_SETTINGS_ALTERNATIVE_DOMAIN_BTCE=Использовать альтернативный домен для BTC-e
+Label_MS=мс
 
 Label_UPDATER_AGAIN_AUTO_UPDATE=Больше не спрашивать, автоматически устанавливать обновления:
+
+String_TAB_NEWS=Новости
+String_TAB_CHAT=Чат
+
+String_TIME_SYNC_ERROR=Ваши часы не установлены. Пожалуйста, закройте QtBitcoinTrader и установите часы. Изменение времени при включенном QtBitcoinTrader может привести к ошибкам и испортить ключи.
+String_TIME_ERROR=Ошибка времени

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -79,7 +79,6 @@ Exchange_GOCio::~Exchange_GOCio()
 
 void Exchange_GOCio::clearVariables()
 {
-	isFirstTicker=true;
 	isFirstAccInfo=true;
 	Exchange::clearVariables();
 	lastOpenedOrders=-1;
@@ -184,12 +183,6 @@ void Exchange_GOCio::dataReceivedAuth(QByteArray data, int reqType)
                     IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Volume",newTickerVolume);
 				lastTickerVolume=newTickerVolume;
             }
-
-			if(isFirstTicker)
-			{
-				emit firstTicker();
-				isFirstTicker=false;
-			}
 		}
 		break;//ticker
 	case 109: //trades
@@ -376,7 +369,7 @@ void Exchange_GOCio::dataReceivedAuth(QByteArray data, int reqType)
 	case 204://orders
 		{
 		if(data.size()<=30)break;
-		bool isEmptyOrders=!success&&errorString==QLatin1String("no orders");if(isEmptyOrders)success=true;
+        bool isEmptyOrders=!success&&errorString==QLatin1String("no active orders");if(isEmptyOrders)success=true;
 		if(lastOrders!=data)
 		{
 			lastOrders=data;
@@ -421,7 +414,7 @@ void Exchange_GOCio::dataReceivedAuth(QByteArray data, int reqType)
 	case 307: if(debugLevel)logThread->writeLog("Sell OK: "+data,2);break;//order/sell
 	case 208: ///history
 		{
-		bool isEmptyOrders=!success&&errorString==QLatin1String("no trades");if(isEmptyOrders)success=true;
+        bool isEmptyOrders=!success&&errorString==QLatin1String("no trade history");if(isEmptyOrders)success=true;
 		if(lastHistory!=data)
 		{
 			lastHistory=data;
@@ -476,6 +469,25 @@ void Exchange_GOCio::dataReceivedAuth(QByteArray data, int reqType)
 		}
 	default: break;
 	}
+
+    static int authErrorCount=0;
+    if(reqType>=200 && reqType<300)
+    {
+        if(!success)
+        {
+            authErrorCount++;
+            if(authErrorCount>2)
+            {
+                QString authErrorString=getMidData("error\":\"","\"",&data);
+                if(debugLevel)logThread->writeLog("API error: "+authErrorString.toLatin1()+" ReqType: "+QByteArray::number(reqType),2);
+
+                if(authErrorString=="API key not found or inactive")authErrorString=julyTr("TRUNAUTHORIZED","Invalid API key.");
+                else if(authErrorString.startsWith("invalid nonce parameter"))authErrorString=julyTr("THIS_PROFILE_ALREADY_USED","Invalid nonce parameter.");
+                if(!authErrorString.isEmpty())emit showErrorMessage(authErrorString);
+            }
+        }
+        else authErrorCount=0;
+    }
 
 	static int errorCount=0;
 	if(!success)
@@ -572,13 +584,6 @@ void Exchange_GOCio::secondSlot()
     }
     if(sendCounter++>=5)sendCounter=0;
 
-    static int infoCounter=0;
-	if(++infoCounter>9)
-	{
-		infoCounter=0;
-        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
-		if(privateNonce<syncNonce)privateNonce=syncNonce;
-	}
 	Exchange::secondSlot();
 }
 

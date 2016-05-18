@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -77,12 +77,12 @@ Exchange_BitMarket::~Exchange_BitMarket()
 
 void Exchange_BitMarket::clearVariables()
 {
-	isFirstTicker=true;
     cancelingOrderIDs.clear();
 	Exchange::clearVariables();
 	lastOpenedOrders=-1;
 	apiDownCounter=0;
     lastHistoryId=0;
+    lastHistoryCount=0;
 	lastHistory.clear();
 	lastOrders.clear();
 	reloadDepth();
@@ -139,7 +139,7 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
 
             QByteArray tickerSell=getMidData("\"bid\":",",\"",&data);
 			if(!tickerSell.isEmpty())
-			{
+            {
                 double newTickerSell=tickerSell.toDouble();
                 if(newTickerSell!=lastTickerSell)
                     IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Sell",newTickerSell);
@@ -148,7 +148,7 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
 
             QByteArray tickerBuy=getMidData("\"ask\":",",\"",&data);
 			if(!tickerBuy.isEmpty())
-			{
+            {
                 double newTickerBuy=tickerBuy.toDouble();
                 if(newTickerBuy!=lastTickerBuy)
                     IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",newTickerBuy);
@@ -172,12 +172,6 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
                     IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newTickerLast);
                 lastTickerLast=newTickerLast;
             }
-
-			if(isFirstTicker)
-			{
-				emit firstTicker();
-				isFirstTicker=false;
-			}
 		}
         else {
             success=false;
@@ -444,6 +438,11 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
             {
                 lastHistory=historyData;
                 if(historyData=="^")break;
+
+                quint32 count=getMidData("total\":",",",&data).toInt();
+                if(count<=lastHistoryCount)break;
+                lastHistoryCount=count;
+
                 QString newLog(historyData);
                 QStringList dataList=newLog.split("},{");
                 if(dataList.count()==0)return;
@@ -483,6 +482,25 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
 		break;//money/wallet/history
 	default: break;
 	}
+
+    static int authErrorCount=0;
+    if(reqType>=200 && reqType<300)
+    {
+        if(!success)
+        {
+            authErrorCount++;
+            if(authErrorCount>2)
+            {
+                QString authErrorString=getMidData("errorMsg\":\"","\"",&data);
+                if(debugLevel)logThread->writeLog("API error: "+authErrorString.toLatin1()+" ReqType: "+QByteArray::number(reqType),2);
+
+                if(authErrorString=="Invalid API key")authErrorString=julyTr("TRUNAUTHORIZED","Invalid API key.");
+                else if(authErrorString=="Invalid nonce value")authErrorString=julyTr("THIS_PROFILE_ALREADY_USED","Invalid nonce parameter.");
+                if(!authErrorString.isEmpty())emit showErrorMessage(authErrorString);
+            }
+        }
+        else authErrorCount=0;
+    }
 
     static int errorCount=0;
 	if(!success)
@@ -578,13 +596,6 @@ void Exchange_BitMarket::secondSlot()
     }
     if(sendCounter++>=5)sendCounter=0;
 
-    static int nonceCounter=0;
-    if(++nonceCounter>9)
-	{
-        nonceCounter=0;
-        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
-		if(privateNonce<syncNonce)privateNonce=syncNonce;
-	}
 	Exchange::secondSlot();
 }
 
@@ -592,7 +603,7 @@ void Exchange_BitMarket::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-    if(!isReplayPending(208))sendToApi(208,"trades&market="+baseValues.currentPair.symbol.toLatin1()+"&start="+QByteArray::number(lastHistoryId),true,true);
+    if(!isReplayPending(208))sendToApi(208,"trades&market="+baseValues.currentPair.symbol.toLatin1()/*+"&start="+QByteArray::number(lastHistoryCount)*/,true,true);
 }
 
 void Exchange_BitMarket::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)

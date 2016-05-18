@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,8 @@ SettingsNetworkProxy::SettingsNetworkProxy()
 	: QWidget()
 {
 	ui.setupUi(this);
+    ui.typeComboBox->addItem("Http","HttpProxy");
+    ui.typeComboBox->addItem("Socks5","Socks5Proxy");
     proxySettings=new QSettings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
     networkSettings=new QSettings(baseValues.iniFileName,QSettings::IniFormat);
 
@@ -71,6 +73,8 @@ void SettingsNetworkProxy::allSetStatus()
 	ui.userLineEdit->setEnabled(manualProxy);
 	ui.passwordLabel->setEnabled(manualProxy);
 	ui.passwordLineEdit->setEnabled(manualProxy);
+    ui.typeLabel->setEnabled(manualProxy);
+    ui.typeComboBox->setEnabled(manualProxy);
 }
 
 void SettingsNetworkProxy::on_enabledCheckBox_stateChanged(int)
@@ -92,6 +96,9 @@ void SettingsNetworkProxy::loadProxy()
     ui.portLineEdit->setText(proxySettings->value("Proxy/Port","1234").toString());
     ui.userLineEdit->setText(proxySettings->value("Proxy/User","username").toString());
     ui.passwordLineEdit->setText(proxySettings->value("Proxy/Password","password").toString());
+
+    if(proxySettings->value("Proxy/Type","HttpProxy").toString()=="Socks5Proxy")ui.typeComboBox->setCurrentIndex(1);
+    else ui.typeComboBox->setCurrentIndex(0);
 }
 
 void SettingsNetworkProxy::saveProxy()
@@ -102,6 +109,7 @@ void SettingsNetworkProxy::saveProxy()
 	proxySettings->setValue("Proxy/Port",ui.portLineEdit->text());
 	proxySettings->setValue("Proxy/User",ui.userLineEdit->text());
 	proxySettings->setValue("Proxy/Password",ui.passwordLineEdit->text());
+    proxySettings->setValue("Proxy/Type",ui.typeComboBox->itemData(ui.typeComboBox->currentIndex()).toString());
 }
 
 void SettingsNetworkProxy::activateProxy()
@@ -120,7 +128,9 @@ void SettingsNetworkProxy::activateProxy()
 			proxy.setPort(ui.portLineEdit->text().toUInt());
 			proxy.setUser(ui.userLineEdit->text());
 			proxy.setPassword(ui.passwordLineEdit->text());
-			proxy.setType(QNetworkProxy::HttpProxy);
+
+            if(ui.typeComboBox->currentIndex()==1)proxy.setType(QNetworkProxy::Socks5Proxy);
+            else proxy.setType(QNetworkProxy::HttpProxy);
 		}
 		QNetworkProxy::setApplicationProxy(proxy);
 	}
@@ -133,6 +143,7 @@ void SettingsNetworkProxy::loadNetwork()
     ui.httpRetryCountSpinBox->setValue(networkSettings->value("Network/HttpRetryCount",8).toInt());
     ui.httpRequestsIntervalSpinBox->setValue(networkSettings->value("Network/HttpRequestsInterval",500).toInt());
     ui.httpRequestsTimeoutSpinBox->setValue(networkSettings->value("Network/HttpRequestsTimeout",4001).toInt());
+    ui.alternativeDomainBTCeCheckBox->setChecked(networkSettings->value("Network/AlternativeDomainBTCe",false).toBool());
 }
 
 void SettingsNetworkProxy::saveNetwork()
@@ -141,6 +152,7 @@ void SettingsNetworkProxy::saveNetwork()
 	networkSettings->setValue("Network/HttpRetryCount",ui.httpRetryCountSpinBox->value());
 	networkSettings->setValue("Network/HttpRequestsInterval",ui.httpRequestsIntervalSpinBox->value());
 	networkSettings->setValue("Network/HttpRequestsTimeout",ui.httpRequestsTimeoutSpinBox->value());
+    networkSettings->setValue("Network/AlternativeDomainBTCe",ui.alternativeDomainBTCeCheckBox->isChecked());
 }
 
 void SettingsNetworkProxy::activateNetwork()
@@ -149,6 +161,7 @@ void SettingsNetworkProxy::activateNetwork()
 	baseValues.httpRetryCount=ui.httpRetryCountSpinBox->value();
 	baseValues.httpRequestInterval=ui.httpRequestsIntervalSpinBox->value();
 	baseValues.httpRequestTimeout=ui.httpRequestsTimeoutSpinBox->value();
+    baseValues.alternativeDomainBTCe=ui.alternativeDomainBTCeCheckBox->isChecked();
 }
 
 void SettingsNetworkProxy::on_revertChangesButton_clicked()
@@ -168,11 +181,13 @@ void SettingsNetworkProxy::on_restoreDefaultsButton_clicked()
 	ui.portLineEdit->setText("1234");
 	ui.userLineEdit->setText("username");
 	ui.passwordLineEdit->setText("password");
+    ui.typeComboBox->setCurrentIndex(0);
 
 	ui.apiDownCounterMaxSpinBox->setValue(5);
 	ui.httpRetryCountSpinBox->setValue(8);
 	ui.httpRequestsIntervalSpinBox->setValue(500);
 	ui.httpRequestsTimeoutSpinBox->setValue(4000);
+    ui.alternativeDomainBTCeCheckBox->setChecked(false);
 
 	ui.restoreDefaultsButton->setEnabled(false);
 }

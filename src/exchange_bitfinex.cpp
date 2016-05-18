@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -87,7 +87,6 @@ Exchange_Bitfinex::~Exchange_Bitfinex()
 void Exchange_Bitfinex::clearVariables()
 {
 	historyLastTimestamp="0";
-	isFirstTicker=true;
 	isFirstAccInfo=true;
 	lastTickerHigh=0.0;
 	lastTickerLow=0.0;
@@ -149,13 +148,6 @@ void Exchange_Bitfinex::secondSlot()
     }
     if(sendCounter++>=5)sendCounter=0;
 
-    static int infoCounter=0;
-	if(++infoCounter>9)
-	{
-		infoCounter=0;
-        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
-		if(privateNonce<syncNonce)privateNonce=syncNonce;
-	}
 	Exchange::secondSlot();
 }
 
@@ -345,11 +337,6 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                     IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newTickerLast);
 					tickerLastDate=tickerNow;
 				}
-			}
-			if(isFirstTicker)
-			{
-				emit firstTicker();
-				isFirstTicker=false;
 			}
 		}
 		else if(debugLevel)logThread->writeLog("Invalid ticker fast data:"+data,2);
@@ -704,6 +691,25 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 		break;//money/wallet/history
 	default: break;
 	}
+
+    static int authErrorCount=0;
+    if(reqType>=200 && reqType<300)
+    {
+        if(!success)
+        {
+            authErrorCount++;
+            if(authErrorCount>2)
+            {
+                QString authErrorString=getMidData("message\":\"","\"",&data);
+                if(debugLevel)logThread->writeLog("API error: "+authErrorString.toLatin1()+" ReqType: "+QByteArray::number(reqType),2);
+
+                if(authErrorString=="Could not find a key matching the given X-BFX-APIKEY.")authErrorString=julyTr("TRUNAUTHORIZED","Invalid API key.");
+                else if(authErrorString=="Nonce is too small.")authErrorString=julyTr("THIS_PROFILE_ALREADY_USED","Invalid nonce parameter.");
+                if(!authErrorString.isEmpty())emit showErrorMessage(authErrorString);
+            }
+        }
+        else authErrorCount=0;
+    }
 
 	static int errorCount=0;
 	if(!success)

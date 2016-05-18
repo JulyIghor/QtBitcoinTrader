@@ -514,12 +514,21 @@ Label_SETTINGS_PORT=Port:
 Label_SETTINGS_USER=User:
 Label_SETTINGS_PASSWORD=Password:
 GroupBox_SETTINGS_API=API
-Label_SETTINGS_DOWN_COUNT=Down count Max:
+Label_SETTINGS_DOWN_COUNT=Count of failed request for API:
 Label_SETTINGS_RETRY_COUNT=Retry count:
 Label_SETTINGS_INTERVAL=Request Interval:
 Label_SETTINGS_TIMEOUT=Request Timeout:
 GroupBox_SETTINGS_TIME=Time
 Label_SETTINGS_USE_24HOUR_TIME_FORMAT=Use 24-hour time format:
 Label_SETTINGS_TIME_SYNC=Time synchronization:
+Label_SETTINGS_TYPE=Type
+Label_SETTINGS_ALTERNATIVE_DOMAIN_BTCE=Use alternative domain for BTC-e
+Label_MS=ms
 
 Label_UPDATER_AGAIN_AUTO_UPDATE=Don't ask again and automatically install updates:
+
+String_TAB_NEWS=News
+String_TAB_CHAT=Chat
+
+String_TIME_SYNC_ERROR=Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys.
+String_TIME_ERROR=Time error

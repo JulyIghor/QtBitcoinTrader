@@ -1816,7 +1816,7 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>600</width>
+          <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
@@ -2417,7 +2417,7 @@
          <string notr="true"/>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>6</number>
         </property>
         <property name="iconSize">
          <size>
@@ -3743,6 +3743,32 @@
              <number>0</number>
             </property>
            </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabNews">
+         <property name="accessibleName">
+          <string>TAB_NEWS</string>
+         </property>
+         <attribute name="title">
+          <string>News</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_17">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="newsLayout"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabChat">
+         <property name="accessibleName">
+          <string>TAB_CHAT</string>
+         </property>
+         <attribute name="title">
+          <string>Chat</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_22">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="chatLayout"/>
           </item>
          </layout>
         </widget>
@@ -6020,22 +6046,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>aboutTranslationButton</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>aboutTranslationButton()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1268</x>
-     <y>576</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1085</x>
-     <y>583</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>buttonNewWindow</sender>
    <signal>clicked()</signal>
    <receiver>QtBitcoinTraderClass</receiver>
@@ -6080,22 +6090,6 @@
     <hint type="destinationlabel">
      <x>399</x>
      <y>656</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>langComboBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>languageComboBoxChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1207</x>
-     <y>491</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1085</x>
-     <y>616</y>
     </hint>
    </hints>
   </connection>
@@ -6276,70 +6270,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>detachOrdersLog</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>detachLog()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1254</x>
-     <y>223</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1085</x>
-     <y>239</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>detachRules</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>detachRules()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1254</x>
-     <y>223</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1085</x>
-     <y>101</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>detachTrades</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>detachTrades()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1254</x>
-     <y>223</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1085</x>
-     <y>269</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>detachCharts</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>detachCharts()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1254</x>
-     <y>259</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1085</x>
-     <y>151</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>tabWidget</sender>
    <signal>currentChanged(int)</signal>
    <receiver>QtBitcoinTraderClass</receiver>
@@ -6352,22 +6282,6 @@
     <hint type="destinationlabel">
      <x>1085</x>
      <y>242</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>detachDepth</sender>
-   <signal>clicked()</signal>
-   <receiver>QtBitcoinTraderClass</receiver>
-   <slot>detachDepth()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1254</x>
-     <y>223</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1085</x>
-     <y>164</y>
     </hint>
    </hints>
   </connection>

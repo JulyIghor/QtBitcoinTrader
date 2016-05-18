@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -56,7 +56,9 @@
 #include "networkmenu.h"
 #include <time.h>
 #include <QElapsedTimer>
-#include "chartsview.h"
+#include "charts/chartsview.h"
+#include "news/newsview.h"
+#include "debugviewer.h"
 
 class Exchange;
 class QDockWidget;
@@ -164,7 +166,8 @@ public:
 
     bool closeToTray;
 
-    ChartsView *chartsView;
+    ChartsView* chartsView;
+    NewsView* newsView;
 private:
     QList<GroupStateItem> pendingGroupStates;
 
@@ -227,6 +230,8 @@ private:
 	bool profitBuyThanSellUnlocked;
 	bool profitBuyThanSellChangedUnlocked;
 	bool profitSellThanBuyChangedUnlocked;
+
+    DebugViewer* debugViewer;
 
 	void translateUnicodeStr(QString *str);
 
@@ -333,7 +338,6 @@ public slots:
     void orderCanceled(QString,QByteArray);
 	void ordersIsAvailable();
 	void ordersIsEmpty();
-	void firstTicker();
 
 	void fixWindowMinimumSize();
 
@@ -415,6 +419,8 @@ signals:
 private slots:
     void on_buttonAddScript_clicked();
     void on_helpButton_clicked();
+    void depthVisibilityChanged(bool);
+    void chartsVisibilityChanged(bool);
 
 private:
     void initDocks();
@@ -433,6 +439,7 @@ private slots:
     void onActionLockDocks(bool checked);
     void onActionConfigManager();
     void onActionSettings();
+    void onActionDebug();
     void onMenuConfigTriggered();
     void onConfigChanged();
     void onConfigError(const QString& error);
@@ -446,6 +453,7 @@ private:
     QAction*    actionLockDocks;
     QAction*    actionConfigManager;
     QAction*    actionSettings;
+    QAction*    actionDebug;
     QMenu*      menuFile;
     QMenu*      menuView;
     QMenu*      menuConfig;

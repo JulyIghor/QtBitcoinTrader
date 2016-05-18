@@ -113,8 +113,8 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.1001";
-	appVerReal=appVerStr.toDouble();
+    appVerStr="1.2000";
+    appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
 		if(appVerStr.size()==7)appVerStr.remove(6,1);
@@ -335,6 +335,10 @@ int main(int argc, char *argv[])
 		QString proxyUser=settingsMain.value("User","username").toString();
 		QString proxyPassword=settingsMain.value("Password","password").toString();
 
+        QNetworkProxy::ProxyType proxyType;
+        if(settingsMain.value("Proxy/Type","HttpProxy").toString()=="Socks5Proxy")proxyType=QNetworkProxy::Socks5Proxy;
+        else proxyType=QNetworkProxy::HttpProxy;
+
 		settingsMain.setValue("Enabled",proxyEnabled);
 		settingsMain.setValue("Auto",proxyAuto);
 		settingsMain.setValue("Host",proxyHost);
@@ -356,7 +360,7 @@ int main(int argc, char *argv[])
 				proxy.setUser(proxyUser);
 				proxy.setPort(proxyPort);
 				proxy.setPassword(proxyPassword);
-				proxy.setType(QNetworkProxy::HttpProxy);
+                proxy.setType(proxyType);
 			}
 			QNetworkProxy::setApplicationProxy(proxy);
 		}
@@ -511,6 +515,12 @@ int main(int argc, char *argv[])
 					encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
 				}
 				break;
+            case 9:
+                {//OKCoin
+                    baseValues.restSign=newPassword.getRestSign().toLatin1();
+                    encryptedData=JulyAES256::encrypt("Qt Bitcoin Trader\r\n"+baseValues.restKey+"\r\n"+baseValues.restSign.toBase64()+"\r\n"+QUuid::createUuid().toString().toLatin1(),tryPassword.toUtf8());
+                }
+                break;
 			default:
 				break;
 			}
@@ -608,7 +618,7 @@ int main(int argc, char *argv[])
     baseValues.mainWindow_=new QtBitcoinTrader;
 	}
 	mainWindow.setupClass();
-	a.exec();
+    a.exec();
 
     if(julyLock)delete julyLock;
 

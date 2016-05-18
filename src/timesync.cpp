@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,29 +30,29 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "timesync.h"
+#include "main.h"
 #include <QUdpSocket>
 #include <QtEndian>
-#include <QDateTime>
-#include <QSettings>
 #include <QStandardPaths>
-#include <QApplication>
+#include <QMessageBox>
 
 TimeSync::TimeSync() : QObject()
 {
+    startTime=QDateTime::currentDateTime().toTime_t();
     timeShift=0;
+    additionalTimer=0;
+    getNTPTimeRetryCount=0;
 
     dateUpdateThread=new QThread;
     connect(dateUpdateThread,SIGNAL(started()),this,SLOT(runThread()));
-    connect(this,SIGNAL(finishThread()),dateUpdateThread,SLOT(quit()));//terminate()
-
+    connect(this,SIGNAL(finishThread()),dateUpdateThread,SLOT(quit()));
+    connect(this,SIGNAL(startSync()),this,SLOT(getNTPTime()));
     this->moveToThread(dateUpdateThread);
     dateUpdateThread->start();
 }
 
 TimeSync::~TimeSync()
 {
-    emit stopTimer();
-    emit deleteTimer();
     emit finishThread();
 }
 
@@ -64,22 +64,32 @@ TimeSync* TimeSync::global()
 
 quint32 TimeSync::getTimeT()
 {
-    return QDateTime::currentDateTime().addSecs(TimeSync::global()->timeShift.load()).toTime_t();
+    TimeSync* timeSync=TimeSync::global();
+    if(timeSync->additionalTimer==0)return 0;
+
+    qint64 additionalBuffer=0;
+    timeSync->mutex.lock();
+    additionalBuffer=timeSync->additionalTimer->elapsed();
+    timeSync->mutex.unlock();
+
+    return timeSync->startTime+timeSync->timeShift+quint32(additionalBuffer/1000);
 }
 
-void TimeSync::runThread()
+void TimeSync::syncNow()
 {
     QString appDataDir=QStandardPaths::standardLocations(QStandardPaths::DataLocation).first().replace('\\','/')+"/";
     QSettings mainSettings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
     if(mainSettings.value("TimeSynchronization",true).toBool()){
-        dateUpdateTimer=new QTimer();
-        connect(dateUpdateTimer,SIGNAL(timeout()),this,SLOT(getNTPTime()));
-        connect(this,SIGNAL(stopTimer()),dateUpdateTimer,SLOT(stop()));
-        connect(this,SIGNAL(deleteTimer()),dateUpdateTimer,SLOT(deleteLater()));
-        dateUpdateTimer->start(30000);
-
-        getNTPTime();
+        emit TimeSync::global()->startSync();
     }
+}
+
+void TimeSync::runThread()
+{
+    startTime=QDateTime::currentDateTime().toTime_t();
+
+    additionalTimer=new QElapsedTimer();
+    additionalTimer->start();
 }
 
 void TimeSync::getNTPTime()
@@ -92,5 +102,18 @@ void TimeSync::getNTPTime()
     data=sock.readAll();
     quint32 seconds=qToBigEndian(*(reinterpret_cast<quint32 *>(&data.data()[40])));
     quint32 fraction=qToBigEndian(*(reinterpret_cast<quint32 *>(&data.data()[44])));
-    timeShift.fetchAndStoreOrdered(QDateTime::fromMSecsSinceEpoch(seconds*1000ll+fraction*1000ll/0x100000000ll-2208988800000ll).toTime_t()-QDateTime::currentDateTime().toTime_t());
+    quint32 newTime=QDateTime::fromMSecsSinceEpoch(seconds*1000ll+fraction*1000ll/0x100000000ll-2208988800000ll).toTime_t();
+    if(newTime<1451606400)return;
+    qint32 tempTimeShift=qint64(newTime)-qint64(QDateTime::currentDateTime().toTime_t());
+
+    if(timeShift!=0)tempTimeShift=qint32((qint64(timeShift)+qint64(tempTimeShift))/2);
+
+    timeShift.fetchAndStoreOrdered(tempTimeShift);
+
+    if(getNTPTimeRetryCount==2)if(timeShift>3600 || timeShift<-3600){
+        emit warningMessage(julyTr("TIME_SYNC_ERROR","Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys."));
+    }
+
+    getNTPTimeRetryCount++;
+    if(getNTPTimeRetryCount<3)emit startSync();
 }

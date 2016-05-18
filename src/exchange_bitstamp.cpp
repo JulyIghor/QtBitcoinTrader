@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -88,7 +88,6 @@ void Exchange_Bitstamp::filterAvailableUSDAmountValue(double *amount)
 
 void Exchange_Bitstamp::clearVariables()
 {
-	isFirstTicker=true;
 	cancelingOrderIDs.clear();
 	Exchange::clearVariables();
 	secondPart=0;
@@ -110,33 +109,35 @@ void Exchange_Bitstamp::clearValues()
 
 void Exchange_Bitstamp::secondSlot()
 {
-	static int infoCounter=0;
-	switch(infoCounter)
+    static int sendCounter=0;
+    switch(sendCounter)
 	{
-	case 0: if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"open_orders/",true,true); break;
-	case 1: if(!isReplayPending(202))sendToApi(202,"balance/",true,true); break;
-	case 2: if(!isReplayPending(103))sendToApi(103,"ticker/",false,true); break;
-	case 3: if(!isReplayPending(109))sendToApi(109,"transactions/",false,true); break;
-	case 4: if(lastHistory.isEmpty()&&!isReplayPending(208))sendToApi(208,"user_transactions/",true,true); break;
+    case 0:
+        if(!isReplayPending(103))sendToApi(103,"v2/ticker/"+baseValues.currentPair.currRequestPair.toLower()+"/",false,true);
+        break;
+    case 1:
+        if(!isReplayPending(202))sendToApi(202,"balance/",true,true);
+        break;
+    case 2:
+        if(!isReplayPending(109))sendToApi(109,"v2/transactions/"+baseValues.currentPair.currRequestPair.toLower()+"/",false,true);
+        break;
+    case 3:
+        if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"v2/open_orders/"+baseValues.currentPair.currRequestPair.toLower()+"/",true,true);
+        break;
+    case 4:
+        if(isDepthEnabled()&&(forceDepthLoad||!isReplayPending(111)))
+        {
+            emit depthRequested();
+            sendToApi(111,"v2/order_book/"+baseValues.currentPair.currRequestPair.toLower()+"/",false,true);
+            forceDepthLoad=false;
+        }
+        break;
+    case 5:
+        if(lastHistory.isEmpty()&&!isReplayPending(208))sendToApi(208,"v2/user_transactions/",true,true);
+        break;
 	default: break;
 	}
-
-	if(isDepthEnabled())
-	{
-		if(forceDepthLoad||/*infoCounter==5&&*/!isReplayPending(111))
-		{
-			emit depthRequested();
-			sendToApi(111,"order_book/",false,true);
-			forceDepthLoad=false;
-		}
-	}
-
-	if(++infoCounter>4)
-	{
-		infoCounter=0;
-        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
-		if(privateNonce<syncNonce)privateNonce=syncNonce;
-	}
+    if(sendCounter++>=5)sendCounter=0;
 
 	Exchange::secondSlot();
 }
@@ -151,7 +152,7 @@ void Exchange_Bitstamp::getHistory(bool force)
 {
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
-	if(!isReplayPending(208))sendToApi(208,"user_transactions/",true,true);
+    if(!isReplayPending(208))sendToApi(208,"v2/user_transactions/",true,true);
 }
 
 void Exchange_Bitstamp::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
@@ -164,7 +165,7 @@ void Exchange_Bitstamp::buy(QString symbol, double apiBtcToBuy, double apiPriceT
 
     QByteArray params="amount="+byteArrayFromDouble(apiBtcToBuy,pairItem.currADecimals,0)+"&price="+byteArrayFromDouble(apiPriceToBuy,pairItem.priceDecimals,0);
 	if(debugLevel)logThread->writeLog("Buy: "+params,2);
-	sendToApi(306,"buy/",true,true,params);
+    sendToApi(306,"v2/buy/"+baseValues.currentPair.currRequestPair.toLower()+"/",true,true,params);
 }
 
 void Exchange_Bitstamp::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
@@ -177,7 +178,7 @@ void Exchange_Bitstamp::sell(QString symbol, double apiBtcToSell, double apiPric
 
     QByteArray params="amount="+byteArrayFromDouble(apiBtcToSell,pairItem.currADecimals,0)+"&price="+byteArrayFromDouble(apiPriceToSell,pairItem.priceDecimals,0);
 	if(debugLevel)logThread->writeLog("Sell: "+params,2);
-	sendToApi(307,"sell/",true,true,params);
+    sendToApi(307,"v2/sell/"+baseValues.currentPair.currRequestPair.toLower()+"/",true,true,params);
 }
 
 void Exchange_Bitstamp::cancelOrder(QString, QByteArray order)
@@ -344,12 +345,6 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					}
 					lastBidAskTimestamp=tickerTimestamp;
 				}
-
-				if(isFirstTicker)
-				{
-					emit firstTicker();
-					isFirstTicker=false;
-				}
 			}
 			else if(debugLevel)logThread->writeLog("Invalid ticker data:"+data,2);
 		break;//ticker
@@ -514,7 +509,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 		else if(debugLevel)logThread->writeLog("Invalid depth data:"+data,2);
 		break;
 	case 202: //balance
-		{
+        {
 			if(!success)break;
 			if(data.startsWith("{\"btc_reserved\""))
 			{
@@ -528,15 +523,15 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					accountFee=accFee;
 				}
 
-				QByteArray btcBalance=getMidData("\"btc_balance\": \"","\"",&data);
+                QByteArray btcBalance=getMidData("\""+baseValues.currentPair.currAStrLow+"_balance\": \"","\"",&data);
 				if(!btcBalance.isEmpty())
 				{
                     double newBtcBalance=btcBalance.toDouble();
 					if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbol,newBtcBalance);
 					lastBtcBalance=newBtcBalance;
-				}
+                }
 
-				QByteArray usdBalance=getMidData("\"usd_balance\": \"","\"",&data);
+                QByteArray usdBalance=getMidData("\""+baseValues.currentPair.currBStrLow+"_balance\": \"","\"",&data);
 				if(!usdBalance.isEmpty())
 				{
                     double newUsdBalance=usdBalance.toDouble();
@@ -544,7 +539,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					lastUsdBalance=newUsdBalance;
 				}
 
-				QByteArray usdAvBalance=getMidData("\"usd_available\": \"","\"",&data);
+                QByteArray usdAvBalance=getMidData("\""+baseValues.currentPair.currBStrLow+"_available\": \"","\"",&data);
 				if(!usdAvBalance.isEmpty())
 				{
                     double newAvUsdBalance=usdAvBalance.toDouble();
@@ -621,7 +616,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 			  else logThread->writeLog("Invalid Order Sell Data:"+data);
 		break;//order/sell
 	case 208: //user_transactions
-		if(!success)break;
+        if(!success)break;
 		if(data.startsWith("["))
 		{
 			if(lastHistory!=data)
@@ -638,14 +633,28 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					HistoryItem currentHistoryItem;
 
 					QByteArray curLog(dataList.at(n).toLatin1());
-					int logTypeInt=getMidData("\"type\": ",",",&curLog).toInt();
+                    int logTypeInt=getMidData("\"type\": \"","\"",&curLog).toInt();
 					QByteArray btcAmount=getMidData("\"btc\": \"","\"",&curLog);
 					bool negativeAmount=btcAmount.startsWith("-");
 					if(negativeAmount)btcAmount.remove(0,1);
 					QDateTime orderDateTime=QDateTime::fromString(getMidData("\"datetime\": \"","\"",&curLog),"yyyy-MM-dd HH:mm:ss");
 					orderDateTime.setTimeSpec(Qt::UTC);
 
-					currentHistoryItem.price=getMidData("_usd\": \"","\"",&curLog).toDouble();
+                    if(curLog.indexOf("\"btc_eur\"")>=0)
+                    {
+                        currentHistoryItem.price=getMidData("btc_eur\": ",",",&curLog).toDouble();
+                        currentHistoryItem.symbol="BTCEUR";
+                    }
+                    else
+                    {
+                        if(curLog.indexOf("\"btc_usd\"")>=0)
+                        {
+                            currentHistoryItem.price=getMidData("btc_usd\": ",",",&curLog).toDouble();
+                            currentHistoryItem.symbol="BTCUSD";
+                        }
+                        else continue;
+                    }
+
 					currentHistoryItem.volume=btcAmount.toDouble();
 
 					QByteArray logType;
@@ -660,7 +669,6 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 						else currentHistoryItem.type=2;//Buy
 					}
 					currentHistoryItem.dateTimeInt=orderDateTime.toTime_t();
-					currentHistoryItem.symbol="BTCUSD";
 					if(currentHistoryItem.isValid())(*historyItems)<<currentHistoryItem;
 				}
 				emit historyChanged(historyItems);
@@ -670,6 +678,25 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 		break;//user_transactions
 	default: break;
 	}
+
+    static int authErrorCount=0;
+    if(reqType>=200 && reqType<300)
+    {
+        if(!success)
+        {
+            authErrorCount++;
+            if(authErrorCount>2)
+            {
+                QString authErrorString=getMidData("error\": \"","\"",&data);
+                if(debugLevel)logThread->writeLog("API error: "+authErrorString.toLatin1()+" ReqType: "+QByteArray::number(reqType),2);
+
+                if(authErrorString=="API key not found")authErrorString=julyTr("TRUNAUTHORIZED","Invalid API key.");
+                else if(authErrorString=="Invalid nonce")authErrorString=julyTr("THIS_PROFILE_ALREADY_USED","Invalid nonce parameter.");
+                if(!authErrorString.isEmpty())emit showErrorMessage(authErrorString);
+            }
+        }
+        else authErrorCount=0;
+    }
 
 	static int errorCount=0;
 	if(!success&&reqType!=305)

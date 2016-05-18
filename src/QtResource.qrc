@@ -106,5 +106,11 @@
         <file>Resources/settings_global_32x32.png</file>
         <file>Resources/settings_network_32x32.png</file>
         <file>Resources/settings_decimals_32x32.png</file>
+        <file>Resources/Exchanges/Logos/OKCoin.png</file>
+        <file>Resources/Exchanges/Logos/OKCoin_Big.png</file>
+        <file>Resources/Exchanges/OKCoin.ini</file>
+        <file>Resources/Language/Japanese.lng</file>
+        <file>Resources/CurrencySign/DSH.png</file>
+        <file>Resources/CurrencySign/ETH.png</file>
     </qresource>
 </RCC>

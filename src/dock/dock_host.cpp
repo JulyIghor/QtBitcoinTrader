@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -197,4 +197,22 @@ bool DockHost::isConstrained(QDockWidget* dock)
 {
     QSize size = dock->widget()->maximumSize();
     return size.width() != QWIDGETSIZE_MAX || size.height() != QWIDGETSIZE_MAX;
+}
+
+void DockHost::closeFloatingWindow()
+{
+    Q_FOREACH(QWidget* widget, widgets) {
+        QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
+        if (dock && dock->isFloating()) {
+            dock->deleteLater();
+        }
+    }
+}
+
+void DockHost::closeAllWindow()
+{
+    Q_FOREACH(QWidget* widget, widgets) {
+        QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
+        dock->deleteLater();
+    }
 }

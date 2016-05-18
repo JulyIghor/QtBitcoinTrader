@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -191,11 +191,10 @@ QVariant TradesModel::data(const QModelIndex &index, int role) const
 	switch(indexColumn)
 	{
 	case 1:
-		{//Date
+		 {//Date
 			if(role==Qt::ToolTipRole||itemsList.at(currentRow).displayFullDate)return itemsList.at(currentRow).dateStr;
-			return itemsList.at(currentRow).timeStr;
-		}
-		break;
+			return itemsList.at(currentRow).timeStr; break;
+		 }
 	case 2:
 		{//Volume
 			if(itemsList.at(currentRow).amount<=0.0)return QVariant();
@@ -348,7 +347,7 @@ void TradesModel::addNewTrades(QList<TradesItem> *newItems)
 	(*newItems)[n].backGray=backSwitcher;
 	verifedItems<<newItems->at(n);
     static QMap<QString,quint32> lastDateMap;
-    if(lastDateMap.value(verifedItems.last().symbol,0UL)<verifedItems.last().date)
+    if(lastDateMap.value(verifedItems.last().symbol,0UL)<=verifedItems.last().date)
 	{
         lastDateMap[verifedItems.last().symbol]=verifedItems.last().date;
 		mainWindow.sendIndicatorEvent(verifedItems.last().symbol, QLatin1String("LastTrade"), verifedItems.last().amount);
@@ -365,6 +364,7 @@ void TradesModel::addNewTrades(QList<TradesItem> *newItems)
 	endInsertRows();
 	}
 
+    //emit addChartsData(newItems);
 	emit addChartsTrades(newItems);
 }
 

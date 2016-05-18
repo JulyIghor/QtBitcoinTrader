@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ bool RuleHolder::isValidSymbol(QString &symbol)
 
 bool RuleHolder::isValidPlusMinus(QString &plusMinus)
 {
-    return plusMinus==QLatin1String("+")||plusMinus==QLatin1String("-");
+    return plusMinus==QLatin1String("+")||plusMinus==QLatin1String("-")||plusMinus==QLatin1String("*")||plusMinus==QLatin1String("/");
 }
 
 bool RuleHolder::isValidCode(QString &code)
@@ -83,8 +83,8 @@ bool RuleHolder::isTradingRule()
 bool RuleHolder::isValid()
 {
     bool immediately=variableACode==QLatin1String("IMMEDIATELY")||variableACode==QLatin1String("LastTrade")||variableACode==QLatin1String("MyLastTrade");
-	bool exactB=variableBCode==QLatin1String("EXACT");
-    if(thanAmountFeeIndex<0||thanPriceFeeIndex<0||thanTypeIndex<0)return false;
+    bool exactB=variableBCode==QLatin1String("EXACT");
+    if(thanAmountFeeIndex<0||thanPriceFeeIndex<0||thanPriceFeeIndex<0||thanTypeIndex<0)return false;
     if(thanTypeIndex>3||thanAmount>0.0);else return false;
     if(immediately||!exactB||variableBExact!=0);else return false;
     if(thanPriceTypeCode==QLatin1String("EXACT")?thanPrice>0.0:true);else return false;

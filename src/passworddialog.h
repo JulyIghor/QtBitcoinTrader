@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -48,11 +48,13 @@ public:
 	QString getIniFilePath();
 	PasswordDialog(QWidget *parent = 0);
 	~PasswordDialog();
+
 private slots:
 	void resetDataSlot();
 	void addNewProfile();
 	void checkToEnableButton(QString);
     void on_descriptionGroupBox_toggled(bool arg1);
+    void showTimeMessage(QString);
 
 private:
 	void accept();

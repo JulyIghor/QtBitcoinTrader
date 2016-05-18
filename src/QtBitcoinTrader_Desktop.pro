@@ -1,7 +1,8 @@
-equals(QT_MAJOR_VERSION, 4): {
-error("Qt 4 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt 5 and C++11");
+lessThan(QT_VERSION, 5.5): {
+error("Qt less than 5.5 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt 5.5 and C++11");
 }
 
+QMAKE_MAC_SDK = macosx10.11
 QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 
@@ -12,19 +13,20 @@ INCLUDEPATH	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
 
-CONFIG	+= qt release
+CONFIG	+= qt # release
 CONFIG	+= c++11
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
 !win32 { TARGET = QtBitcoinTrader }
 
-QT  += network script
-greaterThan(QT_MAJOR_VERSION, 4): {
-QT += widgets
+QT += network script widgets
 !win32 { QT += multimedia }
-}
 
-exists("sapi.h"){ DEFINES += SAPI_ENABLED }
+#exists("sapi.h"){ DEFINES += SAPI_ENABLED }
+exists($$(WINDOWSSDKDIR)/Include/sapi.h){
+  DEFINES += SAPI_ENABLED
+  #win32 { !CONFIG(static) { LIBS += -lole32 } }
+}
 
 CONFIG(static) {
   greaterThan(QT_MAJOR_VERSION, 4): {
@@ -40,7 +42,7 @@ CONFIG(static) {
    QTPLUGIN.designer=-
    QTPLUGIN.iconengines=-
    QTPLUGIN.imageformats=-
-   win32 { DEFINES += STATIC_QT5_BUILD }
+   #win32 { DEFINES += STATIC_QT5_BUILD }
   }
 }
 
@@ -116,14 +118,15 @@ HEADERS += aboutdialog.h \
            julymath.h \
            exchange_bitcurex.h \
            exchange_bitmarket.h \
+		   exchange_okcoin.h \
            platform/sound.h \
            platform/socket.h \
            config/config_manager.h \
            config/config_manager_dialog.h \
            utils/utils.h \
            dock/dock_host.h \
-           chartsview.h \
-           chartsmodel.h \
+           charts/chartsview.h \
+           charts/chartsmodel.h \
            settingsdialog.h \
            settingsgeneral.h \
            settingsnetworkproxy.h \
@@ -131,7 +134,9 @@ HEADERS += aboutdialog.h \
            settingsdecimals.h \
     timesync.h \
     translationmessage.h \
-    indicatorengine.h
+    indicatorengine.h \
+    news/newsview.h \
+    news/newsmodel.h
 
 FORMS += addrulegroup.ui \
          datafolderchusedialog.ui \
@@ -155,13 +160,14 @@ FORMS += addrulegroup.ui \
          exchangebutton.ui \
          addruledialog.ui \
          config/config_manager_dialog.ui \
-         chartsview.ui \
+         charts/chartsview.ui \
          settingsdialog.ui \
          settingsgeneral.ui \
          settingsnetworkproxy.ui \
          settingsdialoglistelement.ui \
          settingsdecimals.ui \
-    translationmessage.ui
+    translationmessage.ui \
+    news/newsview.ui
 
 SOURCES += aboutdialog.cpp \
            addrulegroup.cpp \
@@ -222,14 +228,15 @@ SOURCES += aboutdialog.cpp \
            exchange_indacoin.cpp \
            exchange_bitcurex.cpp \
            exchange_bitmarket.cpp \
+		   exchange_okcoin.cpp \
            platform/sound.cpp \
            platform/socket.cpp \
            config/config_manager.cpp \
            config/config_manager_dialog.cpp \
            utils/utils.cpp \
            dock/dock_host.cpp \
-           chartsview.cpp \
-           chartsmodel.cpp \
+           charts/chartsview.cpp \
+           charts/chartsmodel.cpp \
            settingsdialog.cpp \
            settingsgeneral.cpp \
            settingsnetworkproxy.cpp \
@@ -237,7 +244,9 @@ SOURCES += aboutdialog.cpp \
            settingsdecimals.cpp \
     timesync.cpp \
     translationmessage.cpp \
-    indicatorengine.cpp
+    indicatorengine.cpp \
+    news/newsview.cpp \
+    news/newsmodel.cpp
 
 #
 # Resources
@@ -281,3 +290,4 @@ RC_FILE = WinResource.rc
 }
 
 macx:ICON = $${PWD}/QtBitcoinTrader.icns
+macx:QMAKE_INFO_PLIST = $${PWD}/QtBitcoinTrader.plist

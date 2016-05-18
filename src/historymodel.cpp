@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -85,24 +85,24 @@ void HistoryModel::historyChanged(QList<HistoryItem> *histList)
         (*histList)[histList->count()-1].displayFullDate=histList->at(histList->count()-1).dateInt!=itemsList.last().dateInt;
     }
     quint32 maxListDate=0;
-	for(int n=histList->count()-1;n>=0;n--)
-	{
-		if(maxListDate<histList->at(n).dateTimeInt)maxListDate=histList->at(n).dateTimeInt;
+    for(int n=histList->count()-1;n>=0;n--)
+    {
+        if(maxListDate<histList->at(n).dateTimeInt)maxListDate=histList->at(n).dateTimeInt;
 
-		if(n!=histList->count()-1)(*histList)[n].displayFullDate=histList->at(n).dateInt!=histList->at(n+1).dateInt;
+        if(n!=histList->count()-1)(*histList)[n].displayFullDate=histList->at(n).dateInt!=histList->at(n+1).dateInt;
 
-		itemsList<<histList->at(n);
+        itemsList<<histList->at(n);
 
         static QMap<QString,quint32> lastDateMap;
-        if(lastDateMap.value(itemsList.last().symbol,0UL)<itemsList.last().dateInt)
+        if(lastDateMap.value(itemsList.last().symbol,0UL)<=itemsList.last().dateInt)
         {
             lastDateMap[itemsList.last().symbol]=itemsList.last().dateInt;
             mainWindow.sendIndicatorEvent(itemsList.last().symbol, QLatin1String("MyLastTrade"), itemsList.last().volume);
         }
-	}
-	delete histList;
-	if(maxListDate>lastDate)lastDate=maxListDate;
-	endInsertRows();
+    }
+    delete histList;
+    if(maxListDate>lastDate)lastDate=maxListDate;
+    endInsertRows();
 }
 
 double HistoryModel::getRowPrice(int row)

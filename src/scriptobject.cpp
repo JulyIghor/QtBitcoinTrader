@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@
 #include <QMetaMethod>
 #include <QDoubleSpinBox>
 #include <QScriptEngine>
+#include <QScriptValueIterator>
 
 ScriptObject::ScriptObject(QString _scriptName) :
     QObject()
@@ -235,6 +236,7 @@ void ScriptObject::startApp(QString name, QString arg1, QString arg2, QString ar
 void ScriptObject::startApp(QString name, QString arg1, QString arg2, QString arg3, QString arg4){startApp(name,QStringList()<<arg1<<arg2<<arg3<<arg4);}
 void ScriptObject::startApp(QString name, QStringList list)
 {
+    if(testMode)return;
     emit startAppSignal(name,list);
     if(list.count())name+=" "+list.join(" ");
     writeLog(julyTr("START_APPLICATION","Start application: %1").arg(name));
@@ -518,13 +520,22 @@ void ScriptObject::secondSlot()
 
 void ScriptObject::deleteEngine()
 {
+    qDeleteAll(timerMap.keys());
+    timerMap.clear();
+
     if(!engine)return;
     if(!testMode)
         Q_FOREACH(QDoubleSpinBox *spinBox, spinBoxList)
             disconnect(spinBox,SIGNAL(valueChanged(double)),this,SLOT(indicatorValueChanged(double)));
 
+    if(testMode)
+    {
+        QScriptValueIterator it(engine->globalObject());
+        while(it.hasNext()){it.next();it.setValue(0);}
+    }
     engine->deleteLater();
     engine=0;
+
     if(!testMode&&scriptWantsOrderBookData)
     {
         scriptWantsOrderBookData=false;
@@ -540,8 +551,6 @@ void ScriptObject::setRunning(bool on)
     if(!isRunningFlag)
         if(engine)
         {
-            qDeleteAll(timerMap.keys());
-            timerMap.clear();
             deleteEngine();
         }
     if(!testMode)emit runningChanged(isRunningFlag);
@@ -559,13 +568,11 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
     setRunning(false);
     if(script.isEmpty()){emit errorHappend(-1, "Script is empty");return false;}
 
-    testMode=_testMode;
     if(engine)
     {
-        qDeleteAll(timerMap.keys());
-        timerMap.clear();
         deleteEngine();
     }
+    testMode=_testMode;
     engine=new QScriptEngine;
 
     QScriptValue scriptValue=engine->newQObject(this);

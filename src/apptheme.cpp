@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ void AppTheme::loadTheme(QString name)
 {
     QSettings themeLoad(baseValues.themeFolder+name+".thm",QSettings::IniFormat);
 
-	themeLoad.beginGroup("Normal");
+    themeLoad.beginGroup("Normal");
 	QStringList colorList=themeLoad.childKeys();
 	themeLoad.endGroup();
 	for(int n=0;n<colorList.count();n++)
@@ -82,7 +82,7 @@ void AppTheme::loadTheme(QString name)
 	}
 
 	themeLoad.beginGroup("Disabled");
-	colorList=themeLoad.childKeys();
+    colorList=themeLoad.childKeys();
 	themeLoad.endGroup();
 	for(int n=0;n<colorList.count();n++)
 	{
@@ -132,7 +132,7 @@ void AppTheme::loadTheme(QString name)
 	styleSheet="QHeaderView::section {color: "+black.name()+";}"
 		"QToolButton {color: "+black.name()+";}"
 		"QPushButton {color: "+black.name()+";}"
-		"QGroupBox {background: rgba(255,255,255,60); color: "+black.name()+"; border: 1px solid "+gray.name()+";border-radius: 3px;margin-top: 8px;}"
+        "QGroupBox {background: rgba(255,255,255,60); color: "+black.name()+"; border: 1px solid "+gray.name()+";border-radius: 3px;margin-top: 8px;}"
 		"QGroupBox:title {subcontrol-origin: margin; position: relative; left: 6px; color: "+black.name()+"; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 transparent, stop: 0.45 "+white.name()+", stop: 0.5 "+white.name()+", stop: 0.55 "+white.name()+", stop: 1.0 transparent);  padding-left: 2px;} QLabel {color: "+black.name()+";}"
 		"QTabBar::tab {color: "+black.name()+";}"
 		"QRadioButton {color: "+black.name()+";}"

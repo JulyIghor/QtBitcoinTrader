@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "chartsmodel.h"
+#include "charts/chartsmodel.h"
 #include "main.h"
 #include <QDateTime>
 #include "timesync.h"
@@ -38,6 +38,7 @@ ChartsModel::ChartsModel():QObject()
 {
     intervalDate=60;
     intervalCount=10;
+    perfomanceStep=1;
     fontMetrics=new QFontMetrics(QApplication::font());
 }
 
@@ -65,6 +66,8 @@ void ChartsModel::addLastTrades(QList<TradesItem> *newItems)
     }
 
     delete newItems;
+
+    baseValues_->mainWindow_->chartsView->comeNewData();
 }
 
 void ChartsModel::addBound(double price,bool type)
@@ -238,13 +241,17 @@ void ChartsModel::preparePriceMinMax()
         if(temp>0)max.push_back(temp);
     }
     if(iBoundsSellFirst<boundsSellDate.count()){
-        temp=boundsSellPrice.at(std::min_element(boundsSellPrice.begin()+iBoundsSellFirst,boundsSellPrice.end())-boundsSellPrice.begin());
+        int tempIBoundsSellFirst=iBoundsSellFirst;
+        if(tempIBoundsSellFirst>0)tempIBoundsSellFirst--;
+        temp=boundsSellPrice.at(std::min_element(boundsSellPrice.begin()+tempIBoundsSellFirst,boundsSellPrice.end())-boundsSellPrice.begin());
         if(temp>0)min.push_back(temp);
-        temp=boundsSellPrice.at(std::max_element(boundsSellPrice.begin()+iBoundsSellFirst,boundsSellPrice.end())-boundsSellPrice.begin());
+        temp=boundsSellPrice.at(std::max_element(boundsSellPrice.begin()+tempIBoundsSellFirst,boundsSellPrice.end())-boundsSellPrice.begin());
         if(temp>0)max.push_back(temp);
     }
     if(iBoundsBuyFirst<boundsBuyDate.count()){
-        temp=boundsBuyPrice.at(std::min_element(boundsBuyPrice.begin()+iBoundsBuyFirst,boundsBuyPrice.end())-boundsBuyPrice.begin());
+        int tempIBoundsBuyFirst=iBoundsBuyFirst;
+        if(tempIBoundsBuyFirst>0)tempIBoundsBuyFirst--;
+        temp=boundsBuyPrice.at(std::min_element(boundsBuyPrice.begin()+tempIBoundsBuyFirst,boundsBuyPrice.end())-boundsBuyPrice.begin());
         if(temp>0){if(min.count()<2)min.push_back(temp);else min.last()=qMin(min.last(),temp);}
         temp=boundsBuyPrice.at(std::max_element(boundsBuyPrice.begin()+iBoundsBuyFirst,boundsBuyPrice.end())-boundsBuyPrice.begin());
         if(temp>0){if(max.count()<2)max.push_back(temp);else max.last()=qMax(max.last(),temp);}
@@ -258,8 +265,8 @@ void ChartsModel::preparePriceMinMax()
     {
         priceInit=true;
         if((priceMax-priceMin)*100<priceMax){
-            priceMax+=priceMax-priceMin;
-            priceMin-=(priceMax-priceMin)*0.5;
+            priceMax+=(priceMax-priceMin)*0.2;
+            priceMin-=(priceMax-priceMin)*0.1;
         }
         double deltaPrice=(priceMax-priceMin)*0.1;
         priceMin-=deltaPrice;
@@ -287,9 +294,15 @@ void ChartsModel::preparePriceYAxis()
 
 void ChartsModel::preparePrice()
 {
+    qint16 x,y;
     if(priceInit)for(qint32 i=iTradesFirst;i<tradesDate.count();i++){
-        graphTradesX.append(qRound(graphXScale*(tradesDate.at(i)-graphFirstDate)));
-        graphTradesY.append(qRound(priceYScale*(tradesPrice.at(i)-priceMin)));
+        x=qRound(graphXScale*(tradesDate.at(i)-graphFirstDate));
+        y=qRound(priceYScale*(tradesPrice.at(i)-priceMin));
+        if(graphTradesX.count()){
+            if(abs(x-graphTradesX.last())<=perfomanceStep&&abs(y-graphTradesY.last())<=perfomanceStep)continue;
+        }
+        graphTradesX.append(x);
+        graphTradesY.append(y);
         graphTradesType.append(tradesType.at(i));
     }
 }
@@ -338,14 +351,14 @@ void ChartsModel::prepareBound()
 bool ChartsModel::prepareChartsData(qint16 parentWidth,qint16 parentHeight)
 {
     if(!boundsSellDate.count())return false;
-    chartsHeight=parentHeight-50;
+    chartsHeight=parentHeight-5;
 
     prepareInit();
     prepareAmountYAxis();
     preparePriceMinMax();
     preparePriceYAxis();
 
-    chartsWidth=parentWidth-widthAmountYAxis-widthPriceYAxis-4;
+    chartsWidth=parentWidth-widthAmountYAxis-widthPriceYAxis-1;
     prepareXAxis();
     prepareAmount();
     preparePrice();

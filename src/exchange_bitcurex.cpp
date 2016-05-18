@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -77,7 +77,6 @@ Exchange_BitCurex::~Exchange_BitCurex()
 
 void Exchange_BitCurex::clearVariables()
 {
-	isFirstTicker=true;
     isFirstAccInfo=false;
 	Exchange::clearVariables();
 	lastOpenedOrders=-1;
@@ -171,12 +170,6 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
                     IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Last",newTickerLast);
                 lastTickerLast=newTickerLast;
             }
-
-			if(isFirstTicker)
-			{
-				emit firstTicker();
-				isFirstTicker=false;
-			}
         }
         else success=false;
 		break;//ticker
@@ -187,7 +180,7 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
 			QList<TradesItem> *newTradesItems=new QList<TradesItem>;
 
             TradesItem newItem;
-            for(int n=0;n<tradeList.count();n++)
+            for(int n=tradeList.count()-1;n>=0;n--)
 			{
 				QByteArray tradeData=tradeList.at(n).toLatin1()+"}";
 
@@ -200,7 +193,7 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
 
                 newItem.price=getMidData("\"price\": ",", \"",&tradeData).toDouble();
                 newItem.amount=getMidData("\"amount\": ",", \"",&tradeData).toDouble();
-                newItem.orderType=getMidData("\"type\": \"","\"}",&tradeData)=="ask"?1:-1;
+                newItem.orderType=getMidData("\"type\": \"","\"}",&tradeData)=="ask"?-1:1;
                 newItem.symbol=baseValues.currentPair.symbol;
 
 				if(newItem.isValid())(*newTradesItems)<<newItem;
@@ -453,6 +446,25 @@ void Exchange_BitCurex::dataReceivedAuth(QByteArray data, int reqType)
 	default: break;
 	}
 
+    static int authErrorCount=0;
+    if(reqType>=200 && reqType<300)
+    {
+        if(!success)
+        {
+            authErrorCount++;
+            if(authErrorCount>2)
+            {
+                QString authErrorString=getMidData("data\": \"","\"",&data);
+                if(debugLevel)logThread->writeLog("API error: "+authErrorString.toLatin1()+" ReqType: "+QByteArray::number(reqType),2);
+
+                if(authErrorString=="auth_error")authErrorString=julyTr("TRUNAUTHORIZED","Invalid API key.");
+                else if(authErrorString=="nonce_error")authErrorString=julyTr("THIS_PROFILE_ALREADY_USED","Invalid nonce parameter.");
+                if(!authErrorString.isEmpty())emit showErrorMessage(authErrorString);
+            }
+        }
+        else authErrorCount=0;
+    }
+
 	static int errorCount=0;
 	if(!success)
 	{
@@ -551,13 +563,6 @@ void Exchange_BitCurex::secondSlot()
     }
     if(sendCounter++>=5)sendCounter=0;
 
-    static int infoCounter=0;
-	if(++infoCounter>9)
-	{
-		infoCounter=0;
-        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
-        if(privateNonce<syncNonce)privateNonce=syncNonce;
-	}
 	Exchange::secondSlot();
 }
 

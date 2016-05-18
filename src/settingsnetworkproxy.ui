@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>469</width>
-    <height>275</height>
+    <width>437</width>
+    <height>447</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>SettingsNetworkProxy</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -32,7 +32,7 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0">
+   <item>
     <widget class="QGroupBox" name="proxyGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -113,7 +113,14 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="hostLineEdit"/>
+       <widget class="QLineEdit" name="hostLineEdit">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="portLabel">
@@ -126,7 +133,14 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="portLineEdit"/>
+       <widget class="QLineEdit" name="portLineEdit">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item row="4" column="0">
        <widget class="QLabel" name="userLabel">
@@ -139,7 +153,14 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QLineEdit" name="userLineEdit"/>
+       <widget class="QLineEdit" name="userLineEdit">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item row="5" column="0">
        <widget class="QLabel" name="passwordLabel">
@@ -152,7 +173,27 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QLineEdit" name="passwordLineEdit"/>
+       <widget class="QLineEdit" name="passwordLineEdit">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="typeLabel">
+        <property name="accessibleName">
+         <string>SETTINGS_TYPE</string>
+        </property>
+        <property name="text">
+         <string>Type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QComboBox" name="typeComboBox"/>
       </item>
      </layout>
      <zorder>autoLabel</zorder>
@@ -167,9 +208,11 @@
      <zorder>passwordLineEdit</zorder>
      <zorder>enabledLabel</zorder>
      <zorder>enabledCheckBox</zorder>
+     <zorder>typeLabel</zorder>
+     <zorder>typeComboBox</zorder>
     </widget>
    </item>
-   <item row="0" column="1">
+   <item>
     <widget class="QGroupBox" name="networkGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -183,42 +226,14 @@
      <property name="title">
       <string>API</string>
      </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <property name="fieldGrowthPolicy">
-       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="apiDownCounterMaxLabel">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="3" column="0">
+       <widget class="QLabel" name="httpRequestsTimeoutLabel">
         <property name="accessibleName">
-         <string>SETTINGS_DOWN_COUNT</string>
+         <string>SETTINGS_TIMEOUT</string>
         </property>
         <property name="text">
-         <string>Down count Max:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QSpinBox" name="apiDownCounterMaxSpinBox">
-        <property name="minimumSize">
-         <size>
-          <width>55</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>55</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>15</number>
-        </property>
-        <property name="value">
-         <number>5</number>
+         <string>Request Timeout:</string>
         </property>
        </widget>
       </item>
@@ -245,7 +260,7 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>55</width>
+          <width>0</width>
           <height>16777215</height>
          </size>
         </property>
@@ -257,6 +272,105 @@
         </property>
         <property name="value">
          <number>8</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="msLabel1">
+        <property name="accessibleName">
+         <string>MS</string>
+        </property>
+        <property name="text">
+         <string>ms</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="apiDownCounterMaxSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>55</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>0</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>15</number>
+        </property>
+        <property name="value">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="apiDownCounterMaxLabel">
+        <property name="accessibleName">
+         <string>SETTINGS_DOWN_COUNT</string>
+        </property>
+        <property name="text">
+         <string>Down count Max:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="msLabel2">
+        <property name="accessibleName">
+         <string>MS</string>
+        </property>
+        <property name="text">
+         <string>ms</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="httpRequestsTimeoutSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>55</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>0</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="suffix">
+         <string/>
+        </property>
+        <property name="minimum">
+         <number>1000</number>
+        </property>
+        <property name="maximum">
+         <number>15000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>4000</number>
         </property>
        </widget>
       </item>
@@ -280,7 +394,7 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>55</width>
+          <width>0</width>
           <height>16777215</height>
          </size>
         </property>
@@ -295,48 +409,27 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="httpRequestsTimeoutLabel">
+      <item row="4" column="0">
+       <widget class="QLabel" name="alternativeDomainBTCeLabel">
         <property name="accessibleName">
-         <string>SETTINGS_TIMEOUT</string>
+         <string>SETTINGS_ALTERNATIVE_DOMAIN_BTCE</string>
         </property>
         <property name="text">
-         <string>Request Timeout:</string>
+         <string>Use alternative domain for BTC-e</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="httpRequestsTimeoutSpinBox">
-        <property name="minimumSize">
-         <size>
-          <width>55</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>55</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="minimum">
-         <number>1000</number>
-        </property>
-        <property name="maximum">
-         <number>15000</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>4000</number>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="alternativeDomainBTCeCheckBox">
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="revertChangesButton">
@@ -512,8 +605,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>361</x>
-     <y>30</y>
+     <x>245</x>
+     <y>254</y>
     </hint>
     <hint type="destinationlabel">
      <x>562</x>
@@ -528,8 +621,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>356</x>
-     <y>54</y>
+     <x>245</x>
+     <y>280</y>
     </hint>
     <hint type="destinationlabel">
      <x>529</x>
@@ -544,8 +637,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>365</x>
-     <y>80</y>
+     <x>245</x>
+     <y>306</y>
     </hint>
     <hint type="destinationlabel">
      <x>516</x>
@@ -560,12 +653,44 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>364</x>
-     <y>112</y>
+     <x>245</x>
+     <y>332</y>
     </hint>
     <hint type="destinationlabel">
      <x>563</x>
      <y>102</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>typeComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SettingsNetworkProxy</receiver>
+   <slot>anyValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>132</x>
+     <y>170</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-5</x>
+     <y>168</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternativeDomainBTCeCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>SettingsNetworkProxy</receiver>
+   <slot>anyValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>198</x>
+     <y>342</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>502</x>
+     <y>346</y>
     </hint>
    </hints>
   </connection>

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -80,7 +80,6 @@ Exchange_Indacoin::~Exchange_Indacoin()
 
 void Exchange_Indacoin::clearVariables()
 {
-    isFirstTicker=true;
     isFirstAccInfo=true;
     cancelingOrderIDs.clear();
     Exchange::clearVariables();
@@ -328,12 +327,6 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
                 depthAsks=0;
                 depthBids=0;
             }
-
-			if(isFirstTicker)
-			{
-				emit firstTicker();
-				isFirstTicker=false;
-			}
         }
         else if(debugLevel)logThread->writeLog("Invalid depth data:"+data,2);
         break;
@@ -464,6 +457,25 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
     default: break;
     }
 
+    static int authErrorCount=0;
+    if(reqType>=200 && reqType<300)
+    {
+        if(!success)
+        {
+            authErrorCount++;
+            if(authErrorCount>2)
+            {
+                QString authErrorString=data;
+                if(data=="\"unauthorized\"")authErrorString="unauthorized";
+                if(debugLevel)logThread->writeLog("API error: "+authErrorString.toLatin1()+" ReqType: "+QByteArray::number(reqType),2);
+
+                if(authErrorString=="unauthorized")authErrorString=julyTr("TRUNAUTHORIZED","Invalid API key.")+"<br><br>"+julyTr("THIS_PROFILE_ALREADY_USED","Invalid nonce parameter.");
+                if(!authErrorString.isEmpty())emit showErrorMessage(authErrorString);
+            }
+        }
+        else authErrorCount=0;
+    }
+
     static int errorCount=0;
     if(!success)
     {
@@ -528,7 +540,7 @@ bool Exchange_Indacoin::isReplayPending(int reqType)
 }
 
 void Exchange_Indacoin::secondSlot()
-{
+{privateNonce=1;
     static int sendCounter=0;
     switch(sendCounter)
     {
@@ -545,7 +557,7 @@ void Exchange_Indacoin::secondSlot()
         if(!tickerOnly&&!isReplayPending(204))sendToApi(204,"openorders",true,true,"");
         break;
     case 4:
-        if(forceDepthLoad||!isReplayPending(111))
+        if(isDepthEnabled()&&(forceDepthLoad||!isReplayPending(111)))
         {
             emit depthRequested();
             sendToApi(111,"orderbook?pair="+baseValues.currentPair.currRequestPair/*+"?limit="+baseValues.depthCountLimitStr*/,false,true);
@@ -559,13 +571,6 @@ void Exchange_Indacoin::secondSlot()
     }
     if(sendCounter++>=5)sendCounter=0;
 
-    static int infoCounter=0;
-    if(++infoCounter>9)
-    {
-        infoCounter=0;
-        quint32 syncNonce=(TimeSync::getTimeT()-1371854884)*10;
-        if(privateNonce<syncNonce)privateNonce=syncNonce;
-    }
     Exchange::secondSlot();
 }
 

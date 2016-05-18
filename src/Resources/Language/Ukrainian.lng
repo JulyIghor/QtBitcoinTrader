@@ -213,7 +213,7 @@ String_AS_MARKET_SELL=Ціна продажу
 String_AS_ORDERS_LAST_BUY=Остання покупка
 String_AS_ORDERS_LAST_SELL=Остання продаж
 String_AT=за %1
-String_AUTH_ERROR=%1 Ошибка
+String_AUTH_ERROR=%1 Помилка
 String_BUY=купити
 String_CANCEL_ALL_ORDERS=Видалити всі ордери
 String_CANCEL_ORDER=Видалити обрані ордери
@@ -513,12 +513,21 @@ Label_SETTINGS_PORT=Порт:
 Label_SETTINGS_USER=Користувач:
 Label_SETTINGS_PASSWORD=Пароль:
 GroupBox_SETTINGS_API=API
-Label_SETTINGS_DOWN_COUNT=Down count Max:
+Label_SETTINGS_DOWN_COUNT=Кількість API запитів без відповіді:
 Label_SETTINGS_RETRY_COUNT=Кількість повторів:
 Label_SETTINGS_INTERVAL=Інтервал між пакетами:
 Label_SETTINGS_TIMEOUT=Час очікування:
 GroupBox_SETTINGS_TIME=Час
 Label_SETTINGS_USE_24HOUR_TIME_FORMAT=Використовувати 24-годинний формат часу:
 Label_SETTINGS_TIME_SYNC=Синхронізація часу:
+Label_SETTINGS_TYPE=Тип
+Label_SETTINGS_ALTERNATIVE_DOMAIN_BTCE=Використовувати альтернативний домен для BTC-е
+Label_MS=мс
 
 Label_UPDATER_AGAIN_AUTO_UPDATE=Більше не питати, автоматично встановлювати оновлення:
+
+String_TAB_NEWS=Новини
+String_TAB_CHAT=Чат
+
+String_TIME_SYNC_ERROR=Ваш годинник не настроєний. Будь-ласка закрийте QtBitcoinTrader та настройте годинник. Зміна години при включеному QtBitcoinTrader може викликати помилки та зіпсувати ключі.
+String_TIME_ERROR=Помилка часу

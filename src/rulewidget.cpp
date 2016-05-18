@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -206,7 +206,7 @@ void RuleWidget::addRuleByHolder(RuleHolder &holder, bool isEnabled)
 void RuleWidget::on_ruleAddButton_clicked()
 {
     AddRuleDialog ruleWindow(groupName,0);
-    if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
+    ruleWindow.setWindowFlags(mainWindow.windowFlags());
     if(ruleWindow.exec()==QDialog::Rejected)return;
 
     RuleHolder holder=ruleWindow.getRuleHolder();
@@ -228,7 +228,7 @@ void RuleWidget::on_ruleEditButton_clicked()
 	if(curRow<0)return;
 
     AddRuleDialog ruleWindow(groupName,baseValues.mainWindow_);
-    if(!mainWindow.isDetachedRules)ruleWindow.setWindowFlags(mainWindow.windowFlags());
+    ruleWindow.setWindowFlags(mainWindow.windowFlags());
     ruleWindow.fillByHolder(rulesModel->holderList[curRow],rulesModel->getStateByRow(curRow)==1);
     if(ruleWindow.exec()==QDialog::Rejected)return;
 

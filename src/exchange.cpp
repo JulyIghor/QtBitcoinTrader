@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -209,7 +209,6 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
     connect(this,SIGNAL(availableAmountChanged(QString, double)),mainClass,SLOT(availableAmountChanged(QString, double)));
 	connect(mainClass,SIGNAL(clearValues()),this,SLOT(clearValues()));
 	connect(mainClass,SIGNAL(reloadDepth()),this,SLOT(reloadDepth()));
-    connect(this,SIGNAL(firstTicker()),mainClass,SLOT(firstTicker()));
 
     connect(this,SIGNAL(accVolumeChanged(double)),mainClass->ui.accountVolume,SLOT(setValue(double)));
     connect(this,SIGNAL(accFeeChanged(QString, double)),mainClass,SLOT(accFeeChanged(QString,double)));
@@ -225,7 +224,7 @@ void Exchange::setupApi(QtBitcoinTrader *mainClass, bool tickOnly)//Execute only
 
 void Exchange::setApiKeySecret(QByteArray key, QByteArray secret)
 {
-	if(!apiKeyChars.isEmpty()||!apiKeyChars.isEmpty())return;
+    if(!apiKeyChars.isEmpty())return;
 
 	privateKey=key;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ChartsView</class>
- <widget class="QWidget" name="ChartsView">
+ <class>NewsView</class>
+ <widget class="QWidget" name="NewsView">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,10 +13,10 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>0</number>
-   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QGridLayout" name="borderLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -29,8 +29,12 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
-    <widget class="QGraphicsView" name="graphicsView"/>
+   <item row="0" column="0">
+    <widget class="QTextBrowser" name="newsBrowser">
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

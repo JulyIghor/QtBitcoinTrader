@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -64,8 +64,6 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	defaultCurrencyParams.currABalanceDecimals=8;
 	defaultCurrencyParams.currBBalanceDecimals=5;
 	defaultCurrencyParams.priceDecimals=2;
-	defaultCurrencyParams.currABalanceDecimals=8;
-	defaultCurrencyParams.currBBalanceDecimals=5;
 	defaultCurrencyParams.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 
 	supportsLoginIndicator=true;
@@ -81,7 +79,6 @@ Exchange_BTCChina::~Exchange_BTCChina()
 
 void Exchange_BTCChina::clearVariables()
 {
-	isFirstTicker=true;
 	cancelingOrderIDs.clear();
 	Exchange::clearVariables();
 	secondPart=0;
@@ -148,7 +145,7 @@ void Exchange_BTCChina::secondSlot()
     if(infoCounter==3&&!isReplayPending(109))
 	{
 		if(!lastFetchTid.isEmpty())historyLastTradesRequest="historydata?market="+baseValues.currentPair.currRequestPair+"&since="+lastFetchTid;
-		else "historydata?market="+baseValues.currentPair.currRequestPair;
+        else historyLastTradesRequest="historydata?market="+baseValues.currentPair.currRequestPair;
         sendToApi(109,historyLastTradesRequest,false,true);
 	}
 
@@ -425,12 +422,6 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
                 if(newTickerBuy!=lastTickerBuy)
                     IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",newTickerBuy);
 				lastTickerBuy=newTickerBuy;
-			}
-
-			if(isFirstTicker)
-			{
-				emit firstTicker();
-				isFirstTicker=false;
 			}
 		}
 		else if(debugLevel)logThread->writeLog("Invalid ticker data:"+data,2);

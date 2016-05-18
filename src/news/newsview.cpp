@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,42 +29,44 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CHARTSVIEW_H
-#define CHARTSVIEW_H
-
-#include <QWidget>
-#include <QGraphicsScene>
-#include <QGraphicsTextItem>
+#include "news/newsview.h"
+#include <QFile>
+#include <QDesktopServices>
 #include <QTimer>
-#include "chartsmodel.h"
-#include "ui_chartsview.h"
+#include "timesync.h"
 
-class ChartsView : public QWidget
+NewsView::NewsView():QWidget()
 {
-    Q_OBJECT
+    ui.setupUi(this);
+    loadingFinished=true;
+    lastUpdatedTime=0;
 
-public:
-    ChartsModel *chartsModel;
+    newsModel=new NewsModel;
+    connect(this,SIGNAL(loadData()),newsModel,SLOT(loadData()));
+    connect(newsModel,SIGNAL(setHtmlData(QByteArray)),this,SLOT(setHtmlData(QByteArray)));
+}
 
-    ChartsView();
-    ~ChartsView();
-    void clearCharts();
+NewsView::~NewsView()
+{
+    newsModel->deleteLater();
+}
 
-private:
-    Ui::ChartsView ui;
-    QGraphicsScene *sceneCharts;
-    QTimer *refreshTimer;
-    qint32 lastResize;
+void NewsView::visibilityChanged(bool visible)
+{
+    if(visible && loadingFinished)
+    {
+        quint32 nowTime=TimeSync::getTimeT();
+        if(nowTime-lastUpdatedTime>600)
+        {
+            loadingFinished=false;
+            emit loadData();
+        }
+    }
+}
 
-    void resizeEvent(QResizeEvent *event);
-    void drawText(QString, qint16 x=0, qint16 y=0, QString style="");
-    void explainColor(QString,qint16,qint16,QColor);
-    bool prepareCharts();
-    void drawRect(qint16,qint16);
-    //void drawCandle(ChartsItem *,qint16,qint16);
-
-public slots:
-    void refreshCharts();
-};
-
-#endif // CHARTSVIEW_H
+void NewsView::setHtmlData(QByteArray data)
+{
+    ui.newsBrowser->setHtml(data);
+    lastUpdatedTime=TimeSync::getTimeT();
+    loadingFinished=true;
+}

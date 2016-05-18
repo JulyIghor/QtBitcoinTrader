@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcion Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include "qmath.h"
 
 static QByteArray byteArrayFromDouble(const double &value, int maxDecimals=8, int minDecimals=1);
+static QByteArray byteArrayRoundFromDouble(const double &value, int maxDecimals=8);
 static QString textFromDouble(const double &value, int maxDecimals=8, int minDecimals=1);
 
 static double &cutDoubleDecimals(double &val, int maxDecimals=8, bool roundUp=false);
@@ -117,7 +118,7 @@ static bool validDouble(const double &val, int decimals)
 
 static QByteArray byteArrayFromDouble(const double &val, int maxDecimals, int minDecimals)
 {
-    maxDecimals=qMin(maxDecimals,decimalsForDouble(val));
+    /*maxDecimals=qMin(maxDecimals,decimalsForDouble(val));
     if(minDecimals>maxDecimals)minDecimals=maxDecimals;
     if(!validDouble(val,maxDecimals))return QByteArray("0");
     if(maxDecimals>8)maxDecimals=8;
@@ -140,12 +141,50 @@ static QByteArray byteArrayFromDouble(const double &val, int maxDecimals, int mi
         if(numberText.size()>numberTextLess.size())
             return numberTextLess;
     }
+    return numberText;*/
+
+    if(maxDecimals>8)maxDecimals=8;
+    if(maxDecimals<0)maxDecimals=0;
+    if(minDecimals>maxDecimals)minDecimals=maxDecimals;
+    if(minDecimals<0)minDecimals=0;
+
+    int floorLength=QByteArray::number(floor(val),'f',0).length();
+    int decimals=16-floorLength;
+    if(val<0)decimals++;
+    if(decimals<minDecimals)decimals=minDecimals;
+    QByteArray numberText=QByteArray::number(val,'f',decimals);
+
+    int resultLength=floorLength+maxDecimals+1;
+    if(numberText.length()>resultLength)numberText.chop(numberText.length()-resultLength);
+
+    int minLength=floorLength;
+    if(minDecimals>0)minLength+=minDecimals+1;
+    while(numberText[numberText.length()-1]=='0' && numberText.length()>minLength)numberText.chop(1);
+    if(numberText[numberText.length()-1]=='.')numberText.chop(1);
+
+    return numberText;
+}
+
+static QByteArray byteArrayRoundFromDouble(const double &val, int maxDecimals)
+{
+    if(maxDecimals>8)maxDecimals=8;
+    QByteArray numberText=QByteArray::number(val,'f',maxDecimals);
+
+    int numberTextLength=numberText.length();
+    if(val<0)numberTextLength--;
+    if(numberTextLength>16){
+        int deltaLength=numberTextLength-16;
+        maxDecimals-=deltaLength;
+        if(maxDecimals<0)maxDecimals=0;
+        numberText=QByteArray::number(val,'f',maxDecimals);
+    }
+
     return numberText;
 }
 
 static QString textFromDouble(const double &val, int maxDecimals, int minDecimals)
 {
-    double value=val+0.0000000025;
+    /*double value=val+0.0000000025;
     maxDecimals=qMin(maxDecimals,decimalsForDouble(value));
     if(minDecimals>maxDecimals)minDecimals=maxDecimals;
     if(!validDouble(val,maxDecimals))return QLatin1String("0");
@@ -170,6 +209,27 @@ static QString textFromDouble(const double &val, int maxDecimals, int minDecimal
         if(numberText.size()>numberTextLess.size())
             return numberTextLess;
     }
+    return numberText;*/
+
+    if(maxDecimals>8)maxDecimals=8;
+    if(maxDecimals<0)maxDecimals=0;
+    if(minDecimals>maxDecimals)minDecimals=maxDecimals;
+    if(minDecimals<0)minDecimals=0;
+
+    int floorLength=QString::number(floor(val),'f',0).length();
+    int decimals=16-floorLength;
+    if(val<0)decimals++;
+    if(decimals<minDecimals)decimals=minDecimals;
+    QString numberText=QString::number(val,'f',decimals);
+
+    int resultLength=floorLength+maxDecimals+1;
+    if(numberText.length()>resultLength)numberText.chop(numberText.length()-resultLength);
+
+    int minLength=floorLength;
+    if(minDecimals>0)minLength+=minDecimals+1;
+    while(numberText[numberText.length()-1]=='0' && numberText.length()>minLength)numberText.chop(1);
+    if(numberText[numberText.length()-1]=='.')numberText.chop(1);
+
     return numberText;
 }
 
