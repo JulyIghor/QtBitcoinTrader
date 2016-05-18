@@ -34,6 +34,7 @@
 
 #include <QThread>
 #include <QElapsedTimer>
+#include <QMutex>
 
 class TimeSync : public QObject
 {
