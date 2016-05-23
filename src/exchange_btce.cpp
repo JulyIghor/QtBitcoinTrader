@@ -68,7 +68,7 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume=false;
 
 	authRequestTime.restart();
-    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
+    privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
     lastHistoryId=0;
 
     QSettings networkSettings(baseValues.iniFileName,QSettings::IniFormat);
@@ -88,7 +88,7 @@ void Exchange_BTCe::clearVariables()
 	lastHistory.clear();
 	lastOrders.clear();
 	reloadDepth();
-    lastFetchTid=TimeSync::getTimeT()-600;
+    lastFetchTid=QDateTime::currentDateTime().toTime_t()-600;
 	lastFetchTid=-lastFetchTid;
 	lastTickerDate=0;
 }

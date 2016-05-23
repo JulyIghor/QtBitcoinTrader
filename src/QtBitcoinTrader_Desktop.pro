@@ -2,9 +2,9 @@ lessThan(QT_VERSION, 5.5): {
 error("Qt less than 5.5 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt 5.5 and C++11");
 }
 
-QMAKE_MAC_SDK = macosx10.11
-QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
-QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+#QMAKE_MAC_SDK = macosx10.11
+#QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+#QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 
 TEMPLATE	= app
 LANGUAGE	= C++

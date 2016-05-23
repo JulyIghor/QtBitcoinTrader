@@ -72,7 +72,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 
 	moveToThread(this);
 	authRequestTime.restart();
-    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
+    privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 }
 
 Exchange_Bitstamp::~Exchange_Bitstamp()
@@ -97,7 +97,7 @@ void Exchange_Bitstamp::clearVariables()
 	reloadDepth();
 	lastInfoReceived=false;
 	lastBidAskTimestamp=0;
-    lastTradesDate=TimeSync::getTimeT()-600;
+    lastTradesDate=QDateTime::currentDateTime().toTime_t()-600;
 	lastTickerDate=0;
 }
 
@@ -557,7 +557,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 		}
 		break;//balance
 	case 204://open_orders
-		if(!success)break;
+        if(!success)break;
 		if(data=="[]"){lastOrders.clear();emit ordersIsEmpty();break;}
 		if(data.startsWith("[")&&data.endsWith("]"))
 		{
@@ -575,13 +575,13 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 				{	
 					OrderItem currentOrder;
 					QByteArray currentOrderData=ordersList.at(n).toLatin1();
-					currentOrder.oid=getMidData("\"id\": ",",",&currentOrderData);
+                    currentOrder.oid=getMidData("\"id\": \"","\",",&currentOrderData);
 
 					QByteArray dateTimeData=getMidData("\"datetime\": \"","\"",&currentOrderData);
 					QDateTime orderDateTime=QDateTime::fromString(dateTimeData,"yyyy-MM-dd HH:mm:ss");
 					orderDateTime.setTimeSpec(Qt::UTC);
-					currentOrder.date=orderDateTime.toTime_t();
-					currentOrder.type=getMidData("\"type\": ",",",&currentOrderData)=="1";
+                    currentOrder.date=orderDateTime.toTime_t();
+                    currentOrder.type=getMidData("\"type\": \"","\",",&currentOrderData)=="1";
 					currentOrder.status=1;
 					currentOrder.amount=getMidData("\"amount\": \"","\"",&currentOrderData).toDouble();
 					currentOrder.price=getMidData("\"price\": \"","\"",&currentOrderData).toDouble();

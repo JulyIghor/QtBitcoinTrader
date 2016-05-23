@@ -68,7 +68,7 @@ Exchange_BitCurex::Exchange_BitCurex(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume=false;
 
 	authRequestTime.restart();
-    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
+    privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 }
 
 Exchange_BitCurex::~Exchange_BitCurex()
@@ -85,7 +85,7 @@ void Exchange_BitCurex::clearVariables()
 	lastOrders.clear();
 	reloadDepth();
     lastFetchTid=0;
-    startTradesDate=TimeSync::getTimeT()-600;
+    startTradesDate=QDateTime::currentDateTime().toTime_t()-600;
     lastTradesDate=0;
     lastHistoryId=0;
 }

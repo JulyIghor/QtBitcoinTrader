@@ -38,6 +38,7 @@
 
 TimeSync::TimeSync() : QObject()
 {
+    started=0;
     startTime=QDateTime::currentDateTime().toTime_t();
     timeShift=0;
     additionalTimer=0;
@@ -58,14 +59,27 @@ TimeSync::~TimeSync()
 
 TimeSync* TimeSync::global()
 {
-    static TimeSync instance;
-    return &instance;
+    static TimeSync *instance=0;
+
+    static QAtomicInt created=0;
+    if(created)return instance;
+    static QMutex mut;
+    QMutexLocker lock(&mut);
+
+    if(instance==0)
+    {
+        instance=new TimeSync;
+        while(instance->started==0)QThread::msleep(100);
+        created=1;
+    }
+
+    return instance;
 }
 
 quint32 TimeSync::getTimeT()
 {
     TimeSync* timeSync=TimeSync::global();
-    if(timeSync->additionalTimer==0)return 0;
+    if(timeSync->additionalTimer==0)return QDateTime::currentDateTime().toTime_t();
 
     qint64 additionalBuffer=0;
     timeSync->mutex.lock();
@@ -90,6 +104,8 @@ void TimeSync::runThread()
 
     additionalTimer=new QElapsedTimer();
     additionalTimer->start();
+
+    started=1;
 }
 
 void TimeSync::getNTPTime()
@@ -103,16 +119,23 @@ void TimeSync::getNTPTime()
     quint32 seconds=qToBigEndian(*(reinterpret_cast<quint32 *>(&data.data()[40])));
     quint32 fraction=qToBigEndian(*(reinterpret_cast<quint32 *>(&data.data()[44])));
     quint32 newTime=QDateTime::fromMSecsSinceEpoch(seconds*1000ll+fraction*1000ll/0x100000000ll-2208988800000ll).toTime_t();
-    if(newTime<1451606400)return;
+
+    if(newTime<1451606400 || newTime>4000000000){
+        QThread::msleep(500);
+        emit startSync();
+        return;
+    }
     qint32 tempTimeShift=qint64(newTime)-qint64(QDateTime::currentDateTime().toTime_t());
 
     if(timeShift!=0)tempTimeShift=qint32((qint64(timeShift)+qint64(tempTimeShift))/2);
 
-    timeShift.fetchAndStoreOrdered(tempTimeShift);
-
-    if(getNTPTimeRetryCount==2)if(timeShift>3600 || timeShift<-3600){
-        emit warningMessage(julyTr("TIME_SYNC_ERROR","Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys."));
+    if(tempTimeShift>3600 || tempTimeShift<-3600){
+        static bool showMessage=true;
+        if(showMessage)emit warningMessage(julyTr("TIME_SYNC_ERROR","Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys."));
+        showMessage=false;
     }
+    else
+        timeShift.fetchAndStoreOrdered(tempTimeShift);
 
     getNTPTimeRetryCount++;
     if(getNTPTimeRetryCount<3)emit startSync();

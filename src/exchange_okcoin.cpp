@@ -86,7 +86,7 @@ void Exchange_OKCoin::clearVariables()
 	reloadDepth();
     lastFetchTid=1;
 	lastTickerDate=0;
-    startTradesDate=TimeSync::getTimeT()-600;
+    startTradesDate=QDateTime::currentDateTime().toTime_t()-600;
 }
 
 void Exchange_OKCoin::clearValues()

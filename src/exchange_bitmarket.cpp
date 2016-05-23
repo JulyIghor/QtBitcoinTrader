@@ -68,7 +68,7 @@ Exchange_BitMarket::Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey
     supportsAccountVolume=false;
 
 	authRequestTime.restart();
-    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
+    privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 }
 
 Exchange_BitMarket::~Exchange_BitMarket()
@@ -86,7 +86,7 @@ void Exchange_BitMarket::clearVariables()
 	lastHistory.clear();
 	lastOrders.clear();
 	reloadDepth();
-    lastFetchTid=TimeSync::getTimeT()-600;
+    lastFetchTid=QDateTime::currentDateTime().toTime_t()-600;
 	lastFetchTid=-lastFetchTid;
     lastTickerDate=0;
     lastTradesTid.clear();
@@ -657,7 +657,7 @@ void Exchange_BitMarket::sendToApi(int reqType, QByteArray method, bool auth, bo
 
 	if(auth)
     {
-        QByteArray postData="method="+method+"&tonce="+QByteArray::number(TimeSync::getTimeT())+"&nonce="+QByteArray::number(++privateNonce);
+        QByteArray postData="method="+method+"&tonce="+QByteArray::number(QDateTime::currentDateTime().toTime_t())+"&nonce="+QByteArray::number(++privateNonce);
 		if(sendNow)
             julyHttp->sendData(reqType, "POST /api2/", postData, "API-Hash: "+hmacSha512(getApiSign(),postData).toHex()+"\r\n");
 		else

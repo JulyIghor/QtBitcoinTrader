@@ -249,8 +249,8 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 		QByteArray appendedHeader;
 
 		static int tonceCounter=0;		
-        static quint32 lastTonce=TimeSync::getTimeT();
-        quint32 newTonce=TimeSync::getTimeT();
+        static quint32 lastTonce=QDateTime::currentDateTime().toTime_t();
+        quint32 newTonce=QDateTime::currentDateTime().toTime_t();
 
 		if(lastTonce!=newTonce)
 		{

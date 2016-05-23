@@ -70,7 +70,7 @@ Exchange_Indacoin::Exchange_Indacoin(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume=false;
 
     authRequestTime.restart();
-    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
+    privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
     lastHistoryTs=0;
 }
 
@@ -89,7 +89,7 @@ void Exchange_Indacoin::clearVariables()
     lastOrders.clear();
     reloadDepth();
     lastFetchTid=0;
-    lastFetchDate=TimeSync::getTimeT()-600;
+    lastFetchDate=QDateTime::currentDateTime().toTime_t()-600;
     lastTickerDate=0;
 }
 

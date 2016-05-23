@@ -48,6 +48,8 @@ public:
     static quint32 getTimeT();
     static void syncNow();
 
+    QAtomicInt started;
+
 private:
     QThread *dateUpdateThread;
     quint32 startTime;

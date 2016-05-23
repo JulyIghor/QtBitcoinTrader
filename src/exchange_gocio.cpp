@@ -67,7 +67,7 @@ Exchange_GOCio::Exchange_GOCio(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume=false;
 
 	authRequestTime.restart();
-    privateNonce=(TimeSync::getTimeT()-1371854884)*10;
+    privateNonce=(QDateTime::currentDateTime().toTime_t()-1371854884)*10;
 
 	lastDate="0";
     lastHistoryId=0;
@@ -87,7 +87,7 @@ void Exchange_GOCio::clearVariables()
 	lastHistory.clear();
 	lastOrders.clear();
 	reloadDepth();
-    lastFetchTid=TimeSync::getTimeT()-600;
+    lastFetchTid=QDateTime::currentDateTime().toTime_t()-600;
 	lastFetchTid=-lastFetchTid;
     lastTickerDate=0;
 }
