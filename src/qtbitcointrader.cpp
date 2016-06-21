@@ -508,6 +508,9 @@ QtBitcoinTrader::QtBitcoinTrader() :
     connect(this,SIGNAL(clearCharts()),chartsView->chartsModel,SLOT(clearCharts()));
     connect(this,SIGNAL(addBound(double,bool)),chartsView->chartsModel,SLOT(addBound(double,bool)));
     ui.chartsLayout->addWidget(chartsView);
+
+    //margins and spacing
+    recursiveUpdateLayouts(this);
 }
 
 QtBitcoinTrader::~QtBitcoinTrader()
@@ -924,7 +927,7 @@ void QtBitcoinTrader::on_buttonAddRuleGroup_clicked()
     }
 
     RuleWidget *newRule=new RuleWidget(ruleGroup.fileName);
-    ui.rulesTabs->insertTab(ui.rulesTabs->count(),newRule,newRule->windowTitle());
+    int newTabIndex = ui.rulesTabs->insertTab(ui.rulesTabs->count(),newRule,newRule->windowTitle());
 
 	QStringList rulesListLoad=ruleGroup.groupsList;
 	if(rulesListLoad.count())
@@ -1356,8 +1359,10 @@ void QtBitcoinTrader::updateTrafficTotalValue()
 	totalValueLast=totalValue;
     if(networkMenu->getNetworkTotalMaximum()<totalValue)networkMenu->setNetworkTotalMaximum(totalValue*10);
     networkMenu->setNetworkTotal(totalValue);
-	}
+    }
 }
+
+
 
 void QtBitcoinTrader::tabTradesScrollUp()
 {

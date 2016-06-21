@@ -48,8 +48,10 @@ win32 { LIBS += -lcrypt32 -leay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lz -lw
 !win32 { LIBS += -lcrypto -lz }
 
 mac{
-LIBS += -framework CoreFoundation
-LIBS += -framework ApplicationServices
+    LIBS += -framework CoreFoundation
+    LIBS += -framework ApplicationServices
+    DEPENDPATH	+= /usr/local/opt/openssl/include
+    INCLUDEPATH	+= /usr/local/opt/openssl/include
 }
 
 #
