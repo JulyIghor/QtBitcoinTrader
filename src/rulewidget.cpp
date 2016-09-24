@@ -38,6 +38,7 @@
 #include "rulescriptparser.h"
 #include "addruledialog.h"
 #include "exchange.h"
+#include "utils/utils.h"
 
 RuleWidget::RuleWidget(QString fileName)
 	: QWidget()
@@ -109,6 +110,9 @@ RuleWidget::RuleWidget(QString fileName)
 	checkValidRulesButtons();
 
 	mainWindow.fixTableViews(this);
+
+    //margins and spacing
+    recursiveUpdateLayouts(this);
 }
 
 RuleWidget::~RuleWidget()

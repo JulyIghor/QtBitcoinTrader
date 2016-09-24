@@ -36,6 +36,7 @@
 #include <QWidget>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QLayout>
 
 
 QString changeFileExt(const QString& fileName, const QString& ext)
@@ -85,4 +86,31 @@ void adjustWidgetGeometry(QWidget* widget)
         bounds.translate(0, delta);
     }
     widget->move(bounds.topLeft());
+}
+
+void recursiveUpdateLayouts(const QObject *object)
+{
+    int space = 3;
+
+    const QWidget *widget = qobject_cast<const QWidget *>(object);
+    if (widget->layout())
+    {
+        widget->layout()->setSpacing(space);
+        widget->layout()->setMargin(space);
+    }
+
+    QObjectList children = object->children();
+    foreach (const QObject *child, children)
+    {
+        const QWidget *widget = qobject_cast<const QWidget *>(child);
+        if (widget)
+        {
+            if (widget->layout())
+            {
+                widget->layout()->setSpacing(space);
+                widget->layout()->setMargin(space);
+            }
+            recursiveUpdateLayouts(widget);
+        }
+    }
 }
