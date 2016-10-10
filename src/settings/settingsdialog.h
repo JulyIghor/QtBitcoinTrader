@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -29,61 +29,45 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef EXCHANGE_OKCOIN_H
-#define EXCHANGE_OKCOIN_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-#include "exchange.h"
+#include <QDialog>
+#include <QStandardItemModel>
+#include "settingsdialoglistelement.h"
+#include "settingsgeneral.h"
+#include "settingsnetworkproxy.h"
+#include "settingsdecimals.h"
+#include "ui_settingsdialog.h"
 
-class Exchange_OKCoin : public Exchange
+class SettingsDialogListElement;
+
+class SettingsDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	Exchange_OKCoin(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_OKCoin();
+	SettingsDialog();
+	~SettingsDialog();
+    void reject(){};
+
+    void clickOnList(qint32);
+    void disableTranslateButton();
 
 private:
-	bool isApiDown;
-	bool isFirstAccInfo;
-	bool isReplayPending(int);
-    bool tickerOnly;
-
-	int apiDownCounter;
-	int lastOpenedOrders;
-
-	JulyHttp *julyHttp;
-
-	qint64 lastFetchTid;
-
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
-
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
-
-	QTime authRequestTime;
-
-	quint32 lastPriceDate;
-	quint32 lastTickerDate;
-    quint32 startTradesDate;
-	quint32 privateNonce;
-    quint32 lastHistoryId;
-
-	void clearVariables();
-	void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double,double,bool);
-    void sendToApi(int reqType, QByteArray method, bool auth=false, QByteArray commands=0);
-private slots:
-	void reloadDepth();
-	void sslErrors(const QList<QSslError> &);
-	void dataReceivedAuth(QByteArray,int);
-	void secondSlot();
-public slots:
-	void clearValues();
-	void getHistory(bool);
-	void buy(QString, double, double);
-	void sell(QString, double, double);
-	void cancelOrder(QString, QByteArray);
+	Ui::SettingsDialog ui;
+    QVBoxLayout *listLayout;
+    QList<SettingsDialogListElement *> listListElement;
+	SettingsGeneral *settingsGeneral;
+	SettingsNetworkProxy *settingsNetworkProxy;
+    SettingsDecimals *settingsDecimals;
+	void resizeNameList();
+	void configureNameList();
+    void addDialog(QString, QString, QWidget*);
+    void closeEvent(QCloseEvent *);
+	bool isSettingsSaved();
+	void settingsSave();
+    void settingsDiscard();
 };
 
-#endif // EXCHANGE_OKCOIN_H
+#endif // SETTINGS_H

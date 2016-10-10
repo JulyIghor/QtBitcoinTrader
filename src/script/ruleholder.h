@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -29,18 +29,46 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DEPTHITEM_H
-#define DEPTHITEM_H
+#ifndef RULEHOLDER_H
+#define RULEHOLDER_H
 
 #include <QString>
 
-struct DepthItem 
+struct RuleHolder
 {
-	double price;
-	double volume;
-	QString priceStr;
-	QString volumeStr;
-	bool isValid();
+    RuleHolder();
+    QString description;
+    bool isTradingRule();
+    bool isValidComparation(QString &text);
+    bool isValidSymbol(QString &symbol);
+    bool isValidPlusMinus(QString &plusMinus);
+    bool isValidCode(QString &code);
+    bool isValid();
+
+    bool thanAmountPercentChecked;
+    bool thanPricePercentChecked;
+    bool variableBPercentChecked;
+    int thanAmountFeeIndex;
+    int thanPriceFeeIndex;
+    int thanTypeIndex;
+    int variableBFeeIndex;
+    int variableBModeIndex;
+    double delayMilliseconds;
+    double thanAmount;
+    double thanPrice;
+    double variableBExact;
+    QString comparationText;
+    QString thanPricePlusMinusText;
+    QString thanPriceTypeCode;
+    QString thanText;
+    QString tradeSymbolCode;
+    QString valueASymbolCode;
+    QString valueBSymbolCode;
+    QString variableACode;
+    QString variableBCode;
+    QString variableBplusMinus;
+    QString variableBSymbolCode;
+    QString sayCode;
 };
 
-#endif // DEPTHITEM_H
+#endif // RULEHOLDER_H

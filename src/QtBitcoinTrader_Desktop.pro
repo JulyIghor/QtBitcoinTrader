@@ -2,18 +2,13 @@ lessThan(QT_VERSION, 5.5): {
 error("Qt less than 5.5 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt 5.5 and C++11");
 }
 
-#QMAKE_MAC_SDK = macosx10.11
-#QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
-#QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
-
 TEMPLATE	= app
 LANGUAGE	= C++
 DEPENDPATH	+= .
 INCLUDEPATH	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
 
-
-CONFIG	+= qt # release
+CONFIG	+= qt release
 CONFIG	+= c++11
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
@@ -28,37 +23,67 @@ exists($$(WINDOWSSDKDIR)/Include/sapi.h){
   #win32 { !CONFIG(static) { LIBS += -lole32 } }
 }
 
-CONFIG(static) {
-  greaterThan(QT_MAJOR_VERSION, 4): {
-   QTPLUGIN.mediaservice=-
-   QTPLUGIN.playlistformats=-
-   QTPLUGIN.position=-
-   QTPLUGIN.printsupport=-
-   QTPLUGIN.bearer=-
-   QTPLUGIN.accessible=-
-   QTPLUGIN.sensors=-
-   QTPLUGIN.sqldrivers=-
-   QTPLUGIN.qmltooling=-
-   QTPLUGIN.designer=-
-   QTPLUGIN.iconengines=-
-   QTPLUGIN.imageformats=-
-   #win32 { DEFINES += STATIC_QT5_BUILD }
-  }
-}
+mac {
+LIBS+= -dead_strip
+QMAKE_MAC_SDK = macosx10.12
+QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 
-win32 { LIBS += -lcrypt32 -leay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lz -lws2_32 -lwinmm }
-!win32 { LIBS += -lcrypto -lz }
-
-mac{
 LIBS += -framework CoreFoundation
 LIBS += -framework ApplicationServices
 }
+CONFIG(static) {
+    QTPLUGIN.mediaservice=-
+    QTPLUGIN.playlistformats=-
+    QTPLUGIN.position=-
+    QTPLUGIN.printsupport=-
+    QTPLUGIN.bearer=-
+    QTPLUGIN.accessible=-
+    QTPLUGIN.sensors=-
+    QTPLUGIN.sqldrivers=-
+    QTPLUGIN.qmltooling=-
+    QTPLUGIN.designer=-
+    QTPLUGIN.iconengines=-
+    QTPLUGIN.imageformats=-
+
+    QTPLUGIN.geoservices=-
+    QTPLUGIN.position=-
+    QTPLUGIN.qmltooling=-
+    QTPLUGIN.sensorgestures=-
+}
+
+win32 { LIBS += -lcrypt32 -leay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lz -lws2_32 -lwinmm }
+!win32 { LIBS += -lcrypto -lz -lssl}
 
 #
 # Headers
 #
-HEADERS += aboutdialog.h \
-           addrulegroup.h \
+HEADERS += script/addrulegroup.h \
+           script/rulesmodel.h \
+           script/rulewidget.h \
+           script/scriptwidget.h \
+           script/scriptobject.h \
+           script/addscriptwindow.h \
+           script/addruledialog.h \
+           script/rulescriptparser.h \
+           script/ruleholder.h \
+           script/scriptobjectthread.h \
+           platform/sound.h \
+           platform/socket.h \
+           config/config_manager.h \
+           config/config_manager_dialog.h \
+           utils/utils.h \
+           settings/settingsdialog.h \
+           settings/settingsgeneral.h \
+           settings/settingsnetworkproxy.h \
+           settings/settingsdialoglistelement.h \
+           settings/settingsdecimals.h \
+           dock/dock_host.h \
+           charts/chartsview.h \
+           charts/chartsmodel.h \
+           news/newsview.h \
+           news/newsmodel.h \
+           aboutdialog.h \
            currencyinfo.h \
            currencypairitem.h \
            datafolderchusedialog.h \
@@ -90,8 +115,6 @@ HEADERS += aboutdialog.h \
            passworddialog.h \
            percentpicker.h \
            qtbitcointrader.h \
-           rulesmodel.h \
-           rulewidget.h \
            thisfeatureunderdevelopment.h \
            tradesitem.h \
            tradesmodel.h \
@@ -102,43 +125,34 @@ HEADERS += aboutdialog.h \
            logobutton.h \
            networkmenu.h \
            julybuttonmenu.h \
-           scriptwidget.h \
-           scriptobject.h \
-           addscriptwindow.h \
            julylockfile.h \
            exchange_gocio.h \
            featuredexchangesdialog.h \
            allexchangesdialog.h \
            allexchangesmodel.h \
            exchangebutton.h \
-           addruledialog.h \
-           rulescriptparser.h \
-           ruleholder.h \
            exchange_indacoin.h \
            julymath.h \
            exchange_bitcurex.h \
            exchange_bitmarket.h \
-		   exchange_okcoin.h \
-           platform/sound.h \
-           platform/socket.h \
-           config/config_manager.h \
-           config/config_manager_dialog.h \
-           utils/utils.h \
-           dock/dock_host.h \
-           charts/chartsview.h \
-           charts/chartsmodel.h \
-           settingsdialog.h \
-           settingsgeneral.h \
-           settingsnetworkproxy.h \
-           settingsdialoglistelement.h \
-           settingsdecimals.h \
-    timesync.h \
-    translationmessage.h \
-    indicatorengine.h \
-    news/newsview.h \
-    news/newsmodel.h
+           exchange_okcoin.h \
+           timesync.h \
+           translationmessage.h \
+           indicatorengine.h
 
-FORMS += addrulegroup.ui \
+FORMS += script/addrulegroup.ui \
+         script/rulewidget.ui \
+         script/scriptwidget.ui \
+         script/addscriptwindow.ui \
+         script/addruledialog.ui \
+         config/config_manager_dialog.ui \
+         charts/chartsview.ui \
+         news/newsview.ui \
+         settings/settingsdialog.ui \
+         settings/settingsgeneral.ui \
+         settings/settingsnetworkproxy.ui \
+         settings/settingsdialoglistelement.ui \
+         settings/settingsdecimals.ui \
          datafolderchusedialog.ui \
          debugviewer.ui \
          feecalculator.ui \
@@ -146,31 +160,43 @@ FORMS += addrulegroup.ui \
          passworddialog.ui \
          percentpicker.ui \
          qtbitcointrader.ui \
-         rulewidget.ui \
          thisfeatureunderdevelopment.ui \
          translationabout.ui \
          translationdialog.ui \
          updaterdialog.ui \
          logobutton.ui \
          networkmenu.ui \
-         scriptwidget.ui \
-         addscriptwindow.ui \
          featuredexchangesdialog.ui \
          allexchangesdialog.ui \
          exchangebutton.ui \
-         addruledialog.ui \
-         config/config_manager_dialog.ui \
-         charts/chartsview.ui \
-         settingsdialog.ui \
-         settingsgeneral.ui \
-         settingsnetworkproxy.ui \
-         settingsdialoglistelement.ui \
-         settingsdecimals.ui \
-    translationmessage.ui \
-    news/newsview.ui
+         translationmessage.ui
 
-SOURCES += aboutdialog.cpp \
-           addrulegroup.cpp \
+SOURCES += script/addrulegroup.cpp \ 
+           script/rulesmodel.cpp \
+           script/rulewidget.cpp \    
+           script/scriptwidget.cpp \
+           script/scriptobject.cpp \
+           script/addscriptwindow.cpp \
+           script/addruledialog.cpp \
+           script/rulescriptparser.cpp \
+           script/ruleholder.cpp \
+           script/scriptobjectthread.cpp \
+           platform/sound.cpp \
+           platform/socket.cpp \
+           config/config_manager.cpp \
+           config/config_manager_dialog.cpp \
+           utils/utils.cpp \
+           dock/dock_host.cpp \
+           charts/chartsview.cpp \
+           charts/chartsmodel.cpp \
+           news/newsview.cpp \
+           news/newsmodel.cpp \
+           settings/settingsdialog.cpp \
+           settings/settingsgeneral.cpp \
+           settings/settingsnetworkproxy.cpp \
+           settings/settingsdialoglistelement.cpp \
+           settings/settingsdecimals.cpp \
+           aboutdialog.cpp \
            currencypairitem.cpp \
            datafolderchusedialog.cpp \
            debugviewer.cpp \
@@ -201,8 +227,6 @@ SOURCES += aboutdialog.cpp \
            passworddialog.cpp \
            percentpicker.cpp \
            qtbitcointrader.cpp \
-           rulesmodel.cpp \
-           rulewidget.cpp \
            thisfeatureunderdevelopment.cpp \
            tradesitem.cpp \
            tradesmodel.cpp \
@@ -213,40 +237,19 @@ SOURCES += aboutdialog.cpp \
            logobutton.cpp \
            networkmenu.cpp \
            julybuttonmenu.cpp \
-           scriptwidget.cpp \
-           scriptobject.cpp \
-           addscriptwindow.cpp \
            julylockfile.cpp \
            exchange_gocio.cpp \
            featuredexchangesdialog.cpp \
            allexchangesdialog.cpp \
            allexchangesmodel.cpp \
            exchangebutton.cpp \
-           addruledialog.cpp \
-           rulescriptparser.cpp \
-           ruleholder.cpp \
            exchange_indacoin.cpp \
            exchange_bitcurex.cpp \
            exchange_bitmarket.cpp \
-		   exchange_okcoin.cpp \
-           platform/sound.cpp \
-           platform/socket.cpp \
-           config/config_manager.cpp \
-           config/config_manager_dialog.cpp \
-           utils/utils.cpp \
-           dock/dock_host.cpp \
-           charts/chartsview.cpp \
-           charts/chartsmodel.cpp \
-           settingsdialog.cpp \
-           settingsgeneral.cpp \
-           settingsnetworkproxy.cpp \
-           settingsdialoglistelement.cpp \
-           settingsdecimals.cpp \
-    timesync.cpp \
-    translationmessage.cpp \
-    indicatorengine.cpp \
-    news/newsview.cpp \
-    news/newsmodel.cpp
+           exchange_okcoin.cpp \
+           timesync.cpp \
+           translationmessage.cpp \
+           indicatorengine.cpp
 
 #
 # Resources
@@ -291,3 +294,4 @@ RC_FILE = WinResource.rc
 
 macx:ICON = $${PWD}/QtBitcoinTrader.icns
 macx:QMAKE_INFO_PLIST = $${PWD}/QtBitcoinTrader.plist
+

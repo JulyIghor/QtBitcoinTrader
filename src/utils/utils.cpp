@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -36,7 +36,7 @@
 #include <QWidget>
 #include <QApplication>
 #include <QDesktopWidget>
-
+#include <QLayout>
 
 QString changeFileExt(const QString& fileName, const QString& ext)
 {
@@ -85,4 +85,22 @@ void adjustWidgetGeometry(QWidget* widget)
         bounds.translate(0, delta);
     }
     widget->move(bounds.topLeft());
+}
+
+void recursiveUpdateLayouts(const QObject *object)
+{
+    const QWidget *widget = qobject_cast<const QWidget *>(object);
+    if (widget->layout())
+    {
+        if(widget->layout()->spacing()>0)widget->layout()->setSpacing(widget->layout()->spacing()/2);
+        if(widget->layout()->margin()>0)widget->layout()->setMargin(3);
+        if(widget->layout()->margin()==-1)widget->layout()->setContentsMargins(3,5,3,3);
+    }
+
+    QObjectList children = object->children();
+    foreach (const QObject *child, children)
+    {
+        const QWidget *widget = qobject_cast<const QWidget *>(child);
+        if (widget)recursiveUpdateLayouts(widget);
+    }
 }

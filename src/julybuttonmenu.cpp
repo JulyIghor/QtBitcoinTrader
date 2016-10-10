@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -66,6 +66,7 @@ void JulyButtonMenu::displayMenuClicked()
     }
 
     pointToShow=widgetUnderButton->mapToGlobal(pointToShow);
+    show();
     exec(pointToShow);return;
     if(pointToShow.x()<parentWindow->geometry().x())pointToShow.setX(parentWindow->geometry().x());
     if(pointToShow.y()<parentWindow->geometry().y())pointToShow.setY(parentWindow->geometry().y());

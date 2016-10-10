@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -70,8 +70,6 @@ Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
 	defaultCurrencyParams.priceDecimals=5;
 	defaultCurrencyParams.priceMin=qPow(0.1,baseValues.currentPair.priceDecimals);
 
-	balanceDisplayAvailableAmount=false;
-	exchangeSupportsAvailableAmount=true;
 	supportsLoginIndicator=false;
     supportsAccountVolume=false;
 
@@ -500,7 +498,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 		else if(debugLevel)logThread->writeLog("Invalid depth data:"+data,2);
 		break;
 	case 202: //info
-		{
+        {
 			if(!success)break;
 			if(data.startsWith("[{\"type\""))
 			{
@@ -509,7 +507,6 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 				
 				QByteArray btcBalance;
 				QByteArray usdBalance;
-				QByteArray usdAvBalance;
 
 				QStringList balances=QString(data).split("},{");
 				for(int n=0;n<balances.count();n++)
@@ -521,11 +518,10 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 
 					QByteArray balanceCurrency=getMidData("currency\":\"","\"",&currentBalance);
 					if(btcBalance.isEmpty()&&balanceCurrency==baseValues.currentPair.currAStrLow)
-						btcBalance=getMidData("amount\":\"","\"",&currentBalance);
+                        btcBalance=getMidData("available\":\"","\"",&currentBalance);
 					if(usdBalance.isEmpty()&&balanceCurrency==baseValues.currentPair.currBStrLow)
 					{
-						usdBalance=getMidData("amount\":\"","\"",&currentBalance);
-						usdAvBalance=getMidData("available\":\"","\"",&currentBalance);
+                        usdBalance=getMidData("available\":\"","\"",&currentBalance);
 					}
 				}
 
@@ -542,31 +538,6 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                     if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbolSecond(),newUsdBalance);
 					lastUsdBalance=newUsdBalance;
 				}
-
-				if(!usdAvBalance.isEmpty())
-				{
-                    double newAvUsdBalance=usdAvBalance.toDouble();
-                    if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(baseValues.currentPair.symbolSecond(),newAvUsdBalance);
-					lastAvUsdBalance=newAvUsdBalance;
-				}
-
-				//QByteArray tradeFee=getMidData("Trade_Fee\":","}",&data);
-				//if(!tradeFee.isEmpty())
-				//{
-                //	double newFee=tradeFee.toDouble();
-                //	if(newFee!=lastFee)emit accFeeChanged(baseValues.currentPair.currSymbol,newFee);
-				//	lastFee=newFee;
-				//}
-				//if(isFirstAccInfo)
-				//{
-				//	QByteArray rights=getMidData("Rights\":","]",&data);
-				//	if(!rights.isEmpty())
-				//	{
-				//		bool isRightsGood=rights.contains("get_info")&&rights.contains("trade");
-				//		if(!isRightsGood)emit showErrorMessage("I:>invalid_rights");
-				//		isFirstAccInfo=false;
-				//	}
-				//}
 			}
 			else if(debugLevel)logThread->writeLog("Invalid Info data:"+data,2);
 		}

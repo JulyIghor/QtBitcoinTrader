@@ -112,5 +112,7 @@
         <file>Resources/Language/Japanese.lng</file>
         <file>Resources/CurrencySign/DSH.png</file>
         <file>Resources/CurrencySign/ETH.png</file>
+        <file>Resources/CurrencySign/ETC.png</file>
+        <file>Resources/CurrencySign/BFX.png</file>
     </qresource>
 </RCC>

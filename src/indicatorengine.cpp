@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -32,7 +32,6 @@
 #include <QThread>
 #include "indicatorengine.h"
 #include "main.h"
-#include <QDebug>
 
 IndicatorEngine::IndicatorEngine() : QObject()
 {
@@ -46,13 +45,14 @@ IndicatorEngine::IndicatorEngine() : QObject()
     connect(this,SIGNAL(indicatorVolumeChanged(QString, double)),baseValues_->mainWindow_,SLOT(indicatorVolumeChanged(QString, double)));
 
     QThread *indicatorEngineThread=new QThread;
+    connect(this,SIGNAL(finishThread()),indicatorEngineThread,SLOT(quit()));
     this->moveToThread(indicatorEngineThread);
     indicatorEngineThread->start();
 }
 
 IndicatorEngine::~IndicatorEngine()
 {
-
+    emit finishThread();
 }
 
 //---------------------------------------- Static ----------------------------------------

@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -37,11 +37,9 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
 {
 	checkDuplicatedOID=true;
 	accountFee=0.0;
-	balanceDisplayAvailableAmount=false;
 	minimumRequestIntervalAllowed=1200;
 	calculatingFeeMode=1;
 	isLastTradesTypeSupported=false;
-	exchangeSupportsAvailableAmount=true;
 	lastBidAskTimestamp=0;
 	baseValues.exchangeName="Bitstamp";
 	baseValues.currentPair.name="BTC/USD";
@@ -523,29 +521,22 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					accountFee=accFee;
 				}
 
-                QByteArray btcBalance=getMidData("\""+baseValues.currentPair.currAStrLow+"_balance\": \"","\"",&data);
-				if(!btcBalance.isEmpty())
-				{
+                QByteArray btcBalance=getMidData("\""+baseValues.currentPair.currAStrLow+"_available\": \"","\"",&data);
+                if(!btcBalance.isEmpty())
+                {
                     double newBtcBalance=btcBalance.toDouble();
-					if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbol,newBtcBalance);
-					lastBtcBalance=newBtcBalance;
+                    if(lastBtcBalance!=newBtcBalance)emit accBtcBalanceChanged(baseValues.currentPair.symbol,newBtcBalance);
+                    lastBtcBalance=newBtcBalance;
                 }
 
-                QByteArray usdBalance=getMidData("\""+baseValues.currentPair.currBStrLow+"_balance\": \"","\"",&data);
-				if(!usdBalance.isEmpty())
-				{
+                QByteArray usdBalance=getMidData("\""+baseValues.currentPair.currBStrLow+"_available\": \"","\"",&data);
+                if(!usdBalance.isEmpty())
+                {
                     double newUsdBalance=usdBalance.toDouble();
-					if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbol,newUsdBalance);
-					lastUsdBalance=newUsdBalance;
-				}
+                    if(newUsdBalance!=lastUsdBalance)emit accUsdBalanceChanged(baseValues.currentPair.symbol,newUsdBalance);
+                    lastUsdBalance=newUsdBalance;
+                }
 
-                QByteArray usdAvBalance=getMidData("\""+baseValues.currentPair.currBStrLow+"_available\": \"","\"",&data);
-				if(!usdAvBalance.isEmpty())
-				{
-                    double newAvUsdBalance=usdAvBalance.toDouble();
-					if(newAvUsdBalance!=lastAvUsdBalance)emit availableAmountChanged(baseValues.currentPair.symbol,newAvUsdBalance);
-					lastAvUsdBalance=newAvUsdBalance;
-				}
 				static bool balanceSent=false;
 				if(!balanceSent)
 				{
@@ -633,17 +624,13 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 					HistoryItem currentHistoryItem;
 
 					QByteArray curLog(dataList.at(n).toLatin1());
-                    int logTypeInt=getMidData("\"type\": \"","\"",&curLog).toInt();
-					QByteArray btcAmount=getMidData("\"btc\": \"","\"",&curLog);
-					bool negativeAmount=btcAmount.startsWith("-");
-					if(negativeAmount)btcAmount.remove(0,1);
-					QDateTime orderDateTime=QDateTime::fromString(getMidData("\"datetime\": \"","\"",&curLog),"yyyy-MM-dd HH:mm:ss");
-					orderDateTime.setTimeSpec(Qt::UTC);
 
+                    QString firstCurrency;
                     if(curLog.indexOf("\"btc_eur\"")>=0)
                     {
                         currentHistoryItem.price=getMidData("btc_eur\": ",",",&curLog).toDouble();
                         currentHistoryItem.symbol="BTCEUR";
+                        firstCurrency="btc";
                     }
                     else
                     {
@@ -651,13 +638,28 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                         {
                             currentHistoryItem.price=getMidData("btc_usd\": ",",",&curLog).toDouble();
                             currentHistoryItem.symbol="BTCUSD";
+                            firstCurrency="btc";
                         }
-                        else continue;
+                        else
+                        {
+                            if(curLog.indexOf("\"eur_usd\"")>=0)
+                            {
+                                currentHistoryItem.price=getMidData("eur_usd\": ",",",&curLog).toDouble();
+                                currentHistoryItem.symbol="EURUSD";
+                                firstCurrency="eur";
+                            }
+                            else continue;
+                        }
                     }
 
-					currentHistoryItem.volume=btcAmount.toDouble();
+                    int logTypeInt=getMidData("\"type\": \"","\"",&curLog).toInt();
+                    QByteArray btcAmount=getMidData("\""+firstCurrency+"\": \"","\"",&curLog);
+					bool negativeAmount=btcAmount.startsWith("-");
+					if(negativeAmount)btcAmount.remove(0,1);
+					QDateTime orderDateTime=QDateTime::fromString(getMidData("\"datetime\": \"","\"",&curLog),"yyyy-MM-dd HH:mm:ss");
+					orderDateTime.setTimeSpec(Qt::UTC);
 
-					QByteArray logType;
+					currentHistoryItem.volume=btcAmount.toDouble();
 
 					if(logTypeInt==0)currentHistoryItem.type=4;//Deposit
 					else

@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -48,8 +48,8 @@
 #include "historymodel.h"
 #include <QKeyEvent>
 #include "currencypairitem.h"
-#include "rulewidget.h"
-#include "scriptwidget.h"
+#include "script/rulewidget.h"
+#include "script/scriptwidget.h"
 #include "feecalculator.h"
 #include "percentpicker.h"
 #include <QScrollArea>

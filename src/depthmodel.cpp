@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -83,7 +83,7 @@ double DepthModel::getPriceByVolume(double amount)
     if(currentIndex<0)return 0.0;
     if(currentIndex>=sizeList.count())currentIndex=sizeList.count()-1;
     if(!originalIsAsk)currentIndex=priceList.count()-currentIndex-1;
-    return priceList.at(currentIndex)*(currentIndex==priceList.count()-1?-1:1);
+    return priceList.at(currentIndex)*(currentIndex==priceList.count()-1?-1:1)*(currentIndex==0?-1:1);
 }
 
 double DepthModel::getVolumeByPrice(double price)
@@ -92,7 +92,7 @@ double DepthModel::getVolumeByPrice(double price)
     int currentIndex=qUpperBound(priceList.begin(),priceList.end(),price)-priceList.begin();
     if(currentIndex<0)return 0.0;
     if(currentIndex>=priceList.count())currentIndex=priceList.count()-1;
-    return sizeListAt(currentIndex)*(currentIndex==priceList.count()-1?-1:1);
+    return sizeListAt(currentIndex)*(currentIndex==priceList.count()-1?-1:1)*(currentIndex==0?-1:1);
 }
 
 int DepthModel::rowCount(const QModelIndex &) const

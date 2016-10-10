@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -77,7 +77,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 				groupboxLayout->addWidget(logoButton);
 			}
 		}
-	}
+    }
 
     if(updateCheckRetryCount>3)httpGet=new JulyHttp("api.qtbitcointrader.com",0,this,false,false);
     else httpGet=new JulyHttp("qbtapi.centrabit.com",0,this,false,false);
@@ -142,8 +142,8 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived,int reqType)
     timeOutTimer->stop();
 
 	if(stateUpdate==0)
-	{
-		if(dataReceived.size()>10245)exitSlot();
+    {
+        if(dataReceived.size()>50000)exitSlot();
 
 		bool canAutoUpdate=false;
 #ifdef Q_OS_MAC

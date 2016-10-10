@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AddScriptWindow</class>
+ <widget class="QDialog" name="AddScriptWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>271</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Add Script</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="1" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupContentGroupBox">
+     <property name="accessibleName">
+      <string>RULES_SCRIPT_CONTENT</string>
+     </property>
+     <property name="title">
+      <string>Script content</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="3" column="0">
+       <widget class="QRadioButton" name="checkUseFile">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="accessibleName">
+         <string>USE_SCRIPT_FILE</string>
+        </property>
+        <property name="text">
+         <string>Load script from file:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="openFile">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../QtResource.qrc">
+          <normaloff>:/Resources/Open.png</normaloff>:/Resources/Open.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="scriptFileName">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="checkEmptyScript">
+        <property name="accessibleName">
+         <string>CREATE_EMPTY_SCRIPT</string>
+        </property>
+        <property name="text">
+         <string>Create empty script</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="checkExistingScript">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="accessibleName">
+         <string>COPY_FROM_EXISTING_SCRIPT</string>
+        </property>
+        <property name="text">
+         <string>Copy from existing script:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QComboBox" name="existingScriptList">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QRadioButton" name="checkUseTemplate">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="accessibleName">
+         <string>USE_SCRIPT_TEMPLATE</string>
+        </property>
+        <property name="text">
+         <string>Use script template:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QComboBox" name="useScriptGroupTemplateList">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="buttonAddScript">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="accessibleName">
+      <string>ADD_SCRIPT</string>
+     </property>
+     <property name="text">
+      <string>Add Group</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>154</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="3">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>154</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="buttonCancel">
+     <property name="accessibleName">
+      <string>TRCANCEL</string>
+     </property>
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupNameGroupbox">
+     <property name="accessibleName">
+      <string>SCRIPT_NAME</string>
+     </property>
+     <property name="title">
+      <string>Script Name</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="groupNameLabel">
+        <property name="accessibleName">
+         <string>SHORT_NAME</string>
+        </property>
+        <property name="text">
+         <string>Short name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="scriptName">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="groupNameClear">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../QtResource.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>checkEmptyScript</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddScriptWindow</receiver>
+   <slot>onGroupContentChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>58</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-63</x>
+     <y>104</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkExistingScript</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddScriptWindow</receiver>
+   <slot>onGroupContentChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>46</x>
+     <y>129</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-17</x>
+     <y>126</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkUseTemplate</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddScriptWindow</receiver>
+   <slot>onGroupContentChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>52</x>
+     <y>148</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-19</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkUseFile</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>AddScriptWindow</receiver>
+   <slot>onGroupContentChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>31</x>
+     <y>184</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-22</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>groupNameClear</sender>
+   <signal>clicked()</signal>
+   <receiver>scriptName</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>46</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>216</x>
+     <y>43</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>AddScriptWindow</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>297</x>
+     <y>224</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>303</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onGroupContentChanged(bool)</slot>
+ </slots>
+</ui>

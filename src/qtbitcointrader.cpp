@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -51,7 +51,7 @@
 #include <QUrl>
 #include <QDockWidget>
 #include "exchange.h"
-#include "addscriptwindow.h"
+#include "script/addscriptwindow.h"
 #include "aboutdialog.h"
 #include "exchange_btce.h"
 #include "exchange_bitstamp.h"
@@ -64,20 +64,20 @@
 #include "exchange_okcoin.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
-#include "addrulegroup.h"
+#include "script/addrulegroup.h"
 #include "percentpicker.h"
 #include "logobutton.h"
-#include "scriptwidget.h"
+#include "script/scriptwidget.h"
 #include "thisfeatureunderdevelopment.h"
 #include "orderstablecancelbutton.h"
-#include "rulescriptparser.h"
+#include "script/rulescriptparser.h"
 #include "julymath.h"
 #include "platform/sound.h"
 #include "dock/dock_host.h"
 #include "config/config_manager.h"
 #include "config/config_manager_dialog.h"
 #include "utils/utils.h"
-#include "settingsdialog.h"
+#include "settings/settingsdialog.h"
 #include "indicatorengine.h"
 //#include "chatwindow.h"
 
@@ -518,6 +518,8 @@ QtBitcoinTrader::QtBitcoinTrader() :
     connect(::config, &ConfigManager::onChanged, this, &QtBitcoinTrader::onConfigChanged);
     connect(::config, &ConfigManager::onError, this, &QtBitcoinTrader::onConfigError);
     initConfigMenu();
+
+    if(iniSettings->value("UI/OptimizeInterface",false).toBool())recursiveUpdateLayouts(this);
 }
 
 QtBitcoinTrader::~QtBitcoinTrader()
@@ -1355,13 +1357,13 @@ void QtBitcoinTrader::updateTrafficTotalValue()
 	{
 		trafficTotalTypeLast=baseValues.trafficTotalType;
 
-		switch(trafficTotalTypeLast)
+        switch(trafficTotalTypeLast)
 		{
         case 0: networkMenu->setSuffix(" Kb"); break;
         case 1: networkMenu->setSuffix(" Mb"); break;
         case 2: networkMenu->setSuffix(" Gb"); break;
 		default: break;
-		}
+        }
 	}
 	static int totalValueLast=-1;
 	int totalValue=0;
@@ -2203,7 +2205,7 @@ void QtBitcoinTrader::on_sellPricePerCoinAsMarketLastPrice_clicked()
 
 void QtBitcoinTrader::on_sellTotalBtcAllIn_clicked()
 {
-	ui.sellTotalBtc->setValue(getAvailableBTC());
+    ui.sellTotalBtc->setValue(getAvailableBTC());
 }
 
 void QtBitcoinTrader::on_sellTotalBtcHalfIn_clicked()
@@ -2393,7 +2395,7 @@ void QtBitcoinTrader::checkValidOrdersButtons()
 
 void QtBitcoinTrader::on_buyTotalBtcAllIn_clicked()
 {
-	ui.buyTotalBtc->setValue(getAvailableUSDtoBTC(ui.buyPricePerCoin->value()));
+    ui.buyTotalBtc->setValue(getAvailableUSDtoBTC(ui.buyPricePerCoin->value()));
 }
 
 void QtBitcoinTrader::on_buyTotalBtcHalfIn_clicked()
@@ -3027,11 +3029,11 @@ double QtBitcoinTrader::getAvailableUSD()
     double amountToReturn=0.0;
 	if(currentExchange->balanceDisplayAvailableAmount)amountToReturn=ui.accountUSD->value();
 	else amountToReturn=ui.accountUSD->value()-ui.ordersTotalUSD->value();
-	
+
     amountToReturn=cutDoubleDecimalsCopy(amountToReturn,baseValues.currentPair.currBDecimals,false);
 
 	if(currentExchange->exchangeSupportsAvailableAmount)amountToReturn=qMin(availableAmount,amountToReturn);
-	
+
 	currentExchange->filterAvailableUSDAmountValue(&amountToReturn);
 
 	return amountToReturn;

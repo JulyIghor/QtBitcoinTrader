@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -39,7 +39,7 @@ TranslationAbout::TranslationAbout(QWidget *par)
 {
 	ui.setupUi(this);
     ui.buttonCheckUpdates->setVisible(false);
-    setWindowTitle("Qt Bitcon Trader v"+baseValues.appVerStr);
+    setWindowTitle("Qt Bitcoin Trader v"+baseValues.appVerStr);
 	setWindowFlags(Qt::WindowCloseButtonHint|par->windowFlags());
 	setWindowModality(Qt::ApplicationModal);
 	setAttribute(Qt::WA_DeleteOnClose,true);
@@ -76,10 +76,10 @@ TranslationAbout::~TranslationAbout()
 void TranslationAbout::showWindow()
 {
     julyTranslator.translateUi(this);
-    setWindowTitle("Qt Bitcon Trader v"+baseValues.appVerStr);
+    setWindowTitle("Qt Bitcoin Trader v"+baseValues.appVerStr);
 	ui.languageField->setText(julyTr("LANGUAGE_NAME","Invalid Language"));
 	ui.translationAuthor->setText(julyTr("LANGUAGE_AUTHOR","Invalid About"));
-    ui.aboutBitcoinTraderGroupBox->setTitle(julyTr("ABOUT_QT_BITCOIN_TRADER","About %1").arg("Qt Bitcon Trader"));
+    ui.aboutBitcoinTraderGroupBox->setTitle(julyTr("ABOUT_QT_BITCOIN_TRADER","About %1").arg("Qt Bitcoin Trader"));
 	ui.aboutTextLabel->setText(julyTr("ABOUT_QT_BITCOIN_TRADER_TEXT","Qt Bitcoin Trader is a free Open Source project<br>developed on C++ Qt and OpenSSL.<br>If you want to help make project better please donate.<br>Feel free to send me recommendations and fixes to: %1").arg("<a href=\"mailto:julyighor@gmail.com\">julyighor@gmail.com</a>"));
     show();
 }

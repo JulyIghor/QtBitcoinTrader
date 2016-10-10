@@ -523,6 +523,8 @@ Label_SETTINGS_USE_24HOUR_TIME_FORMAT=Use 24-hour time format:
 Label_SETTINGS_TIME_SYNC=Time synchronization:
 Label_SETTINGS_TYPE=Type
 Label_SETTINGS_ALTERNATIVE_DOMAIN_BTCE=Use alternative domain for BTC-e
+GroupBox_SETTINGS_OTHER=Other   
+Label_SETTINGS_OPTIMIZE=Reducing interface elements spacing (after restart)
 Label_MS=ms
 
 Label_UPDATER_AGAIN_AUTO_UPDATE=Don't ask again and automatically install updates:

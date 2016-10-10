@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -63,6 +63,8 @@ signals:
     void indicatorBuyChanged(QString,double);
     void indicatorLastChanged(QString,double);
     void indicatorVolumeChanged(QString,double);
+
+    void finishThread();
 };
 
 #endif // INDICATORENGINE_H

@@ -522,6 +522,8 @@ Label_SETTINGS_USE_24HOUR_TIME_FORMAT=Использовать 24-часовой
 Label_SETTINGS_TIME_SYNC=Синхронизация времени:
 Label_SETTINGS_TYPE=Тип
 Label_SETTINGS_ALTERNATIVE_DOMAIN_BTCE=Использовать альтернативный домен для BTC-e
+GroupBox_SETTINGS_OTHER=Другие  
+Label_SETTINGS_OPTIMIZE=Уменьшение отступлений между элементами интерфейса (после перезагрузки)
 Label_MS=мс
 
 Label_UPDATER_AGAIN_AUTO_UPDATE=Больше не спрашивать, автоматически устанавливать обновления:

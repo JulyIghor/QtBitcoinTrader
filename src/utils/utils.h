@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -34,6 +34,7 @@
 #include <QString>
 
 class QWidget;
+class QObject;
 
 
 QString changeFileExt(const QString& fileName, const QString& ext);
@@ -41,3 +42,4 @@ QString adjustPathSeparators(const QString& path);
 QString slash(const QString& path1, const QString& path2);
 QString slash(const QString& path1, const QString& path2, const QString& path3);
 void adjustWidgetGeometry(QWidget* widget);
+void recursiveUpdateLayouts(const QObject *object);

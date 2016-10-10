@@ -1,6 +1,6 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2015 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -113,7 +113,7 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.2001";
+    appVerStr="1.2000";
     appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -279,10 +279,8 @@ int main(int argc, char *argv[])
     baseValues.appThemeGray.loadTheme("Gray");
     baseValues.appTheme=baseValues.appThemeLight;
 
-    if(argc>1)
-	{
-        if(a.arguments().last().startsWith("/checkupdate"))
-		{
+    if(argc>1){if(a.arguments().last().startsWith("/checkupdate"))
+        {
 			a.setStyleSheet(baseValues.appTheme.styleSheet);
 
 			QSettings settings(appDataDir+"/QtBitcoinTrader.cfg",QSettings::IniFormat);
@@ -554,7 +552,7 @@ int main(int argc, char *argv[])
 			tryPassword=enterPassword.getPassword();
 
 		if(!tryPassword.isEmpty())
-		{
+        {
 			baseValues.iniFileName=enterPassword.getIniFilePath();
             baseValues.logFileName=baseValues.iniFileName;
             baseValues.logFileName.replace(".ini",".log",Qt::CaseInsensitive);
@@ -562,7 +560,7 @@ int main(int argc, char *argv[])
             julyLock=new JulyLockFile(baseValues.iniFileName);
             bool profileLocked=julyLock->isLocked();
             if(profileLocked)
-			{
+            {
 				QMessageBox msgBox(0);
 				msgBox.setIcon(QMessageBox::Question);
 				msgBox.setWindowTitle("Qt Bitcoin Trader");
@@ -616,8 +614,8 @@ int main(int argc, char *argv[])
 	}
 	::config = new ConfigManager(slash(appDataDir, "QtBitcoinTrader.ws.cfg"), &a);
     baseValues.mainWindow_=new QtBitcoinTrader;
-	}
-	mainWindow.setupClass();
+    }
+    mainWindow.setupClass();
     a.exec();
 
     if(julyLock)delete julyLock;

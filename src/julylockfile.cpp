@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -33,6 +33,7 @@
 #include "main.h"
 #include <QCryptographicHash>
 #include <QUdpSocket>
+#include <QNetworkProxy>
 #include <QFile>
 #include <QDir>
 #include <QTime>
@@ -41,10 +42,13 @@
 
 JulyLockFile::JulyLockFile(QString imageName)
     : QObject()
-{	
+{
     qsrand(QDateTime::fromTime_t(TimeSync::getTimeT()).time().msecsTo(QTime(23,59,59,999)));
     lockFile=new QFile;
     lockSocket=new QUdpSocket;
+    QNetworkProxy proxy;
+    proxy.setType(QNetworkProxy::NoProxy);
+    lockSocket->setProxy(proxy);
     isLockedFile=false;
     lockPort=0;
 
@@ -69,7 +73,19 @@ JulyLockFile::JulyLockFile(QString imageName)
     if(lockPort==0||lockSocket->state()!=QUdpSocket::BoundState)
     {
         lockPort=1999+qrand()%2000;
-        while(!lockSocket->bind(QHostAddress::LocalHost,++lockPort,QUdpSocket::DontShareAddress));
+        int i=0;
+        while(!lockSocket->bind(QHostAddress::LocalHost,++lockPort,QUdpSocket::DontShareAddress)){
+            i++;
+            if(i>100){
+                if(lockFile->isOpen())
+                {
+                    lockFile->close();
+                    lockFile->remove(lockFilePath);
+                }
+                isLockedFile=false;
+                return;
+            }
+        }
     }
 
     QTimer *minuteTimer=new QTimer(this);

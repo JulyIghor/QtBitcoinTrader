@@ -1,4 +1,4 @@
-//  This file is part of Qt Bitcion Trader
+//  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
 //  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
 //
@@ -38,7 +38,7 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
 	buySellAmountExcludedFee=true;
 	clearHistoryOnCurrencyChanged=false;
     isLastTradesTypeSupported=true;
-	balanceDisplayAvailableAmount=false;
+    //balanceDisplayAvailableAmount=false;-----------------------------------------------------------------
 	minimumRequestIntervalAllowed=600;
 	calculatingFeeMode=1;
 	baseValues.exchangeName="BTC China";
@@ -248,26 +248,25 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 		QByteArray postData;
 		QByteArray appendedHeader;
 
-		static int tonceCounter=0;		
+        static int tonceCounter=10;
         static quint32 lastTonce=QDateTime::currentDateTime().toTime_t();
         quint32 newTonce=QDateTime::currentDateTime().toTime_t();
 
-		if(lastTonce!=newTonce)
-		{
-			tonceCounter=0;
-			lastTonce=newTonce;
-		}
-		else
-		{
-			tonceCounter+=10;
-			if(tonceCounter>99)tonceCounter=0;
-		}
+        if(lastTonce!=newTonce)
+        {
+            tonceCounter=10;
+            lastTonce=newTonce;
+        }
+        else
+        {
+            tonceCounter+=1;
+            if(tonceCounter>99)tonceCounter=0;
+        }
 
-		QByteArray tonceCounterData=QByteArray::number(tonceCounter);
-		if(tonceCounter>9)tonceCounterData.append("0000");
-		else tonceCounterData.append("00000");
+        QByteArray tonceCounterData=QByteArray::number(tonceCounter);
+        tonceCounterData.append("0000");
 
-		QByteArray tonce=QByteArray::number(newTonce)+tonceCounterData;
+        QByteArray tonce=QByteArray::number(newTonce)+tonceCounterData;
 
 		QByteArray signatureString="tonce="+tonce+"&accesskey="+getApiKey()+"&requestmethod=post&id=1&method="+method+"&params="+signatureParams;
 
