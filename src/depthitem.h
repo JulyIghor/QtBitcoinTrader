@@ -29,55 +29,18 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CHARTSVIEW_H
-#define CHARTSVIEW_H
+#ifndef DEPTHITEM_H
+#define DEPTHITEM_H
 
-#include <QWidget>
+#include <QString>
 
-class QGraphicsScene;
-class QElapsedTimer;
-class ChartsModel;
-
-namespace Ui {
-class ChartsView;
-}
-
-class ChartsView : public QWidget
+struct DepthItem 
 {
-    Q_OBJECT
-public:
-    bool isVisible;
-    bool sizeIsChanged;
-    ChartsModel* chartsModel;
-
-    ChartsView();
-    ~ChartsView();
-
-    void clearCharts();
-    void comeNewData();
-
-public slots:
-    void refreshCharts();
-
-private:
-    Ui::ChartsView* ui;
-    quint16 fontHeight;
-    quint16 fontHeightHalf;
-    QGraphicsScene* sceneCharts;
-    QGraphicsScene* leftSceneCharts;
-    QGraphicsScene* rightSceneCharts;
-    QGraphicsScene* bottomSceneCharts;
-    QTimer* refreshTimer;
-    QElapsedTimer* perfomanceTimer;
-    qint32 timeRefreshCharts;
-    qint32 lastResize;
-    qint32 lastNewData;
-
-    void resizeEvent(QResizeEvent* event);
-    void drawText(QGraphicsScene*, QString, qint16 x = 0, qint16 y = 0, QString style = "");
-    void explainColor(QString, qint16, qint16, QColor);
-    bool prepareCharts();
-    void drawRect(qint16, qint16);
+	double price;
+	double volume;
+	QString priceStr;
+	QString volumeStr;
+	bool isValid();
 };
 
-#endif // CHARTSVIEW_H
+#endif // DEPTHITEM_H

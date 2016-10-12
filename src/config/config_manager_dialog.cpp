@@ -35,9 +35,9 @@
 
 
 ConfigManagerDialog::ConfigManagerDialog(QWidget* parent) :
-    QDialog     (parent),
-    ui          (new Ui::ConfigManagerDialog),
-    nameChanging    (false)
+    QDialog      (parent),
+    ui           (new Ui::ConfigManagerDialog),
+    nameChanging (false)
 {
     ui->setupUi(this);
 
@@ -66,7 +66,8 @@ ConfigManagerDialog::~ConfigManagerDialog()
 void ConfigManagerDialog::onBtnConfigSave()
 {
     QString name = ui->editName->text();
-    if(!::config->defaultNamesTr.contains(name)){
+    if (!::config->defaultNamesTr.contains(name))
+    {
         ::config->save(name);
         close();
     }
@@ -99,7 +100,8 @@ void ConfigManagerDialog::onNameTextChanged(const QString& text)
     ui->btnSave->setEnabled(!text.trimmed().isEmpty());
     nameChanging = true;
     selectNameInList(text);
-    if(config->defaultNamesTr.contains(text)){
+    if (config->defaultNamesTr.contains(text))
+    {
         ui->btnSave->setEnabled(false);
     }
     nameChanging = false;
@@ -107,16 +109,19 @@ void ConfigManagerDialog::onNameTextChanged(const QString& text)
 
 void ConfigManagerDialog::onNameListCurrentTextChanged(const QString& text)
 {
-    if (!nameChanging) {
+    if (!nameChanging)
+    {
         ui->editName->setText(text);
     }
 
-    if(config->defaultNamesTr.contains(text)){
+    if (config->defaultNamesTr.contains(text))
+    {
         ui->btnLoad->setEnabled(true);
         ui->btnSave->setEnabled(false);
         ui->btnRemove->setEnabled(false);
     }
-    else {
+    else
+    {
         bool nameExists = ::config->getConfigNames().contains(text);
         ui->btnLoad->setEnabled(nameExists);
         ui->btnSave->setEnabled(true);

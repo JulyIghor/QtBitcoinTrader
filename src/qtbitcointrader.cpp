@@ -79,7 +79,7 @@
 #include "utils/utils.h"
 #include "settings/settingsdialog.h"
 #include "indicatorengine.h"
-//#include "chatwindow.h"
+#include "charts/chartsmodel.h"
 
 #ifdef Q_OS_WIN
 

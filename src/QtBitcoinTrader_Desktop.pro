@@ -2,11 +2,16 @@ lessThan(QT_VERSION, 5.5): {
 error("Qt less than 5.5 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt 5.5 and C++11");
 }
 
+#QMAKE_MAC_SDK = macosx10.11
+#QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+#QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+
 TEMPLATE	= app
 LANGUAGE	= C++
 DEPENDPATH	+= .
 INCLUDEPATH	+= .
 INCLUDEPATH += $$[QT_INSTALL_PREFIX]/src/3rdparty/zlib
+
 
 CONFIG	+= qt release
 CONFIG	+= c++11
@@ -23,15 +28,6 @@ exists($$(WINDOWSSDKDIR)/Include/sapi.h){
   #win32 { !CONFIG(static) { LIBS += -lole32 } }
 }
 
-mac {
-LIBS+= -dead_strip
-QMAKE_MAC_SDK = macosx10.12
-QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
-QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
-
-LIBS += -framework CoreFoundation
-LIBS += -framework ApplicationServices
-}
 CONFIG(static) {
     QTPLUGIN.mediaservice=-
     QTPLUGIN.playlistformats=-
@@ -52,8 +48,16 @@ CONFIG(static) {
     QTPLUGIN.sensorgestures=-
 }
 
-win32 { LIBS += -lcrypt32 -leay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lz -lws2_32 -lwinmm }
-!win32 { LIBS += -lcrypto -lz -lssl}
+win32 { LIBS += -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lzlib -lws2_32 -lwinmm }
+!win32 { LIBS += -lcrypto -lz }
+
+mac{
+LIBS+= -dead_strip
+QMAKE_MAC_SDK = macosx10.12
+
+LIBS += -framework CoreFoundation
+LIBS += -framework ApplicationServices
+}
 
 #
 # Headers
@@ -294,4 +298,3 @@ RC_FILE = WinResource.rc
 
 macx:ICON = $${PWD}/QtBitcoinTrader.icns
 macx:QMAKE_INFO_PLIST = $${PWD}/QtBitcoinTrader.plist
-

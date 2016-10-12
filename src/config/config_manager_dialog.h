@@ -50,9 +50,6 @@ public:
     explicit ConfigManagerDialog(QWidget* parent = NULL);
     ~ConfigManagerDialog();
 
-private:
-    Ui::ConfigManagerDialog *ui;
-
 private Q_SLOTS:
     void onBtnConfigSave();
     void onBtnConfigLoad();
@@ -64,9 +61,9 @@ private Q_SLOTS:
     void onNameListItemDoubleClicked(QListWidgetItem* item);
 
 private:
-    void selectNameInList(const QString& name);
+    Ui::ConfigManagerDialog* ui;
+    bool nameChanging;
 
-private:
-    bool            nameChanging;
+    void selectNameInList(const QString& name);
 };
 

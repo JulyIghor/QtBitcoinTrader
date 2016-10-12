@@ -41,6 +41,23 @@ Next ToDo:
 
 ## Change Log
 
+v1.3
+
+0. macOS Sierra support
+1. JL Script file read/write support
+2. Syncronised currency pairs of Bitfinex, Bitstamp, BTC-e
+3. Fixed bugs of history and currency pair in Bitstamp
+4. Improved Proxy settings
+5. Fixed network stat information
+6. Fixed display of balance in bitfinex, bitstamp, btcchina
+8. Fix tonce in btcchina
+9. Add reducing interface elements spacing (optional in settings)
+10. Add inactive start script button
+11. Fixed JL Script groups bug
+12. Fixed open order/cancel bug in bitstamp
+13. Fixed time synchronization bug
+
+
 v1.07.01
 - Hotfix. High CPU load fix. Nonce error fix
 

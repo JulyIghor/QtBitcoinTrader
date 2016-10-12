@@ -33,8 +33,9 @@
 #define CHARTSMODEL_H
 
 #include <QObject>
-#include <QFontMetrics>
-#include "tradesitem.h"
+
+struct TradesItem;
+class QFontMetrics;
 
 class ChartsModel : public QObject
 {
@@ -63,16 +64,20 @@ public:
     QList<QString> graphAmountText;
     QList<qint16>  graphAmountTextY;
 
-
     ChartsModel();
     ~ChartsModel();
 
     bool prepareChartsData(qint16,qint16);
 
+public slots:
+    void addLastTrades(QList<TradesItem>*);
+    void addBound(double, bool);
+    void clearCharts();
+
 private:
     qint32 intervalDate;
     qint32 intervalCount;
-    QFontMetrics *fontMetrics;
+    QFontMetrics* fontMetrics;
 
     QList<quint32> tradesDate;
     QList<double>  tradesPrice;
@@ -101,7 +106,7 @@ private:
     double  priceStepY;
 
     double stepRound(double);
-    double axisRound(double,double);
+    double axisRound(double, double);
     void prepareInit();
     void prepareXAxis();
     void prepareAmountYAxis();
@@ -110,13 +115,6 @@ private:
     void preparePriceYAxis();
     void preparePrice();
     void prepareBound();
-
-signals:
-
-public slots:
-    void addLastTrades(QList<TradesItem> *);
-    void addBound(double,bool);
-    void clearCharts();
 };
 
 #endif // CHARTSMODEL_H
