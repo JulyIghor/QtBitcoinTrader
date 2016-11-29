@@ -1,0 +1,9 @@
+[01]
+Symbol=BTCUSD
+Request=BTCUSD
+PriceMin=0.001
+TradeVolumeMin=0.01
+TradePriceMin=0.1
+ItemDecimals=8
+PriceDecimals=3
+ValueDecimals=8
