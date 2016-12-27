@@ -53,7 +53,7 @@ private:
 
 	JulyHttp *julyHttp;
 
-	qint64 lastFetchTid;
+    quint64 lastFetchTid;
 
 	QList<DepthItem> *depthAsks;
 	QList<DepthItem> *depthBids;
@@ -67,7 +67,7 @@ private:
 	quint32 lastTickerDate;
     quint32 startTradesDate;
 	quint32 privateNonce;
-    quint32 lastHistoryId;
+    quint64 lastHistoryId;
 
 	void clearVariables();
 	void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);

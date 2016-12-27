@@ -2,9 +2,16 @@ lessThan(QT_VERSION, 5.5): {
 error("Qt less than 5.5 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt 5.5 and C++11");
 }
 
-#QMAKE_MAC_SDK = macosx10.11
-#QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
-#QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+mac{
+LIBS+= -dead_strip
+QMAKE_MAC_SDK = macosx10.12
+
+LIBS += -framework CoreFoundation
+LIBS += -framework ApplicationServices
+
+QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
+}
 
 TEMPLATE	= app
 LANGUAGE	= C++
@@ -50,14 +57,6 @@ CONFIG(static) {
 
 win32 { LIBS += -lcrypt32 -llibeay32 -lssleay32 -luser32 -lgdi32 -ladvapi32 -lzlib -lws2_32 -lwinmm }
 !win32 { LIBS += -lcrypto -lz }
-
-mac{
-LIBS+= -dead_strip
-QMAKE_MAC_SDK = macosx10.12
-
-LIBS += -framework CoreFoundation
-LIBS += -framework ApplicationServices
-}
 
 #
 # Headers
@@ -175,9 +174,9 @@ FORMS += script/addrulegroup.ui \
          exchangebutton.ui \
          translationmessage.ui
 
-SOURCES += script/addrulegroup.cpp \ 
+SOURCES += script/addrulegroup.cpp \
            script/rulesmodel.cpp \
-           script/rulewidget.cpp \    
+           script/rulewidget.cpp \
            script/scriptwidget.cpp \
            script/scriptobject.cpp \
            script/addscriptwindow.cpp \
@@ -257,7 +256,7 @@ SOURCES += script/addrulegroup.cpp \
 
 #
 # Resources
-# 
+#
 RESOURCES += QtResource.qrc
 
 #

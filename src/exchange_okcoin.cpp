@@ -185,7 +185,7 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
                 QByteArray tradeData=tradeList.at(n).toLatin1();
                 newItem.date=getMidData("\"date\":",",",&tradeData).toUInt();
                 if(newItem.date<startTradesDate)continue;
-                quint32 currentTid=getMidData("\"tid\":",",",&tradeData).toUInt();
+                quint64 currentTid=getMidData("\"tid\":",",",&tradeData).toULongLong();
                 if(lastFetchTid>=currentTid)continue;
                 lastFetchTid=currentTid;
                 newItem.price=getMidData("\"price\":\"","\"",&tradeData).toDouble();
@@ -421,14 +421,14 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
 
                 QStringList dataList=QString(data).split("},{");
                 if(dataList.count()==0)return;
-                quint32 currentId;
-                quint32 maxId=0;
+                quint64 currentId;
+                quint64 maxId=0;
                 for(int n=0;n<dataList.count();n++)
                 {
                     QByteArray curLog(dataList.at(n).toLatin1());
                     if(getMidData("\"status\":",",",&curLog)!="2")continue;
 
-                    currentId=getMidData("\"order_id\":",",",&curLog).toUInt();
+                    currentId=getMidData("\"order_id\":",",",&curLog).toULongLong();
                     if(currentId<=lastHistoryId)break;
                     if(n==0)maxId=currentId;
 

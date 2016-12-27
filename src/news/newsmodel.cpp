@@ -29,43 +29,37 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <QThread>
 #include "news/newsmodel.h"
 
-NewsModel::NewsModel() : QObject()
+NewsModel::NewsModel()
+    : QObject(),
+      runningJulyHttp(false),
+      downloadThread(new QThread)
 {
-    runningJulyHttp=false;
-
-    downloadThread=new QThread;
-    connect(downloadThread,SIGNAL(started()),this,SLOT(runThread()));
+    connect(downloadThread, &QThread::started, this, &NewsModel::runThread);
     moveToThread(downloadThread);
     downloadThread->start();
 }
 
 NewsModel::~NewsModel()
 {
-    julyHttp->destroyClass=true;
+    julyHttp->destroyClass = true;
     julyHttp->deleteLater();
-
-    /*for(int i=0;runningJulyHttp&&i<2000;i++)
-    {
-        QThread::msleep(2);
-    }
-
-    downloadThread->exit(0);*/
     downloadThread->deleteLater();
 }
 
 void NewsModel::destroyedJulyHttp()
 {
-    runningJulyHttp=false;
+    runningJulyHttp = false;
 }
 
 void NewsModel::runThread()
 {
-    julyHttp=new JulyHttp("centrabit.com","",this);
-    connect(julyHttp,SIGNAL(dataReceived(QByteArray,int)),this,SLOT(dataReceived(QByteArray,int)));
-    connect(julyHttp,SIGNAL(destroyed()),this,SLOT(destroyedJulyHttp()));
-    runningJulyHttp=true;
+    julyHttp = new JulyHttp("centrabit.com", "", this);
+    connect(julyHttp, &JulyHttp::dataReceived, this, &NewsModel::dataReceived);
+    connect(julyHttp, &JulyHttp::destroyed,    this, &NewsModel::destroyedJulyHttp);
+    runningJulyHttp = true;
 }
 
 void NewsModel::loadData()
@@ -73,9 +67,8 @@ void NewsModel::loadData()
     julyHttp->sendData(100, "GET /TraderNews/");
 }
 
-void NewsModel::dataReceived(QByteArray data,int reqType)
+void NewsModel::dataReceived(QByteArray data, int reqType)
 {
-    if(reqType==100){
+    if (reqType == 100)
         emit setHtmlData(data);
-    }
 }

@@ -3200,9 +3200,6 @@ void QtBitcoinTrader::initDocks()
 
 void QtBitcoinTrader::createActions()
 {
-    //actionTest = new QAction("&Test", this);
-    //connect(actionTest, SIGNAL(triggered()), this, SLOT(onActionTest()));
-
     actionLockDocks = new QAction("&Lock Docks", this);
     actionLockDocks->setCheckable(true);
     connect(actionLockDocks, SIGNAL(triggered(bool)), this, SLOT(onActionLockDocks(bool)));
@@ -3230,12 +3227,14 @@ void QtBitcoinTrader::createActions()
 void QtBitcoinTrader::createMenu()
 {
     menuFile = menuBar()->addMenu("&QtBitcoinTrader");
-    //menuFile->addAction(actionTest);
     menuFile->addSeparator();
     menuFile->addAction(actionSettings);
     menuFile->addAction(actionDebug);
     menuFile->addSeparator();
     menuFile->addAction(actionExit);
+    actionSettings->setMenuRole(QAction::ApplicationSpecificRole);
+    actionDebug->setMenuRole(QAction::ApplicationSpecificRole);
+    actionExit->setMenuRole(QAction::QuitRole);
 
     menuView = menuBar()->addMenu("&View");
     menuView->addAction(actionLockDocks);
@@ -3333,11 +3332,6 @@ void QtBitcoinTrader::moveWidgetsToDocks()
     connect(dockDepth, SIGNAL(visibilityChanged(bool)), this, SLOT(depthVisibilityChanged(bool)));
     connect(dockCharts, SIGNAL(visibilityChanged(bool)), this, SLOT(chartsVisibilityChanged(bool)));
     connect(dockNews, SIGNAL(visibilityChanged(bool)), newsView, SLOT(visibilityChanged(bool)));
-}
-
-void QtBitcoinTrader::onActionTest()
-{
-    //
 }
 
 void QtBitcoinTrader::onActionAbout()

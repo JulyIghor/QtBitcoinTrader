@@ -14,7 +14,7 @@ Next ToDo:
 
 ## Official website
 
-* https://centrabit.com/?m0prm=6
+* https://centrabit.com/index.php?m0prm=6
 
 ## Download binaries
 

@@ -433,7 +433,6 @@ private:
     void initConfigMenu();
 
 private slots:
-    void onActionTest();
     void onActionAbout();
     void onActionAboutQt();
     void onActionLockDocks(bool checked);
@@ -446,7 +445,6 @@ private slots:
     void exitApp();
 
 private:
-    QAction*    actionTest;
     QAction*    actionExit;
     QAction*    actionAbout;
     QAction*    actionAboutQt;

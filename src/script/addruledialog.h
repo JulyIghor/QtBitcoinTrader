@@ -34,13 +34,12 @@
 
 #include <QDialog>
 #include "ruleholder.h"
-#include <QComboBox>
-#include <QDoubleSpinBox>
-#include "rulewidget.h"
 
 namespace Ui {
 class AddRuleDialog;
 }
+class QComboBox;
+class QDoubleSpinBox;
 
 class AddRuleDialog : public QDialog
 {
@@ -51,8 +50,8 @@ public:
 	QString getGroupName();
     bool isRuleEnabled();
     RuleHolder getRuleHolder();
-    void fillByHolder(RuleHolder &,bool enabled);
-    explicit AddRuleDialog(QString groupName, QWidget *parent = 0);
+    void fillByHolder(RuleHolder&, bool enabled);
+    explicit AddRuleDialog(QString groupName, QWidget* parent = 0);
     ~AddRuleDialog();
 
 private slots:
@@ -88,18 +87,18 @@ private slots:
 private:
     QString groupName;
 	QString getFreeGroupName();
-    void fixSize(bool fitToWindow=false);
+    void fixSize(bool fitToWindow = false);
     bool pendingFix;
     bool ruleIsEnabled;
     QList<QDoubleSpinBox*> usedSpinBoxes;
 	RuleHolder lastHolder;
-    QString comboData(QComboBox *list, int row);
-    QString comboCurrentData(QComboBox *);
-    void setComboIndex(QComboBox *list, int &row);
-    void setComboIndex(QComboBox *list, QString &text);
-    void setComboIndexByData(QComboBox *list, QString &data);
+    QString comboData(QComboBox* list, int row);
+    QString comboCurrentData(QComboBox*);
+    void setComboIndex(QComboBox* list, int& row);
+    void setComboIndex(QComboBox* list, QString& text);
+    void setComboIndexByData(QComboBox* list, QString& data);
     QString currentThanType;
-    Ui::AddRuleDialog *ui;
+    Ui::AddRuleDialog* ui;
 };
 
 #endif // ADDRULEDIALOG_H

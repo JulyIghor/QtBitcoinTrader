@@ -32,8 +32,9 @@
 #ifndef NEWSMODEL_H
 #define NEWSMODEL_H
 
-#include <QThread>
 #include "julyhttp.h"
+
+class QThread;
 
 class NewsModel : public QObject
 {
@@ -43,21 +44,21 @@ public:
     NewsModel();
     ~NewsModel();
 
-private:
-    QThread *downloadThread;
-    bool runningJulyHttp;
-    JulyHttp* julyHttp;
+public slots:
+    void loadData();
 
 signals:
     void setHtmlData(QByteArray);
 
-public slots:
-    void loadData();
-
 private slots:
     void runThread();
-    void dataReceived(QByteArray,int);
+    void dataReceived(QByteArray, int);
     void destroyedJulyHttp();
+
+private:
+    QThread*  downloadThread;
+    bool      runningJulyHttp;
+    JulyHttp* julyHttp;
 };
 
 #endif // NEWSMODEL_H

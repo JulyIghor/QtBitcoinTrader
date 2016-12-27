@@ -36,9 +36,7 @@ Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
 {
 	orderBookItemIsDedicatedOrder=true;
 	supportsExchangeFee=false;
-	supportsExchangeVolume=false;
 	clearHistoryOnCurrencyChanged=true;
-	exchangeTickerSupportsHiLowPrices=false;
 	isLastTradesTypeSupported=false;
 	calculatingFeeMode=2;
 	historyLastTimestamp="0";
@@ -119,7 +117,7 @@ void Exchange_Bitfinex::secondSlot()
     switch(sendCounter)
     {
     case 0:
-        if(!isReplayPending(103))sendToApi(103,"ticker/"+baseValues.currentPair.currRequestPair,false,true);
+        if(!isReplayPending(103))sendToApi(103,"pubticker/"+baseValues.currentPair.currRequestPair,false,true);
         break;
     case 1:
         if(!isReplayPending(202))sendToApi(202,"balances",true,true);
@@ -325,6 +323,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                     IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Buy",newTickerBuy);
 				lastTickerBuy=newTickerBuy;
 			}
+
 			quint32 tickerNow=getMidData("timestamp\":\"",".",&data).toUInt();
 			if(tickerLastDate<tickerNow)
 			{
@@ -336,6 +335,33 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 					tickerLastDate=tickerNow;
 				}
 			}
+
+            QByteArray tickerHigh=getMidData("high\":\"","\"",&data);
+            if(!tickerHigh.isEmpty())
+            {
+                double newTickerHigh=tickerHigh.toDouble();
+                if(newTickerHigh!=lastTickerHigh)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"High",newTickerHigh);
+                lastTickerHigh=newTickerHigh;
+            }
+
+            QByteArray tickerLow=getMidData("\"low\":\"","\"",&data);
+            if(!tickerLow.isEmpty())
+            {
+                double newTickerLow=tickerLow.toDouble();
+                if(newTickerLow!=lastTickerLow)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Low",newTickerLow);
+                lastTickerLow=newTickerLow;
+            }
+
+            QByteArray tickerVolume=getMidData("\"volume\":\"","\"",&data);
+            if(!tickerVolume.isEmpty())
+            {
+                double newTickerVolume=tickerVolume.toDouble();
+                if(newTickerVolume!=lastTickerVolume)
+                    IndicatorEngine::setValue(baseValues.exchangeName,baseValues.currentPair.symbol,"Volume",newTickerVolume);
+                lastTickerVolume=newTickerVolume;
+            }
 		}
 		else if(debugLevel)logThread->writeLog("Invalid ticker fast data:"+data,2);
 		break;//ticker

@@ -149,7 +149,6 @@ int NewPasswordDialog::difficulty(QString pass, bool * resive_PasswordIsGood, QS
     qint32 diff=0UL;						// Difficulty level
 	qint32 passLength=pass.length();	// Password length
     if(passLength){
-		if(passLength>20)passLength=20;
 		static QString allowedPassChars="!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 		bool containsDigit=false;
 		bool containsSpec=false;
@@ -168,6 +167,20 @@ int NewPasswordDialog::difficulty(QString pass, bool * resive_PasswordIsGood, QS
 		if(containsDigit)passDifficulty+=10;
 		if(containsSpec)passDifficulty+=12;
 
+        const int blockSize = 3;
+        int repeatCount = 1;
+        for(int n = 0; n < pass.length() - blockSize; ++n)
+        {
+            QString fragment = pass.mid(n, blockSize);
+            if(pass.indexOf(fragment, n + 1) > -1)
+            {
+                ++repeatCount;
+                n += blockSize - 1;
+            }
+        }
+        passLength -= repeatCount;
+
+        if(passLength>20)passLength=20;
 		if(passDifficulty>=26 && passLength>14)passLength=14;
 		if(passDifficulty>=36 && passLength>13)passLength=13;
 		if(passDifficulty>=52 && passLength>12)passLength=12;

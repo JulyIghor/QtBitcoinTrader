@@ -34,7 +34,6 @@
 #include <QObject>
 #include <QDockWidget>
 
-
 class QDockWidget;
 
 
@@ -68,6 +67,6 @@ private:
     bool isConstrained(QDockWidget* dock);
 
 private:
-    QList<QWidget*>     widgets;
-    QDockWidget*        dockToggling;
+    QList<QWidget*> widgets;
+    QDockWidget*    dockToggling;
 };
