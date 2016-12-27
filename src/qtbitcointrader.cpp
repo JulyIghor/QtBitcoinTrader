@@ -3232,8 +3232,11 @@ void QtBitcoinTrader::createMenu()
     menuFile->addAction(actionDebug);
     menuFile->addSeparator();
     menuFile->addAction(actionExit);
-    actionSettings->setMenuRole(QAction::ApplicationSpecificRole);
-    actionDebug->setMenuRole(QAction::ApplicationSpecificRole);
+    #ifdef Q_OS_MAC
+        actionSettings->setMenuRole(QAction::ApplicationSpecificRole);
+        actionDebug->setMenuRole(QAction::ApplicationSpecificRole);
+    #endif
+
     actionExit->setMenuRole(QAction::QuitRole);
 
     menuView = menuBar()->addMenu("&View");
