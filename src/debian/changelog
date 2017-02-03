@@ -1,0 +1,13 @@
+qtbitcointrader (1.30.0-3) stable; urgency=medium
+
+  * Initial release
+  
+v1.30.03
+- High screen resolution support for Windows
+- Fixed fee for BTCChina and OKCoin
+- Add new pairs for Bitfinex
+- Fixed authorization for Bitfinex
+- Completed the Norwegian translation
+- Fixed bug on restoring Workspace from previous state
+- Fixed account data and add new pairs for bitstamp
+- Fixed minor bugs

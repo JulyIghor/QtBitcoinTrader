@@ -1,0 +1,26 @@
+Source: qtbitcointrader
+Section: Utilities
+Priority: optional
+Maintainer: Ighor July <julyighor@gmail.com>
+Build-Depends:  cdbs (>= 0.4), debhelper (>= 9), qtbase5-dev (>= 5), qtbase5-dev-tools (>= 5), qt5-qmake (>= 5)
+Standards-Version: 3.9.8
+Homepage: https://github.com/JulyIGHOR/QtBitcoinTrader
+#Vcs-Git: https://github.com/JulyIGHOR/QtBitcoinTrader.git
+#Vcs-Browser: https://github.com/JulyIGHOR/QtBitcoinTrader.git
+
+Package: qtbitcointrader
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},libqt5core5a (>= 5), libqt5gui5 (>= 5), libqt5network5 (>= 5)
+Description: Qt Bitcoin Trader
+  This software helps you open and cancel orders very fast. Real time data monitoring.
+  Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
+  I want to develop this Trader App so that it can be configured for any rule and strategy.
+  If you want to help development, than donate to 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
+  Forums
+      https://bitcointalk.org/index.php?topic=201062 ENG
+      https://bitcointalk.org/index.php?topic=218044 RUS
+      https://forum.btcsec.com/index.php?/topic/1496-qt-bitcoin-trader-klient-mtgox-pod-macwinlinux/ RUS
+  Social
+      http://www.facebook.com/QtBitcoinTrader
+      http://twitter.com/QtBitcoinTrader
+      http://vk.com/QtBitcoinTrader RUS

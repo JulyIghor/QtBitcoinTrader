@@ -169,9 +169,8 @@ int main(int argc, char *argv[])
 	baseValues.Construct();
 
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-#ifdef Q_OS_WIN
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
+
 	QApplication a(argc,argv);
     TimeSync::global();
 
@@ -179,11 +178,6 @@ int main(int argc, char *argv[])
 	a.setStyle(QStyleFactory::create("Fusion"));
 #endif
 
-#ifdef Q_OS_WIN//DPI Fix
-	QFont font=a.font();
-	font.setPointSize(8);
-	a.setFont(font);
-#endif
 	a.setApplicationName("QtBitcoinTrader");
     a.setApplicationVersion(baseValues.appVerStr);
 
