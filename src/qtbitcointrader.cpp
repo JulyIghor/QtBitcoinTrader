@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -50,18 +50,18 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDockWidget>
-#include "exchange.h"
+#include "exchange/exchange.h"
 #include "script/addscriptwindow.h"
 #include "aboutdialog.h"
-#include "exchange_btce.h"
-#include "exchange_bitstamp.h"
-#include "exchange_btcchina.h"
-#include "exchange_bitfinex.h"
-#include "exchange_gocio.h"
-#include "exchange_indacoin.h"
-#include "exchange_bitcurex.h"
-#include "exchange_bitmarket.h"
-#include "exchange_okcoin.h"
+#include "exchange/exchange_btce.h"
+#include "exchange/exchange_bitstamp.h"
+#include "exchange/exchange_btcchina.h"
+#include "exchange/exchange_bitfinex.h"
+#include "exchange/exchange_gocio.h"
+#include "exchange/exchange_indacoin.h"
+#include "exchange/exchange_bitcurex.h"
+#include "exchange/exchange_bitmarket.h"
+#include "exchange/exchange_okcoin.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
 #include "script/addrulegroup.h"
@@ -84,6 +84,7 @@
 #ifdef Q_OS_WIN
 
 #ifdef SAPI_ENABLED
+#include <windows.h>
 #include <sapi.h>
 #endif
 
@@ -1205,11 +1206,14 @@ void QtBitcoinTrader::sayText(QString text)
 
 void QtBitcoinTrader::resizeEvent(QResizeEvent *event)
 {
-	event->accept();
+    event->accept();
+
+    QApplication::processEvents();
     ::config->restoreState();
-	depthAsksLastScrollValue=-1;
+
+    depthAsksLastScrollValue=-1;
 	depthBidsLastScrollValue=-1;
-	fixWindowMinimumSize();
+    fixWindowMinimumSize();
 }
 
 void QtBitcoinTrader::setLastTrades10MinVolume(double val)
@@ -3236,7 +3240,6 @@ void QtBitcoinTrader::createMenu()
         actionSettings->setMenuRole(QAction::ApplicationSpecificRole);
         actionDebug->setMenuRole(QAction::ApplicationSpecificRole);
     #endif
-
     actionExit->setMenuRole(QAction::QuitRole);
 
     menuView = menuBar()->addMenu("&View");

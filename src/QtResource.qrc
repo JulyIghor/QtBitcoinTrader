@@ -114,5 +114,9 @@
         <file>Resources/CurrencySign/ETH.png</file>
         <file>Resources/CurrencySign/ETC.png</file>
         <file>Resources/CurrencySign/BFX.png</file>
+        <file>Resources/CurrencySign/XRP.png</file>
+        <file>Resources/CurrencySign/ZEC.png</file>
+        <file>Resources/CurrencySign/XMR.png</file>
+        <file>Resources/CurrencySign/RRT.png</file>
     </qresource>
 </RCC>

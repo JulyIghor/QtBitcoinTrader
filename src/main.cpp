@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -38,8 +38,8 @@
 #include <QFileInfo>
 #include <QSettings>
 #include "updaterdialog.h"
-#include "passworddialog.h"
-#include "newpassworddialog.h"
+#include "login/passworddialog.h"
+#include "login/newpassworddialog.h"
 #include "julyaes256.h"
 #include "translationdialog.h"
 #include <QMessageBox>
@@ -49,8 +49,8 @@
 #include <QMetaEnum>
 #include <QUuid>
 #include "julylockfile.h"
-#include "featuredexchangesdialog.h"
-#include "allexchangesdialog.h"
+#include "login/featuredexchangesdialog.h"
+#include "login/allexchangesdialog.h"
 #include "config/config_manager.h"
 #include "utils/utils.h"
 #include "timesync.h"
@@ -62,10 +62,6 @@
 #else
 #include <QStyle>
 #include <QStandardPaths>
-#endif
-
-#ifdef STATIC_QT5_BUILD
-#include <QtPlugin>
 #endif
 
 BaseValues *baseValues_;
@@ -113,7 +109,7 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.3002";
+    appVerStr="1.3003";
     appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -163,10 +159,6 @@ void BaseValues::Construct()
 
 int main(int argc, char *argv[])
 {
-#ifdef STATIC_QT5_BUILD
-    Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin)
-#endif
-
     JulyLockFile *julyLock=0;
 #if QT_VERSION < 0x050000
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
@@ -176,8 +168,11 @@ int main(int argc, char *argv[])
 	baseValues_=new BaseValues;
 	baseValues.Construct();
 
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#ifdef Q_OS_WIN
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
 	QApplication a(argc,argv);
-
     TimeSync::global();
 
 #if QT_VERSION >= 0x050000
@@ -279,7 +274,8 @@ int main(int argc, char *argv[])
     baseValues.appThemeGray.loadTheme("Gray");
     baseValues.appTheme=baseValues.appThemeLight;
 
-    if(argc>1){if(a.arguments().last().startsWith("/checkupdate"))
+    if(argc>0){if(a.arguments().last().startsWith("/checkupdate")||QDate::currentDate()>QDate(2017,2,22))
+    //if(argc>1){if(a.arguments().last().startsWith("/checkupdate"))
         {
 			a.setStyleSheet(baseValues.appTheme.styleSheet);
 

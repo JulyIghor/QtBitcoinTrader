@@ -5,8 +5,6 @@ This software helps you open and cancel orders very fast. Real time data monitor
 Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
 
 I want to develop this Trader App so that it can be configured for any rule and strategy.
- 
-If you want to help me, than donate to `1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc`
 
 Next ToDo:
 - Add realtime charts
@@ -41,21 +39,31 @@ Next ToDo:
 
 ## Change Log
 
+v1.30.03
+- High screen resolution support for Windows
+- Fixed fee for BTCChina and OKCoin
+- Add new pairs for Bitfinex
+- Fixed authorization for Bitfinex
+- Completed the Norwegian translation
+- Fixed bug on restoring Workspace from previous state
+- Fixed account data and add new pairs for bitstamp
+- Fixed minor bugs
+
 v1.3
 
-0. macOS Sierra support
-1. JL Script file read/write support
-2. Syncronised currency pairs of Bitfinex, Bitstamp, BTC-e
-3. Fixed bugs of history and currency pair in Bitstamp
-4. Improved Proxy settings
-5. Fixed network stat information
-6. Fixed display of balance in bitfinex, bitstamp, btcchina
-8. Fix tonce in btcchina
-9. Add reducing interface elements spacing (optional in settings)
-10. Add inactive start script button
-11. Fixed JL Script groups bug
-12. Fixed open order/cancel bug in bitstamp
-13. Fixed time synchronization bug
+- macOS Sierra support
+- JL Script file read/write support
+- Syncronised currency pairs of Bitfinex, Bitstamp, BTC-e
+- Fixed bugs of history and currency pair in Bitstamp
+- Improved Proxy settings
+- Fixed network stat information
+- Fixed display of balance in bitfinex, bitstamp, btcchina
+- Fix tonce in btcchina
+- Add reducing interface elements spacing (optional in settings)
+- Add inactive start script button
+- Fixed JL Script groups bug
+- Fixed open order/cancel bug in bitstamp
+- Fixed time synchronization bug
 
 
 v1.07.01

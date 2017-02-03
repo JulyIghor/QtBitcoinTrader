@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -140,13 +140,17 @@ void ConfigManager::load(const QString& name)
     qint16 index = defaultNamesTr.indexOf(name);
     if (index >- 1)
     {
+        lastRestoreGeometry = defaultGeometry[index];
+        lastRestoreState = defaultState[index];
+        lastRestoreTime = TimeSync::getTimeT();
         if (baseValues_->mainWindow_->saveGeometry() != defaultGeometry[index])
         {
             baseValues_->mainWindow_->restoreGeometry(defaultGeometry[index]);
-            lastRestoreState = defaultState[index];
-            lastRestoreTime = TimeSync::getTimeT();
         }
-        baseValues_->mainWindow_->restoreState(defaultState[index]);
+        if (baseValues_->mainWindow_->saveState() != defaultState[index])
+        {
+            baseValues_->mainWindow_->restoreState(defaultState[index]);
+        }
         return;
     }
 
@@ -173,13 +177,19 @@ void ConfigManager::load(const QString& name)
     settings.beginGroup(sectionName(name));
     QByteArray geometry = settings.value("Geometry", defaultGeometry[0]).toByteArray();
     QByteArray state    = settings.value("State",    defaultState[0]   ).toByteArray();
+    lastRestoreGeometry = geometry;
+    lastRestoreState = state;
+    lastRestoreTime = TimeSync::getTimeT();
+
     if (baseValues_->mainWindow_->saveGeometry() != geometry)
     {
         baseValues_->mainWindow_->restoreGeometry(geometry);
-        lastRestoreState = state;
-        lastRestoreTime = TimeSync::getTimeT();
     }
-    baseValues_->mainWindow_->restoreState(state);
+    if (baseValues_->mainWindow_->saveState() != state)
+    {
+        baseValues_->mainWindow_->restoreState(state);
+    }
+
     QString storedName = settings.value(CONFIG_NAME).toString();
     settings.endGroup();
     if (storedName != name)
@@ -193,7 +203,16 @@ void ConfigManager::restoreState()
     if (!lastRestoreState.isEmpty())
     {
         if(TimeSync::getTimeT() - lastRestoreTime < 2)
-            baseValues_->mainWindow_->restoreState(lastRestoreState);
+        {
+            if (baseValues_->mainWindow_->saveGeometry() != lastRestoreGeometry)
+            {
+                baseValues_->mainWindow_->restoreGeometry(lastRestoreGeometry);
+            }
+            if (baseValues_->mainWindow_->saveState() != lastRestoreState)
+            {
+                baseValues_->mainWindow_->restoreState(lastRestoreState);
+            }
+        }
     }
     lastRestoreState.clear();
 }

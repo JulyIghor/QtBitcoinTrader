@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2016 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
 #include <QDesktopServices>
 #include "rulescriptparser.h"
 #include "addruledialog.h"
-#include "exchange.h"
+#include "exchange/exchange.h"
 #include "utils/utils.h"
 
 RuleWidget::RuleWidget(QString fileName)
