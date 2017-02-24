@@ -2616,7 +2616,36 @@ void QtBitcoinTrader::on_marketBid_valueChanged(double val)
 	ruleTotalToBuyBSValueChanged();
 	meridianPrice=(val+ui.marketAsk->value())/2;
 
-    if(val>0.000000001)emit addBound(val,false);
+    if(val>0.000000001)
+    {
+        emit addBound(val,false);
+
+        double ask = ui.marketAsk->value();
+        if(ask>0.000000001)
+        {
+            val = (val + ask)/2;
+
+            static double lastValue=val;
+            static int priceDirection=0;
+            int lastPriceDirection=priceDirection;
+            if(lastValue<val)priceDirection=1;else
+            if(lastValue>val)priceDirection=-1;else
+            priceDirection=lastPriceDirection;
+            lastValue=val;
+
+            static QString directionChar("-");
+            switch(priceDirection)
+            {
+            case -1: directionChar=downArrowNoUtfStr; break;
+            case 1: directionChar=upArrowNoUtfStr; break;
+            default: break;
+            }
+            static QString titleText;
+            titleText=baseValues.currentPair.currBSign+" "+textFromDouble(val)+" "+directionChar+" "+windowTitleP;
+            if(windowWidget->isVisible())windowWidget->setWindowTitle(titleText);
+            if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip(titleText);
+        }
+    }
 }
 
 void QtBitcoinTrader::on_marketAsk_valueChanged(double val)
@@ -2624,35 +2653,42 @@ void QtBitcoinTrader::on_marketAsk_valueChanged(double val)
 	ruleAmountToReceiveBSValueChanged();
 	meridianPrice=(val+ui.marketBid->value())/2;
 
-    if(val>0.000000001)emit addBound(val,true);
+    if(val>0.000000001)
+    {
+        emit addBound(val,true);
+
+        double bid = ui.marketBid->value();
+        if(bid>0.000000001)
+        {
+            val = (val + bid)/2;
+
+            static double lastValue=val;
+            static int priceDirection=0;
+            int lastPriceDirection=priceDirection;
+            if(lastValue<val)priceDirection=1;else
+            if(lastValue>val)priceDirection=-1;else
+            priceDirection=lastPriceDirection;
+            lastValue=val;
+
+            static QString directionChar("-");
+            switch(priceDirection)
+            {
+            case -1: directionChar=downArrowNoUtfStr; break;
+            case 1: directionChar=upArrowNoUtfStr; break;
+            default: break;
+            }
+            static QString titleText;
+            titleText=baseValues.currentPair.currBSign+" "+textFromDouble(val)+" "+directionChar+" "+windowTitleP;
+            if(windowWidget->isVisible())windowWidget->setWindowTitle(titleText);
+            if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip(titleText);
+        }
+    }
 }
 
-void QtBitcoinTrader::on_marketLast_valueChanged(double val)
+void QtBitcoinTrader::on_marketLast_valueChanged(double /*val*/)
 {
 	ruleTotalToBuyValueChanged();
     ruleAmountToReceiveValueChanged();
-	if(val>0.0)
-	{
-        static double lastValue=val;
-		static int priceDirection=0;
-		int lastPriceDirection=priceDirection;
-		if(lastValue<val)priceDirection=1;else
-		if(lastValue>val)priceDirection=-1;else
-		priceDirection=lastPriceDirection;
-		lastValue=val;
-
-		static QString directionChar("-");
-		switch(priceDirection)
-		{
-		case -1: directionChar=downArrowNoUtfStr; break;
-		case 1: directionChar=upArrowNoUtfStr; break;
-		default: break;
-		}
-		static QString titleText;
-        titleText=baseValues.currentPair.currBSign+" "+textFromDouble(val)+" "+directionChar+" "+windowTitleP;
-		if(windowWidget->isVisible())windowWidget->setWindowTitle(titleText);
-		if(trayIcon&&trayIcon->isVisible())trayIcon->setToolTip(titleText);
-	}
 }
 
 void QtBitcoinTrader::historyDoubleClicked(QModelIndex index)

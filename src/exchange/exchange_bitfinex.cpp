@@ -35,10 +35,9 @@ Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
 	: Exchange()
 {
 	orderBookItemIsDedicatedOrder=true;
-	supportsExchangeFee=false;
 	clearHistoryOnCurrencyChanged=true;
 	isLastTradesTypeSupported=false;
-	calculatingFeeMode=2;
+    calculatingFeeMode=1;
 	historyLastTimestamp="0";
 	lastTradesDate=0;
 	tickerLastDate=0;
@@ -92,7 +91,6 @@ void Exchange_Bitfinex::clearVariables()
 	lastBtcBalance=0.0;
 	lastUsdBalance=0.0;
 	lastVolume=0.0;
-	lastFee=0.0;
 	secondPart=0;
 	apiDownCounter=0;
 	lastHistory.clear();
@@ -138,7 +136,10 @@ void Exchange_Bitfinex::secondSlot()
         break;
     case 5:
         if(lastHistory.isEmpty())
+        {
             if(!isReplayPending(208))sendToApi(208,"mytrades",true,true,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 200");
+            if(!isReplayPending(209))sendToApi(209,"account_infos",true,true);
+        }
         break;
     default: break;
     }
@@ -158,6 +159,7 @@ void Exchange_Bitfinex::getHistory(bool force)
 	if(tickerOnly)return;
 	if(force)lastHistory.clear();
     if(!isReplayPending(208))sendToApi(208,"mytrades",true,true,", \"symbol\": \""+baseValues.currentPair.currRequestPair+"\", \"timestamp\": "+historyLastTimestamp+", \"limit_trades\": 100");
+    if(!isReplayPending(209))sendToApi(209,"account_infos",true,true);
 }
 
 void Exchange_Bitfinex::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
@@ -686,6 +688,33 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 		}
 		else if(debugLevel)logThread->writeLog("Invalid History data:"+data.left(200),2);
 		break;//money/wallet/history
+    case 209: //fee
+        if(!success)break;
+        if(data.startsWith("[{\"maker_fees"))
+        {
+            bool feeInit = false;
+            double newFee;
+
+            QStringList feeList = QString(getMidData("[{\"pairs\":\"","}]}]",&data)).split("},{\"pairs\":\"");
+            for(int n=0;n<feeList.count();n++)
+            {
+                if(!feeList.at(n).startsWith(baseValues.currentPair.currAStr))continue;
+                QByteArray currentFeeData = feeList.at(n).toLatin1();
+                newFee = getMidData("taker_fees\":\"", "\"",&currentFeeData).toDouble();
+
+                feeInit = true;
+                break;
+            }
+
+            if(!feeInit)
+            {
+                newFee = getMidData("taker_fees\":\"", "\"",&data).toDouble();
+            }
+
+            if(newFee!=lastFee)emit accFeeChanged(baseValues.currentPair.symbol,newFee);
+            lastFee=newFee;
+        }
+        break;//fee
 	default: break;
 	}
 

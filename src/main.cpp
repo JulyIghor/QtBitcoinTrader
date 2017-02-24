@@ -109,7 +109,7 @@ void BaseValues::Construct()
 	gzipEnabled=true;
 	appVerIsBeta=false;
     jlScriptVersion=1.0;
-    appVerStr="1.3003";
+    appVerStr="1.3004";
     appVerReal=appVerStr.toDouble();
 	if(appVerStr.size()>4)
 	{ 
@@ -168,8 +168,10 @@ int main(int argc, char *argv[])
 	baseValues_=new BaseValues;
 	baseValues.Construct();
 
+#if QT_VERSION >= 0x050600
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
 
 	QApplication a(argc,argv);
     TimeSync::global();
@@ -268,8 +270,7 @@ int main(int argc, char *argv[])
     baseValues.appThemeGray.loadTheme("Gray");
     baseValues.appTheme=baseValues.appThemeLight;
 
-    if(argc>0){if(a.arguments().last().startsWith("/checkupdate")||QDate::currentDate()>QDate(2017,2,22))
-    //if(argc>1){if(a.arguments().last().startsWith("/checkupdate"))
+    if(argc>1){if(a.arguments().last().startsWith("/checkupdate"))
         {
 			a.setStyleSheet(baseValues.appTheme.styleSheet);
 

@@ -22,7 +22,15 @@ Next ToDo:
 * http://packages.gentoo.org/package/app-office/QtBitcoinTrader `Gentoo`
 * http://packages.altlinux.org/en/Sisyphus/srpms/QtBitcoinTrader `Alt Linux`
 
+## Compilation on Linux
+
+sudo apt-get install g++ libssl-dev libglu1-mesa-dev qt5-qmake qtscript5-dev qtmultimedia5-dev
+export QT_SELECT=5
+qmake QtBitcoinTrader_Desktop.pro
+make && make install && make clean
+
 ## Demos
+
 * http://www.youtube.com/watch?v=C--P258DQkk
 
 ## Forums
@@ -39,6 +47,12 @@ Next ToDo:
 
 ## Change Log
 
+v1.30.04
+- Add new pair for BitStamp
+- Fixd fee calculations in Bitfinex
+- Main window title now shows middle price instead of last trade price
+- Fixed issue when app can't start
+
 v1.30.03
 - High screen resolution support for Windows
 - Fixed fee for BTCChina and OKCoin
@@ -50,7 +64,6 @@ v1.30.03
 - Fixed minor bugs
 
 v1.3
-
 - macOS Sierra support
 - JL Script file read/write support
 - Syncronised currency pairs of Bitfinex, Bitstamp, BTC-e
