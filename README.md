@@ -23,11 +23,12 @@ Next ToDo:
 * http://packages.altlinux.org/en/Sisyphus/srpms/QtBitcoinTrader `Alt Linux`
 
 ## Compilation on Linux
-
+```
 sudo apt-get install g++ libssl-dev libglu1-mesa-dev qt5-qmake qtscript5-dev qtmultimedia5-dev
 export QT_SELECT=5
 qmake QtBitcoinTrader_Desktop.pro
 make && make install && make clean
+```
 
 ## Demos
 
