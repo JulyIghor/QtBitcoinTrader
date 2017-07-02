@@ -37,7 +37,8 @@
 class QListWidgetItem;
 
 
-namespace Ui {
+namespace Ui
+{
 class ConfigManagerDialog;
 }
 
@@ -66,4 +67,3 @@ private:
 
     void selectNameInList(const QString& name);
 };
-

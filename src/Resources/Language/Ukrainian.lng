@@ -524,6 +524,8 @@ Label_SETTINGS_TYPE=Тип
 Label_SETTINGS_ALTERNATIVE_DOMAIN_BTCE=Використовувати альтернативний домен для BTC-е
 GroupBox_SETTINGS_OTHER=Інші  
 Label_SETTINGS_OPTIMIZE=Зменшення відступів між елементами інтерфейсу (після перезавантаження)
+Label_SETTINGS_HIDPI=HiDPI (після перезавантаження)
+Label_SETTINGS_DISABLE_PAIR_SYNC=Відключити синхронізацію пар при запуску програми
 Label_MS=мс
 
 Label_UPDATER_AGAIN_AUTO_UPDATE=Більше не питати, автоматично встановлювати оновлення:
@@ -533,3 +535,4 @@ String_TAB_CHAT=Чат
 
 String_TIME_SYNC_ERROR=Ваш годинник не настроєний. Будь-ласка закрийте QtBitcoinTrader та настройте годинник. Зміна години при включеному QtBitcoinTrader може викликати помилки та зіпсувати ключі.
 String_TIME_ERROR=Помилка часу
+String_PROGRAM_CORRUPTED=Програма пошкоджена. Завантажте з офіційного сайту https://centrabit.com.

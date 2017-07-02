@@ -17,8 +17,6 @@
         <file>Resources/Exchanges/Logos/BTC-e_Big.png</file>
         <file>Resources/Exchanges/Logos/Indacoin.png</file>
         <file>Resources/Exchanges/Logos/Indacoin_Big.png</file>
-        <file>Resources/Exchanges/Logos/BitCurex.png</file>
-        <file>Resources/Exchanges/Logos/BitCurex_Big.png</file>
         <file>Resources/Exchanges/Logos/BitMarket.png</file>
         <file>Resources/Exchanges/Logos/BitMarket_Big.png</file>
         <file>Resources/Open.png</file>
@@ -52,7 +50,6 @@
         <file>Resources/Exchanges/BTCChina.ini</file>
         <file>Resources/Exchanges/Bitstamp.ini</file>
         <file>Resources/Exchanges/GOCio.ini</file>
-        <file>Resources/Exchanges/BitCurex.ini</file>
         <file>Resources/Exchanges/BitMarket.ini</file>
         <file>Resources/CurrencySign/AUD.png</file>
         <file>Resources/CurrencySign/BTC.png</file>
@@ -118,5 +115,9 @@
         <file>Resources/CurrencySign/ZEC.png</file>
         <file>Resources/CurrencySign/XMR.png</file>
         <file>Resources/CurrencySign/RRT.png</file>
+        <file>Resources/Exchanges/YObit.ini</file>
+        <file>Resources/Exchanges/Logos/YObit.png</file>
+        <file>Resources/Exchanges/Logos/YObit_Big.png</file>
+        <file>Resources/CurrencySign/IOT.png</file>
     </qresource>
 </RCC>

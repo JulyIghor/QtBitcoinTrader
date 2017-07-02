@@ -37,28 +37,28 @@
 
 class PasswordDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	QString lockFilePath(QString);
-	bool isProfileLocked(QString);
-	QString getPassword();
-	bool resetData;
-	bool newProfile;
-	QString getIniFilePath();
-	PasswordDialog(QWidget *parent = 0);
-	~PasswordDialog();
+    QString lockFilePath(QString);
+    bool isProfileLocked(QString);
+    QString getPassword();
+    bool resetData;
+    bool newProfile;
+    QString getIniFilePath();
+    explicit PasswordDialog(QWidget* parent = 0);
+    ~PasswordDialog();
 
 private slots:
-	void resetDataSlot();
-	void addNewProfile();
-	void checkToEnableButton(QString);
+    void resetDataSlot();
+    void addNewProfile();
+    void checkToEnableButton(QString);
     void on_descriptionGroupBox_toggled(bool arg1);
     void showTimeMessage(QString);
 
 private:
-	void accept();
-	Ui::PasswordDialog ui;
+    void accept();
+    Ui::PasswordDialog ui;
 };
 
 #endif // PASSWORDDIALOG_H

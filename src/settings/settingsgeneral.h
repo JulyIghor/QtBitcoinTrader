@@ -38,32 +38,33 @@
 
 class SettingsGeneral : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	SettingsGeneral();
-	~SettingsGeneral();
-	Ui::SettingsGeneral ui;
+    SettingsGeneral();
+    ~SettingsGeneral();
+    Ui::SettingsGeneral ui;
 
 private:
-    QSettings *iniSettings;
-    QSettings *mainSettings;
-	void loadLanguage();
+    QSettings* iniSettings;
+    QSettings* mainSettings;
+    QSettings* hiDpiSettings;
+    void loadLanguage();
     void saveLanguage();
     void loadOther();
     void saveOther();
-	void loadUpdates();
+    void loadUpdates();
     void saveUpdates();
     void loadTime();
     void saveTime();
 
 public slots:
-	void on_saveButton_clicked();
+    void on_saveButton_clicked();
     void on_revertChangesButton_clicked();
 
 private slots:
-	void on_restoreDefaultsButton_clicked();
-	void anyValueChanged();
+    void on_restoreDefaultsButton_clicked();
+    void anyValueChanged();
     void on_showTranslationButton_clicked();
 
 };

@@ -38,7 +38,8 @@ class QGraphicsScene;
 class QElapsedTimer;
 class ChartsModel;
 
-namespace Ui {
+namespace Ui
+{
 class ChartsView;
 }
 

@@ -40,7 +40,7 @@ class QSettings;
 
 
 class ConfigManager :
-        public QObject
+    public QObject
 {
     Q_OBJECT
 
@@ -68,7 +68,7 @@ Q_SIGNALS:
 
 private:
     QSettings               settings;
-    QHash<QString,QVariant> settingsCache;
+    QHash<QString, QVariant> settingsCache;
     QByteArray lastRestoreState;
     QByteArray lastRestoreGeometry;
     quint32 lastRestoreTime;

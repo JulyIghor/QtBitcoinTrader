@@ -37,19 +37,19 @@
 
 class DebugViewer : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	DebugViewer();
-	~DebugViewer();
+    DebugViewer();
+    ~DebugViewer();
 
 private:
     bool savingFile;
-	Ui::DebugViewer ui;
+    Ui::DebugViewer ui;
 private slots:
     void on_buttonSaveAs_clicked();
-	void sendLogSlot(QByteArray);
-	void on_radioDebug_toggled(bool);
+    void sendLogSlot(QByteArray);
+    void on_radioDebug_toggled(bool);
 };
 
 #endif // DEBUGVIEWER_H

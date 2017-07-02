@@ -34,89 +34,167 @@
 
 #include "qmath.h"
 
-static QByteArray byteArrayFromDouble(const double &value, int maxDecimals=8, int minDecimals=1);
-static QByteArray byteArrayRoundFromDouble(const double &value, int maxDecimals=8);
-static QString textFromDouble(const double &value, int maxDecimals=8, int minDecimals=1);
+static QByteArray byteArrayFromDouble(const double& value, int maxDecimals = 8, int minDecimals = 1);
+static QByteArray byteArrayRoundFromDouble(const double& value, int maxDecimals = 8);
+static QString textFromDouble(const double& value, int maxDecimals = 8, int minDecimals = 1);
 
-static double &cutDoubleDecimals(double &val, int maxDecimals=8, bool roundUp=false);
-static double cutDoubleDecimalsCopy(const double &val, int maxDecimals=8, bool roundUp=false);
+static double& cutDoubleDecimals(double& val, int maxDecimals = 8, bool roundUp = false);
+static double cutDoubleDecimalsCopy(const double& val, int maxDecimals = 8, bool roundUp = false);
 
-static bool validDouble(const double &value, int decimals=8);
-static int decimalsForDouble(const double &value);
-static bool compareDoubles(double &valueA, double &valueB, int decimals=8);
+static bool validDouble(const double& value, int decimals = 8);
+static int decimalsForDouble(const double& value);
+static bool compareDoubles(double& valueA, double& valueB, int decimals = 8);
 
-static bool compareDoubles(double &valueA, double &valueB, int decimals)
+static bool compareDoubles(double& valueA, double& valueB, int decimals)
 {
-    return qPow(0.1,qMin(8,decimals)+1)>qAbs(cutDoubleDecimalsCopy(valueA,decimals)-cutDoubleDecimalsCopy(valueB,decimals));
+    return qPow(0.1, qMin(8, decimals) + 1) > qAbs(cutDoubleDecimalsCopy(valueA, decimals) - cutDoubleDecimalsCopy(valueB,
+            decimals));
 }
 
-static double &cutDoubleDecimals(double &val, int decimals, bool roundUp)
+static double& cutDoubleDecimals(double& val, int decimals, bool roundUp)
 {
-    if(!validDouble(val,decimals)){val=0.0;return val;}
-    if(decimals>8)decimals=8;
-    double zeros=qPow(10,decimals);
-    double intPart=floor(val);
-    val=floor((val-intPart)*zeros+(roundUp?0.5:0.0))/zeros+intPart;
+    if (!validDouble(val, decimals))
+    {
+        val = 0.0;
+        return val;
+    }
+
+    if (decimals > 8)
+        decimals = 8;
+
+    double zeros = qPow(10, decimals);
+    double intPart = floor(val);
+    val = floor((val - intPart) * zeros + (roundUp ? 0.5 : 0.0)) / zeros + intPart;
     return val;
 }
 
-static double cutDoubleDecimalsCopy(const double &val, int decimals, bool roundUp)
+static double cutDoubleDecimalsCopy(const double& val, int decimals, bool roundUp)
 {
-    if(!validDouble(val,decimals))return 0.0;
-    if(decimals>8)decimals=8;
-    double zeros=qPow(10,decimals);
-    double intPart=floor(val);
-    intPart=floor((val-intPart)*zeros+(roundUp?0.5:0.0))/zeros+intPart;
+    if (!validDouble(val, decimals))
+        return 0.0;
+
+    if (decimals > 8)
+        decimals = 8;
+
+    double zeros = qPow(10, decimals);
+    double intPart = floor(val);
+    intPart = floor((val - intPart) * zeros + (roundUp ? 0.5 : 0.0)) / zeros + intPart;
     return intPart;
 }
 
-static int decimalsForDouble(const double &val)
+static int decimalsForDouble(const double& val)
 {
-    if(val>999999999999999.9)return 0;
-    if(val>99999999999999.99)return 1;
-    if(val>9999999999999.999)return 2;
-    if(val>999999999999.9999)return 3;
-    if(val>99999999999.99999)return 4;
-    if(val>9999999999.999999)return 5;
-    if(val>999999999.9999999)return 6;
-    if(val>99999999.99999999)return 7;
-    if(val>9999999.999999999)return 8;
-    if(val>999999.9999999999)return 9;
-    if(val>99999.99999999999)return 10;
-    if(val>9999.999999999999)return 11;
-    if(val>999.9999999999999)return 12;
-    if(val>99.99999999999999)return 13;
-    if(val>9.999999999999999)return 14;
-    if(val>0.999999999999999)return 15;
+    if (val > 999999999999999.9)
+        return 0;
+
+    if (val > 99999999999999.99)
+        return 1;
+
+    if (val > 9999999999999.999)
+        return 2;
+
+    if (val > 999999999999.9999)
+        return 3;
+
+    if (val > 99999999999.99999)
+        return 4;
+
+    if (val > 9999999999.999999)
+        return 5;
+
+    if (val > 999999999.9999999)
+        return 6;
+
+    if (val > 99999999.99999999)
+        return 7;
+
+    if (val > 9999999.999999999)
+        return 8;
+
+    if (val > 999999.9999999999)
+        return 9;
+
+    if (val > 99999.99999999999)
+        return 10;
+
+    if (val > 9999.999999999999)
+        return 11;
+
+    if (val > 999.9999999999999)
+        return 12;
+
+    if (val > 99.99999999999999)
+        return 13;
+
+    if (val > 9.999999999999999)
+        return 14;
+
+    if (val > 0.999999999999999)
+        return 15;
+
     return 16;
 }
 
-static bool validDouble(const double &val, int decimals)
+static bool validDouble(const double& val, int decimals)
 {
-    if(val<0.00000001)return false;
-    switch(decimals)
+    if (val < 0.00000001)
+        return false;
+
+    switch (decimals)
     {
-    case 0:  return val<=9999999999999999.0;
-    case 1:  return val<=999999999999999.9;
-    case 2:  return val<=99999999999999.99;
-    case 3:  return val<=9999999999999.999;
-    case 4:  return val<=999999999999.9999;
-    case 5:  return val<=99999999999.99999;
-    case 6:  return val<=9999999999.999999;
-    case 7:  return val<=999999999.9999999;
-    case 8:  return val<=99999999.99999999;
-    case 9:  return val<=9999999.999999999;
-    case 10: return val<=999999.9999999999;
-    case 11: return val<=99999.99999999999;
-    case 12: return val<=9999.999999999999;
-    case 13: return val<=999.9999999999999;
-    case 14: return val<=99.99999999999999;
-    case 15: return val<=9.999999999999999;
+        case 0:
+            return val <= 9999999999999999.0;
+
+        case 1:
+            return val <= 999999999999999.9;
+
+        case 2:
+            return val <= 99999999999999.99;
+
+        case 3:
+            return val <= 9999999999999.999;
+
+        case 4:
+            return val <= 999999999999.9999;
+
+        case 5:
+            return val <= 99999999999.99999;
+
+        case 6:
+            return val <= 9999999999.999999;
+
+        case 7:
+            return val <= 999999999.9999999;
+
+        case 8:
+            return val <= 99999999.99999999;
+
+        case 9:
+            return val <= 9999999.999999999;
+
+        case 10:
+            return val <= 999999.9999999999;
+
+        case 11:
+            return val <= 99999.99999999999;
+
+        case 12:
+            return val <= 9999.999999999999;
+
+        case 13:
+            return val <= 999.9999999999999;
+
+        case 14:
+            return val <= 99.99999999999999;
+
+        case 15:
+            return val <= 9.999999999999999;
     }
+
     return true;
 }
 
-static QByteArray byteArrayFromDouble(const double &val, int maxDecimals, int minDecimals)
+static QByteArray byteArrayFromDouble(const double& val, int maxDecimals, int minDecimals)
 {
     /*maxDecimals=qMin(maxDecimals,decimalsForDouble(val));
     if(minDecimals>maxDecimals)minDecimals=maxDecimals;
@@ -143,46 +221,75 @@ static QByteArray byteArrayFromDouble(const double &val, int maxDecimals, int mi
     }
     return numberText;*/
 
-    if(maxDecimals>8)maxDecimals=8;
-    if(maxDecimals<0)maxDecimals=0;
-    if(minDecimals>maxDecimals)minDecimals=maxDecimals;
-    if(minDecimals<0)minDecimals=0;
+    if (maxDecimals > 8)
+        maxDecimals = 8;
 
-    int floorLength=QByteArray::number(floor(val),'f',0).length();
-    int decimals=16-floorLength;
-    if(val<0)decimals++;
-    if(decimals<minDecimals)decimals=minDecimals;
-    QByteArray numberText=QByteArray::number(val,'f',decimals);
+    if (maxDecimals < 0)
+        maxDecimals = 0;
 
-    int resultLength=floorLength+maxDecimals+1;
-    if(numberText.length()>resultLength)numberText.chop(numberText.length()-resultLength);
+    if (minDecimals > maxDecimals)
+        minDecimals = maxDecimals;
 
-    int minLength=floorLength;
-    if(minDecimals>0)minLength+=minDecimals+1;
-    while(numberText[numberText.length()-1]=='0' && numberText.length()>minLength)numberText.chop(1);
-    if(numberText[numberText.length()-1]=='.')numberText.chop(1);
+    if (minDecimals < 0)
+        minDecimals = 0;
+
+    int floorLength = QByteArray::number(floor(val), 'f', 0).length();
+    int decimals = 16 - floorLength;
+
+    if (val < 0)
+        decimals++;
+
+    if (decimals < minDecimals)
+        decimals = minDecimals;
+
+    QByteArray numberText = QByteArray::number(val, 'f', decimals);
+
+    int resultLength = floorLength + maxDecimals + 1;
+
+    if (numberText.length() > resultLength)
+        numberText.chop(numberText.length() - resultLength);
+
+    int minLength = floorLength;
+
+    if (minDecimals > 0)
+        minLength += minDecimals + 1;
+
+    while (numberText[numberText.length() - 1] == '0' && numberText.length() > minLength)
+        numberText.chop(1);
+
+    if (numberText[numberText.length() - 1] == '.')
+        numberText.chop(1);
 
     return numberText;
 }
 
-static QByteArray byteArrayRoundFromDouble(const double &val, int maxDecimals)
+static QByteArray byteArrayRoundFromDouble(const double& val, int maxDecimals)
 {
-    if(maxDecimals>8)maxDecimals=8;
-    QByteArray numberText=QByteArray::number(val,'f',maxDecimals);
+    if (maxDecimals > 8)
+        maxDecimals = 8;
 
-    int numberTextLength=numberText.length();
-    if(val<0)numberTextLength--;
-    if(numberTextLength>16){
-        int deltaLength=numberTextLength-16;
-        maxDecimals-=deltaLength;
-        if(maxDecimals<0)maxDecimals=0;
-        numberText=QByteArray::number(val,'f',maxDecimals);
+    QByteArray numberText = QByteArray::number(val, 'f', maxDecimals);
+
+    int numberTextLength = numberText.length();
+
+    if (val < 0)
+        numberTextLength--;
+
+    if (numberTextLength > 16)
+    {
+        int deltaLength = numberTextLength - 16;
+        maxDecimals -= deltaLength;
+
+        if (maxDecimals < 0)
+            maxDecimals = 0;
+
+        numberText = QByteArray::number(val, 'f', maxDecimals);
     }
 
     return numberText;
 }
 
-static QString textFromDouble(const double &val, int maxDecimals, int minDecimals)
+static QString textFromDouble(const double& val, int maxDecimals, int minDecimals)
 {
     /*double value=val+0.0000000025;
     maxDecimals=qMin(maxDecimals,decimalsForDouble(value));
@@ -211,24 +318,44 @@ static QString textFromDouble(const double &val, int maxDecimals, int minDecimal
     }
     return numberText;*/
 
-    if(maxDecimals>8)maxDecimals=8;
-    if(maxDecimals<0)maxDecimals=0;
-    if(minDecimals>maxDecimals)minDecimals=maxDecimals;
-    if(minDecimals<0)minDecimals=0;
+    if (maxDecimals > 8)
+        maxDecimals = 8;
 
-    int floorLength=QString::number(floor(val),'f',0).length();
-    int decimals=16-floorLength;
-    if(val<0)decimals++;
-    if(decimals<minDecimals)decimals=minDecimals;
-    QString numberText=QString::number(val,'f',decimals);
+    if (maxDecimals < 0)
+        maxDecimals = 0;
 
-    int resultLength=floorLength+maxDecimals+1;
-    if(numberText.length()>resultLength)numberText.chop(numberText.length()-resultLength);
+    if (minDecimals > maxDecimals)
+        minDecimals = maxDecimals;
 
-    int minLength=floorLength;
-    if(minDecimals>0)minLength+=minDecimals+1;
-    while(numberText[numberText.length()-1]=='0' && numberText.length()>minLength)numberText.chop(1);
-    if(numberText[numberText.length()-1]=='.')numberText.chop(1);
+    if (minDecimals < 0)
+        minDecimals = 0;
+
+    int floorLength = QString::number(floor(val), 'f', 0).length();
+    int decimals = 16 - floorLength;
+
+    if (val < 0)
+        decimals++;
+
+    if (decimals < minDecimals)
+        decimals = minDecimals;
+
+    QString numberText = QString::number(val, 'f', decimals);
+
+    int resultLength = floorLength + maxDecimals + 1;
+
+    if (numberText.length() > resultLength)
+        numberText.chop(numberText.length() - resultLength);
+
+    int minLength = floorLength;
+
+    if (minDecimals > 0)
+        minLength += minDecimals + 1;
+
+    while (numberText[numberText.length() - 1] == '0' && numberText.length() > minLength)
+        numberText.chop(1);
+
+    if (numberText[numberText.length() - 1] == '.')
+        numberText.chop(1);
 
     return numberText;
 }

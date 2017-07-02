@@ -37,32 +37,32 @@
 
 class FeeCalculator : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	FeeCalculator();
-	~FeeCalculator();
+    FeeCalculator();
+    ~FeeCalculator();
 
 private:
-	bool buyPaidLocked;
-	bool buyBtcReceivedLocked;
-	bool buyBtcLocked;
-	Ui::FeeCalculator ui;
+    bool buyPaidLocked;
+    bool buyBtcReceivedLocked;
+    bool buyBtcLocked;
+    Ui::FeeCalculator ui;
 public slots:
-	void languageChanged();
+    void languageChanged();
 private slots:
-	void on_singleInstance_toggled(bool);
-	void setStaysOnTop(bool);
-	void setZeroProfitPrice();
-	void profitLossChanged(double);
-	void buyBtcChanged(double);
-	void buyPriceChanged(double);
-	void buyTotalPaidChanged(double);
-	void buyBtcReceivedChanged(double);
-	void sellPriceChanged(double);
-	void sellAmountChanged(double);
+    void on_singleInstance_toggled(bool);
+    void setStaysOnTop(bool);
+    void setZeroProfitPrice();
+    void profitLossChanged(double);
+    void buyBtcChanged(double);
+    void buyPriceChanged(double);
+    void buyTotalPaidChanged(double);
+    void buyBtcReceivedChanged(double);
+    void sellPriceChanged(double);
+    void sellAmountChanged(double);
     void sellFiatReceived(double);
-	void feeChanged(double);
+    void feeChanged(double);
 
 };
 

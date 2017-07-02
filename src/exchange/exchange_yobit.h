@@ -29,49 +29,59 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "networkmenu.h"
-#include "ui_networkmenu.h"
-#include "main.h"
+#ifndef EXCHANGE_YOBIT_H
+#define EXCHANGE_YOBIT_H
 
-NetworkMenu::NetworkMenu(QToolButton *_parentButton) :
-    JulyButtonMenu(_parentButton,JulyButtonMenu::Right),
-    ui(new Ui::NetworkMenu)
-{
-    ui->setupUi(this);
-    julyTranslator.translateUi(this);
-}
+#include "exchange.h"
 
-NetworkMenu::~NetworkMenu()
+class Exchange_YObit : public Exchange
 {
-    delete ui;
-}
+    Q_OBJECT
 
-void NetworkMenu::setSuffix(QString suf)
-{
-    ui->trafficTotal->setSuffix(suf);
-}
+public:
+    Exchange_YObit(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_YObit();
 
-int NetworkMenu::getNetworkTotal()
-{
-    return ui->trafficTotal->value();
-}
+private:
+    bool isApiDown;
+    bool isFirstAccInfo;
+    bool isReplayPending(int);
 
-int NetworkMenu::getNetworkTotalMaximum()
-{
-    return ui->trafficTotal->maximum();
-}
+    int apiDownCounter;
+    int lastOpenedOrders;
 
-void NetworkMenu::setNetworkTotalMaximum(int val)
-{
-    ui->trafficTotal->setMaximum(val);
-}
+    JulyHttp* julyHttp;
 
-void NetworkMenu::setNetworkTotal(int val)
-{
-    ui->trafficTotal->setValue(val);
-}
+    qint64 lastFetchTid;
 
-void NetworkMenu::on_trafficTotalToZero_clicked()
-{
-    emit trafficTotalToZero_clicked();
-}
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
+
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
+
+    QTime authRequestTime;
+
+    quint32 lastPriceDate;
+    quint32 lastTickerDate;
+    quint32 privateNonce;
+    quint32 lastHistoryId;
+
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = 0);
+private slots:
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
+public slots:
+    void clearValues();
+    void getHistory(bool);
+    void buy(QString, double, double);
+    void sell(QString, double, double);
+    void cancelOrder(QString, QByteArray);
+};
+
+#endif // EXCHANGE_YOBIT_H

@@ -33,13 +33,13 @@
 #include "main.h"
 
 AllExchangesModel::AllExchangesModel()
-	: QAbstractItemModel()
+    : QAbstractItemModel()
 {
-	rowsCount=0;
-	columnsCount=2;
+    rowsCount = 0;
+    columnsCount = 2;
 
-	headerList.append(julyTr("NAME","Name"));
-	headerList.append(julyTr("SUPPORTED_CUEEENCIRS","Supported currencies"));
+    headerList.append(julyTr("NAME", "Name"));
+    headerList.append(julyTr("SUPPORTED_CUEEENCIRS", "Supported currencies"));
 }
 
 AllExchangesModel::~AllExchangesModel()
@@ -47,58 +47,76 @@ AllExchangesModel::~AllExchangesModel()
 
 }
 
-QModelIndex AllExchangesModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex AllExchangesModel::index(int row, int column, const QModelIndex& parent) const
 {
-	if(!hasIndex(row, column, parent))return QModelIndex();
-	return createIndex(row,column);
+    if (!hasIndex(row, column, parent))
+        return QModelIndex();
+
+    return createIndex(row, column);
 }
 
-QModelIndex AllExchangesModel::parent(const QModelIndex &) const
+QModelIndex AllExchangesModel::parent(const QModelIndex&) const
 {
-	return QModelIndex();
+    return QModelIndex();
 }
 
-int AllExchangesModel::rowCount(const QModelIndex &) const
+int AllExchangesModel::rowCount(const QModelIndex&) const
 {
-	return rowsCount;
+    return rowsCount;
 }
 
-int AllExchangesModel::columnCount(const QModelIndex &) const
+int AllExchangesModel::columnCount(const QModelIndex&) const
 {
-	return columnsCount;
+    return columnsCount;
 }
 
-QVariant AllExchangesModel::data(const QModelIndex &index, int role) const
+QVariant AllExchangesModel::data(const QModelIndex& index, int role) const
 {
-	if(role==Qt::TextAlignmentRole)
-	{
-		return 0x0084;
-	}
-	if(role==Qt::DisplayRole)
-	{
-		QString unswer="";
-		if(index.column()==0)unswer=nameList.at(index.row());
-		else if(index.column()==1)unswer=currenciesList.at(index.row());
-		return unswer;
-	}
-	return QVariant();
+    if (role == Qt::TextAlignmentRole)
+    {
+        return 0x0084;
+    }
+
+    if (role == Qt::DisplayRole)
+    {
+        QString unswer = "";
+
+        if (index.column() == 0)
+            unswer = nameList.at(index.row());
+        else if (index.column() == 1)
+            unswer = currenciesList.at(index.row());
+
+        return unswer;
+    }
+
+    return QVariant();
 }
 
 QVariant AllExchangesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	if(role!=Qt::DisplayRole)return QVariant();
-	if(headerList.count()!=columnsCount)return QVariant();
+    if (role != Qt::DisplayRole)
+        return QVariant();
 
-	if(orientation==Qt::Horizontal)return headerList.at(section);
-	return section+1;
+    if (headerList.count() != columnsCount)
+        return QVariant();
+
+    if (orientation == Qt::Horizontal)
+        return headerList.at(section);
+
+    return section + 1;
 }
 
 void AllExchangesModel::addExchange(quint32 id, QString name, QString currencies)
 {
-	beginInsertRows(QModelIndex(), 0, 0);
-	rowsCount++;
-	exchangeIdList.append(id);
-	nameList.append(name);
-	currenciesList.append(currencies);
-	endInsertRows();
+    beginInsertRows(QModelIndex(), 0, 0);
+    rowsCount++;
+    exchangeIdList.append(id);
+    nameList.append(name);
+    currenciesList.append(currencies);
+    endInsertRows();
+}
+
+int AllExchangesModel::getExchangeId(int rowId)
+{
+    return exchangeIdList.at(rowId);
 }

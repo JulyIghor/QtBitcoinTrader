@@ -29,32 +29,65 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NETWORKMENU_H
-#define NETWORKMENU_H
+#ifndef INIENGINE_H
+#define INIENGINE_H
 
-#include "julybuttonmenu.h"
+#include <QObject>
+#include <QMap>
+#include <atomic>
+#include "currencyinfo.h"
+#include "currencypairitem.h"
 
-namespace Ui {
-class NetworkMenu;
-}
+class QThread;
+class JulyHttp;
+class QTimer;
+class QElapsedTimer;
 
-class NetworkMenu : public JulyButtonMenu
+class IniEngine : public QObject
 {
     Q_OBJECT
+
 public:
-    explicit NetworkMenu(QToolButton *parentButton);
-    ~NetworkMenu();
-    int getNetworkTotal();
-    void setNetworkTotal(int);
-    int getNetworkTotalMaximum();
-    void setNetworkTotalMaximum(int);
-    void setSuffix(QString);
-private:
-    Ui::NetworkMenu *ui;
-private slots:
-    void on_trafficTotalToZero_clicked();
+    IniEngine();
+    ~IniEngine();
+    static IniEngine* global();
+    static CurrencyInfo getCurrencyInfo(QString);
+    static void loadExchangeLock(QString, CurrencyPairItem&);
+    static QList<CurrencyPairItem>* getPairs();
+    static QString getPairName(int);
+    static QString getPairSymbol(int);
+    static QString getPairSymbolSecond(int);
+    static int getPairsCount();
+
 signals:
-    void trafficTotalToZero_clicked();
+    void loadExchangeSignal(QString);
+
+private slots:
+    void runThread();
+    void dataReceived(QByteArray, int);
+    void loadExchange(QString);
+    void checkWait();
+
+private:
+    QThread* iniEngineThread;
+    bool disablePairSynchronization;
+    JulyHttp* julyHttp;
+    QMap<QString, QString> currencyMapSign;
+    QMap<QString, CurrencyInfo> currencyMap;
+    QString currencyCacheFileName;
+    QString currencyResourceFileName;
+    QString exchangeCacheFileName;
+    QString exchangeResourceFileName;
+    CurrencyPairItem defaultExchangeParams;
+    QList<CurrencyPairItem> exchangePairs;
+    std::atomic<bool> waitForDownload;
+    QTimer* waitTimer;
+    QElapsedTimer* checkTimer;
+    bool existNewFile(QString, QByteArray&);
+    void parseCurrency(QString);
+    void parseExchange(QString);
+    void parseExchangeCheck();
+    void exitFromProgram();
 };
 
-#endif // NETWORKMENU_H
+#endif // INIENGINE_H

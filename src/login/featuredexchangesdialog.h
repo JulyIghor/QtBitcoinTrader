@@ -34,35 +34,36 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
 class FeaturedExchangesDialog;
 }
 
 class FeaturedExchangesDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	FeaturedExchangesDialog();
-	~FeaturedExchangesDialog();
-	void selectExchange(qint32);
-	qint32 exchangeNum;		// Exchange; -1 is error; -2 is show all exchange
+    FeaturedExchangesDialog();
+    ~FeaturedExchangesDialog();
+    void selectExchange(qint32);
+    qint32 exchangeNum;     // Exchange; -1 is error; -2 is show all exchange
 
 private:
     QByteArray cacheData;
-    Ui::FeaturedExchangesDialog *ui;
-	QStringList featuredExchangesList;
-	QStringList allExchangesList;
-	QList<quint32> featuredExchangesListIndex;
-	QString loadCurrencies(QString);
-	QString fixLogo(QString);
-	QString fixURL(QString);
-	void removeNotValidExchanges();
+    Ui::FeaturedExchangesDialog* ui;
+    QStringList featuredExchangesList;
+    QStringList allExchangesList;
+    QList<quint32> featuredExchangesListIndex;
+    QString loadCurrencies(QString);
+    QString fixLogo(QString);
+    QString fixURL(QString);
+    void removeNotValidExchanges();
 
 private slots:
-    void dataReceived(QByteArray,int);
-	void on_okButton_clicked();
-	void on_otherExchangesButton_clicked();
+    void dataReceived(QByteArray, int);
+    void on_okButton_clicked();
+    void on_otherExchangesButton_clicked();
 };
 
 #endif // FEATUREDEXCHANGESDIALOG_H

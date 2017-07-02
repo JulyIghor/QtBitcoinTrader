@@ -32,12 +32,13 @@
 #include "sound.h"
 
 #ifdef Q_OS_WIN
-#include <Windows.h>
+    #include <Windows.h>
 #else
-#include <QSound>
+    #include <QSound>
 #endif
 
-namespace Platform {
+namespace Platform
+{
 
 
 void playSound(const QString& path)
@@ -45,7 +46,7 @@ void playSound(const QString& path)
 #ifdef Q_OS_WIN
     PlaySound((LPCWSTR) path.utf16(), NULL, SND_ASYNC);
 #else
-    static QSound soundInstance("",0);
+    static QSound soundInstance("", 0);
     soundInstance.stop();
     soundInstance.play(path);
 #endif

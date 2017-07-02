@@ -43,77 +43,95 @@
 JulyLockFile::JulyLockFile(QString imageName)
     : QObject()
 {
-    qsrand(QDateTime::fromTime_t(TimeSync::getTimeT()).time().msecsTo(QTime(23,59,59,999)));
-    lockFile=new QFile;
-    lockSocket=new QUdpSocket;
+    qsrand(QDateTime::fromTime_t(TimeSync::getTimeT()).time().msecsTo(QTime(23, 59, 59, 999)));
+    lockFile = new QFile;
+    lockSocket = new QUdpSocket;
     QNetworkProxy proxy;
     proxy.setType(QNetworkProxy::NoProxy);
     lockSocket->setProxy(proxy);
-    isLockedFile=false;
-    lockPort=0;
+    isLockedFile = false;
+    lockPort = 0;
 
-    lockFilePath=QDir().tempPath()+"/Locked_"+QCryptographicHash::hash(imageName.toUtf8(),QCryptographicHash::Md5).toHex()+".lockfile";
-    if(QFile::exists(lockFilePath)&&QFileInfo(lockFilePath).lastModified().addSecs(240).toTime_t()<TimeSync::getTimeT())QFile::remove(lockFilePath);
+    lockFilePath = QDir().tempPath() + "/Locked_" + QCryptographicHash::hash(imageName.toUtf8(),
+                   QCryptographicHash::Md5).toHex() + ".lockfile";
+
+    if (QFile::exists(lockFilePath) &&
+        QFileInfo(lockFilePath).lastModified().addSecs(240).toTime_t() < TimeSync::getTimeT())
+        QFile::remove(lockFilePath);
+
     lockFile->setFileName(lockFilePath);
-    if(QFile::exists(lockFilePath))
+
+    if (QFile::exists(lockFilePath))
     {
-        if(lockFile->open(QIODevice::ReadOnly))
+        if (lockFile->open(QIODevice::ReadOnly))
         {
-            lockPort=lockFile->readAll().trimmed().toUInt();
+            lockPort = lockFile->readAll().trimmed().toUInt();
             lockFile->close();
         }
 
-        if(lockPort>0)
+        if (lockPort > 0)
         {
-            isLockedFile=!lockSocket->bind(QHostAddress::LocalHost,lockPort,QUdpSocket::DontShareAddress);
-            if(isLockedFile)return;
+            isLockedFile = !lockSocket->bind(QHostAddress::LocalHost, lockPort, QUdpSocket::DontShareAddress);
+
+            if (isLockedFile)
+                return;
         }
     }
 
-    if(lockPort==0||lockSocket->state()!=QUdpSocket::BoundState)
+    if (lockPort == 0 || lockSocket->state() != QUdpSocket::BoundState)
     {
-        lockPort=1999+qrand()%2000;
-        int i=0;
-        while(!lockSocket->bind(QHostAddress::LocalHost,++lockPort,QUdpSocket::DontShareAddress)){
+        lockPort = 1999 + qrand() % 2000;
+        int i = 0;
+
+        while (!lockSocket->bind(QHostAddress::LocalHost, ++lockPort, QUdpSocket::DontShareAddress))
+        {
             i++;
-            if(i>100){
-                if(lockFile->isOpen())
+
+            if (i > 100)
+            {
+                if (lockFile->isOpen())
                 {
                     lockFile->close();
                     lockFile->remove(lockFilePath);
                 }
-                isLockedFile=false;
+
+                isLockedFile = false;
                 return;
             }
         }
     }
 
-    QTimer *minuteTimer=new QTimer(this);
-    connect(minuteTimer,SIGNAL(timeout()),this,SLOT(updateLockFile()));
+    QTimer* minuteTimer = new QTimer(this);
+    connect(minuteTimer, SIGNAL(timeout()), this, SLOT(updateLockFile()));
     minuteTimer->start(60000);
     updateLockFile();
-    isLockedFile=lockSocket->state()!=QUdpSocket::BoundState;
+    isLockedFile = lockSocket->state() != QUdpSocket::BoundState;
 }
 
 JulyLockFile::~JulyLockFile()
 {
-    if(lockFile->isOpen()||lockSocket->state()==QUdpSocket::BoundState)
-	{
-    lockFile->close();
-    lockFile->remove(lockFilePath);
-	}
-    if(lockFile)delete lockFile;
-    if(lockSocket)delete lockSocket;
+    if (lockFile->isOpen() || lockSocket->state() == QUdpSocket::BoundState)
+    {
+        lockFile->close();
+        lockFile->remove(lockFilePath);
+    }
+
+    if (lockFile)
+        delete lockFile;
+
+    if (lockSocket)
+        delete lockSocket;
 }
 
 void JulyLockFile::updateLockFile()
 {
-    if(lockFile->open(QIODevice::WriteOnly))
+    if (lockFile->open(QIODevice::WriteOnly))
     {
         lockFile->write(QByteArray::number(lockPort));
         lockFile->close();
     }
-    else lockSocket->close();
+    else
+        lockSocket->close();
 }
 
 bool JulyLockFile::isLocked()

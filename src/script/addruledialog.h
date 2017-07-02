@@ -35,7 +35,8 @@
 #include <QDialog>
 #include "ruleholder.h"
 
-namespace Ui {
+namespace Ui
+{
 class AddRuleDialog;
 }
 class QComboBox;
@@ -47,7 +48,7 @@ class AddRuleDialog : public QDialog
 
 public:
     bool saveClicked;
-	QString getGroupName();
+    QString getGroupName();
     bool isRuleEnabled();
     RuleHolder getRuleHolder();
     void fillByHolder(RuleHolder&, bool enabled);
@@ -72,7 +73,7 @@ private slots:
     void on_variableBFee_currentIndexChanged(int index);
     void on_thanAmountFee_currentIndexChanged(int index);
     void on_thanPriceFee_currentIndexChanged(int index);
-    void on_thanText_textChanged(const QString &arg1);
+    void on_thanText_textChanged(const QString& arg1);
     void on_codePreview_toggled(bool checked);
     void on_buttonAddRule_clicked();
     void on_buttonSaveRule_clicked();
@@ -86,12 +87,12 @@ private slots:
 
 private:
     QString groupName;
-	QString getFreeGroupName();
+    QString getFreeGroupName();
     void fixSize(bool fitToWindow = false);
     bool pendingFix;
     bool ruleIsEnabled;
     QList<QDoubleSpinBox*> usedSpinBoxes;
-	RuleHolder lastHolder;
+    RuleHolder lastHolder;
     QString comboData(QComboBox* list, int row);
     QString comboCurrentData(QComboBox*);
     void setComboIndex(QComboBox* list, int& row);

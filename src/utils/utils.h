@@ -42,4 +42,4 @@ QString adjustPathSeparators(const QString& path);
 QString slash(const QString& path1, const QString& path2);
 QString slash(const QString& path1, const QString& path2, const QString& path3);
 void adjustWidgetGeometry(QWidget* widget);
-void recursiveUpdateLayouts(const QObject *object);
+void recursiveUpdateLayouts(const QObject* object);

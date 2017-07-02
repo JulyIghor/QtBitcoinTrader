@@ -129,14 +129,14 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
+       <pointsize>-1</pointsize>
       </font>
      </property>
      <property name="accessibleName">
       <string>RULE_NOITEMS</string>
      </property>
      <property name="styleSheet">
-      <string notr="true">border: 1px solid gray; background: white; color: gray</string>
+      <string notr="true">font-size:27px; border: 1px solid gray; background: white; color: gray</string>
      </property>
      <property name="text">
       <string>No Rules</string>

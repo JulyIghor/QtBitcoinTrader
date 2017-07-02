@@ -38,20 +38,20 @@
 
 class JulyLightChanges : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	JulyLightChanges(QDoubleSpinBox *parent);
-	~JulyLightChanges();
+    explicit JulyLightChanges(QDoubleSpinBox* parent);
+    ~JulyLightChanges();
 private:
-	double lastValue;
-	QDoubleSpinBox *parentSpinBox;
-	QTimer *changeTimer;
+    double lastValue;
+    QDoubleSpinBox* parentSpinBox;
+    QTimer* changeTimer;
 private slots:
-	void changeTimerSlot();
+    void changeTimerSlot();
 public slots:
-	void valueChanged(double);
-	
+    void valueChanged(double);
+
 };
 
 #endif // JULYLIGHTCHANGES_H

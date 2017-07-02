@@ -39,10 +39,10 @@ struct RuleHolder
     RuleHolder();
     QString description;
     bool isTradingRule();
-    bool isValidComparation(QString &text);
-    bool isValidSymbol(QString &symbol);
-    bool isValidPlusMinus(QString &plusMinus);
-    bool isValidCode(QString &code);
+    bool isValidComparation(QString& text);
+    bool isValidSymbol(QString& symbol);
+    bool isValidPlusMinus(QString& plusMinus);
+    bool isValidCode(QString& code);
     bool isValid();
 
     bool thanAmountPercentChecked;

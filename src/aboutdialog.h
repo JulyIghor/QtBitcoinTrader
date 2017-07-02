@@ -37,18 +37,18 @@
 
 class TranslationAbout : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	void showWindow();
-	TranslationAbout(QWidget *parent = 0);
-	~TranslationAbout();
+    void showWindow();
+    explicit TranslationAbout(QWidget* parent = 0);
+    ~TranslationAbout();
 
 private:
-	Ui::TranslationAbout ui;
+    Ui::TranslationAbout ui;
 private slots:
-	void createTranslation();
-	void buttonCheckUpdates();
+    void createTranslation();
+    void buttonCheckUpdates();
 };
 
 #endif // TRANSLATIONABOUT_H

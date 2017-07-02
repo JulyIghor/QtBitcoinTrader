@@ -44,7 +44,7 @@ class SettingsDialogListElement : public QWidget
     Q_OBJECT
 
 public:
-    SettingsDialogListElement(SettingsDialog *, qint32, QString, QString);
+    SettingsDialogListElement(SettingsDialog*, qint32, QString, QString);
     ~SettingsDialogListElement();
     quint32 width;
     void selectedItem();
@@ -52,8 +52,8 @@ public:
 
 private:
     qint32 index;
-    SettingsDialog *parent;
-    void mouseReleaseEvent(QMouseEvent *);
+    SettingsDialog* parent;
+    void mouseReleaseEvent(QMouseEvent*);
     Ui::SettingsDialogListElement ui;
 };
 

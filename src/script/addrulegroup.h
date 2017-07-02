@@ -37,24 +37,24 @@
 
 class AddRuleGroup : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     QStringList groupsList;
     QString fileName;
     QString groupName;
-	AddRuleGroup(QWidget *parent = 0);
-	~AddRuleGroup();
+    explicit AddRuleGroup(QWidget* parent = 0);
+    ~AddRuleGroup();
 
 private:
-	Ui::AddRuleGroup ui;
+    Ui::AddRuleGroup ui;
 
 private slots:
-	void checkValidButton();
-	void on_ruleOpen_clicked();
-	void onGroupContentChanged(bool);
-	void on_groupName_textChanged(QString);
-	void on_buttonAddRule_clicked();
+    void checkValidButton();
+    void on_ruleOpen_clicked();
+    void onGroupContentChanged(bool);
+    void on_groupName_textChanged(QString);
+    void on_buttonAddRule_clicked();
 };
 
 #endif // ADDRULEGROUP_H

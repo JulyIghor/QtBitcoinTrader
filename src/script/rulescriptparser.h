@@ -40,11 +40,11 @@ class RuleScriptParser
 {
 public:
     explicit RuleScriptParser();
-    static QString holderToScript(RuleHolder &holder, bool testMode=false);
-    static bool writeHolderToFile(RuleHolder &holder, QString &file, QString section);
-    static bool writeHolderToSettings(RuleHolder &holder, QSettings &settings, QString section);
-    static RuleHolder readHolderFromFile(QString &data, QString section);
-    static RuleHolder readHolderFromSettings(QSettings &settings, QString section);
+    static QString holderToScript(RuleHolder& holder, bool testMode = false);
+    static bool writeHolderToFile(RuleHolder& holder, QString& file, QString section);
+    static bool writeHolderToSettings(RuleHolder& holder, QSettings& settings, QString section);
+    static RuleHolder readHolderFromFile(QString& data, QString section);
+    static RuleHolder readHolderFromSettings(QSettings& settings, QString section);
 signals:
 
 public slots:

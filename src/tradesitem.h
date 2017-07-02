@@ -36,30 +36,30 @@
 
 struct TradesItem
 {
-	TradesItem();
-	bool backGray;
+    TradesItem();
+    bool backGray;
 
-	bool displayFullDate;
-	quint32 date;
-	QString dateStr;
-	QString timeStr;
+    bool displayFullDate;
+    quint32 date;
+    QString dateStr;
+    QString timeStr;
 
     double amount;
-	QString amountStr;
+    QString amountStr;
 
     double price;
-	QString priceStr;
+    QString priceStr;
 
     double total;
-	QString totalStr;
+    QString totalStr;
 
     QString symbol;//Like a "BTCUSD" 6 symbols only
 
-	int orderType;//-1:Bid; 0:None; 1:Ask
+    int orderType;//-1:Bid; 0:None; 1:Ask
 
-	int direction;//-1:Down; 0: None; 1:Up
+    int direction;//-1:Down; 0: None; 1:Up
 
-	void cacheStrings();
+    void cacheStrings();
 
     bool isValid();
 };

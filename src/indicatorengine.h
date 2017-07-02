@@ -44,25 +44,25 @@ public:
     ~IndicatorEngine();
 
     static IndicatorEngine* global();
-    static void setValue(QString,QString,QString,double);
+    static void setValue(QString, QString, QString, double);
     static double getValue(QString);
 
 private:
     QMutex locker;
-    QHash<QByteArray,double> indicators;
+    QHash<QByteArray, double> indicators;
 
 private slots:
-    void setValueSlot(QString,QString,QString,double);
+    void setValueSlot(QString, QString, QString, double);
 
 signals:
-    void indicatorChanged(QString,QString,QString,double);
+    void indicatorChanged(QString, QString, QString, double);
 
-    void indicatorHighChanged(QString,double);
-    void indicatorLowChanged(QString,double);
-    void indicatorSellChanged(QString,double);
-    void indicatorBuyChanged(QString,double);
-    void indicatorLastChanged(QString,double);
-    void indicatorVolumeChanged(QString,double);
+    void indicatorHighChanged(QString, double);
+    void indicatorLowChanged(QString, double);
+    void indicatorSellChanged(QString, double);
+    void indicatorBuyChanged(QString, double);
+    void indicatorLastChanged(QString, double);
+    void indicatorVolumeChanged(QString, double);
 
     void finishThread();
 };

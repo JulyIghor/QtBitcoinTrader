@@ -40,10 +40,11 @@
 
 class JulyRSA : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	static QByteArray getSignature(QByteArray sign, QByteArray key);
+    static QByteArray getSignature(const QByteArray& sign, const QByteArray& key);
+    static bool isIniFileSigned(const QString& iniFiledata);
 };
 
 #endif // JULYRSA_H

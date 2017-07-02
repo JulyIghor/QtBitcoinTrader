@@ -35,38 +35,49 @@
 #include "exchange/exchange.h"
 
 RulesModel::RulesModel(QString _gName)
-	: QAbstractItemModel()
+    : QAbstractItemModel()
 {
-    runningCount=0;
-    lastRuleGroupIsRunning=false;
-    groupName=_gName;
-    lastRuleId=qrand()%1000+1;
-    stateWidth=80;
-	isConcurrentMode=false;
-    columnsCount=2;
-    connect(this,SIGNAL(setRuleTabRunning(QString,bool)),baseValues_->mainWindow_,SLOT(setRuleTabRunning(QString,bool)));
+    runningCount = 0;
+    lastRuleGroupIsRunning = false;
+    groupName = _gName;
+    lastRuleId = qrand() % 1000 + 1;
+    stateWidth = 80;
+    isConcurrentMode = false;
+    columnsCount = 2;
+    connect(this, SIGNAL(setRuleTabRunning(QString, bool)), baseValues_->mainWindow_, SLOT(setRuleTabRunning(QString,
+            bool)));
 }
 
 RulesModel::~RulesModel()
 {
-	clear();
+    clear();
 }
 
 void RulesModel::currencyChanged()
 {
-    if(baseValues.currentExchange_->multiCurrencyTradeSupport)return;
-    for(int n=0;n<holderList.count();n++)
-        pauseList[n]=holderList.at(n).valueASymbolCode!=baseValues.currentPair.symbol||holderList.at(n).valueBSymbolCode!=baseValues.currentPair.symbol;
-    emit dataChanged(index(0,0),index(rowCount()-1,columnsCount-1));
+    if (baseValues.currentExchange_->multiCurrencyTradeSupport)
+        return;
+
+    for (int n = 0; n < holderList.count(); n++)
+        pauseList[n] = holderList.at(n).valueASymbolCode != baseValues.currentPair.symbol ||
+                       holderList.at(n).valueBSymbolCode != baseValues.currentPair.symbol;
+
+    emit dataChanged(index(0, 0), index(rowCount() - 1, columnsCount - 1));
 }
 
-void RulesModel::updateRule(int row, RuleHolder &holder,bool running)
+void RulesModel::updateRule(int row, RuleHolder& holder, bool running)
 {
-    if(row<0||row>=holderList.count())return;
-    if(stateList.at(row)>0)setRuleStateByRow(row,0);
-    holderList[row]=holder;
-    emit dataChanged(index(row,0),index(row,columnsCount-1));
-    if(running)setRuleStateByRow(row,1);
+    if (row < 0 || row >= holderList.count())
+        return;
+
+    if (stateList.at(row) > 0)
+        setRuleStateByRow(row, 0);
+
+    holderList[row] = holder;
+    emit dataChanged(index(row, 0), index(row, columnsCount - 1));
+
+    if (running)
+        setRuleStateByRow(row, 1);
 }
 
 void RulesModel::writeLogSlot(QString text)
@@ -74,223 +85,267 @@ void RulesModel::writeLogSlot(QString text)
     emit writeLog(text);
 }
 
-void RulesModel::addRule(RuleHolder &holder, bool running)
+void RulesModel::addRule(RuleHolder& holder, bool running)
 {
     beginInsertRows(QModelIndex(), holderList.count(), holderList.count());
-    holderList<<holder;
-    ScriptObject *newScript=new ScriptObject(QString::number(lastRuleId++));
-    connect(newScript,SIGNAL(runningChanged(bool)),this,SLOT(runningChanged(bool)));
-	connect(newScript,SIGNAL(setGroupDone(QString)),this,SLOT(setGroupDone(QString)));
-	connect(newScript,SIGNAL(writeLog(QString)),this,SLOT(writeLogSlot(QString)));
+    holderList << holder;
+    ScriptObject* newScript = new ScriptObject(QString::number(lastRuleId++));
+    connect(newScript, SIGNAL(runningChanged(bool)), this, SLOT(runningChanged(bool)));
+    connect(newScript, SIGNAL(setGroupDone(QString)), this, SLOT(setGroupDone(QString)));
+    connect(newScript, SIGNAL(writeLog(QString)), this, SLOT(writeLogSlot(QString)));
 
-    scriptList<<newScript;
-    stateList<<0;
-    pauseList<<false;
-    doneList<<TimeSync::getTimeT();
+    scriptList << newScript;
+    stateList << 0;
+    pauseList << false;
+    doneList << TimeSync::getTimeT();
     endInsertRows();
 
-    if(running)setRuleStateByRow(holderList.count()-1,1);
+    if (running)
+        setRuleStateByRow(holderList.count() - 1, 1);
 }
 
 void RulesModel::checkRuleGroupIsRunning()
 {
-   if((runningCount>0)!=lastRuleGroupIsRunning)
-   {
-       lastRuleGroupIsRunning=runningCount>0;
-       emit setRuleTabRunning(groupName,lastRuleGroupIsRunning);
-   }
+    if ((runningCount > 0) != lastRuleGroupIsRunning)
+    {
+        lastRuleGroupIsRunning = runningCount > 0;
+        emit setRuleTabRunning(groupName, lastRuleGroupIsRunning);
+    }
 
-   if(!isConcurrentMode)
-   for(int n=0;n<stateList.count();n++)
-   {
-       if(stateList.at(n)==1)return;
-       if(stateList.at(n)==2)
-       {
-           setRuleStateByRow(n,1);
-           return;
-       }
-   }
+    if (!isConcurrentMode)
+        for (int n = 0; n < stateList.count(); n++)
+        {
+            if (stateList.at(n) == 1)
+                return;
+
+            if (stateList.at(n) == 2)
+            {
+                setRuleStateByRow(n, 1);
+                return;
+            }
+        }
 }
 
 void RulesModel::runningChanged(bool on)
 {
-    ScriptObject *senderScript=static_cast<ScriptObject*>(sender());
-    if(senderScript==0)return;
-    QString name=senderScript->scriptName;
-    setStateByName(name,on?1:0);
+    ScriptObject* senderScript = static_cast<ScriptObject*>(sender());
 
-    if(on)runningCount++;else runningCount--;
-    if(runningCount<0)runningCount=0;
+    if (senderScript == 0)
+        return;
+
+    QString name = senderScript->scriptName;
+    setStateByName(name, on ? 1 : 0);
+
+    if (on)
+        runningCount++;
+    else
+        runningCount--;
+
+    if (runningCount < 0)
+        runningCount = 0;
+
     checkRuleGroupIsRunning();
 }
 
 void RulesModel::setGroupDone(QString name)
 {
-    setStateByName(name,3);
-    runningCount--;if(runningCount<0)runningCount=0;
+    setStateByName(name, 3);
+    runningCount--;
+
+    if (runningCount < 0)
+        runningCount = 0;
+
     checkRuleGroupIsRunning();
 }
 
 void RulesModel::setStateByName(QString name, int newState)
 {
-    for(int n=0;n<scriptList.count();n++)
-        if(scriptList.at(n)&&scriptList.at(n)->scriptName==name)
+    for (int n = 0; n < scriptList.count(); n++)
+        if (scriptList.at(n) && scriptList.at(n)->scriptName == name)
         {
-            if(stateList.at(n)==3&&newState==0)
+            if (stateList.at(n) == 3 && newState == 0)
             {
-                if(TimeSync::getTimeT()-doneList.at(n)>1)stateList[n]=newState;
+                if (TimeSync::getTimeT() - doneList.at(n) > 1)
+                    stateList[n] = newState;
             }
             else
-            stateList[n]=newState;
+                stateList[n] = newState;
 
-            if(newState==3)
+            if (newState == 3)
             {
                 emit ruleDone();
-                doneList[n]=TimeSync::getTimeT();
+                doneList[n] = TimeSync::getTimeT();
             }
 
-            if(!baseValues.currentExchange_->multiCurrencyTradeSupport)
-                pauseList[n]=holderList.at(n).valueASymbolCode!=baseValues.currentPair.symbol||holderList.at(n).valueBSymbolCode!=baseValues.currentPair.symbol;
-            emit dataChanged(index(n,0),index(n,columnsCount-1));
+            if (!baseValues.currentExchange_->multiCurrencyTradeSupport)
+                pauseList[n] = holderList.at(n).valueASymbolCode != baseValues.currentPair.symbol ||
+                               holderList.at(n).valueBSymbolCode != baseValues.currentPair.symbol;
+
+            emit dataChanged(index(n, 0), index(n, columnsCount - 1));
             return;
         }
 }
 
 int RulesModel::getStateByRow(int row)
 {
-    if(row<0||row>=stateList.count())return 0;
+    if (row < 0 || row >= stateList.count())
+        return 0;
+
     return stateList.at(row);
 }
 
 bool RulesModel::haveWorkingRule()
 {
-    return runningCount>0;
+    return runningCount > 0;
 }
 
 void RulesModel::moveRowUp(int row)
 {
-    if(row-1<0)return;
+    if (row - 1 < 0)
+        return;
 
-    if(!isConcurrentMode&&stateList.at(row-1)==1&&stateList.at(row)==2)
+    if (!isConcurrentMode && stateList.at(row - 1) == 1 && stateList.at(row) == 2)
     {
-        setRuleStateByRow(row-1,0);
-        stateList[row-1]=2;
-        swapRows(row,row-1);
-        setRuleStateByRow(row-1,0);
-        setRuleStateByRow(row-1,1);
+        setRuleStateByRow(row - 1, 0);
+        stateList[row - 1] = 2;
+        swapRows(row, row - 1);
+        setRuleStateByRow(row - 1, 0);
+        setRuleStateByRow(row - 1, 1);
     }
     else
-        swapRows(row,row-1);
+        swapRows(row, row - 1);
 
-	emit dataChanged(index(row-1,0),index(row,columnsCount-1));
+    emit dataChanged(index(row - 1, 0), index(row, columnsCount - 1));
 }
 
 void RulesModel::moveRowDown(int row)
 {
-    if(row+1>=stateList.count())return;
+    if (row + 1 >= stateList.count())
+        return;
 
-    if(!isConcurrentMode&&stateList.at(row)==1&&stateList.at(row+1)==2)
+    if (!isConcurrentMode && stateList.at(row) == 1 && stateList.at(row + 1) == 2)
     {
-        setRuleStateByRow(row,0);
-        stateList[row]=2;
-        swapRows(row,row+1);
-        setRuleStateByRow(row,0);
-        setRuleStateByRow(row,1);
+        setRuleStateByRow(row, 0);
+        stateList[row] = 2;
+        swapRows(row, row + 1);
+        setRuleStateByRow(row, 0);
+        setRuleStateByRow(row, 1);
     }
     else
-        swapRows(row,row+1);
-	emit dataChanged(index(row,0),index(row+1,columnsCount-1));
+        swapRows(row, row + 1);
+
+    emit dataChanged(index(row, 0), index(row + 1, columnsCount - 1));
 }
 
 void RulesModel::swapRows(int a, int b)
 {
-    pauseList.swap(a,b);
-    stateList.swap(a,b);
-    scriptList.swap(a,b);
-    holderList.swap(a,b);
-    doneList.swap(a,b);
+    pauseList.swap(a, b);
+    stateList.swap(a, b);
+    scriptList.swap(a, b);
+    holderList.swap(a, b);
+    doneList.swap(a, b);
 }
 
 bool RulesModel::isRowPaused(int curRow)
 {
-    if(curRow<0||stateList.count()<=curRow)return false;
+    if (curRow < 0 || stateList.count() <= curRow)
+        return false;
+
     return pauseList.at(curRow);
 }
 
 bool RulesModel::testRuleByRow(int curRow, bool forceTest)
 {
-    if(curRow<0||stateList.count()<=curRow)return false;
-    if(stateList.at(curRow)==1&&!forceTest)return false;
-    if(!forceTest&&!isConcurrentMode)
+    if (curRow < 0 || stateList.count() <= curRow)
+        return false;
+
+    if (stateList.at(curRow) == 1 && !forceTest)
+        return false;
+
+    if (!forceTest && !isConcurrentMode)
     {
-        for(int n=0;n<curRow;n++)
-            if(stateList.at(n)!=3&&stateList.at(n)!=0)
+        for (int n = 0; n < curRow; n++)
+            if (stateList.at(n) != 3 && stateList.at(n) != 0)
                 return false;
     }
-    QString code=RuleScriptParser::holderToScript(holderList[curRow],true);
+
+    QString code = RuleScriptParser::holderToScript(holderList[curRow], true);
     ScriptObject tempScript("Test");
-    tempScript.executeScript(code,true);
+    tempScript.executeScript(code, true);
     tempScript.stopScript();
-    return tempScript.testResult==1;
+    return tempScript.testResult == 1;
 }
 
 void RulesModel::setRuleStateByRow(int curRow, int state)
 {
-    if(curRow<0||stateList.count()<=curRow)return;
-    if(state==0)
+    if (curRow < 0 || stateList.count() <= curRow)
+        return;
+
+    if (state == 0)
     {
-    scriptList[curRow]->stopScript();
-    stateList[curRow]=state;
+        scriptList[curRow]->stopScript();
+        stateList[curRow] = state;
     }
     else
     {
-        if(isConcurrentMode)
+        if (isConcurrentMode)
         {
             scriptList[curRow]->stopScript();
-            scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
+            scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]), false);
         }
         else
         {
-            int firstWorking=-1;
-            int firstPending=-1;
-            for(int n=0;n<scriptList.count();n++)
+            int firstWorking = -1;
+            int firstPending = -1;
+
+            for (int n = 0; n < scriptList.count(); n++)
             {
-                if(firstWorking==-1&&scriptList.at(n)->isRunning())firstWorking=n;
-                if(firstPending==-1&&stateList.at(n)==2)firstPending=n;
-                if(firstWorking!=-1||firstPending!=-1)break;
+                if (firstWorking == -1 && scriptList.at(n)->isRunning())
+                    firstWorking = n;
+
+                if (firstPending == -1 && stateList.at(n) == 2)
+                    firstPending = n;
+
+                if (firstWorking != -1 || firstPending != -1)
+                    break;
             }
-            if(firstPending>-1)
+
+            if (firstPending > -1)
             {
                 scriptList[curRow]->stopScript();
-                if(curRow<firstPending)
-                    scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
+
+                if (curRow < firstPending)
+                    scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]), false);
                 else
-                    scriptList[firstPending]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
+                    scriptList[firstPending]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]), false);
             }
-            else
-            if(firstWorking==-1)
+            else if (firstWorking == -1)
             {
                 scriptList[curRow]->stopScript();
-                scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
+                scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]), false);
             }
             else
             {
-                if(curRow<firstWorking)
+                if (curRow < firstWorking)
                 {
                     scriptList[firstWorking]->stopScript();
-                    stateList[firstWorking]=2;
-                    scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]),false);
-                    emit dataChanged(index(firstWorking,0),index(firstWorking,columnsCount-1));
+                    stateList[firstWorking] = 2;
+                    scriptList[curRow]->executeScript(RuleScriptParser::holderToScript(holderList[curRow]), false);
+                    emit dataChanged(index(firstWorking, 0), index(firstWorking, columnsCount - 1));
                 }
                 else
                 {
-                    stateList[curRow]=2;
+                    stateList[curRow] = 2;
                 }
             }
         }
     }
-    if(!baseValues.currentExchange_->multiCurrencyTradeSupport)pauseList[curRow]=holderList.at(curRow).valueASymbolCode!=baseValues.currentPair.symbol||holderList.at(curRow).valueBSymbolCode!=baseValues.currentPair.symbol;
-	emit dataChanged(index(curRow,0),index(curRow,columnsCount-1));
+
+    if (!baseValues.currentExchange_->multiCurrencyTradeSupport)
+        pauseList[curRow] = holderList.at(curRow).valueASymbolCode != baseValues.currentPair.symbol ||
+                            holderList.at(curRow).valueBSymbolCode != baseValues.currentPair.symbol;
+
+    emit dataChanged(index(curRow, 0), index(curRow, columnsCount - 1));
 }
 
 void RulesModel::clear()
@@ -305,19 +360,19 @@ void RulesModel::clear()
     endResetModel();
 }
 
-int RulesModel::rowCount(const QModelIndex &) const
+int RulesModel::rowCount(const QModelIndex&) const
 {
     return holderList.count();
 }
 
-int RulesModel::columnCount(const QModelIndex &) const
+int RulesModel::columnCount(const QModelIndex&) const
 {
-	return columnsCount;
+    return columnsCount;
 }
 
 void RulesModel::removeRuleByRow(int row)
 {
-	beginRemoveRows(QModelIndex(),row,row);
+    beginRemoveRows(QModelIndex(), row, row);
     holderList.removeAt(row);
     scriptList[row]->stopScript();
     scriptList[row]->deleteLater();
@@ -325,115 +380,162 @@ void RulesModel::removeRuleByRow(int row)
     stateList.removeAt(row);
     pauseList.removeAt(row);
     doneList.removeAt(row);
-	endRemoveRows();
+    endRemoveRows();
 }
 
-QVariant RulesModel::data(const QModelIndex &index, int role) const
+QVariant RulesModel::data(const QModelIndex& index, int role) const
 {
-	if(!index.isValid())return QVariant();
-	int currentRow=index.row();
-    if(currentRow<0||currentRow>=holderList.count())return QVariant();
+    if (!index.isValid())
+        return QVariant();
 
-	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::BackgroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
+    int currentRow = index.row();
 
-	int indexColumn=index.column();
+    if (currentRow < 0 || currentRow >= holderList.count())
+        return QVariant();
 
-	if(role==Qt::TextAlignmentRole)return 0x0084;
+    if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::ForegroundRole && role != Qt::BackgroundRole &&
+        role != Qt::TextAlignmentRole)
+        return QVariant();
 
-	if(role==Qt::ForegroundRole)return baseValues.appTheme.black;
+    int indexColumn = index.column();
 
-	if(role==Qt::BackgroundRole)
-	{
-        switch(stateList.at(currentRow))
-        {
-        case 1: return QVariant(); break;
-        case 2: return baseValues.appTheme.lightRedGreen; break;
-        case 3: return baseValues.appTheme.lightGreen; break;
-        default: return baseValues.appTheme.lightRed; break;
-        }
-		return QVariant();
-	}
+    if (role == Qt::TextAlignmentRole)
+        return 0x0084;
 
-    switch(indexColumn)
+    if (role == Qt::ForegroundRole)
+        return baseValues.appTheme.black;
+
+    if (role == Qt::BackgroundRole)
     {
-    case 0://State
-        switch(stateList.at(currentRow))
+        switch (stateList.at(currentRow))
         {
-        case 1:
-        {
-            if(pauseList.at(currentRow))return julyTr("RULE_STATE_PAUSED","paused");
-            return julyTr("RULE_STATE_PROCESSING","processing");
+            case 1:
+                return QVariant();
+                break;
+
+            case 2:
+                return baseValues.appTheme.lightRedGreen;
+                break;
+
+            case 3:
+                return baseValues.appTheme.lightGreen;
+                break;
+
+            default:
+                return baseValues.appTheme.lightRed;
+                break;
         }
-            break;
-        case 2: return julyTr("RULE_STATE_PENDING","pending"); break;
-        case 3: return julyTr("RULE_STATE_DONE","done"); break;
-        default: return julyTr("RULE_STATE_DISABLED","disabled");break;
-        }
-    case 1://Description
-            return holderList.at(currentRow).description;
-        break;
-    default: break;
+
+        return QVariant();
     }
-	return QVariant();
+
+    switch (indexColumn)
+    {
+        case 0://State
+            switch (stateList.at(currentRow))
+            {
+                case 1:
+                {
+                    if (pauseList.at(currentRow))
+                        return julyTr("RULE_STATE_PAUSED", "paused");
+
+                    return julyTr("RULE_STATE_PROCESSING", "processing");
+                }
+                break;
+
+                case 2:
+                    return julyTr("RULE_STATE_PENDING", "pending");
+                    break;
+
+                case 3:
+                    return julyTr("RULE_STATE_DONE", "done");
+                    break;
+
+                default:
+                    return julyTr("RULE_STATE_DISABLED", "disabled");
+                    break;
+            }
+
+        case 1://Description
+            return holderList.at(currentRow).description;
+            break;
+
+        default:
+            break;
+    }
+
+    return QVariant();
 }
 
 void RulesModel::disableAll()
 {
-    for(int n=holderList.count()-1;n>=0;n--)
-        setRuleStateByRow(n,0);
+    for (int n = holderList.count() - 1; n >= 0; n--)
+        setRuleStateByRow(n, 0);
 }
 
 void RulesModel::enableAll()
 {
-    for(int n=0;n<holderList.count();n++)
-        setRuleStateByRow(n,1);
+    for (int n = 0; n < holderList.count(); n++)
+        setRuleStateByRow(n, 1);
 }
 
 QVariant RulesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	if(role==Qt::TextAlignmentRole)return 0x0084;
+    if (role == Qt::TextAlignmentRole)
+        return 0x0084;
 
-	if(role==Qt::SizeHintRole&&orientation==Qt::Horizontal)
-	{
-		switch(section)
-		{
-		case 0: return QSize(stateWidth,defaultHeightForRow);//State
-		//case 2: return QSize(typeWidth,defaultSectionSize);//Type
-		}
-		return QVariant();
-	}
+    if (role == Qt::SizeHintRole && orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+            case 0:
+                return QSize(stateWidth, defaultHeightForRow); //State
+                //case 2: return QSize(typeWidth,defaultSectionSize);//Type
+        }
 
-	if(role!=Qt::DisplayRole)return QVariant();
-	if(orientation==Qt::Vertical)return section;
-	if(headerLabels.count()!=columnsCount)return QVariant();
+        return QVariant();
+    }
 
-	return headerLabels.at(section);
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    if (orientation == Qt::Vertical)
+        return section;
+
+    if (headerLabels.count() != columnsCount)
+        return QVariant();
+
+    return headerLabels.at(section);
 }
 
-Qt::ItemFlags RulesModel::flags(const QModelIndex &) const
+Qt::ItemFlags RulesModel::flags(const QModelIndex&) const
 {
-	return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 void RulesModel::setHorizontalHeaderLabels(QStringList list)
 {
-	if(list.count()!=columnsCount)return;
-	headerLabels=list;
-	stateWidth=qMax(textFontWidth(headerLabels.first()),textFontWidth(julyTr("RULE_STATE_PROCESSING","processing")));
-	stateWidth=qMax(stateWidth,textFontWidth(julyTr("RULE_STATE_PENDING","pending")));
-	stateWidth=qMax(stateWidth,textFontWidth(julyTr("RULE_STATE_DONE","done")));
-	stateWidth=qMax(stateWidth,textFontWidth(julyTr("RULE_STATE_DISABLED","disabled")));
-	stateWidth+=12;
-	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
+    if (list.count() != columnsCount)
+        return;
+
+    headerLabels = list;
+    stateWidth = qMax(textFontWidth(headerLabels.first()), textFontWidth(julyTr("RULE_STATE_PROCESSING", "processing")));
+    stateWidth = qMax(stateWidth, textFontWidth(julyTr("RULE_STATE_PENDING", "pending")));
+    stateWidth = qMax(stateWidth, textFontWidth(julyTr("RULE_STATE_DONE", "done")));
+    stateWidth = qMax(stateWidth, textFontWidth(julyTr("RULE_STATE_DISABLED", "disabled")));
+    stateWidth += 12;
+    emit headerDataChanged(Qt::Horizontal, 0, columnsCount - 1);
 }
 
-QModelIndex RulesModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex RulesModel::index(int row, int column, const QModelIndex& parent) const
 {
-	if(!hasIndex(row, column, parent))return QModelIndex();
-	return createIndex(row,column);
+    if (!hasIndex(row, column, parent))
+        return QModelIndex();
+
+    return createIndex(row, column);
 }
 
-QModelIndex RulesModel::parent(const QModelIndex &) const
+QModelIndex RulesModel::parent(const QModelIndex&) const
 {
-	return QModelIndex();
+    return QModelIndex();
 }

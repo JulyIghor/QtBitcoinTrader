@@ -67,7 +67,7 @@ public:
     ChartsModel();
     ~ChartsModel();
 
-    bool prepareChartsData(qint16,qint16);
+    bool prepareChartsData(qint16, qint16);
 
 public slots:
     void addLastTrades(QList<TradesItem>*);

@@ -34,17 +34,19 @@
 
 #include <QObject>
 
-struct CurencyInfo
+struct CurrencyInfo
 {
-	CurencyInfo(QByteArray defS="$"){sign=defS;}
+    explicit CurrencyInfo(QByteArray defS = "$")
+    {
+        sign = defS;
+    }
     QString name;
     QString sign;
-    double valueStep;
-    double valueSmall;
-	bool isValid()
-	{
-		return !name.isEmpty()&&!sign.isEmpty();
-	}
+    double valueSmall = 0;
+    bool isValid()
+    {
+        return !name.isEmpty() && !sign.isEmpty();
+    }
 };
 
 #endif // CURRENCYINFO_H

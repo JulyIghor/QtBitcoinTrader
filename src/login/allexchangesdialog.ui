@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>151</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,6 +45,9 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QTableView" name="exchangesTableView">
+        <property name="styleSheet">
+         <string notr="true">font-size:12px</string>
+        </property>
         <property name="selectionMode">
          <enum>QAbstractItemView::SingleSelection</enum>
         </property>

@@ -36,56 +36,54 @@
 
 class Exchange_BTCChina : public Exchange
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_BTCChina();
+    Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_BTCChina();
 
 private:
-	bool isReplayPending(int);
-	bool lastInfoReceived;
-	bool tickerOnly;
+    bool isReplayPending(int);
+    bool lastInfoReceived;
 
-	int apiDownCounter;
-	int secondPart;
+    int apiDownCounter;
+    int secondPart;
 
-	JulyHttp *julyHttpAuth;
-	JulyHttp *julyHttpPublic;
+    JulyHttp* julyHttpAuth;
+    JulyHttp* julyHttpPublic;
 
     QByteArray historyLastDate;
     QByteArray historyLastID;
-	QByteArray lastFetchTid;
-	QByteArray historyLastTradesRequest;
-    QByteArray getMidData(QString a, QString b,QByteArray *data);
+    QByteArray lastFetchTid;
+    QByteArray historyLastTradesRequest;
+    QByteArray getMidData(QString a, QString b, QByteArray* data);
 
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
-	QList<QByteArray> cancelingOrderIDs;
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
+    QList<QByteArray> cancelingOrderIDs;
 
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 
-	QString apiLogin;
+    QString apiLogin;
 
-	QTime authRequestTime;
-	QTimer *secondTimer;
+    QTime authRequestTime;
 
-	void clearVariables();
-	void depthSubmitOrder(QString,QMap<double,double> *,double,double,bool);
-    void depthUpdateOrder(QString, double,double,bool);
-	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>*, double, double, bool);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = 0);
 private slots:
-	void reloadDepth();
-	void sslErrors(const QList<QSslError> &);
-	void dataReceivedAuth(QByteArray,int);
-	void secondSlot();
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
 public slots:
-	void clearValues();
-	void getHistory(bool);
-	void buy(QString, double, double);
-	void sell(QString, double, double);
-	void cancelOrder(QString, QByteArray);
+    void clearValues();
+    void getHistory(bool);
+    void buy(QString, double, double);
+    void sell(QString, double, double);
+    void cancelOrder(QString, QByteArray);
 };
 
 #endif // EXCHANGE_BTCCHINA_H

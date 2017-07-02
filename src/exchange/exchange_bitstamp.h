@@ -36,55 +36,53 @@
 
 class Exchange_Bitstamp : public Exchange
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	void filterAvailableUSDAmountValue(double *amount);
-	Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_Bitstamp();
+    void filterAvailableUSDAmountValue(double* amount);
+    Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_Bitstamp();
 
 private:
-	double accountFee;
-	bool isReplayPending(int);
-	bool lastInfoReceived;
-	bool tickerOnly;
+    double accountFee;
+    bool isReplayPending(int);
+    bool lastInfoReceived;
 
-	int apiDownCounter;
-	int secondPart;
+    int apiDownCounter;
+    int secondPart;
 
-	JulyHttp *julyHttp;
+    JulyHttp* julyHttp;
 
-	QByteArray privateClientId;
+    QByteArray privateClientId;
 
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
-	QList<QByteArray> cancelingOrderIDs;
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
+    QList<QByteArray> cancelingOrderIDs;
 
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
-	QString apiLogin;
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
+    QString apiLogin;
 
-	QTime authRequestTime;
-	QTimer *secondTimer;
+    QTime authRequestTime;
 
-	quint32 lastBidAskTimestamp;
-	quint32 lastTickerDate;
-	quint32 lastTradesDate;
-	quint32 privateNonce;
+    quint32 lastBidAskTimestamp;
+    quint32 lastTickerDate;
+    quint32 lastTradesDate;
+    quint32 privateNonce;
 
-	void clearVariables();
-    void depthSubmitOrder(QString,QMap<double,double> *,double,double,bool);
-    void depthUpdateOrder(QString, double,double,bool);
-	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>*, double, double, bool);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = 0);
 
 private slots:
-	void reloadDepth();
-	void sslErrors(const QList<QSslError> &);
-	void dataReceivedAuth(QByteArray,int);
-	void secondSlot();
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
 public slots:
-	void clearValues();
-	void getHistory(bool);
+    void clearValues();
+    void getHistory(bool);
     void buy(QString, double, double);
     void sell(QString, double, double);
     void cancelOrder(QString, QByteArray);

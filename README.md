@@ -48,6 +48,17 @@ make && make install && make clean
 
 ## Change Log
 
+v1.4
+
+- New Exchange YoBit.net
+- Currency pair synchronization on startup!
+- Fixed issue with functions getPriceByVolume and getVolumeByPrice in JL Script
+- Add HiDPI enable or disable settings
+- Now you can search for currency pairs by keyword
+- Improved many elements of interface
+- Fixed bug with certificate that caused error messages
+- Many other small fixes
+
 v1.30.04
 - Add new pair for BitStamp
 - Fixd fee calculations in Bitfinex

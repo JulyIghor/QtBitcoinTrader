@@ -39,19 +39,19 @@
 
 class LogoButton : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	LogoButton(QWidget *parent = 0);
-	~LogoButton();
+    explicit LogoButton(QWidget* parent = 0);
+    ~LogoButton();
 
 private:
-	QSize logoSize;
-	void resizeEvent(QResizeEvent *);
-	void mouseReleaseEvent(QMouseEvent *event);
-	Ui::LogoButton ui;
+    QSize logoSize;
+    void resizeEvent(QResizeEvent*);
+    void mouseReleaseEvent(QMouseEvent* event);
+    Ui::LogoButton ui;
 public slots:
-	void themeChanged();
+    void themeChanged();
 };
 
 #endif // LOGOBUTTON_H

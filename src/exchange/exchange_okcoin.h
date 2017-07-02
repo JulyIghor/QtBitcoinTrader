@@ -36,54 +36,53 @@
 
 class Exchange_OKCoin : public Exchange
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	Exchange_OKCoin(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_OKCoin();
+    Exchange_OKCoin(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_OKCoin();
 
 private:
-	bool isApiDown;
-	bool isFirstAccInfo;
-	bool isReplayPending(int);
-    bool tickerOnly;
+    bool isApiDown;
+    bool isFirstAccInfo;
+    bool isReplayPending(int);
 
-	int apiDownCounter;
-	int lastOpenedOrders;
+    int apiDownCounter;
+    int lastOpenedOrders;
 
-	JulyHttp *julyHttp;
+    JulyHttp* julyHttp;
 
     quint64 lastFetchTid;
 
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
 
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 
-	QTime authRequestTime;
+    QTime authRequestTime;
 
-	quint32 lastPriceDate;
-	quint32 lastTickerDate;
+    quint32 lastPriceDate;
+    quint32 lastTickerDate;
     quint32 startTradesDate;
-	quint32 privateNonce;
+    quint32 privateNonce;
     quint64 lastHistoryId;
 
-	void clearVariables();
-	void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double,double,bool);
-    void sendToApi(int reqType, QByteArray method, bool auth=false, QByteArray commands=0);
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, QByteArray commands = 0);
 private slots:
-	void reloadDepth();
-	void sslErrors(const QList<QSslError> &);
-	void dataReceivedAuth(QByteArray,int);
-	void secondSlot();
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
 public slots:
-	void clearValues();
-	void getHistory(bool);
-	void buy(QString, double, double);
-	void sell(QString, double, double);
-	void cancelOrder(QString, QByteArray);
+    void clearValues();
+    void getHistory(bool);
+    void buy(QString, double, double);
+    void sell(QString, double, double);
+    void cancelOrder(QString, QByteArray);
 };
 
 #endif // EXCHANGE_OKCOIN_H

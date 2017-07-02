@@ -29,36 +29,47 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef JULYBUTTONMENU_H
-#define JULYBUTTONMENU_H
+#ifndef CURRENCYMENU_H
+#define CURRENCYMENU_H
 
 #include <QMenu>
-class QToolButton;
-class QMouseEvent;
 
-class JulyButtonMenu : public QMenu
+class QToolButton;
+
+namespace Ui
+{
+class CurrencyMenu;
+}
+
+class CurrencyMenu : public QMenu
 {
     Q_OBJECT
-    Q_ENUMS(Align)
-public:
-    enum Align
-    {
-       Left,
-       Right
-    };
 
-    explicit JulyButtonMenu(QToolButton *parentButton, Align position=Left);
-private:
-    Align position;
-    void mouseReleaseEvent(QMouseEvent *);
-    QToolButton *parentButton;
-    QWidget *widgetUnderButton;
-    QWidget *parentWindow;
-private slots:
-    void displayMenuClicked();
-    void aboutToHideWindow();
+public:
+    explicit CurrencyMenu(QToolButton*);
+    ~CurrencyMenu();
+    void setPairs(const QStringList&);
+    int count();
+    int getCurrentIndex();
+    void setCurrentIndex(const int);
+    void currencySelect(const int);
+
 signals:
-    void setCheckedButton(bool);
+    void currencyMenuChanged(int);
+
+private slots:
+    void on_filterLine_textChanged(QString);
+
+private:
+    Ui::CurrencyMenu* ui;
+    QToolButton* parentButton;
+    QStringList currencyPairs;
+    int currentIndex;
+    bool setCurrencyVisible;
+    void displayPairs();
+    void showEvent(QShowEvent*);
+    void currencyResize();
+    void mouseReleaseEvent(QMouseEvent*);
 };
 
-#endif // JULYBUTTONMENU_H
+#endif // CURRENCYMENU_H

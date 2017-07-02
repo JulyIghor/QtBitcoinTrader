@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>623</width>
-    <height>431</height>
+    <height>433</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -90,6 +90,9 @@
         <property name="text">
          <string>Check for updates at startup:</string>
         </property>
+        <property name="buddy">
+         <cstring>checkForUpdatesCheckBox</cstring>
+        </property>
        </widget>
       </item>
       <item row="0" column="1">
@@ -107,6 +110,9 @@
         <property name="text">
          <string>Check for beta updates at startup:</string>
         </property>
+        <property name="buddy">
+         <cstring>checkForUpdatesBetaCheckBox</cstring>
+        </property>
        </widget>
       </item>
       <item row="1" column="1">
@@ -116,26 +122,43 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="autoUpdateCheckBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="disablePairSyncLabel">
+        <property name="accessibleName">
+         <string>SETTINGS_DISABLE_PAIR_SYNC</string>
+        </property>
+        <property name="text">
+         <string>Disable currency pair synchronization at startup</string>
+        </property>
+        <property name="buddy">
+         <cstring>disablePairSyncCheckBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="disablePairSyncCheckBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="autoUpdateLabel">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
         <property name="accessibleName">
          <string>SETTINGS_AUTO_UPDATE</string>
         </property>
         <property name="text">
          <string>Auto update in background:</string>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="autoUpdateCheckBox">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string/>
+        <property name="buddy">
+         <cstring>autoUpdateCheckBox</cstring>
         </property>
        </widget>
       </item>
@@ -165,6 +188,9 @@
         <property name="text">
          <string>Use 24-hour time format:</string>
         </property>
+        <property name="buddy">
+         <cstring>use24HourTimeFormatCheckBox</cstring>
+        </property>
        </widget>
       </item>
       <item row="1" column="0">
@@ -174,6 +200,9 @@
         </property>
         <property name="text">
          <string>Time synchronization:</string>
+        </property>
+        <property name="buddy">
+         <cstring>timeSynchronizationCheckBox</cstring>
         </property>
        </widget>
       </item>
@@ -211,6 +240,9 @@
         <property name="text">
          <string>Confirm open order:</string>
         </property>
+        <property name="buddy">
+         <cstring>confirmOpenOrderCheckBox</cstring>
+        </property>
        </widget>
       </item>
       <item row="0" column="1">
@@ -230,6 +262,9 @@
         </property>
         <property name="text">
          <string>Close to tray:</string>
+        </property>
+        <property name="buddy">
+         <cstring>closeToTrayCheckBox</cstring>
         </property>
        </widget>
       </item>
@@ -254,10 +289,33 @@
         <property name="text">
          <string>Reducing interface elements spacing (after restart)</string>
         </property>
+        <property name="buddy">
+         <cstring>optimizeInterfaceCheckBox</cstring>
+        </property>
        </widget>
       </item>
       <item row="2" column="1">
        <widget class="QCheckBox" name="optimizeInterfaceCheckBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="hiDpiLabel">
+        <property name="accessibleName">
+         <string>SETTINGS_HIDPI</string>
+        </property>
+        <property name="text">
+         <string>HiDPI (after restart)</string>
+        </property>
+        <property name="buddy">
+         <cstring>hiDpiCheckBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="hiDpiCheckBox">
         <property name="text">
          <string/>
         </property>
@@ -359,8 +417,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>438</x>
-     <y>138</y>
+     <x>612</x>
+     <y>130</y>
     </hint>
     <hint type="destinationlabel">
      <x>448</x>
@@ -375,8 +433,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>438</x>
-     <y>176</y>
+     <x>612</x>
+     <y>168</y>
     </hint>
     <hint type="destinationlabel">
      <x>448</x>
@@ -391,8 +449,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>405</x>
-     <y>351</y>
+     <x>612</x>
+     <y>332</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -407,8 +465,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>438</x>
-     <y>370</y>
+     <x>612</x>
+     <y>351</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -423,8 +481,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>438</x>
-     <y>157</y>
+     <x>612</x>
+     <y>149</y>
     </hint>
     <hint type="destinationlabel">
      <x>448</x>
@@ -439,8 +497,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>399</x>
-     <y>265</y>
+     <x>536</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
      <x>448</x>
@@ -455,8 +513,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>285</x>
-     <y>246</y>
+     <x>422</x>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>
@@ -471,12 +529,44 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>583</x>
-     <y>379</y>
+     <x>612</x>
+     <y>370</y>
     </hint>
     <hint type="destinationlabel">
      <x>707</x>
      <y>382</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hiDpiCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>SettingsGeneral</receiver>
+   <slot>anyValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>269</x>
+     <y>382</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>631</x>
+     <y>386</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>disablePairSyncCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>SettingsGeneral</receiver>
+   <slot>anyValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>251</x>
+     <y>179</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>648</x>
+     <y>179</y>
     </hint>
    </hints>
   </connection>

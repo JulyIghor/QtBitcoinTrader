@@ -44,29 +44,29 @@ class SettingsDialogListElement;
 
 class SettingsDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	SettingsDialog();
-	~SettingsDialog();
-    void reject(){};
+    SettingsDialog();
+    ~SettingsDialog();
+    void reject() {};
 
     void clickOnList(qint32);
     void disableTranslateButton();
 
 private:
-	Ui::SettingsDialog ui;
-    QVBoxLayout *listLayout;
-    QList<SettingsDialogListElement *> listListElement;
-	SettingsGeneral *settingsGeneral;
-	SettingsNetworkProxy *settingsNetworkProxy;
-    SettingsDecimals *settingsDecimals;
-	void resizeNameList();
-	void configureNameList();
+    Ui::SettingsDialog ui;
+    QVBoxLayout* listLayout;
+    QList<SettingsDialogListElement*> listListElement;
+    SettingsGeneral* settingsGeneral;
+    SettingsNetworkProxy* settingsNetworkProxy;
+    SettingsDecimals* settingsDecimals;
+    void resizeNameList();
+    void configureNameList();
     void addDialog(QString, QString, QWidget*);
-    void closeEvent(QCloseEvent *);
-	bool isSettingsSaved();
-	void settingsSave();
+    void closeEvent(QCloseEvent*);
+    bool isSettingsSaved();
+    void settingsSave();
     void settingsDiscard();
 };
 

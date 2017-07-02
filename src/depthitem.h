@@ -34,13 +34,13 @@
 
 #include <QString>
 
-struct DepthItem 
+struct DepthItem
 {
-	double price;
-	double volume;
-	QString priceStr;
-	QString volumeStr;
-	bool isValid();
+    double price;
+    double volume;
+    QString priceStr;
+    QString volumeStr;
+    bool isValid();
 };
 
 #endif // DEPTHITEM_H

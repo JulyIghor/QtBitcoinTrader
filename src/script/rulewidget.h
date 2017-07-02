@@ -39,51 +39,51 @@
 
 class RuleWidget : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	void addRuleByHolder(RuleHolder &holder, bool isEnabled);
+    void addRuleByHolder(RuleHolder& holder, bool isEnabled);
     bool isBeepOnDone();
     void currencyChanged();
-	void updateStyleSheets();
-	void saveRulesData();
-	bool haveWorkingRules();
+    void updateStyleSheets();
+    void saveRulesData();
+    bool haveWorkingRules();
     bool haveAnyRules();
     bool removeGroup();
     void languageChanged();
-	Ui::RuleWidget ui;
-	RulesModel *rulesModel;
-    RuleWidget(QString filePath);
-	~RuleWidget();
+    Ui::RuleWidget ui;
+    RulesModel* rulesModel;
+    explicit RuleWidget(QString filePath);
+    ~RuleWidget();
 
 private:
     bool agreeRuleImmediately(QString);
-	QTime ordersCancelTime;
-	QMenu *rulesEnableDisableMenu;
-	QString groupName;
+    QTime ordersCancelTime;
+    QMenu* rulesEnableDisableMenu;
+    QString groupName;
     QString filePath;
 private slots:
     void ruleEnableAllSlot();
 public slots:
-	void writeLog(QString);
-	void on_limitRowsValue_valueChanged(int);
-	void on_buttonSave_clicked();
+    void writeLog(QString);
+    void on_limitRowsValue_valueChanged(int);
+    void on_buttonSave_clicked();
     void ruleDone();
-	void on_ruleUp_clicked();
-	void on_ruleDown_clicked();
-	void rulesMenuRequested(const QPoint&);
-	void ruleDisableEnableMenuFix();
-	void on_ruleConcurrentMode_toggled(bool);
-	void ruleEnableSelected();
+    void on_ruleUp_clicked();
+    void on_ruleDown_clicked();
+    void rulesMenuRequested(const QPoint&);
+    void ruleDisableEnableMenuFix();
+    void on_ruleConcurrentMode_toggled(bool);
+    void ruleEnableSelected();
     void ruleDisableSelected();
     void ruleEnableAll();
     void ruleDisableAll();
-	void on_ruleAddButton_clicked();
-	void on_ruleEditButton_clicked();
-	void on_ruleRemoveAll_clicked();
-	void checkValidRulesButtons();
-	void on_ruleRemove_clicked();
-	void on_ruleSave_clicked();
+    void on_ruleAddButton_clicked();
+    void on_ruleEditButton_clicked();
+    void on_ruleRemoveAll_clicked();
+    void checkValidRulesButtons();
+    void on_ruleRemove_clicked();
+    void on_ruleSave_clicked();
 };
 
 #endif // RULEWIDGET_H

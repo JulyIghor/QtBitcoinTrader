@@ -38,18 +38,18 @@
 
 class JulyScrollUpOnIdle : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	JulyScrollUpOnIdle(QScrollBar *parent);
-	~JulyScrollUpOnIdle();
+    explicit JulyScrollUpOnIdle(QScrollBar* parent);
+    ~JulyScrollUpOnIdle();
 
 private:
-	QTimer *idleTimer;
-	QScrollBar *scrollBar;
+    QTimer* idleTimer;
+    QScrollBar* scrollBar;
 private slots:
-	void timeOut();
-	void valueChanged(int);
+    void timeOut();
+    void valueChanged(int);
 
 };
 

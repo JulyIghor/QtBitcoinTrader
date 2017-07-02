@@ -33,13 +33,12 @@
 #include <QTabBar>
 #include <QEvent>
 #include <QLayout>
-
 #include "dock_host.h"
 
 DockHost::DockHost(QObject* parent) :
-    QObject         (parent),
-    widgets         (),
-    dockToggling    (NULL)
+    QObject(parent),
+    widgets(),
+    dockToggling(NULL)
 {
     //
 }
@@ -49,7 +48,7 @@ DockHost::~DockHost()
     //
 }
 
-QDockWidget* DockHost::createDock(QWidget* parent, QWidget* widget, const QString &title)
+QDockWidget* DockHost::createDock(QWidget* parent, QWidget* widget, const QString& title)
 {
     static int counter = 0;
     QDockWidget* dock = new QDockWidget(parent);
@@ -77,9 +76,10 @@ QDockWidget* DockHost::createDock(QWidget* parent, QWidget* widget, const QStrin
 
 void DockHost::lockDocks(bool lock)
 {
-    Q_FOREACH(QWidget* widget, widgets)
+    Q_FOREACH (QWidget* widget, widgets)
     {
         QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
+
         if (dock)
         {
             if (lock)
@@ -94,11 +94,13 @@ void DockHost::lockDocks(bool lock)
                     dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
                     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
                 }
-            } else
+            }
+            else
             {
                 dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
                 dock->setAllowedAreas(Qt::AllDockWidgetAreas);
             }
+
             adjustFloatingWindowFlags(dock);
         }
     }
@@ -106,9 +108,10 @@ void DockHost::lockDocks(bool lock)
 
 void DockHost::setFloatingVisible(bool visible)
 {
-    Q_FOREACH(QWidget* widget, widgets)
+    Q_FOREACH (QWidget* widget, widgets)
     {
         QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
+
         if (dock && dock->isFloating())
         {
             dock->setVisible(visible);
@@ -119,17 +122,20 @@ void DockHost::setFloatingVisible(bool visible)
 bool DockHost::eventFilter(QObject* obj, QEvent* event)
 {
     QDockWidget* dock = static_cast<QDockWidget*>(obj);
+
     if (dock && dock->isFloating() && event->type() == QEvent::NonClientAreaMouseButtonDblClick)
     {
         if (!isConstrained(dock))
         {
             return true; // handled. allow to minimize/maximize dock
         }
+
         if (dock->allowedAreas() == Qt::NoDockWidgetArea)
         {
             return true; // handled. forbid floating toggling.
         }
     }
+
     return QObject::eventFilter(obj, event);
 }
 
@@ -138,6 +144,7 @@ void DockHost::onDockActionTriggered(bool checked)
     Q_UNUSED(checked);
     QAction* action = static_cast<QAction*>(sender());
     QDockWidget* dock = static_cast<QDockWidget*>(action->parent());
+
     if (dock)
     {
         if (dock->isVisible())
@@ -156,6 +163,7 @@ void DockHost::onDockActionTriggered(bool checked)
 void DockHost::onDockTopLevelChanged()
 {
     QDockWidget* dock = static_cast<QDockWidget*>(sender());
+
     if (!dock->isFloating())
     {
         selectTab(dock);
@@ -169,6 +177,7 @@ void DockHost::onDockTopLevelChanged()
 void DockHost::onDockVisibilityChanged()
 {
     QDockWidget* dock = static_cast<QDockWidget*>(sender());
+
     if (!dock->isFloating() && dock->isVisible() && dockToggling == dock)
     {
         selectTab(dock);
@@ -179,6 +188,7 @@ void DockHost::onDockFeaturesChanged(QDockWidget::DockWidgetFeatures features)
 {
     Q_UNUSED(features)
     QDockWidget* dock = static_cast<QDockWidget*>(sender());
+
     if (dock->isFloating() && dock->isVisible())
     {
         adjustFloatingWindowFlags(dock);
@@ -187,7 +197,7 @@ void DockHost::onDockFeaturesChanged(QDockWidget::DockWidgetFeatures features)
 
 void DockHost::selectTab(QDockWidget* dock)
 {
-    Q_FOREACH(QTabBar* tabBar, parent()->findChildren<QTabBar*>())
+    Q_FOREACH (QTabBar* tabBar, parent()->findChildren<QTabBar*>())
     {
         for (int i = 0; i < tabBar->count(); ++i)
         {
@@ -206,14 +216,17 @@ void DockHost::adjustFloatingWindowFlags(QDockWidget* dock)
     if (dock->isFloating())
     {
         Qt::WindowFlags flags = Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint;
+
         if (dock->features() & QDockWidget::DockWidgetClosable)
         {
             flags |= Qt::WindowCloseButtonHint;
         }
+
         if (!isConstrained(dock))
         {
             flags |= Qt::WindowMinMaxButtonsHint;
         }
+
         dock->setWindowFlags(flags);
         dock->show();
     }
@@ -227,9 +240,10 @@ bool DockHost::isConstrained(QDockWidget* dock)
 
 void DockHost::closeFloatingWindow()
 {
-    Q_FOREACH(QWidget* widget, widgets)
+    Q_FOREACH (QWidget* widget, widgets)
     {
         QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
+
         if (dock && dock->isFloating())
         {
             dock->deleteLater();
@@ -239,7 +253,7 @@ void DockHost::closeFloatingWindow()
 
 void DockHost::closeAllWindow()
 {
-    Q_FOREACH(QWidget* widget, widgets)
+    Q_FOREACH (QWidget* widget, widgets)
     {
         QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
         dock->deleteLater();

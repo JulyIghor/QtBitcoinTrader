@@ -37,16 +37,16 @@
 
 class ThisFeatureUnderDevelopment : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	ThisFeatureUnderDevelopment(QWidget *parent=0);
-	~ThisFeatureUnderDevelopment();
+    explicit ThisFeatureUnderDevelopment(QWidget* parent = 0);
+    ~ThisFeatureUnderDevelopment();
 
 private:
-	Ui::ThisFeatureUnderDevelopment ui;
+    Ui::ThisFeatureUnderDevelopment ui;
 private slots:
-	void themeChanged();
+    void themeChanged();
 };
 
 #endif // THISFEATUREUNDERDEVELOPMENT_H

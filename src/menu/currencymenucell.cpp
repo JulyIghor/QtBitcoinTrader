@@ -29,59 +29,30 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef EXCHANGE_BITCUREX_H
-#define EXCHANGE_BITCUREX_H
+#include "currencymenu.h"
+#include "currencymenucell.h"
+#include "ui_currencymenucell.h"
 
-#include "exchange.h"
-
-class Exchange_BitCurex : public Exchange
+CurrencyMenuCell::CurrencyMenuCell(const QString& currency,
+                                   const QString& currencyStyle,
+                                   const int _index,
+                                   CurrencyMenu* _parentMenu) :
+    QWidget(),
+    ui(new Ui::CurrencyMenuCell),
+    index(_index),
+    parentMenu(_parentMenu)
 {
-	Q_OBJECT
+    ui->setupUi(this);
+    ui->currencyLabel->setText(currency);
+    setStyleSheet(currencyStyle);
+}
 
-public:
-	Exchange_BitCurex(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_BitCurex();
+CurrencyMenuCell::~CurrencyMenuCell()
+{
+    delete ui;
+}
 
-private:
-	bool isApiDown;
-	bool isFirstAccInfo;
-	bool isReplayPending(int);
-	bool tickerOnly;
-
-	int apiDownCounter;
-	int lastOpenedOrders;
-
-	JulyHttp *julyHttp;
-
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
-
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
-
-	QTime authRequestTime;
-
-    quint32 lastFetchTid;
-    quint32 startTradesDate;
-    quint32 lastTradesDate;
-	quint32 privateNonce;
-    quint32 lastHistoryId;
-
-	void clearVariables();
-	void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double,double,bool);
-    void sendToApi(int reqType, QByteArray method, bool auth=false, QByteArray commands=0, QByteArray postData=0);
-private slots:
-	void reloadDepth();
-	void sslErrors(const QList<QSslError> &);
-	void dataReceivedAuth(QByteArray,int);
-	void secondSlot();
-public slots:
-	void clearValues();
-	void getHistory(bool);
-	void buy(QString, double, double);
-	void sell(QString, double, double);
-	void cancelOrder(QString, QByteArray);
-};
-
-#endif // EXCHANGE_BITCUREX_H
+void CurrencyMenuCell::mousePressEvent(QMouseEvent*)
+{
+    parentMenu->currencySelect(index);
+}

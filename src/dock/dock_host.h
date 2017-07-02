@@ -42,7 +42,7 @@ class DockHost : public QObject
     Q_OBJECT
 
 public:
-    DockHost(QObject* parent = NULL);
+    explicit DockHost(QObject* parent = NULL);
     ~DockHost();
 
 public:

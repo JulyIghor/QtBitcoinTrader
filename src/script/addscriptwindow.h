@@ -34,7 +34,8 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
 class AddScriptWindow;
 }
 
@@ -47,11 +48,11 @@ public:
     QString getCopyFromFile();
     QString copyFromExistingScript;
     QString scriptName;
-    explicit AddScriptWindow(QWidget *parent = 0);
+    explicit AddScriptWindow(QWidget* parent = 0);
     ~AddScriptWindow();
 
 private:
-    Ui::AddScriptWindow *ui;
+    Ui::AddScriptWindow* ui;
 
 private slots:
     void on_openFile_clicked();

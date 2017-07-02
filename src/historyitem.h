@@ -37,31 +37,31 @@
 class HistoryItem
 {
 public:
-	HistoryItem();
+    HistoryItem();
 
-	bool displayFullDate;
-	quint32 dateTimeInt;
-	quint32 dateInt;
-	QString dateTimeStr;
-	QString timeStr;
-	QString description;
+    bool displayFullDate;
+    quint32 dateTimeInt;
+    quint32 dateInt;
+    QString dateTimeStr;
+    QString timeStr;
+    QString description;
 
     double volume;
-	QString volumeStr;
+    QString volumeStr;
 
     double price;
-	QString priceStr;
+    QString priceStr;
 
     double total;
-	QString totalStr;
+    QString totalStr;
 
     QString symbol;
 
-	int type; //0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
+    int type; //0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
 
-	void cacheStrings();
+    void cacheStrings();
 
-	bool isValid();
+    bool isValid();
 };
 
 #endif // HISTORYITEM_H

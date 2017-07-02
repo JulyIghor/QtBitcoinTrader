@@ -36,53 +36,53 @@
 
 class Exchange_Bitfinex : public Exchange
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey);
-	~Exchange_Bitfinex();
+    Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_Bitfinex();
 
 private:
-	QByteArray historyLastTimestamp;
+    QByteArray historyLastTimestamp;
 
-	bool isFirstAccInfo;
-	bool isReplayPending(int);
-	bool lastInfoReceived;
+    bool isFirstAccInfo;
+    bool isReplayPending(int);
+    bool lastInfoReceived;
 
-	int apiDownCounter;
-	int secondPart;
+    int apiDownCounter;
+    int secondPart;
 
-	JulyHttp *julyHttp;
+    JulyHttp* julyHttp;
 
-	QByteArray lastTradesDateCache;
+    QByteArray lastTradesDateCache;
 
-	quint64 lastTradesDate;
-	quint32 tickerLastDate;
+    quint64 lastTradesDate;
+    quint32 tickerLastDate;
     quint32 lastHistoryId;
 
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
 
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 
-	QString apiLogin;
+    QString apiLogin;
 
-	QTime authRequestTime;
+    QTime authRequestTime;
 
-	quint32 privateNonce;
+    quint32 privateNonce;
 
-	void clearVariables();
-    void depthSubmitOrder(QString,QMap<double,double> *,double,double,bool);
-    void depthUpdateOrder(QString, double,double,bool);
-	void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>*, double, double, bool);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = 0);
 private slots:
-	void secondSlot();
+    void secondSlot();
 public slots:
-	void dataReceivedAuth(QByteArray,int);
-	void reloadDepth();
-	void clearValues();
-	void getHistory(bool);
+    void dataReceivedAuth(QByteArray, int);
+    void reloadDepth();
+    void clearValues();
+    void getHistory(bool);
     void buy(QString, double, double);
     void sell(QString, double, double);
     void cancelOrder(QString, QByteArray);

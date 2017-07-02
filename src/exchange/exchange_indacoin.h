@@ -43,27 +43,26 @@ public:
     ~Exchange_Indacoin();
 
 private:
-    QByteArray ecdsaSha1(QByteArray shaKey, QByteArray &shaSign);
+    QByteArray ecdsaSha1(QByteArray shaKey, QByteArray& shaSign);
 
     bool isApiDown;
     bool isFirstAccInfo;
     bool isReplayPending(int);
-    bool tickerOnly;
 
     int apiDownCounter;
     int lastOpenedOrders;
 
-    JulyHttp *julyHttp;
+    JulyHttp* julyHttp;
 
     qint64 lastFetchTid;
     qint64 lastFetchDate;
 
-    QList<DepthItem> *depthAsks;
-    QList<DepthItem> *depthBids;
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
     QList<QByteArray> cancelingOrderIDs;
 
-    QMap<double,double> lastDepthAsksMap;
-    QMap<double,double> lastDepthBidsMap;
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 
     QTime authRequestTime;
 
@@ -73,13 +72,13 @@ private:
     quint32 lastHistoryTs;
 
     void clearVariables();
-    void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double,double,bool);
-    void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true, QByteArray commands=0);
+    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = 0);
 private slots:
     void reloadDepth();
-    void sslErrors(const QList<QSslError> &);
-    void dataReceivedAuth(QByteArray,int);
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
     void secondSlot();
 public slots:
     void clearValues();

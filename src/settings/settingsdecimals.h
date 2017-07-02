@@ -46,7 +46,7 @@ public:
     Ui::SettingsDecimals ui;
 
 private:
-    QSettings *decimalsSettings;
+    QSettings* decimalsSettings;
     void loadDecimals();
     void saveDecimals();
     void activateDecimals();

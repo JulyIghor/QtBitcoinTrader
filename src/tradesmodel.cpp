@@ -33,14 +33,14 @@
 #include "main.h"
 
 TradesModel::TradesModel()
-	: QAbstractItemModel()
+    : QAbstractItemModel()
 {
-	lastPrecentBids=0.0;
-	lastRemoveDate=0;
-	lastPrice=0.0;
-	columnsCount=8;
-	dateWidth=100;
-	typeWidth=100;
+    lastPrecentBids = 0.0;
+    lastRemoveDate = 0;
+    lastPrice = 0.0;
+    columnsCount = 8;
+    dateWidth = 100;
+    typeWidth = 100;
 }
 
 TradesModel::~TradesModel()
@@ -50,341 +50,507 @@ TradesModel::~TradesModel()
 
 void TradesModel::clear()
 {
-	if(itemsList.isEmpty())return;
-	beginResetModel();
-	lastPrice=0.0;
-	itemsList.clear();
-	endResetModel();
+    if (itemsList.isEmpty())
+        return;
+
+    beginResetModel();
+    lastPrice = 0.0;
+    itemsList.clear();
+    endResetModel();
 }
 
-int TradesModel::rowCount(const QModelIndex &) const
+int TradesModel::rowCount(const QModelIndex&) const
 {
-	return itemsList.count();
+    return itemsList.count();
 }
 
-int TradesModel::columnCount(const QModelIndex &) const
+int TradesModel::columnCount(const QModelIndex&) const
 {
-	return columnsCount;
+    return columnsCount;
 }
 
 void TradesModel::removeFirst()
 {
-	if(itemsList.count()==0)return;
-	itemsList.removeFirst();
+    if (itemsList.count() == 0)
+        return;
+
+    itemsList.removeFirst();
 }
 
 void TradesModel::removeDataOlderThen(quint32 date)
 {
-	lastRemoveDate=date;
-	if(itemsList.count()==0){updateTotalBTC();return;}
+    lastRemoveDate = date;
 
-	int removeUpToIndex=-1;
-	for(int n=0;n<itemsList.count();n++)
-	{
-		if(date<=itemsList.at(n).date)break;
-		removeUpToIndex=n;
-	}
+    if (itemsList.count() == 0)
+    {
+        updateTotalBTC();
+        return;
+    }
 
-	if(removeUpToIndex==-1)return;
+    int removeUpToIndex = -1;
 
-	beginRemoveRows(QModelIndex(),0,removeUpToIndex);
-	for(int n=0;n<=removeUpToIndex;n++)itemsList.removeFirst();
-	endRemoveRows();
+    for (int n = 0; n < itemsList.count(); n++)
+    {
+        if (date <= itemsList.at(n).date)
+            break;
 
-	if(itemsList.count()==0)clear();
-	updateTotalBTC();
+        removeUpToIndex = n;
+    }
+
+    if (removeUpToIndex == -1)
+        return;
+
+    beginRemoveRows(QModelIndex(), 0, removeUpToIndex);
+
+    for (int n = 0; n <= removeUpToIndex; n++)
+        itemsList.removeFirst();
+
+    endRemoveRows();
+
+    if (itemsList.count() == 0)
+        clear();
+
+    updateTotalBTC();
 }
 
-QVariant TradesModel::data(const QModelIndex &index, int role) const
+QVariant TradesModel::data(const QModelIndex& index, int role) const
 {
-	if(!index.isValid())return QVariant();
-	int currentRow=itemsList.count()-index.row()-1;
-	if(currentRow<0||currentRow>=itemsList.count())return QVariant();
+    if (!index.isValid())
+        return QVariant();
 
-	if(role==Qt::WhatsThisRole)
-	{
-		QString typeText;
-		switch(itemsList.at(currentRow).orderType)
-		{
-		case -1: typeText=textBid; break;
-		case 1: typeText=textAsk; break;
-		}
-		return itemsList.at(currentRow).dateStr+" "+baseValues.currentPair.currASign+itemsList.at(currentRow).amountStr+" "+typeText+" "+(itemsList.at(currentRow).direction==1?upArrowStr:downArrowStr)+" "+baseValues.currentPair.currBSign+itemsList.at(currentRow).priceStr+" "+baseValues.currentPair.currBSign+itemsList.at(currentRow).totalStr;
-	}
+    int currentRow = itemsList.count() - index.row() - 1;
 
-	if(role==Qt::StatusTipRole)
-	{
-		QString lineText;
-		lineText+=itemsList.at(currentRow).dateStr+"\t";
-		lineText+=baseValues.currentPair.currASign+itemsList.at(currentRow).amountStr;
-		
-		switch(itemsList.at(currentRow).orderType)
-		{
-		case -1: lineText+="\t"+textBid; break;
-		case 1: lineText+="\t"+textAsk; break;
-		}
+    if (currentRow < 0 || currentRow >= itemsList.count())
+        return QVariant();
 
-		if(itemsList.at(currentRow).price>0.0)
-		{
-			if(itemsList.at(currentRow).direction)
-			{
-				if(itemsList.at(currentRow).direction==1)lineText+="\t"+upArrowStr;
-				else lineText+="\t"+downArrowStr;
-			}
+    if (role == Qt::WhatsThisRole)
+    {
+        QString typeText;
 
-			lineText+="\t"+baseValues.currentPair.currBSign+itemsList.at(currentRow).priceStr+"\t";
-			lineText+=baseValues.currentPair.currBSign+itemsList.at(currentRow).totalStr;
-		}
+        switch (itemsList.at(currentRow).orderType)
+        {
+            case -1:
+                typeText = textBid;
+                break;
 
-		return lineText;
-	}
+            case 1:
+                typeText = textAsk;
+                break;
+        }
 
-	if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole&&role!=Qt::ForegroundRole&&role!=Qt::BackgroundRole&&role!=Qt::TextAlignmentRole)return QVariant();
+        return itemsList.at(currentRow).dateStr + " " + baseValues.currentPair.currASign + itemsList.at(
+                   currentRow).amountStr + " " + typeText + " " + (itemsList.at(currentRow).direction == 1 ? upArrowStr : downArrowStr) +
+               " " + baseValues.currentPair.currBSign + itemsList.at(currentRow).priceStr + " " + baseValues.currentPair.currBSign +
+               itemsList.at(currentRow).totalStr;
+    }
 
-	int indexColumn=index.column();
+    if (role == Qt::StatusTipRole)
+    {
+        QString lineText;
+        lineText += itemsList.at(currentRow).dateStr + "\t";
+        lineText += baseValues.currentPair.currASign + itemsList.at(currentRow).amountStr;
 
-	if(role==Qt::TextAlignmentRole)
-	{
-		if(indexColumn==1)return 0x0082;
-		if(indexColumn==2)return 0x0082;
-		if(indexColumn==5)return 0x0081;
-		if(indexColumn==6)return 0x0082;
-		return 0x0084;
-	}
+        switch (itemsList.at(currentRow).orderType)
+        {
+            case -1:
+                lineText += "\t" + textBid;
+                break;
 
-	if(role==Qt::BackgroundRole)
-	{
-		return itemsList.at(currentRow).backGray?baseValues.appTheme.altRowColor:QVariant();
-	}
+            case 1:
+                lineText += "\t" + textAsk;
+                break;
+        }
 
-	if(role==Qt::ForegroundRole)
-	{
-		switch(indexColumn)
-		{
-		case 1: return baseValues.appTheme.gray; break;
-		case 2:
-			{
-            double amount=itemsList.at(currentRow).amount;
-            double smallValue=baseValues.currentPair.currAInfo.valueSmall;
-			if(amount<=smallValue)return baseValues.appTheme.gray; smallValue*=10.0;
-			if(amount<=smallValue)return baseValues.appTheme.black; smallValue*=10.0;
-			if(amount<=smallValue)return baseValues.appTheme.darkGreen; smallValue*=10.0;
-			if(amount<=smallValue)return baseValues.appTheme.darkRedBlue;
-			return baseValues.appTheme.red;
-			}
-			break;
-		case 3:
-			switch(itemsList.at(currentRow).orderType)
-			{
-			case -1: return baseValues.appTheme.blue;
-			case 1: return baseValues.appTheme.red;
-			default: return baseValues.appTheme.black;
-			}
-		default: break;
-		}
-		return baseValues.appTheme.black;
-	}
+        if (itemsList.at(currentRow).price > 0.0)
+        {
+            if (itemsList.at(currentRow).direction)
+            {
+                if (itemsList.at(currentRow).direction == 1)
+                    lineText += "\t" + upArrowStr;
+                else
+                    lineText += "\t" + downArrowStr;
+            }
 
-    double requestedPrice=itemsList.at(currentRow).price;
-	if(requestedPrice<=0.0)return QVariant();
+            lineText += "\t" + baseValues.currentPair.currBSign + itemsList.at(currentRow).priceStr + "\t";
+            lineText += baseValues.currentPair.currBSign + itemsList.at(currentRow).totalStr;
+        }
 
-	switch(indexColumn)
-	{
-	case 1:
-		 {//Date
-			if(role==Qt::ToolTipRole||itemsList.at(currentRow).displayFullDate)return itemsList.at(currentRow).dateStr;
-			return itemsList.at(currentRow).timeStr; break;
-		 }
-	case 2:
-		{//Volume
-			if(itemsList.at(currentRow).amount<=0.0)return QVariant();
-			if(role==Qt::ToolTipRole)return baseValues.currentPair.currASign+itemsList.at(currentRow).amountStr;
-			return itemsList.at(currentRow).amountStr;
-		}
-		break;
-	case 3:
-		{//Type
-			switch(itemsList.at(currentRow).orderType)
-			{
-			case -1: return textBid;
-			case 1: return textAsk;
-			default: return QVariant();
-			}
-		}
-		break;
-	case 4:
-		{//Direction
-			if(itemsList.at(currentRow).price<=0.0)return QVariant();
-			if(itemsList.at(currentRow).direction)
-			{
-				if(itemsList.at(currentRow).direction==1)return upArrowStr;
-				else return downArrowStr;
-			}
-			return QVariant();
-		}
-		break;
-	case 5:
-		{//Price
-			if(itemsList.at(currentRow).price<=0.0)return QVariant();
-			if(role==Qt::ToolTipRole)return baseValues.currentPair.currBSign+itemsList.at(currentRow).priceStr;
-			return itemsList.at(currentRow).priceStr;
-		}
-		break;
-	case 6:
-		{//Total
-			if(itemsList.at(currentRow).price<=0.0)return QVariant();
-			if(role==Qt::ToolTipRole)return baseValues.currentPair.currBSign+itemsList.at(currentRow).totalStr;
-			return itemsList.at(currentRow).totalStr;
-		}
-	default: break;
-	}
-	return QVariant();
+        return lineText;
+    }
+
+    if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::ForegroundRole && role != Qt::BackgroundRole &&
+        role != Qt::TextAlignmentRole)
+        return QVariant();
+
+    int indexColumn = index.column();
+
+    if (role == Qt::TextAlignmentRole)
+    {
+        if (indexColumn == 1)
+            return 0x0082;
+
+        if (indexColumn == 2)
+            return 0x0082;
+
+        if (indexColumn == 5)
+            return 0x0081;
+
+        if (indexColumn == 6)
+            return 0x0082;
+
+        return 0x0084;
+    }
+
+    if (role == Qt::BackgroundRole)
+    {
+        return itemsList.at(currentRow).backGray ? baseValues.appTheme.altRowColor : QVariant();
+    }
+
+    if (role == Qt::ForegroundRole)
+    {
+        switch (indexColumn)
+        {
+            case 1:
+                return baseValues.appTheme.gray;
+                break;
+
+            case 2:
+            {
+                double amount = itemsList.at(currentRow).amount;
+                double smallValue = baseValues.currentPair.currAInfo.valueSmall;
+
+                if (amount <= smallValue)
+                    return baseValues.appTheme.gray;
+
+                smallValue *= 10.0;
+
+                if (amount <= smallValue)
+                    return baseValues.appTheme.black;
+
+                smallValue *= 10.0;
+
+                if (amount <= smallValue)
+                    return baseValues.appTheme.darkGreen;
+
+                smallValue *= 10.0;
+
+                if (amount <= smallValue)
+                    return baseValues.appTheme.darkRedBlue;
+
+                return baseValues.appTheme.red;
+            }
+            break;
+
+            case 3:
+                switch (itemsList.at(currentRow).orderType)
+                {
+                    case -1:
+                        return baseValues.appTheme.blue;
+
+                    case 1:
+                        return baseValues.appTheme.red;
+
+                    default:
+                        return baseValues.appTheme.black;
+                }
+
+            default:
+                break;
+        }
+
+        return baseValues.appTheme.black;
+    }
+
+    double requestedPrice = itemsList.at(currentRow).price;
+
+    if (requestedPrice <= 0.0)
+        return QVariant();
+
+    switch (indexColumn)
+    {
+        case 1:
+        {
+            //Date
+            if (role == Qt::ToolTipRole || itemsList.at(currentRow).displayFullDate)
+                return itemsList.at(currentRow).dateStr;
+
+            return itemsList.at(currentRow).timeStr;
+            break;
+        }
+
+        case 2:
+        {
+            //Volume
+            if (itemsList.at(currentRow).amount <= 0.0)
+                return QVariant();
+
+            if (role == Qt::ToolTipRole)
+                return baseValues.currentPair.currASign + itemsList.at(currentRow).amountStr;
+
+            return itemsList.at(currentRow).amountStr;
+        }
+        break;
+
+        case 3:
+        {
+            //Type
+            switch (itemsList.at(currentRow).orderType)
+            {
+                case -1:
+                    return textBid;
+
+                case 1:
+                    return textAsk;
+
+                default:
+                    return QVariant();
+            }
+        }
+        break;
+
+        case 4:
+        {
+            //Direction
+            if (itemsList.at(currentRow).price <= 0.0)
+                return QVariant();
+
+            if (itemsList.at(currentRow).direction)
+            {
+                if (itemsList.at(currentRow).direction == 1)
+                    return upArrowStr;
+                else
+                    return downArrowStr;
+            }
+
+            return QVariant();
+        }
+        break;
+
+        case 5:
+        {
+            //Price
+            if (itemsList.at(currentRow).price <= 0.0)
+                return QVariant();
+
+            if (role == Qt::ToolTipRole)
+                return baseValues.currentPair.currBSign + itemsList.at(currentRow).priceStr;
+
+            return itemsList.at(currentRow).priceStr;
+        }
+        break;
+
+        case 6:
+        {
+            //Total
+            if (itemsList.at(currentRow).price <= 0.0)
+                return QVariant();
+
+            if (role == Qt::ToolTipRole)
+                return baseValues.currentPair.currBSign + itemsList.at(currentRow).totalStr;
+
+            return itemsList.at(currentRow).totalStr;
+        }
+
+        default:
+            break;
+    }
+
+    return QVariant();
 }
 
 QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	if(orientation!=Qt::Horizontal)return QVariant();
-	if(role==Qt::TextAlignmentRole)
-	{
-		if(section==2)return 0x0082;
-		if(section==5)return 0x0081;
-		return 0x0084;
-	}
+    if (orientation != Qt::Horizontal)
+        return QVariant();
 
-	if(role==Qt::SizeHintRole)
-	{
-		switch(section)
-		{
-		case 1: return QSize(dateWidth,defaultHeightForRow);//Date
-		case 3: return QSize(typeWidth,defaultHeightForRow);//Type
-		}
-		return QVariant();
-	}
+    if (role == Qt::TextAlignmentRole)
+    {
+        if (section == 2)
+            return 0x0082;
 
-	if(role!=Qt::DisplayRole)return QVariant();
-	if(headerLabels.count()!=columnsCount)return QVariant();
+        if (section == 5)
+            return 0x0081;
 
-	switch(section)
-	{
-	case 2: return headerLabels.at(section)+" "+baseValues.currentPair.currASign;
-	case 5: 
-	case 6: return headerLabels.at(section)+" "+baseValues.currentPair.currBSign;
-	default: break;
-	}
-	return headerLabels.at(section);
+        return 0x0084;
+    }
+
+    if (role == Qt::SizeHintRole)
+    {
+        switch (section)
+        {
+            case 1:
+                return QSize(dateWidth, defaultHeightForRow); //Date
+
+            case 3:
+                return QSize(typeWidth, defaultHeightForRow); //Type
+        }
+
+        return QVariant();
+    }
+
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    if (headerLabels.count() != columnsCount)
+        return QVariant();
+
+    switch (section)
+    {
+        case 2:
+            return headerLabels.at(section) + " " + baseValues.currentPair.currASign;
+
+        case 5:
+        case 6:
+            return headerLabels.at(section) + " " + baseValues.currentPair.currBSign;
+
+        default:
+            break;
+    }
+
+    return headerLabels.at(section);
 }
 
 void TradesModel::updateTotalBTC()
 {
-    double summ=0.0;
-    double bidsSumm=0.0;
-	for(int n=0;n<itemsList.count();n++)
-	{
-		summ+=itemsList.at(n).amount;
-		if(itemsList.at(n).orderType==-1)bidsSumm+=itemsList.at(n).amount;
-	}
-	bidsSumm=100.0*bidsSumm/summ;
-	if(bidsSumm!=lastPrecentBids)
-	{
-		lastPrecentBids=bidsSumm;
-		emit precentBidsChanged(lastPrecentBids);
-	}
-	emit trades10MinVolumeChanged(summ);
+    double summ = 0.0;
+    double bidsSumm = 0.0;
+
+    for (int n = 0; n < itemsList.count(); n++)
+    {
+        summ += itemsList.at(n).amount;
+
+        if (itemsList.at(n).orderType == -1)
+            bidsSumm += itemsList.at(n).amount;
+    }
+
+    bidsSumm = 100.0 * bidsSumm / summ;
+
+    if (bidsSumm != lastPrecentBids)
+    {
+        lastPrecentBids = bidsSumm;
+        emit precentBidsChanged(lastPrecentBids);
+    }
+
+    emit trades10MinVolumeChanged(summ);
 }
 
-Qt::ItemFlags TradesModel::flags(const QModelIndex &) const
+Qt::ItemFlags TradesModel::flags(const QModelIndex&) const
 {
-	return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 void TradesModel::setHorizontalHeaderLabels(QStringList list)
 {
-	if(list.count()!=columnsCount)return;
+    if (list.count() != columnsCount)
+        return;
 
-	textAsk=julyTr("ORDER_TYPE_ASK","ask");
-	textBid=julyTr("ORDER_TYPE_BID","bid");
-    dateWidth=qMax(qMax(textFontWidth(QDateTime(QDate(2000,12,30),QTime(23,59,59,999)).toString(baseValues.dateTimeFormat)),textFontWidth(QDateTime(QDate(2000,12,30),QTime(12,59,59,999)).toString(baseValues.dateTimeFormat))),textFontWidth(list.at(0)))+10;
-	typeWidth=qMax(qMax(textFontWidth(textAsk),textFontWidth(textBid)),textFontWidth(list.at(2)))+10;
+    textAsk = julyTr("ORDER_TYPE_ASK", "ask");
+    textBid = julyTr("ORDER_TYPE_BID", "bid");
+    dateWidth = qMax(qMax(textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(23, 59, 59,
+                                        999)).toString(baseValues.dateTimeFormat)), textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(12, 59, 59,
+                                                999)).toString(baseValues.dateTimeFormat))), textFontWidth(list.at(0))) + 10;
+    typeWidth = qMax(qMax(textFontWidth(textAsk), textFontWidth(textBid)), textFontWidth(list.at(2))) + 10;
 
-	headerLabels=list;
-	emit headerDataChanged(Qt::Horizontal, 0, columnsCount-1);
-	emit layoutChanged();
+    headerLabels = list;
+    emit headerDataChanged(Qt::Horizontal, 0, columnsCount - 1);
+    emit layoutChanged();
 }
 
-QModelIndex TradesModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex TradesModel::index(int row, int column, const QModelIndex& parent) const
 {
-	if(!hasIndex(row, column, parent))return QModelIndex();
-	return createIndex(row,column);
+    if (!hasIndex(row, column, parent))
+        return QModelIndex();
+
+    return createIndex(row, column);
 }
 
-QModelIndex TradesModel::parent(const QModelIndex &) const
+QModelIndex TradesModel::parent(const QModelIndex&) const
 {
-	return QModelIndex();
+    return QModelIndex();
 }
 
-void TradesModel::addNewTrades(QList<TradesItem> *newItems)
+void TradesModel::addNewTrades(QList<TradesItem>* newItems)
 {
-	QList<TradesItem> verifedItems;
+    QList<TradesItem> verifedItems;
 
-	for(int n=0;n<newItems->count();n++)
-	{
-	if(newItems->at(n).date<200||newItems->at(n).symbol!=baseValues.currentPair.symbol||newItems->at(n).date<=lastRemoveDate)continue;
-	if(lastPrice>newItems->at(n).price)(*newItems)[n].direction=-1;
-	if(lastPrice<newItems->at(n).price)(*newItems)[n].direction=1;
-	lastPrice=newItems->at(n).price;
+    for (int n = 0; n < newItems->count(); n++)
+    {
+        if (newItems->at(n).date < 200 || newItems->at(n).symbol != baseValues.currentPair.symbol ||
+            newItems->at(n).date <= lastRemoveDate)
+            continue;
 
-	if(newItems->at(n).orderType==0)
-	{
-		if(newItems->at(n).date>mainWindow.currencyChangedDate)
-		{
-			if(newItems->at(n).price<mainWindow.meridianPrice)(*newItems)[n].orderType=1;
-			else (*newItems)[n].orderType=-1;
-		}
-		
-	}
-	static bool backSwitcher=false;
+        if (lastPrice > newItems->at(n).price)
+            (*newItems)[n].direction = -1;
 
-	(*newItems)[n].backGray=backSwitcher;
-	verifedItems<<newItems->at(n);
-    static QMap<QString,quint32> lastDateMap;
-    if(lastDateMap.value(verifedItems.last().symbol,0UL)<=verifedItems.last().date)
-	{
-        lastDateMap[verifedItems.last().symbol]=verifedItems.last().date;
-		mainWindow.sendIndicatorEvent(verifedItems.last().symbol, QLatin1String("LastTrade"), verifedItems.last().amount);
-	}
+        if (lastPrice < newItems->at(n).price)
+            (*newItems)[n].direction = 1;
 
-	backSwitcher=!backSwitcher;
-	}
+        lastPrice = newItems->at(n).price;
 
-	if(verifedItems.count()>0)
-	{
-	verifedItems[verifedItems.count()-1].displayFullDate=true;
-	beginInsertRows(QModelIndex(),0,verifedItems.count()-1);
-	itemsList<<verifedItems;
-	endInsertRows();
-	}
+        if (newItems->at(n).orderType == 0)
+        {
+            if (newItems->at(n).date > mainWindow.currencyChangedDate)
+            {
+                if (newItems->at(n).price < mainWindow.meridianPrice)
+                    (*newItems)[n].orderType = 1;
+                else (*newItems)[n].orderType = -1;
+            }
+
+        }
+
+        static bool backSwitcher = false;
+
+        (*newItems)[n].backGray = backSwitcher;
+        verifedItems << newItems->at(n);
+        static QMap<QString, quint32> lastDateMap;
+
+        if (lastDateMap.value(verifedItems.last().symbol, 0UL) <= verifedItems.last().date)
+        {
+            lastDateMap[verifedItems.last().symbol] = verifedItems.last().date;
+            mainWindow.sendIndicatorEvent(verifedItems.last().symbol, QLatin1String("LastTrade"), verifedItems.last().amount);
+        }
+
+        backSwitcher = !backSwitcher;
+    }
+
+    if (verifedItems.count() > 0)
+    {
+        verifedItems[verifedItems.count() - 1].displayFullDate = true;
+        beginInsertRows(QModelIndex(), 0, verifedItems.count() - 1);
+        itemsList << verifedItems;
+        endInsertRows();
+    }
 
     //emit addChartsData(newItems);
-	emit addChartsTrades(newItems);
+    emit addChartsTrades(newItems);
 }
 
 double TradesModel::getRowPrice(int row)
 {
-	row=itemsList.count()-row-1;
-	if(row<0||row>=itemsList.count())return 0.0;
-	return itemsList.at(row).price;
+    row = itemsList.count() - row - 1;
+
+    if (row < 0 || row >= itemsList.count())
+        return 0.0;
+
+    return itemsList.at(row).price;
 }
 
 double TradesModel::getRowVolume(int row)
 {
-	row=itemsList.count()-row-1;
-	if(row<0||row>=itemsList.count())return 0.0;
-	return itemsList.at(row).amount;
+    row = itemsList.count() - row - 1;
+
+    if (row < 0 || row >= itemsList.count())
+        return 0.0;
+
+    return itemsList.at(row).amount;
 }
 
 int TradesModel::getRowType(int row)
 {
-	row=itemsList.count()-row-1;
-	if(row<0||row>=itemsList.count())return true;
-	return itemsList.at(row).orderType;
+    row = itemsList.count() - row - 1;
+
+    if (row < 0 || row >= itemsList.count())
+        return true;
+
+    return itemsList.at(row).orderType;
 }

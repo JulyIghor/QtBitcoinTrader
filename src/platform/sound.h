@@ -34,11 +34,7 @@
 #include <QObject>
 #include <QString>
 
-
-namespace Platform {
-
-
+namespace Platform
+{
 void playSound(const QString& path);
-
-
 }

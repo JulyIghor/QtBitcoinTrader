@@ -30,17 +30,18 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "main.h"
+#include "iniengine.h"
 
 CurrencyPairItem::CurrencyPairItem()
 {
-	priceMin=0.0;
-	tradePriceMin=0.0;
-	tradeVolumeMin=0.0;
-	priceDecimals=5;
-	currADecimals=8;
-	currBDecimals=5;
-	currABalanceDecimals=8;
-	currBBalanceDecimals=5;
+    priceMin = 0.0;
+    tradePriceMin = 0.0;
+    tradeVolumeMin = 0.0;
+    priceDecimals = 5;
+    currADecimals = 8;
+    currBDecimals = 5;
+    currABalanceDecimals = 8;
+    currBBalanceDecimals = 5;
 
     //currASign="BTC";
     //currAStr="BTC";
@@ -56,21 +57,36 @@ CurrencyPairItem::CurrencyPairItem()
 
 void CurrencyPairItem::setSymbol(QByteArray symb)
 {
-    symbol=symb.toUpper();
-    if(symbol.size()!=6){symbol.clear();return;}
+    symbol = symb.toUpper();
 
-    currAStr=symbol.left(3);
-	currAStrLow=currAStr.toLower();
+    if (symbol.size() < 5)
+    {
+        symbol.clear();
+        return;
+    }
 
-    currBStr=symbol.right(3);
-	currBStrLow=currBStr.toLower();
+    int posSplitter = symbol.indexOf('/');
+
+    if (posSplitter == -1)
+    {
+        currAStr = symbol.left(3);
+        currBStr = symbol.right(3);
+    }
+    else
+    {
+        currAStr = symbol.left(posSplitter);
+        currBStr = symbol.right(symbol.size() - posSplitter - 1);
+    }
+
+    currAStrLow = currAStr.toLower();
+    currBStrLow = currBStr.toLower();
 
 
-	currAInfo=baseValues_->currencyMap.value(currAStr,CurencyInfo("$"));
-	currBInfo=baseValues_->currencyMap.value(currBStr,CurencyInfo("$"));
-	
-	currASign=currAInfo.sign;
-	currBSign=currBInfo.sign;
+    currAInfo = IniEngine::getCurrencyInfo(currAStr);
+    currBInfo = IniEngine::getCurrencyInfo(currBStr);
 
-	currAName=currAInfo.name;
+    currASign = currAInfo.sign;
+    currBSign = currBInfo.sign;
+
+    currAName = currAInfo.name;
 }

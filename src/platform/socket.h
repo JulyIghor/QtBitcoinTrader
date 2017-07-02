@@ -33,11 +33,7 @@
 
 #include <QtGlobal>
 
-
-namespace Platform {
-
-
+namespace Platform
+{
 void setSocketTimeout(qintptr socket, int timeout);
-
-
 }

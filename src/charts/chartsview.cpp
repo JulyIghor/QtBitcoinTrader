@@ -118,13 +118,16 @@ ChartsView::~ChartsView()
 void ChartsView::resizeEvent(QResizeEvent* event)
 {
     event->accept();
+
     if (!isVisible)
     {
         sizeIsChanged = true;
         return;
     }
+
     qint32 nowTime = QTime::currentTime().msecsSinceStartOfDay();
     qint32 deltaTime = nowTime - lastResize;
+
     if (deltaTime > 500 || deltaTime < 0)
     {
         refreshTimer->stop();
@@ -138,8 +141,10 @@ void ChartsView::comeNewData()
 {
     if (!isVisible)
         return;
+
     qint32 nowTime = QTime::currentTime().msecsSinceStartOfDay();
     qint32 deltaTime = nowTime - lastNewData;
+
     if (deltaTime > 1000 || deltaTime < 0)
     {
         refreshTimer->stop();
@@ -183,6 +188,7 @@ bool ChartsView::prepareCharts()
     bottomSceneCharts->clear();
     bottomSceneCharts->setSceneRect(1, -fontHeight - 5,
                                     ui->bottomGraphicsView->width(), ui->bottomGraphicsView->height());
+
     for (qint32 i = 0; i < chartsModel->graphDateText.count(); ++i)
     {
         drawText(bottomSceneCharts, chartsModel->graphDateText.at(i),
@@ -192,6 +198,7 @@ bool ChartsView::prepareCharts()
     leftSceneCharts->clear();
     ui->leftGraphicsView->setFixedWidth(chartsModel->widthAmountYAxis);
     leftSceneCharts->setSceneRect(1, -5, ui->leftGraphicsView->width(), ui->leftGraphicsView->height());
+
     for (qint32 i = 0; i < chartsModel->graphAmountText.count(); ++i)
     {
         leftSceneCharts->addLine(ui->leftGraphicsView->width() - 4, chartsModel->graphAmountTextY.at(i),
@@ -204,6 +211,7 @@ bool ChartsView::prepareCharts()
     rightSceneCharts->clear();
     ui->rightGraphicsView->setFixedWidth(chartsModel->widthPriceYAxis);
     rightSceneCharts->setSceneRect(1, -5, ui->rightGraphicsView->width(), ui->rightGraphicsView->height());
+
     for (qint32 i = 0; i < chartsModel->graphPriceText.count(); ++i)
     {
         rightSceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i),
@@ -223,11 +231,13 @@ bool ChartsView::prepareCharts()
     sceneCharts->addLine(0, 0, graphWidth, 0,  QPen("#777777"));
     sceneCharts->addLine(0, 0, 0, graphHeight, QPen("#777777"));
     sceneCharts->addLine(graphWidth, 0, graphWidth, graphHeight, QPen("#777777"));
+
     for (qint32 i = 0; i < chartsModel->graphDateText.count(); ++i)
     {
         sceneCharts->addLine(chartsModel->graphDateTextX.at(i), -5,
                              chartsModel->graphDateTextX.at(i), 0, QPen("#777777"));
     }
+
     for (qint32 i = 1; i < chartsModel->graphPriceText.count(); ++i)
     {
         sceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i),
@@ -244,7 +254,7 @@ void ChartsView::clearCharts()
     leftSceneCharts->clear();
     rightSceneCharts->clear();
     sceneCharts->clear();
-    drawText(sceneCharts,julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
+    drawText(sceneCharts, julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
              0, 0, "font-size:28px;color:" + baseValues.appTheme.gray.name());
     sceneCharts->setSceneRect(sceneCharts->itemsBoundingRect());
     refreshTimer->start(timeRefreshCharts);
@@ -252,15 +262,18 @@ void ChartsView::clearCharts()
 
 void ChartsView::refreshCharts()
 {
-    if (!isVisible)return;
+    if (!isVisible)
+        return;
+
     perfomanceTimer->start();
+
     if (!prepareCharts())
     {
         sceneCharts->clear();
         bottomSceneCharts->clear();
         leftSceneCharts->clear();
         rightSceneCharts->clear();
-        drawText(sceneCharts,julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
+        drawText(sceneCharts, julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
                  0, 0, "font-size:28px;color:" + baseValues.appTheme.gray.name());
         return;
     }
@@ -271,20 +284,24 @@ void ChartsView::refreshCharts()
     }
 
     QPolygonF boundsPolygon;
+
     for (qint32 i = 0; i < chartsModel->graphBoundsSellX.count(); ++i)
     {
         boundsPolygon << QPointF(chartsModel->graphBoundsSellX.at(i),
                                  chartsModel->graphBoundsSellY.at(i));
     }
+
     for (qint32 i = chartsModel->graphBoundsBuyX.count() - 1; i >= 0; --i)
     {
         boundsPolygon << QPointF(chartsModel->graphBoundsBuyX.at(i),
                                  chartsModel->graphBoundsBuyY.at(i));
     }
+
     if (boundsPolygon.count())
         sceneCharts->addPolygon(boundsPolygon, QPen("#4000FF00"), QBrush("#4000FF00"));
 
     QPolygonF tradesPolygon;
+
     if (chartsModel->graphTradesX.count())
     {
         for (qint32 i = 0; i < chartsModel->graphTradesX.count(); ++i)
@@ -293,6 +310,7 @@ void ChartsView::refreshCharts()
                                      chartsModel->graphTradesY.at(i));
         }
     }
+
     if (tradesPolygon.count())
     {
         QPainterPath tradesPath;
@@ -301,6 +319,7 @@ void ChartsView::refreshCharts()
     }
 
     QPen pen;
+
     if (chartsModel->graphTradesX.count())
     {
         for (qint32 i = 0; i < chartsModel->graphTradesX.count(); ++i)
@@ -309,12 +328,14 @@ void ChartsView::refreshCharts()
                 pen = QPen("#FF0000");
             else
                 pen = QPen("#0000FF");
+
             sceneCharts->addEllipse(chartsModel->graphTradesX.at(i) - 2,
                                     chartsModel->graphTradesY.at(i) - 2, 4, 4, pen);
         }
     }
 
     quint32 perfDeltaTime = perfomanceTimer->elapsed();
+
     if (perfDeltaTime > 50 && chartsModel->perfomanceStep < 10)
         ++chartsModel->perfomanceStep;
     else

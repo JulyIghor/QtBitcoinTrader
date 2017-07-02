@@ -43,6 +43,7 @@
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include "rulewidget.h"
+#include "iniengine.h"
 
 AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
     QDialog(par),
@@ -63,13 +64,16 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
 
     ui->sayCode->insertItem(ui->sayCode->count(), julyTr("NOT_USED", "Not Used"), "");
 
-    Q_FOREACH(QDoubleSpinBox* spinBox, mainWindow.findChildren<QDoubleSpinBox*>())
+    Q_FOREACH (QDoubleSpinBox* spinBox, mainWindow.findChildren<QDoubleSpinBox*>())
     {
         QString scriptName = spinBox->whatsThis();
+
         if (scriptName.isEmpty())
             continue;
+
         QString translatedName = julyTranslator.translateString("INDICATOR_" + (scriptName.startsWith("Balance")
                                  ? "BALANCE" : scriptName.toUpper()), scriptName);
+
         if (scriptName.startsWith("BalanceA"))
             translatedName = translatedName.arg(baseValues.currentPair.currAStr);
         else
@@ -77,38 +81,52 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
             if (scriptName.startsWith("BalanceB"))
                 translatedName = translatedName.arg(baseValues.currentPair.currBStr);
         }
+
         ui->variableA->insertItem(ui->variableA->count(), translatedName, scriptName);
         ui->variableB->insertItem(ui->variableB->count(), translatedName, scriptName);
         ui->sayCode->insertItem(ui->sayCode->count(), translatedName, scriptName);
 
         if (spinBox->accessibleName() == "PRICE")
-            ui->thanPriceType->insertItem(ui->thanPriceType->count(), translatedName,scriptName);
+            ui->thanPriceType->insertItem(ui->thanPriceType->count(), translatedName, scriptName);
 
         usedSpinBoxes << spinBox;
     }
-    ui->variableA->insertItem(ui->variableA->count(), julyTr("RULE_IMMEDIATELY_EXECUTION", "Execute Immediately"), "IMMEDIATELY");
 
-    ui->variableA->insertItem(ui->variableB->count(), julyTr("RULE_MY_LASTTRADE_CHANGED", "My order sold or bought"), "MyLastTrade");
-    ui->variableA->insertItem(ui->variableB->count(), julyTr("RULE_LASTTRADE_CHANGED", "Market order sold or bought"), "LastTrade");
+    ui->variableA->insertItem(ui->variableA->count(), julyTr("RULE_IMMEDIATELY_EXECUTION", "Execute Immediately"),
+                              "IMMEDIATELY");
+
+    ui->variableA->insertItem(ui->variableB->count(), julyTr("RULE_MY_LASTTRADE_CHANGED", "My order sold or bought"),
+                              "MyLastTrade");
+    ui->variableA->insertItem(ui->variableB->count(), julyTr("RULE_LASTTRADE_CHANGED", "Market order sold or bought"),
+                              "LastTrade");
 
     ui->variableB->insertItem(ui->variableB->count(), julyTr("RULE_EXACT_VALUE", "Exact value"), "EXACT");
     ui->thanPriceType->insertItem(ui->thanPriceType->count(), julyTr("RULE_EXACT_VALUE", "Exact value"), "EXACT");
 
     int lastPriceInt = ui->variableA->findData("LastPrice");
-    if (lastPriceInt >- 1)
+
+    if (lastPriceInt > - 1)
         ui->variableA->setCurrentIndex(lastPriceInt);
+
     lastPriceInt = ui->variableB->findData("LastPrice");
-    if (lastPriceInt >- 1)
+
+    if (lastPriceInt > - 1)
         ui->variableB->setCurrentIndex(lastPriceInt);
+
     lastPriceInt = ui->thanPriceType->findData("LastPrice");
-    if (lastPriceInt >- 1)
+
+    if (lastPriceInt > - 1)
         ui->thanPriceType->setCurrentIndex(lastPriceInt);
 
-    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SELL", "Sell %1").arg(baseValues.currentPair.currAStr), "TRADE");
-    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_BUY", "Buy %1").arg(baseValues.currentPair.currAStr), "TRADE");
+    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SELL",
+                             "Sell %1").arg(baseValues.currentPair.currAStr), "TRADE");
+    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_BUY", "Buy %1").arg(baseValues.currentPair.currAStr),
+                             "TRADE");
 
-    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_RECEIVE", "Receive %1").arg(baseValues.currentPair.currBStr), "TRADE");
-    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SPEND", "Spend %1").arg(baseValues.currentPair.currBStr), "TRADE");
+    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_RECEIVE",
+                             "Receive %1").arg(baseValues.currentPair.currBStr), "TRADE");
+    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SPEND",
+                             "Spend %1").arg(baseValues.currentPair.currBStr), "TRADE");
 
     ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_CANCEL_ALL", "Cancel All Orders"), "NOPARAMS");
     ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_CANCEL_ASKS", "Cancel Asks"), "NOPARAMS");
@@ -147,20 +165,25 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
         new JulySpinBoxFix(spinBox);
 
     QString baseSymbol = baseValues.currentPair.symbolSecond();
+
     Q_FOREACH (QComboBox* comboBox, findChildren<QComboBox*>())
     {
         if (comboBox->accessibleName() != "SYMBOL")
             continue;
 
         int selectedRow = -1;
-        for (int n = 0; n < mainWindow.currPairsList.count(); ++n)
+
+        for (int n = 0; n < IniEngine::getPairsCount(); ++n)
         {
-            QString curSymbol = mainWindow.currPairsList.at(n).symbolSecond();
+            QString curSymbol = IniEngine::getPairSymbolSecond(n);
+
             if (curSymbol == baseSymbol)
                 selectedRow = n;
+
             //else if(!currentExchange->multiCurrencyTradeSupport)continue;
-            comboBox->insertItem(comboBox->count(), mainWindow.currPairsList.at(n).name, curSymbol);
+            comboBox->insertItem(comboBox->count(), IniEngine::getPairName(n), curSymbol);
         }
+
         if (selectedRow > -1)
             comboBox->setCurrentIndex(selectedRow);
     }
@@ -169,10 +192,13 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
 
     Q_FOREACH (QComboBox* comboBox, findChildren<QComboBox*>())
         connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(reCacheCode()));
+
     Q_FOREACH (QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())
         connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(reCacheCode()));
+
     Q_FOREACH (QCheckBox* checkBox, findChildren<QCheckBox*>())
         connect(checkBox, SIGNAL(toggled(bool)), this, SLOT(reCacheCode()));
+
     Q_FOREACH (QRadioButton* checkBox, findChildren<QRadioButton*>())
         connect(checkBox, SIGNAL(toggled(bool)), this, SLOT(reCacheCode()));
 
@@ -186,26 +212,30 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
     ScriptWidget* parentScriptWidget = (ScriptWidget*)par;
 
     Q_FOREACH (RuleWidget* currentGroup, mainWindow.ui.tabRules->findChildren<RuleWidget*>())
-	{
+    {
         if (currentGroup == 0)
             continue;
+
         if (currentGroup == parentRuleWidget)
             selectedRow = ui->groupName->count();
+
         ui->groupName->addItem(currentGroup->windowTitle(), currentGroup->property("FileName").toString());
-	}
+    }
 
     Q_FOREACH (ScriptWidget* currentGroup, mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
-	{
+    {
         if (currentGroup == 0)
             continue;
+
         if (currentGroup == parentScriptWidget)
             selectedRow = ui->groupName->count();
+
         ui->groupName->addItem(currentGroup->windowTitle(), currentGroup->property("FileName").toString());
-	}
+    }
 
     if (selectedRow > -1)
         ui->groupName->setCurrentIndex(selectedRow);
-	else
+    else
         ui->groupName->addItem(getFreeGroupName(), "");
 
     QTimer::singleShot(200, this, SLOT(reCacheCode()));
@@ -219,7 +249,7 @@ AddRuleDialog::~AddRuleDialog()
 
 QString AddRuleDialog::getGroupName()
 {
-	return ui->groupName->currentText();
+    return ui->groupName->currentText();
 }
 
 QString AddRuleDialog::getFreeGroupName()
@@ -230,13 +260,17 @@ QString AddRuleDialog::getFreeGroupName()
     int incr = 0;
     QStringList existingGroups = mainWindow.getRuleGroupsNames();
     existingGroups << mainWindow.getScriptGroupsNames();
+
     while (existingGroups.contains(newGroupName))
-	{
+    {
         newGroupName = groupLabel;
+
         if (incr > 0)
             newGroupName += " " + QString::number(incr);
+
         ++incr;
-	}
+    }
+
     return newGroupName;
 }
 
@@ -291,16 +325,19 @@ bool AddRuleDialog::isRuleEnabled()
     return ruleIsEnabled;
 }
 
-void AddRuleDialog::setComboIndexByData(QComboBox *list, QString &data)
+void AddRuleDialog::setComboIndexByData(QComboBox* list, QString& data)
 {
     if (list == 0)
         return;
+
     int find = list->findData(data);
+
     if (find < 0)
-	{
+    {
         //qDebug()<<"Critical error. Can't find:"<<data;
-		return;
-	}
+        return;
+    }
+
     list->setCurrentIndex(find);
 }
 
@@ -308,21 +345,26 @@ void AddRuleDialog::setComboIndex(QComboBox* list, QString& text)
 {
     if (list == 0)
         return;
+
     int find = list->findText(text);
+
     if (find < 0)
-	{
+    {
         //qDebug()<<"Critical error. Can't find:"<<text;
-		return;
-	}
+        return;
+    }
+
     list->setCurrentIndex(find);
 }
 
-void AddRuleDialog::setComboIndex(QComboBox* list, int &row)
+void AddRuleDialog::setComboIndex(QComboBox* list, int& row)
 {
     if (list == 0)
         return;
+
     if (row < 0 || row >= list->count())
         return;
+
     list->setCurrentIndex(row);
 }
 
@@ -330,13 +372,14 @@ RuleHolder AddRuleDialog::getRuleHolder()
 {
     if (!isVisible())
         return lastHolder;
+
     lastHolder.thanAmountPercentChecked = ui->thanAmountPercent->isChecked();
     lastHolder.thanPricePercentChecked = ui->thanPricePercent->isChecked();
-    lastHolder.variableBPercentChecked = ui->variableBPercent->isVisible()&&ui->variableBPercent->isChecked();
+    lastHolder.variableBPercentChecked = ui->variableBPercent->isVisible() && ui->variableBPercent->isChecked();
     lastHolder.thanAmountFeeIndex = ui->thanAmountFee->currentIndex();
     lastHolder.thanPriceFeeIndex = ui->thanPriceFee->currentIndex();
     lastHolder.thanTypeIndex = ui->thanType->currentIndex();
-    lastHolder.variableBFeeIndex = !ui->variableBFee->isVisible()?-1:ui->variableBFee->currentIndex();
+    lastHolder.variableBFeeIndex = !ui->variableBFee->isVisible() ? -1 : ui->variableBFee->currentIndex();
     lastHolder.variableBModeIndex = ui->variableBMode->currentIndex();
     lastHolder.thanAmount = ui->thanAmount->value();
     lastHolder.thanPrice = ui->thanPriceValue->value();
@@ -346,8 +389,10 @@ RuleHolder AddRuleDialog::getRuleHolder()
     lastHolder.thanPriceTypeCode = comboCurrentData(ui->thanPriceType);
 
     QString grName = ui->thanText->text();
+
     if (grName.isEmpty())
         grName = groupName;
+
     lastHolder.thanText = grName;
 
     lastHolder.tradeSymbolCode = comboCurrentData(ui->thanSymbol);
@@ -360,16 +405,20 @@ RuleHolder AddRuleDialog::getRuleHolder()
     lastHolder.description = ui->descriptionText->text();
     lastHolder.delayMilliseconds = (int)(ui->delayValue->value() * 1000.0) / 1000.0;
     lastHolder.sayCode = comboCurrentData(ui->sayCode);
+
     if (lastHolder.sayCode == "BalanceA")
         lastHolder.sayCode = "Balance\",\"" + baseValues.currentPair.currAStr;
+
     if (lastHolder.sayCode == "BalanceB")
         lastHolder.sayCode = "Balance\",\"" + baseValues.currentPair.currBStr;
-    return lastHolder; 
+
+    return lastHolder;
 }
 
 void AddRuleDialog::reCacheCode()
 {
     QString descriptionText;
+
     if (ui->delayValue->value() > 0)
         descriptionText = julyTr("DELAY_SEC", "Delay %1 sec").arg(textFromDouble(ui->delayValue->value())) + " ";
 
@@ -386,82 +435,119 @@ void AddRuleDialog::reCacheCode()
     {
         bool requiresBaseValue = currentAType != QLatin1String("MyLastTrade") && currentAType != QLatin1String("LastTrade");
         descriptionText += julyTr("WHEN", "When") + " " + ui->variableA->currentText();
-        if(ui->valueASymbol->isVisible())descriptionText+=" ("+ui->valueASymbol->currentText()+")";
 
-        if(requiresBaseValue)
+        if (ui->valueASymbol->isVisible())
+            descriptionText += " (" + ui->valueASymbol->currentText() + ")";
+
+        if (requiresBaseValue)
         {
-            descriptionText+=" "+ui->comparation->currentText()+" "+ui->variableB->currentText();
-            if(ui->valueBSymbol->isVisible())descriptionText+=" ("+ui->valueBSymbol->currentText()+")";
+            descriptionText += " " + ui->comparation->currentText() + " " + ui->variableB->currentText();
 
-            bool bExact=comboCurrentData(ui->variableB)=="EXACT";
-            if(ui->variableBExact->value()!=0.0||bExact)
+            if (ui->valueBSymbol->isVisible())
+                descriptionText += " (" + ui->valueBSymbol->currentText() + ")";
+
+            bool bExact = comboCurrentData(ui->variableB) == "EXACT";
+
+            if (ui->variableBExact->value() != 0.0 || bExact)
             {
-                if(!bExact)descriptionText+=" "+ui->variableBplusMinus->currentText();
-                descriptionText+=" "+textFromDouble(ui->variableBExact->value(),8,0);
-                if(ui->variableBPercent->isChecked())descriptionText+="%";
+                if (!bExact)
+                    descriptionText += " " + ui->variableBplusMinus->currentText();
+
+                descriptionText += " " + textFromDouble(ui->variableBExact->value(), 8, 0);
+
+                if (ui->variableBPercent->isChecked())
+                    descriptionText += "%";
             }
-            if(ui->variableBFee->currentIndex()>0)
+
+            if (ui->variableBFee->currentIndex() > 0)
             {
-                if(ui->variableBFee->currentIndex()==1)descriptionText+=" + ";
-                else descriptionText+=" - ";
-                descriptionText+=julyTr("LOG_FEE","fee");
+                if (ui->variableBFee->currentIndex() == 1)
+                    descriptionText += " + ";
+                else
+                    descriptionText += " - ";
+
+                descriptionText += julyTr("LOG_FEE", "fee");
             }
-            if(ui->variableBMode->isVisible())descriptionText+=" ("+ui->variableBMode->currentText()+")";
+
+            if (ui->variableBMode->isVisible())
+                descriptionText += " (" + ui->variableBMode->currentText() + ")";
         }
     }
-    descriptionText+=" "+julyTr("THEN","then")+" "+ui->thanType->currentText();
 
-    if(ui->thanAmount->isVisible())
+    descriptionText += " " + julyTr("THEN", "then") + " " + ui->thanType->currentText();
+
+    if (ui->thanAmount->isVisible())
     {
         QString sign;
         CurrencyPairItem pairItem;
-        pairItem=baseValues.currencyPairMap.value(comboCurrentData(ui->valueBSymbol),pairItem);
-        if(!pairItem.symbolSecond().isEmpty())sign=pairItem.currASign;
+        pairItem = baseValues.currencyPairMap.value(comboCurrentData(ui->valueBSymbol), pairItem);
 
-        descriptionText+=" "+sign+textFromDouble(ui->thanAmount->value(),8,0);
-        if(ui->thanAmountPercent->isChecked())descriptionText+="%";
+        if (!pairItem.symbolSecond().isEmpty())
+            sign = pairItem.currASign;
 
-        if(ui->thanAmountFee->currentIndex()>0)
+        descriptionText += " " + sign + textFromDouble(ui->thanAmount->value(), 8, 0);
+
+        if (ui->thanAmountPercent->isChecked())
+            descriptionText += "%";
+
+        if (ui->thanAmountFee->currentIndex() > 0)
         {
-            if(ui->thanAmountFee->currentIndex()==1)descriptionText+=" + ";
-            else descriptionText+=" - ";
-            descriptionText+=julyTr("LOG_FEE","fee");
+            if (ui->thanAmountFee->currentIndex() == 1)
+                descriptionText += " + ";
+            else
+                descriptionText += " - ";
+
+            descriptionText += julyTr("LOG_FEE", "fee");
         }
     }
-    if(ui->thanPriceType->isVisible())
+
+    if (ui->thanPriceType->isVisible())
     {
         QString atPrice;
-        bool priceExact=comboCurrentData(ui->thanPriceType)==QLatin1String("EXACT");
-        if(!priceExact)atPrice=ui->thanPriceType->currentText();
+        bool priceExact = comboCurrentData(ui->thanPriceType) == QLatin1String("EXACT");
 
-        if(ui->thanPriceValue->isVisible()&&ui->thanPriceValue->value()!=0.0)
+        if (!priceExact)
+            atPrice = ui->thanPriceType->currentText();
+
+        if (ui->thanPriceValue->isVisible() && ui->thanPriceValue->value() != 0.0)
         {
-            if(!priceExact)atPrice+=" "+ui->thanPricePlusMinus->currentText();
+            if (!priceExact)
+                atPrice += " " + ui->thanPricePlusMinus->currentText();
 
             QString sign;
             CurrencyPairItem pairItem;
-            pairItem=baseValues.currencyPairMap.value(comboCurrentData(ui->thanSymbol),pairItem);
-            if(!pairItem.symbolSecond().isEmpty())sign=pairItem.currBSign;
+            pairItem = baseValues.currencyPairMap.value(comboCurrentData(ui->thanSymbol), pairItem);
 
-            atPrice+=" "+sign+textFromDouble(ui->thanPriceValue->value(),8,0);
+            if (!pairItem.symbolSecond().isEmpty())
+                sign = pairItem.currBSign;
+
+            atPrice += " " + sign + textFromDouble(ui->thanPriceValue->value(), 8, 0);
         }
 
-        if(ui->thanPriceFee->currentIndex()>0)
+        if (ui->thanPriceFee->currentIndex() > 0)
         {
-            if(ui->thanPriceFee->currentIndex()==1)atPrice+=" + ";
-            else atPrice+=" - ";
-            atPrice+=julyTr("LOG_FEE","fee");
+            if (ui->thanPriceFee->currentIndex() == 1)
+                atPrice += " + ";
+            else
+                atPrice += " - ";
+
+            atPrice += julyTr("LOG_FEE", "fee");
         }
 
-        descriptionText+=" "+julyTr("AT","at %1").arg(atPrice);
+        descriptionText += " " + julyTr("AT", "at %1").arg(atPrice);
     }
-    QString grName=ui->thanText->text();
-    if(grName.isEmpty())grName=groupName;
-    if(ui->thanText->isVisible())descriptionText+=" ("+grName+")";
+
+    QString grName = ui->thanText->text();
+
+    if (grName.isEmpty())
+        grName = groupName;
+
+    if (ui->thanText->isVisible())
+        descriptionText += " (" + grName + ")";
 
     ui->descriptionText->setText(descriptionText);
 
-    RuleHolder holder=getRuleHolder();
+    RuleHolder holder = getRuleHolder();
     ui->scriptCodePreview->setPlainText(RuleScriptParser::holderToScript(holder));
 }
 
@@ -473,30 +559,38 @@ void AddRuleDialog::fixSizeWindow()
 
 void AddRuleDialog::fixSize(bool fitToWindow)
 {
-    if(fitToWindow)
+    if (fitToWindow)
     {
         mainWindow.fixAllChildButtonsAndLabels(this);
         setMinimumWidth(mainWindow.minimumSizeHint().width());
         setMinimumHeight(300);
     }
-    QSize preferedSize=minimumSizeHint();
-    if(pendingFix){pendingFix=false;fitToWindow=true;}
-    int minWidth=fitToWindow?(mainWindow.width()-20):0;
-    if(ui->scriptCodeGroupbox->isVisible())
-        resize(qMax(preferedSize.width(),minWidth),height());
+
+    QSize preferedSize = minimumSizeHint();
+
+    if (pendingFix)
+    {
+        pendingFix = false;
+        fitToWindow = true;
+    }
+
+    int minWidth = fitToWindow ? (mainWindow.width() - 20) : 0;
+
+    if (ui->scriptCodeGroupbox->isVisible())
+        resize(qMax(preferedSize.width(), minWidth), height());
     else
-    resize(qMax(preferedSize.width(),minWidth),qMax(preferedSize.height(),250));
+        resize(qMax(preferedSize.width(), minWidth), qMax(preferedSize.height(), 250));
 }
 
 void AddRuleDialog::on_variableA_currentIndexChanged(int)
 {
-    QString variableAType=comboCurrentData(ui->variableA);
+    QString variableAType = comboCurrentData(ui->variableA);
 
-    bool immediately=variableAType==QLatin1String("IMMEDIATELY");
-    bool tradeEvent=variableAType==QLatin1String("MyLastTrade")||variableAType==QLatin1String("LastTrade");
+    bool immediately = variableAType == QLatin1String("IMMEDIATELY");
+    bool tradeEvent = variableAType == QLatin1String("MyLastTrade") || variableAType == QLatin1String("LastTrade");
 
-    ui->whenValueGroupBox->setEnabled(!immediately&&!tradeEvent);
-    ui->comparation->setEnabled(!immediately&&!tradeEvent);
+    ui->whenValueGroupBox->setEnabled(!immediately && !tradeEvent);
+    ui->comparation->setEnabled(!immediately && !tradeEvent);
 
     ui->valueALabel->setVisible(!immediately);
     ui->valueASymbol->setVisible(!immediately);
@@ -505,8 +599,8 @@ void AddRuleDialog::on_variableA_currentIndexChanged(int)
 
 void AddRuleDialog::on_variableB_currentIndexChanged(int index)
 {
-    QString varBType=comboData(ui->variableB,index);
-    bool exact=varBType=="EXACT";
+    QString varBType = comboData(ui->variableB, index);
+    bool exact = varBType == "EXACT";
     ui->variableBplusMinus->setVisible(!exact);
     ui->variableBFee->setVisible(!exact);
     ui->modeFon->setVisible(!exact);
@@ -520,7 +614,8 @@ void AddRuleDialog::on_variableB_currentIndexChanged(int index)
 void AddRuleDialog::on_thanAmountPercent_toggled(bool checked)
 {
     ui->thanAmountPercentButton->setVisible(checked);
-    if(ui->thanAmountPercentButton->isVisible())
+
+    if (ui->thanAmountPercentButton->isVisible())
     {
         ui->thanAmount->setMaximum(200.0);
         ui->thanAmount->setMinimum(0.00000001);
@@ -530,23 +625,24 @@ void AddRuleDialog::on_thanAmountPercent_toggled(bool checked)
         ui->thanAmount->setMaximum(9999999999.9);
         ui->thanAmount->setMinimum(-9999999999.9);
     }
+
     fixSize();
 }
 
 void AddRuleDialog::on_thanType_currentIndexChanged(int index)
 {
-    currentThanType=comboData(ui->thanType,index);
-    bool trade=currentThanType=="TRADE";
-    bool noParams=currentThanType=="NOPARAM";
-    bool name=currentThanType=="NAME";
-    bool beep=currentThanType=="BEEP";
-    bool wav=currentThanType=="PLAY";
-    bool say=currentThanType=="SAY";
-    bool program=currentThanType=="PROGRAM";
+    currentThanType = comboData(ui->thanType, index);
+    bool trade = currentThanType == "TRADE";
+    bool noParams = currentThanType == "NOPARAM";
+    bool name = currentThanType == "NAME";
+    bool beep = currentThanType == "BEEP";
+    bool wav = currentThanType == "PLAY";
+    bool say = currentThanType == "SAY";
+    bool program = currentThanType == "PROGRAM";
 
-    ui->doubleValueFon->setVisible(!noParams&&trade);
-    ui->thanTextBrowse->setVisible(!noParams&&(wav||program));
-    ui->thanText->setVisible(!noParams&&(wav||program||name||say));
+    ui->doubleValueFon->setVisible(!noParams && trade);
+    ui->thanTextBrowse->setVisible(!noParams && (wav || program));
+    ui->thanText->setVisible(!noParams && (wav || program || name || say));
     ui->clearTextButton->setVisible(ui->thanText->isVisible());
     ui->nameLabel->setVisible(name);
     ui->thanSymbol->setVisible(trade);
@@ -554,82 +650,115 @@ void AddRuleDialog::on_thanType_currentIndexChanged(int index)
     ui->sayCode->setVisible(say);
     ui->sayLabelPlus->setVisible(say);
 
-    ui->playButton->setVisible(!noParams&&(wav||beep||say));
+    ui->playButton->setVisible(!noParams && (wav || beep || say));
 
     fixSize();
 
-    if(wav||program)on_thanTextBrowse_clicked();
+    if (wav || program)
+        on_thanTextBrowse_clicked();
 }
 
 void AddRuleDialog::on_playButton_clicked()
 {
-    if(currentThanType=="SAY")
+    if (currentThanType == "SAY")
     {
-        QString sayText=ui->thanText->text();
-        if(ui->sayCode->currentIndex()>0)
+        QString sayText = ui->thanText->text();
+
+        if (ui->sayCode->currentIndex() > 0)
         {
-            QString currentCode=comboCurrentData(ui->sayCode);
-            Q_FOREACH(QDoubleSpinBox *spin, usedSpinBoxes)
-                if(spin->whatsThis()==currentCode)
+            QString currentCode = comboCurrentData(ui->sayCode);
+
+            Q_FOREACH (QDoubleSpinBox* spin, usedSpinBoxes)
+                if (spin->whatsThis() == currentCode)
                 {
-                    int detectDoublePoint=0;
-                    if(detectDoublePoint==0)//If you reading this and know better solution, please tell me
+                    int detectDoublePoint = 0;
+
+                    if (detectDoublePoint == 0) //If you reading this and know better solution, please tell me
                     {
-                        bool decimalComma=QLocale().decimalPoint()==QChar(',');
-                        if(!decimalComma)decimalComma=QLocale().country()==QLocale::Ukraine||QLocale().country()==QLocale::RussianFederation;
-                        if(decimalComma)detectDoublePoint=2;
-                        else detectDoublePoint=1;
+                        bool decimalComma = QLocale().decimalPoint() == QChar(',');
+
+                        if (!decimalComma)
+                            decimalComma = QLocale().country() == QLocale::Ukraine || QLocale().country() == QLocale::RussianFederation;
+
+                        if (decimalComma)
+                            detectDoublePoint = 2;
+                        else
+                            detectDoublePoint = 1;
                     }
 
-                    QString number=textFromDouble(spin->value(),8,0);
-                    int crop=number.size()-1;
-                    while(crop>0&&number.at(crop)==QLatin1Char('0'))crop--;
-                    if(crop>0&&number.at(crop)==QLatin1Char('.'))crop--;
-                    if(crop>=0&&crop<number.size())number.resize(crop+1);
-                    if(detectDoublePoint==2)number.replace(QLatin1Char('.'),QLatin1Char(','));
+                    QString number = textFromDouble(spin->value(), 8, 0);
+                    int crop = number.size() - 1;
 
-                    sayText.append(" "+number);
+                    while (crop > 0 && number.at(crop) == QLatin1Char('0'))
+                        crop--;
+
+                    if (crop > 0 && number.at(crop) == QLatin1Char('.'))
+                        crop--;
+
+                    if (crop >= 0 && crop < number.size())
+                        number.resize(crop + 1);
+
+                    if (detectDoublePoint == 2)
+                        number.replace(QLatin1Char('.'), QLatin1Char(','));
+
+                    sayText.append(" " + number);
                 }
         }
+
         mainWindow.sayText(sayText);
     }
-    else
-    if(currentThanType=="BEEP")mainWindow.beep();
-    else
-    if(currentThanType=="PLAY")mainWindow.playWav(ui->thanText->text());
+    else if (currentThanType == "BEEP")
+        mainWindow.beep();
+    else if (currentThanType == "PLAY")
+        mainWindow.playWav(ui->thanText->text());
 }
 
 void AddRuleDialog::on_thanTextBrowse_clicked()
 {
-    QString lastRulesDir=mainWindow.iniSettings->value("UI/LastRulesPath",baseValues.desktopLocation).toString();
-    if(!QFile::exists(lastRulesDir))lastRulesDir=baseValues.desktopLocation;
+    QString lastRulesDir = mainWindow.iniSettings->value("UI/LastRulesPath", baseValues.desktopLocation).toString();
+
+    if (!QFile::exists(lastRulesDir))
+        lastRulesDir = baseValues.desktopLocation;
 
     QString description;
-    QString mask="*";
+    QString mask = "*";
 
-    if(currentThanType=="PLAY"){description=julyTr("PLAY_SOUND_WAV","Open WAV file");mask="*.wav";}
-    if(currentThanType=="PROGRAM"){description=julyTr("OPEN_ANY_FILE","Open any file");mask="*";}
+    if (currentThanType == "PLAY")
+    {
+        description = julyTr("PLAY_SOUND_WAV", "Open WAV file");
+        mask = "*.wav";
+    }
 
-    QString fileName=QFileDialog::getOpenFileName(this, description, lastRulesDir,"("+mask+")");
-    if(fileName.isEmpty())return;
-    mainWindow.iniSettings->setValue("UI/LastRulesPath",QFileInfo(fileName).dir().path());
+    if (currentThanType == "PROGRAM")
+    {
+        description = julyTr("OPEN_ANY_FILE", "Open any file");
+        mask = "*";
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(this, description, lastRulesDir, "(" + mask + ")");
+
+    if (fileName.isEmpty())
+        return;
+
+    mainWindow.iniSettings->setValue("UI/LastRulesPath", QFileInfo(fileName).dir().path());
     mainWindow.iniSettings->sync();
 
-    #ifdef Q_OS_WIN
-        fileName.replace("/","\\");
-    #endif
+#ifdef Q_OS_WIN
+    fileName.replace("/", "\\");
+#endif
 
     ui->thanText->setText(fileName);
 }
 
 void AddRuleDialog::on_thanPriceType_currentIndexChanged(int index)
 {
-    QString thanPriceType=comboData(ui->thanPriceType,index);
-    bool exactPrice=thanPriceType=="EXACT";
+    QString thanPriceType = comboData(ui->thanPriceType, index);
+    bool exactPrice = thanPriceType == "EXACT";
 
     ui->thanPricePlusMinus->setVisible(!exactPrice);
     ui->thanPricePercent->setVisible(!exactPrice);
-    if(ui->thanPricePercentButton->isVisible())
+
+    if (ui->thanPricePercentButton->isVisible())
     {
         ui->thanPriceValue->setMaximum(200.0);
         ui->thanPriceValue->setMinimum(0.00000001);
@@ -639,6 +768,7 @@ void AddRuleDialog::on_thanPriceType_currentIndexChanged(int index)
         ui->thanPriceValue->setMaximum(9999999999.9);
         ui->thanPriceValue->setMinimum(-9999999999.9);
     }
+
     ui->thanPriceFee->setVisible(!exactPrice);
 
     on_thanPricePercent_toggled(ui->thanPricePercent->isChecked());
@@ -647,8 +777,9 @@ void AddRuleDialog::on_thanPriceType_currentIndexChanged(int index)
 
 void AddRuleDialog::on_variableBPercent_toggled(bool checked)
 {
-    ui->variableBPercentButton->setVisible(checked&&ui->variableBPercent->isVisible());
-    if(ui->variableBPercentButton->isVisible())
+    ui->variableBPercentButton->setVisible(checked && ui->variableBPercent->isVisible());
+
+    if (ui->variableBPercentButton->isVisible())
     {
         ui->variableBExact->setMaximum(200.0);
         ui->variableBExact->setMinimum(0.00000001);
@@ -658,13 +789,15 @@ void AddRuleDialog::on_variableBPercent_toggled(bool checked)
         ui->variableBExact->setMaximum(9999999999.9);
         ui->variableBExact->setMinimum(-9999999999.9);
     }
+
     fixSize();
 }
 
 void AddRuleDialog::on_thanPricePercent_toggled(bool checked)
 {
     ui->thanPricePercentButton->setVisible(checked);
-    if(ui->thanPricePercentButton->isVisible())
+
+    if (ui->thanPricePercentButton->isVisible())
     {
         ui->thanPriceValue->setMaximum(200.0);
         ui->thanPriceValue->setMinimum(0.00000001);
@@ -674,33 +807,34 @@ void AddRuleDialog::on_thanPricePercent_toggled(bool checked)
         ui->thanPriceValue->setMaximum(9999999999.9);
         ui->thanPriceValue->setMinimum(-9999999999.9);
     }
+
     fixSize();
 }
 
 void AddRuleDialog::on_variableBPercentButton_clicked()
 {
-    PercentPicker *percentPicker=new PercentPicker(ui->variableBExact,100.0);
-    QPoint execPos=ui->whenValueGroupBox->mapToGlobal(ui->variableBPercentButton->geometry().center());
-    execPos.setX(execPos.x()-percentPicker->width()/2);
-    execPos.setY(execPos.y()-percentPicker->width());
+    PercentPicker* percentPicker = new PercentPicker(ui->variableBExact, 100.0);
+    QPoint execPos = ui->whenValueGroupBox->mapToGlobal(ui->variableBPercentButton->geometry().center());
+    execPos.setX(execPos.x() - percentPicker->width() / 2);
+    execPos.setY(execPos.y() - percentPicker->width());
     percentPicker->exec(execPos);
 }
 
 void AddRuleDialog::on_thanAmountPercentButton_clicked()
 {
-    PercentPicker *percentPicker=new PercentPicker(ui->thanAmount,100.0);
-    QPoint execPos=ui->actionGroupBox->mapToGlobal(ui->thanAmountPercentButton->geometry().center());
-    execPos.setX(execPos.x()-percentPicker->width()/2);
-    execPos.setY(execPos.y()-percentPicker->width());
+    PercentPicker* percentPicker = new PercentPicker(ui->thanAmount, 100.0);
+    QPoint execPos = ui->actionGroupBox->mapToGlobal(ui->thanAmountPercentButton->geometry().center());
+    execPos.setX(execPos.x() - percentPicker->width() / 2);
+    execPos.setY(execPos.y() - percentPicker->width());
     percentPicker->exec(execPos);
 }
 
 void AddRuleDialog::on_thanPricePercentButton_clicked()
 {
-    PercentPicker *percentPicker=new PercentPicker(ui->thanPriceValue,100.0);
-    QPoint execPos=ui->actionGroupBox->mapToGlobal(ui->thanPricePercentButton->geometry().center());
-    execPos.setX(execPos.x()-percentPicker->width()/2);
-    execPos.setY(execPos.y()-percentPicker->width());
+    PercentPicker* percentPicker = new PercentPicker(ui->thanPriceValue, 100.0);
+    QPoint execPos = ui->actionGroupBox->mapToGlobal(ui->thanPricePercentButton->geometry().center());
+    execPos.setX(execPos.x() - percentPicker->width() / 2);
+    execPos.setY(execPos.y() - percentPicker->width());
     percentPicker->exec(execPos);
 }
 
@@ -719,161 +853,188 @@ void AddRuleDialog::on_thanPriceFee_currentIndexChanged(int)
     fixSize();
 }
 
-void AddRuleDialog::on_thanText_textChanged(const QString &)
+void AddRuleDialog::on_thanText_textChanged(const QString&)
 {
     reCacheCode();
 }
 
 void AddRuleDialog::on_codePreview_toggled(bool checked)
 {
-    if(checked)
+    if (checked)
     {
-        ui->addRuleGroupBox->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Maximum);
+        ui->addRuleGroupBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
         setMaximumHeight(1280);
-        resize(width(),640);
+        resize(width(), 640);
         fixSize();
     }
     else
     {
-        ui->addRuleGroupBox->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+        ui->addRuleGroupBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         setMaximumHeight(600);
         fixSize();
     }
 }
 
-QString AddRuleDialog::comboData(QComboBox *list, int row)
+QString AddRuleDialog::comboData(QComboBox* list, int row)
 {
-    if(row<0||row>=list->count())return QLatin1String("");
+    if (row < 0 || row >= list->count())
+        return QLatin1String("");
+
     return list->itemData(row).toString();
 }
 
-QString AddRuleDialog::comboCurrentData(QComboBox *list)
+QString AddRuleDialog::comboCurrentData(QComboBox* list)
 {
-    return comboData(list,list->currentIndex());
+    return comboData(list, list->currentIndex());
 }
 
 void AddRuleDialog::on_buttonAddRule_clicked()
 {
-    RuleHolder holder=getRuleHolder();
+    RuleHolder holder = getRuleHolder();
 
-    if(!holder.isValid())
+    if (!holder.isValid())
     {
-        QMessageBox::warning(this,windowTitle(),julyTr("INVALID_RULE_VALUES","Values you entered is invalid"));
-        saveClicked=false;
+        QMessageBox::warning(this, windowTitle(), julyTr("INVALID_RULE_VALUES", "Values you entered is invalid"));
+        saveClicked = false;
         return;
     }
 
-    if(ruleIsEnabled)
+    if (ruleIsEnabled)
     {
-        QString code=RuleScriptParser::holderToScript(holder,true);
+        QString code = RuleScriptParser::holderToScript(holder, true);
         ScriptObject tempScript("Test");
-        tempScript.executeScript(code,true);
+        tempScript.executeScript(code, true);
         tempScript.stopScript();
 
-        ruleIsEnabled=tempScript.testResult!=1;
+        ruleIsEnabled = tempScript.testResult != 1;
     }
 
-    if(!baseValues.currentExchange_->multiCurrencyTradeSupport)
+    if (!baseValues.currentExchange_->multiCurrencyTradeSupport)
     {
-        QString currentSymbol=baseValues.currentPair.symbolSecond();
-        if(comboCurrentData(ui->valueASymbol)!=currentSymbol||comboCurrentData(ui->valueBSymbol)!=currentSymbol||comboCurrentData(ui->thanSymbol)!=currentSymbol)
+        QString currentSymbol = baseValues.currentPair.symbolSecond();
+
+        if (comboCurrentData(ui->valueASymbol) != currentSymbol || comboCurrentData(ui->valueBSymbol) != currentSymbol ||
+            comboCurrentData(ui->thanSymbol) != currentSymbol)
         {
-            QMessageBox::warning(this,windowTitle(),julyTr("RULE_MULTITRADE_NOTSUPPORTED","Warning. Multi currency trading is not supported yet.\nRule will works only with the same currency pair as current.\nSet up all symbols as current main currency."));
-            saveClicked=false;
+            QMessageBox::warning(this, windowTitle(), julyTr("RULE_MULTITRADE_NOTSUPPORTED",
+                                 "Warning. Multi currency trading is not supported yet.\nRule will works only with the same currency pair as current.\nSet up all symbols as current main currency."));
+            saveClicked = false;
             return;
         }
     }
-        accept();
+
+    accept();
 }
 
 void AddRuleDialog::on_buttonSaveRule_clicked()
 {
-    saveClicked=true;
+    saveClicked = true;
     on_buttonAddRule_clicked();
 }
 
 void AddRuleDialog::on_fillFromBuyPanel_clicked()
 {
-    QString tempSymbol=baseValues.currentPair.symbolSecond();
-    setComboIndexByData(ui->thanSymbol,tempSymbol);
+    QString tempSymbol = baseValues.currentPair.symbolSecond();
+    setComboIndexByData(ui->thanSymbol, tempSymbol);
     ui->thanPricePercent->setChecked(false);
     ui->thanPriceFee->setCurrentIndex(0);
     ui->thanType->setCurrentIndex(1);
-    ui->thanPriceType->setCurrentIndex(ui->thanPriceType->count()-1);
+    ui->thanPriceType->setCurrentIndex(ui->thanPriceType->count() - 1);
     ui->thanAmount->setValue(mainWindow.ui.buyTotalBtc->value());
     ui->thanPriceValue->setValue(mainWindow.ui.buyPricePerCoin->value());
 }
 
 void AddRuleDialog::on_fillFromSellPanel_clicked()
 {
-    QString tempSymbol=baseValues.currentPair.symbolSecond();
-    setComboIndexByData(ui->thanSymbol,tempSymbol);
+    QString tempSymbol = baseValues.currentPair.symbolSecond();
+    setComboIndexByData(ui->thanSymbol, tempSymbol);
     ui->thanPricePercent->setChecked(false);
     ui->thanPriceFee->setCurrentIndex(0);
     ui->thanType->setCurrentIndex(0);
-    ui->thanPriceType->setCurrentIndex(ui->thanPriceType->count()-1);
+    ui->thanPriceType->setCurrentIndex(ui->thanPriceType->count() - 1);
     ui->thanAmount->setValue(mainWindow.ui.sellTotalBtc->value());
     ui->thanPriceValue->setValue(mainWindow.ui.sellPricePerCoin->value());
 }
 
 void AddRuleDialog::on_valueBSymbol_currentIndexChanged(int index)
 {
-    QString symbol=ui->valueBSymbol->itemData(index).toString();
+    QString symbol = ui->valueBSymbol->itemData(index).toString();
 
     CurrencyPairItem pairItem;
-    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
-    if(pairItem.symbolSecond().isEmpty())return;
+    pairItem = baseValues.currencyPairMap.value(symbol, pairItem);
 
-    for(int n=0;n<ui->variableB->count();n++)
+    if (pairItem.symbolSecond().isEmpty())
+        return;
+
+    for (int n = 0; n < ui->variableB->count(); n++)
     {
-    QString scriptName=ui->variableB->itemData(n).toString();
-    if(!scriptName.startsWith("Balance"))continue;
+        QString scriptName = ui->variableB->itemData(n).toString();
 
-    QString translatedName=julyTranslator.translateString("INDICATOR_BALANCE",scriptName);
-    if(scriptName.startsWith("BalanceA"))translatedName=translatedName.arg(pairItem.currAStr); else
-    if(scriptName.startsWith("BalanceB"))translatedName=translatedName.arg(pairItem.currBStr);
-    ui->variableB->setItemText(n,translatedName);
+        if (!scriptName.startsWith("Balance"))
+            continue;
+
+        QString translatedName = julyTranslator.translateString("INDICATOR_BALANCE", scriptName);
+
+        if (scriptName.startsWith("BalanceA"))
+            translatedName = translatedName.arg(pairItem.currAStr);
+        else if (scriptName.startsWith("BalanceB"))
+            translatedName = translatedName.arg(pairItem.currBStr);
+
+        ui->variableB->setItemText(n, translatedName);
     }
 }
 
 void AddRuleDialog::on_thanSymbol_currentIndexChanged(int index)
 {
-    QString symbol=ui->thanSymbol->itemData(index).toString();
+    QString symbol = ui->thanSymbol->itemData(index).toString();
 
     CurrencyPairItem pairItem;
-    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
-    if(pairItem.symbolSecond().isEmpty())return;
+    pairItem = baseValues.currencyPairMap.value(symbol, pairItem);
 
-    ui->thanType->setItemText(0,julyTr("RULE_THAN_SELL","Sell %1").arg(pairItem.currAStr));
-    ui->thanType->setItemText(1,julyTr("RULE_THAN_BUY","Buy %1").arg(pairItem.currAStr));
-    ui->thanType->setItemText(2,julyTr("RULE_THAN_RECEIVE","Receive %1").arg(pairItem.currBStr));
-    ui->thanType->setItemText(3,julyTr("RULE_THAN_SPEND","Spend %1").arg(pairItem.currBStr));
+    if (pairItem.symbolSecond().isEmpty())
+        return;
+
+    ui->thanType->setItemText(0, julyTr("RULE_THAN_SELL", "Sell %1").arg(pairItem.currAStr));
+    ui->thanType->setItemText(1, julyTr("RULE_THAN_BUY", "Buy %1").arg(pairItem.currAStr));
+    ui->thanType->setItemText(2, julyTr("RULE_THAN_RECEIVE", "Receive %1").arg(pairItem.currBStr));
+    ui->thanType->setItemText(3, julyTr("RULE_THAN_SPEND", "Spend %1").arg(pairItem.currBStr));
 }
 
 void AddRuleDialog::on_valueASymbol_currentIndexChanged(int index)
 {
-    QString symbol=comboData(ui->valueASymbol,index);
+    QString symbol = comboData(ui->valueASymbol, index);
 
     CurrencyPairItem pairItem;
-    pairItem=baseValues.currencyPairMap.value(symbol,pairItem);
-    if(pairItem.symbolSecond().isEmpty())return;
+    pairItem = baseValues.currencyPairMap.value(symbol, pairItem);
 
-    for(int n=0;n<ui->variableA->count();n++)
+    if (pairItem.symbolSecond().isEmpty())
+        return;
+
+    for (int n = 0; n < ui->variableA->count(); n++)
     {
-    QString scriptName=comboData(ui->variableA,n);
-    if(!scriptName.startsWith("Balance"))continue;
+        QString scriptName = comboData(ui->variableA, n);
 
-    QString translatedName=julyTranslator.translateString("INDICATOR_BALANCE",scriptName);
-    if(scriptName.startsWith("BalanceA"))translatedName=translatedName.arg(pairItem.currAStr); else
-    if(scriptName.startsWith("BalanceB"))translatedName=translatedName.arg(pairItem.currBStr);
-    ui->variableA->setItemText(n,translatedName);
+        if (!scriptName.startsWith("Balance"))
+            continue;
+
+        QString translatedName = julyTranslator.translateString("INDICATOR_BALANCE", scriptName);
+
+        if (scriptName.startsWith("BalanceA"))
+            translatedName = translatedName.arg(pairItem.currAStr);
+        else if (scriptName.startsWith("BalanceB"))
+            translatedName = translatedName.arg(pairItem.currBStr);
+
+        ui->variableA->setItemText(n, translatedName);
     }
 }
 
 void AddRuleDialog::on_sayCode_currentIndexChanged(int index)
 {
-    if(!ui->sayCode->isVisible())return;
-    if(index==0)ui->thanText->setText("");
+    if (!ui->sayCode->isVisible())
+        return;
+
+    if (index == 0)
+        ui->thanText->setText("");
     else
-    ui->thanText->setText(ui->sayCode->itemText(index));
+        ui->thanText->setText(ui->sayCode->itemText(index));
 }

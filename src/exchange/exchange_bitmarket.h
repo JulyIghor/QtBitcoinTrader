@@ -36,55 +36,54 @@
 
 class Exchange_BitMarket : public Exchange
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey);
     ~Exchange_BitMarket();
 
 private:
-	bool isApiDown;
-	bool isReplayPending(int);
-    bool tickerOnly;
+    bool isApiDown;
+    bool isReplayPending(int);
 
-	int apiDownCounter;
-	int lastOpenedOrders;
+    int apiDownCounter;
+    int lastOpenedOrders;
 
-	JulyHttp *julyHttp;
+    JulyHttp* julyHttp;
 
-	qint64 lastFetchTid;
+    qint64 lastFetchTid;
 
-	QList<DepthItem> *depthAsks;
-	QList<DepthItem> *depthBids;
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
     QList<QByteArray> cancelingOrderIDs;
 
-	QMap<double,double> lastDepthAsksMap;
-	QMap<double,double> lastDepthBidsMap;
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 
-	QTime authRequestTime;
+    QTime authRequestTime;
 
-	quint32 lastPriceDate;
-	quint32 lastTickerDate;
+    quint32 lastPriceDate;
+    quint32 lastTickerDate;
     QByteArray lastTradesTid;
-	quint32 privateNonce;
+    quint32 privateNonce;
     quint32 lastHistoryId;
     quint32 lastHistoryCount;
 
-	void clearVariables();
-	void depthSubmitOrder(QString,QMap<double,double> *currentMap ,double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double,double,bool);
-    void sendToApi(int reqType, QByteArray method, bool auth=false, bool sendNow=true);
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true);
 private slots:
-	void reloadDepth();
-	void sslErrors(const QList<QSslError> &);
-	void dataReceivedAuth(QByteArray,int);
-	void secondSlot();
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
 public slots:
-	void clearValues();
-	void getHistory(bool);
-	void buy(QString, double, double);
-	void sell(QString, double, double);
-	void cancelOrder(QString, QByteArray);
+    void clearValues();
+    void getHistory(bool);
+    void buy(QString, double, double);
+    void sell(QString, double, double);
+    void cancelOrder(QString, QByteArray);
 };
 
 #endif // EXCHANGE_BITMARKET_H

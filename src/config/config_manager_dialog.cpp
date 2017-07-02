@@ -35,9 +35,9 @@
 
 
 ConfigManagerDialog::ConfigManagerDialog(QWidget* parent) :
-    QDialog      (parent),
-    ui           (new Ui::ConfigManagerDialog),
-    nameChanging (false)
+    QDialog(parent),
+    ui(new Ui::ConfigManagerDialog),
+    nameChanging(false)
 {
     ui->setupUi(this);
 
@@ -66,6 +66,7 @@ ConfigManagerDialog::~ConfigManagerDialog()
 void ConfigManagerDialog::onBtnConfigSave()
 {
     QString name = ui->editName->text();
+
     if (!::config->defaultNamesTr.contains(name))
     {
         ::config->save(name);
@@ -100,10 +101,12 @@ void ConfigManagerDialog::onNameTextChanged(const QString& text)
     ui->btnSave->setEnabled(!text.trimmed().isEmpty());
     nameChanging = true;
     selectNameInList(text);
+
     if (config->defaultNamesTr.contains(text))
     {
         ui->btnSave->setEnabled(false);
     }
+
     nameChanging = false;
 }
 

@@ -39,36 +39,36 @@
 
 class UpdaterDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	UpdaterDialog(bool feedbackMessage);
-	~UpdaterDialog();
+    explicit UpdaterDialog(bool feedbackMessage);
+    ~UpdaterDialog();
 
 private:
-	QByteArray getMidData(QString a, QString b,QByteArray *data);
-	bool downloaded100;
-	bool feedbackMessage;
-	QTimer *timeOutTimer;
+    QByteArray getMidData(QString a, QString b, QByteArray* data);
+    bool downloaded100;
+    bool feedbackMessage;
+    QTimer* timeOutTimer;
     void downloadError(int);
     void downloadErrorFile(int);
-	QString updateVersion;
-	QByteArray updateSignature;
+    QString updateVersion;
+    QByteArray updateSignature;
     QByteArray versionSignature;
-	QString updateChangeLog;
-	QString updateLink;
-	
-	int stateUpdate;
+    QString updateChangeLog;
+    QString updateLink;
+
+    int stateUpdate;
     bool autoUpdate;
-	JulyHttp *httpGet;
-    JulyHttp *httpGetFile;
-	Ui::UpdaterDialog ui;
+    JulyHttp* httpGet;
+    JulyHttp* httpGetFile;
+    Ui::UpdaterDialog ui;
 private slots:
-	void invalidData(bool);
-	void dataReceived(QByteArray,int);
-	void exitSlot();
-	void dataProgress(int);
-	void buttonUpdate();
+    void invalidData(bool);
+    void dataReceived(QByteArray, int);
+    void exitSlot();
+    void dataProgress(int);
+    void buttonUpdate();
 };
 
 #endif // UPDATERDIALOG_H

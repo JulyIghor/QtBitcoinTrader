@@ -34,21 +34,21 @@
 #include <QByteArray>
 #include <QString>
 
-struct OrderItem 
+struct OrderItem
 {
-	QByteArray oid;
-	quint32 date;
-	QString dateStr;
-	bool type;//true=Ask, false=Bid
-	int status;//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
+    QByteArray oid;
+    quint32 date;
+    QString dateStr;
+    bool type;//true=Ask, false=Bid
+    int status;//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
     double amount;
-	QString amountStr;
+    QString amountStr;
     double price;
-	QString priceStr;
+    QString priceStr;
     double total;
-	QString totalStr;
+    QString totalStr;
     QString symbol;
-	bool isValid();
+    bool isValid();
 };
 
 #endif // ORDERITEM_H
