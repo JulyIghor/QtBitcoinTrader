@@ -218,8 +218,6 @@ void Exchange::setupApi(QtBitcoinTrader* mainClass, bool tickOnly)//Execute only
 
     connect(this, SIGNAL(addLastTrades(QString, QList<TradesItem>*)), mainClass, SLOT(addLastTrades(QString,
             QList<TradesItem>*)));
-
-    start();
 }
 
 void Exchange::setApiKeySecret(QByteArray key, QByteArray secret)

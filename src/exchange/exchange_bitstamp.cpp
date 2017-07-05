@@ -121,7 +121,7 @@ void Exchange_Bitstamp::secondSlot()
 
         case 1:
             if (!isReplayPending(202))
-                sendToApi(202, "balance/", true, true);
+                sendToApi(202, "v2/balance/", true, true);
 
             break;
 
@@ -640,61 +640,61 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
             break;
 
         case 202: //balance
-        {
-            if (!success)
-                break;
-
-            if (data.startsWith("{\""))
             {
-                lastInfoReceived = true;
+                if (!success)
+                    break;
 
-                if (debugLevel)
-                    logThread->writeLog("Info: " + data);
-
-                double accFee = getMidData("\"fee\": \"", "\"", &data).toDouble();
-
-                if (accFee > 0.0)
+                if (data.startsWith("{\""))
                 {
-                    emit accFeeChanged(baseValues.currentPair.symbol, accFee);
-                    accountFee = accFee;
+                    lastInfoReceived = true;
+
+                    if (debugLevel)
+                        logThread->writeLog("Info: " + data);
+
+                    double accFee = getMidData("\"fee\": \"", "\"", &data).toDouble();
+
+                    if (accFee > 0.0)
+                    {
+                        emit accFeeChanged(baseValues.currentPair.symbol, accFee);
+                        accountFee = accFee;
+                    }
+
+                    QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "_available\": \"", "\"", &data);
+
+                    if (!btcBalance.isEmpty())
+                    {
+                        double newBtcBalance = btcBalance.toDouble();
+
+                        if (lastBtcBalance != newBtcBalance)
+                            emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
+
+                        lastBtcBalance = newBtcBalance;
+                    }
+
+                    QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "_available\": \"", "\"", &data);
+
+                    if (!usdBalance.isEmpty())
+                    {
+                        double newUsdBalance = usdBalance.toDouble();
+
+                        if (newUsdBalance != lastUsdBalance)
+                            emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
+
+                        lastUsdBalance = newUsdBalance;
+                    }
+
+                    static bool balanceSent = false;
+
+                    if (!balanceSent)
+                    {
+                        balanceSent = true;
+                        emit loginChanged(privateClientId);
+                    }
                 }
-
-                QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "_available\": \"", "\"", &data);
-
-                if (!btcBalance.isEmpty())
-                {
-                    double newBtcBalance = btcBalance.toDouble();
-
-                    if (lastBtcBalance != newBtcBalance)
-                        emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
-
-                    lastBtcBalance = newBtcBalance;
-                }
-
-                QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "_available\": \"", "\"", &data);
-
-                if (!usdBalance.isEmpty())
-                {
-                    double newUsdBalance = usdBalance.toDouble();
-
-                    if (newUsdBalance != lastUsdBalance)
-                        emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
-
-                    lastUsdBalance = newUsdBalance;
-                }
-
-                static bool balanceSent = false;
-
-                if (!balanceSent)
-                {
-                    balanceSent = true;
-                    emit loginChanged(privateClientId);
-                }
+                else if (debugLevel)
+                    logThread->writeLog("Invalid Info data:" + data, 2);
             }
-            else if (debugLevel)
-                logThread->writeLog("Invalid Info data:" + data, 2);
-        }
-        break;//balance
+            break;//balance
 
         case 204://open_orders
             if (!success)
@@ -752,22 +752,22 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
             break;//open_orders
 
         case 305: //cancel_order
-        {
-            if (!success)
-                break;
-
-            if (!cancelingOrderIDs.isEmpty())
             {
-                if (data == "true")
-                    emit orderCanceled(baseValues.currentPair.symbol, cancelingOrderIDs.first());
+                if (!success)
+                    break;
 
-                if (debugLevel)
-                    logThread->writeLog("Order canceled:" + cancelingOrderIDs.first(), 2);
+                if (!cancelingOrderIDs.isEmpty())
+                {
+                    if (data == "true")
+                        emit orderCanceled(baseValues.currentPair.symbol, cancelingOrderIDs.first());
 
-                cancelingOrderIDs.removeFirst();
+                    if (debugLevel)
+                        logThread->writeLog("Order canceled:" + cancelingOrderIDs.first(), 2);
+
+                    cancelingOrderIDs.removeFirst();
+                }
             }
-        }
-        break;//cancel_order
+            break;//cancel_order
 
         case 306: //order/buy
             if (!success || !debugLevel)
@@ -812,37 +812,18 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                     for (int n = 0; n < dataList.count(); n++)
                     {
                         HistoryItem currentHistoryItem;
-
                         QByteArray curLog(dataList.at(n).toLatin1());
-
+                        QByteArray currentPair = getMidData("\", \"", "\"", &curLog);
                         QString firstCurrency;
 
-                        if (curLog.indexOf("\"btc_eur\"") >= 0)
+                        if (currentPair.count() == 7)
                         {
-                            currentHistoryItem.price = getMidData("btc_eur\": ", ",", &curLog).toDouble();
-                            currentHistoryItem.symbol = "BTCEUR";
-                            firstCurrency = "btc";
+                            currentHistoryItem.price = getMidData(currentPair + "\": ", ",", &curLog).toDouble();
+                            currentHistoryItem.symbol = currentPair.remove(3, 1).toUpper();
+                            firstCurrency = currentPair.left(3);
                         }
                         else
-                        {
-                            if (curLog.indexOf("\"btc_usd\"") >= 0)
-                            {
-                                currentHistoryItem.price = getMidData("btc_usd\": ", ",", &curLog).toDouble();
-                                currentHistoryItem.symbol = "BTCUSD";
-                                firstCurrency = "btc";
-                            }
-                            else
-                            {
-                                if (curLog.indexOf("\"eur_usd\"") >= 0)
-                                {
-                                    currentHistoryItem.price = getMidData("eur_usd\": ", ",", &curLog).toDouble();
-                                    currentHistoryItem.symbol = "EURUSD";
-                                    firstCurrency = "eur";
-                                }
-                                else
-                                    continue;
-                            }
-                        }
+                            continue;
 
                         int logTypeInt = getMidData("\"type\": \"", "\"", &curLog).toInt();
                         QByteArray btcAmount = getMidData("\"" + firstCurrency + "\": \"", "\"", &curLog);

@@ -761,6 +761,7 @@ void QtBitcoinTrader::setupClass()
         on_widgetStaysOnTop_toggled(ui.widgetStaysOnTop->isChecked());
 
     currencyMenuChanged(currencyMenu->getCurrentIndex());
+    currentExchange->start();
 
     ui.buyPercentage->setMaximumWidth(ui.buyPercentage->height());
     ui.sellPercentage->setMaximumWidth(ui.sellPercentage->height());

@@ -119,5 +119,6 @@
         <file>Resources/Exchanges/Logos/YObit.png</file>
         <file>Resources/Exchanges/Logos/YObit_Big.png</file>
         <file>Resources/CurrencySign/IOT.png</file>
+        <file>Resources/CurrencySign/EOS.png</file>
     </qresource>
 </RCC>
