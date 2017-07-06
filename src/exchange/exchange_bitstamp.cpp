@@ -30,6 +30,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "exchange_bitstamp.h"
+#include "iniengine.h"
 #include <openssl/hmac.h>
 
 Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
@@ -814,15 +815,27 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                         HistoryItem currentHistoryItem;
                         QByteArray curLog(dataList.at(n).toLatin1());
                         QByteArray currentPair = getMidData("\", \"", "\"", &curLog);
-                        QString firstCurrency;
+                        QString firstCurrency = "";
 
-                        if (currentPair.count() == 7)
+                        for (int m = 0; m < IniEngine::getPairsCount(); ++m)
                         {
-                            currentHistoryItem.price = getMidData(currentPair + "\": ", ",", &curLog).toDouble();
-                            currentHistoryItem.symbol = currentPair.remove(3, 1).toUpper();
-                            firstCurrency = currentPair.left(3);
+                            QString request = IniEngine::getPairRequest(m).toLower();
+
+                            if (request.count() < 5)
+                                continue;
+
+                            request.insert(3, '_');
+
+                            if (currentPair.indexOf(request) != -1)
+                            {
+                                currentHistoryItem.price = getMidData(currentPair + "\": ", ",", &curLog).toDouble();
+                                currentHistoryItem.symbol = IniEngine::getPairSymbol(m);
+                                firstCurrency = request.left(request.indexOf('_'));
+                                break;
+                            }
                         }
-                        else
+
+                        if (firstCurrency.isEmpty())
                             continue;
 
                         int logTypeInt = getMidData("\"type\": \"", "\"", &curLog).toInt();

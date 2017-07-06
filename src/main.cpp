@@ -114,7 +114,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4001";
+    appVerStr = "1.4002";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -327,6 +327,55 @@ int main(int argc, char* argv[])
     baseValues.appThemeGray.loadTheme("Gray");
     baseValues.appTheme = baseValues.appThemeLight;
 
+    QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    settingsMain.beginGroup("Proxy");
+
+    bool proxyEnabled = settingsMain.value("Enabled", true).toBool();
+    bool proxyAuto = settingsMain.value("Auto", true).toBool();
+    QString proxyHost = settingsMain.value("Host", "127.0.0.1").toString();
+    quint16 proxyPort = settingsMain.value("Port", 1234).toInt();
+    QString proxyUser = settingsMain.value("User", "username").toString();
+    QString proxyPassword = settingsMain.value("Password", "password").toString();
+
+    QNetworkProxy::ProxyType proxyType;
+
+    if (settingsMain.value("Proxy/Type", "HttpProxy").toString() == "Socks5Proxy")
+        proxyType = QNetworkProxy::Socks5Proxy;
+    else
+        proxyType = QNetworkProxy::HttpProxy;
+
+    settingsMain.setValue("Enabled", proxyEnabled);
+    settingsMain.setValue("Auto", proxyAuto);
+    settingsMain.setValue("Host", proxyHost);
+    settingsMain.setValue("Port", proxyPort);
+    settingsMain.setValue("User", proxyUser);
+    settingsMain.setValue("Password", proxyPassword);
+
+    settingsMain.endGroup();
+
+    QNetworkProxy proxy;
+
+    if (proxyEnabled)
+    {
+        if (proxyAuto)
+        {
+            QList<QNetworkProxy> proxyList = QNetworkProxyFactory::systemProxyForQuery(QNetworkProxyQuery(QUrl("https://")));
+
+            if (proxyList.count())
+                proxy = proxyList.first();
+        }
+        else
+        {
+            proxy.setHostName(proxyHost);
+            proxy.setUser(proxyUser);
+            proxy.setPort(proxyPort);
+            proxy.setPassword(proxyPassword);
+            proxy.setType(proxyType);
+        }
+
+        QNetworkProxy::setApplicationProxy(proxy);
+    }
+
     if (argc > 1)
     {
         if (a.arguments().last().startsWith("/checkupdate"))
@@ -368,7 +417,6 @@ int main(int argc, char* argv[])
 
     a.setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
     {
-        QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
         baseValues.appVerLastReal = settingsMain.value("Version", 1.0).toDouble();
 
         if (baseValues.appVerLastReal != baseValues.appVerReal)
@@ -399,54 +447,6 @@ int main(int argc, char* argv[])
 
         a.setPalette(baseValues.appTheme.palette);
         a.setStyleSheet(baseValues.appTheme.styleSheet);
-
-        settingsMain.beginGroup("Proxy");
-
-        bool proxyEnabled = settingsMain.value("Enabled", true).toBool();
-        bool proxyAuto = settingsMain.value("Auto", true).toBool();
-        QString proxyHost = settingsMain.value("Host", "127.0.0.1").toString();
-        quint16 proxyPort = settingsMain.value("Port", 1234).toInt();
-        QString proxyUser = settingsMain.value("User", "username").toString();
-        QString proxyPassword = settingsMain.value("Password", "password").toString();
-
-        QNetworkProxy::ProxyType proxyType;
-
-        if (settingsMain.value("Proxy/Type", "HttpProxy").toString() == "Socks5Proxy")
-            proxyType = QNetworkProxy::Socks5Proxy;
-        else
-            proxyType = QNetworkProxy::HttpProxy;
-
-        settingsMain.setValue("Enabled", proxyEnabled);
-        settingsMain.setValue("Auto", proxyAuto);
-        settingsMain.setValue("Host", proxyHost);
-        settingsMain.setValue("Port", proxyPort);
-        settingsMain.setValue("User", proxyUser);
-        settingsMain.setValue("Password", proxyPassword);
-
-        settingsMain.endGroup();
-
-        QNetworkProxy proxy;
-
-        if (proxyEnabled)
-        {
-            if (proxyAuto)
-            {
-                QList<QNetworkProxy> proxyList = QNetworkProxyFactory::systemProxyForQuery(QNetworkProxyQuery(QUrl("https://")));
-
-                if (proxyList.count())
-                    proxy = proxyList.first();
-            }
-            else
-            {
-                proxy.setHostName(proxyHost);
-                proxy.setUser(proxyUser);
-                proxy.setPort(proxyPort);
-                proxy.setPassword(proxyPassword);
-                proxy.setType(proxyType);
-            }
-
-            QNetworkProxy::setApplicationProxy(proxy);
-        }
 
         settingsMain.beginGroup("Decimals");
         baseValues.decimalsAmountMyTransactions = settingsMain.value("AmountMyTransactions", 8).toInt();

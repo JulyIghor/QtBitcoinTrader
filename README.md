@@ -48,6 +48,12 @@ make && make install && make clean
 
 ## Change Log
 
+v1.40.02
+
+- Bitfinex support fixes
+- Secure auto update now works via Proxy
+
+
 v1.4
 
 - New Exchange YoBit.net

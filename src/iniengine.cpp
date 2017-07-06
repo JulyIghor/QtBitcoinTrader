@@ -395,6 +395,14 @@ QString IniEngine::getPairName(int index)
         return "";
 }
 
+QString IniEngine::getPairRequest(int index)
+{
+    if (index >= 0 && index < IniEngine::global()->exchangePairs.count())
+        return IniEngine::global()->exchangePairs.at(index).currRequestPair;
+    else
+        return "";
+}
+
 QString IniEngine::getPairSymbol(int index)
 {
     if (index >= 0 && index < IniEngine::global()->exchangePairs.count())

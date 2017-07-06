@@ -55,6 +55,7 @@ public:
     static void loadExchangeLock(QString, CurrencyPairItem&);
     static QList<CurrencyPairItem>* getPairs();
     static QString getPairName(int);
+    static QString getPairRequest(int);
     static QString getPairSymbol(int);
     static QString getPairSymbolSecond(int);
     static int getPairsCount();
