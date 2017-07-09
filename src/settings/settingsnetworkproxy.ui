@@ -531,10 +531,12 @@
   <tabstop>portLineEdit</tabstop>
   <tabstop>userLineEdit</tabstop>
   <tabstop>passwordLineEdit</tabstop>
+  <tabstop>typeComboBox</tabstop>
   <tabstop>apiDownCounterMaxSpinBox</tabstop>
   <tabstop>httpRetryCountSpinBox</tabstop>
   <tabstop>httpRequestsIntervalSpinBox</tabstop>
   <tabstop>httpRequestsTimeoutSpinBox</tabstop>
+  <tabstop>alternativeDomainBTCeCheckBox</tabstop>
  </tabstops>
  <resources/>
  <connections>

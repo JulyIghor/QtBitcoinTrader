@@ -526,6 +526,7 @@ GroupBox_SETTINGS_OTHER=Інші
 Label_SETTINGS_OPTIMIZE=Зменшення відступів між елементами інтерфейсу (після перезавантаження)
 Label_SETTINGS_HIDPI=HiDPI (після перезавантаження)
 Label_SETTINGS_DISABLE_PAIR_SYNC=Відключити синхронізацію пар при запуску програми
+Button_SETTINGS_FORCE_SYNC_PAIRS=Примусово синхронізувати пари після перезапуску
 Label_MS=мс
 
 Label_UPDATER_AGAIN_AUTO_UPDATE=Більше не питати, автоматично встановлювати оновлення:

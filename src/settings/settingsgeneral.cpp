@@ -49,6 +49,7 @@ SettingsGeneral::SettingsGeneral()
 
     ui.revertChangesButton->setEnabled(false);
     ui.saveButton->setEnabled(false);
+    ui.forceSyncPairsButton->setEnabled(QDir(appDataDir + "cache").entryList(QStringList("*.cache"), QDir::Files).count() != 0);
 
 #ifdef Q_OS_MAC
     ui.closeToTrayLabel->setVisible(false);
@@ -234,4 +235,14 @@ void SettingsGeneral::on_showTranslationButton_clicked()
 
     TranslationMessage translationMessage;
     translationMessage.exec();
+}
+
+void SettingsGeneral::on_forceSyncPairsButton_clicked()
+{
+    QStringList cacheFiles = QDir(appDataDir + "cache").entryList(QStringList("*.cache"), QDir::Files);
+
+    for (int i = 0; i < cacheFiles.count(); ++i)
+        QFile(appDataDir + "cache/" + cacheFiles.at(i)).remove();
+
+    ui.forceSyncPairsButton->setEnabled(false);
 }

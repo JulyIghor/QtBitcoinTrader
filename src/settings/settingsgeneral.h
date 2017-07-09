@@ -66,7 +66,7 @@ private slots:
     void on_restoreDefaultsButton_clicked();
     void anyValueChanged();
     void on_showTranslationButton_clicked();
-
+    void on_forceSyncPairsButton_clicked();
 };
 
 #endif // SETTINGSGENERAL_H

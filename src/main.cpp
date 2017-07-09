@@ -114,7 +114,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4002";
+    appVerStr = "1.4003";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)

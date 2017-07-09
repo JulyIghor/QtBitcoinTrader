@@ -162,6 +162,16 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QPushButton" name="forceSyncPairsButton">
+        <property name="accessibleName">
+         <string>SETTINGS_FORCE_SYNC_PAIRS</string>
+        </property>
+        <property name="text">
+         <string>Force synchronize pairs after restart</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -389,8 +399,14 @@
   <tabstop>checkForUpdatesCheckBox</tabstop>
   <tabstop>checkForUpdatesBetaCheckBox</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
+  <tabstop>disablePairSyncCheckBox</tabstop>
+  <tabstop>forceSyncPairsButton</tabstop>
   <tabstop>use24HourTimeFormatCheckBox</tabstop>
   <tabstop>timeSynchronizationCheckBox</tabstop>
+  <tabstop>confirmOpenOrderCheckBox</tabstop>
+  <tabstop>closeToTrayCheckBox</tabstop>
+  <tabstop>optimizeInterfaceCheckBox</tabstop>
+  <tabstop>hiDpiCheckBox</tabstop>
  </tabstops>
  <resources/>
  <connections>

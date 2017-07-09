@@ -527,6 +527,7 @@ GroupBox_SETTINGS_OTHER=Other
 Label_SETTINGS_OPTIMIZE=Reducing interface elements spacing (after restart)
 Label_SETTINGS_HIDPI=HiDPI (after restart)
 Label_SETTINGS_DISABLE_PAIR_SYNC=Disable currency pair synchronization at startup
+Button_SETTINGS_FORCE_SYNC_PAIRS=Force synchronize pairs after restart
 Label_MS=ms
 
 Label_UPDATER_AGAIN_AUTO_UPDATE=Don't ask again and automatically install updates:
