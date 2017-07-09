@@ -48,11 +48,12 @@ make && make install && make clean
 
 ## Change Log
 
-v1.40.02
+v1.40.03
 
 - Bitfinex support fixes
 - Secure auto update now works via Proxy
-
+- YoBit support fixes
+- Added button to force resync currencies
 
 v1.4
 
