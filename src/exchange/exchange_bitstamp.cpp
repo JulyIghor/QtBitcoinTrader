@@ -652,7 +652,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                     if (debugLevel)
                         logThread->writeLog("Info: " + data);
 
-                    double accFee = getMidData("\"fee\": \"", "\"", &data).toDouble();
+                    double accFee = getMidData(baseValues.currentPair.symbol.toLower() + "_fee\": \"", "\"", &data).toDouble();
 
                     if (accFee > 0.0)
                     {
@@ -814,55 +814,98 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                     {
                         HistoryItem currentHistoryItem;
                         QByteArray curLog(dataList.at(n).toLatin1());
-                        QByteArray currentPair = getMidData("\", \"", "\"", &curLog);
                         QString firstCurrency = "";
-
-                        for (int m = 0; m < IniEngine::getPairsCount(); ++m)
-                        {
-                            QString request = IniEngine::getPairRequest(m).toLower();
-
-                            if (request.count() < 5)
-                                continue;
-
-                            request.insert(3, '_');
-
-                            if (currentPair.indexOf(request) != -1)
-                            {
-                                currentHistoryItem.price = getMidData(currentPair + "\": ", ",", &curLog).toDouble();
-                                currentHistoryItem.symbol = IniEngine::getPairSymbol(m);
-                                firstCurrency = request.left(request.indexOf('_'));
-                                break;
-                            }
-                        }
-
-                        if (firstCurrency.isEmpty())
-                            continue;
-
-                        int logTypeInt = getMidData("\"type\": \"", "\"", &curLog).toInt();
-                        QByteArray btcAmount = getMidData("\"" + firstCurrency + "\": \"", "\"", &curLog);
-                        bool negativeAmount = btcAmount.startsWith("-");
-
-                        if (negativeAmount)
-                            btcAmount.remove(0, 1);
 
                         QDateTime orderDateTime = QDateTime::fromString(getMidData("\"datetime\": \"", "\"", &curLog), "yyyy-MM-dd HH:mm:ss");
                         orderDateTime.setTimeSpec(Qt::UTC);
+                        currentHistoryItem.dateTimeInt = orderDateTime.toTime_t();
 
-                        currentHistoryItem.volume = btcAmount.toDouble();
+                        int logTypeInt = getMidData("\"type\": \"", "\"", &curLog).toInt();
+                        QString bufferCurrency;
+                        QStringList bufferCurrencies;
+                        QList<CurrencyPairItem>* pairList = IniEngine::getPairs();
+                        double bufferVolume;
 
-                        if (logTypeInt == 0)
-                            currentHistoryItem.type = 4; //Deposit
-                        else if (logTypeInt == 1)
-                            currentHistoryItem.type = 5; //Withdrawal
+                        if (logTypeInt == 0 || logTypeInt == 1)
+                        {
+                            for (int m = 0; m < pairList->size(); ++m)
+                            {
+                                bufferCurrency = pairList->at(m).currAStrLow;
+
+                                if (!bufferCurrencies.contains(bufferCurrency))
+                                {
+                                    bufferCurrencies.append(bufferCurrency);
+                                    bufferVolume = getMidData("\"" + bufferCurrency + "\": \"", "\"", &curLog).toDouble();
+
+                                    if (bufferVolume)
+                                    {
+                                        bufferCurrency = bufferCurrency.toUpper();
+                                        currentHistoryItem.volume = bufferVolume;
+                                        currentHistoryItem.symbol = bufferCurrency + bufferCurrency;
+                                        break;
+                                    }
+                                }
+
+                                bufferCurrency = pairList->at(m).currBStrLow;
+
+                                if (!bufferCurrencies.contains(bufferCurrency))
+                                {
+                                    bufferCurrencies.append(bufferCurrency);
+                                    bufferVolume = getMidData("\"" + bufferCurrency + "\": \"", "\"", &curLog).toDouble();
+
+                                    if (bufferVolume)
+                                    {
+                                        bufferCurrency = bufferCurrency.toUpper();
+                                        currentHistoryItem.volume = bufferVolume;
+                                        currentHistoryItem.symbol = bufferCurrency + bufferCurrency;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (logTypeInt == 0)
+                                currentHistoryItem.type = 4; //Deposit
+                            else if (logTypeInt == 1)
+                                currentHistoryItem.type = 5; //Withdrawal
+                        }
                         else if (logTypeInt == 2) //Market Trade
                         {
+                            for (int m = 0; m < IniEngine::getPairsCount(); ++m)
+                            {
+                                QString request = IniEngine::getPairRequest(m).toLower();
+
+                                if (request.count() < 5)
+                                    continue;
+
+                                request.insert(3, '_');
+
+                                if (curLog.indexOf(request) != -1)
+                                {
+                                    currentHistoryItem.price = getMidData(request + "\": ", ",", &curLog).toDouble();
+                                    currentHistoryItem.symbol = IniEngine::getPairSymbol(m);
+                                    firstCurrency = request.left(request.indexOf('_'));
+                                    break;
+                                }
+                            }
+
+                            if (firstCurrency.isEmpty())
+                                continue;
+
+                            QByteArray btcAmount = getMidData("\"" + firstCurrency + "\": \"", "\"", &curLog);
+                            bool negativeAmount = btcAmount.startsWith("-");
+
+                            if (negativeAmount)
+                                btcAmount.remove(0, 1);
+
+                            currentHistoryItem.volume = btcAmount.toDouble();
+
                             if (negativeAmount)
                                 currentHistoryItem.type = 1; //Sell
                             else
                                 currentHistoryItem.type = 2; //Buy
                         }
-
-                        currentHistoryItem.dateTimeInt = orderDateTime.toTime_t();
+                        else
+                            break;
 
                         if (currentHistoryItem.isValid())
                             (*historyItems) << currentHistoryItem;
