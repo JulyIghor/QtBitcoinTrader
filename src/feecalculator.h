@@ -43,13 +43,9 @@ public:
     FeeCalculator();
     ~FeeCalculator();
 
-private:
-    bool buyPaidLocked;
-    bool buyBtcReceivedLocked;
-    bool buyBtcLocked;
-    Ui::FeeCalculator ui;
 public slots:
     void languageChanged();
+
 private slots:
     void on_singleInstance_toggled(bool);
     void setStaysOnTop(bool);
@@ -60,10 +56,25 @@ private slots:
     void buyTotalPaidChanged(double);
     void buyBtcReceivedChanged(double);
     void sellPriceChanged(double);
-    void sellAmountChanged(double);
-    void sellFiatReceived(double);
     void feeChanged(double);
 
+private:
+    double buy;
+    double buyPrice;
+    double buySum;
+    double buyFee;
+    double buyRez;
+    double sell;
+    double sellPrice;
+    double sellSum;
+    double sellFee;
+    double sellRez;
+    double fee;
+    bool locked;
+    Ui::FeeCalculator ui;
+
+    void buyCalc();
+    void sellCalc();
 };
 
 #endif // FEECALCULATOR_H

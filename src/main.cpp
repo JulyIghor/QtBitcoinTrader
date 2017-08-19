@@ -114,7 +114,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4004";
+    appVerStr = "1.4006";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -339,7 +339,7 @@ int main(int argc, char* argv[])
 
     QNetworkProxy::ProxyType proxyType;
 
-    if (settingsMain.value("Proxy/Type", "HttpProxy").toString() == "Socks5Proxy")
+    if (settingsMain.value("Type", "HttpProxy").toString() == "Socks5Proxy")
         proxyType = QNetworkProxy::Socks5Proxy;
     else
         proxyType = QNetworkProxy::HttpProxy;

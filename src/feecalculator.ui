@@ -1618,38 +1618,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>sellAmount</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>FeeCalculator</receiver>
-   <slot>sellAmountChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>449</x>
-     <y>103</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>790</x>
-     <y>113</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sellFiatReceived</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>FeeCalculator</receiver>
-   <slot>sellFiatReceived(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>732</x>
-     <y>99</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>790</x>
-     <y>180</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>feeValue</sender>
    <signal>valueChanged(double)</signal>
    <receiver>FeeCalculator</receiver>

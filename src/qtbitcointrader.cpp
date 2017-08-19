@@ -487,8 +487,8 @@ QtBitcoinTrader::QtBitcoinTrader() :
 
     if (debugLevel)
         windowTitleP.append(" [DEBUG MODE]");
-    else if (baseValues.appVerIsBeta)
-        windowTitleP.append(" [BETA]");
+    //else if (baseValues.appVerIsBeta)
+    //    windowTitleP.append(" [BETA]");
 
     windowWidget->setWindowTitle(windowTitleP);
 

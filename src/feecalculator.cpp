@@ -36,11 +36,9 @@
 #include "indicatorengine.h"
 
 FeeCalculator::FeeCalculator()
-    : QDialog()
+    : QDialog(),
+      locked(true)
 {
-    buyPaidLocked = false;
-    buyBtcLocked = true;
-    buyBtcReceivedLocked = false;
     ui.setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
     setWindowFlags(Qt::WindowCloseButtonHint);
@@ -53,15 +51,17 @@ FeeCalculator::FeeCalculator()
     mainWindow.fixDecimals(this);
 
     ui.feeValue->setValue(mainWindow.ui.accountFee->value());
+    fee = 1 - (ui.feeValue->value() / 100);
 
-    ui.buyPrice->setValue(IndicatorEngine::getValue(baseValues.exchangeName + '_' + baseValues.currentPair.symbol +
-                          "_Sell"));
-    double btcVal = mainWindow.getAvailableUSD() / ui.buyPrice->value();
+    buyPrice = IndicatorEngine::getValue(baseValues.exchangeName + '_' + baseValues.currentPair.symbol + "_Sell");
+    ui.buyPrice->setValue(buyPrice);
+    double btcVal = mainWindow.getAvailableUSD() / buyPrice;
 
     if (btcVal < baseValues.currentPair.tradeVolumeMin)
         btcVal = baseValues.currentPair.tradeVolumeMin;
 
-    ui.buyTotalBtc->setValue(btcVal);
+    buy = btcVal;
+    ui.buyTotalBtc->setValue(buy);
 
     ui.buyBtcLayout->addWidget(new JulySpinBoxPicker(ui.buyTotalBtc));
     ui.buyPriceLayout->addWidget(new JulySpinBoxPicker(ui.buyPrice));
@@ -70,11 +70,9 @@ FeeCalculator::FeeCalculator()
     ui.totalPaidLayout->addWidget(new JulySpinBoxPicker(ui.totalPaid));
     ui.receivedLayout->addWidget(new JulySpinBoxPicker(ui.btcReceived));
 
-    buyBtcLocked = false;
-    buyBtcChanged(ui.buyTotalBtc->value());
     setZeroProfitPrice();
-    buyBtcChanged(ui.buyTotalBtc->value());//I'll remove this soon
-    setZeroProfitPrice();//and this too
+    locked = false;
+    buyCalc();
 
     ui.singleInstance->setChecked(mainWindow.feeCalculatorSingleInstance);
 
@@ -129,7 +127,8 @@ void FeeCalculator::languageChanged()
 
 void FeeCalculator::setZeroProfitPrice()
 {
-    ui.sellPrice->setValue(ui.buyPrice->value()*mainWindow.floatFeeInc * mainWindow.floatFeeInc);
+    sellPrice = buyPrice / fee / fee;
+    ui.sellPrice->setValue(sellPrice);
 }
 
 void FeeCalculator::profitLossChanged(double val)
@@ -140,90 +139,107 @@ void FeeCalculator::profitLossChanged(double val)
         ui.profitLoss->setStyleSheet("QDoubleSpinBox {background: " + baseValues.appTheme.lightGreen.name() + ";}");
 }
 
-void FeeCalculator::buyBtcChanged(double)
+void FeeCalculator::buyCalc()
 {
-    ui.buyFee->setValue(ui.buyTotalBtc->value()*ui.feeValue->value() / 100);
+    buySum = buy * buyPrice;
+    buyRez = buy * fee;
+    buyFee = buy - buyRez;
 
-    if (buyBtcLocked)
-        return;
+    locked = true;
+    ui.totalPaid->setValue(buySum);
+    ui.buyFee->setValue(buyFee);
+    ui.btcReceived->setValue(buyRez);
+    locked = false;
 
-    buyBtcLocked = true;
-
-    buyPaidLocked = true;
-    ui.totalPaid->setValue(ui.buyTotalBtc->value()*ui.buyPrice->value());
-    buyPaidLocked = false;
-
-    buyBtcReceivedLocked = true;
-    ui.btcReceived->setValue(ui.buyTotalBtc->value() - ui.buyFee->value());
-    buyBtcReceivedLocked = false;
-
-    buyBtcLocked = false;
+    sellCalc();
 }
 
-void FeeCalculator::buyPriceChanged(double)
+void FeeCalculator::buyBtcChanged(double val)
 {
-    buyBtcChanged(ui.buyTotalBtc->value());
-}
-
-void FeeCalculator::buyTotalPaidChanged(double)
-{
-    ui.buyFee->setValue(ui.buyTotalBtc->value()*ui.feeValue->value() / 100);
-    ui.profitLoss->setValue(ui.sellFiatReceived->value() - ui.totalPaid->value());
-
-    if (buyPaidLocked)
+    if (locked)
         return;
 
-    buyPaidLocked = true;
+    buy = val;
+    buyCalc();
+}
 
-    buyBtcLocked = true;
-    ui.buyTotalBtc->setValue(ui.totalPaid->value() / ui.buyPrice->value());
-    buyBtcLocked = false;
+void FeeCalculator::buyPriceChanged(double val)
+{
+    if (locked)
+        return;
 
-    buyBtcReceivedLocked = true;
-    ui.btcReceived->setValue(ui.buyTotalBtc->value() - ui.buyFee->value());
-    buyBtcReceivedLocked = false;
+    buyPrice = val;
+    buySum = buy * buyPrice;
 
-    buyPaidLocked = false;
+    locked = true;
+    ui.totalPaid->setValue(buySum);
+    locked = false;
+}
+
+void FeeCalculator::buyTotalPaidChanged(double val)
+{
+    if (locked)
+        return;
+
+    buySum = val;
+    buy = buySum / buyPrice;
+    buyRez = buy * fee;
+    buyFee = buy - buyRez;
+
+    locked = true;
+    ui.buyTotalBtc->setValue(buy);
+    ui.buyFee->setValue(buyFee);
+    ui.btcReceived->setValue(buyRez);
+    locked = false;
+
+    sellCalc();
 }
 
 void FeeCalculator::buyBtcReceivedChanged(double val)
 {
-    ui.sellAmount->setValue(val * ui.sellPrice->value());
-    ui.sellFiatReceived->setValue(ui.sellAmount->value() - ui.sellFee->value());
-    ui.sellBtc->setValue(val);
-
-    if (buyBtcReceivedLocked)
+    if (locked)
         return;
 
-    buyBtcReceivedLocked = true;
+    buyRez = val;
+    buy = buyRez / fee;
+    buySum = buy * buyPrice;
+    buyFee = buy - buyRez;
 
-    buyBtcLocked = true;
-    ui.buyTotalBtc->setValue(ui.btcReceived->value() + ui.feeValue->value()*ui.btcReceived->value() / 100);
-    buyBtcLocked = false;
+    locked = true;
+    ui.buyTotalBtc->setValue(buy);
+    ui.totalPaid->setValue(buySum);
+    ui.buyFee->setValue(buyFee);
+    locked = false;
 
-    buyPaidLocked = true;
-    ui.totalPaid->setValue(ui.buyTotalBtc->value()*ui.buyPrice->value());
-    buyPaidLocked = false;
-
-    buyBtcReceivedLocked = false;
+    sellCalc();
 }
 
-void FeeCalculator::sellPriceChanged(double)
+void FeeCalculator::sellCalc()
 {
-    buyBtcReceivedChanged(ui.sellBtc->value());
+    sell = buyRez;
+    sellSum = sell * sellPrice;
+    sellRez = sellSum * fee;
+    sellFee = sellSum - sellRez;
+
+    ui.sellBtc->setValue(sell);
+    ui.sellAmount->setValue(sellSum);
+    ui.sellFee->setValue(sellFee);
+    ui.sellFee->setValue(sellFee);
+    ui.sellFiatReceived->setValue(sellRez);
+    ui.profitLoss->setValue(sellRez - buySum);
 }
 
-void FeeCalculator::sellAmountChanged(double)
+void FeeCalculator::sellPriceChanged(double val)
 {
-    ui.sellFee->setValue(ui.sellAmount->value()*ui.feeValue->value() / 100);
+    if (locked)
+        return;
+
+    sellPrice = val;
+    sellCalc();
 }
 
-void FeeCalculator::sellFiatReceived(double)
+void FeeCalculator::feeChanged(double val)
 {
-    ui.profitLoss->setValue(ui.sellFiatReceived->value() - ui.totalPaid->value());
-}
-
-void FeeCalculator::feeChanged(double)
-{
-    buyBtcChanged(ui.buyTotalBtc->value());
+    fee = 1 - (val / 100);
+    buyCalc();
 }

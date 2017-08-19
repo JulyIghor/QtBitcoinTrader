@@ -120,5 +120,11 @@
         <file>Resources/Exchanges/Logos/YObit_Big.png</file>
         <file>Resources/CurrencySign/IOT.png</file>
         <file>Resources/CurrencySign/EOS.png</file>
+        <file>Resources/CurrencySign/BCH.png</file>
+        <file>Resources/CurrencySign/OMG.png</file>
+        <file>Resources/CurrencySign/SAN.png</file>
+        <file>Resources/CurrencySign/SIB.png</file>
+        <file>Resources/CurrencySign/BCC.png</file>
+        <file>Resources/CurrencySign/BCU.png</file>
     </qresource>
 </RCC>
