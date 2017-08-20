@@ -7,7 +7,13 @@ LANGUAGE	= C++
 DEPENDPATH	+= .
 INCLUDEPATH	+= .
 
-CONFIG	+= qt release c++11
+CONFIG	+= qt c++11
+
+CONFIG(debug, debug|release) {
+    BUILD_TYPE=debug
+} else {
+    BUILD_TYPE=release
+}
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
 !win32 { TARGET = QtBitcoinTrader }
@@ -18,9 +24,16 @@ QT += network script widgets
 win32 {
     win32-g++ {
         LIBS += -lws2_32 -lole32 -lwinmm -lgdi32
+        LIBS += -llibcrypto -llibssl -lz
     }
 
-    LIBS += -llibcrypto -llibssl -lz
+    win32-msvc* {
+        QMAKE_CFLAGS_RELEASE += /Zi
+        QMAKE_LFLAGS_RELEASE += /MAP
+        QMAKE_LFLAGS_RELEASE += /debug /opt:ref
+
+        LIBS += -llibcrypto -llibssl -lz
+    }
 
     exists($$(WINDOWSSDKDIR)/Include/um/sapi.h){
         QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
