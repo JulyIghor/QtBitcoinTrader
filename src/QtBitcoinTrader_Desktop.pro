@@ -16,7 +16,11 @@ QT += network script widgets
 !win32 { QT += multimedia }
 
 win32 {
-    LIBS += -llibcrypto -llibssl -lz  #for mingw add: -lws2_32 -lole32 -lwinmm -lgdi32
+    win32-g++ {
+        LIBS += -lws2_32 -lole32 -lwinmm -lgdi32
+    }
+
+    LIBS += -llibcrypto -llibssl -lz
 
     exists($$(WINDOWSSDKDIR)/Include/um/sapi.h){
         QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
