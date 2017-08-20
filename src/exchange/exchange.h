@@ -53,6 +53,46 @@ class Exchange : public QThread
     Q_OBJECT
 
 public:
+    enum RequestType {
+        rtUnknown         = 0,
+        rtTicker          = 103,
+        rtTrades          = 109,
+        rtFee             = 110,
+        rtDepth           = 111,
+
+        rtGetRequestFirst = 199,
+        rtBalance         = 202,
+        rtOrderList       = 204,
+        rtHistory         = 208,
+        rtGetRequestLast  = 298,
+
+        rtSetRequestFirst = 299,
+        rtOrderCancel     = 305,
+        rtOrderBuy        = 306,
+        rtOrderSell       = 307,
+        rtSetRequestLast  = 398,
+    };
+
+    bool isPubRequest(RequestType type)
+    {
+        return (type < rtGetRequestFirst);
+    }
+
+    bool isGetRequest(RequestType type)
+    {
+        return (type > rtGetRequestFirst && type < rtGetRequestLast);
+    }
+
+    bool isSetRequest(RequestType type)
+    {
+        return (type > rtSetRequestFirst && type < rtSetRequestLast);
+    }
+
+    bool isAuthRequest(RequestType type)
+    {
+        return isGetRequest(type) || isSetRequest(type);
+    }
+
     bool exchangeDisplayOnlyCurrentPairOpenOrders;
     bool clearHistoryOnCurrencyChanged;
     bool exchangeTickerSupportsHiLowPrices;
