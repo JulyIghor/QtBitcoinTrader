@@ -11,8 +11,10 @@ CONFIG	+= qt c++11
 
 CONFIG(debug, debug|release) {
     BUILD_TYPE=debug
+    LIB_SUFFIX=d
 } else {
     BUILD_TYPE=release
+    LIB_SUFFIX=
 }
 
  win32 { TARGET = ../Bin/QtBitcoinTrader }
@@ -32,7 +34,28 @@ win32 {
         QMAKE_LFLAGS_RELEASE += /MAP
         QMAKE_LFLAGS_RELEASE += /debug /opt:ref
 
-        LIBS += -llibcrypto -llibssl -lz
+        LIBRESSL_PRJ_DIR = $${PWD}/../../libressl
+        OPENSSL_PRJ_DIR = $${PWD}/../../openssl
+        ZLIB_PRJ_DIR = $${PWD}/../../zlib
+
+        exists($${OPENSSL_PRJ_DIR}/lib/libeay32MT.lib) {
+            INCLUDEPATH += $${OPENSSL_PRJ_DIR}/include
+            LIBS += -L"$${OPENSSL_PRJ_DIR}/lib"
+            LIBS += -llibeay32MT$${LIB_SUFFIX} -lssleay32MT$${LIB_SUFFIX}
+            LIBS += -luser32 -lws2_32 -lole32 -lwinmm -lgdi32 -ladvapi32
+        } else {
+            INCLUDEPATH += $${LIBRESSL_PRJ_DIR}/include
+            LIBS += -llibcrypto -llibssl
+        }
+
+        exists($${ZLIB_PRJ_DIR}/contrib/vstudio/vc14/zlibstat.vcxproj) {
+            DEFINES += ZLIB_WINAPI
+            INCLUDEPATH += $${ZLIB_PRJ_DIR}
+            LIBS += -L"$${ZLIB_PRJ_DIR}/contrib/vstudio/vc14/x86/ZlibStat$${BUILD_TYPE}"
+            LIBS += -lzlibstat
+        } else {
+            LIBS += lz
+        }
     }
 
     exists($$(WINDOWSSDKDIR)/Include/um/sapi.h){
