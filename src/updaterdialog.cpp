@@ -81,6 +81,11 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
         }
     }
 
+    if (settings.value("CheckAppUpdate", true).toBool() == false) {
+        timeOutTimer->start(60000);
+        return;
+    }
+
     if (updateCheckRetryCount > 3)
         httpGet = new JulyHttp("api.qtbitcointrader.com", 0, this, false, false);
     else
