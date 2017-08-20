@@ -160,6 +160,14 @@ int NewPasswordDialog::difficulty(QString pass, bool* resive_PasswordIsGood, QSt
     qint32 diff = 0UL;                      // Difficulty level
     qint32 passLength = pass.length();  // Password length
 
+    QSettings settingsMain(appCfgFileName, QSettings::IniFormat);
+    bool checkPasswordDifficulty = settingsMain.value("CheckPasswordDifficulty", true).toBool();
+    if (passLength && !checkPasswordDifficulty) {
+        *resive_PasswordIsGood = true;
+        *resive_Message = "";
+        return 9999;
+    }
+
     if (passLength)
     {
         static QString allowedPassChars = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
