@@ -36,6 +36,19 @@
 
 struct OrderItem
 {
+    enum Type {
+        otBid = 0,
+        otAsk,
+    };
+
+    enum Status {
+        osCanceled = 0,
+        osOpen,
+        osPending,
+        osPostPending,
+        osClosed,
+    };
+
     QByteArray oid;
     quint32 date;
     QString dateStr;
@@ -48,7 +61,28 @@ struct OrderItem
     double total;
     QString totalStr;
     QString symbol;
+
     bool isValid();
+
+    OrderItem::Type getType()
+    {
+        return type ? otAsk : otBid;
+    }
+
+    void setType(OrderItem::Type orderType)
+    {
+        type = (orderType == otAsk) ? true : false;
+    }
+
+    OrderItem::Status getStatus()
+    {
+        return (Status)status;
+    }
+
+    void setStatus(OrderItem::Status orderStatus)
+    {
+        status = (int)orderStatus;
+    }
 };
 
 #endif // ORDERITEM_H
