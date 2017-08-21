@@ -57,14 +57,14 @@ PasswordDialog::PasswordDialog(QWidget* parent)
 
     QMap<int, QString> logosMap;
 
-    if (!JulyRSA::isIniFileSigned(":/Resources/Exchanges/List.ini"))
+    if (resDataDir.startsWith(':') && !JulyRSA::isIniFileSigned(resDataDir + "/Exchanges/List.ini"))
     {
         QMessageBox::warning(0, windowTitle(),
                              julyTr("PROGRAM_CORRUPTED", "The program is corrupted. Download from the official site https://centrabit.com."));
         exit(0);
     }
 
-    QSettings listSettings(":/Resources/Exchanges/List.ini", QSettings::IniFormat);
+    QSettings listSettings(resDataDir + "/Exchanges/List.ini", QSettings::IniFormat);
     QStringList exchangesList = listSettings.childGroups();
 
     for (int n = 0; n < exchangesList.count(); n++)
@@ -74,7 +74,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
         if (currentLogo.isEmpty())
             continue;
 
-        logosMap.insert(exchangesList.at(n).toInt(), ":/Resources/Exchanges/Logos/" + currentLogo);
+        logosMap.insert(exchangesList.at(n).toInt(), resDataDir + "/Exchanges/Logos/" + currentLogo);
     }
 
     QStringList scriptsOldPlace = QDir(baseValues.scriptFolder).entryList(QStringList() << "*.JLR" << "*.JLS");
@@ -144,7 +144,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
         QString currentLogo = logosMap.value(currentProfileExchangeId);
 
         if (!QFile::exists(currentLogo))
-            currentLogo = ":/Resources/Exchanges/Logos/Unknown.png";
+            currentLogo = resDataDir + "/Exchanges/Logos/Unknown.png";
 
         ui.profileComboBox->addItem(QIcon(currentLogo), settIni.value("Profile/Name",
                                     QFileInfo(settingsList.at(n)).fileName()).toString(), settingsList.at(n));

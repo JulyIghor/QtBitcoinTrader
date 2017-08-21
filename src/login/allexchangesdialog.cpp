@@ -46,7 +46,7 @@ AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum)
     if (featuredExchangesNum == -3)
         ui.backButton->hide();
 
-    QSettings listSettings(":/Resources/Exchanges/List.ini", QSettings::IniFormat);
+    QSettings listSettings(resDataDir + "/Exchanges/List.ini", QSettings::IniFormat);
     QStringList exchangesList = listSettings.childGroups();
 
     allExchangesModel = new AllExchangesModel;
@@ -102,7 +102,7 @@ void AllExchangesDialog::on_exchangesTableView_doubleClicked()
 QString AllExchangesDialog::loadCurrencies(QString name)
 {
     QString nameIni = name.remove(" ").remove("-").remove(".");
-    QSettings listSettings(":/Resources/Exchanges/" + nameIni + ".ini", QSettings::IniFormat);
+    QSettings listSettings(resDataDir + "/Exchanges/" + nameIni + ".ini", QSettings::IniFormat);
     QStringList exchangesList = listSettings.childGroups();
     QString currencies = "";
     QString currencies12, currencies1, currencies2;

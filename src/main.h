@@ -40,6 +40,7 @@
 #define debugLevel (logThread)
 #define appDataDir (baseValues_->appDataDir_)
 #define appCfgFileName (baseValues_->appCfgFileName_)
+#define resDataDir (baseValues_->resDataDir_)
 #define grouped (baseValues_->groupPriceValue>0.0?2:0)
 #define mainWindow (*baseValues_->mainWindow_)
 #define logThread (baseValues_->logThread_)
@@ -119,6 +120,7 @@ struct BaseValues
     JulyTranslator julyTranslator_;
     QString appDataDir_;
     QString appCfgFileName_;
+    QString resDataDir_;
     QByteArray appVerStr;
     LogThread* logThread_;
     QByteArray restKey;

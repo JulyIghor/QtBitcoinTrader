@@ -30,6 +30,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "exchangebutton.h"
+#include "main.h"
 
 ExchangeButton::ExchangeButton(QString logo, QString currencies, QString url, qint32 num,
                                FeaturedExchangesDialog* toParrentForm)
@@ -75,7 +76,7 @@ void ExchangeButton::mouseDoubleClickEvent(QMouseEvent* event)
 
 void ExchangeButton::setLogo(QString logo)
 {
-    ui.imageLabel->setPixmap(QPixmap(":/Resources/Exchanges/Logos/" + logo));
+    ui.imageLabel->setPixmap(QPixmap(resDataDir + "/Exchanges/Logos/" + logo));
     ui.imageLabel->setFixedSize(180, 50);
 }
 

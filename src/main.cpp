@@ -377,6 +377,12 @@ int main(int argc, char* argv[])
         QNetworkProxy::setApplicationProxy(proxy);
     }
 
+    if (settingsMain.value("UseExternalRes", false).toBool()) {
+        resDataDir = appDataDir;
+    } else {
+        resDataDir = ":/Resources";
+    }
+
     if (argc > 1)
     {
         if (a.arguments().last().startsWith("/checkupdate"))
