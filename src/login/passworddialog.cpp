@@ -50,21 +50,21 @@ PasswordDialog::PasswordDialog(QWidget* parent)
     setWindowFlags(Qt::WindowCloseButtonHint);
     ui.okButton->setEnabled(false);
 
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settings(appCfgFileName, QSettings::IniFormat);
     QString lastProfile = settings.value("LastProfile", "").toString();
     int lastProfileIndex = -1;
     int firstUnlockedProfileIndex = -1;
 
     QMap<int, QString> logosMap;
 
-    if (!JulyRSA::isIniFileSigned(":/Resources/Exchanges/List.ini"))
+    if (resDataDir.startsWith(':') && !JulyRSA::isIniFileSigned(resDataDir + "/Exchanges/List.ini"))
     {
         QMessageBox::warning(0, windowTitle(),
                              julyTr("PROGRAM_CORRUPTED", "The program is corrupted. Download from the official site https://centrabit.com."));
         exit(0);
     }
 
-    QSettings listSettings(":/Resources/Exchanges/List.ini", QSettings::IniFormat);
+    QSettings listSettings(resDataDir + "/Exchanges/List.ini", QSettings::IniFormat);
     QStringList exchangesList = listSettings.childGroups();
 
     for (int n = 0; n < exchangesList.count(); n++)
@@ -74,7 +74,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
         if (currentLogo.isEmpty())
             continue;
 
-        logosMap.insert(exchangesList.at(n).toInt(), ":/Resources/Exchanges/Logos/" + currentLogo);
+        logosMap.insert(exchangesList.at(n).toInt(), resDataDir + "/Exchanges/Logos/" + currentLogo);
     }
 
     QStringList scriptsOldPlace = QDir(baseValues.scriptFolder).entryList(QStringList() << "*.JLR" << "*.JLS");
@@ -144,7 +144,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
         QString currentLogo = logosMap.value(currentProfileExchangeId);
 
         if (!QFile::exists(currentLogo))
-            currentLogo = ":/Resources/Exchanges/Logos/Unknown.png";
+            currentLogo = resDataDir + "/Exchanges/Logos/Unknown.png";
 
         ui.profileComboBox->addItem(QIcon(currentLogo), settIni.value("Profile/Name",
                                     QFileInfo(settingsList.at(n)).fileName()).toString(), settingsList.at(n));
@@ -238,7 +238,7 @@ bool PasswordDialog::isProfileLocked(QString name)
 
 void PasswordDialog::accept()
 {
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settings(appCfgFileName, QSettings::IniFormat);
     int currIndex = ui.profileComboBox->currentIndex();
 
     if (currIndex >= 0)
@@ -296,7 +296,7 @@ void PasswordDialog::on_descriptionGroupBox_toggled(bool)
 {
     ui.descriptionGroupBox->setVisible(false);
 
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settings(appCfgFileName, QSettings::IniFormat);
     settings.setValue("HidePasswordDescription", true);
 
     QSize minSizeHint = minimumSizeHint();

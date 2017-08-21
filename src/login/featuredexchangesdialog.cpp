@@ -38,6 +38,7 @@
 #include "julyhttp.h"
 #include <QTimer>
 #include "ui_featuredexchangesdialog.h"
+#include "main.h"
 
 FeaturedExchangesDialog::FeaturedExchangesDialog() :
     QDialog(),
@@ -50,10 +51,10 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
     setWindowTitle("Qt Bitcoin Trader v" + baseValues.appVerStr + " - " + julyTr("FEATURED_EXCHANGES",
                    "Featured Exchanges"));
 
-    QSettings listSettings(":/Resources/Exchanges/List.ini", QSettings::IniFormat);
+    QSettings listSettings(resDataDir + "/Exchanges/List.ini", QSettings::IniFormat);
     allExchangesList = listSettings.childGroups();
 
-    {
+    if (resDataDir.startsWith(':')) {
         JulyHttp* httpGet = new JulyHttp("qbtapi.centrabit.com", 0, this, true, false);
         connect(httpGet, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceived(QByteArray, int)));
         httpGet->secondTimer->stop();
@@ -78,6 +79,11 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
         delete httpGet;
         featuredExchangesList = QString(mainWindow.getMidData("Exchanges\":[", "]", &cacheData)).split(",");
         cacheData.clear();
+    } else {
+        featuredExchangesList.clear();
+        for (int n = 0; n < allExchangesList.count(); n++) {
+            featuredExchangesList.append(QString().sprintf("%d", n));
+        }
     }
 
     for (int n = featuredExchangesList.count() - 1; n >= 0; n--)
@@ -88,12 +94,12 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
 
     if (featuredExchangesList.isEmpty())
     {
-        QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+        QSettings settings(appCfgFileName, QSettings::IniFormat);
         featuredExchangesList = settings.value("LastFeaturedExchanges", featuredExchangesList).toStringList();
     }
     else
     {
-        QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+        QSettings settings(appCfgFileName, QSettings::IniFormat);
         settings.setValue("LastFeaturedExchanges", featuredExchangesList);
     }
 
@@ -184,7 +190,7 @@ void FeaturedExchangesDialog::removeNotValidExchanges()
 QString FeaturedExchangesDialog::loadCurrencies(QString name)
 {
     QString nameIni = name.remove(" ").remove("-").remove(".");
-    QSettings listSettings(":/Resources/Exchanges/" + nameIni + ".ini", QSettings::IniFormat);
+    QSettings listSettings(resDataDir + "/Exchanges/" + nameIni + ".ini", QSettings::IniFormat);
     QStringList exchangesList = listSettings.childGroups();
     QString currencies = "";
     QString currencies12, currencies1, currencies2;

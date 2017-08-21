@@ -37,8 +37,10 @@
 #include "logthread.h"
 
 #define textFontWidth(text) baseValues_->fontMetrics_->width(text)
-#define debugLevel (logThread ? logThread->logLevel : 0)
+#define debugLevel (logThread)
 #define appDataDir (baseValues_->appDataDir_)
+#define appCfgFileName (baseValues_->appCfgFileName_)
+#define resDataDir (baseValues_->resDataDir_)
 #define grouped (baseValues_->groupPriceValue>0.0?2:0)
 #define mainWindow (*baseValues_->mainWindow_)
 #define logThread (baseValues_->logThread_)
@@ -117,6 +119,8 @@ struct BaseValues
     QString defaultLangFile;
     JulyTranslator julyTranslator_;
     QString appDataDir_;
+    QString appCfgFileName_;
+    QString resDataDir_;
     QByteArray appVerStr;
     LogThread* logThread_;
     QByteArray restKey;

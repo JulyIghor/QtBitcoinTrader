@@ -318,7 +318,7 @@ QtBitcoinTrader::QtBitcoinTrader() :
     if (iniFileVersion < baseValues.appVerReal)
         iniSettings->setValue("Profile/Version", baseValues.appVerReal);
 
-    QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settingsMain(appCfgFileName, QSettings::IniFormat);
     checkForUpdates = settingsMain.value("CheckForUpdates", true).toBool();
 
     int defTextHeight = baseValues.fontMetrics_->boundingRect("0123456789").height();

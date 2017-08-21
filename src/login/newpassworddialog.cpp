@@ -55,7 +55,7 @@ NewPasswordDialog::NewPasswordDialog(qint32 num)
 
     julyTranslator.translateUi(this);
 
-    QSettings listSettings(":/Resources/Exchanges/List.ini", QSettings::IniFormat);
+    QSettings listSettings(resDataDir + "/Exchanges/List.ini", QSettings::IniFormat);
     QString exchangeIdText = QByteArray::number(exchangeNum);
 
     if (exchangeIdText.length() == 1)
@@ -69,7 +69,7 @@ NewPasswordDialog::NewPasswordDialog(qint32 num)
     setDiffBar(0);
 
     logo = logo.insert(logo.lastIndexOf("."), "_Big");
-    ui.exchangeLogoLabel->setPixmap(QPixmap(":/Resources/Exchanges/Logos/" + logo));
+    ui.exchangeLogoLabel->setPixmap(QPixmap(resDataDir + "/Exchanges/Logos/" + logo));
     exchangeChanged(exchangeName);
 }
 
@@ -159,6 +159,14 @@ int NewPasswordDialog::difficulty(QString pass, bool* resive_PasswordIsGood, QSt
     QString Message = "";
     qint32 diff = 0UL;                      // Difficulty level
     qint32 passLength = pass.length();  // Password length
+
+    QSettings settingsMain(appCfgFileName, QSettings::IniFormat);
+    bool checkPasswordDifficulty = settingsMain.value("CheckPasswordDifficulty", true).toBool();
+    if (passLength && !checkPasswordDifficulty) {
+        *resive_PasswordIsGood = true;
+        *resive_Message = "";
+        return 9999;
+    }
 
     if (passLength)
     {
@@ -446,7 +454,7 @@ void NewPasswordDialog::updateIniFileName()
         baseValues.iniFileName.prepend(appDataDir);
     }
 
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settings(appCfgFileName, QSettings::IniFormat);
     settings.setValue("LastProfile", QFileInfo(baseValues.iniFileName).fileName());
 }
 

@@ -41,11 +41,11 @@
 IniEngine::IniEngine()
     : QObject(),
       iniEngineThread(new QThread),
-      currencyCacheFileName(appDataDir + "cache/currencies.cache"),
-      currencyResourceFileName("://Resources/Currencies.ini"),
       julyHttp(0),
       waitForDownload(true)
 {
+    currencyCacheFileName = appDataDir + "cache/currencies.cache";
+    currencyResourceFileName = (resDataDir + "/Currencies.ini"),
     connect(this, &IniEngine::loadExchangeSignal, this, &IniEngine::loadExchange);
     connect(iniEngineThread, &QThread::started, this, &IniEngine::runThread);
     moveToThread(iniEngineThread);
@@ -70,16 +70,15 @@ void IniEngine::exitFromProgram()
 
 void IniEngine::runThread()
 {
-    QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settingsMain(appCfgFileName, QSettings::IniFormat);
     disablePairSynchronization = settingsMain.value("DisablePairSynchronization", false).toBool();
 
     if (disablePairSynchronization)
     {
-        if (JulyRSA::isIniFileSigned(currencyResourceFileName))
-            parseCurrency(currencyResourceFileName);
-        else
+        if (resDataDir.startsWith(':') && !JulyRSA::isIniFileSigned(currencyResourceFileName))
             exitFromProgram();
 
+        parseCurrency(currencyResourceFileName);
         return;
     }
 
@@ -106,18 +105,18 @@ void IniEngine::runThread()
         {
             QFile(currencyCacheFileName).remove();
 
-            if (JulyRSA::isIniFileSigned(currencyResourceFileName))
-                parseCurrency(currencyResourceFileName);
-            else
+            if (resDataDir.startsWith(':') && !JulyRSA::isIniFileSigned(currencyResourceFileName))
                 exitFromProgram();
+
+            parseCurrency(currencyResourceFileName);
         }
     }
     else
     {
-        if (JulyRSA::isIniFileSigned(currencyResourceFileName))
-            parseCurrency(currencyResourceFileName);
-        else
+        if (resDataDir.startsWith(':') && !JulyRSA::isIniFileSigned(currencyResourceFileName))
             exitFromProgram();
+
+        parseCurrency(currencyResourceFileName);
     }
 
     julyHttp = new JulyHttp("centrabit.com", "", this, true, false);
@@ -242,15 +241,14 @@ void IniEngine::loadExchangeLock(QString exchangeIniFileName, CurrencyPairItem& 
 void IniEngine::loadExchange(QString exchangeIniFileName)
 {
     exchangeCacheFileName = appDataDir + "cache/" + exchangeIniFileName + ".cache";
-    exchangeResourceFileName = ":/Resources/Exchanges/" + exchangeIniFileName + ".ini";
+    exchangeResourceFileName = resDataDir + "/Exchanges/" + exchangeIniFileName + ".ini";
 
     if (disablePairSynchronization)
     {
-        if (JulyRSA::isIniFileSigned(exchangeResourceFileName))
-            parseExchange(exchangeResourceFileName);
-        else
+        if (resDataDir.startsWith(':') && !JulyRSA::isIniFileSigned(exchangeResourceFileName))
             exitFromProgram();
 
+        parseExchange(exchangeResourceFileName);
         return;
     }
 
@@ -306,10 +304,10 @@ void IniEngine::parseExchangeCheck()
     {
         QFile(currencyCacheFileName).remove();
 
-        if (JulyRSA::isIniFileSigned(exchangeResourceFileName))
-            parseExchange(exchangeResourceFileName);
-        else
+        if (resDataDir.startsWith(':') && !JulyRSA::isIniFileSigned(exchangeResourceFileName))
             exitFromProgram();
+
+        parseExchange(exchangeResourceFileName);
     }
 }
 
