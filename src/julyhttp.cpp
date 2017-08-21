@@ -32,7 +32,6 @@
 #include "julyhttp.h"
 #include "main.h"
 #include <QTimer>
-#include <zlib.h>
 #include <QFile>
 #include <QMutex>
 #include <QWaitCondition>
@@ -45,6 +44,8 @@
     #include <netdb.h>
     #include <net/if.h>
 #endif
+
+#include <zlib.h>
 
 
 JulyHttp::JulyHttp(const QString& hostN, const QByteArray& restLine, QObject* parent, const bool& secure,
