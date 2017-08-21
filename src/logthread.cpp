@@ -36,9 +36,12 @@
 #include "main.h"
 #include "timesync.h"
 
-LogThread::LogThread(bool wrf)
+
+LogThread::LogThread(int level, bool wrf)
     : QThread()
 {
+    logLevel = level;
+    logFile = 0;
     writeFile = wrf;
     moveToThread(this);
     start();
@@ -46,7 +49,8 @@ LogThread::LogThread(bool wrf)
 
 LogThread::~LogThread()
 {
-
+    if (logFile)
+        logFile->close();
 }
 
 void LogThread::run()
@@ -55,33 +59,34 @@ void LogThread::run()
     exec();
 }
 
-void LogThread::writeLog(QByteArray data, int dbLvl)
+void LogThread::writeLog(QByteArray data, int level)
 {
-    if (debugLevel == 0)
+    if (level > logLevel)
         return;
 
-    if (debugLevel == 2 && dbLvl != 2)
-        return;//0: Disabled; 1: Debug; 2: Log
-
-    emit writeLogSignal(data, dbLvl);
+    emit writeLogSignal(data, level);
 }
 
-void LogThread::writeLogSlot(QByteArray data, int dbLvl)
-{
-    data = "------------------\r\n" + QDateTime::fromTime_t(
-               TimeSync::getTimeT()).toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1() + QByteArray::number(
-               dbLvl) + "\r\n" + data + "\r\n------------------\r\n\r\n";
-
-    if (writeFile)
+void LogThread::writeLogSlot(QByteArray data, int level)
     {
-        QFile logFile(baseValues.logFileName);
+    QDateTime tm = QDateTime::fromTime_t(TimeSync::getTimeT());
+    data = "[" + QByteArray::number(level)+ "] ---------------- " +
+           tm.toString("yyyy-MM-dd HH:mm:ss  LVL:").toLatin1() +
+           " ------------------\r\n" + data + "\r\n" +
+           "---------------------------------------\r\n";
 
-        if (logFile.open(QIODevice::Append))
-        {
-            logFile.write(data);
-            logFile.close();
+    if (!logFile && writeFile) {
+        logFile = new QFile(baseValues.logFileName);
+        if (!logFile->open(QIODevice::Append)) {
+            delete logFile;
+            logFile = 0;
+            writeFile = false;
         }
     }
-    else
+    if (writeFile && logFile) {
+        logFile->write(data);
+        logFile->flush();
+    } else {
         emit sendLogSignal(data);
+    }
 }
