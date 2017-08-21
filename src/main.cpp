@@ -136,7 +136,6 @@ void BaseValues::Construct()
     depthCountLimitStr = "100";
     uiUpdateInterval = 100;
     supportsUtfUI = true;
-    debugLevel_ = 0;
 
 #ifdef Q_WS_WIN
 
@@ -770,17 +769,20 @@ int main(int argc, char* argv[])
 
         QSettings iniSettings(baseValues.iniFileName, QSettings::IniFormat);
 
-        if (iniSettings.value("Debug/LogEnabled", false).toBool())
-            debugLevel = 1;
+        int logLevel = -1;
+        if (iniSettings.value("Debug/LogEnabled", false).toBool()) {
+            logLevel = iniSettings.value("Debug/LogLevel", qLOG_LEVEL_INFO).toInt();
+        }
 
-        iniSettings.setValue("Debug/LogEnabled", debugLevel > 0);
+        iniSettings.setValue("Debug/LogEnabled", logLevel > 0);
         baseValues.logThread_ = 0;
 
-        if (debugLevel)
+        if (logLevel >= qLOG_LEVEL_ERROR)
         {
-            baseValues.logThread_ = new LogThread;
-            logThread->writeLog("Proxy settings: " + proxy.hostName().toUtf8() + ":" + QByteArray::number(
-                                    proxy.port()) + " " + proxy.user().toUtf8());
+            baseValues.logThread_ = new LogThread(logLevel);
+            qlogW(QString().sprintf("LogLevel: %d", logLevel));
+            qLOGI("Proxy settings: " + proxy.hostName().toUtf8() + ":" + QByteArray::number(proxy.port()) +
+                  " " + proxy.user().toUtf8());
         }
 
         ::config = new ConfigManager(slash(appDataDir, "QtBitcoinTrader.ws.cfg"), &a);
