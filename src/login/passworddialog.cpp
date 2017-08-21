@@ -50,7 +50,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
     setWindowFlags(Qt::WindowCloseButtonHint);
     ui.okButton->setEnabled(false);
 
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settings(appCfgFileName, QSettings::IniFormat);
     QString lastProfile = settings.value("LastProfile", "").toString();
     int lastProfileIndex = -1;
     int firstUnlockedProfileIndex = -1;
@@ -238,7 +238,7 @@ bool PasswordDialog::isProfileLocked(QString name)
 
 void PasswordDialog::accept()
 {
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settings(appCfgFileName, QSettings::IniFormat);
     int currIndex = ui.profileComboBox->currentIndex();
 
     if (currIndex >= 0)
@@ -296,7 +296,7 @@ void PasswordDialog::on_descriptionGroupBox_toggled(bool)
 {
     ui.descriptionGroupBox->setVisible(false);
 
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settings(appCfgFileName, QSettings::IniFormat);
     settings.setValue("HidePasswordDescription", true);
 
     QSize minSizeHint = minimumSizeHint();

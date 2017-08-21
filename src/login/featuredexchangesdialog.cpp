@@ -38,6 +38,7 @@
 #include "julyhttp.h"
 #include <QTimer>
 #include "ui_featuredexchangesdialog.h"
+#include "main.h"
 
 FeaturedExchangesDialog::FeaturedExchangesDialog() :
     QDialog(),
@@ -88,12 +89,12 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
 
     if (featuredExchangesList.isEmpty())
     {
-        QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+        QSettings settings(appCfgFileName, QSettings::IniFormat);
         featuredExchangesList = settings.value("LastFeaturedExchanges", featuredExchangesList).toStringList();
     }
     else
     {
-        QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+        QSettings settings(appCfgFileName, QSettings::IniFormat);
         settings.setValue("LastFeaturedExchanges", featuredExchangesList);
     }
 

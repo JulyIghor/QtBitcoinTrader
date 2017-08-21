@@ -45,7 +45,7 @@
 UpdaterDialog::UpdaterDialog(bool fbMess)
     : QDialog()
 {
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settings(appCfgFileName, QSettings::IniFormat);
     int updateCheckRetryCount = settings.value("UpdateCheckRetryCount", 0).toInt();
     settings.setValue("UpdateCheckRetryCount", updateCheckRetryCount);
 

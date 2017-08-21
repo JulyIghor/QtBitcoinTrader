@@ -70,7 +70,7 @@ void IniEngine::exitFromProgram()
 
 void IniEngine::runThread()
 {
-    QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settingsMain(appCfgFileName, QSettings::IniFormat);
     disablePairSynchronization = settingsMain.value("DisablePairSynchronization", false).toBool();
 
     if (disablePairSynchronization)

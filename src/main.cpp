@@ -296,9 +296,11 @@ int main(int argc, char* argv[])
 
 #endif
 
+    appCfgFileName = appDataDir + "/QtBitcoinTrader.cfg";
+
     if (baseValues.appVerLastReal < 1.0763)
     {
-        QFile::rename(appDataDir + "/Settings.set", appDataDir + "/QtBitcoinTrader.cfg");
+        QFile::rename(appDataDir + "/Settings.set", appCfgFileName);
     }
 
     if (QFile::exists(appDataDir + "Themes/"))
@@ -326,7 +328,7 @@ int main(int argc, char* argv[])
     baseValues.appThemeGray.loadTheme("Gray");
     baseValues.appTheme = baseValues.appThemeLight;
 
-    QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+    QSettings settingsMain(appCfgFileName, QSettings::IniFormat);
     settingsMain.beginGroup("Proxy");
 
     bool proxyEnabled = settingsMain.value("Enabled", true).toBool();
@@ -381,7 +383,7 @@ int main(int argc, char* argv[])
         {
             a.setStyleSheet(baseValues.appTheme.styleSheet);
 
-            QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+            QSettings settings(appCfgFileName, QSettings::IniFormat);
             QString langFile = settings.value("LanguageFile", "").toString();
 
             if (langFile.isEmpty() || !QFile::exists(langFile))
