@@ -123,10 +123,8 @@ void DebugViewer::sendLogSlot(QByteArray text)
 
 void DebugViewer::on_radioDebug_toggled(bool debugEnabled)
 {
-    if (logThread && debugEnabled)
-        logThread->logLevel = qLOG_LEVEL_DEBUG;
-    else
-        logThread->logLevel = qLOG_LEVEL_INFO;
+    if (logThread)
+        logThread->logLevel = debugEnabled ? qLOG_LEVEL_DEBUG : qLOG_LEVEL_INFO;
 
     ui.debugText->setPlainText("");
 }
