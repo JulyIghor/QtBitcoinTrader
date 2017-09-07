@@ -246,3 +246,15 @@ void SettingsGeneral::on_forceSyncPairsButton_clicked()
 
     ui.forceSyncPairsButton->setEnabled(false);
 }
+
+void SettingsGeneral::on_checkForUpdatesCheckBox_stateChanged(int state)
+{
+    if (!state && ui.autoUpdateCheckBox->isChecked())
+        ui.autoUpdateCheckBox->setChecked(false);
+}
+
+void SettingsGeneral::on_autoUpdateCheckBox_stateChanged(int state)
+{
+    if (state && !ui.checkForUpdatesCheckBox->isChecked())
+        ui.checkForUpdatesCheckBox->setChecked(true);
+}

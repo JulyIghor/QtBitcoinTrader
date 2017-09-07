@@ -42,9 +42,30 @@
 #include "logobutton.h"
 #include "julymath.h"
 
+#ifdef Q_OS_WIN
+    #include "windows.h"
+#endif
+
 UpdaterDialog::UpdaterDialog(bool fbMess)
     : QDialog()
 {
+    forceUpdate = false;
+
+#ifdef Q_OS_WIN
+#ifndef QTBUILDTARGETWIN64
+
+    if (QSysInfo::windowsVersion() >  QSysInfo::WV_XP)
+    {
+        _SYSTEM_INFO sysinfo;
+        GetNativeSystemInfo(&sysinfo);
+
+        if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+            forceUpdate = true;
+    }
+
+#endif
+#endif
+
     QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
     int updateCheckRetryCount = settings.value("UpdateCheckRetryCount", 0).toInt();
     settings.setValue("UpdateCheckRetryCount", updateCheckRetryCount);
@@ -95,6 +116,16 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 
 #ifdef Q_OS_WIN
     osString = "Win";
+
+    if (QSysInfo::windowsVersion() >  QSysInfo::WV_XP)
+    {
+        _SYSTEM_INFO sysinfo;
+        GetNativeSystemInfo(&sysinfo);
+
+        if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+            osString = "Win64";
+    }
+
 #endif
 
 #ifdef Q_OS_MAC
@@ -108,7 +139,10 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
     else
         reqStr.append("false");
 
-    reqStr.append("&Version=" + byteArrayFromDouble(baseValues.appVerReal * 100000, 0));
+    if (forceUpdate)
+        reqStr.append("&Version=" + byteArrayFromDouble(baseValues.appVerReal * 100000 - 100, 0));
+    else
+        reqStr.append("&Version=" + byteArrayFromDouble(baseValues.appVerReal * 100000, 0));
 
     reqStr.append("&OS=" + osString);
     reqStr.append("&Locale=" + QLocale().name());
@@ -179,6 +213,16 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType)
 #endif
 #ifdef Q_OS_WIN
             os = "Win";
+
+            if (QSysInfo::windowsVersion() >  QSysInfo::WV_XP)
+            {
+                _SYSTEM_INFO sysinfo;
+                GetNativeSystemInfo(&sysinfo);
+
+                if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+                    os = "Win64";
+            }
+
 #endif
 
             updateVersion = getMidData("Version\":\"", "\"", &dataReceived);
@@ -199,7 +243,9 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType)
             if (!versionSignature.isEmpty())
                 versionSignature = QByteArray::fromBase64(versionSignature);
 
-            QByteArray versionSha1 = QCryptographicHash::hash(os.toUtf8() + updateVersion.toUtf8() + updateChangeLog.toUtf8() +
+            QByteArray versionSha1 = QCryptographicHash::hash(os.toUtf8() +
+                                     updateVersion.toUtf8() +
+                                     updateChangeLog.toUtf8() +
                                      updateLink.toUtf8(), QCryptographicHash::Sha1);
 
             QFile readPublicKey(":/Resources/Public.key");
@@ -245,8 +291,17 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType)
 #endif
 #ifdef Q_OS_WIN
             os = "Win32";
-#endif
 
+            if (QSysInfo::windowsVersion() >  QSysInfo::WV_XP)
+            {
+                _SYSTEM_INFO sysinfo;
+                GetNativeSystemInfo(&sysinfo);
+
+                if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+                    os = "Win64";
+            }
+
+#endif
             updateVersion = versionsMap.value(os + "Ver");
             updateSignature = versionsMap.value(os + "Signature").toLatin1();
 
@@ -257,21 +312,22 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType)
             updateLink = versionsMap.value(os + "Bin");
         }
 
-        if (updateVersion.toDouble() <= baseValues.appVerReal)
-        {
-            if (feedbackMessage)
+        if (!forceUpdate)
+            if (updateVersion.toDouble() <= baseValues.appVerReal)
             {
-                QMessageBox msgb;
-                msgb.setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
-                msgb.setWindowTitle("Qt Bitcoin Trader");
-                msgb.setIcon(QMessageBox::Information);
-                msgb.setText(julyTr("UP_TO_DATE", "Your version of Qt Bitcoin Trader is up to date."));
-                msgb.exec();
-            }
+                if (feedbackMessage)
+                {
+                    QMessageBox msgb;
+                    msgb.setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
+                    msgb.setWindowTitle("Qt Bitcoin Trader");
+                    msgb.setIcon(QMessageBox::Information);
+                    msgb.setText(julyTr("UP_TO_DATE", "Your version of Qt Bitcoin Trader is up to date."));
+                    msgb.exec();
+                }
 
-            exitSlot();
-            return;
-        }
+                exitSlot();
+                return;
+            }
 
         ui.againAutoUpdateCheckBox->setChecked(autoUpdate);
         ui.autoUpdateGroupBox->setVisible(canAutoUpdate);

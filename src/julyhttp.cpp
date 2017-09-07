@@ -32,6 +32,7 @@
 #include "julyhttp.h"
 #include "main.h"
 #include <QTimer>
+#include <zlib.h>
 #include <QFile>
 #include <QMutex>
 #include <QWaitCondition>
@@ -44,8 +45,6 @@
     #include <netdb.h>
     #include <net/if.h>
 #endif
-
-#include <zlib.h>
 
 
 JulyHttp::JulyHttp(const QString& hostN, const QByteArray& restLine, QObject* parent, const bool& secure,
@@ -561,7 +560,7 @@ void JulyHttp::readSocket()
         if (!buffer.isEmpty() && requestList.count())
         {
             if (contentGzipped)
-                uncompress(&buffer);
+                gzipUncompress(&buffer);
 
             bool apiMaybeDown = buffer[0] == '<';
             setApiDown(apiMaybeDown);
@@ -593,7 +592,7 @@ void JulyHttp::readSocket()
     }
 }
 
-void JulyHttp::uncompress(QByteArray* data)
+void JulyHttp::gzipUncompress(QByteArray* data)
 {
     if (data->size() <= 4)
     {

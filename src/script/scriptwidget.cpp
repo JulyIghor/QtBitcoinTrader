@@ -551,9 +551,11 @@ void ScriptWidget::noteChanged()
 
 void ScriptWidget::writeConsole(QString text)
 {
+    text.replace("\\n", "<br>");
+    text.replace("\\t", "    ");
     text.prepend(QDateTime::fromTime_t(TimeSync::getTimeT()).time().toString(baseValues.timeFormat) + "> ");
     ui->statusLabel->setText(text);
-    ui->consoleOutput->appendPlainText(text);
+    ui->consoleOutput->appendHtml(text);
 }
 
 void ScriptWidget::on_buttonClear_clicked()

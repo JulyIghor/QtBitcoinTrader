@@ -131,8 +131,10 @@ RuleWidget::~RuleWidget()
 
 void RuleWidget::writeLog(QString text)
 {
+    text.replace("\\n", "<br>");
+    text.replace("\\t", "    ");
     text.prepend(QDateTime::fromTime_t(TimeSync::getTimeT()).time().toString(baseValues.timeFormat) + "> ");
-    ui.consoleOutput->appendPlainText(text);
+    ui.consoleOutput->appendHtml(text);
 }
 
 void RuleWidget::on_buttonSave_clicked()

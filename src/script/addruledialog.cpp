@@ -47,11 +47,11 @@
 
 AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
     QDialog(par),
-    ui(new Ui::AddRuleDialog),
-    groupName(grName),
     saveClicked(false),
+    groupName(grName),
     pendingFix(true),
-    ruleIsEnabled(false)
+    ruleIsEnabled(false),
+    ui(new Ui::AddRuleDialog)
 {
     ui->setupUi(this);
     ui->buttonSaveRule->setVisible(false);

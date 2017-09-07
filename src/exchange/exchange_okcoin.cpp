@@ -432,7 +432,7 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
                 break;
 
             case 202: //info
-                if (data.startsWith("{\"info\":{"))
+                if (data.startsWith("{\"result\":true,\"info\":{"))
                 {
                     QByteArray fundsData = getMidData("free\":{", "}", &data);
                     QByteArray btcBalance = getMidData(baseValues.currentPair.currAStrLow + "\":\"", "\"", &fundsData);

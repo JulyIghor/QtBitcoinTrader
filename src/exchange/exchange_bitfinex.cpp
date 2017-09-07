@@ -491,6 +491,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                     TradesItem newItem;
                     newItem.amount = getMidData("\"amount\":\"", "\",", &tradeData).toDouble();
                     newItem.price = getMidData("\"price\":\"", "\",", &tradeData).toDouble();
+                    newItem.orderType = getMidData("\"type\":\"", "\"", &tradeData) == "sell" ? 1 : -1;
 
                     newItem.symbol = baseValues.currentPair.symbol;
                     newItem.date = currentTradeDate;
@@ -669,65 +670,65 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
             break;
 
         case 202: //info
-        {
-            if (!success)
-                break;
-
-            if (data.startsWith("[{\"type\""))
             {
-                lastInfoReceived = true;
+                if (!success)
+                    break;
 
-                if (debugLevel)
-                    logThread->writeLog("Info: " + data);
-
-                QByteArray btcBalance;
-                QByteArray usdBalance;
-
-                QStringList balances = QString(data).split("},{");
-
-                for (int n = 0; n < balances.count(); n++)
+                if (data.startsWith("[{\"type\""))
                 {
-                    QByteArray currentBalance = balances.at(n).toLatin1();
-                    QByteArray balanceType = getMidData("type\":\"", "\"", &currentBalance);
+                    lastInfoReceived = true;
 
-                    if (balanceType != baseValues.currentPair.currRequestSecond)
-                        continue;
+                    if (debugLevel)
+                        logThread->writeLog("Info: " + data);
 
-                    QByteArray balanceCurrency = getMidData("currency\":\"", "\"", &currentBalance);
+                    QByteArray btcBalance;
+                    QByteArray usdBalance;
 
-                    if (btcBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currAStrLow)
-                        btcBalance = getMidData("available\":\"", "\"", &currentBalance);
+                    QStringList balances = QString(data).split("},{");
 
-                    if (usdBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currBStrLow)
+                    for (int n = 0; n < balances.count(); n++)
                     {
-                        usdBalance = getMidData("available\":\"", "\"", &currentBalance);
+                        QByteArray currentBalance = balances.at(n).toLatin1();
+                        QByteArray balanceType = getMidData("type\":\"", "\"", &currentBalance);
+
+                        if (balanceType != baseValues.currentPair.currRequestSecond)
+                            continue;
+
+                        QByteArray balanceCurrency = getMidData("currency\":\"", "\"", &currentBalance);
+
+                        if (btcBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currAStrLow)
+                            btcBalance = getMidData("available\":\"", "\"", &currentBalance);
+
+                        if (usdBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currBStrLow)
+                        {
+                            usdBalance = getMidData("available\":\"", "\"", &currentBalance);
+                        }
+                    }
+
+                    if (!btcBalance.isEmpty())
+                    {
+                        double newBtcBalance = btcBalance.toDouble();
+
+                        if (lastBtcBalance != newBtcBalance)
+                            emit accBtcBalanceChanged(baseValues.currentPair.symbolSecond(), newBtcBalance);
+
+                        lastBtcBalance = newBtcBalance;
+                    }
+
+                    if (!usdBalance.isEmpty())
+                    {
+                        double newUsdBalance = usdBalance.toDouble();
+
+                        if (newUsdBalance != lastUsdBalance)
+                            emit accUsdBalanceChanged(baseValues.currentPair.symbolSecond(), newUsdBalance);
+
+                        lastUsdBalance = newUsdBalance;
                     }
                 }
-
-                if (!btcBalance.isEmpty())
-                {
-                    double newBtcBalance = btcBalance.toDouble();
-
-                    if (lastBtcBalance != newBtcBalance)
-                        emit accBtcBalanceChanged(baseValues.currentPair.symbolSecond(), newBtcBalance);
-
-                    lastBtcBalance = newBtcBalance;
-                }
-
-                if (!usdBalance.isEmpty())
-                {
-                    double newUsdBalance = usdBalance.toDouble();
-
-                    if (newUsdBalance != lastUsdBalance)
-                        emit accUsdBalanceChanged(baseValues.currentPair.symbolSecond(), newUsdBalance);
-
-                    lastUsdBalance = newUsdBalance;
-                }
+                else if (debugLevel)
+                    logThread->writeLog("Invalid Info data:" + data, 2);
             }
-            else if (debugLevel)
-                logThread->writeLog("Invalid Info data:" + data, 2);
-        }
-        break;//info
+            break;//info
 
         case 204://orders
             if (!success)
@@ -792,18 +793,18 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 
         //  }//positions
         case 305: //order/cancel
-        {
-            if (!success)
-                break;
+            {
+                if (!success)
+                    break;
 
-            QByteArray oid = getMidData("\"id\":", ",", &data);
+                QByteArray oid = getMidData("\"id\":", ",", &data);
 
-            if (!oid.isEmpty())
-                emit orderCanceled(baseValues.currentPair.symbol, oid);
-            else if (debugLevel)
-                logThread->writeLog("Invalid Order/Cancel data:" + data, 2);
-        }
-        break;//order/cancel
+                if (!oid.isEmpty())
+                    emit orderCanceled(baseValues.currentPair.symbol, oid);
+                else if (debugLevel)
+                    logThread->writeLog("Invalid Order/Cancel data:" + data, 2);
+            }
+            break;//order/cancel
 
         case 306: //order/buy
             if (!success || !debugLevel)

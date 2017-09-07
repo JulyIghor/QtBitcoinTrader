@@ -41,8 +41,8 @@
 
 FeaturedExchangesDialog::FeaturedExchangesDialog() :
     QDialog(),
-    ui(new Ui::FeaturedExchangesDialog),
-    exchangeNum(-1)
+    exchangeNum(-1),
+    ui(new Ui::FeaturedExchangesDialog)
 {
     ui->setupUi(this);
     ui->okButton->setEnabled(false);

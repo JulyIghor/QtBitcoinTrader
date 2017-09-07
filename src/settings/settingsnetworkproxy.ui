@@ -261,6 +261,29 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="msLabel1">
+        <property name="accessibleName">
+         <string>MS</string>
+        </property>
+        <property name="text">
+         <string>ms</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="httpRetryCountLabel">
         <property name="accessibleName">
@@ -302,8 +325,21 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="msLabel1">
+      <item row="0" column="0">
+       <widget class="QLabel" name="apiDownCounterMaxLabel">
+        <property name="accessibleName">
+         <string>SETTINGS_DOWN_COUNT</string>
+        </property>
+        <property name="text">
+         <string>Down count Max:</string>
+        </property>
+        <property name="buddy">
+         <cstring>apiDownCounterMaxSpinBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="msLabel2">
         <property name="accessibleName">
          <string>MS</string>
         </property>
@@ -311,19 +347,6 @@
          <string>ms</string>
         </property>
        </widget>
-      </item>
-      <item row="5" column="0">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
       </item>
       <item row="0" column="1">
        <widget class="QSpinBox" name="apiDownCounterMaxSpinBox">
@@ -347,29 +370,6 @@
         </property>
         <property name="value">
          <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="apiDownCounterMaxLabel">
-        <property name="accessibleName">
-         <string>SETTINGS_DOWN_COUNT</string>
-        </property>
-        <property name="text">
-         <string>Down count Max:</string>
-        </property>
-        <property name="buddy">
-         <cstring>apiDownCounterMaxSpinBox</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="msLabel2">
-        <property name="accessibleName">
-         <string>MS</string>
-        </property>
-        <property name="text">
-         <string>ms</string>
         </property>
        </widget>
       </item>
@@ -439,26 +439,6 @@
         </property>
         <property name="singleStep">
          <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="alternativeDomainBTCeLabel">
-        <property name="accessibleName">
-         <string>SETTINGS_ALTERNATIVE_DOMAIN_BTCE</string>
-        </property>
-        <property name="text">
-         <string>Use alternative domain for BTC-e</string>
-        </property>
-        <property name="buddy">
-         <cstring>alternativeDomainBTCeCheckBox</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QCheckBox" name="alternativeDomainBTCeCheckBox">
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </item>
@@ -536,7 +516,6 @@
   <tabstop>httpRetryCountSpinBox</tabstop>
   <tabstop>httpRequestsIntervalSpinBox</tabstop>
   <tabstop>httpRequestsTimeoutSpinBox</tabstop>
-  <tabstop>alternativeDomainBTCeCheckBox</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -713,22 +692,6 @@
     <hint type="destinationlabel">
      <x>-5</x>
      <y>168</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>alternativeDomainBTCeCheckBox</sender>
-   <signal>stateChanged(int)</signal>
-   <receiver>SettingsNetworkProxy</receiver>
-   <slot>anyValueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>198</x>
-     <y>342</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>502</x>
-     <y>346</y>
     </hint>
    </hints>
   </connection>

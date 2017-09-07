@@ -37,7 +37,7 @@
 #include "logthread.h"
 
 #define textFontWidth(text) baseValues_->fontMetrics_->width(text)
-#define debugLevel (logThread ? logThread->logLevel : 0)
+#define debugLevel (baseValues_->debugLevel_)
 #define appDataDir (baseValues_->appDataDir_)
 #define grouped (baseValues_->groupPriceValue>0.0?2:0)
 #define mainWindow (*baseValues_->mainWindow_)
@@ -94,6 +94,7 @@ struct BaseValues
     AppTheme appThemeDark;
     AppTheme appThemeGray;
     AppTheme appTheme;
+    int debugLevel_;//0: Disabled; 1: Debug; 2: Log
     bool supportsUtfUI;
     bool highResolutionDisplay;
     int defaultHeightForRow_;
@@ -140,8 +141,6 @@ struct BaseValues
     int decimalsAmountLastTrades;
     int decimalsPriceLastTrades;
     int decimalsTotalLastTrades;
-
-    bool alternativeDomainBTCe;
 };
 
 #define baseValues (*baseValues_)

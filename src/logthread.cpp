@@ -36,12 +36,9 @@
 #include "main.h"
 #include "timesync.h"
 
-
-LogThread::LogThread(int level, bool wrf)
+LogThread::LogThread(bool wrf)
     : QThread()
 {
-    logLevel = level;
-    logFile = 0;
     writeFile = wrf;
     moveToThread(this);
     start();
@@ -49,8 +46,7 @@ LogThread::LogThread(int level, bool wrf)
 
 LogThread::~LogThread()
 {
-    if (logFile)
-        logFile->close();
+
 }
 
 void LogThread::run()
@@ -59,34 +55,33 @@ void LogThread::run()
     exec();
 }
 
-void LogThread::writeLog(QByteArray data, int level)
+void LogThread::writeLog(QByteArray data, int dbLvl)
 {
-    if (level > logLevel)
+    if (debugLevel == 0)
         return;
 
-    emit writeLogSignal(data, level);
+    if (debugLevel == 2 && dbLvl != 2)
+        return;//0: Disabled; 1: Debug; 2: Log
+
+    emit writeLogSignal(data, dbLvl);
 }
 
-void LogThread::writeLogSlot(QByteArray data, int level)
-    {
-    QDateTime tm = QDateTime::fromTime_t(TimeSync::getTimeT());
-    data = "[" + QByteArray::number(level)+ "] ---------------- " +
-           tm.toString("yyyy-MM-dd HH:mm:ss  LVL:").toLatin1() +
-           " ------------------\r\n" + data + "\r\n" +
-           "---------------------------------------\r\n";
+void LogThread::writeLogSlot(QByteArray data, int dbLvl)
+{
+    data = "------------------\r\n" + QDateTime::fromTime_t(
+               TimeSync::getTimeT()).toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1() + QByteArray::number(
+               dbLvl) + "\r\n" + data + "\r\n------------------\r\n\r\n";
 
-    if (!logFile && writeFile) {
-        logFile = new QFile(baseValues.logFileName);
-        if (!logFile->open(QIODevice::Append)) {
-            delete logFile;
-            logFile = 0;
-            writeFile = false;
+    if (writeFile)
+    {
+        QFile logFile(baseValues.logFileName);
+
+        if (logFile.open(QIODevice::Append))
+        {
+            logFile.write(data);
+            logFile.close();
         }
     }
-    if (writeFile && logFile) {
-        logFile->write(data);
-        logFile->flush();
-    } else {
+    else
         emit sendLogSignal(data);
-    }
 }

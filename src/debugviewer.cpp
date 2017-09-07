@@ -54,13 +54,16 @@ DebugViewer::DebugViewer()
         baseValues.logThread_ = 0;
     }
 
-    logThread = new LogThread(qLOG_LEVEL_INFO, false);
+    logThread = new LogThread(false);
     connect(logThread, SIGNAL(sendLogSignal(QByteArray)), this, SLOT(sendLogSlot(QByteArray)));
+    debugLevel = 2;
     show();
 }
 
 DebugViewer::~DebugViewer()
 {
+    debugLevel = 0;
+
     if (logThread)
     {
         logThread->terminate();
@@ -123,8 +126,10 @@ void DebugViewer::sendLogSlot(QByteArray text)
 
 void DebugViewer::on_radioDebug_toggled(bool debugEnabled)
 {
-    if (logThread)
-        logThread->logLevel = debugEnabled ? qLOG_LEVEL_DEBUG : qLOG_LEVEL_INFO;
+    if (debugEnabled)
+        debugLevel = 1;
+    else
+        debugLevel = 2;
 
     ui.debugText->setPlainText("");
 }

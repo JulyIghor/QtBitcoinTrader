@@ -114,7 +114,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4006";
+    appVerStr = "1.4007";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -136,6 +136,7 @@ void BaseValues::Construct()
     depthCountLimitStr = "100";
     uiUpdateInterval = 100;
     supportsUtfUI = true;
+    debugLevel_ = 0;
 
 #ifdef Q_WS_WIN
 
@@ -204,9 +205,7 @@ int main(int argc, char* argv[])
     a.setFont(font);
 #endif
 
-#if QT_VERSION >= 0x050000
     a.setStyle(QStyleFactory::create("Fusion"));
-#endif
 
     a.setApplicationName("QtBitcoinTrader");
     a.setApplicationVersion(baseValues.appVerStr);
@@ -215,13 +214,10 @@ int main(int argc, char* argv[])
 
 #if QT_VERSION < 0x050000
     baseValues.tempLocation = QDesktopServices::storageLocation(QDesktopServices::TempLocation).replace('\\', '/') + "/";
-    baseValues.desktopLocation = QDesktopServices::storageLocation(QDesktopServices::DesktopLocation).replace('\\',
-                                 '/') + "/";
+    baseValues.desktopLocation = QDesktopServices::storageLocation(QDesktopServices::DesktopLocation).replace('\\', '/') + "/";
 #else
-    baseValues.tempLocation = QStandardPaths::standardLocations(QStandardPaths::TempLocation).first().replace('\\',
-                              '/') + "/";
-    baseValues.desktopLocation = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first().replace('\\',
-                                 '/') + "/";
+    baseValues.tempLocation = QStandardPaths::standardLocations(QStandardPaths::TempLocation).first().replace('\\', '/') + "/";
+    baseValues.desktopLocation = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first().replace('\\', '/') + "/";
 #endif
 
 #ifdef Q_OS_WIN
@@ -257,6 +253,14 @@ int main(int argc, char* argv[])
 
         if (!QFile::exists(appDataDir + "Language"))
             QDir().mkpath(appDataDir + "Language");
+
+        if (!QFile::exists(appDataDir))
+        {
+            QMessageBox::warning(0, "Qt Bitcoin Trader",
+                                 julyTr("CAN_NOT_WRITE_TO_FOLDER", "Can not write to folder") +
+                                 ": \"" + appDataDir + "\"");
+            return 0;
+        }
     }
 #else
 
@@ -265,8 +269,7 @@ int main(int argc, char* argv[])
     QString oldAppDataDir = QDesktopServices::storageLocation(QDesktopServices::HomeLocation) + "/.config/QtBitcoinTrader/";
 #else
     appDataDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation).first().replace('\\', '/') + "/";
-    QString oldAppDataDir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first() +
-                            "/.config/QtBitcoinTrader/";
+    QString oldAppDataDir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first() + "/.config/QtBitcoinTrader/";
 #endif
 
     if (!QFile::exists(appDataDir) && oldAppDataDir != appDataDir && QFile::exists(oldAppDataDir))
@@ -293,6 +296,14 @@ int main(int argc, char* argv[])
 
     if (!QFile::exists(appDataDir))
         QDir().mkpath(appDataDir);
+
+    if (!QFile::exists(appDataDir))
+    {
+        QMessageBox::warning(0, "Qt Bitcoin Trader",
+                             julyTr("CAN_NOT_WRITE_TO_FOLDER", "Can not write to folder") +
+                             ": \"" + appDataDir + "\"");
+        return 0;
+    }
 
 #endif
 
@@ -769,20 +780,17 @@ int main(int argc, char* argv[])
 
         QSettings iniSettings(baseValues.iniFileName, QSettings::IniFormat);
 
-        int logLevel = -1;
-        if (iniSettings.value("Debug/LogEnabled", false).toBool()) {
-            logLevel = iniSettings.value("Debug/LogLevel", qLOG_LEVEL_INFO).toInt();
-        }
+        if (iniSettings.value("Debug/LogEnabled", false).toBool())
+            debugLevel = 1;
 
-        iniSettings.setValue("Debug/LogEnabled", logLevel > 0);
+        iniSettings.setValue("Debug/LogEnabled", debugLevel > 0);
         baseValues.logThread_ = 0;
 
-        if (logLevel >= qLOG_LEVEL_ERROR)
+        if (debugLevel)
         {
-            baseValues.logThread_ = new LogThread(logLevel);
-            qlogW(QString().sprintf("LogLevel: %d", logLevel));
-            qLOGI("Proxy settings: " + proxy.hostName().toUtf8() + ":" + QByteArray::number(proxy.port()) +
-                  " " + proxy.user().toUtf8());
+            baseValues.logThread_ = new LogThread;
+            logThread->writeLog("Proxy settings: " + proxy.hostName().toUtf8() + ":" + QByteArray::number(
+                                    proxy.port()) + " " + proxy.user().toUtf8());
         }
 
         ::config = new ConfigManager(slash(appDataDir, "QtBitcoinTrader.ws.cfg"), &a);

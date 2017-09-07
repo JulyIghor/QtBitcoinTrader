@@ -33,53 +33,22 @@
 #define LOGTHREAD_H
 
 #include <QThread>
-#include <QFile>
-
-#ifdef Q_OS_WIN
-#include <WinSock2.h>
-#include <windows.h>
-#endif
-
-#define qLOG_LEVEL_ERROR    0
-#define qLOG_LEVEL_WARN     1
-#define qLOG_LEVEL_INFO     2
-#define qLOG_LEVEL_DEBUG    3
-#define qLOG_LEVEL_TRACE    4
-
-/* QByteArray logging */
-#define qLOGX(level, ...) do { if (logThread) logThread->writeLog(__VA_ARGS__, (level)); } while(0)
-#define qLOGE(...) qLOGX(qLOG_LEVEL_ERROR, __VA_ARGS__)
-#define qLOGW(...) qLOGX(qLOG_LEVEL_WARN, __VA_ARGS__)
-#define qLOGI(...) qLOGX(qLOG_LEVEL_INFO, __VA_ARGS__)
-#define qLOGD(...) qLOGX(qLOG_LEVEL_DEBUG, __VA_ARGS__)
-#define qLOGT(...) qLOGX(qLOG_LEVEL_TRACE, __VA_ARGS__)
-
-/* QString logging */
-#define qlogX(level, ...) do { if (logThread) logThread->writeLogB(__VA_ARGS__, (level)); } while(0)
-#define qlogE(...) qlogX(qLOG_LEVEL_ERROR, __VA_ARGS__)
-#define qlogW(...) qlogX(qLOG_LEVEL_WARN, __VA_ARGS__)
-#define qlogI(...) qlogX(qLOG_LEVEL_INFO, __VA_ARGS__)
-#define qlogD(...) qlogX(qLOG_LEVEL_DEBUG, __VA_ARGS__)
-#define qlogT(...) qlogX(qLOG_LEVEL_TRACE, __VA_ARGS__)
-
 
 class LogThread : public QThread
 {
     Q_OBJECT
 
 public:
-    int logLevel;
-    void writeLog(QByteArray msg, int level = qLOG_LEVEL_DEBUG);
-    void writeLogB(QString mess, int level = qLOG_LEVEL_DEBUG)
+    void writeLog(QByteArray, int debugLevel = 0);
+    void writeLogB(QString mess, int dLevel = 0)
     {
-        writeLog(mess.toLatin1(), level);
+        writeLog(mess.toLatin1(), dLevel);
     }
-    explicit LogThread(int logLevel, bool writeFile = true);
+    explicit LogThread(bool writeFile = true);
     ~LogThread();
 
 private:
     bool writeFile;
-    QFile * logFile;
     void run();
 signals:
     void writeLogSignal(QByteArray, int);

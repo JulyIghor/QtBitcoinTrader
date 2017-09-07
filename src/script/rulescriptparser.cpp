@@ -259,15 +259,15 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                     break;
 
                 case 12://Say text
-                {
-                    QString sayText;
+                    {
+                        QString sayText;
 
-                    if (!holder.sayCode.isEmpty())
-                        sayText = ", trader.get(\"" + holder.sayCode + "\")";
+                        if (!holder.sayCode.isEmpty())
+                            sayText = ", trader.get(\"" + holder.sayCode + "\")";
 
-                    script += " trader.say(\"" + holder.thanText + "\"" + sayText + ");\n";
-                }
-                break;
+                        script += " trader.say(\"" + holder.thanText + "\"" + sayText + ");\n";
+                    }
+                    break;
             }
         }
 
@@ -362,7 +362,7 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
             if (posSplitter == -1)
             {
                 currAStr = holder.valueASymbolCode.left(3);
-                currBStr = holder.valueASymbolCode.right(3);
+                currBStr = holder.valueASymbolCode.mid(3, 3);
             }
             else
             {

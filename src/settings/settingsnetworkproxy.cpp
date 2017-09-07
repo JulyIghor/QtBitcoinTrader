@@ -154,7 +154,6 @@ void SettingsNetworkProxy::loadNetwork()
     ui.httpRetryCountSpinBox->setValue(networkSettings->value("Network/HttpRetryCount", 8).toInt());
     ui.httpRequestsIntervalSpinBox->setValue(networkSettings->value("Network/HttpRequestsInterval", 500).toInt());
     ui.httpRequestsTimeoutSpinBox->setValue(networkSettings->value("Network/HttpRequestsTimeout", 4001).toInt());
-    ui.alternativeDomainBTCeCheckBox->setChecked(networkSettings->value("Network/AlternativeDomainBTCe", true).toBool());
 }
 
 void SettingsNetworkProxy::saveNetwork()
@@ -163,7 +162,6 @@ void SettingsNetworkProxy::saveNetwork()
     networkSettings->setValue("Network/HttpRetryCount", ui.httpRetryCountSpinBox->value());
     networkSettings->setValue("Network/HttpRequestsInterval", ui.httpRequestsIntervalSpinBox->value());
     networkSettings->setValue("Network/HttpRequestsTimeout", ui.httpRequestsTimeoutSpinBox->value());
-    networkSettings->setValue("Network/AlternativeDomainBTCe", ui.alternativeDomainBTCeCheckBox->isChecked());
 }
 
 void SettingsNetworkProxy::activateNetwork()
@@ -172,7 +170,6 @@ void SettingsNetworkProxy::activateNetwork()
     baseValues.httpRetryCount = ui.httpRetryCountSpinBox->value();
     baseValues.httpRequestInterval = ui.httpRequestsIntervalSpinBox->value();
     baseValues.httpRequestTimeout = ui.httpRequestsTimeoutSpinBox->value();
-    baseValues.alternativeDomainBTCe = ui.alternativeDomainBTCeCheckBox->isChecked();
 }
 
 void SettingsNetworkProxy::on_revertChangesButton_clicked()
@@ -198,7 +195,6 @@ void SettingsNetworkProxy::on_restoreDefaultsButton_clicked()
     ui.httpRetryCountSpinBox->setValue(8);
     ui.httpRequestsIntervalSpinBox->setValue(500);
     ui.httpRequestsTimeoutSpinBox->setValue(4000);
-    ui.alternativeDomainBTCeCheckBox->setChecked(true);
 
     ui.restoreDefaultsButton->setEnabled(false);
 }

@@ -41,8 +41,8 @@
 TimeSync::TimeSync()
     : QObject(),
       dateUpdateThread(new QThread),
-      startTime(QDateTime::currentDateTime().toTime_t()),
       started(0),
+      startTime(QDateTime::currentDateTime().toTime_t()),
       timeShift(0),
       additionalTimer(0),
       getNTPTimeRetryCount(0)

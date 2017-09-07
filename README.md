@@ -48,15 +48,26 @@ make && make install && make clean
 
 ## Change Log
 
-v1.40.03
+v1.40.07
+- Release builds for Win64
+- Fix balance for OKCoin
+- Fix script for Bitfinex
+- Fix order type for Bitfinex
+- JL Script logs now recognize endline and tabulation
+- Fixed bug when silent auto update wont work
 
+v1.40.06
+- Fixed fee calculator issue
+- Added new currencies
+- Minor improvements and fixes
+
+v1.40.03
 - Bitfinex support fixes
 - Secure auto update now works via Proxy
 - YoBit support fixes
 - Added button to force resync currencies
 
 v1.4
-
 - New Exchange YoBit.net
 - Currency pair synchronization on startup!
 - Fixed issue with functions getPriceByVolume and getVolumeByPrice in JL Script

@@ -37,8 +37,8 @@
 
 ChartsModel::ChartsModel()
     : QObject(),
-      intervalDate(60),
       perfomanceStep(1),
+      intervalDate(60),
       intervalCount(10),
       fontMetrics(new QFontMetrics(QApplication::font()))
 {

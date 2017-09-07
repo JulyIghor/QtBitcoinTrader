@@ -67,6 +67,8 @@ private slots:
     void anyValueChanged();
     void on_showTranslationButton_clicked();
     void on_forceSyncPairsButton_clicked();
+    void on_checkForUpdatesCheckBox_stateChanged(int);
+    void on_autoUpdateCheckBox_stateChanged(int);
 };
 
 #endif // SETTINGSGENERAL_H

@@ -41,9 +41,9 @@
 IniEngine::IniEngine()
     : QObject(),
       iniEngineThread(new QThread),
+      julyHttp(0),
       currencyCacheFileName(appDataDir + "cache/currencies.cache"),
       currencyResourceFileName("://Resources/Currencies.ini"),
-      julyHttp(0),
       waitForDownload(true)
 {
     connect(this, &IniEngine::loadExchangeSignal, this, &IniEngine::loadExchange);

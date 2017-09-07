@@ -2,84 +2,61 @@ lessThan(QT_VERSION, 5.5): {
 error("Qt less than 5.5 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt 5.5 and C++11");
 }
 
+CONFIG	+= qt release c++11
+
 TEMPLATE	= app
 LANGUAGE	= C++
 DEPENDPATH	+= .
 INCLUDEPATH	+= .
 
-CONFIG	+= qt c++11
-
-CONFIG(debug, debug|release) {
-    BUILD_TYPE=debug
-    LIB_SUFFIX=d
-} else {
-    BUILD_TYPE=release
-    LIB_SUFFIX=
-}
-
- win32 { TARGET = ../Bin/QtBitcoinTrader }
-!win32 { TARGET = QtBitcoinTrader }
-
-QT += network script widgets
-!win32 { QT += multimedia }
+CONFIG	+= qt release c++11
 
 win32 {
-    win32-g++ {
-        LIBS += -lws2_32 -lole32 -lwinmm -lgdi32
-        LIBS += -llibcrypto -llibssl -lz
+    contains(QMAKE_TARGET.arch, x86_64) {
+    TARGET = QtBitcoinTrader_64bit
+
+    } else {
+    TARGET = QtBitcoinTrader_32bit
     }
+    LIBS += -lcrypto -lssl -lz
+}
 
-    win32-msvc* {
-        QMAKE_CFLAGS_RELEASE += /Zi
-        QMAKE_LFLAGS_RELEASE += /MAP
-        QMAKE_LFLAGS_RELEASE += /debug /opt:ref
+!win32 {
+TARGET = QtBitcoinTrader
+}
 
-        LIBRESSL_PRJ_DIR = $${PWD}/../../libressl
-        OPENSSL_PRJ_DIR = $${PWD}/../../openssl
-        ZLIB_PRJ_DIR = $${PWD}/../../zlib
+QT += network script widgets
+linux { QT += multimedia }
+mac { QT += multimedia }
 
-        exists($${OPENSSL_PRJ_DIR}/lib/libeay32MT.lib) {
-            INCLUDEPATH += $${OPENSSL_PRJ_DIR}/include
-            LIBS += -L"$${OPENSSL_PRJ_DIR}/lib"
-            LIBS += -llibeay32MT$${LIB_SUFFIX} -lssleay32MT$${LIB_SUFFIX}
-            LIBS += -luser32 -lws2_32 -lole32 -lwinmm -lgdi32 -ladvapi32
-        } else {
-            INCLUDEPATH += $${LIBRESSL_PRJ_DIR}/include
-            LIBS += -llibcrypto -llibssl
-        }
-
-        exists($${ZLIB_PRJ_DIR}/contrib/vstudio/vc14/zlibstat.vcxproj) {
-            DEFINES += ZLIB_WINAPI
-            INCLUDEPATH += $${ZLIB_PRJ_DIR}
-            LIBS += -L"$${ZLIB_PRJ_DIR}/contrib/vstudio/vc14/x86/ZlibStat$${BUILD_TYPE}"
-            LIBS += -lzlibstat
-        } else {
-            LIBS += lz
-        }
-    }
-
-    exists($$(WINDOWSSDKDIR)/Include/um/sapi.h){
-        QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
-        QMAKE_CFLAGS_RELEASE -= -Zc:strictStrings
-        QMAKE_CFLAGS -= -Zc:strictStrings
-        QMAKE_CXXFLAGS -= -Zc:strictStrings
+win32 {
+   LIBS += -lcrypto -lssl -lz
+#LIBS += -lcrypto -lssl -lz# -lws2_32 -lole32 -lwinmm -lgdi32
+#LIBS +=  -lcrypt32 -lcrypto -lssl -lz
+    #exists($$(WINDOWSSDKDIR)/Include/um/sapi.h){
+#        QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
+#        QMAKE_CFLAGS_RELEASE -= -Zc:strictStrings
+#        QMAKE_CFLAGS -= -Zc:strictStrings
+#        QMAKE_CXXFLAGS -= -Zc:strictStrings
         DEFINES += SAPI_ENABLED
-    }
+   # }
 
     checkFRAMEWORKDIR=$$(FRAMEWORKDIR)
     isEmpty(checkFRAMEWORKDIR) {
         QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
-        QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function -Wno-reorder
+        QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 
         DEFINES += SAPI_ENABLED
         LIBS += -lsapi
     }
 }
 
-!win32 { LIBS += -lcrypto -lssl -lz }
+linux { LIBS += -lcrypto -lssl -lz }
 
 mac {
-    QMAKE_MAC_SDK = macosx10.12
+    LIBS += -lcrypto -lssl -lz
+
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.11
     QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 

@@ -90,7 +90,7 @@ private:
     int apiDownCounter;
     bool secureConnection;
     bool isDataPending;
-    void uncompress(QByteArray* data);
+    void gzipUncompress(QByteArray* data);
     bool contentGzipped;
     QByteArray* currentPendingRequest;
     bool connectionClose;

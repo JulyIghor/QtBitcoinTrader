@@ -112,9 +112,9 @@ static const int ContentMargin = 4;
 
 QtBitcoinTrader::QtBitcoinTrader() :
     QMainWindow(),
+    currencySignLoader(new CurrencySignLoader),
     configDialog(NULL),
-    dockHost(new DockHost(NULL)),
-    currencySignLoader(new CurrencySignLoader)
+    dockHost(new DockHost(NULL))
 {
     windowWidget = this;
     lastRuleExecutedTime = QTime(1, 0, 0, 0);
@@ -485,8 +485,17 @@ QtBitcoinTrader::QtBitcoinTrader() :
     profileName = iniSettings->value("Profile/Name", "Default Profile").toString();
     windowTitleP = profileName + " - " + windowTitle() + " v" + baseValues.appVerStr;
 
+#ifdef QTBUILDTARGETWIN32
+    windowTitleP += " (32bit)";
+#endif
+
+#ifdef QTBUILDTARGETWIN64
+    windowTitleP += " (64bit)";
+#endif
+
     if (debugLevel)
         windowTitleP.append(" [DEBUG MODE]");
+
     //else if (baseValues.appVerIsBeta)
     //    windowTitleP.append(" [BETA]");
 
@@ -604,7 +613,7 @@ void QtBitcoinTrader::fixTableViews(QWidget* wid)
         tableFont.setFixedPitch(true);
         tables->setFont(tableFont);
         tables->setMinimumWidth(200);
-        tables->setMinimumHeight(200);
+        tables->setMinimumHeight(190);
         tables->verticalHeader()->setDefaultSectionSize(defaultHeightForRow);
     }
 }
