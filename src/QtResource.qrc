@@ -126,5 +126,6 @@
         <file>Resources/CurrencySign/SIB.png</file>
         <file>Resources/CurrencySign/BCC.png</file>
         <file>Resources/CurrencySign/BCU.png</file>
+        <file>Resources/CurrencySign/NEO.png</file>
     </qresource>
 </RCC>
