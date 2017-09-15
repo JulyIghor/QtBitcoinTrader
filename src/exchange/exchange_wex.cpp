@@ -29,14 +29,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "exchange_btce.h"
+#include "exchange_wex.h"
 #include <openssl/hmac.h>
 
-Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
+Exchange_WEX::Exchange_WEX(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange()
 {
     calculatingFeeMode = 1;
-    baseValues.exchangeName = "BTC-e";
+    baseValues.exchangeName = "wex";
     baseValues.currentPair.name = "BTC/USD";
     baseValues.currentPair.setSymbol("BTCUSD");
     baseValues.currentPair.currRequestPair = "btc_usd";
@@ -55,7 +55,7 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
 
     moveToThread(this);
 
-    currencyMapFile = "BTCe";
+    currencyMapFile = "WEX";
     defaultCurrencyParams.currADecimals = 8;
     defaultCurrencyParams.currBDecimals = 8;
     defaultCurrencyParams.currABalanceDecimals = 8;
@@ -71,11 +71,11 @@ Exchange_BTCe::Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey)
     lastHistoryId = 0;
 }
 
-Exchange_BTCe::~Exchange_BTCe()
+Exchange_WEX::~Exchange_WEX()
 {
 }
 
-void Exchange_BTCe::clearVariables()
+void Exchange_WEX::clearVariables()
 {
     isFirstAccInfo = true;
     Exchange::clearVariables();
@@ -89,7 +89,7 @@ void Exchange_BTCe::clearVariables()
     lastTickerDate = 0;
 }
 
-void Exchange_BTCe::clearValues()
+void Exchange_WEX::clearValues()
 {
     clearVariables();
 
@@ -97,7 +97,7 @@ void Exchange_BTCe::clearValues()
         julyHttp->clearPendingData();
 }
 
-void Exchange_BTCe::reloadDepth()
+void Exchange_WEX::reloadDepth()
 {
     lastDepthBidsMap.clear();
     lastDepthAsksMap.clear();
@@ -105,7 +105,7 @@ void Exchange_BTCe::reloadDepth()
     Exchange::reloadDepth();
 }
 
-void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
+void Exchange_WEX::dataReceivedAuth(QByteArray data, int reqType)
 {
     if (debugLevel)
         logThread->writeLog("RCV: " + data);
@@ -671,7 +671,7 @@ void Exchange_BTCe::dataReceivedAuth(QByteArray data, int reqType)
         errorCount = 0;
 }
 
-void Exchange_BTCe::depthUpdateOrder(QString symbol, double price, double amount, bool isAsk)
+void Exchange_WEX::depthUpdateOrder(QString symbol, double price, double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
         return;
@@ -702,7 +702,7 @@ void Exchange_BTCe::depthUpdateOrder(QString symbol, double price, double amount
     }
 }
 
-void Exchange_BTCe::depthSubmitOrder(QString symbol, QMap<double, double>* currentMap, double priceDouble,
+void Exchange_WEX::depthSubmitOrder(QString symbol, QMap<double, double>* currentMap, double priceDouble,
                                      double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
@@ -727,7 +727,7 @@ void Exchange_BTCe::depthSubmitOrder(QString symbol, QMap<double, double>* curre
     }
 }
 
-bool Exchange_BTCe::isReplayPending(int reqType)
+bool Exchange_WEX::isReplayPending(int reqType)
 {
     if (julyHttp == 0)
         return false;
@@ -735,7 +735,7 @@ bool Exchange_BTCe::isReplayPending(int reqType)
     return julyHttp->isReqTypePending(reqType);
 }
 
-void Exchange_BTCe::secondSlot()
+void Exchange_WEX::secondSlot()
 {
     static int sendCounter = 0;
 
@@ -792,7 +792,7 @@ void Exchange_BTCe::secondSlot()
     Exchange::secondSlot();
 }
 
-void Exchange_BTCe::getHistory(bool force)
+void Exchange_WEX::getHistory(bool force)
 {
     if (tickerOnly)
         return;
@@ -807,7 +807,7 @@ void Exchange_BTCe::getHistory(bool force)
         sendToApi(110, "info", false, true);
 }
 
-void Exchange_BTCe::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
+void Exchange_WEX::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
 {
     if (tickerOnly)
         return;
@@ -828,7 +828,7 @@ void Exchange_BTCe::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy
     sendToApi(306, "", true, true, data);
 }
 
-void Exchange_BTCe::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
+void Exchange_WEX::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
 {
     if (tickerOnly)
         return;
@@ -849,7 +849,7 @@ void Exchange_BTCe::sell(QString symbol, double apiBtcToSell, double apiPriceToS
     sendToApi(307, "", true, true, data);
 }
 
-void Exchange_BTCe::cancelOrder(QString, QByteArray order)
+void Exchange_WEX::cancelOrder(QString, QByteArray order)
 {
     if (tickerOnly)
         return;
@@ -863,11 +863,11 @@ void Exchange_BTCe::cancelOrder(QString, QByteArray order)
     sendToApi(305, "", true, true, order);
 }
 
-void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
+void Exchange_WEX::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
 {
     if (julyHttp == 0)
     {
-        julyHttp = new JulyHttp("btc-e.nz", "Key: " + getApiKey() + "\r\n", this);
+        julyHttp = new JulyHttp("wex.nz", "Key: " + getApiKey() + "\r\n", this);
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
@@ -906,7 +906,7 @@ void Exchange_BTCe::sendToApi(int reqType, QByteArray method, bool auth, bool se
     }
 }
 
-void Exchange_BTCe::sslErrors(const QList<QSslError>& errors)
+void Exchange_WEX::sslErrors(const QList<QSslError>& errors)
 {
     QStringList errorList;
 

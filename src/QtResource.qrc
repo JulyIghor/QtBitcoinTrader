@@ -9,12 +9,12 @@
         <file>Resources/Exchanges/Logos/Bitfinex.png</file>
         <file>Resources/Exchanges/Logos/BTCChina.png</file>
         <file>Resources/Exchanges/Logos/GOCio.png</file>
-        <file>Resources/Exchanges/Logos/BTC-e.png</file>
+        <file>Resources/Exchanges/Logos/WEX.png</file>
         <file>Resources/Exchanges/Logos/Bitstamp_Big.png</file>
         <file>Resources/Exchanges/Logos/Bitfinex_Big.png</file>
         <file>Resources/Exchanges/Logos/BTCChina_Big.png</file>
         <file>Resources/Exchanges/Logos/GOCio_Big.png</file>
-        <file>Resources/Exchanges/Logos/BTC-e_Big.png</file>
+        <file>Resources/Exchanges/Logos/WEX_Big.png</file>
         <file>Resources/Exchanges/Logos/Indacoin.png</file>
         <file>Resources/Exchanges/Logos/Indacoin_Big.png</file>
         <file>Resources/Exchanges/Logos/BitMarket.png</file>
@@ -44,7 +44,7 @@
         <file>Resources/calc.png</file>
         <file>Resources/Currencies.ini</file>
         <file>Resources/Exchanges/List.ini</file>
-        <file>Resources/Exchanges/BTCe.ini</file>
+        <file>Resources/Exchanges/WEX.ini</file>
         <file>Resources/Exchanges/Bitfinex.ini</file>
         <file>Resources/Exchanges/Indacoin.ini</file>
         <file>Resources/Exchanges/BTCChina.ini</file>

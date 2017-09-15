@@ -53,7 +53,7 @@
 #include "exchange/exchange.h"
 #include "script/addscriptwindow.h"
 #include "aboutdialog.h"
-#include "exchange/exchange_btce.h"
+#include "exchange/exchange_wex.h"
 #include "exchange/exchange_bitstamp.h"
 #include "exchange/exchange_btcchina.h"
 #include "exchange/exchange_bitfinex.h"
@@ -658,7 +658,7 @@ void QtBitcoinTrader::setupClass()
             break;//Secret Excange
 
         case 1:
-            currentExchange = new Exchange_BTCe(baseValues.restSign, baseValues.restKey);
+            currentExchange = new Exchange_WEX(baseValues.restSign, baseValues.restKey);
             break;//BTC-E
 
         case 2:

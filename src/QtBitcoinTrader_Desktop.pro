@@ -123,7 +123,7 @@ HEADERS += $${PWD}/script/addrulegroup.h \
           $${PWD}/exchange/exchange_bitfinex.h \
           $${PWD}/exchange/exchange_bitstamp.h \
           $${PWD}/exchange/exchange_btcchina.h \
-          $${PWD}/exchange/exchange_btce.h \
+          $${PWD}/exchange/exchange_wex.h \
           $${PWD}/feecalculator.h \
           $${PWD}/historyitem.h \
           $${PWD}/historymodel.h \
@@ -240,7 +240,7 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
           $${PWD}/exchange/exchange_bitfinex.cpp \
           $${PWD}/exchange/exchange_bitstamp.cpp \
           $${PWD}/exchange/exchange_btcchina.cpp \
-          $${PWD}/exchange/exchange_btce.cpp \
+          $${PWD}/exchange/exchange_wex.cpp \
           $${PWD}/feecalculator.cpp \
           $${PWD}/historyitem.cpp \
           $${PWD}/historymodel.cpp \
@@ -290,7 +290,7 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
 
 #
 # Resources
-# 
+#
 RESOURCES += $${PWD}/QtResource.qrc
 
 #
