@@ -29,18 +29,18 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef EXCHANGE_BTCE_H
-#define EXCHANGE_BTCE_H
+#ifndef EXCHANGE_WEX_H
+#define EXCHANGE_WEX_H
 
 #include "exchange.h"
 
-class Exchange_BTCe : public Exchange
+class Exchange_WEX : public Exchange
 {
     Q_OBJECT
 
 public:
-    Exchange_BTCe(QByteArray pRestSign, QByteArray pRestKey);
-    ~Exchange_BTCe();
+    Exchange_WEX(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_WEX();
 
 private:
     bool isApiDown;
@@ -84,4 +84,4 @@ public slots:
     void cancelOrder(QString, QByteArray);
 };
 
-#endif // EXCHANGE_BTCE_H
+#endif // EXCHANGE_WEX_H
