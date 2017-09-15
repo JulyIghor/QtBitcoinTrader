@@ -579,7 +579,7 @@ int main(int argc, char* argv[])
 
                         case 1:
                             {
-                                //BTC-e
+                                //WEX
                                 baseValues.restSign = newPassword.getRestSign().toLatin1();
                                 encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
                                                                     baseValues.restSign.toBase64() + "\r\n" +

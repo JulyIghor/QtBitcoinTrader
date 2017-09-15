@@ -659,7 +659,7 @@ void QtBitcoinTrader::setupClass()
 
         case 1:
             currentExchange = new Exchange_WEX(baseValues.restSign, baseValues.restKey);
-            break;//BTC-E
+            break;//WEX
 
         case 2:
             currentExchange = new Exchange_Bitstamp(baseValues.restSign, baseValues.restKey);
