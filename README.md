@@ -48,6 +48,12 @@ make && make install && make clean
 
 ## Change Log
 
+v1.40.08
+- Added WEX exchange, removed BTC-e
+- Fixed crash on app closing
+- Added confirmation message on script editor clear
+- Minor fixes
+
 v1.40.07
 - Release builds for Win64
 - Fix balance for OKCoin

@@ -96,7 +96,6 @@ ConfigManager::ConfigManager(const QString& configFileName, QObject* parent) :
 
 ConfigManager::~ConfigManager()
 {
-    //
 }
 
 void ConfigManager::translateDefaultNames()

@@ -86,6 +86,7 @@ public slots:
     void buy(QString, double, double);
     void sell(QString, double, double);
     void cancelOrder(QString, QByteArray);
+    void quitThread();
 };
 
 #endif // EXCHANGE_BITFINEX_H

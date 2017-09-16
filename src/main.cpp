@@ -114,7 +114,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4007";
+    appVerStr = "1.4008";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -171,7 +171,7 @@ void BaseValues::Construct()
 
 int main(int argc, char* argv[])
 {
-    JulyLockFile* julyLock = 0;
+    QScopedPointer<JulyLockFile> julyLock(nullptr);
 #if QT_VERSION < 0x050000
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
     QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
 
     baseValues_ = new BaseValues;
-    baseValues.Construct();
+    baseValues_->Construct();
 
 #if QT_VERSION >= 0x050600
     QSettings hiDpiSettings("Centrabit", "Qt Bitcoin Trader");
@@ -579,7 +579,7 @@ int main(int argc, char* argv[])
 
                         case 1:
                             {
-                                //BTC-e
+                                //WEX
                                 baseValues.restSign = newPassword.getRestSign().toLatin1();
                                 encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
                                                                     baseValues.restSign.toBase64() + "\r\n" +
@@ -722,9 +722,9 @@ int main(int argc, char* argv[])
                 baseValues.logFileName.replace(".ini", ".log", Qt::CaseInsensitive);
 
                 if (julyLock)
-                    delete julyLock;
+                    julyLock->free();
 
-                julyLock = new JulyLockFile(baseValues.iniFileName);
+                julyLock.reset(new JulyLockFile(baseValues.iniFileName));
                 bool profileLocked = julyLock->isLocked();
 
                 if (profileLocked)
@@ -797,12 +797,11 @@ int main(int argc, char* argv[])
         baseValues.mainWindow_ = new QtBitcoinTrader;
     }
 
-    mainWindow.setupClass();
+    baseValues.mainWindow_->setupClass();
     a.exec();
 
-    if (julyLock)
-        delete julyLock;
+    //delete baseValues_->fontMetrics_;
+    //delete baseValues_;
 
-    //delete baseValues.mainWindow_;
     return 0;
 }

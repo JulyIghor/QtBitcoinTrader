@@ -45,6 +45,7 @@ public:
     bool isLocked();
     explicit JulyLockFile(QString imageName);
     ~JulyLockFile();
+    void free();
 
 private:
     quint16 lockPort;

@@ -76,12 +76,27 @@ Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
 
     authRequestTime.restart();
     privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
+
+    connect(this, &Exchange::threadFinished, this, &Exchange_Bitfinex::quitThread, Qt::DirectConnection);
 }
 
 Exchange_Bitfinex::~Exchange_Bitfinex()
 {
 }
 
+void Exchange_Bitfinex::quitThread()
+{
+    clearValues();
+
+    if (depthAsks)
+        delete depthAsks;
+
+    if (depthBids)
+        delete depthBids;
+
+    if (julyHttp)
+        delete julyHttp;
+}
 
 void Exchange_Bitfinex::clearVariables()
 {

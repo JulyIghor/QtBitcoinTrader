@@ -48,7 +48,7 @@
 
 struct DepthItem;
 
-class Exchange : public QThread
+class Exchange : public QObject
 {
     Q_OBJECT
 
@@ -100,7 +100,7 @@ public:
 
     bool orderBookItemIsDedicatedOrder;
 
-    QTimer* secondTimer;
+    QScopedPointer<QTimer> secondTimer;
 
     void setApiKeySecret(QByteArray key, QByteArray secret);
 
@@ -121,9 +121,10 @@ private:
     QList<char*> apiKeyChars;
     QList<char*> apiSignChars;
 
-    void run();
-
 signals:
+    void started();
+    void threadFinished();
+
     void availableAmountChanged(QString, double);
     void depthRequested();
     void depthRequestReceived();
@@ -150,6 +151,7 @@ signals:
     void softLagChanged(int);
 private slots:
     void sslErrors(const QList<QSslError>&);
+    void quitExchange();
 public slots:
     virtual void secondSlot();
     virtual void dataReceivedAuth(QByteArray, int);
@@ -159,6 +161,8 @@ public slots:
     virtual void buy(QString, double, double);
     virtual void sell(QString, double, double);
     virtual void cancelOrder(QString, QByteArray);
+
+    void run();
 };
 
 #endif // EXCHANGE_H

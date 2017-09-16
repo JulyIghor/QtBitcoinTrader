@@ -78,6 +78,7 @@ private slots:
     void sslErrors(const QList<QSslError>&);
     void dataReceivedAuth(QByteArray, int);
     void secondSlot();
+    void quitThread();
 public slots:
     void clearValues();
     void getHistory(bool);

@@ -29,11 +29,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "news/newsview.h"
-#include <QFile>
 #include <QDesktopServices>
-#include <QTimer>
 #include "timesync.h"
+#include "news/newsview.h"
 
 NewsView::NewsView(): QWidget()
 {

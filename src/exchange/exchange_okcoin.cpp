@@ -55,8 +55,6 @@ Exchange_OKCoin::Exchange_OKCoin(QByteArray pRestSign, QByteArray pRestKey)
     tickerOnly = false;
     setApiKeySecret(pRestKey, pRestSign);
 
-    moveToThread(this);
-
     currencyMapFile = "OKCoin";
     defaultCurrencyParams.currADecimals = 8;
     defaultCurrencyParams.currBDecimals = 8;
@@ -70,10 +68,26 @@ Exchange_OKCoin::Exchange_OKCoin(QByteArray pRestSign, QByteArray pRestKey)
 
     authRequestTime.restart();
     lastHistoryId = 0;
+
+    connect(this, &Exchange::threadFinished, this, &Exchange_OKCoin::quitThread, Qt::DirectConnection);
 }
 
 Exchange_OKCoin::~Exchange_OKCoin()
 {
+}
+
+void Exchange_OKCoin::quitThread()
+{
+    clearValues();
+
+    if (depthAsks)
+        delete depthAsks;
+
+    if (depthBids)
+        delete depthBids;
+
+    if (julyHttp)
+        delete julyHttp;
 }
 
 void Exchange_OKCoin::clearVariables()

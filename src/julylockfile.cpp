@@ -110,17 +110,28 @@ JulyLockFile::JulyLockFile(QString imageName)
 
 JulyLockFile::~JulyLockFile()
 {
-    if (lockFile->isOpen() || lockSocket->state() == QUdpSocket::BoundState)
+    free();
+}
+
+void JulyLockFile::free()
+{
+    if (lockFile)
     {
-        lockFile->close();
-        lockFile->remove(lockFilePath);
+        if (lockFile->isOpen() || lockSocket->state() == QUdpSocket::BoundState)
+        {
+            lockFile->close();
+            lockFile->remove(lockFilePath);
+        }
+
+        delete lockFile;
+        lockFile = nullptr;
     }
 
-    if (lockFile)
-        delete lockFile;
-
     if (lockSocket)
+    {
         delete lockSocket;
+        lockSocket = nullptr;
+    }
 }
 
 void JulyLockFile::updateLockFile()

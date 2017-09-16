@@ -42,7 +42,7 @@ class DockHost : public QObject
     Q_OBJECT
 
 public:
-    explicit DockHost(QObject* parent = NULL);
+    explicit DockHost(QObject*);
     ~DockHost();
 
 public:
@@ -50,7 +50,6 @@ public:
     void lockDocks(bool lock);
     void setFloatingVisible(bool visible);
     void closeFloatingWindow();
-    void closeAllWindow();
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event) Q_DECL_OVERRIDE;

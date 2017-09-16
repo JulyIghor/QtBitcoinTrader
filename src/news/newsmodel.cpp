@@ -45,7 +45,8 @@ NewsModel::NewsModel()
 NewsModel::~NewsModel()
 {
     julyHttp->destroyClass = true;
-    julyHttp->deleteLater();
+    delete julyHttp;
+    downloadThread->quit();
     downloadThread->deleteLater();
 }
 

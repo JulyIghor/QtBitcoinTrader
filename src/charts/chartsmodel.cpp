@@ -47,7 +47,6 @@ ChartsModel::ChartsModel()
 
 ChartsModel::~ChartsModel()
 {
-    delete fontMetrics;
 }
 
 void ChartsModel::addLastTrades(QList<TradesItem>* newItems)

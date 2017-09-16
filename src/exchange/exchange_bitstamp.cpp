@@ -69,15 +69,29 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
     supportsLoginIndicator = true;
     supportsAccountVolume = false;
 
-    moveToThread(this);
     authRequestTime.restart();
     privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
+
+    connect(this, &Exchange::threadFinished, this, &Exchange_Bitstamp::quitThread, Qt::DirectConnection);
 }
 
 Exchange_Bitstamp::~Exchange_Bitstamp()
 {
 }
 
+void Exchange_Bitstamp::quitThread()
+{
+    clearValues();
+
+    if (depthAsks)
+        delete depthAsks;
+
+    if (depthBids)
+        delete depthBids;
+
+    if (julyHttp)
+        delete julyHttp;
+}
 void Exchange_Bitstamp::filterAvailableUSDAmountValue(double* amount)
 {
     double decValue = cutDoubleDecimalsCopy((*amount) * mainWindow.floatFee, baseValues.currentPair.priceDecimals, false);

@@ -77,7 +77,7 @@ public slots:
 private:
     qint32 intervalDate;
     qint32 intervalCount;
-    QFontMetrics* fontMetrics;
+    QScopedPointer<QFontMetrics> fontMetrics;
 
     QList<quint32> tradesDate;
     QList<double>  tradesPrice;

@@ -56,8 +56,6 @@ Exchange_Indacoin::Exchange_Indacoin(QByteArray pRestSign, QByteArray pRestKey)
 
     setApiKeySecret(pRestKey, QByteArray::fromBase64(pRestSign));
 
-    moveToThread(this);
-
     currencyMapFile = "Indacoin";
     defaultCurrencyParams.currADecimals = 8;
     defaultCurrencyParams.currBDecimals = 8;
@@ -72,10 +70,26 @@ Exchange_Indacoin::Exchange_Indacoin(QByteArray pRestSign, QByteArray pRestKey)
     authRequestTime.restart();
     privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
     lastHistoryTs = 0;
+
+    connect(this, &Exchange::threadFinished, this, &Exchange_Indacoin::quitThread, Qt::DirectConnection);
 }
 
 Exchange_Indacoin::~Exchange_Indacoin()
 {
+}
+
+void Exchange_Indacoin::quitThread()
+{
+    clearValues();
+
+    if (depthAsks)
+        delete depthAsks;
+
+    if (depthBids)
+        delete depthBids;
+
+    if (julyHttp)
+        delete julyHttp;
 }
 
 void Exchange_Indacoin::clearVariables()
@@ -128,111 +142,111 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
     switch (reqType)
     {
         case 103: //ticker
-        {
-            data = getMidData("\"" + baseValues.currentPair.currRequestPair.toUpper() + "\":{", "}", &data);
-
-            if (data.size() < 10)
-                break;
-
-            QByteArray tickerHigh = getMidData("max_price\":\"", "\"", &data);
-
-            if (!tickerHigh.isEmpty())
             {
-                double newTickerHigh = tickerHigh.toDouble();
+                data = getMidData("\"" + baseValues.currentPair.currRequestPair.toUpper() + "\":{", "}", &data);
 
-                if (newTickerHigh != lastTickerHigh)
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "High", newTickerHigh);
+                if (data.size() < 10)
+                    break;
 
-                lastTickerHigh = newTickerHigh;
+                QByteArray tickerHigh = getMidData("max_price\":\"", "\"", &data);
+
+                if (!tickerHigh.isEmpty())
+                {
+                    double newTickerHigh = tickerHigh.toDouble();
+
+                    if (newTickerHigh != lastTickerHigh)
+                        IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "High", newTickerHigh);
+
+                    lastTickerHigh = newTickerHigh;
+                }
+
+                QByteArray tickerLow = getMidData("\"min_price\":\"", "\"", &data);
+
+                if (!tickerLow.isEmpty())
+                {
+                    double newTickerLow = tickerLow.toDouble();
+
+                    if (newTickerLow != lastTickerLow)
+                        IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Low", newTickerLow);
+
+                    lastTickerLow = newTickerLow;
+                }
+
+                QByteArray tickerLast = getMidData("\"last_price\":\"", "\"", &data);
+
+                if (!tickerLast.isEmpty())
+                {
+                    double newTickerLast = tickerLast.toDouble();
+
+                    if (newTickerLast != lastTickerLast)
+                        IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", newTickerLast);
+
+                    lastTickerLast = newTickerLast;
+                }
+
+                QByteArray tickerVolume = getMidData("\"volume_base\":\"", "\"", &data);
+
+                if (!tickerVolume.isEmpty())
+                {
+                    double newTickerVolume = tickerVolume.toDouble();
+
+                    if (newTickerVolume != lastTickerVolume)
+                        IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Volume", newTickerVolume);
+
+                    lastTickerVolume = newTickerVolume;
+                }
             }
-
-            QByteArray tickerLow = getMidData("\"min_price\":\"", "\"", &data);
-
-            if (!tickerLow.isEmpty())
-            {
-                double newTickerLow = tickerLow.toDouble();
-
-                if (newTickerLow != lastTickerLow)
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Low", newTickerLow);
-
-                lastTickerLow = newTickerLow;
-            }
-
-            QByteArray tickerLast = getMidData("\"last_price\":\"", "\"", &data);
-
-            if (!tickerLast.isEmpty())
-            {
-                double newTickerLast = tickerLast.toDouble();
-
-                if (newTickerLast != lastTickerLast)
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", newTickerLast);
-
-                lastTickerLast = newTickerLast;
-            }
-
-            QByteArray tickerVolume = getMidData("\"volume_base\":\"", "\"", &data);
-
-            if (!tickerVolume.isEmpty())
-            {
-                double newTickerVolume = tickerVolume.toDouble();
-
-                if (newTickerVolume != lastTickerVolume)
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Volume", newTickerVolume);
-
-                lastTickerVolume = newTickerVolume;
-            }
-        }
-        break;//ticker
+            break;//ticker
 
         case 109: //trades
-        {
-            if (data.size() < 10)
-                break;
-
-            QStringList tradeList = QString(data).split("},{");
-            QList<TradesItem>* newTradesItems = new QList<TradesItem>;
-
-            TradesItem newItem;
-
-            for (int n = 0; n < tradeList.count(); n++)
             {
-                QByteArray tradeData = tradeList.at(n).toLatin1() + "}";
+                if (data.size() < 10)
+                    break;
 
-                quint32 currentTid = getMidData("\"tid\":", ",", &tradeData).toUInt();
+                QStringList tradeList = QString(data).split("},{");
+                QList<TradesItem>* newTradesItems = new QList<TradesItem>;
 
-                if (currentTid < 1000 || currentTid <= lastFetchTid)
-                    continue;
+                TradesItem newItem;
 
-                lastFetchTid = currentTid;
+                for (int n = 0; n < tradeList.count(); n++)
+                {
+                    QByteArray tradeData = tradeList.at(n).toLatin1() + "}";
 
-                newItem.date = getMidData("date\":", "}", &tradeData).toUInt();
+                    quint32 currentTid = getMidData("\"tid\":", ",", &tradeData).toUInt();
 
-                if (newItem.date > lastFetchDate)
-                    lastFetchDate = newItem.date;
+                    if (currentTid < 1000 || currentTid <= lastFetchTid)
+                        continue;
 
-                newItem.price = getMidData("\"price\":", ",", &tradeData).toDouble();
-                newItem.amount = getMidData("\"amount\":", ",", &tradeData).toDouble();
-                newItem.orderType = getMidData("\"oper_type\":", ",", &tradeData) != "1" ? 1 : -1;
-                newItem.symbol = baseValues.currentPair.symbol;
+                    lastFetchTid = currentTid;
 
-                if (newItem.isValid())
-                    (*newTradesItems) << newItem;
-                else if (debugLevel)
-                    logThread->writeLog("Invalid trades fetch data line:" + tradeData, 2);
+                    newItem.date = getMidData("date\":", "}", &tradeData).toUInt();
+
+                    if (newItem.date > lastFetchDate)
+                        lastFetchDate = newItem.date;
+
+                    newItem.price = getMidData("\"price\":", ",", &tradeData).toDouble();
+                    newItem.amount = getMidData("\"amount\":", ",", &tradeData).toDouble();
+                    newItem.orderType = getMidData("\"oper_type\":", ",", &tradeData) != "1" ? 1 : -1;
+                    newItem.symbol = baseValues.currentPair.symbol;
+
+                    if (newItem.isValid())
+                        (*newTradesItems) << newItem;
+                    else if (debugLevel)
+                        logThread->writeLog("Invalid trades fetch data line:" + tradeData, 2);
+                }
+
+                if (lastTickerDate < newItem.date)
+                {
+                    lastTickerDate = newItem.date;
+                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", newItem.price);
+                }
+
+                if (newTradesItems->count())
+                    emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
+                else
+                    delete newTradesItems;
             }
-
-            if (lastTickerDate < newItem.date)
-            {
-                lastTickerDate = newItem.date;
-                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", newItem.price);
-            }
-
-            if (newTradesItems->count())
-                emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
-            else
-                delete newTradesItems;
-        }
-        break;//trades
+            break;//trades
 
         case 111: //depth
             if (data.startsWith("{\"bids\":[["))
@@ -400,38 +414,38 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
             break;
 
         case 202: //info
-        {
-            if (!success)
-                break;
-
-            //QByteArray fundsData=getMidData("funds\":{","}",&data)+",";
-            QByteArray btcBalance = getMidData(baseValues.currentPair.currAStr + "\",\"", "\"", &data); //fundsData);
-
-            if (!btcBalance.isEmpty())
             {
-                double newBtcBalance = btcBalance.toDouble();
+                if (!success)
+                    break;
 
-                if (lastBtcBalance != newBtcBalance)
-                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
+                //QByteArray fundsData=getMidData("funds\":{","}",&data)+",";
+                QByteArray btcBalance = getMidData(baseValues.currentPair.currAStr + "\",\"", "\"", &data); //fundsData);
 
-                lastBtcBalance = newBtcBalance;
+                if (!btcBalance.isEmpty())
+                {
+                    double newBtcBalance = btcBalance.toDouble();
+
+                    if (lastBtcBalance != newBtcBalance)
+                        emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
+
+                    lastBtcBalance = newBtcBalance;
+                }
+
+                QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStr + "\",\"", "\"", &data); //fundsData);
+
+                if (!usdBalance.isEmpty())
+                {
+                    double newUsdBalance = usdBalance.toDouble();
+
+                    if (newUsdBalance != lastUsdBalance)
+                        emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
+
+                    lastUsdBalance = newUsdBalance;
+                }
+
+                emit accFeeChanged(baseValues.currentPair.symbol, 0.15);
             }
-
-            QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStr + "\",\"", "\"", &data); //fundsData);
-
-            if (!usdBalance.isEmpty())
-            {
-                double newUsdBalance = usdBalance.toDouble();
-
-                if (newUsdBalance != lastUsdBalance)
-                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
-
-                lastUsdBalance = newUsdBalance;
-            }
-
-            emit accFeeChanged(baseValues.currentPair.symbol, 0.15);
-        }
-        break;//info
+            break;//info
 
         case 204://orders
             if (data.size() && (data[0] == '[' || data[0] == '{'))
@@ -515,81 +529,81 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
             break;//order/sell
 
         case 208: ///history
-        {
-            bool isEmptyOrders = !success && errorString == QLatin1String("no trades");
-
-            if (isEmptyOrders)
-                success = true;
-
-            if (lastHistory != data)
             {
-                lastHistory = data;
+                bool isEmptyOrders = !success && errorString == QLatin1String("no trades");
 
-                if (!success)
-                    break;
+                if (isEmptyOrders)
+                    success = true;
 
-                QString newLog(getMidData("[[", "]]", &data));
-                QStringList dataList = newLog.split("],[");
-
-                if (dataList.count() == 0)
-                    return;
-
-                quint32 maxTs = 0;
-                QList<HistoryItem>* historyItems = new QList<HistoryItem>;
-
-                for (int n = 0; n < dataList.count(); n++)
+                if (lastHistory != data)
                 {
-                    QString curLog(dataList.at(n));
-                    curLog.remove(0, 1);
-                    curLog.chop(1);
-                    QStringList curLogList = curLog.split("\",\"");
+                    lastHistory = data;
 
-                    HistoryItem currentHistoryItem;
-
-                    if (curLogList.at(0) == "SELL")
-                        currentHistoryItem.type = 1;
-                    else if (curLogList.at(0) == "BUY")
-                        currentHistoryItem.type = 2;
-                    else if (curLogList.at(0) == "IN")
-                        currentHistoryItem.type = 4;
-                    else if (curLogList.at(0) == "OUT")
-                        currentHistoryItem.type = 5;
-                    else
-                        continue;
-
-                    if (currentHistoryItem.type == 1 || currentHistoryItem.type == 2)
-                    {
-                        currentHistoryItem.symbol = curLogList.at(1).toUpper().replace("_", "");
-                        currentHistoryItem.price = curLogList.at(2).toDouble();
-                        currentHistoryItem.volume = curLogList.at(3).toDouble();
-                        currentHistoryItem.dateTimeInt = curLogList.at(6).toUInt();
-                    }
-
-                    if (currentHistoryItem.type == 4 || currentHistoryItem.type == 5)
-                    {
-                        currentHistoryItem.symbol = curLogList.at(2).toUpper() + "   ";
-                        currentHistoryItem.volume = curLogList.at(3).toDouble();
-                        currentHistoryItem.dateTimeInt = curLogList.at(4).toUInt();
-                    }
-
-                    if (currentHistoryItem.dateTimeInt <= lastHistoryTs)
+                    if (!success)
                         break;
 
-                    if (n == 0)
-                        maxTs = currentHistoryItem.dateTimeInt;
+                    QString newLog(getMidData("[[", "]]", &data));
+                    QStringList dataList = newLog.split("],[");
 
-                    if (currentHistoryItem.isValid())
-                        (*historyItems) << currentHistoryItem;
+                    if (dataList.count() == 0)
+                        return;
+
+                    quint32 maxTs = 0;
+                    QList<HistoryItem>* historyItems = new QList<HistoryItem>;
+
+                    for (int n = 0; n < dataList.count(); n++)
+                    {
+                        QString curLog(dataList.at(n));
+                        curLog.remove(0, 1);
+                        curLog.chop(1);
+                        QStringList curLogList = curLog.split("\",\"");
+
+                        HistoryItem currentHistoryItem;
+
+                        if (curLogList.at(0) == "SELL")
+                            currentHistoryItem.type = 1;
+                        else if (curLogList.at(0) == "BUY")
+                            currentHistoryItem.type = 2;
+                        else if (curLogList.at(0) == "IN")
+                            currentHistoryItem.type = 4;
+                        else if (curLogList.at(0) == "OUT")
+                            currentHistoryItem.type = 5;
+                        else
+                            continue;
+
+                        if (currentHistoryItem.type == 1 || currentHistoryItem.type == 2)
+                        {
+                            currentHistoryItem.symbol = curLogList.at(1).toUpper().replace("_", "");
+                            currentHistoryItem.price = curLogList.at(2).toDouble();
+                            currentHistoryItem.volume = curLogList.at(3).toDouble();
+                            currentHistoryItem.dateTimeInt = curLogList.at(6).toUInt();
+                        }
+
+                        if (currentHistoryItem.type == 4 || currentHistoryItem.type == 5)
+                        {
+                            currentHistoryItem.symbol = curLogList.at(2).toUpper() + "   ";
+                            currentHistoryItem.volume = curLogList.at(3).toDouble();
+                            currentHistoryItem.dateTimeInt = curLogList.at(4).toUInt();
+                        }
+
+                        if (currentHistoryItem.dateTimeInt <= lastHistoryTs)
+                            break;
+
+                        if (n == 0)
+                            maxTs = currentHistoryItem.dateTimeInt;
+
+                        if (currentHistoryItem.isValid())
+                            (*historyItems) << currentHistoryItem;
+                    }
+
+                    if (maxTs > lastHistoryTs)
+                        lastHistoryTs = maxTs;
+
+                    emit historyChanged(historyItems);
                 }
 
-                if (maxTs > lastHistoryTs)
-                    lastHistoryTs = maxTs;
-
-                emit historyChanged(historyItems);
+                break;//money/wallet/history
             }
-
-            break;//money/wallet/history
-        }
 
         default:
             break;

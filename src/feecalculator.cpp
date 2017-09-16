@@ -93,7 +93,7 @@ FeeCalculator::FeeCalculator()
 FeeCalculator::~FeeCalculator()
 {
     if (mainWindow.feeCalculatorSingleInstance)
-        mainWindow.feeCalculator = 0;
+        mainWindow.feeCalculator.reset();
 }
 
 void FeeCalculator::on_singleInstance_toggled(bool on)

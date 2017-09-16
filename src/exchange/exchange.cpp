@@ -38,7 +38,7 @@
 #include "iniengine.h"
 
 Exchange::Exchange()
-    : QThread()
+    : QObject()
 {
     multiCurrencyTradeSupport = false;
     exchangeDisplayOnlyCurrentPairOpenOrders = false;
@@ -62,7 +62,6 @@ Exchange::Exchange()
     forceDepthLoad = false;
 
     clearVariables();
-    moveToThread(this);
 }
 
 Exchange::~Exchange()
@@ -134,11 +133,19 @@ void Exchange::run()
 
     clearVariables();
 
-    secondTimer = new QTimer;
+    secondTimer.reset(new QTimer);
     secondTimer->setSingleShot(true);
-    connect(secondTimer, SIGNAL(timeout()), this, SLOT(secondSlot()));
+    connect(secondTimer.data(), &QTimer::timeout, this, &Exchange::secondSlot);
+
+    connect(QThread::currentThread(), &QThread::finished, this, &Exchange::quitExchange, Qt::DirectConnection);
     secondSlot();
-    exec();
+    emit started();
+}
+
+void Exchange::quitExchange()
+{
+    secondTimer.reset();
+    emit threadFinished();
 }
 
 void Exchange::secondSlot()

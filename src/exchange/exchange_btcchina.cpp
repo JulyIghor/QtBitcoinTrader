@@ -69,12 +69,31 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
     supportsLoginIndicator = true;
     supportsAccountVolume = false;
 
-    moveToThread(this);
     authRequestTime.restart();
+
+    connect(this, &Exchange::threadFinished, this, &Exchange_BTCChina::quitThread, Qt::DirectConnection);
 }
 
 Exchange_BTCChina::~Exchange_BTCChina()
 {
+
+}
+
+void Exchange_BTCChina::quitThread()
+{
+    clearValues();
+
+    if (depthAsks)
+        delete depthAsks;
+
+    if (depthBids)
+        delete depthBids;
+
+    if (julyHttpAuth)
+        delete julyHttpAuth;
+
+    if (julyHttpPublic)
+        delete julyHttpPublic;
 }
 
 void Exchange_BTCChina::clearVariables()
@@ -730,66 +749,66 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
             break;
 
         case 202: //AccountInfo
-        {
-            if (!success)
-                break;
-
-            if (data.startsWith("{\"result\":{\"profile\""))
             {
-                lastInfoReceived = true;
+                if (!success)
+                    break;
 
-                if (debugLevel)
-                    logThread->writeLog("Info: " + data);
-
-                if (apiLogin.isEmpty())
+                if (data.startsWith("{\"result\":{\"profile\""))
                 {
-                    QByteArray login = getMidData("username\":\"", "\"", &data);
+                    lastInfoReceived = true;
 
-                    if (!login.isEmpty())
+                    if (debugLevel)
+                        logThread->writeLog("Info: " + data);
+
+                    if (apiLogin.isEmpty())
                     {
-                        apiLogin = login;
-                        translateUnicodeStr(&apiLogin);
-                        emit loginChanged(apiLogin);
+                        QByteArray login = getMidData("username\":\"", "\"", &data);
+
+                        if (!login.isEmpty())
+                        {
+                            apiLogin = login;
+                            translateUnicodeStr(&apiLogin);
+                            emit loginChanged(apiLogin);
+                        }
+                    }
+
+                    QByteArray feeData = getMidData("trade_fee_", ",", &data) + ",";
+                    double newFee = getMidData("\":", ",", &feeData).toDouble();
+
+                    if (newFee != lastFee)
+                        emit accFeeChanged(baseValues.currentPair.symbol, newFee);
+
+                    lastFee = newFee;
+
+                    QByteArray balanceData = getMidData("\"balance\":", "}}}", &data) + "}";
+                    QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "\":", "}", &balanceData);
+
+                    if (!btcBalance.isEmpty())
+                    {
+                        double newBtcBalance = btcBalance.toDouble() + getMidData("\"amount\":\"", "\"", &btcBalance).toDouble();
+
+                        if (lastBtcBalance != newBtcBalance)
+                            emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
+
+                        lastBtcBalance = newBtcBalance;
+                    }
+
+                    QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "\":", "}", &balanceData);
+
+                    if (!usdBalance.isEmpty())
+                    {
+                        double newUsdBalance = usdBalance.toDouble() + getMidData("\"amount\":\"", "\"", &usdBalance).toDouble();
+
+                        if (newUsdBalance != lastUsdBalance)
+                            emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
+
+                        lastUsdBalance = newUsdBalance;
                     }
                 }
-
-                QByteArray feeData = getMidData("trade_fee_", ",", &data) + ",";
-                double newFee = getMidData("\":", ",", &feeData).toDouble();
-
-                if (newFee != lastFee)
-                    emit accFeeChanged(baseValues.currentPair.symbol, newFee);
-
-                lastFee = newFee;
-
-                QByteArray balanceData = getMidData("\"balance\":", "}}}", &data) + "}";
-                QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "\":", "}", &balanceData);
-
-                if (!btcBalance.isEmpty())
-                {
-                    double newBtcBalance = btcBalance.toDouble() + getMidData("\"amount\":\"", "\"", &btcBalance).toDouble();
-
-                    if (lastBtcBalance != newBtcBalance)
-                        emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
-
-                    lastBtcBalance = newBtcBalance;
-                }
-
-                QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "\":", "}", &balanceData);
-
-                if (!usdBalance.isEmpty())
-                {
-                    double newUsdBalance = usdBalance.toDouble() + getMidData("\"amount\":\"", "\"", &usdBalance).toDouble();
-
-                    if (newUsdBalance != lastUsdBalance)
-                        emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
-
-                    lastUsdBalance = newUsdBalance;
-                }
+                else if (debugLevel)
+                    logThread->writeLog("Invalid Info data:" + data, 2);
             }
-            else if (debugLevel)
-                logThread->writeLog("Invalid Info data:" + data, 2);
-        }
-        break;//balance
+            break;//balance
 
         case 204://open_orders
             if (!success)
@@ -854,22 +873,22 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
             break;//open_orders
 
         case 305: //cancelOrder
-        {
-            if (!success)
-                break;
-
-            if (!cancelingOrderIDs.isEmpty())
             {
-                if (data.startsWith("{\"result\":true"))
-                    emit orderCanceled(baseValues.currentPair.symbol, cancelingOrderIDs.first());
+                if (!success)
+                    break;
 
-                if (debugLevel)
-                    logThread->writeLog("Order canceled:" + cancelingOrderIDs.first(), 2);
+                if (!cancelingOrderIDs.isEmpty())
+                {
+                    if (data.startsWith("{\"result\":true"))
+                        emit orderCanceled(baseValues.currentPair.symbol, cancelingOrderIDs.first());
 
-                cancelingOrderIDs.removeFirst();
+                    if (debugLevel)
+                        logThread->writeLog("Order canceled:" + cancelingOrderIDs.first(), 2);
+
+                    cancelingOrderIDs.removeFirst();
+                }
             }
-        }
-        break;//cancelOrder
+            break;//cancelOrder
 
         case 306: //buyOrder
             if (!success || !debugLevel)

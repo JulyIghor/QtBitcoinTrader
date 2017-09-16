@@ -79,40 +79,32 @@ ChartsView::ChartsView()
     ui->descriptionAmountLabel->setText("- " + julyTr("CHARTS_AMOUNT", "Amount"));
 
 
-    sceneCharts = new QGraphicsScene;
+    sceneCharts.reset(new QGraphicsScene);
     ui->graphicsView->scale(1, -1);
-    ui->graphicsView->setScene(sceneCharts);
-    leftSceneCharts = new QGraphicsScene;
+    ui->graphicsView->setScene(sceneCharts.data());
+    leftSceneCharts.reset(new QGraphicsScene);
     ui->leftGraphicsView->scale(1, -1);
-    ui->leftGraphicsView->setScene(leftSceneCharts);
+    ui->leftGraphicsView->setScene(leftSceneCharts.data());
     ui->leftGraphicsView->setFixedWidth(0);
-    rightSceneCharts = new QGraphicsScene;
+    rightSceneCharts.reset(new QGraphicsScene);
     ui->rightGraphicsView->scale(1, -1);
-    ui->rightGraphicsView->setScene(rightSceneCharts);
+    ui->rightGraphicsView->setScene(rightSceneCharts.data());
     ui->rightGraphicsView->setFixedWidth(0);
-    bottomSceneCharts = new QGraphicsScene;
+    bottomSceneCharts.reset(new QGraphicsScene);
     ui->bottomGraphicsView->scale(1, -1);
-    ui->bottomGraphicsView->setScene(bottomSceneCharts);
+    ui->bottomGraphicsView->setScene(bottomSceneCharts.data());
     ui->bottomGraphicsView->setFixedHeight(fontHeight + 3);
-    drawText(sceneCharts, julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
+    drawText(sceneCharts.data(), julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
              0, 0, "font-size:28px;color:" + baseValues.appTheme.gray.name());
 
-    chartsModel = new ChartsModel;
+    chartsModel.reset(new ChartsModel);
 
-    connect(refreshTimer, &QTimer::timeout, this, &ChartsView::refreshCharts);
+    connect(refreshTimer.data(), &QTimer::timeout, this, &ChartsView::refreshCharts);
     refreshTimer->start(timeRefreshCharts);
 }
 
 ChartsView::~ChartsView()
 {
-    chartsModel->deleteLater();
-    sceneCharts->deleteLater();
-    leftSceneCharts->deleteLater();
-    rightSceneCharts->deleteLater();
-    bottomSceneCharts->deleteLater();
-    delete perfomanceTimer;
-    delete refreshTimer;
-    delete ui;
 }
 
 void ChartsView::resizeEvent(QResizeEvent* event)
@@ -191,7 +183,7 @@ bool ChartsView::prepareCharts()
 
     for (qint32 i = 0; i < chartsModel->graphDateText.count(); ++i)
     {
-        drawText(bottomSceneCharts, chartsModel->graphDateText.at(i),
+        drawText(bottomSceneCharts.data(), chartsModel->graphDateText.at(i),
                  chartsModel->graphDateTextX.at(i) - 12 + chartsModel->widthAmountYAxis, -4);
     }
 
@@ -204,7 +196,7 @@ bool ChartsView::prepareCharts()
         leftSceneCharts->addLine(ui->leftGraphicsView->width() - 4, chartsModel->graphAmountTextY.at(i),
                                  ui->leftGraphicsView->width(), chartsModel->graphAmountTextY.at(i),
                                  QPen("#777777"));
-        drawText(leftSceneCharts, chartsModel->graphAmountText.at(i),
+        drawText(leftSceneCharts.data(), chartsModel->graphAmountText.at(i),
                  5, chartsModel->graphAmountTextY.at(i) + 7);
     }
 
@@ -216,14 +208,13 @@ bool ChartsView::prepareCharts()
     {
         rightSceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i),
                                   5, chartsModel->graphPriceTextY.at(i), QPen("#777777"));
-        drawText(rightSceneCharts, chartsModel->graphPriceText.at(i),
+        drawText(rightSceneCharts.data(), chartsModel->graphPriceText.at(i),
                  11, chartsModel->graphPriceTextY.at(i) + 7);
     }
 
     ui->graphicsView->setScene(0);
-    delete sceneCharts;
-    sceneCharts = new QGraphicsScene;
-    ui->graphicsView->setScene(sceneCharts);
+    sceneCharts.reset(new QGraphicsScene);
+    ui->graphicsView->setScene(sceneCharts.data());
 
     int graphWidth = chartsModel->chartsWidth;
     int graphHeight = chartsModel->chartsHeight;
@@ -254,7 +245,7 @@ void ChartsView::clearCharts()
     leftSceneCharts->clear();
     rightSceneCharts->clear();
     sceneCharts->clear();
-    drawText(sceneCharts, julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
+    drawText(sceneCharts.data(), julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
              0, 0, "font-size:28px;color:" + baseValues.appTheme.gray.name());
     sceneCharts->setSceneRect(sceneCharts->itemsBoundingRect());
     refreshTimer->start(timeRefreshCharts);
@@ -273,7 +264,7 @@ void ChartsView::refreshCharts()
         bottomSceneCharts->clear();
         leftSceneCharts->clear();
         rightSceneCharts->clear();
-        drawText(sceneCharts, julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
+        drawText(sceneCharts.data(), julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
                  0, 0, "font-size:28px;color:" + baseValues.appTheme.gray.name());
         return;
     }

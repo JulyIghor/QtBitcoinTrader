@@ -310,46 +310,46 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
             break;
 
         case 1:
-        {
-            //Volume
-            if (volumeList.at(currentRow) <= 0.0)
-                return QVariant();
+            {
+                //Volume
+                if (volumeList.at(currentRow) <= 0.0)
+                    return QVariant();
 
-            if (role == Qt::ToolTipRole)
-                baseValues.currentPair.currASign + volumeListStr.at(currentRow);
+                if (role == Qt::ToolTipRole)
+                    baseValues.currentPair.currASign + volumeListStr.at(currentRow);
 
-            return volumeListStr.at(currentRow);
-        }
-        break;
+                return volumeListStr.at(currentRow);
+            }
+            break;
 
         case 2:
-        {
-            //Direction
-            switch (directionList.at(currentRow))
             {
-                case -1:
-                    return downArrowStr;
+                //Direction
+                switch (directionList.at(currentRow))
+                {
+                    case -1:
+                        return downArrowStr;
 
-                case 1:
-                    return upArrowStr;
+                    case 1:
+                        return upArrowStr;
 
-                default:
-                    return QVariant();
+                    default:
+                        return QVariant();
+                }
             }
-        }
 
         case 3:
-        {
-            //Size
-            if (sizeListGet(currentRow) <= 0.0)
-                return QVariant();
+            {
+                //Size
+                if (sizeListGet(currentRow) <= 0.0)
+                    return QVariant();
 
-            if (role == Qt::ToolTipRole)
-                baseValues.currentPair.currASign + sizeListStr.at(currentRow);
+                if (role == Qt::ToolTipRole)
+                    baseValues.currentPair.currASign + sizeListStr.at(currentRow);
 
-            return sizeListStr.at(currentRow);
-        }
-        break;
+                return sizeListStr.at(currentRow);
+            }
+            break;
 
         default:
             break;
@@ -592,7 +592,7 @@ void DepthModel::depthFirstOrder(double price, double volume)
 
 void DepthModel::depthUpdateOrders(QList<DepthItem>* items)
 {
-    if (items == 0)
+    if (items == nullptr)
         return;
 
     for (int n = 0; n < items->count(); n++)

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleVersion</key>
-        <string>1.40.07</string>
+        <string>1.40.08</string>
 	<key>CFBundleName</key>
 	<string>Qt Bitcoin Trader</string>
 	<key>CFBundleIconFile</key>
@@ -22,5 +22,7 @@
 	<string>NSApplication</string>
 	<key>NSHighResolutionCapable</key>
 	<string>True</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.8.0</string>
 </dict>
 </plist>

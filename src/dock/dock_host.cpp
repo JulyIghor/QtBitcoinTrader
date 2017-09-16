@@ -250,12 +250,3 @@ void DockHost::closeFloatingWindow()
         }
     }
 }
-
-void DockHost::closeAllWindow()
-{
-    Q_FOREACH (QWidget* widget, widgets)
-    {
-        QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
-        dock->deleteLater();
-    }
-}

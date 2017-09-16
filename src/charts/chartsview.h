@@ -40,7 +40,7 @@ class ChartsModel;
 
 namespace Ui
 {
-class ChartsView;
+    class ChartsView;
 }
 
 class ChartsView : public QWidget
@@ -49,7 +49,7 @@ class ChartsView : public QWidget
 public:
     bool isVisible;
     bool sizeIsChanged;
-    ChartsModel* chartsModel;
+    QScopedPointer<ChartsModel> chartsModel;
 
     ChartsView();
     ~ChartsView();
@@ -61,15 +61,15 @@ public slots:
     void refreshCharts();
 
 private:
-    Ui::ChartsView* ui;
+    QScopedPointer<Ui::ChartsView> ui;
     quint16 fontHeight;
     quint16 fontHeightHalf;
-    QGraphicsScene* sceneCharts;
-    QGraphicsScene* leftSceneCharts;
-    QGraphicsScene* rightSceneCharts;
-    QGraphicsScene* bottomSceneCharts;
-    QTimer* refreshTimer;
-    QElapsedTimer* perfomanceTimer;
+    QScopedPointer<QGraphicsScene> sceneCharts;
+    QScopedPointer<QGraphicsScene> leftSceneCharts;
+    QScopedPointer<QGraphicsScene> rightSceneCharts;
+    QScopedPointer<QGraphicsScene> bottomSceneCharts;
+    QScopedPointer<QTimer> refreshTimer;
+    QScopedPointer<QElapsedTimer> perfomanceTimer;
     qint32 timeRefreshCharts;
     qint32 lastResize;
     qint32 lastNewData;

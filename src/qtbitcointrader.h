@@ -86,6 +86,8 @@ class QtBitcoinTrader : public QMainWindow
     Q_OBJECT
 
 public:
+    Ui::QtBitcoinTraderClass ui;
+
     void addRuleByHolder(RuleHolder& holder, bool isEnabled, QString titleName, QString fileName);
 
     QStringList getRuleGroupsNames();
@@ -96,7 +98,7 @@ public:
     QMap<QString, QDoubleSpinBox*> indicatorsMap;
 
     bool feeCalculatorSingleInstance;
-    FeeCalculator* feeCalculator;
+    QScopedPointer<FeeCalculator> feeCalculator;
 
     double meridianPrice;
     double availableAmount;
@@ -126,8 +128,6 @@ public:
     void fixDecimals(QWidget* par);
     void fillAllBtcLabels(QWidget* par, QString curName);
     void fillAllUsdLabels(QWidget* par, QString curName);
-
-    Ui::QtBitcoinTraderClass ui;
 
     QByteArray getMidData(QString a, QString b, QByteArray* data);
     QtBitcoinTrader();
@@ -175,8 +175,10 @@ public:
 
     bool closeToTray;
 
-    ChartsView* chartsView;
-    NewsView* newsView;
+    ChartsView* chartsView = nullptr;
+    NewsView* newsView = nullptr;
+
+    QScopedPointer<QTimer> secondTimer;
 private:
     QList<GroupStateItem> pendingGroupStates;
 
@@ -259,7 +261,7 @@ private:
     qint16 currentPopupDialogs;
     NetworkMenu* networkMenu;
     CurrencyMenu* currencyMenu;
-    CurrencySignLoader* currencySignLoader;
+    QScopedPointer<CurrencySignLoader> currencySignLoader;
 
 public slots:
     void sendIndicatorEvent(QString symbol, QString name, double value);
@@ -440,6 +442,8 @@ private:
     void translateTab(QWidget* tab);
     void lockLogo(bool lock);
     void initConfigMenu();
+
+    QScopedPointer<QThread> currentExchangeThread;
 
 private slots:
     void onActionAbout();

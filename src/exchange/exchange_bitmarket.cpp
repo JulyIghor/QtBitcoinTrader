@@ -54,8 +54,6 @@ Exchange_BitMarket::Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey
     tickerOnly = false;
     setApiKeySecret(pRestKey, pRestSign);
 
-    moveToThread(this);
-
     currencyMapFile = "BitMarket";
     defaultCurrencyParams.currADecimals = 8;
     defaultCurrencyParams.currBDecimals = 8;
@@ -69,10 +67,26 @@ Exchange_BitMarket::Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey
 
     authRequestTime.restart();
     privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
+
+    connect(this, &Exchange::threadFinished, this, &Exchange_BitMarket::quitThread, Qt::DirectConnection);
 }
 
 Exchange_BitMarket::~Exchange_BitMarket()
 {
+}
+
+void Exchange_BitMarket::quitThread()
+{
+    clearValues();
+
+    if (depthAsks)
+        delete depthAsks;
+
+    if (depthBids)
+        delete depthBids;
+
+    if (julyHttp)
+        delete julyHttp;
 }
 
 void Exchange_BitMarket::clearVariables()
@@ -495,47 +509,47 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
             break;//orders
 
         case 305: //order/cancel
-        {
-            if (!cancelingOrderIDs.isEmpty())
             {
-                if (data.startsWith("{\"success\":true"))
-                    emit orderCanceled(baseValues.currentPair.symbol, cancelingOrderIDs.first());
+                if (!cancelingOrderIDs.isEmpty())
+                {
+                    if (data.startsWith("{\"success\":true"))
+                        emit orderCanceled(baseValues.currentPair.symbol, cancelingOrderIDs.first());
 
-                if (debugLevel)
-                    logThread->writeLog("Order canceled:" + cancelingOrderIDs.first(), 2);
+                    if (debugLevel)
+                        logThread->writeLog("Order canceled:" + cancelingOrderIDs.first(), 2);
 
-                cancelingOrderIDs.removeFirst();
+                    cancelingOrderIDs.removeFirst();
+                }
+
+                dataReceivedAuth(data, 202);
             }
-
-            dataReceivedAuth(data, 202);
-        }
-        break;//order/cancel
+            break;//order/cancel
 
         case 306:
-        {
-            if (debugLevel)
-                logThread->writeLog("Buy OK: " + data, 2);
-
-            if (data.startsWith("{\"error\""))
             {
-                success = false;
-                errorString += "Invalid order/buy data. ";
+                if (debugLevel)
+                    logThread->writeLog("Buy OK: " + data, 2);
+
+                if (data.startsWith("{\"error\""))
+                {
+                    success = false;
+                    errorString += "Invalid order/buy data. ";
+                }
             }
-        }
-        break;//order/buy
+            break;//order/buy
 
         case 307:
-        {
-            if (debugLevel)
-                logThread->writeLog("Sell OK: " + data, 2);
-
-            if (data.startsWith("{\"error\""))
             {
-                success = false;
-                errorString += "Invalid order/sell data. ";
+                if (debugLevel)
+                    logThread->writeLog("Sell OK: " + data, 2);
+
+                if (data.startsWith("{\"error\""))
+                {
+                    success = false;
+                    errorString += "Invalid order/sell data. ";
+                }
             }
-        }
-        break;//order/sell
+            break;//order/sell
 
         case 208: ///history
             if (data.startsWith("{\"success\":true,\"data\":{\"total\":"))

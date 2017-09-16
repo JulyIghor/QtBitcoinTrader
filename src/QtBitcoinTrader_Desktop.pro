@@ -9,53 +9,42 @@ LANGUAGE	= C++
 DEPENDPATH	+= .
 INCLUDEPATH	+= .
 
-CONFIG	+= qt release c++11
-
-win32 {
-    contains(QMAKE_TARGET.arch, x86_64) {
-    TARGET = QtBitcoinTrader_64bit
-
-    } else {
-    TARGET = QtBitcoinTrader_32bit
-    }
-    LIBS += -lcrypto -lssl -lz
-}
-
-!win32 {
-TARGET = QtBitcoinTrader
-}
-
 QT += network script widgets
 linux { QT += multimedia }
 mac { QT += multimedia }
 
+LIBS += -lcrypto -lssl -lz # -lws2_32 -lole32 -lwinmm -lgdi32 -lcrypt32
+
 win32 {
-   LIBS += -lcrypto -lssl -lz
-#LIBS += -lcrypto -lssl -lz# -lws2_32 -lole32 -lwinmm -lgdi32
-#LIBS +=  -lcrypt32 -lcrypto -lssl -lz
-    #exists($$(WINDOWSSDKDIR)/Include/um/sapi.h){
-#        QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
-#        QMAKE_CFLAGS_RELEASE -= -Zc:strictStrings
-#        QMAKE_CFLAGS -= -Zc:strictStrings
-#        QMAKE_CXXFLAGS -= -Zc:strictStrings
-        DEFINES += SAPI_ENABLED
-   # }
+    contains(QMAKE_TARGET.arch, x86_64) {
+        TARGET = QtBitcoinTrader_64bit
+    } else {
+        TARGET = QtBitcoinTrader_32bit
+    }
+
+    DEFINES += SAPI_ENABLED
+
+    exists($$(WINDOWSSDKDIR)/Include/um/sapi.h){
+        QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
+        QMAKE_CFLAGS_RELEASE -= -Zc:strictStrings
+        QMAKE_CFLAGS -= -Zc:strictStrings
+        QMAKE_CXXFLAGS -= -Zc:strictStrings
+    }
 
     checkFRAMEWORKDIR=$$(FRAMEWORKDIR)
     isEmpty(checkFRAMEWORKDIR) {
         QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
         QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
 
-        DEFINES += SAPI_ENABLED
         LIBS += -lsapi
     }
 }
 
-linux { LIBS += -lcrypto -lssl -lz }
+!win32 {
+TARGET = QtBitcoinTrader
+}
 
 mac {
-    LIBS += -lcrypto -lssl -lz
-
     QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.11
     QMAKE_CFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations -Wno-unused-function
@@ -123,7 +112,7 @@ HEADERS += $${PWD}/script/addrulegroup.h \
           $${PWD}/exchange/exchange_bitfinex.h \
           $${PWD}/exchange/exchange_bitstamp.h \
           $${PWD}/exchange/exchange_btcchina.h \
-          $${PWD}/exchange/exchange_btce.h \
+          $${PWD}/exchange/exchange_wex.h \
           $${PWD}/feecalculator.h \
           $${PWD}/historyitem.h \
           $${PWD}/historymodel.h \
@@ -240,7 +229,7 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
           $${PWD}/exchange/exchange_bitfinex.cpp \
           $${PWD}/exchange/exchange_bitstamp.cpp \
           $${PWD}/exchange/exchange_btcchina.cpp \
-          $${PWD}/exchange/exchange_btce.cpp \
+          $${PWD}/exchange/exchange_wex.cpp \
           $${PWD}/feecalculator.cpp \
           $${PWD}/historyitem.cpp \
           $${PWD}/historymodel.cpp \

@@ -55,8 +55,6 @@ Exchange_YObit::Exchange_YObit(QByteArray pRestSign, QByteArray pRestKey)
     tickerOnly = false;
     setApiKeySecret(pRestKey, pRestSign);
 
-    moveToThread(this);
-
     currencyMapFile = "YObit";
     defaultCurrencyParams.currADecimals = 8;
     defaultCurrencyParams.currBDecimals = 8;
@@ -71,10 +69,26 @@ Exchange_YObit::Exchange_YObit(QByteArray pRestSign, QByteArray pRestKey)
     authRequestTime.restart();
     privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
     lastHistoryId = 0;
+
+    connect(this, &Exchange::threadFinished, this, &Exchange_YObit::quitThread, Qt::DirectConnection);
 }
 
 Exchange_YObit::~Exchange_YObit()
 {
+}
+
+void Exchange_YObit::quitThread()
+{
+    clearValues();
+
+    if (depthAsks)
+        delete depthAsks;
+
+    if (depthBids)
+        delete depthBids;
+
+    if (julyHttp)
+        delete julyHttp;
 }
 
 void Exchange_YObit::clearVariables()
