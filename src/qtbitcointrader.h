@@ -98,7 +98,7 @@ public:
     QMap<QString, QDoubleSpinBox*> indicatorsMap;
 
     bool feeCalculatorSingleInstance;
-    QScopedPointer<FeeCalculator> feeCalculator;
+    FeeCalculator* feeCalculator;
 
     double meridianPrice;
     double availableAmount;
@@ -458,20 +458,21 @@ private slots:
     void exitApp();
 
 private:
-    QAction*    actionExit;
-    QAction*    actionAbout;
-    QAction*    actionAboutQt;
-    QAction*    actionLockDocks;
-    QAction*    actionConfigManager;
-    QAction*    actionSettings;
-    QAction*    actionDebug;
-    QMenu*      menuFile;
-    QMenu*      menuView;
-    QMenu*      menuConfig;
-    QMenu*      menuHelp;
+    bool         lockedDocks;
+    QAction*     actionExit;
+    QAction*     actionAbout;
+    QAction*     actionAboutQt;
+    QAction*     actionLockDocks;
+    QAction*     actionConfigManager;
+    QAction*     actionSettings;
+    QAction*     actionDebug;
+    QMenu*       menuFile;
+    QMenu*       menuView;
+    QMenu*       menuConfig;
+    QMenu*       menuHelp;
     ConfigManagerDialog*    configDialog;
-    DockHost*   dockHost;
-    QDockWidget*    dockLogo;
+    DockHost*    dockHost;
+    QDockWidget* dockLogo;
 };
 
 #endif // QTBITCOINTRADER_H

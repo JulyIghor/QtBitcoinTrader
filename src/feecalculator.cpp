@@ -92,8 +92,7 @@ FeeCalculator::FeeCalculator()
 
 FeeCalculator::~FeeCalculator()
 {
-    if (mainWindow.feeCalculatorSingleInstance)
-        mainWindow.feeCalculator.reset();
+    mainWindow.feeCalculator = nullptr;
 }
 
 void FeeCalculator::on_singleInstance_toggled(bool on)
@@ -128,7 +127,10 @@ void FeeCalculator::languageChanged()
 void FeeCalculator::setZeroProfitPrice()
 {
     sellPrice = buyPrice / fee / fee;
+    locked = true;
     ui.sellPrice->setValue(sellPrice);
+    locked = false;
+    sellCalc();
 }
 
 void FeeCalculator::profitLossChanged(double val)

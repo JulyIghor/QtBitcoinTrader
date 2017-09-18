@@ -567,6 +567,8 @@ void ScriptWidget::on_buttonClear_clicked()
         msgBox.setWindowTitle("Qt Bitcoin Trader");
         msgBox.setText(julyTr("MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT", "Do you really want to clear the scrypt?"));
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
+        msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
 
         if (msgBox.exec() == QMessageBox::Yes)
             ui->sourceCode->clear();

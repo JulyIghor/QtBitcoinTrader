@@ -137,6 +137,7 @@ QtBitcoinTrader::QtBitcoinTrader() :
     trayMenu(nullptr),
     debugViewer(nullptr),
     trayIcon(nullptr),
+    feeCalculator(nullptr),
     lastRuleExecutedTime(QTime(1, 0, 0, 0)),
     dockHost(new DockHost(this)),
     currencySignLoader(new CurrencySignLoader)
@@ -932,7 +933,13 @@ void QtBitcoinTrader::ordersFilterChanged()
     QString filterSymbol;
 
     if (ui.ordersFilterCheckBox->isChecked())
-        filterSymbol = ui.filterOrdersCurrency->currentText().replace("/", "");
+    {
+        filterSymbol = ui.filterOrdersCurrency->currentText();
+
+        if (filterSymbol.size())
+            if (baseValues.currentPair.symbol.indexOf("/") == -1)
+                filterSymbol.replace("/", "");
+    }
 
     ordersSortModel->setFilterWildcard(filterSymbol);
 }
@@ -2632,7 +2639,7 @@ void QtBitcoinTrader::on_calcButton_clicked()
     if (feeCalculatorSingleInstance && feeCalculator)
         feeCalculator->activateWindow();
     else
-        feeCalculator.reset(new FeeCalculator);
+        feeCalculator = new FeeCalculator;
 }
 
 void QtBitcoinTrader::checkValidSellButtons()
@@ -3351,6 +3358,13 @@ void QtBitcoinTrader::initConfigMenu()
         QAction* action = menuConfig->addAction(name);
         connect(action, &QAction::triggered, this, &QtBitcoinTrader::onMenuConfigTriggered);
     }
+
+    lockedDocks = iniSettings->value("UI/LockedDocks", false).toBool();
+
+    if (lockedDocks)
+        actionLockDocks->setChecked(true);
+
+    onActionLockDocks(lockedDocks);
 }
 
 void QtBitcoinTrader::languageChanged()
@@ -3610,6 +3624,8 @@ void QtBitcoinTrader::saveAppState()
     }
 
     iniSettings->setValue("UI/FeeCalcSingleInstance", feeCalculatorSingleInstance);
+
+    iniSettings->setValue("UI/LockedDocks", lockedDocks);
 
     iniSettings->sync();
 }
@@ -4059,6 +4075,7 @@ void QtBitcoinTrader::onActionAboutQt()
 
 void QtBitcoinTrader::onActionLockDocks(bool checked)
 {
+    lockedDocks = checked;
     dockHost->lockDocks(checked);
     lockLogo(checked);
 }
