@@ -49,6 +49,8 @@
 #include "datafolderchusedialog.h"
 #include <QMetaEnum>
 #include <QUuid>
+#include <QTranslator>
+#include <QLibraryInfo>
 #include "julylockfile.h"
 #include "login/featuredexchangesdialog.h"
 #include "login/allexchangesdialog.h"
@@ -114,7 +116,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4008";
+    appVerStr = "1.4009";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -197,6 +199,11 @@ int main(int argc, char* argv[])
 #endif
 
     QApplication a(argc, argv);
+
+    QTranslator qTranslator;
+    qTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    a.installTranslator(&qTranslator);
+
     TimeSync::global();
 
 #ifdef Q_OS_WIN//DPI Fix

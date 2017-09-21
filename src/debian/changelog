@@ -1,7 +1,12 @@
-qtbitcointrader (1.40.0-8) stable; urgency=medium
+qtbitcointrader (1.40.0-9) stable; urgency=medium
 
   * Initial release
-  
+ 
+v1.40.09
+- Fixed FeeCalculator crash
+- Fixed account open orders filtering and calculations
+- UI layout bugs fixed
+
 v1.40.08
 - Added WEX exchange, removed BTC-e
 - Fixed crash on app closing

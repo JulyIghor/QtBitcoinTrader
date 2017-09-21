@@ -113,6 +113,31 @@ int OrdersModel::getAsksCount()
     return asksCount;
 }
 
+void OrdersModel::filterSymbolChanged(QString filterSymbol)
+{
+    static QString s_filterSymbol;
+    double sumCurrA = 0.0;
+    double sumCurrB = 0.0;
+
+    if (filterSymbol.isEmpty())
+        s_filterSymbol = baseValues.currentPair.symbol;
+    else
+        s_filterSymbol = filterSymbol;
+
+    for (int i = 0; i < symbolList.size(); ++i)
+    {
+        if (symbolList.at(i) != s_filterSymbol)
+            continue;
+
+        if (typesList.at(i))
+            sumCurrA += amountList.at(i);
+        else
+            sumCurrB += totalList.at(i);
+    }
+
+    emit volumeAmountChanged(sumCurrA, sumCurrB);
+}
+
 void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
 {
     currentAsksPrices.clear();
@@ -134,9 +159,6 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
 
     QHash<QByteArray, bool> existingOids;
 
-    double volumeTotal = 0.0;
-    double amountTotal = 0.0;
-
     for (int n = 0; n < ordersRcv->count(); n++)
     {
         bool isAsk = ordersRcv->at(n).type;
@@ -145,12 +167,6 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
             newAsksCount++;
 
         QString orderSymbol = ordersRcv->at(n).symbol;
-
-        if (isAsk && orderSymbol.startsWith(baseValues.currentPair.currAStr))
-            volumeTotal += ordersRcv->at(n).amount - currentExchange->decAmountFromOpenOrder;
-
-        if (!isAsk && orderSymbol.endsWith(baseValues.currentPair.currBStr))
-            amountTotal += (ordersRcv->at(n).amount - currentExchange->decAmountFromOpenOrder) * ordersRcv->at(n).price;
 
         if (ordersRcv->at(n).status > 0 && orderSymbol == baseValues.currentPair.symbol)
         {
@@ -264,7 +280,7 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
     }
 
     countWidth = qMax(textFontWidth(QString::number(oidList.count() + 1)) + 6, defaultHeightForRow);
-    emit volumeAmountChanged(volumeTotal, amountTotal);
+    filterSymbolChanged();
     emit dataChanged(index(0, 0), index(oidList.count() - 1, columnsCount - 1));
 
     ordersCountChanged();
@@ -440,82 +456,82 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
     switch (indexColumn)
     {
         case -1://Counter
-        {
-            if (role == Qt::ToolTipRole)
-                return oidList.at(currentRow);
+            {
+                if (role == Qt::ToolTipRole)
+                    return oidList.at(currentRow);
 
-            return oidList.count() - currentRow;
-        }
-        break;
+                return oidList.count() - currentRow;
+            }
+            break;
 
         case 0:
-        {
-            //Date
-            return dateStrList.at(currentRow);
-        }
-        break;
+            {
+                //Date
+                return dateStrList.at(currentRow);
+            }
+            break;
 
         case 1:
-        {
-            //Type
-            return typesList.at(currentRow) ? textAsk : textBid;
-        }
-        break;
+            {
+                //Type
+                return typesList.at(currentRow) ? textAsk : textBid;
+            }
+            break;
 
         case 2:
-        {
-            //Status
-            switch (statusList.at(currentRow))
             {
-                case 0:
-                    return textStatusList.at(0);
-                    break;
+                //Status
+                switch (statusList.at(currentRow))
+                {
+                    case 0:
+                        return textStatusList.at(0);
+                        break;
 
-                case 1:
-                    return textStatusList.at(1);
-                    break;
+                    case 1:
+                        return textStatusList.at(1);
+                        break;
 
-                case 2:
-                    return textStatusList.at(2);
-                    break;
+                    case 2:
+                        return textStatusList.at(2);
+                        break;
 
-                case 3:
-                    return textStatusList.at(3);
-                    break;
+                    case 3:
+                        return textStatusList.at(3);
+                        break;
 
-                default:
-                    return textStatusList.at(4);
-                    break;
+                    default:
+                        return textStatusList.at(4);
+                        break;
+                }
             }
-        }
-        break;
+            break;
 
         case 3:
-        {
-            //Amount
-            return amountStrList.at(currentRow);
-        }
-        break;
+            {
+                //Amount
+                return amountStrList.at(currentRow);
+            }
+            break;
 
         case 4:
-        {
-            //Price
-            return priceStrList.at(currentRow);
-        }
-        break;
+            {
+                //Price
+                return priceStrList.at(currentRow);
+            }
+            break;
 
         case 5:
-        {
-            //Total
-            return totalStrList.at(currentRow);
-        }
-        break;
+            {
+                //Total
+                return totalStrList.at(currentRow);
+            }
+            break;
 
         case 6:
-        {
-            //X
-            return QVariant();
-        }
+            {
+                //X
+                return QVariant();
+            }
 
         default:
             break;

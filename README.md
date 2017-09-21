@@ -48,6 +48,11 @@ make && make install && make clean
 
 ## Change Log
 
+v1.40.09
+- Fixed FeeCalculator crash
+- Fixed account open orders filtering and calculations
+- UI layout bugs fixed
+
 v1.40.08
 - Added WEX exchange, removed BTC-e
 - Fixed crash on app closing

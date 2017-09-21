@@ -185,9 +185,9 @@ QtBitcoinTrader::QtBitcoinTrader() :
     ui.ordersTable->setSortingEnabled(true);
     ui.ordersTable->sortByColumn(0, Qt::AscendingOrder);
 
-    connect(ordersModel, SIGNAL(ordersIsAvailable()), this, SLOT(ordersIsAvailable()));
-    connect(ordersModel, SIGNAL(cancelOrder(QString, QByteArray)), this, SLOT(cancelOrder(QString, QByteArray)));
-    connect(ordersModel, SIGNAL(volumeAmountChanged(double, double)), this, SLOT(volumeAmountChanged(double, double)));
+    connect(ordersModel, &OrdersModel::ordersIsAvailable,    this, &QtBitcoinTrader::ordersIsAvailable);
+    connect(ordersModel, &OrdersModel::cancelOrder,          this, &QtBitcoinTrader::cancelOrder);
+    connect(ordersModel, &OrdersModel::volumeAmountChanged,  this, &QtBitcoinTrader::volumeAmountChanged);
     connect(ui.ordersTable->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this,
             SLOT(checkValidOrdersButtons()));
 
@@ -931,17 +931,46 @@ void QtBitcoinTrader::on_sellPercentage_clicked()
 void QtBitcoinTrader::ordersFilterChanged()
 {
     QString filterSymbol;
+    QString currAStr;
+    QString currBStr;
+    QPixmap currPixmap;
 
     if (ui.ordersFilterCheckBox->isChecked())
     {
         filterSymbol = ui.filterOrdersCurrency->currentText();
+        int posSplitter = filterSymbol.indexOf('/');
+
+        if (posSplitter == -1)
+        {
+            currAStr = filterSymbol.left(3);
+            currBStr = filterSymbol.right(3);
+        }
+        else
+        {
+            currAStr = filterSymbol.left(posSplitter);
+            currBStr = filterSymbol.right(filterSymbol.size() - posSplitter - 1);
+        }
 
         if (filterSymbol.size())
             if (baseValues.currentPair.symbol.indexOf("/") == -1)
                 filterSymbol.replace("/", "");
     }
+    else
+    {
+        currAStr = baseValues.currentPair.currAStr.toUpper();
+        currBStr = baseValues.currentPair.currBStr.toUpper();
+    }
+
+    currencySignLoader->getCurrencySign(currAStr, currPixmap);
+    ui.currALabel->setPixmap(currPixmap);
+    ui.currALabel->setToolTip(currAStr);
+
+    currencySignLoader->getCurrencySign(currBStr, currPixmap);
+    ui.currBLabel->setPixmap(currPixmap);
+    ui.currBLabel->setToolTip(currBStr);
 
     ordersSortModel->setFilterWildcard(filterSymbol);
+    ordersModel->filterSymbolChanged(filterSymbol);
 }
 
 void QtBitcoinTrader::tableCopyContextMenuRequested(QPoint point)

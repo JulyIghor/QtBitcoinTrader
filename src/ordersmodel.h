@@ -60,6 +60,8 @@ public:
     void ordersCancelAsks(QString pair = 0);
     void setOrderCanceled(QByteArray);
 
+    void filterSymbolChanged(QString filterSymbol = "");
+
     void clear();
 
     OrdersModel();
@@ -80,6 +82,11 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
     QList<OrderItem> orders;
+
+signals:
+    void cancelOrder(QString, QByteArray);
+    void ordersIsAvailable();
+    void volumeAmountChanged(double, double);
 
 private:
     void ordersCountChanged();
@@ -126,11 +133,6 @@ private:
     QStringList totalStrList;
 
     QStringList symbolList;
-
-signals:
-    void cancelOrder(QString, QByteArray);
-    void ordersIsAvailable();
-    void volumeAmountChanged(double, double);
 };
 
 #endif // ORDERSMODEL_H
