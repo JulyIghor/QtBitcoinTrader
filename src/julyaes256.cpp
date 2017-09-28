@@ -38,12 +38,20 @@ QByteArray JulyAES256::sha256(const QByteArray& text)
     unsigned int outLen = 0;
     QByteArray dataBuff;
     dataBuff.resize(EVP_MAX_MD_SIZE);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_MD_CTX* evpMdCtx = EVP_MD_CTX_create();
+#else
+    EVP_MD_CTX* evpMdCtx = EVP_MD_CTX_new();
+#endif
     EVP_DigestInit(evpMdCtx, EVP_sha256());
     EVP_DigestUpdate(evpMdCtx, text.data(), text.size());
     EVP_DigestFinal_ex(evpMdCtx, (unsigned char*)dataBuff.data(), &outLen);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_MD_CTX_cleanup(evpMdCtx);
     delete evpMdCtx;
+#else
+    EVP_MD_CTX_free(evpMdCtx);
+#endif
     dataBuff.resize(outLen);
     return dataBuff.toHex();
 }
