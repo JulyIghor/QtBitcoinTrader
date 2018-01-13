@@ -1,6 +1,9 @@
-lessThan(QT_VERSION, 5.5): {
-error("Qt less than 5.5 is no longer supported. In order to compile Qt Bitcoin Trader you need update at least to Qt 5.6 http://qt.io/download-open-source/");
+lessThan(QT_MAJOR_VERSION, 5) {
+error("Qt 4 is no longer supported. In order to compile Qt Bitcoin Trader you need update to Qt5 http://qt.io/download-open-source/");
 }
+
+lessThan(QT_MAJOR_VERSION, 6) { lessThan(QT_MINOR_VERSION, 6) {
+error("Qt $${QT_VERSION} is no longer supported. In order to compile Qt Bitcoin Trader you need update at least to Qt 5.6 http://qt.io/download-open-source/"); } }
 
 CONFIG	+= qt release c++11
 
