@@ -22,6 +22,20 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt5 COMPONENTS Core Widgets Network Script Multimedia REQUIRED)
 
 #-------------------------------------------------------------
+# Find OpenSSL if on windows
+#-------------------------------------------------------------
+if (WIN32)
+  find_package(OpenSSL REQUIRED)
+endif()
+
+#-------------------------------------------------------------
+# Find zlib if on windows
+#-------------------------------------------------------------
+if (WIN32)
+  find_package(zlib REQUIRED)
+endif()
+
+#-------------------------------------------------------------
 # set CPP files
 #-------------------------------------------------------------
 set(QT_BTC_SRCS
@@ -175,13 +189,12 @@ qt5_add_resources(QT_BTC_RESOURCE_FILES
 )
 
 #-------------------------------------------------------------
-# Find includes in corresponding src/build directories
+# include directories
 #-------------------------------------------------------------
+# Find includes in corresponding src/build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#-------------------------------------------------------------
 # setup Qt5 include directories
-#-------------------------------------------------------------
 include_directories(
     ${Qt5Core_INCLUDE_DIRS}
     ${Qt5Widgets_INCLUDE_DIRS} 
@@ -190,13 +203,23 @@ include_directories(
     ${Qt5Multimedia_INCLUDE_DIRS}
 )
 
+# OpenSSL
+if (WIN32)
+  include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
+
+# zlib
+if (WIN32)
+  include_directories(${ZLIB_INCLUDE_DIRS})
+endif()
+
 #-------------------------------------------------------------
 # Declare executable
 #-------------------------------------------------------------
 add_executable(QtBitcoinTrader
-    ${QT_BTC_SRCS}
-    ${QT_UI_SRCS}
-    ${QT_BTC_RESOURCE_FILES}
+  ${QT_BTC_SRCS}
+  ${QT_UI_SRCS}
+  ${QT_BTC_RESOURCE_FILES}
 )
 
 #-------------------------------------------------------------
@@ -206,8 +229,10 @@ add_executable(QtBitcoinTrader
 target_link_libraries(QtBitcoinTrader Qt5::Widgets Qt5::Script Qt5::Network Qt5::Multimedia)
 
 # Other libs needed
-target_link_libraries(QtBitcoinTrader crypto ssl z)
-
-# windows
-# -lws2_32 -lole32 -lwinmm -lgdi32 -lcrypt32
+if (WIN32)
+  target_link_libraries(QtBitcoinTrader OpenSSL::SSL OpenSSL::Crypto)
+  target_link_libraries(QtBitcoinTrader ${ZLIB_LIBRARIES} winmm ws2_32)
+else()
+  target_link_libraries(QtBitcoinTrader crypto ssl z)
+endif()
 
