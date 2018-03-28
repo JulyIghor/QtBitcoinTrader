@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -87,17 +87,17 @@ void HistoryItem::cacheStrings()
     QString usdSign = IniEngine::getCurrencyInfo(currBStr).sign;
 
     if (price > 0.0)
-        priceStr = usdSign + textFromDouble(price, baseValues.decimalsPriceMyTransactions);
+        priceStr = usdSign + JulyMath::textFromDouble(price, baseValues.decimalsPriceMyTransactions);
 
     if (volume > 0.0)
     {
         volumeStr = IniEngine::getCurrencyInfo(currAStr).sign +
-                    textFromDouble(volume, baseValues.decimalsAmountMyTransactions);
+                    JulyMath::textFromDouble(volume, baseValues.decimalsAmountMyTransactions);
     }
 
     if (volume > 0.0 && price > 0.0)
     {
-        totalStr = textFromDouble(price * volume, baseValues.decimalsTotalMyTransactions);
+        totalStr = JulyMath::textFromDouble(price * volume, baseValues.decimalsTotalMyTransactions);
 
         if (!baseValues.forceDotInSpinBoxes)
         {

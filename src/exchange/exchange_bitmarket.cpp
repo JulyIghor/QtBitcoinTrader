@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -827,8 +827,8 @@ void Exchange_BitMarket::buy(QString symbol, double apiBtcToBuy, double apiPrice
     if (pairItem.symbol.isEmpty())
         return;
 
-    QByteArray data = "trade&market=" + symbol.toLatin1() + "&type=buy&amount=" + byteArrayFromDouble(apiBtcToBuy,
-                      pairItem.currADecimals, 0) + "&rate=" + byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0);
+    QByteArray data = "trade&market=" + symbol.toLatin1() + "&type=buy&amount=" + JulyMath::byteArrayFromDouble(apiBtcToBuy,
+                      pairItem.currADecimals, 0) + "&rate=" + JulyMath::byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0);
 
     if (debugLevel)
         logThread->writeLog("Buy: " + data, 2);
@@ -847,8 +847,8 @@ void Exchange_BitMarket::sell(QString symbol, double apiBtcToSell, double apiPri
     if (pairItem.symbol.isEmpty())
         return;
 
-    QByteArray data = "trade&market=" + symbol.toLatin1() + "&type=sell&amount=" + byteArrayFromDouble(apiBtcToSell,
-                      pairItem.currADecimals, 0) + "&rate=" + byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0);
+    QByteArray data = "trade&market=" + symbol.toLatin1() + "&type=sell&amount=" + JulyMath::byteArrayFromDouble(apiBtcToSell,
+                      pairItem.currADecimals, 0) + "&rate=" + JulyMath::byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0);
 
     if (debugLevel)
         logThread->writeLog("Sell: " + data, 2);

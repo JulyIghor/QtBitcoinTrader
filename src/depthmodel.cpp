@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -196,7 +196,7 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
         switch (indexColumn)
         {
             case 0: //Price
-                firstRowText = textFromDouble(groupedPrice);
+                firstRowText = JulyMath::textFromDouble(groupedPrice);
 
                 if (role == Qt::ToolTipRole)
                     firstRowText.prepend(baseValues.currentPair.currBSign);
@@ -204,7 +204,7 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
                 break;
 
             case 1: //Volume
-                firstRowText = textFromDouble(groupedVolume, baseValues.currentPair.currADecimals);
+                firstRowText = JulyMath::textFromDouble(groupedVolume, baseValues.currentPair.currADecimals);
 
                 if (role == Qt::ToolTipRole)
                     firstRowText.prepend(baseValues.currentPair.currASign);
@@ -399,7 +399,7 @@ void DepthModel::calculateSize()
 
             sizeListAt(currentRow) = totalSize;
             sizePriceList[currentRow] = totalPrice;
-            sizeListStr[currentRow] = textFromDouble(totalSize, qMin(baseValues.currentPair.currADecimals,
+            sizeListStr[currentRow] = JulyMath::textFromDouble(totalSize, qMin(baseValues.currentPair.currADecimals,
                                       baseValues.decimalsTotalOrderBook));
 
             maxPrice = qMax(maxPrice, priceList.at(currentRow));
@@ -420,7 +420,7 @@ void DepthModel::calculateSize()
             totalPrice += volumeList.at(currentRow) * priceList.at(currentRow);
             sizeListAt(currentRow) = totalSize;
             sizePriceList[currentRow] = totalPrice;
-            sizeListStr[currentRow] = textFromDouble(totalSize, qMin(baseValues.currentPair.currADecimals,
+            sizeListStr[currentRow] = JulyMath::textFromDouble(totalSize, qMin(baseValues.currentPair.currADecimals,
                                       baseValues.decimalsTotalOrderBook));
 
             maxPrice = qMax(maxPrice, priceList.at(currentRow));
@@ -429,9 +429,9 @@ void DepthModel::calculateSize()
         }
     }
 
-    widthPrice = 10 + textFontWidth(textFromDouble(maxPrice, baseValues.currentPair.priceDecimals));
-    widthVolume = 10 + textFontWidth(textFromDouble(maxVolume, baseValues.currentPair.currADecimals));
-    widthSize = 10 + textFontWidth(textFromDouble(maxTotal, baseValues.currentPair.currADecimals));
+    widthPrice = 10 + textFontWidth(JulyMath::textFromDouble(maxPrice, baseValues.currentPair.priceDecimals));
+    widthVolume = 10 + textFontWidth(JulyMath::textFromDouble(maxVolume, baseValues.currentPair.currADecimals));
+    widthSize = 10 + textFontWidth(JulyMath::textFromDouble(maxTotal, baseValues.currentPair.currADecimals));
 
     widthPrice = qMax(widthPrice, widthPriceTitle);
     widthVolume = qMax(widthVolume, widthVolumeTitle);

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ bool OrderItem::isValid()
         {
             QString mmssTemp = itemDate.toString("mm:ss");
             QString hTemp = itemDate.toString("H");
-            qint16 hTempInt = hTemp.toInt();
+            qint16 hTempInt = hTemp.toShort();
             QString timeStr;
 
             if (hTempInt <= 12)
@@ -76,10 +76,10 @@ bool OrderItem::isValid()
         }
 
         QString priceSign = IniEngine::getCurrencyInfo(currBStr).sign;
-        amountStr = IniEngine::getCurrencyInfo(currAStr).sign + textFromDouble(amount);
-        priceStr = priceSign + textFromDouble(price);
+        amountStr = IniEngine::getCurrencyInfo(currAStr).sign + JulyMath::textFromDouble(amount);
+        priceStr = priceSign + JulyMath::textFromDouble(price);
         total = price * amount;
-        totalStr = priceSign + textFromDouble(total, baseValues.currentPair.currBDecimals);
+        totalStr = priceSign + JulyMath::textFromDouble(total, baseValues.currentPair.currBDecimals);
     }
 
     return isVal;

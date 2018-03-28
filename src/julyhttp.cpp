@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -129,48 +129,48 @@ JulyHttp::~JulyHttp()
 
 void JulyHttp::setupSocket()
 {
-    static QMutex mutex;
-    mutex.lock();
-    static QList<QSslCertificate> certs;
+//    static QMutex mutex;
+//    mutex.lock();
+//    static QList<QSslCertificate> certs;
 
-    if (certs.count() == 0)
-    {
-        QFile readCerts(":/Resources/CertBase.cer");
+//    if (certs.count() == 0)
+//    {
+//        QFile readCerts(":/Resources/CertBase.cer");
 
-        if (readCerts.open(QIODevice::ReadOnly))
-        {
-            QByteArray certData = readCerts.readAll() + "{SPLIT}";
-            readCerts.close();
+//        if (readCerts.open(QIODevice::ReadOnly))
+//        {
+//            QByteArray certData = readCerts.readAll() + "{SPLIT}";
+//            readCerts.close();
 
-            do
-            {
-                int nextCert = certData.indexOf("{SPLIT}");
+//            do
+//            {
+//                int nextCert = certData.indexOf("{SPLIT}");
 
-                if (nextCert > -1)
-                {
-                    QByteArray currentCert = certData.left(nextCert);
-                    QSslCertificate derCert(currentCert, QSsl::Der);
+//                if (nextCert > -1)
+//                {
+//                    QByteArray currentCert = certData.left(nextCert);
+//                    QSslCertificate derCert(currentCert, QSsl::Der);
 
-                    if (!derCert.isNull())
-                        certs << derCert;
+//                    if (!derCert.isNull())
+//                        certs << derCert;
 
-                    certData.remove(0, nextCert + 7);
-                }
-                else
-                    certData.clear();
-            }
-            while (certData.size());
-        }
-    }
+//                    certData.remove(0, nextCert + 7);
+//                }
+//                else
+//                    certData.clear();
+//            }
+//            while (certData.size());
+//        }
+//    }
 
-    setCaCertificates(certs);
+//    setCaCertificates(certs);
 
     setPeerVerifyMode(QSslSocket::VerifyPeer);
     connect(this, SIGNAL(readyRead()), SLOT(readSocket()));
     connect(this, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(errorSlot(QAbstractSocket::SocketError)));
     connect(this, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(sslErrorsSlot(const QList<QSslError>&)));
 
-    mutex.unlock();
+//    mutex.unlock();
 }
 
 void JulyHttp::clearPendingData()

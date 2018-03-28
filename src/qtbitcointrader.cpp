@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -1381,9 +1381,9 @@ void QtBitcoinTrader::anyDataReceived()
 
 double QtBitcoinTrader::getFeeForUSDDec(double usd)
 {
-    double result = cutDoubleDecimalsCopy(usd, baseValues.currentPair.currBDecimals, false);
-    double calcFee = cutDoubleDecimalsCopy(result, baseValues.currentPair.priceDecimals, true) * floatFee;
-    calcFee = cutDoubleDecimalsCopy(calcFee, baseValues.currentPair.priceDecimals, true);
+    double result = JulyMath::cutDoubleDecimalsCopy(usd, baseValues.currentPair.currBDecimals, false);
+    double calcFee = JulyMath::cutDoubleDecimalsCopy(result, baseValues.currentPair.priceDecimals, true) * floatFee;
+    calcFee = JulyMath::cutDoubleDecimalsCopy(calcFee, baseValues.currentPair.priceDecimals, true);
     result = result - calcFee;
     return result;
 }
@@ -2821,8 +2821,8 @@ void QtBitcoinTrader::sellBitcoinButton()
         msgBox.setWindowTitle(julyTr("MESSAGE_CONFIRM_SELL_TRANSACTION", "Please confirm transaction"));
         msgBox.setText(julyTr("MESSAGE_CONFIRM_SELL_TRANSACTION_TEXT",
                               "Are you sure to sell %1 at %2 ?<br><br>Note: If total orders amount of your Bitcoins exceeds your balance, %3 will remove this order immediately.").arg(
-                           baseValues.currentPair.currASign + " " + textFromDouble(sellTotalBtc,
-                                   baseValues.currentPair.currADecimals)).arg(baseValues.currentPair.currBSign + " " + textFromDouble(sellPricePerCoin,
+                           baseValues.currentPair.currASign + " " + JulyMath::textFromDouble(sellTotalBtc,
+                                   baseValues.currentPair.currADecimals)).arg(baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(sellPricePerCoin,
                                            baseValues.currentPair.priceDecimals)).arg(baseValues.exchangeName));
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::Yes);
@@ -2855,7 +2855,7 @@ void QtBitcoinTrader::on_buyTotalSpend_valueChanged(double val)
 
     double valueForResult = val / ui.buyPricePerCoin->value();
     valueForResult *= floatFeeDec;
-    valueForResult = cutDoubleDecimalsCopy(valueForResult, baseValues.currentPair.currADecimals, false);
+    valueForResult = JulyMath::cutDoubleDecimalsCopy(valueForResult, baseValues.currentPair.currADecimals, false);
     setSpinValue(ui.buyTotalBtcResult, valueForResult);
 
     checkValidBuyButtons();
@@ -2997,8 +2997,8 @@ void QtBitcoinTrader::buyBitcoinsButton()
         msgBox.setWindowTitle(julyTr("MESSAGE_CONFIRM_BUY_TRANSACTION", "Please confirm new order"));
         msgBox.setText(julyTr("MESSAGE_CONFIRM_BUY_TRANSACTION_TEXT",
                               "Are you sure to buy %1 at %2 ?<br><br>Note: If total orders amount of your funds exceeds your balance, %3 will remove this order immediately.").arg(
-                           baseValues.currentPair.currASign + " " + textFromDouble(btcToBuy,
-                                   baseValues.currentPair.currADecimals)).arg(baseValues.currentPair.currBSign + " " + textFromDouble(priceToBuy,
+                           baseValues.currentPair.currASign + " " + JulyMath::textFromDouble(btcToBuy,
+                                   baseValues.currentPair.currADecimals)).arg(baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(priceToBuy,
                                            baseValues.currentPair.priceDecimals)).arg(baseValues.exchangeName));
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::Yes);
@@ -3166,7 +3166,7 @@ void QtBitcoinTrader::on_marketBid_valueChanged(double val)
             }
 
             static QString titleText;
-            titleText = baseValues.currentPair.currBSign + " " + textFromDouble(val) + " " + directionChar + " " + windowTitleP;
+            titleText = baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(val) + " " + directionChar + " " + windowTitleP;
 
             if (windowWidget->isVisible())
                 windowWidget->setWindowTitle(titleText);
@@ -3222,7 +3222,7 @@ void QtBitcoinTrader::on_marketAsk_valueChanged(double val)
             }
 
             static QString titleText;
-            titleText = baseValues.currentPair.currBSign + " " + textFromDouble(val) + " " + directionChar + " " + windowTitleP;
+            titleText = baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(val) + " " + directionChar + " " + windowTitleP;
 
             if (windowWidget->isVisible())
                 windowWidget->setWindowTitle(titleText);
@@ -3728,7 +3728,7 @@ double QtBitcoinTrader::getAvailableUSD()
     else
         amountToReturn = ui.accountUSD->value() - ui.ordersTotalUSD->value();
 
-    amountToReturn = cutDoubleDecimalsCopy(amountToReturn, baseValues.currentPair.currBDecimals, false);
+    amountToReturn = JulyMath::cutDoubleDecimalsCopy(amountToReturn, baseValues.currentPair.currBDecimals, false);
 
     if (currentExchange->exchangeSupportsAvailableAmount)
         amountToReturn = qMin(availableAmount, amountToReturn);
@@ -3751,7 +3751,7 @@ double QtBitcoinTrader::getAvailableUSDtoBTC(double priceToBuy)
             decValue = 2.0 * qPow(0.1, qMax(baseValues.currentPair.currADecimals, 1));
     }
 
-    return cutDoubleDecimalsCopy(avUSD / priceToBuy - decValue, baseValues.currentPair.currADecimals, false);
+    return JulyMath::cutDoubleDecimalsCopy(avUSD / priceToBuy - decValue, baseValues.currentPair.currADecimals, false);
 }
 
 void QtBitcoinTrader::apiSellSend(QString symbol, double btc, double price)
@@ -3877,7 +3877,7 @@ void QtBitcoinTrader::setSpinValueP(QDoubleSpinBox* spin, double& val)
         spin->setDecimals(1);
     else
     {
-        QByteArray valueStr = byteArrayFromDouble(val);
+        QByteArray valueStr = JulyMath::byteArrayFromDouble(val);
         int dotPos = valueStr.indexOf('.');
 
         if (dotPos == -1)

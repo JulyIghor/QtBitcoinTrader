@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -111,12 +111,12 @@ void BaseValues::Construct()
     trafficSpeed = 0;
     trafficTotal = 0;
     trafficTotalType = 0;
-    currentExchange_ = 0;
+    currentExchange_ = nullptr;
     currentTheme = 0;
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4009";
+    appVerStr = "1.4010";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -129,7 +129,7 @@ void BaseValues::Construct()
 
     appVerLastReal = appVerReal;
 
-    logThread = 0;
+    logThread = nullptr;
 
     highResolutionDisplay = true;
     timeFormat = QLocale().timeFormat(QLocale::LongFormat).replace(" ", "").replace("t", "");

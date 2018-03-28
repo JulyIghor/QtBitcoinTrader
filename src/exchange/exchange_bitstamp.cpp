@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -94,9 +94,9 @@ void Exchange_Bitstamp::quitThread()
 }
 void Exchange_Bitstamp::filterAvailableUSDAmountValue(double* amount)
 {
-    double decValue = cutDoubleDecimalsCopy((*amount) * mainWindow.floatFee, baseValues.currentPair.priceDecimals, false);
+    double decValue = JulyMath::cutDoubleDecimalsCopy((*amount) * mainWindow.floatFee, baseValues.currentPair.priceDecimals, false);
     decValue += qPow(0.1, qMax(baseValues.currentPair.priceDecimals, 1));
-    *amount = cutDoubleDecimalsCopy((*amount) - decValue, baseValues.currentPair.currBDecimals, false);
+    *amount = JulyMath::cutDoubleDecimalsCopy((*amount) - decValue, baseValues.currentPair.currBDecimals, false);
 }
 
 void Exchange_Bitstamp::clearVariables()
@@ -209,8 +209,8 @@ void Exchange_Bitstamp::buy(QString symbol, double apiBtcToBuy, double apiPriceT
     if (pairItem.symbol.isEmpty())
         return;
 
-    QByteArray params = "amount=" + byteArrayFromDouble(apiBtcToBuy, pairItem.currADecimals,
-                        0) + "&price=" + byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0);
+    QByteArray params = "amount=" + JulyMath::byteArrayFromDouble(apiBtcToBuy, pairItem.currADecimals,
+                        0) + "&price=" + JulyMath::byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0);
 
     if (debugLevel)
         logThread->writeLog("Buy: " + params, 2);
@@ -229,8 +229,8 @@ void Exchange_Bitstamp::sell(QString symbol, double apiBtcToSell, double apiPric
     if (pairItem.symbol.isEmpty())
         return;
 
-    QByteArray params = "amount=" + byteArrayFromDouble(apiBtcToSell, pairItem.currADecimals,
-                        0) + "&price=" + byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0);
+    QByteArray params = "amount=" + JulyMath::byteArrayFromDouble(apiBtcToSell, pairItem.currADecimals,
+                        0) + "&price=" + JulyMath::byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0);
 
     if (debugLevel)
         logThread->writeLog("Sell: " + params, 2);

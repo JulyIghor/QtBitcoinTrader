@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -63,10 +63,10 @@ public:
     void clearPendingData();
     void reConnect(bool mastAbort = true);
     bool isReqTypePending(int);
-    void sendData(int reqType, const QByteArray& method, QByteArray postData = 0, const QByteArray& restSignLine = 0,
+    void sendData(int reqType, const QByteArray& method, QByteArray postData = nullptr, const QByteArray& restSignLine = nullptr,
                   const int& forceRetryCount = -1);
 
-    void prepareData(int reqType, const QByteArray& method, QByteArray postData = 0, const QByteArray& restSignLine = 0,
+    void prepareData(int reqType, const QByteArray& method, QByteArray postData = nullptr, const QByteArray& restSignLine = nullptr,
                      const int& forceRetryCount = -1);
     void prepareDataSend();
     void prepareDataClear();

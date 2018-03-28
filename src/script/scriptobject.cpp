@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -446,7 +446,7 @@ void ScriptObject::say(QVariantList list)
     {
         if (list.at(n).type() == QVariant::Double)
         {
-            QString number = textFromDouble(list.at(n).toDouble(), 8, 0);
+            QString number = JulyMath::textFromDouble(list.at(n).toDouble(), 8, 0);
 
             if (detectDoublePoint == 2)
                 number.replace(QLatin1Char('.'), QLatin1Char(','));
@@ -574,7 +574,7 @@ void ScriptObject::buy(QString symbol, double amount, double price)
     if (!testMode)
         mainWindow.apiBuySend(symbol, amount, price);
 
-    log(symbol + ": Buy " + textFromDouble(amount, 8, 0) + " at " + textFromDouble(price, 8, 0));
+    log(symbol + ": Buy " + JulyMath::textFromDouble(amount, 8, 0) + " at " + JulyMath::textFromDouble(price, 8, 0));
 }
 
 void ScriptObject::sell(QString symbol, double amount, double price)
@@ -587,7 +587,7 @@ void ScriptObject::sell(QString symbol, double amount, double price)
     if (!testMode)
         mainWindow.apiSellSend(symbol, amount, price);
 
-    log(symbol + ": Sell " + textFromDouble(amount, 8, 0) + " at " + textFromDouble(price, 8, 0));
+    log(symbol + ": Sell " + JulyMath::textFromDouble(amount, 8, 0) + " at " + JulyMath::textFromDouble(price, 8, 0));
 }
 
 void ScriptObject::cancelOrders()
@@ -677,7 +677,7 @@ void ScriptObject::log(QVariantList list)
             logText.append(QLatin1Char(' '));
 
         if (list.at(n).type() == QVariant::Double)
-            logText.append(textFromDouble(list.at(n).toDouble(), 8, 0));
+            logText.append(JulyMath::textFromDouble(list.at(n).toDouble(), 8, 0));
         else
             logText.append(list.at(n).toString());
     }
@@ -696,7 +696,7 @@ void ScriptObject::log(QVariant arg1)
         double doubleVal = arg1.toDouble(&ok);
 
         if (ok)
-            result = textFromDouble(doubleVal, 8, 0);
+            result = JulyMath::textFromDouble(doubleVal, 8, 0);
         else
         {
             quint64 uLongVal = arg1.toULongLong(&ok);
@@ -1065,7 +1065,7 @@ void ScriptObject::fileWrite(QVariant path, QVariant data)
         double doubleVal = data.toDouble(&ok);
 
         if (ok)
-            result = textFromDouble(doubleVal, 8, 0);
+            result = JulyMath::textFromDouble(doubleVal, 8, 0);
         else
         {
             quint64 uLongVal = data.toULongLong(&ok);
@@ -1095,7 +1095,7 @@ void ScriptObject::fileAppend(QVariant path, QVariant data)
         double doubleVal = data.toDouble(&ok);
 
         if (ok)
-            result = textFromDouble(doubleVal, 8, 0);
+            result = JulyMath::textFromDouble(doubleVal, 8, 0);
         else
         {
             quint64 uLongVal = data.toULongLong(&ok);

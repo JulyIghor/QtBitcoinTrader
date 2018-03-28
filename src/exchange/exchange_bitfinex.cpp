@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -238,9 +238,9 @@ void Exchange_Bitfinex::buy(QString symbol, double apiBtcToBuy, double apiPriceT
         orderType.prepend("exchange ");
 
     QByteArray params = ", \"symbol\": \"" + pairItem.currRequestPair + "\", \"amount\": \"";
-    params += textFromDouble(apiBtcToBuy, pairItem.currADecimals);
+    params += JulyMath::textFromDouble(apiBtcToBuy, pairItem.currADecimals);
     params += "\", \"price\": \"";
-    params += textFromDouble(apiPriceToBuy, pairItem.priceDecimals);
+    params += JulyMath::textFromDouble(apiPriceToBuy, pairItem.priceDecimals);
     params += "\", \"exchange\": \"all\", \"side\": \"buy\", \"type\": \"" + orderType + "\"";
 
     if (debugLevel)
@@ -266,9 +266,9 @@ void Exchange_Bitfinex::sell(QString symbol, double apiBtcToSell, double apiPric
         orderType.prepend("exchange ");
 
     QByteArray params = ", \"symbol\": \"" + pairItem.currRequestPair + "\", \"amount\": \"";
-    params += textFromDouble(apiBtcToSell, pairItem.currADecimals);
+    params += JulyMath::textFromDouble(apiBtcToSell, pairItem.currADecimals);
     params += "\", \"price\": \"";
-    params += textFromDouble(apiPriceToSell, pairItem.priceDecimals);
+    params += JulyMath::textFromDouble(apiPriceToSell, pairItem.priceDecimals);
     params += "\", \"exchange\": \"all\", \"side\": \"sell\", \"type\": \"" + orderType + "\"";
 
     if (debugLevel)
@@ -675,8 +675,8 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                             depthBids->removeAt(--n);
 
                     emit depthSubmitOrders(baseValues.currentPair.symbol, depthAsks, depthBids);
-                    depthAsks = 0;
-                    depthBids = 0;
+                    depthAsks = nullptr;
+                    depthBids = nullptr;
                 }
             }
             else if (debugLevel)
@@ -855,14 +855,14 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                     QList<HistoryItem>* historyItems = new QList<HistoryItem>;
                     bool firstTimestampReceived = false;
                     QStringList dataList = QString(data).split("},{");
-                    quint32 currentId;
-                    quint32 maxId = 0;
+                    quint64 currentId;
+                    quint64 maxId = 0;
 
                     for (int n = 0; n < dataList.count(); n++)
                     {
                         QByteArray curLog(dataList.at(n).toLatin1() + "}");
 
-                        currentId = getMidData("order_id\":", "}", &curLog).toUInt();
+                        currentId = getMidData("order_id\":", "}", &curLog).toULongLong();
 
                         if (currentId <= lastHistoryId)
                             break;

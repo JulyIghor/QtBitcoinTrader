@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ void TradesItem::cacheStrings()
     {
         QString mmssTemp = itemDate.toString("mm:ss");
         QString hTemp = itemDate.toString("H");
-        qint16 hTempInt = hTemp.toInt();
+        qint16 hTempInt = hTemp.toShort();
 
         if (hTempInt <= 12)
             timeStr = hTemp + ':' + mmssTemp + " am";
@@ -69,14 +69,14 @@ void TradesItem::cacheStrings()
     }
 
     if (price > 0.0)
-        priceStr = textFromDouble(price, baseValues.decimalsPriceLastTrades);
+        priceStr = JulyMath::textFromDouble(price, baseValues.decimalsPriceLastTrades);
 
     if (amount > 0.0)
-        amountStr = textFromDouble(amount, baseValues.decimalsAmountLastTrades);
+        amountStr = JulyMath::textFromDouble(amount, baseValues.decimalsAmountLastTrades);
 
     if (amount > 0.0 && price > 0.0)
-        totalStr = textFromDouble(price * amount, qMin(baseValues.currentPair.currBDecimals,
-                                  baseValues.decimalsTotalLastTrades));
+        totalStr = JulyMath::textFromDouble(price * amount, qMin(baseValues.currentPair.currBDecimals,
+                                            baseValues.decimalsTotalLastTrades));
 }
 
 bool TradesItem::isValid()

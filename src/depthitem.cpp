@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -39,10 +39,10 @@ bool DepthItem::isValid()
 
     if (valid)
     {
-        priceStr = textFromDouble(price, qMin(baseValues.currentPair.priceDecimals, baseValues.decimalsPriceOrderBook));
+        priceStr = JulyMath::textFromDouble(price, qMin(baseValues.currentPair.priceDecimals, baseValues.decimalsPriceOrderBook));
 
         int decimals = qMin(baseValues.currentPair.currADecimals, baseValues.decimalsAmountOrderBook);
-        volumeStr = textFromDouble(volume, decimals, decimals);
+        volumeStr = JulyMath::textFromDouble(volume, decimals, decimals);
     }
 
     return valid;

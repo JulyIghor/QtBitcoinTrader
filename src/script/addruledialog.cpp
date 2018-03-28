@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -420,7 +420,7 @@ void AddRuleDialog::reCacheCode()
     QString descriptionText;
 
     if (ui->delayValue->value() > 0)
-        descriptionText = julyTr("DELAY_SEC", "Delay %1 sec").arg(textFromDouble(ui->delayValue->value())) + " ";
+        descriptionText = julyTr("DELAY_SEC", "Delay %1 sec").arg(JulyMath::textFromDouble(ui->delayValue->value())) + " ";
 
     QString currentAType = comboCurrentData(ui->variableA);
 
@@ -453,7 +453,7 @@ void AddRuleDialog::reCacheCode()
                 if (!bExact)
                     descriptionText += " " + ui->variableBplusMinus->currentText();
 
-                descriptionText += " " + textFromDouble(ui->variableBExact->value(), 8, 0);
+                descriptionText += " " + JulyMath::textFromDouble(ui->variableBExact->value(), 8, 0);
 
                 if (ui->variableBPercent->isChecked())
                     descriptionText += "%";
@@ -485,7 +485,7 @@ void AddRuleDialog::reCacheCode()
         if (!pairItem.symbolSecond().isEmpty())
             sign = pairItem.currASign;
 
-        descriptionText += " " + sign + textFromDouble(ui->thanAmount->value(), 8, 0);
+        descriptionText += " " + sign + JulyMath::textFromDouble(ui->thanAmount->value(), 8, 0);
 
         if (ui->thanAmountPercent->isChecked())
             descriptionText += "%";
@@ -521,7 +521,7 @@ void AddRuleDialog::reCacheCode()
             if (!pairItem.symbolSecond().isEmpty())
                 sign = pairItem.currBSign;
 
-            atPrice += " " + sign + textFromDouble(ui->thanPriceValue->value(), 8, 0);
+            atPrice += " " + sign + JulyMath::textFromDouble(ui->thanPriceValue->value(), 8, 0);
         }
 
         if (ui->thanPriceFee->currentIndex() > 0)
@@ -686,7 +686,7 @@ void AddRuleDialog::on_playButton_clicked()
                             detectDoublePoint = 1;
                     }
 
-                    QString number = textFromDouble(spin->value(), 8, 0);
+                    QString number = JulyMath::textFromDouble(spin->value(), 8, 0);
                     int crop = number.size() - 1;
 
                     while (crop > 0 && number.at(crop) == QLatin1Char('0'))

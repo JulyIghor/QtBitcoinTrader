@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2017 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -106,7 +106,7 @@ RuleHolder RuleScriptParser::readHolderFromSettings(QSettings& settings, QString
     holder.variableBplusMinus = settings.value("VariableBplusMinus", "").toString();
     holder.variableBSymbolCode = settings.value("VariableBSymbolCode", "").toString();
     holder.description = settings.value("Description", "").toString();
-    holder.delayMilliseconds = cutDoubleDecimalsCopy(settings.value("Delay", 0.0).toReal(), 3, false);
+    holder.delayMilliseconds = JulyMath::cutDoubleDecimalsCopy(settings.value("Delay", 0.0).toReal(), 3, false);
     settings.endGroup();
     return holder;
 }
@@ -155,10 +155,10 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                     script += " var amount = trader.get(\"Balance\",\"" + baseValues.currentPair.currBStr + "\");\n";
 
                 if (amount != 0.0 && amount != 1.0)
-                    script += " amount *= " + textFromDouble(amount) + ";\n";
+                    script += " amount *= " + JulyMath::textFromDouble(amount) + ";\n";
             }
             else
-                script += " var amount = " + textFromDouble(amount) + ";\n";
+                script += " var amount = " + JulyMath::textFromDouble(amount) + ";\n";
 
             if (amount != 0.0)
             {
@@ -173,15 +173,15 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                 script += "\n";
 
             if (holder.thanPriceTypeCode == "EXACT")
-                script += " var price = " + textFromDouble(holder.thanPrice) + ";\n";
+                script += " var price = " + JulyMath::textFromDouble(holder.thanPrice) + ";\n";
             else
             {
                 script += " var price = trader.get(\"" + holder.tradeSymbolCode + "\" , \"" + holder.thanPriceTypeCode + "\");\n";
 
                 if (holder.thanPricePercentChecked)
-                    script += " price " + holder.thanPricePlusMinusText + "= price * " + textFromDouble(holder.thanPrice / 100.0) + ";\n";
+                    script += " price " + holder.thanPricePlusMinusText + "= price * " + JulyMath::textFromDouble(holder.thanPrice / 100.0) + ";\n";
                 else if (holder.thanPrice != 0.0)
-                    script += " price " + holder.thanPricePlusMinusText + "= " + textFromDouble(holder.thanPrice) + ";\n";
+                    script += " price " + holder.thanPricePlusMinusText + "= " + JulyMath::textFromDouble(holder.thanPrice) + ";\n";
 
                 if (holder.thanPriceFeeIndex == 1)
                     script += " price *= ( 1.0 + trader.get(\"Fee\") / 100.0 );\n";
@@ -283,7 +283,7 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
     QString executeRuleLine;
 
     if (haveDelay)
-        executeRuleLine = " trader.delay(" + textFromDouble(holder.delayMilliseconds, 3, 0) + ",\"executeRule()\");";
+        executeRuleLine = " trader.delay(" + JulyMath::textFromDouble(holder.delayMilliseconds, 3, 0) + ",\"executeRule()\");";
     else
         executeRuleLine = " executeRule();";
 
@@ -309,7 +309,7 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
         {
             if (holder.variableBCode == "EXACT")
             {
-                ifLine = " if(value " + comparationText + " " + textFromDouble(holder.variableBExact) + ")";
+                ifLine = " if(value " + comparationText + " " + JulyMath::textFromDouble(holder.variableBExact) + ")";
             }
             else
             {
@@ -317,10 +317,10 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                 indicatorB = indicatorBValue + ";\n";
 
                 if (holder.variableBPercentChecked)
-                    indicatorB += " baseVariable " + holder.variableBplusMinus + "= baseVariable*" + textFromDouble(
+                    indicatorB += " baseVariable " + holder.variableBplusMinus + "= baseVariable*" + JulyMath::textFromDouble(
                                       holder.variableBExact / 100.0) + ";\n";
                 else if (holder.variableBExact != 0.0)
-                    indicatorB += " baseVariable " + holder.variableBplusMinus + "= " + textFromDouble(holder.variableBExact) + ";\n";
+                    indicatorB += " baseVariable " + holder.variableBplusMinus + "= " + JulyMath::textFromDouble(holder.variableBExact) + ";\n";
 
                 if (holder.variableBFeeIndex > 0)
                 {
