@@ -48,6 +48,14 @@ make && make install && make clean
 
 ## Change Log
 
+v1.40.12
+Dropped support of Windows XP and macOS 10.9, but you still can compile it manually
+Removed update size limit for future bigger updates
+Fixed Bitfinex trade history bug
+Fixed Bitstamp certificate issue
+Switched to OpenSSL 1.1, no UPX in release binaries
+Minor improvements
+
 v1.40.09
 - Fixed FeeCalculator crash
 - Fixed account open orders filtering and calculations

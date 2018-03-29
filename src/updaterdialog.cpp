@@ -344,17 +344,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType)
         if (autoUpdate)
             ui.buttonUpdate->click();
         else
-        {
             show();
-
-            QMessageBox msgb;
-            msgb.setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
-            msgb.setWindowTitle("Qt Bitcoin Trader");
-            msgb.setIcon(QMessageBox::Information);
-            msgb.setText(QString("%1 <= %2").arg(
-                             updateVersion.toDouble()).arg(baseValues.appVerReal));
-            msgb.exec();
-        }
     }
     else if (stateUpdate == 1)
     {
@@ -536,7 +526,7 @@ void UpdaterDialog::downloadErrorFile(int val)
 
 void UpdaterDialog::dataProgress(int precent)
 {
-    if (httpGetFile->getCurrentPacketContentLength() > 20000000)
+    if (httpGetFile->getCurrentPacketContentLength() > 300000000)
         downloadErrorFile(10);
 
     ui.progressBar->setValue(precent);
