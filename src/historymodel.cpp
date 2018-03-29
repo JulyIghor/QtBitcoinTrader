@@ -91,7 +91,7 @@ void HistoryModel::historyChanged(QList<HistoryItem>* histList)
         return;
     }
 
-    beginInsertRows(QModelIndex(), 0, histList->count());
+    beginInsertRows(QModelIndex(), 0, histList->count() - 1);
 
     if (histList->count() && itemsList.count())
     {
@@ -259,13 +259,13 @@ QVariant HistoryModel::data(const QModelIndex& index, int role) const
     switch (indexColumn)
     {
         case 1:
-        {
-            //Date
-            if (role == Qt::ToolTipRole || itemsList.at(currentRow).displayFullDate)
-                return itemsList.at(currentRow).dateTimeStr;//DateTime
+            {
+                //Date
+                if (role == Qt::ToolTipRole || itemsList.at(currentRow).displayFullDate)
+                    return itemsList.at(currentRow).dateTimeStr;//DateTime
 
-            return itemsList.at(currentRow).timeStr;//Time
-        }
+                return itemsList.at(currentRow).timeStr;//Time
+            }
 
         case 2:
             return itemsList.at(currentRow).volumeStr;//Volume
@@ -347,7 +347,7 @@ void HistoryModel::setHorizontalHeaderLabels(QStringList list)
 
     typeWidth = 0;
 
-    for (int n = 11; n < typesLabels.count(); n++)
+    for (int n = 1; n < typesLabels.count(); n++)
         typeWidth = qMax(typeWidth, textFontWidth(typesLabels.at(n)));
 
     typeWidth = qMax(typeWidth, textFontWidth(list.at(2)));

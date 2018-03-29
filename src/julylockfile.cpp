@@ -40,7 +40,7 @@
 #include <QTimer>
 #include "timesync.h"
 
-JulyLockFile::JulyLockFile(QString imageName)
+JulyLockFile::JulyLockFile(QString imageName, QString tempDir)
     : QObject()
 {
     qsrand(QDateTime::fromTime_t(TimeSync::getTimeT()).time().msecsTo(QTime(23, 59, 59, 999)));
@@ -51,6 +51,9 @@ JulyLockFile::JulyLockFile(QString imageName)
     lockSocket->setProxy(proxy);
     isLockedFile = false;
     lockPort = 0;
+
+    if (tempDir.isEmpty())
+        tempDir = QDir().tempPath();
 
     lockFilePath = QDir().tempPath() + "/Locked_" + QCryptographicHash::hash(imageName.toUtf8(),
                    QCryptographicHash::Md5).toHex() + ".lockfile";
@@ -65,7 +68,7 @@ JulyLockFile::JulyLockFile(QString imageName)
     {
         if (lockFile->open(QIODevice::ReadOnly))
         {
-            lockPort = lockFile->readAll().trimmed().toUInt();
+            lockPort = lockFile->readAll().trimmed().toUShort();
             lockFile->close();
         }
 

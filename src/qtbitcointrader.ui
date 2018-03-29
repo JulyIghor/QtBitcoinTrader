@@ -3031,7 +3031,7 @@
                <string>BUY_ORDERS</string>
               </property>
               <property name="styleSheet">
-               <string notr="true">color: red</string>
+               <string notr="true">color: blue</string>
               </property>
               <property name="text">
                <string>Bids</string>
@@ -3053,7 +3053,7 @@
                <string>SELL_ORDERS</string>
               </property>
               <property name="styleSheet">
-               <string notr="true">color: blue;</string>
+               <string notr="true">color: red</string>
               </property>
               <property name="text">
                <string>Asks</string>
@@ -3217,6 +3217,21 @@
               <item>
                <property name="text">
                 <string>50.000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100.000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>250.000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>500.000</string>
                </property>
               </item>
              </widget>

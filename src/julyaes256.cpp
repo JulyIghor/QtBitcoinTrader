@@ -44,15 +44,15 @@ QByteArray JulyAES256::sha256(const QByteArray& text)
     EVP_MD_CTX* evpMdCtx = EVP_MD_CTX_new();
 #endif
     EVP_DigestInit(evpMdCtx, EVP_sha256());
-    EVP_DigestUpdate(evpMdCtx, text.data(), text.size());
-    EVP_DigestFinal_ex(evpMdCtx, (unsigned char*)dataBuff.data(), &outLen);
+    EVP_DigestUpdate(evpMdCtx, text.data(), static_cast<size_t>(text.size()));
+    EVP_DigestFinal_ex(evpMdCtx, reinterpret_cast<unsigned char*>(dataBuff.data()), &outLen);
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_MD_CTX_cleanup(evpMdCtx);
-    delete evpMdCtx;
+    OPENSSL_free(evpMdCtx);
 #else
     EVP_MD_CTX_free(evpMdCtx);
 #endif
-    dataBuff.resize(outLen);
+    dataBuff.resize(static_cast<int>(outLen));
     return dataBuff.toHex();
 }
 
@@ -63,15 +63,16 @@ QByteArray JulyAES256::encrypt(const QByteArray& data, const QByteArray& passwor
     dataBuff.resize(data.size() + AES_BLOCK_SIZE);
     EVP_CIPHER_CTX* evpCipherCtx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init(evpCipherCtx);
-    EVP_EncryptInit(evpCipherCtx, EVP_aes_256_cbc(), (const unsigned char*)sha256(password).data(),
-                    (const unsigned char*)sha256("JulyAES" + password).data());
-    EVP_EncryptUpdate(evpCipherCtx, (unsigned char*)dataBuff.data(), &outLen, (const unsigned char*)data.data(),
+    EVP_EncryptInit(evpCipherCtx, EVP_aes_256_cbc(), reinterpret_cast<const unsigned char*>(sha256(password).data()),
+                    reinterpret_cast<const unsigned char*>(sha256("JulyAES" + password).data()));
+    EVP_EncryptUpdate(evpCipherCtx, reinterpret_cast<unsigned char*>(dataBuff.data()), &outLen,
+                      reinterpret_cast<const unsigned char*>(data.data()),
                       data.size());
     int tempLen = outLen;
-    EVP_EncryptFinal(evpCipherCtx, (unsigned char*)dataBuff.data() + tempLen, &outLen);
+    EVP_EncryptFinal(evpCipherCtx, reinterpret_cast<unsigned char*>(dataBuff.data()) + tempLen, &outLen);
     tempLen += outLen;
     EVP_CIPHER_CTX_cleanup(evpCipherCtx);
-    delete evpCipherCtx;
+    EVP_CIPHER_CTX_free(evpCipherCtx);
     dataBuff.resize(tempLen);
     return dataBuff;
 }
@@ -83,15 +84,16 @@ QByteArray JulyAES256::decrypt(const QByteArray& data, const QByteArray& passwor
     dataBuff.resize(data.size() + AES_BLOCK_SIZE);
     EVP_CIPHER_CTX* evpCipherCtx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init(evpCipherCtx);
-    EVP_DecryptInit(evpCipherCtx, EVP_aes_256_cbc(), (const unsigned char*)sha256(password).data(),
-                    (const unsigned char*)sha256("JulyAES" + password).data());
-    EVP_DecryptUpdate(evpCipherCtx, (unsigned char*)dataBuff.data(), &outLen, (const unsigned char*)data.data(),
+    EVP_DecryptInit(evpCipherCtx, EVP_aes_256_cbc(), reinterpret_cast<const unsigned char*>(sha256(password).data()),
+                    reinterpret_cast<const unsigned char*>(sha256("JulyAES" + password).data()));
+    EVP_DecryptUpdate(evpCipherCtx, reinterpret_cast<unsigned char*>(dataBuff.data()), &outLen,
+                      reinterpret_cast<const unsigned char*>(data.data()),
                       data.size());
     int tempLen = outLen;
-    EVP_DecryptFinal(evpCipherCtx, (unsigned char*)dataBuff.data() + tempLen, &outLen);
+    EVP_DecryptFinal(evpCipherCtx, reinterpret_cast<unsigned char*>(dataBuff.data()) + tempLen, &outLen);
     tempLen += outLen;
     EVP_CIPHER_CTX_cleanup(evpCipherCtx);
-    delete evpCipherCtx;
+    EVP_CIPHER_CTX_free(evpCipherCtx);
     dataBuff.resize(tempLen);
     return dataBuff;
 }

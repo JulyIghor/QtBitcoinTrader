@@ -18,6 +18,11 @@ mac { QT += multimedia }
 
 LIBS += -lssl -lcrypto -lz
 
+linux {
+    contains(QMAKE_TARGET.arch, x86_64) {
+        DEFINES += QTBUILDTARGET_Linux86_64
+    }
+}
 win32 {
     contains(QMAKE_TARGET.arch, x86_64) {
         TARGET = QtBitcoinTrader_64bit

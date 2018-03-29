@@ -104,43 +104,72 @@ static const int ContentMargin = 4;
 
 QtBitcoinTrader::QtBitcoinTrader() :
     QMainWindow(),
-    swapedDepth(false),
-    waitingDepthLag(false),
-    isDataPending(false),
+    feeCalculator(nullptr),
+    meridianPrice(0.0),
+    availableAmount(0.0),
+    exchangeId(-1),
+    floatFee(0.0),
+    floatFeeDec(0.0),
+    floatFeeInc(0.0),
+    ordersModel(nullptr),
+    currencyChangedDate(0),
+    iniSettings(nullptr),
     isValidSoftLag(false),
+    confirmOpenOrder(false),
+    lastRuleExecutedTime(QTime(1, 0, 0, 0)),
+
+
+    windowWidget(this),
+    lastCopyTable(nullptr),
+    swapedDepth(false),
+    depthAsksModel(nullptr),
+    depthBidsModel(nullptr),
+    tradesModel(nullptr),
+    historyModel(nullptr),
+    isDataPending(false),
+    waitingDepthLag(false),
+    trayMenu(nullptr),
+    trayIcon(nullptr),
+    checkForUpdates(true),
+    lastLoadedCurrency(-1),
+    constructorFinished(false),
+    appDir(QApplication::applicationDirPath() + "/"),
+
+    showingMessage(false),
+    balanceNotLoaded(true),
+    marketPricesNotLoaded(true),
+    sellLockBtcToSell(false),
+    sellLockPricePerCoin(false),
+    sellLockAmountToReceive(false),
+    buyLockTotalBtc(false),
+    buyLockTotalBtcSelf(false),
+    buyLockPricePerCoin(false),
     profitSellThanBuyUnlocked(true),
     profitBuyThanSellUnlocked(true),
     profitBuyThanSellChangedUnlocked(true),
     profitSellThanBuyChangedUnlocked(true),
-    constructorFinished(false),
-    showingMessage(false),
-    marketPricesNotLoaded(true),
-    balanceNotLoaded(true),
-    sellLockBtcToSell(false),
-    sellLockPricePerCoin(false),
-    sellLockAmountToReceive(false),
-    buyLockTotalBtcSelf(false),
-    buyLockTotalBtc(false),
-    buyLockPricePerCoin(false),
-    currencyChangedDate(0),
-    currentPopupDialogs(0),
-    lastLoadedCurrency(-1),
-    meridianPrice(0.0),
-    availableAmount(0.0),
-    tradesPrecentLast(0.0),
-    floatFee(0.0),
-    floatFeeDec(0.0),
-    floatFeeInc(0.0),
-    appDir(QApplication::applicationDirPath() + "/"),
-    windowWidget(this),
-    configDialog(nullptr),
-    trayMenu(nullptr),
     debugViewer(nullptr),
-    trayIcon(nullptr),
-    feeCalculator(nullptr),
-    lastRuleExecutedTime(QTime(1, 0, 0, 0)),
+    tradesPrecentLast(0.0),
+    currentPopupDialogs(0),
+    networkMenu(nullptr),
+    currencyMenu(nullptr),
+    currencySignLoader(new CurrencySignLoader),
+
+    lockedDocks(false),
+    actionExit(nullptr),
+    actionAbout(nullptr),
+    actionAboutQt(nullptr),
+    actionLockDocks(nullptr),
+    actionConfigManager(nullptr),
+    actionSettings(nullptr),
+    actionDebug(nullptr),
+    menuFile(nullptr),
+    menuView(nullptr),
+    menuConfig(nullptr),
+    menuHelp(nullptr),
+    configDialog(nullptr),
     dockHost(new DockHost(this)),
-    currencySignLoader(new CurrencySignLoader)
+    dockLogo(nullptr)
 {
     depthLagTime.restart();
     softLagTime.restart();
@@ -2988,7 +3017,7 @@ void QtBitcoinTrader::buyBitcoinsButton()
         btcToBuy = ui.buyTotalBtc->value();
 
     //double amountWithoutFee=getAvailableUSD()/priceToBuy;
-    //amountWithoutFee=cutDoubleDecimalsCopy(amountWithoutFee,baseValues.currentPair.currADecimals,false);
+    //amountWithoutFee=JulyMath::cutDoubleDecimalsCopy(amountWithoutFee,baseValues.currentPair.currADecimals,false);
 
     if (confirmOpenOrder)
     {
@@ -4072,7 +4101,6 @@ void QtBitcoinTrader::moveWidgetsToDocks()
     QDockWidget* dockCharts = createDock(ui.tabCharts, "Charts");
     QDockWidget* dockNews = createDock(ui.tabNews, "News");
     //QDockWidget* dockChat = createDock(ui.tabChat, "Chat");
-    dockCharts->setMinimumSize(400, 200);
     splitDockWidget(dockGroupOrders, dockOrdersLog, Qt::Horizontal);
     tabifyDockWidget(dockOrdersLog, dockRules);
     tabifyDockWidget(dockOrdersLog, dockDepth);
@@ -4086,6 +4114,7 @@ void QtBitcoinTrader::moveWidgetsToDocks()
     QDockWidget* centralDockNULL = new QDockWidget(this);
     centralDockNULL->setFixedWidth(0);
     setCentralWidget(centralDockNULL);
+    //centralWidget()->deleteLater();
 
     connect(dockDepth, SIGNAL(visibilityChanged(bool)), this, SLOT(depthVisibilityChanged(bool)));
     connect(dockCharts, SIGNAL(visibilityChanged(bool)), this, SLOT(chartsVisibilityChanged(bool)));
@@ -4218,12 +4247,14 @@ bool QtBitcoinTrader::confirmExitApp()
 
 void QtBitcoinTrader::exitApp()
 {
-    this->hide();
-
     secondTimer.reset();
 
     saveAppState();
     ::config->save("");
+    hide();
+
+    if (configDialog)
+        configDialog->deleteLater();
 
     QCoreApplication::quit();
 }

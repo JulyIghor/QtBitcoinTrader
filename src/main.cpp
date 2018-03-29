@@ -59,14 +59,8 @@
 #include "timesync.h"
 #include "iniengine.h"
 
-#if QT_VERSION < 0x050000
-    #include <QPlastiqueStyle>
-    #include <QTextCodec>
-    #include <QDesktopServices>
-#else
-    #include <QStyle>
-    #include <QStandardPaths>
-#endif
+#include <QStyle>
+#include <QStandardPaths>
 
 BaseValues* baseValues_;
 
@@ -116,7 +110,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4012";
+    appVerStr = "1.40130";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -731,7 +725,7 @@ int main(int argc, char* argv[])
                 if (julyLock)
                     julyLock->free();
 
-                julyLock.reset(new JulyLockFile(baseValues.iniFileName));
+                julyLock.reset(new JulyLockFile(baseValues.iniFileName, appDataDir));
                 bool profileLocked = julyLock->isLocked();
 
                 if (profileLocked)

@@ -31,6 +31,7 @@
 
 #include <QDateTime>
 #include "main.h"
+#include "julymath.h"
 #include "tradesitem.h"
 #include "timesync.h"
 #include "charts/chartsmodel.h"
@@ -224,7 +225,7 @@ void ChartsModel::prepareAmountYAxis()
 
         for (double amountY = 0; amountY < amountMax; amountY += amountStepY)
         {
-            graphAmountText .append(baseValues.currentPair.currASign + " " + QString::number(amountY));
+            graphAmountText .append(baseValues.currentPair.currASign + " " + JulyMath::textFromDouble(amountY, 8, 0));
             graphAmountTextY.append(qRound(amountYScale * amountY));
             widthAmountYAxis = qMax(fontMetrics->width(graphAmountText.last()), widthAmountYAxis);
         }
@@ -360,7 +361,7 @@ void ChartsModel::preparePriceYAxis()
 
         for (double priceY = priceMin; priceY < priceMax; priceY += priceStepY)
         {
-            graphPriceText .append(baseValues.currentPair.currBSign + " " + QString::number(priceY));
+            graphPriceText .append(baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(priceY, 8, 0));
             graphPriceTextY.append(qRound(priceYScale * (priceY - priceMin)));
             widthPriceYAxis = qMax(fontMetrics->width(graphPriceText.last()), widthPriceYAxis);
         }

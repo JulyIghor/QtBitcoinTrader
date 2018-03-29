@@ -608,9 +608,9 @@ void JulyHttp::gzipUncompress(QByteArray* data)
     char out[CHUNK_SIZE];
 
     z_stream strm;
-    strm.zalloc = Z_NULL;
-    strm.zfree = Z_NULL;
-    strm.opaque = Z_NULL;
+    strm.zalloc = nullptr;
+    strm.zfree = nullptr;
+    strm.opaque = nullptr;
     strm.avail_in = data->size();
     strm.next_in = (Bytef*)(data->data());
 
@@ -631,6 +631,7 @@ void JulyHttp::gzipUncompress(QByteArray* data)
         {
             case Z_NEED_DICT:
                 ret = Z_DATA_ERROR;
+                break;
 
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
