@@ -361,7 +361,7 @@ void ScriptWidget::addEventsClicked()
 {
     QAction* action = qobject_cast<QAction*>(sender());
 
-    if (action == 0)
+    if (action == nullptr)
         return;
 
     QString command = action->property("ScriptName").toString();
@@ -436,7 +436,7 @@ bool ScriptWidget::eventFilter(QObject* obj, QEvent* event)
         QToolButton* enteredToolButton = qobject_cast<QToolButton*>(obj);
 
         if (enteredToolButton)
-            Q_FOREACH (QToolButton* button, menuButtons)
+            for (QToolButton* button : menuButtons)
             {
                 if (button == enteredToolButton)
                     continue;

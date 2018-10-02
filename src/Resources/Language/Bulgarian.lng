@@ -1,7 +1,7 @@
 Label_ACTION=Действие:
 Label_AT=От:
 Label_BUY_ORDERS=Ордер за покупка
-Label_CLIENT_ID=ID на Клиента:
+Label_CLIENT_ID=Main user ID:
 Label_DELAY=Закъснение:
 Label_DISABLE_ALL_RULES=Изключи всички правила които са включени в момента
 Label_DISABLE_ALL_RULES_GROUP=Забранете всички правила в посочената група # включване според зададен времеви период

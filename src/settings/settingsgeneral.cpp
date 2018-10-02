@@ -129,7 +129,7 @@ void SettingsGeneral::loadOther()
     ui.confirmOpenOrderCheckBox->setChecked(iniSettings->value("UI/ConfirmOpenOrder", true).toBool());
     ui.closeToTrayCheckBox->setChecked(iniSettings->value("UI/CloseToTray", false).toBool());
     ui.optimizeInterfaceCheckBox->setChecked(iniSettings->value("UI/OptimizeInterface", false).toBool());
-    ui.hiDpiCheckBox->setChecked(hiDpiSettings->value("HiDPI", true).toBool());
+    ui.hiDpiCheckBox->setChecked(hiDpiSettings->value("HiDPI", baseValues.defaultEnableHiDPI).toBool());
 }
 
 void SettingsGeneral::saveOther()
@@ -195,7 +195,7 @@ void SettingsGeneral::on_restoreDefaultsButton_clicked()
     ui.confirmOpenOrderCheckBox->setChecked(true);
     ui.closeToTrayCheckBox->setChecked(false);
     ui.optimizeInterfaceCheckBox->setChecked(false);
-    ui.hiDpiCheckBox->setChecked(true);
+    ui.hiDpiCheckBox->setChecked(baseValues.defaultEnableHiDPI);
     ui.checkForUpdatesCheckBox->setChecked(true);
     ui.checkForUpdatesBetaCheckBox->setChecked(false);
     ui.autoUpdateCheckBox->setChecked(false);

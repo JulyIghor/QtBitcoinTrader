@@ -56,32 +56,32 @@ public:
     }
     bool stopScript();
     bool executeScript(QString, bool);
-    explicit ScriptObject(QString scriptName);
+    explicit ScriptObject(const QString& scriptName);
     ~ScriptObject();
     QStringList indicatorList;
     QStringList functionsList;
     QStringList argumentsList;
     QStringList commandsList;
 private:
-    void initValueChangedPrivate(QString& symbol, QString& scriptNameInd, double& val, bool forceEmit = false);
+    void initValueChangedPrivate(const QString& symbol, QString& scriptNameInd, double& val, bool forceEmit = false);
     void deleteEngine();
     bool scriptWantsOrderBookData;
-    void timerCreate(int milliseconds, QString& command, bool once);
+    void timerCreate(int milliseconds, const QString& command, bool once);
     QMap<QTimer*, bool> timerMap;
-    double orderBookInfo(QString& symbol, double& value, bool isAsk, bool getPrice);
+    double orderBookInfo(const QString& symbol, double& value, bool isAsk, bool getPrice);
     bool haveTimer;
     QTimer* secondTimer;
     bool pendingStop;
     void setRunning(bool);
     bool isRunningFlag;
-    bool replaceString(QString what, QString to, QString& text, bool skipFirstLeft);
+    bool replaceString(const QString& what, const QString& to, QString& text, bool skipFirstLeft);
     QString sourceToScript(QString);
     QScriptEngine* engine;
     QStringList functionNames;
     QList<QDoubleSpinBox*> spinBoxList;
     void addIndicator(QDoubleSpinBox* spinbox, QString value);
-    void addCommand(QString, QList<QByteArray>);
-    void addFunction(QString name);
+    void addCommand(const QString&, QList<QByteArray>);
+    void addFunction(const QString& name);
     bool testMode;
     QMap<QString, double> indicatorsMap;
     ScriptObjectThread performThread;
@@ -89,55 +89,55 @@ private:
     quint32 fileOperationNumber;
     qint32 fileOpenCount;
 public slots:
-    void sendEvent(QString symbol, QString name, double value);
-    void sendEvent(QString name, double value);
-    void timer(double seconds, QString _command_);
-    void delay(double seconds, QString _command_);
-    void log(QVariant);
-    void log(QVariant, QVariant);
-    void log(QVariant, QVariant, QVariant);
-    void log(QVariant, QVariant, QVariant, QVariant);
-    void log(QVariant, QVariant, QVariant, QVariant, QVariant);
-    void log(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant);
-    void log(QVariantList);
+    void sendEvent(const QString& symbol, const QString& name, double value);
+    void sendEvent(const QString& name, double value);
+    void timer(double seconds, const QString& _command_);
+    void delay(double seconds, const QString& _command_);
+    void log(const QVariant&);
+    void log(const QVariant&, const QVariant&);
+    void log(const QVariant&, const QVariant&, const QVariant&);
+    void log(const QVariant&, const QVariant&, const QVariant&, const QVariant&);
+    void log(const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&);
+    void log(const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&);
+    void log(const QVariantList&);
     void logClear();
     void test(int);
 
     void beep();
-    void playWav(QString _filePath_);
+    void playWav(const QString& _filePath_);
 
-    void say(QString _text_);
+    void say(const QString& _text_);
     void say(int);
     void say(double);
-    void say(QVariant);
-    void say(QVariantList);
-    void say(QVariant, QVariant);
-    void say(QVariant, QVariant, QVariant);
-    void say(QVariant, QVariant, QVariant, QVariant);
-    void say(QVariant, QVariant, QVariant, QVariant, QVariant);
-    void say(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant);
+    void say(const QVariant&);
+    void say(const QVariantList&);
+    void say(const QVariant&, const QVariant&);
+    void say(const QVariant&, const QVariant&, const QVariant&);
+    void say(const QVariant&, const QVariant&, const QVariant&, const QVariant&);
+    void say(const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&);
+    void say(const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&);
 
     void groupDone();
     void groupStart(QString _name_);
     void groupStop(QString _name_);
     void groupStop();
-    bool groupIsRunning(QString _name_);
+    bool groupIsRunning(const QString& _name_);
 
-    void startApp(QString _filePath_);
-    void startApp(QString, QStringList);
-    void startApp(QString, QString);
-    void startApp(QString, QString, QString);
-    void startApp(QString, QString, QString, QString);
-    void startApp(QString, QString, QString, QString, QString);
+    void startApp(const QString& _filePath_);
+    void startApp(const QString&, const QStringList&);
+    void startApp(const QString&, const QString&);
+    void startApp(const QString&, const QString&, const QString&);
+    void startApp(const QString&, const QString&, const QString&, const QString&);
+    void startApp(const QString&, const QString&, const QString&, const QString&, const QString&);
 
     void sell(double amount, double price);
-    void sell(QString symbol, double amount, double price);
+    void sell(const QString& symbol, double amount, double price);
     void buy(double amount, double price);
-    void buy(QString symbol, double amount, double price);
-    void cancelOrders(QString symbol);
+    void buy(const QString& symbol, double amount, double price);
+    void cancelOrders(const QString& symbol);
     void cancelOrders();
-    void cancelAsks(QString symbol);
-    void cancelBids(QString symbol);
+    void cancelAsks(const QString& symbol);
+    void cancelBids(const QString& symbol);
     void cancelAsks();
     void cancelBids();
 
@@ -147,33 +147,33 @@ public slots:
 
     double getAsksVolByPrice(double price);
     double getAsksPriceByVol(double volume);
-    double getAsksVolByPrice(QString symbol, double price);
-    double getAsksPriceByVol(QString symbol, double volume);
+    double getAsksVolByPrice(const QString& symbol, double price);
+    double getAsksPriceByVol(const QString& symbol, double volume);
 
     double getBidsVolByPrice(double price);
     double getBidsPriceByVol(double volume);
-    double getBidsVolByPrice(QString symbol, double price);
-    double getBidsPriceByVol(QString symbol, double volume);
+    double getBidsVolByPrice(const QString& symbol, double price);
+    double getBidsPriceByVol(const QString& symbol, double volume);
 
     quint32 getTimeT();
-    double get(QString indicator);
-    double get(QString symbol, QString indicator);
+    double get(const QString& indicator);
+    double get(const QString& symbol, const QString& indicator);
 
-    void fileWrite(QVariant path, QVariant data);
-    void fileAppend(QVariant path, QVariant data);
-    QVariant fileReadLine(QVariant path, qint64 seek = -1);
-    QVariant fileReadLineSimple(QVariant path);
-    QVariant fileRead(QVariant path, qint64 size);
-    QVariant fileReadAll(QVariant path);
+    void fileWrite(const QVariant& path, const QVariant& data);
+    void fileAppend(const QVariant& path, const QVariant& data);
+    QVariant fileReadLine(const QVariant& path, qint64 seek = -1);
+    QVariant fileReadLineSimple(const QVariant& path);
+    QVariant fileRead(const QVariant& path, qint64 size);
+    QVariant fileReadAll(const QVariant& path);
     QVariant dateTimeString();
 private slots:
-    void initValueChanged(QString symbol, QString name, double val);
+    void initValueChanged(const QString& symbol, QString name, double val);
     void timerOut();
     void secondSlot();
     void indicatorValueChanged(double);
-    void fileReadResult(QByteArray, quint32);
+    void fileReadResult(const QByteArray& data, quint32);
 signals:
-    void eventSignal(QString symbol, QString name, double value);
+    void eventSignal(const QString& symbol, const QString& name, double value);
     void startAppSignal(QString, QStringList);
     void setGroupEnabled(QString name, bool enabled);
     void setGroupDone(QString);

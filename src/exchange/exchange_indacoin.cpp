@@ -497,6 +497,8 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
                 break;//orders
             }
 
+            break;
+
         case 305: //order/cancel
             if (!success)
                 break;

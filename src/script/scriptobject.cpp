@@ -42,17 +42,17 @@
 #include <QScriptEngine>
 #include <QScriptValueIterator>
 
-ScriptObject::ScriptObject(QString _scriptName) :
+ScriptObject::ScriptObject(const QString& _scriptName) :
     QObject()
 {
     scriptWantsOrderBookData = false;
     haveTimer = false;
-    secondTimer = 0;
+    secondTimer = nullptr;
     pendingStop = false;
     testResult = 0;
     scriptName = _scriptName;
     isRunningFlag = false;
-    engine = 0;
+    engine = nullptr;
     testMode = true;
 
     for (int n = staticMetaObject.methodOffset(); n < staticMetaObject.methodCount(); n++)
@@ -154,7 +154,7 @@ ScriptObject::~ScriptObject()
 
 }
 
-void ScriptObject::sendEvent(QString name, double value)
+void ScriptObject::sendEvent(const QString& name, double value)
 {
     if (testMode)
         return;
@@ -162,7 +162,7 @@ void ScriptObject::sendEvent(QString name, double value)
     emit eventSignal(baseValues.currentPair.symbolSecond(), name, value);
 }
 
-void ScriptObject::sendEvent(QString symbol, QString name, double value)
+void ScriptObject::sendEvent(const QString& symbol, const QString& name, double value)
 {
     if (testMode)
         return;
@@ -207,25 +207,24 @@ double ScriptObject::getBidsPriceByVol(double price)
     return getBidsPriceByVol(baseValues.currentPair.symbolSecond(), price);
 }
 
-double ScriptObject::getAsksPriceByVol(QString symbol, double price)
+double ScriptObject::getAsksPriceByVol(const QString& symbol, double price)
 {
     return orderBookInfo(symbol, price, true, true);
 }
-double ScriptObject::getAsksVolByPrice(QString symbol, double volume)
+double ScriptObject::getAsksVolByPrice(const QString& symbol, double volume)
 {
     return orderBookInfo(symbol, volume, true, false);
 }
-double ScriptObject::getBidsPriceByVol(QString symbol, double price)
+double ScriptObject::getBidsPriceByVol(const QString& symbol, double price)
 {
     return orderBookInfo(symbol, price, false, true);
 }
-double ScriptObject::getBidsVolByPrice(QString symbol, double volume)
+double ScriptObject::getBidsVolByPrice(const QString& symbol, double volume)
 {
     return orderBookInfo(symbol, volume, false, false);
 }
 
-
-double ScriptObject::orderBookInfo(QString& symbol, double& value, bool isAsk, bool getPrice)
+double ScriptObject::orderBookInfo(const QString& symbol, double& value, bool isAsk, bool getPrice)
 {
     double result = 0.0;
 
@@ -245,17 +244,17 @@ double ScriptObject::orderBookInfo(QString& symbol, double& value, bool isAsk, b
     return result;
 }
 
-double ScriptObject::get(QString indicator)
+double ScriptObject::get(const QString& indicator)
 {
     return get(baseValues.currentPair.symbolSecond(), indicator);
 }
 
-void ScriptObject::timerCreate(int milliseconds, QString& command, bool once)
+void ScriptObject::timerCreate(int milliseconds, const QString& command, bool once)
 {
     if (testMode)
         return;
 
-    if (engine == 0 || command.isEmpty())
+    if (engine == nullptr || command.isEmpty())
         return;
 
     if (milliseconds < 0)
@@ -273,12 +272,12 @@ void ScriptObject::timerCreate(int milliseconds, QString& command, bool once)
     newTimer->start(milliseconds);
 }
 
-void ScriptObject::delay(double seconds, QString command)
+void ScriptObject::delay(double seconds, const QString& command)
 {
     timerCreate(seconds * 1000, command, true);
 }
 
-void ScriptObject::timer(double seconds, QString command)
+void ScriptObject::timer(double seconds, const QString& command)
 {
     timerCreate(seconds * 1000, command, false);
 }
@@ -287,7 +286,7 @@ void ScriptObject::timerOut()
 {
     QTimer* senderTimer = qobject_cast<QTimer*>(sender());
 
-    if (senderTimer == 0)
+    if (senderTimer == nullptr)
         return;
 
     QString command = senderTimer->property("Command").toString();
@@ -301,13 +300,13 @@ void ScriptObject::timerOut()
     if (command.isEmpty())
         return;
 
-    if (engine == 0)
+    if (engine == nullptr)
         return;
 
     engine->evaluate(command.replace("\\", "\\\\"));
 }
 
-double ScriptObject::get(QString symbol, QString indicator)
+double ScriptObject::get(const QString& symbol, const QString& indicator)
 {
     QString indicatorLower = indicator.toLower();
 
@@ -323,45 +322,44 @@ double ScriptObject::get(QString symbol, QString indicator)
     if (indicatorLower == QLatin1String("openbidscount"))
         return getOpenBidsCount();
 
-    if (indicator.length() >= 8 && indicatorLower.startsWith(QLatin1String("balance")))
-        symbol.clear();
-    else if (!symbol.isEmpty())
-        symbol.append("_");
+    QString symbolCopy = symbol;
 
-    return indicatorsMap.value(symbol + indicator, 0.0);
+    if (indicator.length() >= 8 && indicatorLower.startsWith(QLatin1String("balance")))
+        symbolCopy.clear();
+    else if (!symbolCopy.isEmpty())
+        symbolCopy.append("_");
+
+    return indicatorsMap.value(symbolCopy + indicator, 0.0);
 }
 
-void ScriptObject::startApp(QString name)
+void ScriptObject::startApp(const QString& name)
 {
     startApp(name, QStringList());
 }
-void ScriptObject::startApp(QString name, QString arg1)
+void ScriptObject::startApp(const QString& name, const QString& arg1)
 {
     startApp(name, QStringList() << arg1);
 }
-void ScriptObject::startApp(QString name, QString arg1, QString arg2)
+void ScriptObject::startApp(const QString& name, const QString& arg1, const QString& arg2)
 {
     startApp(name, QStringList() << arg1 << arg2);
 }
-void ScriptObject::startApp(QString name, QString arg1, QString arg2, QString arg3)
+void ScriptObject::startApp(const QString& name, const QString& arg1, const QString& arg2, const QString& arg3)
 {
     startApp(name, QStringList() << arg1 << arg2 << arg3);
 }
-void ScriptObject::startApp(QString name, QString arg1, QString arg2, QString arg3, QString arg4)
+void ScriptObject::startApp(const QString& name, const QString& arg1, const QString& arg2, const QString& arg3, const QString& arg4)
 {
     startApp(name, QStringList() << arg1 << arg2 << arg3 << arg4);
 }
-void ScriptObject::startApp(QString name, QStringList list)
+void ScriptObject::startApp(const QString& name, const QStringList& list)
 {
     if (testMode)
         return;
 
     emit startAppSignal(name, list);
 
-    if (list.count())
-        name += " " + list.join(" ");
-
-    writeLog(julyTr("START_APPLICATION", "Start application: %1").arg(name));
+    writeLog(julyTr("START_APPLICATION", "Start application: %1").arg(list.count() ? name + " " + list.join(" ") : name));
 }
 
 void ScriptObject::beep()
@@ -372,7 +370,7 @@ void ScriptObject::beep()
     mainWindow.beep(false);
 }
 
-void ScriptObject::playWav(QString fileName)
+void ScriptObject::playWav(const QString& fileName)
 {
     if (testMode)
         return;
@@ -386,7 +384,7 @@ void ScriptObject::playWav(QString fileName)
     mainWindow.playWav(fileName, false);
 }
 
-void ScriptObject::say(QString text)
+void ScriptObject::say(const QString& text)
 {
     if (!testMode)
         mainWindow.sayText(text);
@@ -399,46 +397,44 @@ void ScriptObject::say(int text)
 {
     say(QVariantList() << text);
 }
-void ScriptObject::say(QVariant text1)
+void ScriptObject::say(const QVariant& text1)
 {
     say(QVariantList() << text1);
 }
-void ScriptObject::say(QVariant text1, QVariant text2)
+void ScriptObject::say(const QVariant& text1, const QVariant& text2)
 {
     say(QVariantList() << text1 << text2);
 }
-void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3)
+void ScriptObject::say(const QVariant& text1, const QVariant& text2, const QVariant& text3)
 {
     say(QVariantList() << text1 << text2 << text3);
 }
-void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4)
+void ScriptObject::say(const QVariant& text1, const QVariant& text2, const QVariant& text3, const QVariant& text4)
 {
     say(QVariantList() << text1 << text2 << text3 << text4);
 }
-void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4, QVariant text5)
+void ScriptObject::say(const QVariant& text1, const QVariant& text2, const QVariant& text3, const QVariant& text4, const QVariant& text5)
 {
     say(QVariantList() << text1 << text2 << text3 << text4 << text5);
 }
-void ScriptObject::say(QVariant text1, QVariant text2, QVariant text3, QVariant text4, QVariant text5, QVariant text6)
+void ScriptObject::say(const QVariant& text1, const QVariant& text2, const QVariant& text3, const QVariant& text4, const QVariant& text5,
+                       const QVariant& text6)
 {
     say(QVariantList() << text1 << text2 << text3 << text4 << text5 << text6);
 }
-void ScriptObject::say(QVariantList list)
+void ScriptObject::say(const QVariantList& list)
 {
     int detectDoublePoint = 0;
 
-    if (detectDoublePoint == 0) //If you reading this and know better solution, please tell me
-    {
-        bool decimalComma = QLocale().decimalPoint() == QChar(',');
+    bool decimalComma = QLocale().decimalPoint() == QChar(',');
 
-        if (!decimalComma)
-            decimalComma = QLocale().country() == QLocale::Ukraine || QLocale().country() == QLocale::RussianFederation;
+    if (!decimalComma)
+        decimalComma = QLocale().country() == QLocale::Ukraine || QLocale().country() == QLocale::RussianFederation;
 
-        if (decimalComma)
-            detectDoublePoint = 2;
-        else
-            detectDoublePoint = 1;
-    }
+    if (decimalComma)
+        detectDoublePoint = 2;
+    else
+        detectDoublePoint = 1;
 
     QString text;
 
@@ -524,7 +520,7 @@ void ScriptObject::addIndicator(QDoubleSpinBox* spinBox, QString value)
     functionsList << "trader.get(\"" + value + "\")";
 }
 
-void ScriptObject::addCommand(QString name, QList<QByteArray> parameters)
+void ScriptObject::addCommand(const QString& name, QList<QByteArray> parameters)
 {
     if (!commandsList.contains(name))
     {
@@ -548,10 +544,10 @@ void ScriptObject::addCommand(QString name, QList<QByteArray> parameters)
     }
 }
 
-void ScriptObject::addFunction(QString name)
+void ScriptObject::addFunction(const QString& name)
 {
     if (!functionsList.contains(name))
-        functionsList << name.replace('_', '.');
+        functionsList << QString(name).replace('_', '.');
 }
 
 void ScriptObject::buy(double amount, double price)
@@ -564,8 +560,10 @@ void ScriptObject::sell(double amount, double price)
     sell("", amount, price);
 }
 
-void ScriptObject::buy(QString symbol, double amount, double price)
+void ScriptObject::buy(const QString& symbolR, double amount, double price)
 {
+    QString symbol = symbolR;
+
     if (symbol.isEmpty())
         symbol = baseValues.currentPair.symbolSecond();
     else
@@ -577,8 +575,10 @@ void ScriptObject::buy(QString symbol, double amount, double price)
     log(symbol + ": Buy " + JulyMath::textFromDouble(amount, 8, 0) + " at " + JulyMath::textFromDouble(price, 8, 0));
 }
 
-void ScriptObject::sell(QString symbol, double amount, double price)
+void ScriptObject::sell(const QString& symbolR, double amount, double price)
 {
+    QString symbol = symbolR;
+
     if (symbol.isEmpty())
         symbol = baseValues.currentPair.symbolSecond();
     else
@@ -598,7 +598,7 @@ void ScriptObject::cancelOrders()
     log("Cancel all orders");
 }
 
-void ScriptObject::cancelOrders(QString symbol)
+void ScriptObject::cancelOrders(const QString& symbol)
 {
     if (!testMode)
         mainWindow.cancelPairOrders(symbol);
@@ -623,7 +623,7 @@ void ScriptObject::cancelBids()
         mainWindow.cancelBidOrders("");
 }
 
-void ScriptObject::cancelAsks(QString symbol)
+void ScriptObject::cancelAsks(const QString& symbol)
 {
     log("Cancel all " + symbol + " asks");
 
@@ -631,7 +631,7 @@ void ScriptObject::cancelAsks(QString symbol)
         mainWindow.cancelAskOrders(symbol);
 }
 
-void ScriptObject::cancelBids(QString symbol)
+void ScriptObject::cancelBids(const QString& symbol)
 {
     log("Cancel all " + symbol + " bids");
 
@@ -644,27 +644,28 @@ void ScriptObject::logClear()
     emit logClearSignal();
 }
 
-void ScriptObject::log(QVariant arg1, QVariant arg2)
+void ScriptObject::log(const QVariant& arg1, const QVariant& arg2)
 {
     log(QVariantList() << arg1 << arg2);
 }
-void ScriptObject::log(QVariant arg1, QVariant arg2, QVariant arg3)
+void ScriptObject::log(const QVariant& arg1, const QVariant& arg2, const QVariant& arg3)
 {
     log(QVariantList() << arg1 << arg2 << arg3);
 }
-void ScriptObject::log(QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4)
+void ScriptObject::log(const QVariant& arg1, const QVariant& arg2, const QVariant& arg3, const QVariant& arg4)
 {
     log(QVariantList() << arg1 << arg2 << arg3 << arg4);
 }
-void ScriptObject::log(QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5)
+void ScriptObject::log(const QVariant& arg1, const QVariant& arg2, const QVariant& arg3, const QVariant& arg4, const QVariant& arg5)
 {
     log(QVariantList() << arg1 << arg2 << arg3 << arg4 << arg5);
 }
-void ScriptObject::log(QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6)
+void ScriptObject::log(const QVariant& arg1, const QVariant& arg2, const QVariant& arg3, const QVariant& arg4, const QVariant& arg5,
+                       const QVariant& arg6)
 {
     log(QVariantList() << arg1 << arg2 << arg3 << arg4 << arg5 << arg6);
 }
-void ScriptObject::log(QVariantList list)
+void ScriptObject::log(const QVariantList& list)
 {
     if (testMode)
         return;
@@ -684,7 +685,7 @@ void ScriptObject::log(QVariantList list)
 
     log(logText);
 }
-void ScriptObject::log(QVariant arg1)
+void ScriptObject::log(const QVariant& arg1)
 {
     if (testMode)
         return;
@@ -713,7 +714,7 @@ void ScriptObject::log(QVariant arg1)
         emit writeLog(arg1.toString());
 }
 
-void ScriptObject::initValueChangedPrivate(QString& symbol, QString& scriptNameInd, double& val, bool forceEmit)
+void ScriptObject::initValueChangedPrivate(const QString& symbol, QString& scriptNameInd, double& val, bool forceEmit)
 {
     QString prependName;
 
@@ -727,12 +728,12 @@ void ScriptObject::initValueChangedPrivate(QString& symbol, QString& scriptNameI
     if (val < 0.00000001 && scriptNameInd.endsWith(QLatin1String("price"), Qt::CaseInsensitive))
         return;
 
-    if (!forceEmit && !testMode && indicatorsMap.value(prependName + scriptNameInd, -2508.1987) == val)
+    if (!forceEmit && !testMode && qFuzzyCompare(indicatorsMap.value(prependName + scriptNameInd, -2508.1987), val) == 0)
         return;
 
     indicatorsMap[prependName + scriptNameInd] = val;
 
-    if (engine == 0)
+    if (engine == nullptr)
         return;
 
     if (val < 0.00000001 && scriptNameInd.contains(QLatin1String("price"), Qt::CaseInsensitive))
@@ -741,7 +742,7 @@ void ScriptObject::initValueChangedPrivate(QString& symbol, QString& scriptNameI
     emit valueChanged(symbol, scriptNameInd, val);
 }
 
-void ScriptObject::initValueChanged(QString symbol, QString scriptNameInd, double val)
+void ScriptObject::initValueChanged(const QString& symbol, QString scriptNameInd, double val)
 {
     initValueChangedPrivate(symbol, scriptNameInd, val, false);
 }
@@ -753,7 +754,7 @@ void ScriptObject::indicatorValueChanged(double val)
 
     QObject* senderObject = sender();
 
-    if (senderObject == 0)
+    if (senderObject == nullptr)
         return;
 
     QString scriptNameInd = senderObject->property("ScriptName").toString();
@@ -769,7 +770,7 @@ quint32 ScriptObject::getTimeT()
     return TimeSync::getTimeT();
 }
 
-bool ScriptObject::groupIsRunning(QString name)
+bool ScriptObject::groupIsRunning(const QString& name)
 {
     if (name.isEmpty() || name == scriptName)
         return isRunning();
@@ -811,7 +812,7 @@ void ScriptObject::deleteEngine()
     }
 
     engine->deleteLater();
-    engine = 0;
+    engine = nullptr;
 
     if (!testMode && scriptWantsOrderBookData)
     {
@@ -997,7 +998,7 @@ QString ScriptObject::sourceToScript(QString text)
     return text;
 }
 
-bool ScriptObject::replaceString(QString what, QString to, QString& text, bool skipFirstLeft)
+bool ScriptObject::replaceString(const QString& what, const QString& to, QString& text, bool skipFirstLeft)
 {
     int indexOf_what = text.indexOf(what, 0, Qt::CaseInsensitive);
 
@@ -1052,7 +1053,7 @@ bool ScriptObject::replaceString(QString what, QString to, QString& text, bool s
     return true;
 }
 
-void ScriptObject::fileWrite(QVariant path, QVariant data)
+void ScriptObject::fileWrite(const QVariant& path, const QVariant& data)
 {
     if (testMode)
         return;
@@ -1082,7 +1083,7 @@ void ScriptObject::fileWrite(QVariant path, QVariant data)
     emit performFileWrite(path.toString(), result.toLatin1());
 }
 
-void ScriptObject::fileAppend(QVariant path, QVariant data)
+void ScriptObject::fileAppend(const QVariant& path, const QVariant& data)
 {
     if (testMode)
         return;
@@ -1112,26 +1113,24 @@ void ScriptObject::fileAppend(QVariant path, QVariant data)
     emit performFileAppend(path.toString(), result.toLatin1());
 }
 
-QVariant ScriptObject::fileReadLine(QVariant path, qint64 seek)
+QVariant ScriptObject::fileReadLine(const QVariant& path, qint64 seek)
 {
     if (testMode)
-        return "";
+        return QLatin1String("");
 
     fileOpenCount++;
     quint32 tempFileOperationNumber = fileOperationNumber++;
     emit performFileReadLine(path.toString(), seek, tempFileOperationNumber);
 
     QEventLoop waitLoop;
-    connect(this, SIGNAL(fileReadExitLoop()), &waitLoop, SLOT(quit()));
+    connect(this, &ScriptObject::fileReadExitLoop, &waitLoop, &QEventLoop::quit);
     QTimer::singleShot(5000, &waitLoop, &QEventLoop::quit);
     waitLoop.exec();
 
-    QString tempData = arrayFileReadResult[tempFileOperationNumber];
-    arrayFileReadResult.remove(tempFileOperationNumber);
-    return tempData;
+    return arrayFileReadResult.take(tempFileOperationNumber);
 }
 
-QVariant ScriptObject::fileReadLineSimple(QVariant path)
+QVariant ScriptObject::fileReadLineSimple(const QVariant& path)
 {
     if (testMode)
         return "";
@@ -1141,16 +1140,14 @@ QVariant ScriptObject::fileReadLineSimple(QVariant path)
     emit performFileReadLineSimple(path.toString(), tempFileOperationNumber);
 
     QEventLoop waitLoop;
-    connect(this, SIGNAL(fileReadExitLoop()), &waitLoop, SLOT(quit()));
+    connect(this, &ScriptObject::fileReadExitLoop, &waitLoop, &QEventLoop::quit);
     QTimer::singleShot(5000, &waitLoop, &QEventLoop::quit);
     waitLoop.exec();
 
-    QString tempData = arrayFileReadResult[tempFileOperationNumber];
-    arrayFileReadResult.remove(tempFileOperationNumber);
-    return tempData;
+    return arrayFileReadResult.take(tempFileOperationNumber);
 }
 
-QVariant ScriptObject::fileRead(QVariant path, qint64 size)
+QVariant ScriptObject::fileRead(const QVariant& path, qint64 size)
 {
     if (testMode)
         return "";
@@ -1160,16 +1157,14 @@ QVariant ScriptObject::fileRead(QVariant path, qint64 size)
     emit performFileRead(path.toString(), size, tempFileOperationNumber);
 
     QEventLoop waitLoop;
-    connect(this, SIGNAL(fileReadExitLoop()), &waitLoop, SLOT(quit()));
+    connect(this, &ScriptObject::fileReadExitLoop, &waitLoop, &QEventLoop::quit);
     QTimer::singleShot(5000, &waitLoop, &QEventLoop::quit);
     waitLoop.exec();
 
-    QString tempData = arrayFileReadResult[tempFileOperationNumber];
-    arrayFileReadResult.remove(tempFileOperationNumber);
-    return tempData;
+    return arrayFileReadResult.take(tempFileOperationNumber);
 }
 
-QVariant ScriptObject::fileReadAll(QVariant path)
+QVariant ScriptObject::fileReadAll(const QVariant& path)
 {
     if (testMode)
         return "";
@@ -1179,13 +1174,11 @@ QVariant ScriptObject::fileReadAll(QVariant path)
     emit performFileReadAll(path.toString(), tempFileOperationNumber);
 
     QEventLoop waitLoop;
-    connect(this, SIGNAL(fileReadExitLoop()), &waitLoop, SLOT(quit()));
+    connect(this, &ScriptObject::fileReadExitLoop, &waitLoop, &QEventLoop::quit);
     QTimer::singleShot(5000, &waitLoop, &QEventLoop::quit);
     waitLoop.exec();
 
-    QString tempData = arrayFileReadResult[tempFileOperationNumber];
-    arrayFileReadResult.remove(tempFileOperationNumber);
-    return tempData;
+    return arrayFileReadResult.take(tempFileOperationNumber);
 }
 
 QVariant ScriptObject::dateTimeString()
@@ -1193,7 +1186,7 @@ QVariant ScriptObject::dateTimeString()
     return QDateTime::fromTime_t(TimeSync::getTimeT()).toString(baseValues.dateTimeFormat);
 }
 
-void ScriptObject::fileReadResult(QByteArray data, quint32 tempFileOperationNumber)
+void ScriptObject::fileReadResult(const QByteArray& data, quint32 tempFileOperationNumber)
 {
     fileOpenCount--;
     arrayFileReadResult.insert(tempFileOperationNumber, data);

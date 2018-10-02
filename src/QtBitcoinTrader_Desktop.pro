@@ -316,9 +316,7 @@ unix:!macx {
     INSTALLS += icon
 }
 ################################
-win32 {
-    RC_FILE = $${PWD}/WinResource.rc
-}
+win32:RC_FILE = $${PWD}/WinResource.rc
 
 macx:ICON = $${PWD}/QtBitcoinTrader.icns
 macx:QMAKE_INFO_PLIST = $${PWD}/QtBitcoinTrader.plist

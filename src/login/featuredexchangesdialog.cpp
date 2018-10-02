@@ -157,17 +157,15 @@ void FeaturedExchangesDialog::dataReceived(QByteArray data, int)
 
 void FeaturedExchangesDialog::removeNotValidExchanges()
 {
-    bool isValid;
-
     for (int i = 0; i < featuredExchangesList.count(); i++)
     {
-        isValid = false;
+        bool isValid = false;
 
         for (int j = 0; j < allExchangesList.count(); j++)
         {
             if (featuredExchangesList.at(i) == allExchangesList.at(j))
             {
-                featuredExchangesListIndex.insert(i, featuredExchangesList.at(i).toInt());
+                featuredExchangesListIndex.insert(i, featuredExchangesList.at(i).toUInt());
                 isValid = true;
                 break;
             }

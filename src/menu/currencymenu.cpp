@@ -60,12 +60,11 @@ void CurrencyMenu::on_filterLine_textChanged(QString filter)
 
     filter = filter.toUpper();
     setCurrencyVisible = false;
-    bool bufferVisible;
     ui->scrollArea->hide();
 
     for (int i = 0; i < currencyPairs.size(); ++i)
     {
-        bufferVisible = currencyPairs.at(i).contains(filter);
+        bool bufferVisible = currencyPairs.at(i).contains(filter);
         ui->currencyLayout->itemAt(i)->widget()->setVisible(bufferVisible);
 
         if (bufferVisible && !setCurrencyVisible)

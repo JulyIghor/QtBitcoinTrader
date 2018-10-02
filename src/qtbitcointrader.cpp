@@ -1043,6 +1043,7 @@ int QtBitcoinTrader::getOpenOrdersCount(int all)//-1: asks, 0 all, 1: bids
     return ordersModel->rowCount() - ordersModel->getAsksCount();
 }
 
+
 void QtBitcoinTrader::repeatSelectedOrderByType(int type, bool availableOnly)
 {
     if (lastCopyTable == 0 || lastCopyTable->selectionModel()->selectedRows().count() != 1)
@@ -2085,14 +2086,6 @@ void QtBitcoinTrader::currencyMenuChanged(int val)
 
     ui.widgetSell->parentWidget()->setWindowTitle(sellGroupboxText);
 
-    if (currentExchange->clearHistoryOnCurrencyChanged)
-    {
-        historyModel->clear();
-
-        setSpinValue(ui.ordersLastBuyPrice, 0.0);
-        setSpinValue(ui.ordersLastSellPrice, 0.0);
-    }
-
     static int firstLoad = 0;
 
     if (firstLoad++ > 1)
@@ -2113,14 +2106,19 @@ void QtBitcoinTrader::currencyMenuChanged(int val)
     depthAsksModel->fixTitleWidths();
     depthBidsModel->fixTitleWidths();
 
+    setSpinValue(ui.ordersLastBuyPrice, 0.0);
+    setSpinValue(ui.ordersLastSellPrice, 0.0);
+
+    if (currentExchange->clearHistoryOnCurrencyChanged)
+        historyModel->clear();
+    else
+        historyModel->loadLastPrice();
+
     calcOrdersTotalValues();
 
     ui.filterOrdersCurrency->setCurrentIndex(val);
 
     currencyChangedDate = TimeSync::getTimeT();
-
-    setSpinValue(ui.ordersLastBuyPrice, 0.0);
-    setSpinValue(ui.ordersLastSellPrice, 0.0);
 
     fixDecimals(this);
 

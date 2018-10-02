@@ -1,7 +1,7 @@
 Label_ACTION=Eylem:
 Label_AT=İle:
 Label_BUY_ORDERS=Alış Emirleri
-Label_CLIENT_ID=Müşteri Kimliği:
+Label_CLIENT_ID=Main user ID:
 Label_DELAY=Gecikme:
 Label_DISABLE_ALL_RULES=Kural çalışma anında uygulanan kural dahil tüm kuralları kapat.
 Label_DISABLE_ALL_RULES_GROUP=Kural çalışma anında açık olan # Belirli grubun tüm kurallarını kapat 

@@ -41,7 +41,7 @@ class AllExchangesDialog : public QDialog
     Q_OBJECT
 
 public:
-    AllExchangesDialog(int);
+    explicit AllExchangesDialog(int);
     ~AllExchangesDialog();
     qint32 exchangeNum;
 

@@ -1,7 +1,7 @@
 Label_ACTION=Действие:
 Label_AT=По:
 Label_BUY_ORDERS=Ордера на покупку
-Label_CLIENT_ID=ID Клиента:
+Label_CLIENT_ID=Главный user ID:
 Label_DISABLE_ALL_RULES=Отключить все правила которые включены на момент выполнения правила.
 Label_DISABLE_ALL_RULES_GROUP=Отключить все правила из указанной группы которые были включены на момент выполнения
 Label_DONATE_THANK_YOU=Спасибо за вашу поддержку!
@@ -521,7 +521,7 @@ GroupBox_SETTINGS_TIME=Время
 Label_SETTINGS_USE_24HOUR_TIME_FORMAT=Использовать 24-часовой формат времени:
 Label_SETTINGS_TIME_SYNC=Синхронизация времени:
 Label_SETTINGS_TYPE=Тип
-GroupBox_SETTINGS_OTHER=Другие  
+GroupBox_SETTINGS_GENERAL=Общие  
 Label_SETTINGS_OPTIMIZE=Уменьшение отступлений между элементами интерфейса (после перезагрузки)
 Label_SETTINGS_HIDPI=HiDPI (после перезагрузки)
 Label_SETTINGS_DISABLE_PAIR_SYNC=Отключить синхронизацию пар при запуске программы

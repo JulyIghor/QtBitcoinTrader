@@ -68,6 +68,8 @@ struct BaseValues
 {
     void Construct();
 
+    bool defaultEnableHiDPI;
+
     int scriptsThatUseOrderBookCount;
 
     QString osStyle;

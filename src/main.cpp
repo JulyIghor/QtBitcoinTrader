@@ -110,7 +110,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.40130";
+    appVerStr = "1.40200";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -179,9 +179,16 @@ int main(int argc, char* argv[])
     baseValues_->Construct();
 
 #if QT_VERSION >= 0x050600
+
+#ifdef Q_OS_LINUX
+    baseValues.defaultEnableHiDPI = false;
+#else
+    baseValues.defaultEnableHiDPI = true;
+#endif
+
     QSettings hiDpiSettings("Centrabit", "Qt Bitcoin Trader");
 
-    if (hiDpiSettings.value("HiDPI", true).toBool())
+    if (hiDpiSettings.value("HiDPI", baseValues.defaultEnableHiDPI).toBool())
     {
         QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -193,6 +200,12 @@ int main(int argc, char* argv[])
 #endif
 
     QApplication a(argc, argv);
+
+    if (QSslSocket::sslLibraryVersionString().isEmpty())
+    {
+        QMessageBox::critical(nullptr, "Qt Bitcoin Trader", julyTr("CANT_LOAD_OPENSSL", "Can't load OpenSSL"));
+        return 0;
+    }
 
     QTranslator qTranslator;
     qTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
@@ -300,7 +313,7 @@ int main(int argc, char* argv[])
 
     if (!QFile::exists(appDataDir))
     {
-        QMessageBox::warning(0, "Qt Bitcoin Trader",
+        QMessageBox::warning(nullptr, "Qt Bitcoin Trader",
                              julyTr("CAN_NOT_WRITE_TO_FOLDER", "Can not write to folder") +
                              ": \"" + appDataDir + "\"");
         return 0;
@@ -344,7 +357,7 @@ int main(int argc, char* argv[])
     bool proxyEnabled = settingsMain.value("Enabled", true).toBool();
     bool proxyAuto = settingsMain.value("Auto", true).toBool();
     QString proxyHost = settingsMain.value("Host", "127.0.0.1").toString();
-    quint16 proxyPort = settingsMain.value("Port", 1234).toInt();
+    quint16 proxyPort = settingsMain.value("Port", 1234).toUInt();
     QString proxyUser = settingsMain.value("User", "username").toString();
     QString proxyPassword = settingsMain.value("Password", "password").toString();
 
@@ -430,7 +443,7 @@ int main(int argc, char* argv[])
     {
         baseValues.appVerLastReal = settingsMain.value("Version", 1.0).toDouble();
 
-        if (baseValues.appVerLastReal != baseValues.appVerReal)
+        if (qFuzzyCompare(baseValues.appVerLastReal, baseValues.appVerReal))
         {
             settingsMain.setValue("Version", baseValues.appVerReal);
             QStringList cacheFiles = QDir(appDataDir + "cache").entryList(QStringList("*.cache"), QDir::Files);
@@ -562,114 +575,114 @@ int main(int argc, char* argv[])
                     settings.sync();
 
                     if (!QFile::exists(baseValues.iniFileName))
-                        QMessageBox::warning(0, "Qt Bitcoin Trader", "Can't write file: \"" + baseValues.iniFileName + "\"");
+                        QMessageBox::warning(nullptr, "Qt Bitcoin Trader", "Can't write file: \"" + baseValues.iniFileName + "\"");
 
                     QByteArray encryptedData;
 
                     switch (newPassword.getExchangeId())
                     {
-                        case 0:
-                            {
-                                //Secret Exchange
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 0:
+                    {
+                        //Secret Exchange
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 1:
-                            {
-                                //WEX
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 1:
+                    {
+                        //WEX
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 2:
-                            {
-                                //Bitstamp
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 2:
+                    {
+                        //Bitstamp
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 3:
-                            {
-                                //BTC China
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 3:
+                    {
+                        //BTC China
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 4:
-                            {
-                                //Bitfinex
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 4:
+                    {
+                        //Bitfinex
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 5:
-                            {
-                                //GOCio
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 5:
+                    {
+                        //GOCio
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 6:
-                            {
-                                //Indacoin
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 6:
+                    {
+                        //Indacoin
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 8:
-                            {
-                                //BitMarket
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 8:
+                    {
+                        //BitMarket
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 9:
-                            {
-                                //OKCoin
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 9:
+                    {
+                        //OKCoin
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        case 10:
-                            {
-                                //YObit
-                                baseValues.restSign = newPassword.getRestSign().toLatin1();
-                                encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
-                                                                    baseValues.restSign.toBase64() + "\r\n" +
-                                                                    QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
-                            }
-                            break;
+                    case 10:
+                    {
+                        //YObit
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
 
-                        default:
-                            break;
+                    default:
+                        break;
                     }
 
                     settings.setValue("EncryptedData/ApiKeySign", QString(encryptedData.toBase64()));
@@ -730,7 +743,7 @@ int main(int argc, char* argv[])
 
                 if (profileLocked)
                 {
-                    QMessageBox msgBox(0);
+                    QMessageBox msgBox(nullptr);
                     msgBox.setIcon(QMessageBox::Question);
                     msgBox.setWindowTitle("Qt Bitcoin Trader");
                     msgBox.setText(julyTr("THIS_PROFILE_ALREADY_USED",
@@ -739,8 +752,7 @@ int main(int argc, char* argv[])
                     msgBox.setDefaultButton(QMessageBox::Ok);
                     msgBox.exec();
 
-                    if (profileLocked)
-                        tryPassword.clear();
+                    tryPassword.clear();
                 }
 
                 if (!profileLocked)
@@ -785,7 +797,7 @@ int main(int argc, char* argv[])
             debugLevel = 1;
 
         iniSettings.setValue("Debug/LogEnabled", debugLevel > 0);
-        baseValues.logThread_ = 0;
+        baseValues.logThread_ = nullptr;
 
         if (debugLevel)
         {

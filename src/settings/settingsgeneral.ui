@@ -68,6 +68,107 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="generalGroupBox">
+     <property name="accessibleName">
+      <string>SETTINGS_GENERAL</string>
+     </property>
+     <property name="title">
+      <string>General</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_4">
+      <item row="1" column="0">
+       <widget class="QLabel" name="confirmOpenOrderLabel">
+        <property name="accessibleName">
+         <string>CONFIRM_ORDER_CHECK</string>
+        </property>
+        <property name="text">
+         <string>Confirm open order:</string>
+        </property>
+        <property name="buddy">
+         <cstring>confirmOpenOrderCheckBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="confirmOpenOrderCheckBox">
+        <property name="accessibleName">
+         <string/>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="closeToTrayLabel">
+        <property name="accessibleName">
+         <string>CLOSE_TO_TRAY</string>
+        </property>
+        <property name="text">
+         <string>Close to tray:</string>
+        </property>
+        <property name="buddy">
+         <cstring>closeToTrayCheckBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="closeToTrayCheckBox">
+        <property name="toolTip">
+         <string/>
+        </property>
+        <property name="accessibleName">
+         <string/>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="optimizeInterfaceLabel">
+        <property name="accessibleName">
+         <string>SETTINGS_OPTIMIZE</string>
+        </property>
+        <property name="text">
+         <string>Reducing interface elements spacing (after restart)</string>
+        </property>
+        <property name="buddy">
+         <cstring>optimizeInterfaceCheckBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="optimizeInterfaceCheckBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="hiDpiLabel">
+        <property name="accessibleName">
+         <string>SETTINGS_HIDPI</string>
+        </property>
+        <property name="text">
+         <string>HiDPI (after restart)</string>
+        </property>
+        <property name="buddy">
+         <cstring>hiDpiCheckBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="hiDpiCheckBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="updatesGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -234,107 +335,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="otherGroupBox">
-     <property name="accessibleName">
-      <string>SETTINGS_OTHER</string>
-     </property>
-     <property name="title">
-      <string>Other</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_4">
-      <item row="0" column="0">
-       <widget class="QLabel" name="confirmOpenOrderLabel">
-        <property name="accessibleName">
-         <string>CONFIRM_ORDER_CHECK</string>
-        </property>
-        <property name="text">
-         <string>Confirm open order:</string>
-        </property>
-        <property name="buddy">
-         <cstring>confirmOpenOrderCheckBox</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="confirmOpenOrderCheckBox">
-        <property name="accessibleName">
-         <string/>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="closeToTrayLabel">
-        <property name="accessibleName">
-         <string>CLOSE_TO_TRAY</string>
-        </property>
-        <property name="text">
-         <string>Close to tray:</string>
-        </property>
-        <property name="buddy">
-         <cstring>closeToTrayCheckBox</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="closeToTrayCheckBox">
-        <property name="toolTip">
-         <string/>
-        </property>
-        <property name="accessibleName">
-         <string/>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="optimizeInterfaceLabel">
-        <property name="accessibleName">
-         <string>SETTINGS_OPTIMIZE</string>
-        </property>
-        <property name="text">
-         <string>Reducing interface elements spacing (after restart)</string>
-        </property>
-        <property name="buddy">
-         <cstring>optimizeInterfaceCheckBox</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="optimizeInterfaceCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="hiDpiLabel">
-        <property name="accessibleName">
-         <string>SETTINGS_HIDPI</string>
-        </property>
-        <property name="text">
-         <string>HiDPI (after restart)</string>
-        </property>
-        <property name="buddy">
-         <cstring>hiDpiCheckBox</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QCheckBox" name="hiDpiCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="revertChangesButton">
@@ -406,7 +406,6 @@
   <tabstop>confirmOpenOrderCheckBox</tabstop>
   <tabstop>closeToTrayCheckBox</tabstop>
   <tabstop>optimizeInterfaceCheckBox</tabstop>
-  <tabstop>hiDpiCheckBox</tabstop>
  </tabstops>
  <resources/>
  <connections>

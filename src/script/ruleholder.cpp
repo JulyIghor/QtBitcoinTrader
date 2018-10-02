@@ -78,7 +78,7 @@ bool RuleHolder::isValidCode(QString& code)
            code == QLatin1String("IMMEDIATELY") ||
            code == QLatin1String("LastTrade") ||
            code == QLatin1String("MyLastTrade") ||
-           mainWindow.indicatorsMap.value(code, 0) != 0;
+           mainWindow.indicatorsMap.value(code, nullptr) != 0;
 }
 
 bool RuleHolder::isTradingRule()
@@ -92,7 +92,7 @@ bool RuleHolder::isValid()
                        variableACode == QLatin1String("MyLastTrade");
     bool exactB = variableBCode == QLatin1String("EXACT");
 
-    if (thanAmountFeeIndex < 0 || thanPriceFeeIndex < 0 || thanPriceFeeIndex < 0 || thanTypeIndex < 0)
+    if (thanAmountFeeIndex < 0 || thanPriceFeeIndex < 0 || thanTypeIndex < 0)
         return false;
 
     if (thanTypeIndex > 3 || thanAmount > 0.0)
@@ -100,7 +100,7 @@ bool RuleHolder::isValid()
     else
         return false;
 
-    if (immediately || !exactB || variableBExact != 0)
+    if (immediately || !exactB || qFuzzyCompare(variableBExact, 0))
         ;
     else
         return false;

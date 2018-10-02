@@ -58,6 +58,31 @@ void HistoryModel::clear()
     endResetModel();
 }
 
+void HistoryModel::loadLastPrice()
+{
+    bool haveLastBuy = false;
+    bool haveLastSell = false;
+
+    for (int n = 0; n < itemsList.count(); n++)
+        if (itemsList.at(n).symbol == baseValues.currentPair.symbol)
+        {
+            if (!haveLastSell && itemsList.at(n).type == 1)
+            {
+                emit accLastSellChanged(itemsList.at(n).symbol.right(3), itemsList.at(n).price);
+                haveLastSell = true;
+            }
+
+            if (!haveLastBuy && itemsList.at(n).type == 2)
+            {
+                emit accLastBuyChanged(itemsList.at(n).symbol.right(3), itemsList.at(n).price);
+                haveLastBuy = true;
+            }
+
+            if (haveLastSell && haveLastBuy)
+                break;
+        }
+}
+
 void HistoryModel::historyChanged(QList<HistoryItem>* histList)
 {
     bool haveLastBuy = false;
@@ -158,7 +183,6 @@ int HistoryModel::getRowType(int row)
     return itemsList.at(row).type;
 }
 
-
 int HistoryModel::rowCount(const QModelIndex&) const
 {
     return itemsList.count();
@@ -217,40 +241,40 @@ QVariant HistoryModel::data(const QModelIndex& index, int role) const
     {
         switch (indexColumn)
         {
+        case 1:
+            return baseValues.appTheme.gray;
+            break;
+
+        case 3:
+            switch (itemsList.at(currentRow).type)
+            {
             case 1:
-                return baseValues.appTheme.gray;
-                break;
+                return baseValues.appTheme.red;
+
+            case 2:
+                return baseValues.appTheme.blue;
 
             case 3:
-                switch (itemsList.at(currentRow).type)
-                {
-                    case 1:
-                        return baseValues.appTheme.red;
+                return baseValues.appTheme.darkGreen;
 
-                    case 2:
-                        return baseValues.appTheme.blue;
+            case 4:
+                return baseValues.appTheme.darkRed;
 
-                    case 3:
-                        return baseValues.appTheme.darkGreen;
-
-                    case 4:
-                        return baseValues.appTheme.darkRed;
-
-                    case 5:
-                        return baseValues.appTheme.darkRedBlue;
-
-                    default:
-                        break;
-                }
-
-                break;
-
-            case 6:
-                return baseValues.appTheme.gray;
-                break;
+            case 5:
+                return baseValues.appTheme.darkRedBlue;
 
             default:
                 break;
+            }
+
+            break;
+
+        case 6:
+            return baseValues.appTheme.gray;
+            break;
+
+        default:
+            break;
         }
 
         return baseValues.appTheme.black;
@@ -258,32 +282,32 @@ QVariant HistoryModel::data(const QModelIndex& index, int role) const
 
     switch (indexColumn)
     {
-        case 1:
-            {
-                //Date
-                if (role == Qt::ToolTipRole || itemsList.at(currentRow).displayFullDate)
-                    return itemsList.at(currentRow).dateTimeStr;//DateTime
+    case 1:
+    {
+        //Date
+        if (role == Qt::ToolTipRole || itemsList.at(currentRow).displayFullDate)
+            return itemsList.at(currentRow).dateTimeStr;//DateTime
 
-                return itemsList.at(currentRow).timeStr;//Time
-            }
+        return itemsList.at(currentRow).timeStr;//Time
+    }
 
-        case 2:
-            return itemsList.at(currentRow).volumeStr;//Volume
+    case 2:
+        return itemsList.at(currentRow).volumeStr;//Volume
 
-        case 3:
-            return typesLabels.at(itemsList.at(currentRow).type);//Type
+    case 3:
+        return typesLabels.at(itemsList.at(currentRow).type);//Type
 
-        case 4:
-            return itemsList.at(currentRow).priceStr;//Price
+    case 4:
+        return itemsList.at(currentRow).priceStr;//Price
 
-        case 5:
-            return itemsList.at(currentRow).totalStr;//Total
+    case 5:
+        return itemsList.at(currentRow).totalStr;//Total
 
-        case 6:
-            return itemsList.at(currentRow).description;//Description
+    case 6:
+        return itemsList.at(currentRow).description;//Description
 
-        default:
-            break;
+    default:
+        break;
     }
 
     return QVariant();
@@ -309,11 +333,11 @@ QVariant HistoryModel::headerData(int section, Qt::Orientation orientation, int 
     {
         switch (section)
         {
-            case 1:
-                return QSize(dateWidth, defaultHeightForRow); //Date
+        case 1:
+            return QSize(dateWidth, defaultHeightForRow); //Date
 
-            case 3:
-                return QSize(typeWidth, defaultHeightForRow); //Type
+        case 3:
+            return QSize(typeWidth, defaultHeightForRow); //Type
         }
 
         return QVariant();

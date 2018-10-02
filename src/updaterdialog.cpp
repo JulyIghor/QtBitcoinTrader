@@ -90,7 +90,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
         {
             QLayout* groupboxLayout = groupBox->layout();
 
-            if (groupboxLayout == 0)
+            if (groupboxLayout == nullptr)
             {
                 groupboxLayout = new QGridLayout;
                 groupboxLayout->setContentsMargins(0, 0, 0, 0);
@@ -103,9 +103,9 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
     }
 
     if (updateCheckRetryCount > 3)
-        httpGet = new JulyHttp("api.qtbitcointrader.com", 0, this, false, false);
+        httpGet = new JulyHttp("api.qtbitcointrader.com", nullptr, this, false, false);
     else
-        httpGet = new JulyHttp("qbtapi.centrabit.com", 0, this, false, false);
+        httpGet = new JulyHttp("qbtapi.centrabit.com", nullptr, this, false, false);
 
     httpGet->noReconnect = true;
     timeOutTimer = new QTimer(this);
@@ -481,7 +481,7 @@ void UpdaterDialog::buttonUpdate()
 
     updateLink.remove(0, removeLength);
 
-    httpGetFile = new JulyHttp(domain, 0, this, protocol.startsWith("https"), false);
+    httpGetFile = new JulyHttp(domain, nullptr, this, protocol.startsWith("https"), false);
     connect(httpGetFile, SIGNAL(apiDown(bool)), this, SLOT(invalidData(bool)));
     connect(httpGetFile, SIGNAL(dataProgress(int)), this, SLOT(dataProgress(int)));
     connect(httpGetFile, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceived(QByteArray, int)));

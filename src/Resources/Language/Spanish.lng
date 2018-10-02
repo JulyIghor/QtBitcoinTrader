@@ -1,5 +1,5 @@
 Label_BUY_ORDERS=Órdenes de Compra
-Label_CLIENT_ID=ID del Cliente:
+Label_CLIENT_ID=Main user ID:
 Label_DISABLE_ALL_RULES=Desactivar todas las Reglas activas cuando se ejecute esta Regla.
 Label_DISABLE_ALL_RULES_GROUP=Deshabilitar todas las reglas en determinado grupo # habilitadas en el momento de ejecutarse la regla
 Label_DONATE_THANK_YOU=Su apoyo es muy importante. ¡Gracias!

@@ -47,6 +47,7 @@ public:
     double getRowVolume(int);
     int getRowType(int);
     void clear();
+    void loadLastPrice();
 
     void historyChanged(QList<HistoryItem>* histList);
 
@@ -62,8 +63,8 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 private:
-    int dateWidth;
-    int typeWidth;
+    int dateWidth = 0;
+    int typeWidth = 0;
     quint32 lastDate;
     int columnsCount;
     QStringList headerLabels;

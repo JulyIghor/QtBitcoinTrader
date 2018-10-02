@@ -35,9 +35,6 @@
 ThisFeatureUnderDevelopment::ThisFeatureUnderDevelopment(QWidget* parent)
     : QDialog(parent)
 {
-    if (parent == 0)
-        parent = this;
-
     ui.setupUi(this);
     setWindowFlags(Qt::WindowCloseButtonHint);
     themeChanged();

@@ -55,7 +55,7 @@ AppTheme::AppTheme()
     white = Qt::white;
 }
 
-QColor AppTheme::getColor(QString str)
+QColor AppTheme::getColor(const QString& str) const
 {
     QStringList colorList = str.split(",");
 
@@ -68,7 +68,7 @@ QColor AppTheme::getColor(QString str)
     return QColor(colorList.at(0).toInt(), colorList.at(1).toInt(), colorList.at(2).toInt(), colorList.at(3).toInt());
 }
 
-void AppTheme::loadTheme(QString name)
+void AppTheme::loadTheme(const QString& name)
 {
     QSettings themeLoad(baseValues.themeFolder + name + ".thm", QSettings::IniFormat);
 

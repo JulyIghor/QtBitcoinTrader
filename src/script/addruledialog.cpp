@@ -208,12 +208,12 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
     julyTranslator.translateUi(this);
 
     int selectedRow = -1;
-    RuleWidget* parentRuleWidget = (RuleWidget*)par;
-    ScriptWidget* parentScriptWidget = (ScriptWidget*)par;
+    RuleWidget* parentRuleWidget = qobject_cast<RuleWidget*>(par);
+    ScriptWidget* parentScriptWidget = qobject_cast<ScriptWidget*>(par);
 
-    Q_FOREACH (RuleWidget* currentGroup, mainWindow.ui.tabRules->findChildren<RuleWidget*>())
+    for (RuleWidget* currentGroup : mainWindow.ui.tabRules->findChildren<RuleWidget*>())
     {
-        if (currentGroup == 0)
+        if (currentGroup == nullptr)
             continue;
 
         if (currentGroup == parentRuleWidget)
@@ -224,7 +224,7 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
 
     Q_FOREACH (ScriptWidget* currentGroup, mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
     {
-        if (currentGroup == 0)
+        if (currentGroup == nullptr)
             continue;
 
         if (currentGroup == parentScriptWidget)
@@ -232,6 +232,9 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
 
         ui->groupName->addItem(currentGroup->windowTitle(), currentGroup->property("FileName").toString());
     }
+
+    if (selectedRow < 0)
+        selectedRow = ui->groupName->findText(groupName);
 
     if (selectedRow > -1)
         ui->groupName->setCurrentIndex(selectedRow);
@@ -327,7 +330,7 @@ bool AddRuleDialog::isRuleEnabled()
 
 void AddRuleDialog::setComboIndexByData(QComboBox* list, QString& data)
 {
-    if (list == 0)
+    if (list == nullptr)
         return;
 
     int find = list->findData(data);
@@ -343,7 +346,7 @@ void AddRuleDialog::setComboIndexByData(QComboBox* list, QString& data)
 
 void AddRuleDialog::setComboIndex(QComboBox* list, QString& text)
 {
-    if (list == 0)
+    if (list == nullptr)
         return;
 
     int find = list->findText(text);
@@ -359,7 +362,7 @@ void AddRuleDialog::setComboIndex(QComboBox* list, QString& text)
 
 void AddRuleDialog::setComboIndex(QComboBox* list, int& row)
 {
-    if (list == 0)
+    if (list == nullptr)
         return;
 
     if (row < 0 || row >= list->count())
@@ -673,18 +676,15 @@ void AddRuleDialog::on_playButton_clicked()
                 {
                     int detectDoublePoint = 0;
 
-                    if (detectDoublePoint == 0) //If you reading this and know better solution, please tell me
-                    {
-                        bool decimalComma = QLocale().decimalPoint() == QChar(',');
+                    bool decimalComma = QLocale().decimalPoint() == QChar(',');
 
-                        if (!decimalComma)
-                            decimalComma = QLocale().country() == QLocale::Ukraine || QLocale().country() == QLocale::RussianFederation;
+                    if (!decimalComma)
+                        decimalComma = QLocale().country() == QLocale::Ukraine || QLocale().country() == QLocale::RussianFederation;
 
-                        if (decimalComma)
-                            detectDoublePoint = 2;
-                        else
-                            detectDoublePoint = 1;
-                    }
+                    if (decimalComma)
+                        detectDoublePoint = 2;
+                    else
+                        detectDoublePoint = 1;
 
                     QString number = JulyMath::textFromDouble(spin->value(), 8, 0);
                     int crop = number.size() - 1;

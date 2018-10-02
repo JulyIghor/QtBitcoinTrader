@@ -56,7 +56,6 @@ JulyHttp::JulyHttp(const QString& hostN, const QByteArray& restLine, QObject* pa
     noReconnect = false;
     forcedPort = 0U;
     noReconnectCount = 0;
-    noReconnect = false;
     secureConnection = secure;
     isDataPending = false;
     httpState = 999;
@@ -629,14 +628,14 @@ void JulyHttp::gzipUncompress(QByteArray* data)
 
         switch (ret)
         {
-            case Z_NEED_DICT:
-                ret = Z_DATA_ERROR;
-                break;
+        case Z_NEED_DICT:
+            ret = Z_DATA_ERROR;
+            break;
 
-            case Z_DATA_ERROR:
-            case Z_MEM_ERROR:
-                (void)inflateEnd(&strm);
-                return;
+        case Z_DATA_ERROR:
+        case Z_MEM_ERROR:
+            (void)inflateEnd(&strm);
+            return;
         }
 
         result.append(out, CHUNK_SIZE - strm.avail_out);
@@ -864,7 +863,7 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
         setApiDown(true);
 
     if (debugLevel)
-        logThread->writeLog("SocketError: " + errorString().toLatin1(), 2);
+        logThread->writeLog("SocketError: " + errorString().toUtf8(), 2);
 
     if (socketError == QAbstractSocket::ProxyAuthenticationRequiredError)
     {
@@ -915,7 +914,7 @@ void JulyHttp::sendPendingData()
             setApiDown(true);
 
             if (debugLevel)
-                logThread->writeLog("Socket state: " + errorString().toLatin1(), 2);
+                logThread->writeLog("Socket state: " + errorString().toUtf8(), 2);
 
             reconnectSocket(false);
 

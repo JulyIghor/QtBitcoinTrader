@@ -40,11 +40,11 @@
 struct AppTheme
 {
     AppTheme();
-    void loadTheme(QString);
+    void loadTheme(const QString&);
     QString styleSheet;
-    QColor getColor(QString);
+    QColor getColor(const QString&) const;
     QPalette palette;
-    QColor swapColor(QColor color);
+    QColor swapColor(const QColor& color);
     QColor altRowColor;
     QColor gray;
     QColor lightGray;
