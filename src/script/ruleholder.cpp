@@ -48,14 +48,14 @@ RuleHolder::RuleHolder()
     delayMilliseconds = 0.0;
 }
 
-bool RuleHolder::isValidComparation(QString& text)
+bool RuleHolder::isValidComparation(const QString& text) const
 {
     return text == QLatin1String("=") || text == QLatin1String("<") || text == QLatin1String(">") ||
            text == QLatin1String("<=") || text == QLatin1String(">=") || text == QLatin1String("!=") ||
            text == QLatin1String("==") || text == QLatin1String("<>");
 }
 
-bool RuleHolder::isValidSymbol(QString& symbol)
+bool RuleHolder::isValidSymbol(const QString& symbol) const
 {
     CurrencyPairItem pairItem;
     pairItem = baseValues.currencyPairMap.value(symbol.toUpper(), pairItem);
@@ -66,27 +66,27 @@ bool RuleHolder::isValidSymbol(QString& symbol)
     return true;
 }
 
-bool RuleHolder::isValidPlusMinus(QString& plusMinus)
+bool RuleHolder::isValidPlusMinus(const QString& plusMinus) const
 {
     return plusMinus == QLatin1String("+") || plusMinus == QLatin1String("-") || plusMinus == QLatin1String("*") ||
            plusMinus == QLatin1String("/");
 }
 
-bool RuleHolder::isValidCode(QString& code)
+bool RuleHolder::isValidCode(const QString& code) const
 {
     return code == QLatin1String("EXACT") ||
            code == QLatin1String("IMMEDIATELY") ||
            code == QLatin1String("LastTrade") ||
            code == QLatin1String("MyLastTrade") ||
-           mainWindow.indicatorsMap.value(code, nullptr) != 0;
+           mainWindow.indicatorsMap.value(code, nullptr) != nullptr;
 }
 
-bool RuleHolder::isTradingRule()
+bool RuleHolder::isTradingRule() const
 {
     return thanTypeIndex <= 6;
 }
 
-bool RuleHolder::isValid()
+bool RuleHolder::isValid() const
 {
     bool immediately = variableACode == QLatin1String("IMMEDIATELY") || variableACode == QLatin1String("LastTrade") ||
                        variableACode == QLatin1String("MyLastTrade");
@@ -100,7 +100,7 @@ bool RuleHolder::isValid()
     else
         return false;
 
-    if (immediately || !exactB || qFuzzyCompare(variableBExact, 0))
+    if (immediately || !exactB || qFuzzyCompare(variableBExact + 1.0, 1.0))
         ;
     else
         return false;

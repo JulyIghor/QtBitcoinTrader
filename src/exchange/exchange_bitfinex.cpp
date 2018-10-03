@@ -946,7 +946,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 newFee = getMidData("taker_fees\":\"", "\"", &data).toDouble();
             }
 
-            if (qFuzzyCompare(newFee, lastFee))
+            if (qFuzzyCompare(newFee + 1.0, lastFee + 1.0))
                 emit accFeeChanged(baseValues.currentPair.symbol, newFee);
 
             lastFee = newFee;

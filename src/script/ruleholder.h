@@ -38,12 +38,12 @@ struct RuleHolder
 {
     RuleHolder();
     QString description;
-    bool isTradingRule();
-    bool isValidComparation(QString& text);
-    bool isValidSymbol(QString& symbol);
-    bool isValidPlusMinus(QString& plusMinus);
-    bool isValidCode(QString& code);
-    bool isValid();
+    bool isTradingRule() const;
+    bool isValidComparation(const QString& text) const;
+    bool isValidSymbol(const QString& symbol) const;
+    bool isValidPlusMinus(const QString& plusMinus) const;
+    bool isValidCode(const QString& code) const;
+    bool isValid() const;
 
     bool thanAmountPercentChecked;
     bool thanPricePercentChecked;
