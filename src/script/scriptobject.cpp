@@ -728,7 +728,7 @@ void ScriptObject::initValueChangedPrivate(const QString& symbol, QString& scrip
     if (val < 0.00000001 && scriptNameInd.endsWith(QLatin1String("price"), Qt::CaseInsensitive))
         return;
 
-    if (!forceEmit && !testMode && qFuzzyCompare(indicatorsMap.value(prependName + scriptNameInd, -2508.1987) + 1.0, val + 1.0) == 0)
+    if (!forceEmit && !testMode && qFuzzyCompare(indicatorsMap.value(prependName + scriptNameInd, -2508.1987) + 1.0, val + 1.0))
         return;
 
     indicatorsMap[prependName + scriptNameInd] = val;

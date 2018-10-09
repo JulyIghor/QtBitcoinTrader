@@ -110,7 +110,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.40210";
+    appVerStr = "1.40211";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -443,7 +443,7 @@ int main(int argc, char* argv[])
     {
         baseValues.appVerLastReal = settingsMain.value("Version", 1.0).toDouble();
 
-        if (qFuzzyCompare(baseValues.appVerLastReal + 1.0, baseValues.appVerReal + 1.0))
+        if (!qFuzzyCompare(baseValues.appVerLastReal + 1.0, baseValues.appVerReal + 1.0))
         {
             settingsMain.setValue("Version", baseValues.appVerReal);
             QStringList cacheFiles = QDir(appDataDir + "cache").entryList(QStringList("*.cache"), QDir::Files);

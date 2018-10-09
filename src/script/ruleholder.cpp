@@ -100,7 +100,7 @@ bool RuleHolder::isValid() const
     else
         return false;
 
-    if (immediately || !exactB || qFuzzyCompare(variableBExact + 1.0, 1.0))
+    if (immediately || !exactB || !qFuzzyCompare(variableBExact + 1.0, 1.0))
         ;
     else
         return false;
