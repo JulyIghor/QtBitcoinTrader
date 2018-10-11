@@ -571,7 +571,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
                         TradesItem newItem;
                         newItem.amount = getMidData("\"amount\":", ",", &tradeData).toDouble();
                         newItem.price = getMidData("\"price\":", ",", &tradeData).toDouble();
-                        newItem.date = getMidData("\"date\":\"", "\"", &tradeData).toUInt();
+                        newItem.date = getMidData("\"date\":\"", "\"", &tradeData).toLongLong();
                         newItem.symbol = baseValues.currentPair.symbol;
                         newItem.orderType = getMidData("\"type\":\"", "\"", &tradeData) == "sell" ? 1 : -1;
 

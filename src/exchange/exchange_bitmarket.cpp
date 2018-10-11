@@ -231,7 +231,7 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
                     QByteArray tradeData = tradeList.at(n).toLatin1() + "}";
                     TradesItem newItem;
 
-                    newItem.date = getMidData("\"date\":", ",\"", &tradeData).toUInt();
+                    newItem.date = getMidData("\"date\":", ",\"", &tradeData).toLongLong();
                     currentTid = getMidData("\"tid\":", ",\"", &tradeData).toUInt();
 
                     if (lastFetchTid < 0 && newItem.date < -lastFetchTid)

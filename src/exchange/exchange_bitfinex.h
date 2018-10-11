@@ -56,8 +56,8 @@ private:
 
     QByteArray lastTradesDateCache;
 
-    quint64 lastTradesDate;
-    quint32 tickerLastDate;
+    qint64 lastTradesDate;
+    qint64 tickerLastDate;
     quint64 lastHistoryId;
 
     QList<DepthItem>* depthAsks;

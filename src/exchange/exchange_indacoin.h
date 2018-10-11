@@ -67,7 +67,7 @@ private:
     QTime authRequestTime;
 
     quint32 lastPriceDate;
-    quint32 lastTickerDate;
+    qint64 lastTickerDate;
     quint32 privateNonce;
     quint32 lastHistoryTs;
 

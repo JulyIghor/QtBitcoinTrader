@@ -29,14 +29,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "featuredexchangesdialog.h"
+#include <QDesktopServices>
 #include <QSettings>
 #include <QtCore/qmath.h>
 #include <QLabel>
-#include "exchangebutton.h"
+#include <QTimer>
 #include "main.h"
 #include "julyhttp.h"
-#include <QTimer>
+#include "exchangebutton.h"
+#include "featuredexchangesdialog.h"
 #include "ui_featuredexchangesdialog.h"
 
 FeaturedExchangesDialog::FeaturedExchangesDialog() :
@@ -54,7 +55,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
     allExchangesList = listSettings.childGroups();
 
     {
-        JulyHttp* httpGet = new JulyHttp("qbtapi.centrabit.com", 0, this, true, false);
+        JulyHttp* httpGet = new JulyHttp("qbtapi.centrabit.com", nullptr, this, true, false);
         connect(httpGet, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceived(QByteArray, int)));
         httpGet->secondTimer->stop();
         httpGet->noReconnect = true;
@@ -63,7 +64,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
         QElapsedTimer elapsedRequest;
         elapsedRequest.restart();
 
-        httpGet->sendData(145, "GET /?Object=General&Method=FeaturedExchanges", 0, 0, 0);
+        httpGet->sendData(145, "GET /?Object=General&Method=FeaturedExchanges", nullptr, nullptr, 0);
         httpGet->destroyClass = true;
 
         int counter = 0;
@@ -85,6 +86,9 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
         if (featuredExchangesList.at(n).isEmpty())
             featuredExchangesList.removeAt(n);
     }
+
+    if (!featuredExchangesList.contains("0"))
+        featuredExchangesList.prepend("0");
 
     if (featuredExchangesList.isEmpty())
     {
@@ -113,7 +117,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
 
     removeNotValidExchanges();
 
-    quint32 countCol = 3;
+    qint32 countCol = 3;
 
     if (featuredExchangesList.count() <= 4)
         countCol = 2;
@@ -165,7 +169,7 @@ void FeaturedExchangesDialog::removeNotValidExchanges()
         {
             if (featuredExchangesList.at(i) == allExchangesList.at(j))
             {
-                featuredExchangesListIndex.insert(i, featuredExchangesList.at(i).toUInt());
+                featuredExchangesListIndex.insert(i, featuredExchangesList.at(i).toInt());
                 isValid = true;
                 break;
             }
@@ -190,7 +194,6 @@ QString FeaturedExchangesDialog::loadCurrencies(QString name)
     for (int n = 0; n < exchangesList.count(); n++)
     {
         currencies12 = listSettings.value(exchangesList.at(n) + "/Symbol").toString();
-
         int posSplitter = currencies12.indexOf('/');
 
         if (posSplitter == -1)
@@ -252,6 +255,12 @@ QString FeaturedExchangesDialog::fixURL(QString currentURL)
 
 void FeaturedExchangesDialog::on_okButton_clicked()
 {
+    if (exchangeNum == 0)
+    {
+        QDesktopServices::openUrl(QUrl("https://qttrader.com/"));
+        return;
+    }
+
     accept();
 }
 

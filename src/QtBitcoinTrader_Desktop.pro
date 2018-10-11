@@ -24,6 +24,8 @@ linux {
     }
 }
 win32 {
+    LIBS += -lgdi32 -lws2_32 -lole32 -lwinmm
+
     contains(QMAKE_TARGET.arch, x86_64) {
         TARGET = QtBitcoinTrader_64bit
         DEFINES += QTBUILDTARGETWIN64
@@ -115,6 +117,12 @@ HEADERS += $${PWD}/script/addrulegroup.h \
           $${PWD}/exchange/exchange_bitstamp.h \
           $${PWD}/exchange/exchange_btcchina.h \
           $${PWD}/exchange/exchange_wex.h \
+          $${PWD}/exchange/exchange_gocio.h \
+          $${PWD}/exchange/exchange_indacoin.h \
+          $${PWD}/exchange/exchange_bitmarket.h \
+          $${PWD}/exchange/exchange_okcoin.h \
+          $${PWD}/exchange/exchange_yobit.h \
+          $${PWD}/exchange/exchange_binance.h \
           $${PWD}/feecalculator.h \
           $${PWD}/historyitem.h \
           $${PWD}/historymodel.h \
@@ -145,16 +153,11 @@ HEADERS += $${PWD}/script/addrulegroup.h \
           $${PWD}/logobutton.h \
           $${PWD}/menu/networkmenu.h \
           $${PWD}/julylockfile.h \
-          $${PWD}/exchange/exchange_gocio.h \
           $${PWD}/login/featuredexchangesdialog.h \
           $${PWD}/login/allexchangesdialog.h \
           $${PWD}/login/allexchangesmodel.h \
           $${PWD}/login/exchangebutton.h \
-          $${PWD}/exchange/exchange_indacoin.h \
           $${PWD}/julymath.h \
-          $${PWD}/exchange/exchange_bitmarket.h \
-          $${PWD}/exchange/exchange_okcoin.h \
-          $${PWD}/exchange/exchange_yobit.h \
           $${PWD}/timesync.h \
           $${PWD}/translationmessage.h \
           $${PWD}/indicatorengine.h \
@@ -232,6 +235,12 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
           $${PWD}/exchange/exchange_bitstamp.cpp \
           $${PWD}/exchange/exchange_btcchina.cpp \
           $${PWD}/exchange/exchange_wex.cpp \
+          $${PWD}/exchange/exchange_gocio.cpp \
+          $${PWD}/exchange/exchange_indacoin.cpp \
+          $${PWD}/exchange/exchange_bitmarket.cpp \
+          $${PWD}/exchange/exchange_okcoin.cpp \
+          $${PWD}/exchange/exchange_yobit.cpp \
+          $${PWD}/exchange/exchange_binance.cpp \
           $${PWD}/feecalculator.cpp \
           $${PWD}/historyitem.cpp \
           $${PWD}/historymodel.cpp \
@@ -262,15 +271,10 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
           $${PWD}/logobutton.cpp \
           $${PWD}/menu/networkmenu.cpp \
           $${PWD}/julylockfile.cpp \
-          $${PWD}/exchange/exchange_gocio.cpp \
           $${PWD}/login/featuredexchangesdialog.cpp \
           $${PWD}/login/allexchangesdialog.cpp \
           $${PWD}/login/allexchangesmodel.cpp \
           $${PWD}/login/exchangebutton.cpp \
-          $${PWD}/exchange/exchange_indacoin.cpp \
-          $${PWD}/exchange/exchange_bitmarket.cpp \
-          $${PWD}/exchange/exchange_okcoin.cpp \
-          $${PWD}/exchange/exchange_yobit.cpp \
           $${PWD}/timesync.cpp \
           $${PWD}/translationmessage.cpp \
           $${PWD}/indicatorengine.cpp \

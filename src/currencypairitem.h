@@ -66,6 +66,7 @@ struct CurrencyPairItem
     //double priceMax;
     double tradePriceMin;
     double tradeVolumeMin;
+    double tradeTotalMin;
 
     int priceDecimals;
     int currADecimals;

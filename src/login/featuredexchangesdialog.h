@@ -49,12 +49,15 @@ public:
     void selectExchange(qint32);
     qint32 exchangeNum;     // Exchange; -1 is error; -2 is show all exchange
 
+public slots:
+    void on_okButton_clicked();
+
 private:
     QByteArray cacheData;
     Ui::FeaturedExchangesDialog* ui;
     QStringList featuredExchangesList;
     QStringList allExchangesList;
-    QList<quint32> featuredExchangesListIndex;
+    QList<qint32> featuredExchangesListIndex;
     QString loadCurrencies(QString);
     QString fixLogo(QString);
     QString fixURL(QString);
@@ -62,7 +65,6 @@ private:
 
 private slots:
     void dataReceived(QByteArray, int);
-    void on_okButton_clicked();
     void on_otherExchangesButton_clicked();
 };
 

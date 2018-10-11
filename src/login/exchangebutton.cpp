@@ -68,9 +68,10 @@ void ExchangeButton::mouseReleaseEvent(QMouseEvent* event)
 
 void ExchangeButton::mouseDoubleClickEvent(QMouseEvent* event)
 {
-    event->accept();
+    event->ignore();
+    QCoreApplication::processEvents();
     parrentForm->selectExchange(exchangeNum);
-    parrentForm->accept();
+    parrentForm->on_okButton_clicked();
 }
 
 void ExchangeButton::setLogo(QString logo)

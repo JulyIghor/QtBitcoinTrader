@@ -10,15 +10,32 @@
         <file>Resources/Exchanges/Logos/BTCChina.png</file>
         <file>Resources/Exchanges/Logos/GOCio.png</file>
         <file>Resources/Exchanges/Logos/WEX.png</file>
+        <file>Resources/Exchanges/Logos/Indacoin.png</file>
+        <file>Resources/Exchanges/Logos/BitMarket.png</file>
+        <file>Resources/Exchanges/Logos/OKCoin.png</file>
+        <file>Resources/Exchanges/Logos/YObit.png</file>
+        <file>Resources/Exchanges/Logos/Binance.png</file>
         <file>Resources/Exchanges/Logos/Bitstamp_Big.png</file>
         <file>Resources/Exchanges/Logos/Bitfinex_Big.png</file>
         <file>Resources/Exchanges/Logos/BTCChina_Big.png</file>
         <file>Resources/Exchanges/Logos/GOCio_Big.png</file>
         <file>Resources/Exchanges/Logos/WEX_Big.png</file>
-        <file>Resources/Exchanges/Logos/Indacoin.png</file>
         <file>Resources/Exchanges/Logos/Indacoin_Big.png</file>
-        <file>Resources/Exchanges/Logos/BitMarket.png</file>
         <file>Resources/Exchanges/Logos/BitMarket_Big.png</file>
+        <file>Resources/Exchanges/Logos/OKCoin_Big.png</file>
+        <file>Resources/Exchanges/Logos/YObit_Big.png</file>
+        <file>Resources/Exchanges/Logos/Binance_Big.png</file>
+        <file>Resources/Exchanges/List.ini</file>
+        <file>Resources/Exchanges/WEX.ini</file>
+        <file>Resources/Exchanges/Bitfinex.ini</file>
+        <file>Resources/Exchanges/Indacoin.ini</file>
+        <file>Resources/Exchanges/BTCChina.ini</file>
+        <file>Resources/Exchanges/Bitstamp.ini</file>
+        <file>Resources/Exchanges/GOCio.ini</file>
+        <file>Resources/Exchanges/BitMarket.ini</file>
+        <file>Resources/Exchanges/OKCoin.ini</file>
+        <file>Resources/Exchanges/YObit.ini</file>
+        <file>Resources/Exchanges/Binance.ini</file>
         <file>Resources/Open.png</file>
         <file>Resources/Save.png</file>
         <file>Resources/Themes/Dark.thm</file>
@@ -43,14 +60,6 @@
         <file>Resources/equal.png</file>
         <file>Resources/calc.png</file>
         <file>Resources/Currencies.ini</file>
-        <file>Resources/Exchanges/List.ini</file>
-        <file>Resources/Exchanges/WEX.ini</file>
-        <file>Resources/Exchanges/Bitfinex.ini</file>
-        <file>Resources/Exchanges/Indacoin.ini</file>
-        <file>Resources/Exchanges/BTCChina.ini</file>
-        <file>Resources/Exchanges/Bitstamp.ini</file>
-        <file>Resources/Exchanges/GOCio.ini</file>
-        <file>Resources/Exchanges/BitMarket.ini</file>
         <file>Resources/CurrencySign/AUD.png</file>
         <file>Resources/CurrencySign/BTC.png</file>
         <file>Resources/CurrencySign/LTC.png</file>
@@ -103,9 +112,6 @@
         <file>Resources/settings_global_32x32.png</file>
         <file>Resources/settings_network_32x32.png</file>
         <file>Resources/settings_decimals_32x32.png</file>
-        <file>Resources/Exchanges/Logos/OKCoin.png</file>
-        <file>Resources/Exchanges/Logos/OKCoin_Big.png</file>
-        <file>Resources/Exchanges/OKCoin.ini</file>
         <file>Resources/Language/Japanese.lng</file>
         <file>Resources/CurrencySign/DSH.png</file>
         <file>Resources/CurrencySign/ETH.png</file>
@@ -115,9 +121,6 @@
         <file>Resources/CurrencySign/ZEC.png</file>
         <file>Resources/CurrencySign/XMR.png</file>
         <file>Resources/CurrencySign/RRT.png</file>
-        <file>Resources/Exchanges/YObit.ini</file>
-        <file>Resources/Exchanges/Logos/YObit.png</file>
-        <file>Resources/Exchanges/Logos/YObit_Big.png</file>
         <file>Resources/CurrencySign/IOT.png</file>
         <file>Resources/CurrencySign/EOS.png</file>
         <file>Resources/CurrencySign/BCH.png</file>
@@ -127,5 +130,9 @@
         <file>Resources/CurrencySign/BCC.png</file>
         <file>Resources/CurrencySign/BCU.png</file>
         <file>Resources/CurrencySign/NEO.png</file>
+        <file>Resources/Exchanges/Logos/QtTrader_Big.png</file>
+        <file>Resources/Exchanges/QtTrader.ini</file>
+        <file>Resources/QtTraderDay.png</file>
+        <file>Resources/QtTraderNight.png</file>
     </qresource>
 </RCC>

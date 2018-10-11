@@ -37,6 +37,7 @@ CurrencyPairItem::CurrencyPairItem()
     priceMin = 0.0;
     tradePriceMin = 0.0;
     tradeVolumeMin = 0.0;
+    tradeTotalMin = 0.0;
     priceDecimals = 5;
     currADecimals = 8;
     currBDecimals = 5;

@@ -19,9 +19,6 @@
   <property name="windowTitle">
    <string>LogoButton</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true"/>
-  </property>
   <widget class="QLabel" name="logo">
    <property name="geometry">
     <rect>
@@ -42,9 +39,6 @@
      <width>40</width>
      <height>40</height>
     </size>
-   </property>
-   <property name="text">
-    <string/>
    </property>
    <property name="pixmap">
     <pixmap resource="QtResource.qrc">:/Resources/CentrabitDay.png</pixmap>

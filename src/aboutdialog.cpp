@@ -52,13 +52,13 @@ TranslationAbout::TranslationAbout(QWidget* par)
 
     QLayout* groupboxLayout = ui.LogoGroupBox->layout();
 
-    if (groupboxLayout == 0)
+    if (groupboxLayout == nullptr)
     {
         groupboxLayout = new QGridLayout;
         groupboxLayout->setContentsMargins(0, 0, 0, 0);
         groupboxLayout->setSpacing(0);
         ui.LogoGroupBox->setLayout(groupboxLayout);
-        LogoButton* logoButton = new LogoButton;
+        LogoButton* logoButton = new LogoButton(true);
         groupboxLayout->addWidget(logoButton);
     }
 

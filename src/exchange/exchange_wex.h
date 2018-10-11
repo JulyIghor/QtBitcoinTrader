@@ -62,9 +62,8 @@ private:
 
     QTime authRequestTime;
 
-    quint32 lastPriceDate;
-    quint32 lastTickerDate;
-    quint32 privateNonce;
+    qint64 lastTickerDate;
+    qint64 privateNonce;
     quint32 lastHistoryId;
 
     void clearVariables();

@@ -29,39 +29,56 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef TRADESITEM_H
-#define TRADESITEM_H
+#ifndef EXCHANGE_BINANCE_H
+#define EXCHANGE_BINANCE_H
 
-#include <QObject>
+#include "exchange.h"
 
-struct TradesItem
+class Exchange_Binance : public Exchange
 {
-    TradesItem();
-    bool backGray;
+    Q_OBJECT
 
-    bool displayFullDate;
-    qint64 date;
-    QString dateStr;
-    QString timeStr;
+public:
+    Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_Binance();
 
-    double amount;
-    QString amountStr;
+private:
+    bool isApiDown;
+    bool isFirstAccInfo;
+    bool isReplayPending(int);
 
-    double price;
-    QString priceStr;
+    int apiDownCounter;
 
-    double total;
-    QString totalStr;
+    JulyHttp* julyHttp;
 
-    QString symbol;//Like a "BTCUSD" 6 symbols only
+    qint64 lastTradesId;
+    qint64 lastTickerId;
+    qint64 lastHistoryId;
 
-    int orderType;//-1:Bid; 0:None; 1:Ask
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
 
-    int direction;//-1:Down; 0: None; 1:Up
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 
-    void cacheStrings();
+    QTime authRequestTime;
 
-    bool isValid();
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool simple = false, QByteArray commands = nullptr);
+private slots:
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
+    void quitThread();
+public slots:
+    void clearValues();
+    void getHistory(bool);
+    void buy(QString, double, double);
+    void sell(QString, double, double);
+    void cancelOrder(QString, QByteArray);
 };
 
-#endif // TRADESITEM_H
+#endif // EXCHANGE_BINANCE_H

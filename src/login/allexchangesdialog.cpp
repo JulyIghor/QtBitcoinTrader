@@ -29,14 +29,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "allexchangesdialog.h"
+#include <QDesktopServices>
 #include <QSettings>
+#include "allexchangesdialog.h"
 #include "main.h"
 
 AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum)
     : QDialog()
 {
-    startIndex = 1;
+    startIndex = 0;
     exchangeNum = -1;
     ui.setupUi(this);
     ui.okButton->setEnabled(false);
@@ -59,7 +60,7 @@ AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum)
         if (currentName.isEmpty() || exchangesList.at(n) == "RSA2048Sign")
             continue;
 
-        allExchangesModel->addExchange(exchangesList.at(n).toInt(), currentName, loadCurrencies(currentName));
+        allExchangesModel->addExchange(exchangesList.at(n).toUInt(), currentName, loadCurrencies(currentName));
     }
 
     mainWindow.setColumnResizeMode(ui.exchangesTableView, 0, QHeaderView::ResizeToContents);
@@ -84,6 +85,12 @@ AllExchangesDialog::~AllExchangesDialog()
 
 void AllExchangesDialog::on_okButton_clicked()
 {
+    if (exchangeNum == 0)
+    {
+        QDesktopServices::openUrl(QUrl("https://qttrader.com/"));
+        return;
+    }
+
     accept();
 }
 
@@ -96,6 +103,13 @@ void AllExchangesDialog::on_backButton_clicked()
 void AllExchangesDialog::on_exchangesTableView_doubleClicked()
 {
     selectionExchange();
+
+    if (exchangeNum == 0)
+    {
+        QDesktopServices::openUrl(QUrl("https://qttrader.com/"));
+        return;
+    }
+
     accept();
 }
 
@@ -103,14 +117,13 @@ QString AllExchangesDialog::loadCurrencies(QString name)
 {
     QString nameIni = name.remove(" ").remove("-").remove(".");
     QSettings listSettings(":/Resources/Exchanges/" + nameIni + ".ini", QSettings::IniFormat);
-    QStringList exchangesList = listSettings.childGroups();
+    QStringList pairsList = listSettings.childGroups();
     QString currencies = "";
     QString currencies12, currencies1, currencies2;
 
-    for (int n = 0; n < exchangesList.count(); n++)
+    for (int n = 0; n < pairsList.count(); n++)
     {
-        currencies12 = listSettings.value(exchangesList.at(n) + "/Symbol").toString();
-
+        currencies12 = listSettings.value(pairsList.at(n) + "/Symbol").toString();
         int posSplitter = currencies12.indexOf('/');
 
         if (posSplitter == -1)

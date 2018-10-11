@@ -42,8 +42,9 @@ class LogoButton : public QWidget
     Q_OBJECT
 
 public:
-    explicit LogoButton(QWidget* parent = 0);
+    explicit LogoButton(bool isCentrabit, QWidget* parent = nullptr);
     ~LogoButton();
+    void setImage(QString image);
 
 private:
     QSize logoSize;

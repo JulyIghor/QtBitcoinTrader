@@ -232,7 +232,7 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
                     for (int n = 0; n < tradeList.count(); n++)
                     {
                         QByteArray tradeData = tradeList.at(n).toLatin1();
-                        newItem.date = getMidData("\"date\":", ",", &tradeData).toUInt();
+                        newItem.date = getMidData("\"date\":", ",", &tradeData).toLongLong();
 
                         if (newItem.date < startTradesDate)
                             continue;

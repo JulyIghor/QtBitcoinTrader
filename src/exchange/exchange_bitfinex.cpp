@@ -498,7 +498,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
             for (int n = tradeList.count() - 1; n >= 0; n--)
             {
                 QByteArray tradeData = tradeList.at(n).toLatin1();
-                quint32 currentTradeDate = getMidData("timestamp\":", ",", &tradeData).toUInt();
+                qint64 currentTradeDate = getMidData("timestamp\":", ",", &tradeData).toLongLong();
 
                 if (lastTradesDate >= currentTradeDate || currentTradeDate == 0)
                     continue;

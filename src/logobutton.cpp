@@ -34,17 +34,28 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-LogoButton::LogoButton(QWidget* parent)
+LogoButton::LogoButton(bool isCentrabit, QWidget* parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
-    themeChanged();
     setCursor(Qt::PointingHandCursor);
+
+    if (isCentrabit)
+        setImage(":/Resources/CentrabitDay.png");
+    else
+        themeChanged();
 }
 
 LogoButton::~LogoButton()
 {
 
+}
+
+void LogoButton::setImage(QString image)
+{
+    QPixmap logoDay(image);
+    logoSize = logoDay.size();
+    ui.logo->setPixmap(image);
 }
 
 void LogoButton::mouseReleaseEvent(QMouseEvent* event)
@@ -56,13 +67,13 @@ void LogoButton::mouseReleaseEvent(QMouseEvent* event)
         return;
 
     if (event->button() == Qt::LeftButton)
-        QDesktopServices::openUrl(QUrl("https://centrabit.com"));
+        QDesktopServices::openUrl(QUrl("https://qttrader.com/"));
 }
 
 void LogoButton::themeChanged()
 {
-    static QPixmap logoDay(":/Resources/CentrabitDay.png");
-    static QPixmap logoNight(":/Resources/CentrabitNight.png");
+    static QPixmap logoDay(":/Resources/QtTraderDay.png");
+    static QPixmap logoNight(":/Resources/QtTraderNight.png");
     logoSize = logoDay.size();
 
     if (baseValues.currentTheme == 1)
@@ -76,6 +87,6 @@ void LogoButton::resizeEvent(QResizeEvent* event)
     event->accept();
     QSize newSize = logoSize;
     newSize.scale(size(), Qt::KeepAspectRatio);
-    ui.logo->setGeometry((width() - newSize.width()) / 2, (height() - newSize.height()) / 2, newSize.width(),
+    ui.logo->setGeometry((width() - newSize.width()) / 2 + 1, (height() - newSize.height()) / 2, newSize.width() - 2,
                          newSize.height());
 }

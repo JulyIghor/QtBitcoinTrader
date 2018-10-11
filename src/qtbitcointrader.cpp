@@ -50,9 +50,9 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDockWidget>
-#include "exchange/exchange.h"
 #include "script/addscriptwindow.h"
 #include "aboutdialog.h"
+#include "exchange/exchange.h"
 #include "exchange/exchange_wex.h"
 #include "exchange/exchange_bitstamp.h"
 #include "exchange/exchange_btcchina.h"
@@ -62,6 +62,7 @@
 #include "exchange/exchange_bitmarket.h"
 #include "exchange/exchange_okcoin.h"
 #include "exchange/exchange_yobit.h"
+#include "exchange/exchange_binance.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
 #include "script/addrulegroup.h"
@@ -342,6 +343,16 @@ QtBitcoinTrader::QtBitcoinTrader() :
 
     settingsMain.setValue("RowHeight", defaultHeightForRow);
 
+    exchangeId = iniSettings->value("Profile/ExchangeId", 0).toInt();
+
+    if (exchangeId == 11)
+    {
+        ui.depthComboBoxLimitRows->blockSignals(true);
+        ui.depthComboBoxLimitRows->clear();
+        ui.depthComboBoxLimitRows->addItems({"1000", "500", "100", "50", "20", "10", "5"});
+        ui.depthComboBoxLimitRows->blockSignals(false);
+    }
+
     baseValues.depthCountLimit = iniSettings->value("UI/DepthCountLimit", 100).toInt();
 
     if (baseValues.depthCountLimit < 0)
@@ -361,8 +372,6 @@ QtBitcoinTrader::QtBitcoinTrader() :
     }
 
     ui.depthComboBoxLimitRows->setCurrentIndex(currentDepthComboBoxLimitIndex);
-
-    exchangeId = iniSettings->value("Profile/ExchangeId", 0).toInt();
 
     baseValues.apiDownCount = iniSettings->value("Network/ApiDownCounterMax", 5).toInt();
 
@@ -705,6 +714,10 @@ void QtBitcoinTrader::setupClass()
             currentExchange = new Exchange_YObit(baseValues.restSign, baseValues.restKey);
             break;//YObit
 
+        case 11:
+            currentExchange = new Exchange_Binance(baseValues.restSign, baseValues.restKey);
+            break;//Binance
+
         default:
             return;
     }
@@ -806,6 +819,8 @@ void QtBitcoinTrader::setupClass()
         baseValues.currentTheme = 1;
         on_buttonNight_clicked();
     }
+    else
+        ui.widgetLogo->setStyleSheet("background:white");
 
     languageChanged();
 
@@ -1898,13 +1913,13 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget* par)
         {
             QLayout* layout = widget->layout();
 
-            if (layout == NULL)
+            if (layout == nullptr)
             {
                 layout = new QGridLayout();
                 layout->setContentsMargins(0, 0, 0, 0);
                 layout->setSpacing(0);
                 widget->setLayout(layout);
-                LogoButton* logoButton = new LogoButton;
+                LogoButton* logoButton = new LogoButton(false);
                 connect(this, SIGNAL(themeChanged()), logoButton, SLOT(themeChanged()));
                 layout->addWidget(logoButton);
             }
@@ -2688,6 +2703,11 @@ void QtBitcoinTrader::on_buttonNight_clicked()
 
     chartsView->setStyleSheet("background: " + baseValues.appTheme.white.name());
     chartsView->refreshCharts();
+
+    if (baseValues.currentTheme == 1)
+        ui.widgetLogo->setStyleSheet("background:black");
+    else
+        ui.widgetLogo->setStyleSheet("background:white");
 }
 
 void QtBitcoinTrader::on_calcButton_clicked()
@@ -2700,7 +2720,8 @@ void QtBitcoinTrader::on_calcButton_clicked()
 
 void QtBitcoinTrader::checkValidSellButtons()
 {
-    ui.widgetSellThenBuy->setEnabled(ui.sellTotalBtc->value() >= baseValues.currentPair.tradeVolumeMin);
+    ui.widgetSellThenBuy->setEnabled(ui.sellTotalBtc->value() >= baseValues.currentPair.tradeVolumeMin &&
+                                     ui.sellAmountToReceive->value() >= baseValues.currentPair.tradeTotalMin);
     ui.sellBitcoinsButton->setEnabled(ui.widgetSellThenBuy->isEnabled() &&
                                       /*ui.sellTotalBtc->value()<=getAvailableBTC()&&*/ui.sellTotalBtc->value() > 0.0);
 }
@@ -2930,7 +2951,8 @@ void QtBitcoinTrader::on_buyPricePerCoin_valueChanged(double)
 
 void QtBitcoinTrader::checkValidBuyButtons()
 {
-    ui.widgetBuyThenSell->setEnabled(ui.buyTotalBtc->value() >= baseValues.currentPair.tradeVolumeMin);
+    ui.widgetBuyThenSell->setEnabled(ui.buyTotalBtc->value() >= baseValues.currentPair.tradeVolumeMin &&
+                                     ui.buyTotalSpend->value() >= baseValues.currentPair.tradeTotalMin);
     ui.buyBitcoinsButton->setEnabled(ui.widgetBuyThenSell->isEnabled() &&
                                      /*ui.buyTotalSpend->value()<=getAvailableUSD()&&*/ui.buyTotalSpend->value() > 0.0);
 }
@@ -3738,9 +3760,9 @@ void QtBitcoinTrader::on_depthAutoResize_toggled(bool on)
 double QtBitcoinTrader::getAvailableBTC()
 {
     if (currentExchange->balanceDisplayAvailableAmount)
-        return ui.accountBTC->value();
+        return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value(), baseValues.currentPair.currADecimals, false);
 
-    return ui.accountBTC->value() - ui.ordersTotalBTC->value();
+    return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value() - ui.ordersTotalBTC->value(), baseValues.currentPair.currADecimals, false);
 }
 
 double QtBitcoinTrader::getAvailableUSD()
@@ -4065,7 +4087,7 @@ void QtBitcoinTrader::moveWidgetsToDocks()
     QDockWidget* dockSell = createDock(ui.widgetSell, "Sell Bitcoin");
     QDockWidget* dockSellBuy = createDock(ui.widgetSellThenBuy, "Generate subsequent buy order");
     QDockWidget* dockGeneral = createDock(ui.widgetSellBuy, "General");
-    dockLogo = createDock(ui.widgetLogo, "Powered By");
+    dockLogo = createDock(ui.widgetLogo, "Qt Trader Exchange"); //Powered By
     dockLogo->setMinimumSize(170, 70);
     ui.widgetBuyThenSell->setFixedHeight(ui.widgetBuyThenSell->minimumSizeHint().height());
     ui.widgetSellThenBuy->setFixedHeight(ui.widgetSellThenBuy->minimumSizeHint().height());

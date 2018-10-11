@@ -110,7 +110,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.40211";
+    appVerStr = "1.4022";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -193,7 +193,6 @@ int main(int argc, char* argv[])
         QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     }
-
     else
         QApplication::setAttribute(Qt::AA_Use96Dpi);
 
@@ -674,6 +673,16 @@ int main(int argc, char* argv[])
                     case 10:
                     {
                         //YObit
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
+
+                    case 11:
+                    {
+                        //Binance
                         baseValues.restSign = newPassword.getRestSign().toLatin1();
                         encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
                                                             baseValues.restSign.toBase64() + "\r\n" +

@@ -345,6 +345,7 @@ void IniEngine::parseExchange(QString exchangeFileName)
         currentPair.priceDecimals = settingsParams.value(symbolList.at(n) + "/PriceDecimals", "").toInt();
         currentPair.priceMin = settingsParams.value(symbolList.at(n) + "/PriceMin", "").toDouble();
         currentPair.tradeVolumeMin = settingsParams.value(symbolList.at(n) + "/TradeVolumeMin", "").toDouble();
+        currentPair.tradeTotalMin = settingsParams.value(symbolList.at(n) + "/TradeTotalMin", "").toDouble();
         currentPair.tradePriceMin = settingsParams.value(symbolList.at(n) + "/TradePriceMin", "").toDouble();
         currentPair.currADecimals = settingsParams.value(symbolList.at(n) + "/ItemDecimals").toInt();
         currentPair.currBDecimals = settingsParams.value(symbolList.at(n) + "/ValueDecimals").toInt();
