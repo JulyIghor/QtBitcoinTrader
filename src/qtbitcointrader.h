@@ -446,6 +446,7 @@ private:
     QScopedPointer<QThread> currentExchangeThread;
 
 private slots:
+    void onActionSendBugReport();
     void onActionAbout();
     void onActionAboutQt();
     void onActionLockDocks(bool checked);
@@ -460,6 +461,7 @@ private slots:
 private:
     bool         lockedDocks;
     QAction*     actionExit;
+    QAction*     actionSendBugReport;
     QAction*     actionAbout;
     QAction*     actionAboutQt;
     QAction*     actionLockDocks;

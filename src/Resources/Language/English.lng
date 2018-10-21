@@ -539,3 +539,5 @@ String_TIME_ERROR=Time error
 String_PROGRAM_CORRUPTED=The program is corrupted. Download from the official site https://centrabit.com.
 String_CAN_NOT_WRITE_TO_FOLDER=Can not write to folder
 String_MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT=Do you really want to clear the scrypt
+
+String_SEND_BUG_REPORT=&Send bug report

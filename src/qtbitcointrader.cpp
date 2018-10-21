@@ -158,6 +158,7 @@ QtBitcoinTrader::QtBitcoinTrader() :
 
     lockedDocks(false),
     actionExit(nullptr),
+    actionSendBugReport(nullptr),
     actionAbout(nullptr),
     actionAboutQt(nullptr),
     actionLockDocks(nullptr),
@@ -438,7 +439,7 @@ QtBitcoinTrader::QtBitcoinTrader() :
     {
         double currentValueDouble = ui.comboBoxGroupByPrice->itemText(n).toDouble();
 
-        if (currentValueDouble == baseValues.groupPriceValue)
+        if (qFuzzyCompare(currentValueDouble + 1.0, baseValues.groupPriceValue + 1.0))
             currentDepthComboBoxIndex = n;
 
         ui.comboBoxGroupByPrice->setItemData(n, currentValueDouble, Qt::UserRole);
@@ -649,9 +650,9 @@ void QtBitcoinTrader::fixTableViews(QWidget* wid)
 
 double QtBitcoinTrader::getIndicatorValue(QString name)
 {
-    QDoubleSpinBox* spin = indicatorsMap.value(name, 0);
+    QDoubleSpinBox* spin = indicatorsMap.value(name, nullptr);
 
-    if (spin == 0)
+    if (spin == nullptr)
         return 0.0;
 
     return spin->value();
@@ -675,8 +676,7 @@ void QtBitcoinTrader::setupClass()
     {
         case 0:
             QCoreApplication::quit();
-            return;
-            break;//Secret Excange
+            return;//Secret Excange
 
         case 1:
             currentExchange = new Exchange_WEX(baseValues.restSign, baseValues.restKey);
@@ -1021,7 +1021,7 @@ void QtBitcoinTrader::tableCopyContextMenuRequested(QPoint point)
 {
     QTableView* table = dynamic_cast<QTableView*>(sender());
 
-    if (table == 0)
+    if (table == nullptr)
         return;
 
     int selectedCount = table->selectionModel()->selectedRows().count();
@@ -1061,7 +1061,7 @@ int QtBitcoinTrader::getOpenOrdersCount(int all)//-1: asks, 0 all, 1: bids
 
 void QtBitcoinTrader::repeatSelectedOrderByType(int type, bool availableOnly)
 {
-    if (lastCopyTable == 0 || lastCopyTable->selectionModel()->selectedRows().count() != 1)
+    if (lastCopyTable == nullptr || lastCopyTable->selectionModel()->selectedRows().count() != 1)
         return;
 
     int row = lastCopyTable->selectionModel()->selectedRows().first().row();
@@ -1101,7 +1101,7 @@ void QtBitcoinTrader::repeatSellOrder()
 
 void QtBitcoinTrader::copyDate()
 {
-    if (lastCopyTable == 0)
+    if (lastCopyTable == nullptr)
         return;
 
     if (lastCopyTable == ui.tableHistory)
@@ -1114,7 +1114,7 @@ void QtBitcoinTrader::copyDate()
 
 void QtBitcoinTrader::copyAmount()
 {
-    if (lastCopyTable == 0)
+    if (lastCopyTable == nullptr)
         return;
 
     if (lastCopyTable == ui.tableHistory)
@@ -1133,7 +1133,7 @@ void QtBitcoinTrader::copyAmount()
 
 void QtBitcoinTrader::copyPrice()
 {
-    if (lastCopyTable == 0)
+    if (lastCopyTable == nullptr)
         return;
 
     if (lastCopyTable == ui.tableHistory)
@@ -1152,7 +1152,7 @@ void QtBitcoinTrader::copyPrice()
 
 void QtBitcoinTrader::copyTotal()
 {
-    if (lastCopyTable == 0)
+    if (lastCopyTable == nullptr)
         return;
 
     if (lastCopyTable == ui.tableHistory)
@@ -1196,7 +1196,7 @@ void QtBitcoinTrader::copySelectedRow()
 {
     QStringList listToCopy;
 
-    if (lastCopyTable == 0)
+    if (lastCopyTable == nullptr)
         return;
 
     QModelIndexList selectedRows = lastCopyTable->selectionModel()->selectedRows();
@@ -1441,7 +1441,7 @@ void QtBitcoinTrader::addPopupDialog(int val)
 
 void QtBitcoinTrader::buttonMinimizeToTray()
 {
-    if (trayIcon == 0)
+    if (trayIcon == nullptr)
     {
         trayIcon = new QSystemTrayIcon(QIcon(":/Resources/QtBitcoinTrader.png"), this);
         trayIcon->setToolTip(windowTitle());
@@ -1462,7 +1462,7 @@ void QtBitcoinTrader::buttonMinimizeToTray()
 
 void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason reazon)
 {
-    if (trayIcon == 0)
+    if (trayIcon == nullptr)
         return;
 
     if (reazon == QSystemTrayIcon::Context)
@@ -1481,9 +1481,9 @@ void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason reazon)
 
     trayIcon->hide();
     delete trayMenu;
-    trayMenu = 0;
+    trayMenu = nullptr;
     delete trayIcon;
-    trayIcon = 0;
+    trayIcon = nullptr;
 }
 
 void QtBitcoinTrader::checkUpdate()
@@ -1515,22 +1515,22 @@ void QtBitcoinTrader::sayText(QString text)
     if (once)
     {
         once = false;
-        NewSpeechChannel((VoiceSpec*)NULL, &voiceChannel);
+        NewSpeechChannel((VoiceSpec*)nullptr, &voiceChannel);
     }
 
     CFStringRef talkText = CFStringCreateWithCharacters(0, reinterpret_cast<const UniChar*>(text.unicode()), text.length());
-    SpeakCFString(voiceChannel, talkText, NULL);
+    SpeakCFString(voiceChannel, talkText, nullptr);
     CFRelease(talkText);
 #else
 #ifdef Q_OS_WIN
 #ifdef SAPI_ENABLED
-    static ISpVoice* pVoice = NULL;
-    static HRESULT hr = CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void**)&pVoice);
+    static ISpVoice* pVoice = nullptr;
+    static HRESULT hr = CoCreateInstance(CLSID_SpVoice, nullptr, CLSCTX_ALL, IID_ISpVoice, reinterpret_cast<void**>(&pVoice));
 
     if (SUCCEEDED(hr))
     {
-        pVoice->Speak(NULL, SPF_PURGEBEFORESPEAK, 0);
-        pVoice->Speak((LPCWSTR)text.utf16(), SPF_ASYNC, NULL);
+        pVoice->Speak(nullptr, SPF_PURGEBEFORESPEAK, nullptr);
+        pVoice->Speak(reinterpret_cast<LPCWSTR>(text.utf16()), SPF_ASYNC, nullptr);
     }
 
 #endif
@@ -1737,15 +1737,15 @@ void QtBitcoinTrader::updateTrafficTotalValue()
     switch (trafficTotalTypeLast)
     {
         case 0:
-            totalValue = baseValues.trafficTotal / 1024;
+            totalValue = static_cast<int>(baseValues.trafficTotal / 1024);
             break;
 
         case 1:
-            totalValue = baseValues.trafficTotal / 1048576;
+            totalValue = static_cast<int>(baseValues.trafficTotal / 1048576);
             break;
 
         case 2:
-            totalValue = baseValues.trafficTotal / 1073741824;
+            totalValue = static_cast<int>(baseValues.trafficTotal / 1073741824);
             break;
 
         default:
@@ -2154,15 +2154,15 @@ void QtBitcoinTrader::currencyMenuChanged(int val)
     setSpinValue(ui.marketBid, IndicatorEngine::getValue(baseValues.exchangeName +
                  '_' + baseValues.currentPair.symbol + "_Sell"));
 
-    if (ui.marketAsk->value())
-        ui.buyPricePerCoin->setValue(ui.marketAsk->value());
-    else
+    if (qFuzzyIsNull(ui.marketAsk->value()))
         ui.buyPricePerCoin->setValue(100.0);
-
-    if (ui.marketBid->value())
-        ui.sellPricePerCoin->setValue(ui.marketBid->value());
     else
+        ui.buyPricePerCoin->setValue(ui.marketAsk->value());
+
+    if (qFuzzyIsNull(ui.marketBid->value()))
         ui.sellPricePerCoin->setValue(200.0);
+    else
+        ui.sellPricePerCoin->setValue(ui.marketBid->value());
 }
 
 void QtBitcoinTrader::clearDepth()
@@ -2543,7 +2543,7 @@ void QtBitcoinTrader::translateUnicodeStr(QString* str)
     int pos = 0;
 
     while ((pos = rx.indexIn(*str, pos)) != -1)
-        str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(0, 16)));
+        str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
 }
 
 void QtBitcoinTrader::cancelOrder(QString symbol, QByteArray oid)
@@ -3096,7 +3096,7 @@ void QtBitcoinTrader::blinkWindow()
     {
         FLASHWINFO flashInfo;
         flashInfo.cbSize = sizeof(FLASHWINFO);
-        flashInfo.hwnd = (HWND)windowWidget->winId();
+        flashInfo.hwnd = reinterpret_cast<HWND>(windowWidget->winId());
         flashInfo.dwFlags = FLASHW_ALL;
         flashInfo.uCount = 10;
         flashInfo.dwTimeout = 400;
@@ -3113,7 +3113,7 @@ void QtBitcoinTrader::ruleTotalToBuyValueChanged()
 
     double newValue = ui.accountUSD->value() / ui.marketLast->value() * floatFeeDec;
 
-    if (newValue != ui.ruleTotalToBuyValue->value())
+    if (!qFuzzyCompare(newValue, ui.ruleTotalToBuyValue->value()))
     {
         setSpinValueP(ui.ruleTotalToBuyValue, newValue);
     }
@@ -3126,7 +3126,7 @@ void QtBitcoinTrader::ruleAmountToReceiveValueChanged()
 
     double newValue = ui.accountBTC->value() * ui.marketLast->value() * floatFeeDec;
 
-    if (newValue != ui.ruleAmountToReceiveValue->value())
+    if (!qFuzzyCompare(newValue, ui.ruleAmountToReceiveValue->value()))
     {
         setSpinValueP(ui.ruleAmountToReceiveValue, newValue);
     }
@@ -3139,7 +3139,7 @@ void QtBitcoinTrader::ruleTotalToBuyBSValueChanged()
 
     double newValue = ui.accountUSD->value() / ui.marketBid->value() * floatFeeDec;
 
-    if (newValue != ui.ruleTotalToBuyValue->value())
+    if (!qFuzzyCompare(newValue, ui.ruleTotalToBuyValue->value()))
     {
         setSpinValueP(ui.ruleTotalToBuyBSValue, newValue);
     }
@@ -3152,7 +3152,7 @@ void QtBitcoinTrader::ruleAmountToReceiveBSValueChanged()
 
     double newValue = ui.accountBTC->value() * ui.marketAsk->value() * floatFeeDec;
 
-    if (newValue != ui.ruleAmountToReceiveBSValue->value())
+    if (!qFuzzyCompare(newValue, ui.ruleAmountToReceiveBSValue->value()))
     {
         setSpinValueP(ui.ruleAmountToReceiveBSValue, newValue);
     }
@@ -3492,8 +3492,9 @@ void QtBitcoinTrader::languageChanged()
             toolButton->setToolTip(julyTr("TOGGLE_SOUND", "Toggle sound notification on value change"));
 
     ui.comboBoxGroupByPrice->setItemText(0, julyTr("DONT_GROUP", "None"));
-    ui.comboBoxGroupByPrice->setMinimumWidth(qMax(textFontWidth(ui.comboBoxGroupByPrice->itemText(0)) + (int)(
-                ui.comboBoxGroupByPrice->height() * 1.1), textFontWidth("50.000")));
+    ui.comboBoxGroupByPrice->setMinimumWidth(qMax(textFontWidth(ui.comboBoxGroupByPrice->itemText(0)) +
+                                                  static_cast<int>(ui.comboBoxGroupByPrice->height() * 1.1),
+                                                  textFontWidth("50.000")));
 
     copyTableValuesMenu.actions().at(0)->setText(julyTr("COPY_ROW", "Copy selected Rows"));
 
@@ -3521,6 +3522,7 @@ void QtBitcoinTrader::languageChanged()
 
     actionLockDocks->setText(julyTr("LOCK_DOCKS", "&Lock Docks"));
     actionExit->setText(julyTr("EXIT", "E&xit"));
+    actionSendBugReport->setText(julyTr("SEND_BUG_REPORT", "&Send bug report"));
     actionAbout->setText(julyTr("ABOUT", "&About"));
     actionAboutQt->setText(julyTr("ABOUT_QT", "&About Qt"));
     actionConfigManager->setText(julyTr("CONFIG_MANAGER", "&Save..."));
@@ -3555,7 +3557,7 @@ void QtBitcoinTrader::on_rulesTabs_tabCloseRequested(int tab)
     ScriptWidget* currentScript = dynamic_cast<ScriptWidget*>(ui.rulesTabs->widget(tab));
     RuleWidget* currentGroup = dynamic_cast<RuleWidget*>(ui.rulesTabs->widget(tab));
 
-    if (currentGroup == 0 && currentScript == 0)
+    if (currentGroup == nullptr && currentScript == nullptr)
         return;
 
     if (currentScript || currentGroup->haveAnyRules())
@@ -4006,6 +4008,9 @@ void QtBitcoinTrader::createActions()
     actionExit->setShortcut(QKeySequence::Quit);
     connect(actionExit, SIGNAL(triggered()), this, SLOT(exitApp()));
 
+    actionSendBugReport = new QAction("&Send bug report", this);
+    connect(actionSendBugReport, SIGNAL(triggered()), this, SLOT(onActionSendBugReport()));
+
     actionAbout = new QAction("&About", this);
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(onActionAbout()));
 
@@ -4043,6 +4048,7 @@ void QtBitcoinTrader::createMenu()
     menuConfig = menuBar()->addMenu("&Config");
 
     menuHelp = menuBar()->addMenu("&Help");
+    menuHelp->addAction(actionSendBugReport);
     menuHelp->addAction(actionAbout);
     menuHelp->addAction(actionAboutQt);
 
@@ -4144,6 +4150,11 @@ void QtBitcoinTrader::moveWidgetsToDocks()
 void QtBitcoinTrader::onActionAbout()
 {
     (new TranslationAbout(windowWidget))->showWindow();
+}
+
+void QtBitcoinTrader::onActionSendBugReport()
+{
+    QDesktopServices::openUrl(QUrl("https://github.com/JulyIGHOR/QtBitcoinTrader/issues"));
 }
 
 void QtBitcoinTrader::onActionAboutQt()

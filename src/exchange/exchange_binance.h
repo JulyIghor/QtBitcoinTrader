@@ -42,43 +42,42 @@ public:
     Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey);
     ~Exchange_Binance();
 
-private:
-    bool isApiDown;
-    bool isFirstAccInfo;
-    bool isReplayPending(int);
-
-    int apiDownCounter;
-
-    JulyHttp* julyHttp;
-
-    qint64 lastTradesId;
-    qint64 lastTickerId;
-    qint64 lastHistoryId;
-
-    QList<DepthItem>* depthAsks;
-    QList<DepthItem>* depthBids;
-
-    QMap<double, double> lastDepthAsksMap;
-    QMap<double, double> lastDepthBidsMap;
-
-    QTime authRequestTime;
-
-    void clearVariables();
-    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double, double, bool);
-    void sendToApi(int reqType, QByteArray method, bool auth = false, bool simple = false, QByteArray commands = nullptr);
-private slots:
-    void reloadDepth();
-    void sslErrors(const QList<QSslError>&);
-    void dataReceivedAuth(QByteArray, int);
-    void secondSlot();
-    void quitThread();
 public slots:
     void clearValues();
     void getHistory(bool);
     void buy(QString, double, double);
     void sell(QString, double, double);
     void cancelOrder(QString, QByteArray);
+
+private slots:
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
+    void quitThread();
+
+private:
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool simple = false, QByteArray commands = nullptr);
+    bool isReplayPending(int);
+
+private:
+    bool isFirstAccInfo;
+    int  sslErrorCounter;
+
+    qint64 lastTickerId;
+    qint64 lastTradesId;
+    qint64 lastHistoryId;
+
+    JulyHttp* julyHttp;
+
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
+
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 };
 
 #endif // EXCHANGE_BINANCE_H

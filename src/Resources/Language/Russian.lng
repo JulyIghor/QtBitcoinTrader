@@ -538,3 +538,5 @@ String_TIME_ERROR=Ошибка времени
 String_PROGRAM_CORRUPTED=Программа повреждена. Загрузите с официального сайта https://centrabit.com.
 String_CAN_NOT_WRITE_TO_FOLDER=Не могу записать в папку
 String_MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT=Вы действительно хотите очистить скрипт?
+
+String_SEND_BUG_REPORT=&Отправить отчет об ошибке

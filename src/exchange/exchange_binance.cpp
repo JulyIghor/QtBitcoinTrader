@@ -34,7 +34,17 @@
 #include <openssl/hmac.h>
 
 Exchange_Binance::Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey)
-    : Exchange()
+    : Exchange(),
+      isFirstAccInfo(true),
+      sslErrorCounter(0),
+      lastTickerId(0),
+      lastTradesId(0),
+      lastHistoryId(0),
+      julyHttp(nullptr),
+      depthAsks(nullptr),
+      depthBids(nullptr),
+      lastDepthAsksMap(),
+      lastDepthBidsMap()
 {
     clearHistoryOnCurrencyChanged = true;
     calculatingFeeMode = 1;
@@ -47,11 +57,7 @@ Exchange_Binance::Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey)
     baseValues.currentPair.priceMin = qPow(0.1, baseValues.currentPair.priceDecimals);
     baseValues.currentPair.tradeVolumeMin = 0.01;
     baseValues.currentPair.tradePriceMin = 0.1;
-    depthAsks = nullptr;
-    depthBids = nullptr;
     forceDepthLoad = false;
-    julyHttp = nullptr;
-    isApiDown = false;
     tickerOnly = false;
     setApiKeySecret(pRestKey, pRestSign);
 
@@ -65,8 +71,6 @@ Exchange_Binance::Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey)
 
     supportsLoginIndicator = false;
     supportsAccountVolume = false;
-
-    authRequestTime.restart();
 
     connect(this, &Exchange::threadFinished, this, &Exchange_Binance::quitThread, Qt::DirectConnection);
 }
@@ -92,14 +96,13 @@ void Exchange_Binance::quitThread()
 void Exchange_Binance::clearVariables()
 {
     isFirstAccInfo = true;
+    lastTickerId = 0;
+    lastTradesId = 0;
+    lastHistoryId = 0;
     Exchange::clearVariables();
-    apiDownCounter = 0;
     lastHistory.clear();
     lastOrders.clear();
     reloadDepth();
-    lastTradesId = 0;
-    lastTickerId = 0;
-    lastHistoryId = 0;
 }
 
 void Exchange_Binance::clearValues()
@@ -120,6 +123,8 @@ void Exchange_Binance::reloadDepth()
 
 void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
 {
+    sslErrorCounter = 0;
+
     if (debugLevel)
         logThread->writeLog("RCV: " + data);
 
@@ -535,7 +540,7 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
                     qint64 maxId = 0;
                     QList<HistoryItem>* historyItems = new QList<HistoryItem>;
 
-                    for (int n = 0; n < historyList.count(); n++)
+                    for (int n = historyList.count() - 1; n >= 0; --n)
                     {
                         QByteArray logData(historyList.at(n).toLatin1());
                         qint64 id = getMidData("\"id\":", ",", &logData).toLongLong();
@@ -870,6 +875,9 @@ void Exchange_Binance::sendToApi(int reqType, QByteArray method, bool auth, bool
 
 void Exchange_Binance::sslErrors(const QList<QSslError>& errors)
 {
+    if (++sslErrorCounter < 3)
+        return;
+
     QStringList errorList;
 
     for (int n = 0; n < errors.count(); n++)
