@@ -49,7 +49,7 @@ SettingsGeneral::SettingsGeneral()
 
     ui.revertChangesButton->setEnabled(false);
     ui.saveButton->setEnabled(false);
-    ui.forceSyncPairsButton->setEnabled(QDir(appDataDir + "cache").entryList(QStringList("*.cache"), QDir::Files).count() != 0);
+    ui.forceSyncPairsButton->setEnabled(QDir(appDataDir + "/cache").entryList(QStringList("*.cache"), QDir::Files).count() != 0);
 
 #ifdef Q_OS_MAC
     ui.closeToTrayLabel->setVisible(false);
@@ -75,11 +75,11 @@ void SettingsGeneral::loadLanguage()
         if (!resourceLanguages.at(n).isEmpty())
             langList << ":/Resources/Language/" + resourceLanguages.at(n);
 
-    QStringList folderLangList = QDir(appDataDir + "Language", "*.lng").entryList();
+    QStringList folderLangList = QDir(appDataDir + "/Language", "*.lng").entryList();
     folderLangList.sort();
 
     for (int n = 0; n < folderLangList.count(); n++)
-        langList << appDataDir + "Language/" + folderLangList.at(n);
+        langList << appDataDir + "/Language/" + folderLangList.at(n);
 
     int selectedLangId = -1;
 
@@ -239,10 +239,10 @@ void SettingsGeneral::on_showTranslationButton_clicked()
 
 void SettingsGeneral::on_forceSyncPairsButton_clicked()
 {
-    QStringList cacheFiles = QDir(appDataDir + "cache").entryList(QStringList("*.cache"), QDir::Files);
+    QStringList cacheFiles = QDir(appDataDir + "/cache").entryList(QStringList("*.cache"), QDir::Files);
 
     for (int i = 0; i < cacheFiles.count(); ++i)
-        QFile(appDataDir + "cache/" + cacheFiles.at(i)).remove();
+        QFile(appDataDir + "/cache/" + cacheFiles.at(i)).remove();
 
     ui.forceSyncPairsButton->setEnabled(false);
 }

@@ -74,7 +74,7 @@ AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum)
     mainWindow.fixTableViews(this);
 
     ui.exchangesTableView->setMinimumHeight(
-        ui.exchangesTableView->verticalHeader()->defaultSectionSize() * (exchangesList.count() - 1) - 1);
+        ui.exchangesTableView->verticalHeader()->defaultSectionSize() * exchangesList.count());
 }
 
 AllExchangesDialog::~AllExchangesDialog()

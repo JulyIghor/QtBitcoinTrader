@@ -55,8 +55,8 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
     allExchangesList = listSettings.childGroups();
 
     {
-        JulyHttp* httpGet = new JulyHttp("qbtapi.centrabit.com", nullptr, this, true, false);
-        connect(httpGet, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceived(QByteArray, int)));
+        QScopedPointer<JulyHttp> httpGet(new JulyHttp("qbtapi.centrabit.com", nullptr, this, true, false));
+        connect(httpGet.data(), &JulyHttp::dataReceived, this, &FeaturedExchangesDialog::dataReceived);
         httpGet->secondTimer->stop();
         httpGet->noReconnect = true;
         httpGet->ignoreError = true;
@@ -76,7 +76,6 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
             loop.exec();
         }
 
-        delete httpGet;
         featuredExchangesList = QString(mainWindow.getMidData("Exchanges\":[", "]", &cacheData)).split(",");
         cacheData.clear();
     }

@@ -63,6 +63,7 @@
 #include "exchange/exchange_okcoin.h"
 #include "exchange/exchange_yobit.h"
 #include "exchange/exchange_binance.h"
+#include "exchange/exchange_bittrex.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
 #include "script/addrulegroup.h"
@@ -165,6 +166,7 @@ QtBitcoinTrader::QtBitcoinTrader() :
     actionConfigManager(nullptr),
     actionSettings(nullptr),
     actionDebug(nullptr),
+    actionUninstall(nullptr),
     menuFile(nullptr),
     menuView(nullptr),
     menuConfig(nullptr),
@@ -590,13 +592,13 @@ QtBitcoinTrader::QtBitcoinTrader() :
     if (checkForUpdates)
         QProcess::startDetached(QApplication::applicationFilePath(), QStringList("/checkupdate"));
 
-    connect(networkMenu, SIGNAL(trafficTotalToZero_clicked()), this, SLOT(trafficTotalToZero_clicked()));
+    connect(networkMenu, &NetworkMenu::trafficTotalToZero_clicked, this, &QtBitcoinTrader::trafficTotalToZero_clicked);
     iniSettings->sync();
 
     chartsView = new ChartsView;
     connect(tradesModel, &TradesModel::addChartsTrades, chartsView->chartsModel.data(), &ChartsModel::addLastTrades);
-    connect(this, SIGNAL(clearCharts()), chartsView->chartsModel.data(), SLOT(clearCharts()));
-    connect(this, SIGNAL(addBound(double, bool)), chartsView->chartsModel.data(), SLOT(addBound(double, bool)));
+    connect(this, &QtBitcoinTrader::clearCharts, chartsView->chartsModel.data(), &ChartsModel::clearCharts);
+    connect(this, &QtBitcoinTrader::addBound, chartsView->chartsModel.data(), &ChartsModel::addBound);
     ui.chartsLayout->addWidget(chartsView);
 
     newsView = new NewsView();
@@ -674,52 +676,56 @@ void QtBitcoinTrader::setupClass()
 
     switch (exchangeId)
     {
-        case 0:
-            QCoreApplication::quit();
-            return;//Secret Excange
+    case 0:
+        QCoreApplication::quit();
+        return;//Secret Excange
 
-        case 1:
-            currentExchange = new Exchange_WEX(baseValues.restSign, baseValues.restKey);
-            break;//WEX
+    case 1:
+        currentExchange = new Exchange_WEX(baseValues.restSign, baseValues.restKey);
+        break;//WEX
 
-        case 2:
-            currentExchange = new Exchange_Bitstamp(baseValues.restSign, baseValues.restKey);
-            break;//Bitstamp
+    case 2:
+        currentExchange = new Exchange_Bitstamp(baseValues.restSign, baseValues.restKey);
+        break;//Bitstamp
 
-        case 3:
-            currentExchange = new Exchange_BTCChina(baseValues.restSign, baseValues.restKey);
-            break;//BTC China
+    case 3:
+        currentExchange = new Exchange_BTCChina(baseValues.restSign, baseValues.restKey);
+        break;//BTC China
 
-        case 4:
-            currentExchange = new Exchange_Bitfinex(baseValues.restSign, baseValues.restKey);
-            break;//Bitfinex
+    case 4:
+        currentExchange = new Exchange_Bitfinex(baseValues.restSign, baseValues.restKey);
+        break;//Bitfinex
 
-        case 5:
-            currentExchange = new Exchange_GOCio(baseValues.restSign, baseValues.restKey);
-            break;//GOCio
+    case 5:
+        currentExchange = new Exchange_GOCio(baseValues.restSign, baseValues.restKey);
+        break;//GOCio
 
-        case 6:
-            currentExchange = new Exchange_Indacoin(baseValues.restSign, baseValues.restKey);
-            break;//Indacoin
+    case 6:
+        currentExchange = new Exchange_Indacoin(baseValues.restSign, baseValues.restKey);
+        break;//Indacoin
 
-        case 8:
-            currentExchange = new Exchange_BitMarket(baseValues.restSign, baseValues.restKey);
-            break;//BitMarket
+    case 8:
+        currentExchange = new Exchange_BitMarket(baseValues.restSign, baseValues.restKey);
+        break;//BitMarket
 
-        case 9:
-            currentExchange = new Exchange_OKCoin(baseValues.restSign, baseValues.restKey);
-            break;//OKCoin
+    case 9:
+        currentExchange = new Exchange_OKCoin(baseValues.restSign, baseValues.restKey);
+        break;//OKCoin
 
-        case 10:
-            currentExchange = new Exchange_YObit(baseValues.restSign, baseValues.restKey);
-            break;//YObit
+    case 10:
+        currentExchange = new Exchange_YObit(baseValues.restSign, baseValues.restKey);
+        break;//YObit
 
-        case 11:
-            currentExchange = new Exchange_Binance(baseValues.restSign, baseValues.restKey);
-            break;//Binance
+    case 11:
+        currentExchange = new Exchange_Binance(baseValues.restSign, baseValues.restKey);
+        break;//Binance
 
-        default:
-            return;
+    case 12:
+        currentExchange = new Exchange_Bittrex(baseValues.restSign, baseValues.restKey);
+        break;//Bittrex
+
+    default:
+        return;
     }
 
     currentExchangeThread.reset(new QThread);
@@ -1714,20 +1720,20 @@ void QtBitcoinTrader::updateTrafficTotalValue()
 
         switch (trafficTotalTypeLast)
         {
-            case 0:
-                networkMenu->setSuffix(" Kb");
-                break;
+        case 0:
+            networkMenu->setSuffix(" Kb");
+            break;
 
-            case 1:
-                networkMenu->setSuffix(" Mb");
-                break;
+        case 1:
+            networkMenu->setSuffix(" Mb");
+            break;
 
-            case 2:
-                networkMenu->setSuffix(" Gb");
-                break;
+        case 2:
+            networkMenu->setSuffix(" Gb");
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
@@ -1736,20 +1742,20 @@ void QtBitcoinTrader::updateTrafficTotalValue()
 
     switch (trafficTotalTypeLast)
     {
-        case 0:
-            totalValue = static_cast<int>(baseValues.trafficTotal / 1024);
-            break;
+    case 0:
+        totalValue = static_cast<int>(baseValues.trafficTotal / 1024);
+        break;
 
-        case 1:
-            totalValue = static_cast<int>(baseValues.trafficTotal / 1048576);
-            break;
+    case 1:
+        totalValue = static_cast<int>(baseValues.trafficTotal / 1048576);
+        break;
 
-        case 2:
-            totalValue = static_cast<int>(baseValues.trafficTotal / 1073741824);
-            break;
+    case 2:
+        totalValue = static_cast<int>(baseValues.trafficTotal / 1073741824);
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     if (totalValueLast != totalValue)
@@ -3071,7 +3077,7 @@ void QtBitcoinTrader::playWav(const QString& wav, bool noBlink)
 
 void QtBitcoinTrader::beep(bool noBlink)
 {
-    QString fileName = appDataDir + "Sound/Beep.wav";
+    QString fileName = appDataDir + "/Sound/Beep.wav";
 
     if (!QFile::exists(fileName))
     {
@@ -3202,16 +3208,16 @@ void QtBitcoinTrader::on_marketBid_valueChanged(double val)
 
             switch (priceDirection)
             {
-                case -1:
-                    directionChar = downArrowNoUtfStr;
-                    break;
+            case -1:
+                directionChar = downArrowNoUtfStr;
+                break;
 
-                case 1:
-                    directionChar = upArrowNoUtfStr;
-                    break;
+            case 1:
+                directionChar = upArrowNoUtfStr;
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
 
             static QString titleText;
@@ -3258,16 +3264,16 @@ void QtBitcoinTrader::on_marketAsk_valueChanged(double val)
 
             switch (priceDirection)
             {
-                case -1:
-                    directionChar = downArrowNoUtfStr;
-                    break;
+            case -1:
+                directionChar = downArrowNoUtfStr;
+                break;
 
-                case 1:
-                    directionChar = upArrowNoUtfStr;
-                    break;
+            case 1:
+                directionChar = upArrowNoUtfStr;
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
 
             static QString titleText;
@@ -3493,8 +3499,8 @@ void QtBitcoinTrader::languageChanged()
 
     ui.comboBoxGroupByPrice->setItemText(0, julyTr("DONT_GROUP", "None"));
     ui.comboBoxGroupByPrice->setMinimumWidth(qMax(textFontWidth(ui.comboBoxGroupByPrice->itemText(0)) +
-                                                  static_cast<int>(ui.comboBoxGroupByPrice->height() * 1.1),
-                                                  textFontWidth("50.000")));
+            static_cast<int>(ui.comboBoxGroupByPrice->height() * 1.1),
+            textFontWidth("50.000")));
 
     copyTableValuesMenu.actions().at(0)->setText(julyTr("COPY_ROW", "Copy selected Rows"));
 
@@ -3988,8 +3994,8 @@ void QtBitcoinTrader::on_helpButton_clicked()
             helpType = "JLScript";
     }
 
-    QDesktopServices::openUrl(QUrl("https://qbtapi.centrabit.com/?Object=Help&Method=" + helpType + "&Locale=" +
-                                   QLocale().name()));
+    QDesktopServices::openUrl(QUrl("https://qbtapi.centrabit.com/?Object=Help&Method="
+                                   + helpType + "&Locale=" + QLocale().name()));
 }
 
 void QtBitcoinTrader::initDocks()
@@ -4025,6 +4031,12 @@ void QtBitcoinTrader::createActions()
 
     actionDebug = new QAction("&Debug", this);
     connect(actionDebug, &QAction::triggered, this, &QtBitcoinTrader::onActionDebug);
+
+    if (!baseValues_->portableMode)
+    {
+        actionUninstall = new QAction(julyTr("UNINSTALL", "&Uninstall"), this);
+        connect(actionUninstall, &QAction::triggered, this, &QtBitcoinTrader::uninstall);
+    }
 }
 
 void QtBitcoinTrader::createMenu()
@@ -4052,7 +4064,53 @@ void QtBitcoinTrader::createMenu()
     menuHelp->addAction(actionAbout);
     menuHelp->addAction(actionAboutQt);
 
+    if (!baseValues_->portableMode)
+        menuHelp->addAction(actionUninstall);
+
     ui.menubar->setStyleSheet("font-size:12px");
+}
+
+void QtBitcoinTrader::uninstall()
+{
+    QMessageBox msgBox(windowWidget);
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setWindowTitle("Qt Bitcoin Trader");
+    msgBox.setText(julyTr("CONFIRM_UNINSTALL",
+                          "Are you sure to uninstall Application?<br>All configs, scripts, rules will be deleted"));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::Yes);
+    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
+    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
+
+    if (msgBox.exec() != QMessageBox::Yes)
+        return;
+
+    QString tmpDir = QStandardPaths::standardLocations(QStandardPaths::TempLocation).first();
+
+    QString fileName = QFileInfo(QCoreApplication::applicationFilePath()).fileName();
+    QFile::Permissions selfPerms = QFile(QCoreApplication::applicationFilePath()).permissions();
+
+    if (QFile::exists(tmpDir + "/TMP_" + fileName))
+    {
+        QFile::remove(tmpDir + "/TMP_" + fileName);
+
+        if (QFile::exists(tmpDir + "/TMP_" + fileName))
+            QFile::rename(tmpDir + "/TMP_" + fileName, tmpDir + "/TMP_" + QString::number(QDateTime::currentSecsSinceEpoch()) + "_" + fileName);
+    }
+
+    QFile::copy(QCoreApplication::applicationFilePath(), tmpDir + "/TMP_" + fileName);
+    QFile(tmpDir + "/TMP_" + fileName).setPermissions(selfPerms);
+    QProcess proc;
+
+    if (!proc.startDetached(tmpDir + "/TMP_" + fileName, QStringList() << "/uninstall"))
+    {
+        QMessageBox::warning(this, "Qt Bitcoin Trader", julyTr("UNINSTALL_ERROR",
+                             "Can't uninstall app, you can delete files manually") + "\n" + appDataDir + "\n" + tmpDir + "/TMP_" + fileName + "\n" + proc.errorString());
+        QFile::remove(tmpDir + "/TMP_" + fileName);
+        return;
+    }
+
+    QCoreApplication::quit();
 }
 
 QDockWidget* QtBitcoinTrader::createDock(QWidget* widget, const QString& title)

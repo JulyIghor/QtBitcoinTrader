@@ -31,6 +31,7 @@
 
 #include "datafolderchusedialog.h"
 #include "main.h"
+#include <QStandardPaths>
 
 DataFolderChuseDialog::DataFolderChuseDialog(QString systemPath, QString localPath)
     : QDialog()
@@ -38,11 +39,28 @@ DataFolderChuseDialog::DataFolderChuseDialog(QString systemPath, QString localPa
     isPortable = false;
     ui.setupUi(this);
     setWindowFlags(Qt::WindowCloseButtonHint);
-    ui.buttonUseSystemFolder->setText(julyTr("USE_SYSTEM_FOLDER", "Store your data in system folder."));
-    ui.buttonUseSystemFolder->setToolTip(systemPath.replace("/", "\\"));
+
+
+#ifdef Q_OS_WIN
+    systemPath.replace('/', '\\');
+    localPath.replace('/', '\\');
+#else
+
+    QString homeDir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first();
+
+    if (systemPath.startsWith(homeDir))
+    {
+        systemPath.remove(0, homeDir.size());
+        systemPath.prepend("~");
+    }
+
+#endif
+
+    ui.buttonUseSystemFolder->setText(julyTr("USE_SYSTEM_FOLDER", "Store your data in system folder") + "\n\n" + systemPath);
+    ui.buttonUsePortableMode->setToolTip(systemPath);
     ui.buttonUsePortableMode->setText(julyTr("USE_PORTABLE_MODE",
-                                      "Enable portable mode. Store your data in same folder as executable file."));
-    ui.buttonUsePortableMode->setToolTip(localPath.replace("/", "\\"));
+                                      "Enable portable mode. Store your data in same folder as executable file"));
+    ui.buttonUsePortableMode->setToolTip(localPath);
     setFixedSize(minimumSizeHint().width() + 40, qMax(minimumSizeHint().height(), 150));
 }
 

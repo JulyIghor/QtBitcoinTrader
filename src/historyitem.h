@@ -40,7 +40,7 @@ public:
     HistoryItem();
 
     bool displayFullDate;
-    quint32 dateTimeInt;
+    qint64  dateTimeInt;
     quint32 dateInt;
     QString dateTimeStr;
     QString timeStr;

@@ -41,8 +41,8 @@
 IniEngine::IniEngine()
     : QObject(),
       iniEngineThread(new QThread),
-      julyHttp(0),
-      currencyCacheFileName(appDataDir + "cache/currencies.cache"),
+      julyHttp(nullptr),
+      currencyCacheFileName(appDataDir + "/cache/currencies.cache"),
       currencyResourceFileName("://Resources/Currencies.ini"),
       waitForDownload(true)
 {
@@ -87,8 +87,8 @@ void IniEngine::runThread()
     connect(waitTimer, &QTimer::timeout, this, &IniEngine::checkWait);
     checkTimer = new QElapsedTimer;
 
-    if (!QFile::exists(appDataDir + "cache"))
-        QDir().mkpath(appDataDir + "cache");
+    if (!QFile::exists(appDataDir + "/cache"))
+        QDir().mkpath(appDataDir + "/cache");
 
     QFileInfo currencyFileInfo(currencyCacheFileName);
 
@@ -203,27 +203,27 @@ void IniEngine::dataReceived(QByteArray data, int reqType)
 
     switch (reqType)
     {
-        case 170:
-            {
-                if (!existNewFile(currencyCacheFileName, data))
-                    break;
-
-                if (!JulyRSA::isIniFileSigned(currencyCacheFileName))
-                {
-                    QFile(currencyCacheFileName).remove();
-                    break;
-                }
-
-                parseCurrency(currencyCacheFileName);
-            }
+    case 170:
+    {
+        if (!existNewFile(currencyCacheFileName, data))
             break;
 
-        case 171:
-            {
-                existNewFile(exchangeCacheFileName, data);
-                parseExchangeCheck();
-            }
+        if (!JulyRSA::isIniFileSigned(currencyCacheFileName))
+        {
+            QFile(currencyCacheFileName).remove();
             break;
+        }
+
+        parseCurrency(currencyCacheFileName);
+    }
+    break;
+
+    case 171:
+    {
+        existNewFile(exchangeCacheFileName, data);
+        parseExchangeCheck();
+    }
+    break;
     }
 }
 
@@ -241,7 +241,7 @@ void IniEngine::loadExchangeLock(QString exchangeIniFileName, CurrencyPairItem& 
 
 void IniEngine::loadExchange(QString exchangeIniFileName)
 {
-    exchangeCacheFileName = appDataDir + "cache/" + exchangeIniFileName + ".cache";
+    exchangeCacheFileName = appDataDir + "/cache/" + exchangeIniFileName + ".cache";
     exchangeResourceFileName = ":/Resources/Exchanges/" + exchangeIniFileName + ".ini";
 
     if (disablePairSynchronization)

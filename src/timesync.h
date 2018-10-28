@@ -56,13 +56,13 @@ signals:
 private slots:
     void runThread();
     void getNTPTime();
-
+    void quitThread();
 private:
-    QThread* dateUpdateThread;
+    QScopedPointer<QThread> dateUpdateThread;
     QAtomicInt started;
     quint32 startTime;
     QAtomicInt timeShift;
-    QElapsedTimer* additionalTimer;
+    QScopedPointer<QElapsedTimer> additionalTimer;
     QMutex mutex;
     int getNTPTimeRetryCount;
 };

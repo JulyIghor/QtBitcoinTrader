@@ -428,6 +428,7 @@ signals:
     void clearCharts();
     void addBound(double, bool);
 private slots:
+    void uninstall();
     void on_buttonAddScript_clicked();
     void on_helpButton_clicked();
     void depthVisibilityChanged(bool);
@@ -468,6 +469,7 @@ private:
     QAction*     actionConfigManager;
     QAction*     actionSettings;
     QAction*     actionDebug;
+    QAction*     actionUninstall;
     QMenu*       menuFile;
     QMenu*       menuView;
     QMenu*       menuConfig;

@@ -48,14 +48,14 @@ RuleHolder::RuleHolder()
     delayMilliseconds = 0.0;
 }
 
-bool RuleHolder::isValidComparation(const QString& text) const
+bool RuleHolder::isValidComparation(const QString& text)
 {
     return text == QLatin1String("=") || text == QLatin1String("<") || text == QLatin1String(">") ||
            text == QLatin1String("<=") || text == QLatin1String(">=") || text == QLatin1String("!=") ||
            text == QLatin1String("==") || text == QLatin1String("<>");
 }
 
-bool RuleHolder::isValidSymbol(const QString& symbol) const
+bool RuleHolder::isValidSymbol(const QString& symbol)
 {
     CurrencyPairItem pairItem;
     pairItem = baseValues.currencyPairMap.value(symbol.toUpper(), pairItem);
@@ -66,13 +66,13 @@ bool RuleHolder::isValidSymbol(const QString& symbol) const
     return true;
 }
 
-bool RuleHolder::isValidPlusMinus(const QString& plusMinus) const
+bool RuleHolder::isValidPlusMinus(const QString& plusMinus)
 {
     return plusMinus == QLatin1String("+") || plusMinus == QLatin1String("-") || plusMinus == QLatin1String("*") ||
            plusMinus == QLatin1String("/");
 }
 
-bool RuleHolder::isValidCode(const QString& code) const
+bool RuleHolder::isValidCode(const QString& code)
 {
     return code == QLatin1String("EXACT") ||
            code == QLatin1String("IMMEDIATELY") ||

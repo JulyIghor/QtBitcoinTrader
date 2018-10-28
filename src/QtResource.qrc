@@ -134,5 +134,9 @@
         <file>Resources/Exchanges/QtTrader.ini</file>
         <file>Resources/QtTraderDay.png</file>
         <file>Resources/QtTraderNight.png</file>
+        <file>Resources/Exchanges/Bittrex.ini</file>
+        <file>Resources/Exchanges/Logos/Bittrex.png</file>
+        <file>Resources/Exchanges/Logos/Bittrex_Big.png</file>
+        <file>Resources/QtTrader.png</file>
     </qresource>
 </RCC>

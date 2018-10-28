@@ -70,7 +70,7 @@ QColor AppTheme::getColor(const QString& str) const
 
 void AppTheme::loadTheme(const QString& name)
 {
-    QSettings themeLoad(baseValues.themeFolder + name + ".thm", QSettings::IniFormat);
+    QSettings themeLoad(baseValues.themeFolder + "/" + name + ".thm", QSettings::IniFormat);
 
     themeLoad.beginGroup("Normal");
     QStringList colorList = themeLoad.childKeys();

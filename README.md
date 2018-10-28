@@ -13,6 +13,7 @@ Next ToDo:
 ## Official website
 
 * https://centrabit.com/index.php?m0prm=6
+* https://qttrader.com
 
 ## Download binaries
 
@@ -47,6 +48,28 @@ make && make install && make clean
 * http://vk.com/QtBitcoinTrader `RUS`
 
 ## Change Log
+
+v1.40.23
+- Added new exchange Bittrex
+- Portable mode for Linux and macOS
+- Secure auto update for Linux x86_64
+- Uninstall option in help menu
+- Fixed Binance own trade history order
+- Minor fixes
+
+v1.40.22
+- Added new exchange Binance
+- Many small fixes
+- Subscribe to beta of Qt Trader exchange www.QtTrader.com
+
+v1.40.21
+- Qt Trader 2.0 Announced! Visit www.QtTrader.com
+- Fixed bug of Rules dialog
+- Fixed HiDPI mode
+- Fixed Script and Rules enable-disable command
+- Fixed Last Buy and Sell price event bug
+- Memory optimisations, refractoring
+- Minor fixes
 
 v1.40.12
 - Dropped support of Windows XP and macOS 10.9, but you still can compile it manually

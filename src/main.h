@@ -68,6 +68,8 @@ struct BaseValues
 {
     void Construct();
 
+    bool portableMode = false;
+
     bool defaultEnableHiDPI;
 
     int scriptsThatUseOrderBookCount;

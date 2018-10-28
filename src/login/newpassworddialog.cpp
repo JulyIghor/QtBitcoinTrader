@@ -132,21 +132,21 @@ void NewPasswordDialog::setDiffBar(int val)
 
     switch (val)
     {
-        case 0:
-            style = styleWhite;
-            break;
+    case 0:
+        style = styleWhite;
+        break;
 
-        case 1:
-            style = "background: #FFAAAA; border: 1px solid #999999; border-radius: 1px";
-            break;
+    case 1:
+        style = "background: #FFAAAA; border: 1px solid #999999; border-radius: 1px";
+        break;
 
-        case 2:
-            style = "background: #FFFF66; border: 1px solid #999999; border-radius: 1px";
-            break;
+    case 2:
+        style = "background: #FFFF66; border: 1px solid #999999; border-radius: 1px";
+        break;
 
-        case 3:
-            style = "background: #66FF66; border: 1px solid #999999; border-radius: 1px";
-            break;
+    case 3:
+        style = "background: #66FF66; border: 1px solid #999999; border-radius: 1px";
+        break;
     }
 
     ui.bar1->setStyleSheet(val > 0 ? style : styleWhite);
@@ -438,12 +438,12 @@ bool NewPasswordDialog::isValidPassword()
 void NewPasswordDialog::updateIniFileName()
 {
     if (ui.profileNameEdit->text().isEmpty())
-        baseValues.iniFileName = appDataDir + "QtBitcoinTrader.ini";
+        baseValues.iniFileName = appDataDir + "/QtBitcoinTrader.ini";
     else
     {
         baseValues.iniFileName = exchangeName + "_" + ui.profileNameEdit->text() + ".ini";
         baseValues.iniFileName.replace(' ', '_');
-        baseValues.iniFileName.prepend(appDataDir);
+        baseValues.iniFileName.prepend(appDataDir + "/");
     }
 
     QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);

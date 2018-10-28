@@ -195,17 +195,17 @@ void TranslationDialog::applyButton()
     resultList << "String_LANGUAGE_AUTHOR=" + authorAbout->getValidText();
     QString localeName = locale().name(); //if(localeName.contains("_"))localeName.split("_").first();
     resultList << "String_LANGUAGE_LOCALE=" + localeName;
-    QFile writeFile(appDataDir + "Language/Custom.lng");
+    QFile writeFile(appDataDir + "/Language/Custom.lng");
     writeFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     writeFile.write(resultList.join("\r\n").toUtf8());
     writeFile.close();
 
     if (baseValues.mainWindow_)
-        mainWindow.reloadLanguage(appDataDir + "Language/Custom.lng");
+        mainWindow.reloadLanguage(appDataDir + "/Language/Custom.lng");
 
     ui.buttonSaveAs->setEnabled(true);
     ui.buttonApply->setEnabled(false);
-    ui.deleteTranslationButton->setEnabled(QFile::exists(appDataDir + "Language/Custom.lng"));
+    ui.deleteTranslationButton->setEnabled(QFile::exists(appDataDir + "/Language/Custom.lng"));
 }
 
 void TranslationDialog::saveAsButton()

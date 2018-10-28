@@ -44,50 +44,48 @@ TimeSync::TimeSync()
       started(0),
       startTime(QDateTime::currentDateTime().toTime_t()),
       timeShift(0),
-      additionalTimer(0),
       getNTPTimeRetryCount(0)
 {
-    connect(dateUpdateThread, SIGNAL(started()), this, SLOT(runThread()));
-    connect(this, SIGNAL(startSync()), this, SLOT(getNTPTime()));
-    moveToThread(dateUpdateThread);
+    connect(dateUpdateThread.data(), &QThread::started, this, &TimeSync::runThread);
+    connect(this, &TimeSync::startSync, this, &TimeSync::getNTPTime, Qt::QueuedConnection);
+    moveToThread(dateUpdateThread.data());
     dateUpdateThread->start();
 }
 
 TimeSync::~TimeSync()
 {
-    dateUpdateThread->deleteLater();
+    if (dateUpdateThread && dateUpdateThread->isRunning())
+    {
+        dateUpdateThread->quit();
+        dateUpdateThread->wait();
+    }
 }
 
 TimeSync* TimeSync::global()
 {
-    static TimeSync* instance = 0;
+    static TimeSync instance;
 
     static QAtomicInt created = 0;
 
     if (created)
-        return instance;
+        return &instance;
 
     static QMutex mut;
     QMutexLocker lock(&mut);
 
-    if (instance == 0)
-    {
-        instance = new TimeSync;
+    while (instance.started == 0)
+        QThread::msleep(100);
 
-        while (instance->started == 0)
-            QThread::msleep(100);
+    created = 1;
 
-        created = 1;
-    }
-
-    return instance;
+    return &instance;
 }
 
 quint32 TimeSync::getTimeT()
 {
     TimeSync* timeSync = TimeSync::global();
 
-    if (timeSync->additionalTimer == 0)
+    if (timeSync->additionalTimer == nullptr)
         return QDateTime::currentDateTime().toTime_t();
 
     qint64 additionalBuffer = 0;
@@ -100,7 +98,6 @@ quint32 TimeSync::getTimeT()
 
 void TimeSync::syncNow()
 {
-    QString appDataDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation).first().replace('\\', '/') + "/";
     QSettings mainSettings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
 
     if (mainSettings.value("TimeSynchronization", true).toBool())
@@ -111,14 +108,19 @@ void TimeSync::syncNow()
 
 void TimeSync::runThread()
 {
+    connect(QThread::currentThread(), &QThread::finished, this, &TimeSync::quitThread, Qt::DirectConnection);
     startTime = QDateTime::currentDateTime().toTime_t();
 
-    additionalTimer = new QElapsedTimer();
+    additionalTimer.reset(new QElapsedTimer);
     additionalTimer->start();
 
     started = 1;
 }
 
+void TimeSync::quitThread()
+{
+    additionalTimer.reset();
+}
 void TimeSync::getNTPTime()
 {
     QUdpSocket sock;
@@ -146,7 +148,7 @@ void TimeSync::getNTPTime()
         return;
     }
 
-    qint32 tempTimeShift = qint64(newTime) - qint64(QDateTime::currentDateTime().toTime_t());
+    qint64 tempTimeShift = newTime - QDateTime::currentDateTime().toTime_t();
 
     if (timeShift != 0)
         tempTimeShift = qint32((qint64(timeShift) + qint64(tempTimeShift)) / 2);

@@ -29,26 +29,56 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ORDERITEM_H
-#define ORDERITEM_H
-#include <QByteArray>
-#include <QString>
+#ifndef EXCHANGE_BITTREX_H
+#define EXCHANGE_BITTREX_H
 
-struct OrderItem
+#include "exchange.h"
+
+class Exchange_Bittrex : public Exchange
 {
-    QByteArray oid;
-    qint64 date;
-    QString dateStr;
-    bool type;//true=Ask, false=Bid
-    int status;//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
-    double amount;
-    QString amountStr;
-    double price;
-    QString priceStr;
-    double total;
-    QString totalStr;
-    QString symbol;
-    bool isValid();
+    Q_OBJECT
+
+public:
+    Exchange_Bittrex(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_Bittrex();
+
+public slots:
+    void clearValues();
+    void getHistory(bool);
+    void buy(QString, double, double);
+    void sell(QString, double, double);
+    void cancelOrder(QString, QByteArray);
+
+private slots:
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
+    void quitThread();
+
+private:
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false);
+    bool isReplayPending(int);
+
+private:
+    bool isFirstAccInfo;
+
+    QByteArray lastTickerTime;
+    qint64 lastTradesId;
+    qint64 lastHistoryTime;
+    qint64 privateNonce;
+    QByteArray lastCanceledId;
+
+    JulyHttp* julyHttp;
+
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
+
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 };
 
-#endif // ORDERITEM_H
+#endif // EXCHANGE_BITTREX_H

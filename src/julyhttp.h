@@ -37,14 +37,17 @@
 #include <QTime>
 #include <QNetworkCookie>
 
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+
 class QTimer;
 
 struct PacketItem
 {
-    QByteArray* data;
-    int reqType;
-    int retryCount;
-    bool skipOnce;
+    QByteArray* data = nullptr;
+    int reqType = 0;
+    int retryCount = 0;
+    bool skipOnce = false;
 };
 
 class JulyHttp : public QSslSocket
@@ -56,12 +59,12 @@ public:
     bool destroyClass;
     bool ignoreError;
     QTimer* secondTimer;
-    uint getCurrentPacketContentLength()
+    uint getCurrentPacketContentLength() const
     {
         return contentLength;
     }
     void clearPendingData();
-    void reConnect(bool mastAbort = true);
+    void reConnect(bool forceAbort = true);
     bool isReqTypePending(int);
     void sendData(int reqType, const QByteArray& method, QByteArray postData = nullptr, const QByteArray& restSignLine = nullptr,
                   const int& forceRetryCount = -1);
@@ -79,6 +82,8 @@ public:
     {
         forcedPort = port;
     }
+
+    static bool requestWait(const QUrl& url, QByteArray& result, QString* errorString = nullptr);
 private:
     quint16 forcedPort;
     QByteArray outBuffer;
@@ -107,12 +112,12 @@ private:
     int outGoingPacketsCount;
     void setupSocket();
     bool isSocketConnected();
-    void reconnectSocket(bool mastAbort);
+    void reconnectSocket(bool forceAbort);
     void setApiDown(bool);
     bool apiDownState;
     bool packetIsChunked;
     QByteArray buffer;
-    bool nextPacketMastBeSize;
+    bool nextPacketMustBeSize;
     bool endOfPacket;
     void clearRequest();
     void retryRequest();
