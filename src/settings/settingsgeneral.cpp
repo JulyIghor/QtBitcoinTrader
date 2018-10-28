@@ -144,7 +144,12 @@ void SettingsGeneral::saveOther()
     baseValues.mainWindow_->closeToTray = ui.closeToTrayCheckBox->isChecked();
 
     iniSettings->setValue("UI/OptimizeInterface", ui.optimizeInterfaceCheckBox->isChecked());
-    hiDpiSettings->setValue("HiDPI", ui.hiDpiCheckBox->isChecked());
+
+    if (ui.hiDpiCheckBox->isChecked() != hiDpiSettings->value("HiDPI", baseValues.defaultEnableHiDPI).toBool())
+    {
+        hiDpiSettings->setValue("HiDPI", ui.hiDpiCheckBox->isChecked());
+        mainSettings->remove("RowHeight");
+    }
 }
 
 void SettingsGeneral::loadUpdates()

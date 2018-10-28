@@ -55,6 +55,8 @@ v1.40.23
 - Secure auto update for Linux x86_64
 - Uninstall option in help menu
 - Fixed Binance own trade history order
+- Time Sync bug fixed
+- HDPI bug fixed
 - Minor fixes
 
 v1.40.22

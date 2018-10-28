@@ -81,7 +81,7 @@ TimeSync* TimeSync::global()
     return &instance;
 }
 
-quint32 TimeSync::getTimeT()
+qint64 TimeSync::getTimeT()
 {
     TimeSync* timeSync = TimeSync::global();
 
@@ -93,7 +93,7 @@ quint32 TimeSync::getTimeT()
     additionalBuffer = timeSync->additionalTimer->elapsed();
     timeSync->mutex.unlock();
 
-    return timeSync->startTime + timeSync->timeShift + quint32(additionalBuffer / 1000);
+    return timeSync->startTime + timeSync->timeShift + qint64(additionalBuffer / 1000);
 }
 
 void TimeSync::syncNow()
@@ -136,9 +136,9 @@ void TimeSync::getNTPTime()
         return;
 
     data = sock.readAll();
-    quint32 seconds = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[40])));
-    quint32 fraction = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[44])));
-    quint32 newTime = QDateTime::fromMSecsSinceEpoch(seconds * 1000ll + fraction * 1000ll / 0x100000000ll -
+    qint64 seconds  = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[40])));
+    qint64 fraction = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[44])));
+    qint64 newTime  = QDateTime::fromMSecsSinceEpoch(seconds * 1000ll + fraction * 1000ll / 0x100000000ll -
                       2208988800000ll).toTime_t();
 
     if (newTime < 1451606400 || newTime > 4000000000)
@@ -151,7 +151,7 @@ void TimeSync::getNTPTime()
     qint64 tempTimeShift = newTime - QDateTime::currentDateTime().toTime_t();
 
     if (timeShift != 0)
-        tempTimeShift = qint32((qint64(timeShift) + qint64(tempTimeShift)) / 2);
+        tempTimeShift = (timeShift + tempTimeShift) / 2;
 
     if (tempTimeShift > 3600 || tempTimeShift < -3600)
     {
@@ -164,7 +164,7 @@ void TimeSync::getNTPTime()
         showMessage = false;
     }
     else
-        timeShift.fetchAndStoreOrdered(tempTimeShift);
+        timeShift = tempTimeShift;
 
     getNTPTimeRetryCount++;
 
