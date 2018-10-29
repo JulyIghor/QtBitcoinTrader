@@ -24,9 +24,11 @@ Next ToDo:
 ## Compilation on Linux
 ```
 cd ./src
+
 sudo apt-get install g++ libssl-dev libglu1-mesa-dev qt5-qmake qtscript5-dev qtmultimedia5-dev
-export QT_SELECT=5
-qmake QtBitcoinTrader_Desktop.pro
+
+export QT_SELECT=5 qmake QtBitcoinTrader_Desktop.pro
+
 make && make install && make clean
 ```
 
