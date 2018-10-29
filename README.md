@@ -22,11 +22,11 @@ Next ToDo:
 * http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml `Mac`
 
 ## Compilation on Linux
-`sudo apt-get install g++ libssl-dev libglu1-mesa-dev qt5-qmake qtscript5-dev qtmultimedia5-dev git`
-`git clone https://github.com/JulyIGHOR/QtBitcoinTrader.git`
-`cd ./QtBitcoinTrader/src`
-`QT_SELECT=5 qmake QtBitcoinTrader_Desktop.pro`
-`make && make install && make clean`
+* `sudo apt-get install g++ libssl-dev libglu1-mesa-dev qt5-qmake qtscript5-dev qtmultimedia5-dev git`
+* `git clone https://github.com/JulyIGHOR/QtBitcoinTrader.git`
+* `cd ./QtBitcoinTrader/src`
+* `QT_SELECT=5 qmake QtBitcoinTrader_Desktop.pro`
+* `make && make install && make clean`
 
 ## Demos
 
