@@ -17,14 +17,13 @@ Next ToDo:
 
 ## Download binaries
 
-* https://sourceforge.net/projects/bitcointrader/  `Win32`,`Mac`
+* https://sourceforge.net/projects/bitcointrader/  `Win32`,`Mac`,`Linux`
 * http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml `Win32`
 * http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml `Mac`
-* http://packages.gentoo.org/package/app-office/QtBitcoinTrader `Gentoo`
-* http://packages.altlinux.org/en/Sisyphus/srpms/QtBitcoinTrader `Alt Linux`
 
 ## Compilation on Linux
 ```
+cd ./src
 sudo apt-get install g++ libssl-dev libglu1-mesa-dev qt5-qmake qtscript5-dev qtmultimedia5-dev
 export QT_SELECT=5
 qmake QtBitcoinTrader_Desktop.pro
