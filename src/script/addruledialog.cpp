@@ -138,7 +138,7 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
     ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_START_APP", "Start Application"), "PROGRAM");
     ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SAY_TEXT", "Say Text"), "SAY");
 
-    ui->variableBMode->setItemText(0, julyTr("RULE_TYPE_REALTIME", "Realtime comparation"));
+    ui->variableBMode->setItemText(0, julyTr("RULE_TYPE_REALTIME", "Realtime comparison"));
     ui->variableBMode->setItemText(1, julyTr("RULE_TYPE_SAVEONSTART", "Fixed. Save base value once at rule starts"));
     ui->variableBMode->setItemText(2, julyTr("RULE_TYPE_FIXED", "Trailing. Save base value on opposide direction"));
 

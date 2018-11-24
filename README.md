@@ -46,6 +46,14 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.30
+- Added new exchange HitBTC
+- Added more decimals for Fee Calculator
+- Fixed canceling order via rule or script for Binance
+- Fixed bug in charts
+- Fixed wex mirror
+- Minor cleanup and optimizations
+
 v1.40.23
 - Added new exchange Bittrex
 - Portable mode for Linux and macOS
