@@ -543,22 +543,37 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
 void OrdersModel::ordersCancelAll(QString pair)
 {
     for (int n = oidList.count() - 1; n >= 0; n--)
-        if (statusList.at(n) && (pair.isEmpty() || symbolList.at(n) == pair))
-            emit cancelOrder(pair, oidList.at(n));
+        if (statusList.at(n))
+        {
+            if(symbolList.at(n) == pair)
+                emit cancelOrder(pair, oidList.at(n));
+            else if (pair.isEmpty())
+                emit cancelOrder(symbolList.at(n), oidList.at(n));
+        }
 }
 
 void OrdersModel::ordersCancelBids(QString pair)
 {
     for (int n = oidList.count() - 1; n >= 0; n--)
-        if (statusList.at(n) && typesList.at(n) == false && (pair.isEmpty() || symbolList.at(n) == pair))
-            emit cancelOrder(pair, oidList.at(n));
+        if (statusList.at(n))
+        {
+            if(symbolList.at(n) == pair)
+                emit cancelOrder(pair, oidList.at(n));
+            else if (pair.isEmpty())
+                emit cancelOrder(symbolList.at(n), oidList.at(n));
+        }
 }
 
 void OrdersModel::ordersCancelAsks(QString pair)
 {
     for (int n = oidList.count() - 1; n >= 0; n--)
-        if (statusList.at(n) && typesList.at(n) == true && (pair.isEmpty() || symbolList.at(n) == pair))
-            emit cancelOrder(pair, oidList.at(n));
+        if (statusList.at(n))
+        {
+            if(symbolList.at(n) == pair)
+                emit cancelOrder(pair, oidList.at(n));
+            else if (pair.isEmpty())
+                emit cancelOrder(symbolList.at(n), oidList.at(n));
+        }
 }
 
 void OrdersModel::setOrderCanceled(QByteArray oid)

@@ -54,6 +54,7 @@ class Exchange : public QObject
 
 public:
     bool exchangeDisplayOnlyCurrentPairOpenOrders;
+    bool clearOpenOrdersOnCurrencyChanged;
     bool clearHistoryOnCurrencyChanged;
     bool exchangeTickerSupportsHiLowPrices;
     bool isDepthEnabled();

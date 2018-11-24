@@ -112,12 +112,13 @@ void BaseValues::Construct()
     trafficSpeed = 0;
     trafficTotal = 0;
     trafficTotalType = 0;
+    feeDecimals = 2;
     currentExchange_ = nullptr;
     currentTheme = 0;
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.40231";
+    appVerStr = "1.40300";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -231,6 +232,7 @@ int main(int argc, char* argv[])
         if (a.arguments().contains("/uninstall"))
         {
             QThread::msleep(2000);
+#ifndef Q_OS_MAC
             QString tmpDir = QStandardPaths::standardLocations(QStandardPaths::TempLocation).first();
 
             if (!a.applicationFilePath().startsWith(tmpDir))
@@ -249,6 +251,8 @@ int main(int argc, char* argv[])
                 QFile::remove(desktopShortcut);
 
 #endif
+
+#endif
             QDir appdataDir(QStandardPaths::standardLocations(QStandardPaths::DataLocation).first());
 
             if (appdataDir.exists())
@@ -256,7 +260,9 @@ int main(int argc, char* argv[])
 
             QMessageBox::information(nullptr, "Qt Bitcoin Trader",
                                      julyTr("QT_BITCOIN_TRADER_UNINSTALLED", "Qt Bitcoin Trader completely uninstalled"));
+#ifndef Q_OS_MAC
             QFile::remove(a.applicationFilePath());
+#endif
             return 0;
         }
 
@@ -266,7 +272,7 @@ int main(int argc, char* argv[])
                                      "Qt Bitcoin Trader installed into system folder<br>"
                                      "Launch shortcut have been placed in your Desktop folder<br>"
                                      "To uninstall it you can use menu Help->Uninstall<br>"
-                                     "You can now delete installation file"));
+                                     "You can now delete installation file").replace("<br>", "<br><br>"));
         }
     }
 
@@ -566,6 +572,9 @@ int main(int argc, char* argv[])
 
             for (int i = 0; i < cacheFiles.count(); ++i)
                 QFile(appDataDir + "/cache/" + cacheFiles.at(i)).remove();
+
+            if (qFuzzyIsNull(baseValues.appVerLastReal))
+                baseValues.appVerLastReal = baseValues.appVerReal;
         }
 
         IniEngine::global();
@@ -792,6 +801,16 @@ int main(int argc, char* argv[])
                     case 12:
                     {
                         //Bittrex
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
+
+                    case 13:
+                    {
+                        //HitBTC
                         baseValues.restSign = newPassword.getRestSign().toLatin1();
                         encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
                                                             baseValues.restSign.toBase64() + "\r\n" +

@@ -64,6 +64,7 @@
 #include "exchange/exchange_yobit.h"
 #include "exchange/exchange_binance.h"
 #include "exchange/exchange_bittrex.h"
+#include "exchange/exchange_hitbtc.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
 #include "script/addrulegroup.h"
@@ -390,16 +391,6 @@ QtBitcoinTrader::QtBitcoinTrader() :
     if (baseValues.httpRetryCount < 1 || baseValues.httpRetryCount > 50)
         baseValues.httpRetryCount = 8;
 
-    if (iniFileVersion < 1.07969)
-    {
-        baseValues.httpRetryCount = 8;
-        baseValues.httpRequestTimeout = 4000;
-        iniSettings->remove("Sounds/MarketHighBeep");
-        iniSettings->remove("Sounds/MarketLowBeep");
-        iniSettings->remove("Sounds/AccountBTCBeep");
-        iniSettings->remove("Sounds/AccountUSDBeep");
-    }
-
     iniSettings->setValue("Network/HttpRetryCount", baseValues.httpRetryCount);
 
     baseValues.uiUpdateInterval = iniSettings->value("UI/UiUpdateInterval", 100).toInt();
@@ -451,31 +442,6 @@ QtBitcoinTrader::QtBitcoinTrader() :
 
     ui.rulesTabs->setVisible(false);
 
-    if (baseValues.appVerLastReal < 1.0763)
-    {
-        baseValues.httpRequestInterval = 500;
-        settingsMain.remove("HttpConnectionsCount");
-        settingsMain.remove("HttpSwapSocketAfterPacketsCount");
-        settingsMain.remove("HttpRequestsInterval");
-        settingsMain.remove("HttpRequestsTimeout");
-        settingsMain.remove("DepthCountLimit");
-        settingsMain.remove("UiUpdateInterval");
-        settingsMain.remove("LogEnabled");
-        settingsMain.remove("RowHeight");
-        settingsMain.remove("ApiDownCount");
-        QStringList oldKeys = iniSettings->childKeys();
-
-        for (int n = 0; n < oldKeys.count(); n++)
-            iniSettings->remove(oldKeys.at(n));
-
-        iniSettings->sync();
-    }
-
-    if (baseValues.appVerLastReal < 1.07967)
-    {
-        baseValues.httpRequestTimeout = 4000;
-    }
-
     if (baseValues.httpRequestInterval < 50)
         baseValues.httpRequestInterval = 500;
 
@@ -487,25 +453,6 @@ QtBitcoinTrader::QtBitcoinTrader() :
     iniSettings->setValue("Network/HttpRetryCount", baseValues.httpRetryCount);
     iniSettings->setValue("UI/UiUpdateInterval", baseValues.uiUpdateInterval);
     iniSettings->setValue("UI/DepthAutoResizeColumns", ui.depthAutoResize->isChecked());
-
-    if (iniFileVersion < 1.07968)
-    {
-        iniSettings->beginGroup("Rules");
-        QStringList loadRulesGroups = iniSettings->childKeys();
-        iniSettings->endGroup();
-
-        for (int n = 0; n < loadRulesGroups.count(); n++)
-        {
-            QString ruleData = iniSettings->value("Rules/" + loadRulesGroups.at(n), "").toString();
-            iniSettings->remove("Rules/" + loadRulesGroups.at(n));
-            QString rName = QString::number(n + 1);
-
-            while (rName.count() < 3)
-                rName.prepend("0");
-
-            iniSettings->setValue("Rules/" + rName, ruleData + ":" + loadRulesGroups.at(n));
-        }
-    }
 
     profileName = iniSettings->value("Profile/Name", "Default Profile").toString();
     windowTitleP = profileName + " - " + windowTitle() + " v" + baseValues.appVerStr;
@@ -724,6 +671,10 @@ void QtBitcoinTrader::setupClass()
         currentExchange = new Exchange_Bittrex(baseValues.restSign, baseValues.restKey);
         break;//Bittrex
 
+    case 13:
+        currentExchange = new Exchange_HitBTC(baseValues.restSign, baseValues.restKey);
+        break;//HitBTC
+
     default:
         return;
     }
@@ -763,7 +714,7 @@ void QtBitcoinTrader::setupClass()
         ui.marketVolume->setVisible(false);
     }
 
-    if (currentExchange->clearHistoryOnCurrencyChanged || currentExchange->exchangeDisplayOnlyCurrentPairOpenOrders)
+    if (currentExchange->clearOpenOrdersOnCurrencyChanged || currentExchange->exchangeDisplayOnlyCurrentPairOpenOrders)
     {
         ui.ordersFilterCheckBox->setVisible(false);
 

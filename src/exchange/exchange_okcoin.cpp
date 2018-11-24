@@ -37,6 +37,7 @@ Exchange_OKCoin::Exchange_OKCoin(QByteArray pRestSign, QByteArray pRestKey)
 {
     lastFee = 0;
     calculatingFeeMode = 1;
+    clearOpenOrdersOnCurrencyChanged = true;
     clearHistoryOnCurrencyChanged = true;
     baseValues.exchangeName = "OKCoin";
     baseValues.currentPair.name = "BTC/CNY";

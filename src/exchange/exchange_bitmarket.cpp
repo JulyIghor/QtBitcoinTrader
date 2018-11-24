@@ -36,6 +36,7 @@ Exchange_BitMarket::Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey
     : Exchange()
 {
     calculatingFeeMode = 1;
+    clearOpenOrdersOnCurrencyChanged = true;
     clearHistoryOnCurrencyChanged = true;
     baseValues.exchangeName = "BitMarket";
     baseValues.currentPair.name = "BTC/PLN";

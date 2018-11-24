@@ -137,6 +137,9 @@
         <file>Resources/Exchanges/Bittrex.ini</file>
         <file>Resources/Exchanges/Logos/Bittrex.png</file>
         <file>Resources/Exchanges/Logos/Bittrex_Big.png</file>
+        <file>Resources/Exchanges/HitBTC.ini</file>
+        <file>Resources/Exchanges/Logos/HitBTC.png</file>
+        <file>Resources/Exchanges/Logos/HitBTC_Big.png</file>
         <file>Resources/QtTrader.png</file>
     </qresource>
 </RCC>

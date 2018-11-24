@@ -146,7 +146,7 @@ double ChartsModel::axisRound(double old_x, double old_step)
 {
     double x = old_x;
     double step = old_step;
-    qint16 signCount = 0;
+    int signCount = 0;
 
     while (step > 1)
     {
@@ -162,12 +162,12 @@ double ChartsModel::axisRound(double old_x, double old_step)
         --signCount;
     }
 
-    x = qRound(x - 0.5);
+    x = qRound64(x - 0.5);
 
-    for (qint16 i = 0; i < signCount; ++i)
+    for (int i = 0; i < signCount; ++i)
         x *= 10;
 
-    for (qint16 i = 0; i < -signCount; ++i)
+    for (int i = 0; i < -signCount; ++i)
         x /= 10;
 
     while (x + old_step < old_x)
@@ -206,7 +206,7 @@ void ChartsModel::prepareXAxis()
 
     for (quint32 i = graphFirstDate; i <= graphLastDate; i += intervalDate)
     {
-        graphDateTextX.append(qRound(graphXScale * (i - graphFirstDate)));
+        graphDateTextX.append(qRound64(graphXScale * (i - graphFirstDate)));
         graphDateText .append(QDateTime::fromTime_t(i).toString("h:mm"));
     }
 }
@@ -226,7 +226,7 @@ void ChartsModel::prepareAmountYAxis()
         for (double amountY = 0; amountY < amountMax; amountY += amountStepY)
         {
             graphAmountText .append(baseValues.currentPair.currASign + " " + JulyMath::textFromDouble(amountY, 8, 0));
-            graphAmountTextY.append(qRound(amountYScale * amountY));
+            graphAmountTextY.append(qRound64(amountYScale * amountY));
             widthAmountYAxis = qMax(fontMetrics->width(graphAmountText.last()), widthAmountYAxis);
         }
     }
@@ -240,8 +240,8 @@ void ChartsModel::prepareAmount()
     {
         for (qint32 i = iAmountFirst; i < amountPrice.count(); ++i)
         {
-            graphAmountX.append(qRound(graphXScale * (amountDate.at(i) - graphFirstDate + intervalDate / 2)));
-            graphAmountY.append(qRound(amountYScale * amountPrice.at(i)));
+            graphAmountX.append(qRound64(graphXScale * (amountDate.at(i) - graphFirstDate + intervalDate / 2)));
+            graphAmountY.append(qRound64(amountYScale * amountPrice.at(i)));
         }
     }
 }
@@ -362,7 +362,7 @@ void ChartsModel::preparePriceYAxis()
         for (double priceY = priceMin; priceY < priceMax; priceY += priceStepY)
         {
             graphPriceText .append(baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(priceY, 8, 0));
-            graphPriceTextY.append(qRound(priceYScale * (priceY - priceMin)));
+            graphPriceTextY.append(qRound64(priceYScale * (priceY - priceMin)));
             widthPriceYAxis = qMax(fontMetrics->width(graphPriceText.last()), widthPriceYAxis);
         }
     }
@@ -378,8 +378,8 @@ void ChartsModel::preparePrice()
     {
         for (qint32 i = iTradesFirst; i < tradesDate.count(); ++i)
         {
-            x = qRound(graphXScale * (tradesDate .at(i) - graphFirstDate));
-            y = qRound(priceYScale * (tradesPrice.at(i) - priceMin));
+            x = qRound64(graphXScale * (tradesDate .at(i) - graphFirstDate));
+            y = qRound64(priceYScale * (tradesPrice.at(i) - priceMin));
 
             if (graphTradesX.count())
             {
@@ -403,18 +403,18 @@ void ChartsModel::prepareBound()
         if (iBoundsSellFirst > 0 && iBoundsSellFirst <= boundsSellPrice.count())
         {
             graphBoundsSellX.append(1);
-            graphBoundsSellY.append(qRound(priceYScale * (boundsSellPrice[iBoundsSellFirst - 1] - priceMin)));
+            graphBoundsSellY.append(qRound64(priceYScale * (boundsSellPrice[iBoundsSellFirst - 1] - priceMin)));
         }
 
         if (iBoundsBuyFirst > 0 && iBoundsBuyFirst <= boundsBuyPrice.count())
         {
             graphBoundsBuyX.append(1);
-            graphBoundsBuyY.append(qRound(priceYScale * (boundsBuyPrice[iBoundsBuyFirst - 1] - priceMin)));
+            graphBoundsBuyY.append(qRound64(priceYScale * (boundsBuyPrice[iBoundsBuyFirst - 1] - priceMin)));
         }
 
         for (qint32 i = iBoundsSellFirst; i < boundsSellPrice.count(); ++i)
         {
-            graphBoundX = qRound(graphXScale * (boundsSellDate[i] - graphFirstDate));
+            graphBoundX = qRound64(graphXScale * (boundsSellDate[i] - graphFirstDate));
 
             if (graphBoundsSellY.count())
             {
@@ -423,12 +423,12 @@ void ChartsModel::prepareBound()
             }
 
             graphBoundsSellX.append(graphBoundX);
-            graphBoundsSellY.append(qRound(priceYScale * (boundsSellPrice[i] - priceMin)));
+            graphBoundsSellY.append(qRound64(priceYScale * (boundsSellPrice[i] - priceMin)));
         }
 
         for (qint32 i = iBoundsBuyFirst; i < boundsBuyPrice.count(); ++i)
         {
-            graphBoundX = qRound(graphXScale * (boundsBuyDate[i] - graphFirstDate));
+            graphBoundX = qRound64(graphXScale * (boundsBuyDate[i] - graphFirstDate));
 
             if (graphBoundsBuyY.count())
             {
@@ -437,18 +437,18 @@ void ChartsModel::prepareBound()
             }
 
             graphBoundsBuyX.append(graphBoundX);
-            graphBoundsBuyY.append(qRound(priceYScale * (boundsBuyPrice[i] - priceMin)));
+            graphBoundsBuyY.append(qRound64(priceYScale * (boundsBuyPrice[i] - priceMin)));
         }
 
         if (graphBoundsSellX.count())
         {
-            graphBoundsSellX.append(qRound(graphXScale * (nowTime - graphFirstDate)));
+            graphBoundsSellX.append(qRound64(graphXScale * (nowTime - graphFirstDate)));
             graphBoundsSellY.append(graphBoundsSellY.last());
         }
 
         if (graphBoundsBuyX.count())
         {
-            graphBoundsBuyX.append(qRound(graphXScale * (nowTime - graphFirstDate)));
+            graphBoundsBuyX.append(qRound64(graphXScale * (nowTime - graphFirstDate)));
             graphBoundsBuyY.append(graphBoundsBuyY.last());
         }
     }

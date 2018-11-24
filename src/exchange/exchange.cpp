@@ -45,6 +45,7 @@ Exchange::Exchange()
     orderBookItemIsDedicatedOrder = false;
     supportsExchangeFee = true;
     supportsExchangeVolume = true;
+    clearOpenOrdersOnCurrencyChanged = false;
     clearHistoryOnCurrencyChanged = false;
     exchangeTickerSupportsHiLowPrices = true;
     depthEnabledFlag = true;

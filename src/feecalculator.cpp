@@ -51,6 +51,7 @@ FeeCalculator::FeeCalculator()
     mainWindow.fixDecimals(this);
 
     ui.feeValue->setValue(mainWindow.ui.accountFee->value());
+    ui.feeValue->setDecimals(baseValues.feeDecimals);
     fee = 1 - (ui.feeValue->value() / 100);
 
     buyPrice = IndicatorEngine::getValue(baseValues.exchangeName + '_' + baseValues.currentPair.symbol + "_Sell");

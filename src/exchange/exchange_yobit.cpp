@@ -38,6 +38,7 @@ Exchange_YObit::Exchange_YObit(QByteArray pRestSign, QByteArray pRestKey)
 {
     calculatingFeeMode = 1;
     buySellAmountExcludedFee = true;
+    clearOpenOrdersOnCurrencyChanged = true;
     clearHistoryOnCurrencyChanged = true;
     baseValues.exchangeName = "YObit";
     baseValues.currentPair.name = "BTC/USD";

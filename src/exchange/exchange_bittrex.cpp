@@ -47,6 +47,7 @@ Exchange_Bittrex::Exchange_Bittrex(QByteArray pRestSign, QByteArray pRestKey)
       lastDepthAsksMap(),
       lastDepthBidsMap()
 {
+    clearOpenOrdersOnCurrencyChanged = true;
     clearHistoryOnCurrencyChanged = true;
     calculatingFeeMode = 1;
     baseValues.exchangeName = "Bittrex";
@@ -221,7 +222,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
                     QDateTime date = QDateTime::fromString(getMidData("\"TimeStamp\":\"", "\"", &tradeData), Qt::ISODate);
                     date.setTimeSpec(Qt::UTC);
-                    newItem.date = date.toLocalTime().toSecsSinceEpoch();
+                    newItem.date = date.toSecsSinceEpoch();
 
                     if (newItem.date < time10Min)
                         continue;
@@ -441,7 +442,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
                         QDateTime date = QDateTime::fromString(getMidData("\"Opened\":\"", "\"", &currentOrderData), Qt::ISODate);
                         date.setTimeSpec(Qt::UTC);
-                        currentOrder.date   = date.toLocalTime().toSecsSinceEpoch();
+                        currentOrder.date   = date.toSecsSinceEpoch();
                         currentOrder.oid    = getMidData("\"OrderUuid\":\"", "\"", &currentOrderData);
                         currentOrder.type   = getMidData("\"OrderType\":\"", "\"", &currentOrderData) == "LIMIT_SELL";
                         currentOrder.amount = getMidData("\"Quantity\":",    ",",  &currentOrderData).toDouble();
@@ -502,7 +503,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
                         QDateTime date = QDateTime::fromString(getMidData("\"Closed\":\"", "\"", &logData), Qt::ISODate);
                         date.setTimeSpec(Qt::UTC);
-                        qint64 dateInt = date.toLocalTime().toMSecsSinceEpoch();
+                        qint64 dateInt = date.toMSecsSinceEpoch();
 
                         if (dateInt <= lastHistoryTime)
                             break;
@@ -753,7 +754,7 @@ void Exchange_Bittrex::sell(QString symbol, double apiBtcToSell, double apiPrice
     if (debugLevel)
         logThread->writeLog("Sell: " + data, 2);
 
-    sendToApi(306, "market/selllimit?" + data, true);
+    sendToApi(307, "market/selllimit?" + data, true);
 }
 
 void Exchange_Bittrex::cancelOrder(QString, QByteArray order)

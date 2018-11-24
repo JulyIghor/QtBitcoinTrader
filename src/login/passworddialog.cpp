@@ -59,7 +59,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
 
     if (!JulyRSA::isIniFileSigned(":/Resources/Exchanges/List.ini"))
     {
-        QMessageBox::warning(0, windowTitle(),
+        QMessageBox::warning(nullptr, windowTitle(),
                              julyTr("PROGRAM_CORRUPTED", "The program is corrupted. Download from the official site https://centrabit.com."));
         exit(0);
     }
@@ -89,59 +89,13 @@ PasswordDialog::PasswordDialog(QWidget* parent)
 
         QSettings settIni(appDataDir + "/" + settingsList.at(n), QSettings::IniFormat);
 
-        if (baseValues.appVerLastReal < 1.0772)
-        {
-            QString cryptedData = settIni.value("CryptedData", "").toString();
-
-            if (!cryptedData.isEmpty())
-                settIni.setValue("EncryptedData/ApiKeySign", cryptedData);
-
-            QString profileNameOld = settIni.value("ProfileName", "").toString();
-
-            if (!profileNameOld.isEmpty())
-            {
-                settIni.remove("ProfileName");
-                settIni.setValue("Profile/Name", profileNameOld);
-            }
-
-            QString profileExchangeIdOld = settIni.value("ExchangeId", "").toString();
-
-            if (!profileExchangeIdOld.isEmpty())
-            {
-                settIni.remove("ExchangeId");
-                settIni.setValue("Profile/ExchangeId", profileExchangeIdOld);
-            }
-
-            settIni.sync();
-        }
-
         if (settIni.value("EncryptedData/ApiKeySign", "").toString().isEmpty())
         {
             QFile::remove(appDataDir + "/" + settingsList.at(n));
             continue;
         }
 
-        int currentProfileExchangeId = settIni.value("Profile/ExchangeId", 0).toInt();
-
-        if (baseValues.appVerLastReal < 1.0775)
-        {
-            if (currentProfileExchangeId == 2)
-            {
-                QFile::remove(appDataDir + "/" + settingsList.at(n));
-                static bool haveBitstampProfile = false;
-
-                if (!haveBitstampProfile)
-                {
-                    haveBitstampProfile = true;
-                    QMessageBox::warning(0, windowTitle(),
-                                         "From now Bitstamp support API keys with permissions. To ensure the security of your Bitstamp account you must create new API keys and add a new profile of Bitstamp to the Qt Bitcoin Trader.");
-                }
-
-                continue;
-            }
-        }
-
-        QString currentLogo = logosMap.value(currentProfileExchangeId);
+        QString currentLogo = logosMap.value(settIni.value("Profile/ExchangeId", 0).toInt());
 
         if (!QFile::exists(currentLogo))
             currentLogo = ":/Resources/Exchanges/Logos/Unknown.png";

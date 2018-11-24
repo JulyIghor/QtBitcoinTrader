@@ -111,6 +111,7 @@ struct BaseValues
     int httpRetryCount;
     int httpRequestInterval;
     int httpRequestTimeout;
+    QAtomicInt feeDecimals;
     Exchange* currentExchange_;
     QString scriptFolder;
     QString themeFolder;

@@ -47,6 +47,7 @@ Exchange_Binance::Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey)
       lastDepthBidsMap()
 {
     clearHistoryOnCurrencyChanged = true;
+    baseValues.feeDecimals = 3;
     calculatingFeeMode = 1;
     baseValues.exchangeName = "Binance";
     baseValues.currentPair.name = "BTC/USD";
@@ -419,8 +420,22 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
                     lastUsdBalance = usdBalance;
                 }
 
-                double fee = qMax(getMidData("\"makerCommission\":", ",", &data).toDouble(),
-                                  getMidData("\"takerCommission\":", ",", &data).toDouble()) / 100;
+                QByteArray makerCommission = getMidData("\"makerCommission\":", ",", &data);
+                QByteArray takerCommission = getMidData("\"takerCommission\":", ",", &data);
+
+                if (makerCommission.size() && makerCommission.at(0) == '"')
+                    makerCommission.remove(0, 1);
+
+                if (takerCommission.size() && takerCommission.at(0) == '"')
+                    takerCommission.remove(0, 1);
+
+                if (makerCommission.size() && makerCommission.at(makerCommission.size() - 1) == '"')
+                    makerCommission.chop(1);
+
+                if (takerCommission.size() && takerCommission.at(makerCommission.size() - 1) == '"')
+                    takerCommission.chop(1);
+
+                double fee = qMax(makerCommission.toDouble(), takerCommission.toDouble()) / 100;
 
                 if (!qFuzzyCompare(fee + 1.0, lastFee + 1.0))
                 {
@@ -728,7 +743,7 @@ void Exchange_Binance::secondSlot()
 
         case 3:
             if (!tickerOnly && !isReplayPending(204))
-                sendToApi(204, "GET /api/v3/openOrders?", true, true/*, "symbol=" + baseValues.currentPair.currRequestPair + "&"*/);
+                sendToApi(204, "GET /api/v3/openOrders?", true, true);
 
             break;
 

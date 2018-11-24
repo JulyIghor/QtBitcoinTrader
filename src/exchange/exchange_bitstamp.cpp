@@ -36,6 +36,7 @@
 Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange()
 {
+    clearOpenOrdersOnCurrencyChanged = true;
     checkDuplicatedOID = true;
     accountFee = 0.0;
     minimumRequestIntervalAllowed = 1200;
