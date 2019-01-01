@@ -141,5 +141,8 @@
         <file>Resources/Exchanges/Logos/HitBTC.png</file>
         <file>Resources/Exchanges/Logos/HitBTC_Big.png</file>
         <file>Resources/QtTrader.png</file>
+        <file>Resources/Exchanges/Poloniex.ini</file>
+        <file>Resources/Exchanges/Logos/Poloniex.png</file>
+        <file>Resources/Exchanges/Logos/Poloniex_Big.png</file>
     </qresource>
 </RCC>

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -105,6 +105,7 @@ void Exchange_Indacoin::clearVariables()
     lastFetchTid = 0;
     lastFetchDate = QDateTime::currentDateTime().toTime_t() - 600;
     lastTickerDate = 0;
+    emit accFeeChanged(baseValues.currentPair.symbol, 0.15);
 }
 
 void Exchange_Indacoin::clearValues()
@@ -419,31 +420,14 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
                     break;
 
                 //QByteArray fundsData=getMidData("funds\":{","}",&data)+",";
-                QByteArray btcBalance = getMidData(baseValues.currentPair.currAStr + "\",\"", "\"", &data); //fundsData);
-
-                if (!btcBalance.isEmpty())
-                {
-                    double newBtcBalance = btcBalance.toDouble();
-
-                    if (lastBtcBalance != newBtcBalance)
-                        emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
-
-                    lastBtcBalance = newBtcBalance;
-                }
-
+                QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStr + "\",\"", "\"", &data); //fundsData);
                 QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStr + "\",\"", "\"", &data); //fundsData);
 
-                if (!usdBalance.isEmpty())
-                {
-                    double newUsdBalance = usdBalance.toDouble();
+                if (checkValue(btcBalance, lastBtcBalance))
+                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
 
-                    if (newUsdBalance != lastUsdBalance)
-                        emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
-
-                    lastUsdBalance = newUsdBalance;
-                }
-
-                emit accFeeChanged(baseValues.currentPair.symbol, 0.15);
+                if (checkValue(usdBalance, lastUsdBalance))
+                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
             }
             break;//info
 

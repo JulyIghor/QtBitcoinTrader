@@ -267,7 +267,7 @@ String_IF_TOTAL_TO_BUY_AT_BUY_PRICE_MORE=If Total to Buy at Bid price goes more 
 String_IF_TOTAL_TO_BUY_AT_LAST_LESS=If Total to Buy at Last price goes less than %1
 String_IF_TOTAL_TO_BUY_AT_LAST_MORE=If Total to Buy at Last price goes more than %1
 String_INVALID_RULE_CHECK=This rule will be executed instantly.<br>This means that you made a mistake.<br>Please check values you entered.
-String_LANGUAGE_AUTHOR=July IGHOR<br><a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Donate Bitcoin:<br><a href="bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>
+String_LANGUAGE_AUTHOR=July Ighor<br><a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Donate Bitcoin:<br><a href="bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>
 String_LANGUAGE_LOCALE=en
 String_LANGUAGE_NAME=English
 String_LOG_BOUGHT=bought

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.40300";
+    appVerStr = "1.40400";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -811,6 +811,16 @@ int main(int argc, char* argv[])
                     case 13:
                     {
                         //HitBTC
+                        baseValues.restSign = newPassword.getRestSign().toLatin1();
+                        encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
+                                                            baseValues.restSign.toBase64() + "\r\n" +
+                                                            QUuid::createUuid().toString().toLatin1(), tryPassword.toUtf8());
+                    }
+                    break;
+
+                    case 14:
+                    {
+                        //Poloniex
                         baseValues.restSign = newPassword.getRestSign().toLatin1();
                         encryptedData = JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" +
                                                             baseValues.restSign.toBase64() + "\r\n" +

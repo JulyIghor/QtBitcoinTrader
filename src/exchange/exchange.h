@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public:
     int minimumRequestIntervalAllowed;
     int minimumRequestTimeoutAllowed;
     double decAmountFromOpenOrder;
-    int calculatingFeeMode;//0: direct multiply; 1: rounded by decimals
+    int calculatingFeeMode;//0: direct multiply; 1: rounded by decimals; 3: real fee
     bool buySellAmountExcludedFee;
 
     CurrencyPairItem currencyPairInfo;
@@ -164,6 +164,9 @@ public slots:
     virtual void cancelOrder(QString, QByteArray);
 
     void run();
+
+protected:
+    bool checkValue(QByteArray& valueStr, double& lastValue);
 };
 
 #endif // EXCHANGE_H

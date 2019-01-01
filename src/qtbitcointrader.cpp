@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@
 #include "exchange/exchange_binance.h"
 #include "exchange/exchange_bittrex.h"
 #include "exchange/exchange_hitbtc.h"
+#include "exchange/exchange_poloniex.h"
 #include <QSystemTrayIcon>
 #include <QtCore/qmath.h>
 #include "script/addrulegroup.h"
@@ -112,8 +113,8 @@ QtBitcoinTrader::QtBitcoinTrader() :
     availableAmount(0.0),
     exchangeId(-1),
     floatFee(0.0),
-    floatFeeDec(0.0),
-    floatFeeInc(0.0),
+    floatFeeDec(1.0),
+    floatFeeInc(1.0),
     ordersModel(nullptr),
     currencyChangedDate(0),
     iniSettings(nullptr),
@@ -674,6 +675,10 @@ void QtBitcoinTrader::setupClass()
     case 13:
         currentExchange = new Exchange_HitBTC(baseValues.restSign, baseValues.restKey);
         break;//HitBTC
+
+    case 14:
+        currentExchange = new Exchange_Poloniex(baseValues.restSign, baseValues.restKey);
+        break;//Poloniex
 
     default:
         return;
@@ -3719,9 +3724,9 @@ void QtBitcoinTrader::on_depthAutoResize_toggled(bool on)
 double QtBitcoinTrader::getAvailableBTC()
 {
     if (currentExchange->balanceDisplayAvailableAmount)
-        return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value(), baseValues.currentPair.currADecimals, false);
+        return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value(), baseValues.currentPair.currADecimals, true);
 
-    return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value() - ui.ordersTotalBTC->value(), baseValues.currentPair.currADecimals, false);
+    return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value() - ui.ordersTotalBTC->value(), baseValues.currentPair.currADecimals, true);
 }
 
 double QtBitcoinTrader::getAvailableUSD()
@@ -3736,7 +3741,7 @@ double QtBitcoinTrader::getAvailableUSD()
     else
         amountToReturn = ui.accountUSD->value() - ui.ordersTotalUSD->value();
 
-    amountToReturn = JulyMath::cutDoubleDecimalsCopy(amountToReturn, baseValues.currentPair.currBDecimals, false);
+    amountToReturn = JulyMath::cutDoubleDecimalsCopy(amountToReturn, baseValues.currentPair.currBDecimals, true);
 
     if (currentExchange->exchangeSupportsAvailableAmount)
         amountToReturn = qMin(availableAmount, amountToReturn);
@@ -3749,14 +3754,30 @@ double QtBitcoinTrader::getAvailableUSD()
 double QtBitcoinTrader::getAvailableUSDtoBTC(double priceToBuy)
 {
     double avUSD = getAvailableUSD();
-    double decValue = 0.0;
+    double decValue = 0.0L;
 
     if (floatFee > 0.0)
     {
-        if (currentExchange->calculatingFeeMode == 1)
+        switch (currentExchange->calculatingFeeMode)
+        {
+        case 1:
             decValue = qPow(0.1, qMax(baseValues.currentPair.currADecimals, 1));
-        else if (currentExchange->calculatingFeeMode == 2)
+            break;
+
+        case 2:
             decValue = 2.0 * qPow(0.1, qMax(baseValues.currentPair.currADecimals, 1));
+            break;
+
+        case 3:
+        {
+            double zeros = qPow(10, baseValues.currentPair.currBDecimals);
+            avUSD = ceil(avUSD / (floatFee + 1.0) * zeros) / zeros;
+            break;
+        }
+
+        default:
+            break;
+        }
     }
 
     return JulyMath::cutDoubleDecimalsCopy(avUSD / priceToBuy - decValue, baseValues.currentPair.currADecimals, false);

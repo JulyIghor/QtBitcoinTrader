@@ -286,7 +286,7 @@ String_IF_TOTAL_TO_BUY_AT_LAST_CHANGED=Обсяг можливої купівл�
 String_IF_TOTAL_TO_BUY_AT_LAST_LESS=Обсяг можливої купівлі по останній ціні менший за %1
 String_IF_TOTAL_TO_BUY_AT_LAST_MORE=Обсяг можливої купівлі по останній ціні більший за %1
 String_INVALID_RULE_CHECK=Правило виконано негайно.<br>Це означає що ви зробили помилку.<br>Перевірте дані які було введено.
-String_LANGUAGE_AUTHOR=July IGHOR<br><a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Bitcoin donate:<br><a href="bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>
+String_LANGUAGE_AUTHOR=July Ighor<br><a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Bitcoin donate:<br><a href="bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>
 String_LANGUAGE_LOCALE=uk_UA
 String_LANGUAGE_NAME=Українська
 String_LOG_BOUGHT=куплено

@@ -46,6 +46,12 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.40
+- New exchange Poloniex
+- Fixed script language command cancel ask and bid for Binance
+- Fixed bug caused forever API down in some cases
+- Minor fixes
+
 v1.40.30
 - Added new exchange HitBTC
 - Added more decimals for Fee Calculator
@@ -300,6 +306,6 @@ v0.81
 v0.8
 - First public release
 
-Created by July IGHOR
+Copyright (C) 2013-2019 July Ighor
 Contact: `julyighor@gmail.com`
 Donate: `1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc`

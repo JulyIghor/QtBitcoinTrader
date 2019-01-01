@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ Exchange_Bittrex::Exchange_Bittrex(QByteArray pRestSign, QByteArray pRestKey)
 {
     clearOpenOrdersOnCurrencyChanged = true;
     clearHistoryOnCurrencyChanged = true;
-    calculatingFeeMode = 1;
+    calculatingFeeMode = 3;
     baseValues.exchangeName = "Bittrex";
     baseValues.currentPair.name = "LTC/BTC";
     baseValues.currentPair.setSymbol("LTC/BTC");
@@ -386,31 +386,16 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
         case 202: //info
             {
-                QByteArray dataA = getMidData("\"Currency\":\"" + baseValues.currentPair.currAStr, "}", &data);
+                QByteArray btcBalance = getMidData("\"Currency\":\"" + baseValues.currentPair.currAStr, "}", &data);
+                QByteArray usdBalance = getMidData("\"Currency\":\"" + baseValues.currentPair.currBStr, "}", &data);
+                btcBalance = getMidData("\"Available\":", ",", &btcBalance);
+                usdBalance = getMidData("\"Available\":", ",", &usdBalance);
 
-                if (!dataA.isEmpty())
-                {
-                    double btcBalance = getMidData("\"Available\":", ",", &dataA).toDouble();
+                if (checkValue(btcBalance, lastBtcBalance))
+                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
 
-                    if (btcBalance > 0.0 && !qFuzzyCompare(btcBalance, lastBtcBalance))
-                    {
-                        emit accBtcBalanceChanged(baseValues.currentPair.symbol, btcBalance);
-                        lastBtcBalance = btcBalance;
-                    }
-                }
-
-                QByteArray dataB = getMidData("\"Currency\":\"" + baseValues.currentPair.currBStr, "}", &data);
-
-                if (!dataB.isEmpty())
-                {
-                    double usdBalance = getMidData("\"Available\":", ",", &dataB).toDouble();
-
-                    if (usdBalance > 0.0 && !qFuzzyCompare(usdBalance, lastUsdBalance))
-                    {
-                        emit accUsdBalanceChanged(baseValues.currentPair.symbol, usdBalance);
-                        lastUsdBalance = usdBalance;
-                    }
-                }
+                if (checkValue(usdBalance, lastUsdBalance))
+                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
             }
             break;//info
 

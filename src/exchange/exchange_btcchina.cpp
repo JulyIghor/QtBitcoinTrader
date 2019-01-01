@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -100,8 +100,8 @@ void Exchange_BTCChina::clearVariables()
 {
     cancelingOrderIDs.clear();
     Exchange::clearVariables();
-    secondPart = 0;
     apiDownCounter = 0;
+    secondPart = 0;
     historyLastDate.clear();
     lastHistory.clear();
     lastOrders.clear();
@@ -782,6 +782,7 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
                     QByteArray balanceData = getMidData("\"balance\":", "}}}", &data) + "}";
                     QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "\":", "}", &balanceData);
+                    QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "\":", "}", &balanceData);
 
                     if (!btcBalance.isEmpty())
                     {
@@ -792,8 +793,6 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
 
                         lastBtcBalance = newBtcBalance;
                     }
-
-                    QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "\":", "}", &balanceData);
 
                     if (!usdBalance.isEmpty())
                     {

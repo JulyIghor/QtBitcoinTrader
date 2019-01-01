@@ -449,7 +449,7 @@ String_WHEN=Когда
 String_YEARS_DIFFICULTY=%1 лет
 String_YES=Да
 String_LANGUAGE_NAME=Русский
-String_LANGUAGE_AUTHOR=July IGHOR<br><a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Bitcoin donate:<br><a href="bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>
+String_LANGUAGE_AUTHOR=July Ighor<br><a href="mailto:julyighor@gmail.com">julyighor@gmail.com</a><br>Bitcoin donate:<br><a href="bitcoin:1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc">1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc</a>
 String_LANGUAGE_LOCALE=uk_UA
 String_SCRIPT_NAME=Скрипт
 String_DELAY_SEC=Задержка %1 сек

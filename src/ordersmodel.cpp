@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -555,7 +555,7 @@ void OrdersModel::ordersCancelAll(QString pair)
 void OrdersModel::ordersCancelBids(QString pair)
 {
     for (int n = oidList.count() - 1; n >= 0; n--)
-        if (statusList.at(n))
+        if (statusList.at(n) && typesList.at(n) == false)
         {
             if(symbolList.at(n) == pair)
                 emit cancelOrder(pair, oidList.at(n));
@@ -567,7 +567,7 @@ void OrdersModel::ordersCancelBids(QString pair)
 void OrdersModel::ordersCancelAsks(QString pair)
 {
     for (int n = oidList.count() - 1; n >= 0; n--)
-        if (statusList.at(n))
+        if (statusList.at(n) && typesList.at(n) == true)
         {
             if(symbolList.at(n) == pair)
                 emit cancelOrder(pair, oidList.at(n));

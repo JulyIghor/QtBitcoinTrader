@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -667,37 +667,18 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
             if (debugLevel)
                 logThread->writeLog("Info: " + data);
 
-            double accFee = getMidData(baseValues.currentPair.symbol.toLower() + "_fee\": \"", "\"", &data).toDouble();
-
-            if (accFee > 0.0)
-            {
-                emit accFeeChanged(baseValues.currentPair.symbol, accFee);
-                accountFee = accFee;
-            }
-
+            QByteArray accFee     = getMidData(baseValues.currentPair.symbol.toLower() + "_fee\": \"", "\"", &data);
             QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "_available\": \"", "\"", &data);
-
-            if (!btcBalance.isEmpty())
-            {
-                double newBtcBalance = btcBalance.toDouble();
-
-                if (lastBtcBalance != newBtcBalance)
-                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
-
-                lastBtcBalance = newBtcBalance;
-            }
-
             QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "_available\": \"", "\"", &data);
 
-            if (!usdBalance.isEmpty())
-            {
-                double newUsdBalance = usdBalance.toDouble();
+            if (checkValue(accFee, accountFee))
+                emit accFeeChanged(baseValues.currentPair.symbol, accountFee);
 
-                if (newUsdBalance != lastUsdBalance)
-                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
+            if (checkValue(btcBalance, lastBtcBalance))
+                emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
 
-                lastUsdBalance = newUsdBalance;
-            }
+            if (checkValue(usdBalance, lastUsdBalance))
+                emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
 
             static bool balanceSent = false;
 

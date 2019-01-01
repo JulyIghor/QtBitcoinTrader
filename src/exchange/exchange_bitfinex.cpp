@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -107,8 +107,6 @@ void Exchange_Bitfinex::clearVariables()
     lastTickerSell = 0.0;
     lastTickerBuy = 0.0;
     lastTickerVolume = 0.0;
-    lastBtcBalance = 0.0;
-    lastUsdBalance = 0.0;
     lastVolume = 0.0;
     secondPart = 0;
     apiDownCounter = 0;
@@ -720,25 +718,11 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 }
             }
 
-            if (!btcBalance.isEmpty())
-            {
-                double newBtcBalance = btcBalance.toDouble();
+            if (checkValue(btcBalance, lastBtcBalance))
+                emit accBtcBalanceChanged(baseValues.currentPair.symbolSecond(), lastBtcBalance);
 
-                if (lastBtcBalance != newBtcBalance)
-                    emit accBtcBalanceChanged(baseValues.currentPair.symbolSecond(), newBtcBalance);
-
-                lastBtcBalance = newBtcBalance;
-            }
-
-            if (!usdBalance.isEmpty())
-            {
-                double newUsdBalance = usdBalance.toDouble();
-
-                if (newUsdBalance != lastUsdBalance)
-                    emit accUsdBalanceChanged(baseValues.currentPair.symbolSecond(), newUsdBalance);
-
-                lastUsdBalance = newUsdBalance;
-            }
+            if (checkValue(usdBalance, lastUsdBalance))
+                emit accUsdBalanceChanged(baseValues.currentPair.symbolSecond(), lastUsdBalance);
         }
         else if (debugLevel)
             logThread->writeLog("Invalid Info data:" + data, 2);

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public:
     double getRowVolume(int);
     int getRowType(int);
     void clear();
-    void removeDataOlderThen(quint32);
+    void removeDataOlderThen(qint64);
     void addNewTrades(QList<TradesItem>*);
 
     void setHorizontalHeaderLabels(QStringList list);
@@ -65,7 +65,7 @@ public:
 
 private:
     double lastPrecentBids;
-    quint32 lastRemoveDate;
+    qint64 lastRemoveDate;
     void removeFirst();
     QString textBid;
     QString textAsk;

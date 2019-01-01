@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -449,30 +449,15 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
             case 202: //info
                 if (data.startsWith("{\"result\":true,\"info\":{"))
                 {
-                    QByteArray fundsData = getMidData("free\":{", "}", &data);
+                    QByteArray fundsData  = getMidData("free\":{", "}", &data);
                     QByteArray btcBalance = getMidData(baseValues.currentPair.currAStrLow + "\":\"", "\"", &fundsData);
-
-                    if (!btcBalance.isEmpty())
-                    {
-                        double newBtcBalance = btcBalance.toDouble();
-
-                        if (lastBtcBalance != newBtcBalance)
-                            emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
-
-                        lastBtcBalance = newBtcBalance;
-                    }
-
                     QByteArray usdBalance = getMidData(baseValues.currentPair.currBStrLow + "\":\"", "\"", &fundsData);
 
-                    if (!usdBalance.isEmpty())
-                    {
-                        double newUsdBalance = usdBalance.toDouble();
+                    if (checkValue(btcBalance, lastBtcBalance))
+                        emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
 
-                        if (newUsdBalance != lastUsdBalance)
-                            emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
-
-                        lastUsdBalance = newUsdBalance;
-                    }
+                    if (checkValue(usdBalance, lastUsdBalance))
+                        emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
                 }
                 else
                     success = false;

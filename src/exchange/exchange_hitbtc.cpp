@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -399,31 +399,16 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
     case 202: //info
         if (data.size() > 10)
         {
-            QByteArray dataA = getMidData("\"currency\":\"" + baseValues.currentPair.currAStr, "}", &data);
+            QByteArray btcBalance = getMidData("\"currency\":\"" + baseValues.currentPair.currAStr, "}", &data);
+            QByteArray usdBalance = getMidData("\"currency\":\"" + baseValues.currentPair.currBStr, "}", &data);
+            btcBalance = getMidData("\"available\":\"", "\"", &btcBalance);
+            usdBalance = getMidData("\"available\":\"", "\"", &usdBalance);
 
-            if (!dataA.isEmpty())
-            {
-                double btcBalance = getMidData("\"available\":\"", "\"", &dataA).toDouble();
+            if (checkValue(btcBalance, lastBtcBalance))
+                emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
 
-                if (btcBalance > 0.0 && !qFuzzyCompare(btcBalance, lastBtcBalance))
-                {
-                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, btcBalance);
-                    lastBtcBalance = btcBalance;
-                }
-            }
-
-            QByteArray dataB = getMidData("\"currency\":\"" + baseValues.currentPair.currBStr, "}", &data);
-
-            if (!dataB.isEmpty())
-            {
-                double usdBalance = getMidData("\"available\":\"", "\"", &dataB).toDouble();
-
-                if (usdBalance > 0.0 && !qFuzzyCompare(usdBalance, lastUsdBalance))
-                {
-                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, usdBalance);
-                    lastUsdBalance = usdBalance;
-                }
-            }
+            if (checkValue(usdBalance, lastUsdBalance))
+                emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
         }
         break;//info
 

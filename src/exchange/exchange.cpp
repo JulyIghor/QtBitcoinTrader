@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -286,4 +286,21 @@ void Exchange::sslErrors(const QList<QSslError>& errors)
         logThread->writeLog(errorList.join(" ").toLatin1(), 2);
 
     emit showErrorMessage("SSL Error: " + errorList.join(" "));
+}
+
+bool Exchange::checkValue(QByteArray& valueStr, double& lastValue)
+{
+    if (valueStr.isEmpty())
+        return false;
+
+    double value = valueStr.toDouble();
+
+    if (!qFuzzyIsNull(value) && value < 0.0)
+        return false;
+
+    if(qFuzzyCompare(value + 1.0, lastValue + 1.0))
+        return false;
+
+    lastValue = value;
+    return true;
 }

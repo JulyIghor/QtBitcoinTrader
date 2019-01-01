@@ -29,61 +29,55 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef EXCHANGE_BITMARKET_H
-#define EXCHANGE_BITMARKET_H
+#ifndef EXCHANGE_POLONIEX_H
+#define EXCHANGE_POLONIEX_H
 
 #include "exchange.h"
 
-class Exchange_BitMarket : public Exchange
+class Exchange_Poloniex : public Exchange
 {
     Q_OBJECT
 
 public:
-    Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey);
-    ~Exchange_BitMarket();
+    Exchange_Poloniex(QByteArray pRestSign, QByteArray pRestKey);
+    ~Exchange_Poloniex();
 
-private:
-    bool isApiDown;
-    bool isReplayPending(int);
-
-    int apiDownCounter;
-    int lastOpenedOrders;
-
-    JulyHttp* julyHttp;
-
-    qint64 lastFetchTid;
-
-    QList<DepthItem>* depthAsks;
-    QList<DepthItem>* depthBids;
-    QList<QByteArray> cancelingOrderIDs;
-
-    QMap<double, double> lastDepthAsksMap;
-    QMap<double, double> lastDepthBidsMap;
-
-    QTime authRequestTime;
-
-    qint64 lastTickerDate;
-    QByteArray lastTradesTid;
-    quint32 privateNonce;
-    quint32 lastHistoryId;
-    quint32 lastHistoryCount;
-
-    void clearVariables();
-    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double, double, bool);
-    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true);
-private slots:
-    void reloadDepth();
-    void sslErrors(const QList<QSslError>&);
-    void dataReceivedAuth(QByteArray, int);
-    void secondSlot();
-    void quitThread();
 public slots:
     void clearValues();
     void getHistory(bool);
     void buy(QString, double, double);
     void sell(QString, double, double);
     void cancelOrder(QString, QByteArray);
+
+private slots:
+    void reloadDepth();
+    void sslErrors(const QList<QSslError>&);
+    void dataReceivedAuth(QByteArray, int);
+    void secondSlot();
+    void quitThread();
+
+private:
+    void clearVariables();
+    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(QString, double, double, bool);
+    void sendToApi(int reqType, QByteArray method, bool auth = false);
+    bool isReplayPending(int);
+
+private:
+    bool isFirstAccInfo;
+
+    qint64 lastTradesId;
+    qint64 lastTradesDate;
+    qint64 lastHistoryTime;
+    qint64 privateNonce;
+
+    JulyHttp* julyHttp;
+
+    QList<DepthItem>* depthAsks;
+    QList<DepthItem>* depthBids;
+
+    QMap<double, double> lastDepthAsksMap;
+    QMap<double, double> lastDepthBidsMap;
 };
 
-#endif // EXCHANGE_BITMARKET_H
+#endif // EXCHANGE_POLONIEX_H

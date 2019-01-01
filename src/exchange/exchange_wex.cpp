@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -429,30 +429,15 @@ void Exchange_WEX::dataReceivedAuth(QByteArray data, int reqType)
                 if (!success)
                     break;
 
-                QByteArray fundsData = getMidData("funds\":{", "}", &data) + ",";
-                QByteArray btcBalance = getMidData(baseValues.currentPair.currAStrLow + "\":", ",", &fundsData);
-
-                if (!btcBalance.isEmpty())
-                {
-                    double newBtcBalance = btcBalance.toDouble();
-
-                    if (lastBtcBalance != newBtcBalance)
-                        emit accBtcBalanceChanged(baseValues.currentPair.symbol, newBtcBalance);
-
-                    lastBtcBalance = newBtcBalance;
-                }
-
+                QByteArray fundsData  = getMidData("funds\":{", "}", &data) + ",";
+                QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "\":", ",", &fundsData);
                 QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "\":", ",", &fundsData);
 
-                if (!usdBalance.isEmpty())
-                {
-                    double newUsdBalance = usdBalance.toDouble();
+                if (checkValue(btcBalance, lastBtcBalance))
+                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
 
-                    if (newUsdBalance != lastUsdBalance)
-                        emit accUsdBalanceChanged(baseValues.currentPair.symbol, newUsdBalance);
-
-                    lastUsdBalance = newUsdBalance;
-                }
+                if (checkValue(usdBalance, lastUsdBalance))
+                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
 
                 int openedOrders = getMidData("open_orders\":", ",\"", &data).toInt();
 

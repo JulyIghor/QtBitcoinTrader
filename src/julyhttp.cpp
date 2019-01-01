@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 #include <QWaitCondition>
 
 #ifdef Q_OS_WIN
-    #include <WinSock2.h>
+    #include <winsock2.h>
 #else
     #include <sys/socket.h>
     #include <fcntl.h>
@@ -215,7 +215,9 @@ void JulyHttp::reconnectSocket(bool forceAbort)
         waitForConnected(((noReconnect && noReconnectCount++ > 5) ? 1000 : baseValues.httpRequestTimeout));
 
 #ifdef Q_OS_WIN
-        setsockopt(this->socketDescriptor(), SOL_SOCKET, SO_RCVTIMEO, (const char*)&baseValues.httpRequestTimeout, sizeof(int));
+        setsockopt(static_cast<SOCKET>(this->socketDescriptor()),
+                   SOL_SOCKET, SO_RCVTIMEO,
+                   (const char*)&baseValues.httpRequestTimeout, sizeof(int));
 #else
         struct timeval vtime;
         vtime.tv_sec = baseValues.httpRequestTimeout / 1000;
@@ -301,15 +303,7 @@ void JulyHttp::readSocket()
             else
                 currentLine = readLine();
 
-            if (outBuffer.size())
-            {
-                currentLine.prepend(outBuffer);
-                outBuffer.clear();
-            }
-
-            if (currentLine == "\r\n" ||
-                currentLine == "\n" ||
-                currentLine.isEmpty())
+            if (currentLine == "\r\n" || currentLine == "\n" || currentLine.isEmpty())
                 endFound = true;
             else
             {
@@ -320,10 +314,12 @@ void JulyHttp::readSocket()
                     if (currentLineLow.length() > 12)
                         httpState = currentLineLow.mid(9, 3).toInt();
 
-                    if (debugLevel)
+                    if (debugLevel && httpState != 200)
                     {
-                        if (httpState != 200)
-                            logThread->writeLog(currentLine + readAll());
+                        logThread->writeLog(currentLine + readAll());
+                        takeFirstRequest();
+                        clearRequest();
+                        return;
                     }
                 }
                 else if (currentLineLow.startsWith("set-cookie"))
@@ -466,10 +462,10 @@ void JulyHttp::readSocket()
             if (!dataArray)
                 dataArray.reset(new QByteArray);
 
-            quint32 oldDataSize = dataArray->size();
-            dataArray->resize(oldDataSize + bytesToRead);
+            qint64 oldDataSize = dataArray->size();
+            dataArray->resize(static_cast<int>(oldDataSize + bytesToRead));
             qint64 read = this->read(dataArray->data() + oldDataSize, bytesToRead);
-            dataArray->resize(oldDataSize + read);
+            dataArray->resize(static_cast<int>(oldDataSize + read));
 
             chunkedSize -= read;
 
@@ -496,8 +492,8 @@ void JulyHttp::readSocket()
         if (readSize > 0)
         {
             dataArray.reset(new QByteArray);
-            dataArray->resize(readSize);
-            dataArray->resize(read(dataArray->data(), readSize));
+            dataArray->resize(static_cast<int>(readSize));
+            dataArray->resize(static_cast<int>(read(dataArray->data(), readSize)));
         }
 
         if (bytesDone + bytesAvailable() + readSize == contentLength)
@@ -521,7 +517,7 @@ void JulyHttp::readSocket()
         if (contentLength > 0)
         {
             bytesDone += readSize;
-            emit dataProgress(100 * bytesDone / contentLength);
+            emit dataProgress(static_cast<int>(100 * bytesDone / contentLength));
         }
     }
 
@@ -583,7 +579,7 @@ void JulyHttp::gzipUncompress(QByteArray* data)
     strm.zalloc = nullptr;
     strm.zfree = nullptr;
     strm.opaque = nullptr;
-    strm.avail_in = data->size();
+    strm.avail_in = static_cast<unsigned int>(data->size());
     strm.next_in = (Bytef*)(data->data());
 
     int ret = inflateInit2(&strm, 47);
@@ -611,7 +607,7 @@ void JulyHttp::gzipUncompress(QByteArray* data)
             return;
         }
 
-        result.append(out, CHUNK_SIZE - strm.avail_out);
+        result.append(out, CHUNK_SIZE - static_cast<int>(strm.avail_out));
     }
     while (strm.avail_out == 0);
 
@@ -795,7 +791,7 @@ void JulyHttp::takeRequestAt(int pos)
     reqTypePending[packetTake.reqType] = reqTypePending.value(packetTake.reqType, 1) - 1;
 
     delete packetTake.data;
-    packetTake.data = 0;
+    packetTake.data = nullptr;
     requestList.removeAt(pos);
 
     if (requestList.count() == 0)

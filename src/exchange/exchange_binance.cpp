@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2018 July IGHOR <julyighor@gmail.com>
+//  Copyright (C) 2013-2019 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -404,21 +404,14 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
                     break;
 
                 QByteArray fundsData = getMidData("\"balances\":[{", "}]}", &data);
-                double btcBalance = getMidData("\"" + baseValues.currentPair.currAStr + "\",\"free\":\"", "\"", &fundsData).toDouble();
+                QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStr + "\",\"free\":\"", "\"", &fundsData);
+                QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStr + "\",\"free\":\"", "\"", &fundsData);
 
-                if (btcBalance > 0.0 && !qFuzzyCompare(btcBalance, lastBtcBalance))
-                {
-                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, btcBalance);
-                    lastBtcBalance = btcBalance;
-                }
+                if (checkValue(btcBalance, lastBtcBalance))
+                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
 
-                double usdBalance = getMidData("\"" + baseValues.currentPair.currBStr + "\",\"free\":\"", "\"", &fundsData).toDouble();
-
-                if (usdBalance > 0.0 && !qFuzzyCompare(usdBalance, lastUsdBalance))
-                {
-                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, usdBalance);
-                    lastUsdBalance = usdBalance;
-                }
+                if (checkValue(usdBalance, lastUsdBalance))
+                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
 
                 QByteArray makerCommission = getMidData("\"makerCommission\":", ",", &data);
                 QByteArray takerCommission = getMidData("\"takerCommission\":", ",", &data);
