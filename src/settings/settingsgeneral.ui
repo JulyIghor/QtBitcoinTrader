@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>623</width>
-    <height>433</height>
+    <width>532</width>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -94,9 +94,6 @@
         <property name="accessibleName">
          <string/>
         </property>
-        <property name="text">
-         <string/>
-        </property>
        </widget>
       </item>
       <item row="2" column="0">
@@ -120,9 +117,6 @@
         <property name="accessibleName">
          <string/>
         </property>
-        <property name="text">
-         <string/>
-        </property>
        </widget>
       </item>
       <item row="3" column="0">
@@ -131,7 +125,7 @@
          <string>SETTINGS_OPTIMIZE</string>
         </property>
         <property name="text">
-         <string>Reducing interface elements spacing (after restart)</string>
+         <string>Reducing interface elements spacing (after restart):</string>
         </property>
         <property name="buddy">
          <cstring>optimizeInterfaceCheckBox</cstring>
@@ -139,11 +133,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QCheckBox" name="optimizeInterfaceCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QCheckBox" name="optimizeInterfaceCheckBox"/>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="hiDpiLabel">
@@ -151,7 +141,7 @@
          <string>SETTINGS_HIDPI</string>
         </property>
         <property name="text">
-         <string>HiDPI (after restart)</string>
+         <string>HiDPI (after restart):</string>
         </property>
         <property name="buddy">
          <cstring>hiDpiCheckBox</cstring>
@@ -159,11 +149,23 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QCheckBox" name="hiDpiCheckBox">
+       <widget class="QCheckBox" name="hiDpiCheckBox"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="useAltDomainYobitLabel">
+        <property name="accessibleName">
+         <string>SETTINGS_USE_ALTERNATE_DOMAIN_FOR_YOBIT</string>
+        </property>
         <property name="text">
-         <string/>
+         <string>Use alternate domain for Yobit:</string>
+        </property>
+        <property name="buddy">
+         <cstring>useAltDomainYobitBox</cstring>
         </property>
        </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="useAltDomainYobitBox"/>
       </item>
      </layout>
     </widget>
@@ -197,11 +199,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QCheckBox" name="checkForUpdatesCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QCheckBox" name="checkForUpdatesCheckBox"/>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="checkForUpdatesBetaLabel">
@@ -217,18 +215,10 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QCheckBox" name="checkForUpdatesBetaCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QCheckBox" name="checkForUpdatesBetaCheckBox"/>
       </item>
       <item row="2" column="1">
-       <widget class="QCheckBox" name="autoUpdateCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QCheckBox" name="autoUpdateCheckBox"/>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="disablePairSyncLabel">
@@ -236,7 +226,7 @@
          <string>SETTINGS_DISABLE_PAIR_SYNC</string>
         </property>
         <property name="text">
-         <string>Disable currency pair synchronization at startup</string>
+         <string>Disable currency pair synchronization at startup:</string>
         </property>
         <property name="buddy">
          <cstring>disablePairSyncCheckBox</cstring>
@@ -244,11 +234,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QCheckBox" name="disablePairSyncCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QCheckBox" name="disablePairSyncCheckBox"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="autoUpdateLabel">
@@ -318,18 +304,10 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QCheckBox" name="timeSynchronizationCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QCheckBox" name="timeSynchronizationCheckBox"/>
       </item>
       <item row="0" column="1">
-       <widget class="QCheckBox" name="use24HourTimeFormatCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QCheckBox" name="use24HourTimeFormatCheckBox"/>
       </item>
      </layout>
     </widget>
@@ -391,11 +369,13 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
-  <tabstop>saveButton</tabstop>
-  <tabstop>restoreDefaultsButton</tabstop>
-  <tabstop>revertChangesButton</tabstop>
   <tabstop>languageComboBox</tabstop>
   <tabstop>showTranslationButton</tabstop>
+  <tabstop>hiDpiCheckBox</tabstop>
+  <tabstop>confirmOpenOrderCheckBox</tabstop>
+  <tabstop>closeToTrayCheckBox</tabstop>
+  <tabstop>optimizeInterfaceCheckBox</tabstop>
+  <tabstop>useAltDomainYobitBox</tabstop>
   <tabstop>checkForUpdatesCheckBox</tabstop>
   <tabstop>checkForUpdatesBetaCheckBox</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
@@ -403,9 +383,9 @@
   <tabstop>forceSyncPairsButton</tabstop>
   <tabstop>use24HourTimeFormatCheckBox</tabstop>
   <tabstop>timeSynchronizationCheckBox</tabstop>
-  <tabstop>confirmOpenOrderCheckBox</tabstop>
-  <tabstop>closeToTrayCheckBox</tabstop>
-  <tabstop>optimizeInterfaceCheckBox</tabstop>
+  <tabstop>saveButton</tabstop>
+  <tabstop>revertChangesButton</tabstop>
+  <tabstop>restoreDefaultsButton</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -432,8 +412,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>130</y>
+     <x>521</x>
+     <y>251</y>
     </hint>
     <hint type="destinationlabel">
      <x>448</x>
@@ -448,8 +428,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>168</y>
+     <x>521</x>
+     <y>289</y>
     </hint>
     <hint type="destinationlabel">
      <x>448</x>
@@ -464,8 +444,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>332</y>
+     <x>521</x>
+     <y>142</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -480,8 +460,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>351</y>
+     <x>521</x>
+     <y>161</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -496,8 +476,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>149</y>
+     <x>521</x>
+     <y>270</y>
     </hint>
     <hint type="destinationlabel">
      <x>448</x>
@@ -512,8 +492,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>536</x>
-     <y>252</y>
+     <x>521</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>448</x>
@@ -528,8 +508,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>422</x>
-     <y>233</y>
+     <x>521</x>
+     <y>389</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>
@@ -544,8 +524,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>370</y>
+     <x>521</x>
+     <y>180</y>
     </hint>
     <hint type="destinationlabel">
      <x>707</x>
@@ -560,8 +540,8 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>269</x>
-     <y>382</y>
+     <x>521</x>
+     <y>123</y>
     </hint>
     <hint type="destinationlabel">
      <x>631</x>
@@ -576,12 +556,28 @@
    <slot>anyValueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>179</y>
+     <x>500</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
      <x>648</x>
      <y>179</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useAltDomainYobitBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>SettingsGeneral</receiver>
+   <slot>anyValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>274</x>
+     <y>191</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>553</x>
+     <y>193</y>
     </hint>
    </hints>
   </connection>

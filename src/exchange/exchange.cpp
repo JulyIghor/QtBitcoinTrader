@@ -30,7 +30,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "exchange.h"
-#include <QDateTime>
 #include "main.h"
 #include "depthitem.h"
 #include <QFile>

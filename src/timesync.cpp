@@ -41,10 +41,11 @@
 TimeSync::TimeSync()
     : QObject(),
       dateUpdateThread(new QThread),
-      started(0),
-      startTime(QDateTime::currentDateTime().toTime_t()),
-      timeShift(0),
-      getNTPTimeRetryCount(0)
+      mutex(),
+      started(false),
+      startTime(0LL),
+      timeShift(0LL),
+      additionalTimer()
 {
     connect(dateUpdateThread.data(), &QThread::started, this, &TimeSync::runThread);
     connect(this, &TimeSync::startSync, this, &TimeSync::getNTPTime, Qt::QueuedConnection);
@@ -61,39 +62,20 @@ TimeSync::~TimeSync()
     }
 }
 
-TimeSync* TimeSync::global()
+void TimeSync::runThread()
 {
-    static TimeSync instance;
+    connect(QThread::currentThread(), &QThread::finished, this, &TimeSync::quitThread, Qt::DirectConnection);
 
-    static QAtomicInt created = 0;
+    additionalTimer.reset(new QElapsedTimer);
+    additionalTimer->start();
+    startTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
 
-    if (created)
-        return &instance;
-
-    static QMutex mut;
-    QMutexLocker lock(&mut);
-
-    while (instance.started == 0)
-        QThread::msleep(100);
-
-    created = 1;
-
-    return &instance;
+    started = true;
 }
 
-qint64 TimeSync::getTimeT()
+void TimeSync::quitThread()
 {
-    TimeSync* timeSync = TimeSync::global();
-
-    if (timeSync->additionalTimer == nullptr)
-        return QDateTime::currentDateTime().toTime_t();
-
-    qint64 additionalBuffer = 0;
-    timeSync->mutex.lock();
-    additionalBuffer = timeSync->additionalTimer->elapsed();
-    timeSync->mutex.unlock();
-
-    return timeSync->startTime + timeSync->timeShift + qint64(additionalBuffer / 1000);
+    additionalTimer.reset();
 }
 
 void TimeSync::syncNow()
@@ -106,21 +88,53 @@ void TimeSync::syncNow()
     }
 }
 
-void TimeSync::runThread()
+TimeSync* TimeSync::global()
 {
-    connect(QThread::currentThread(), &QThread::finished, this, &TimeSync::quitThread, Qt::DirectConnection);
-    startTime = QDateTime::currentDateTime().toTime_t();
+    static TimeSync instance;
+    static QAtomicInt created = 0;
 
-    additionalTimer.reset(new QElapsedTimer);
-    additionalTimer->start();
+    if (created)
+        return &instance;
 
-    started = 1;
+    static QMutex mutexGlobal;
+    QMutexLocker lock(&mutexGlobal);
+
+    while (instance.started == false)
+        QThread::msleep(100);
+
+    created = 1;
+
+    return &instance;
 }
 
-void TimeSync::quitThread()
+qint64 TimeSync::getMSecs()
 {
-    additionalTimer.reset();
+    TimeSync* timeSync = TimeSync::global();
+
+    if (timeSync->additionalTimer == nullptr)
+        return QDateTime::currentDateTime().toMSecsSinceEpoch();
+
+    timeSync->mutex.lock();
+    qint64 additionalBuffer = timeSync->additionalTimer->elapsed();
+    timeSync->mutex.unlock();
+
+    return timeSync->startTime + timeSync->timeShift + additionalBuffer;
 }
+
+qint64 TimeSync::getTimeT()
+{
+    TimeSync* timeSync = TimeSync::global();
+
+    if (timeSync->additionalTimer == nullptr)
+        return QDateTime::currentDateTime().toTime_t();
+
+    timeSync->mutex.lock();
+    qint64 additionalBuffer = timeSync->additionalTimer->elapsed();
+    timeSync->mutex.unlock();
+
+    return (timeSync->startTime + timeSync->timeShift + additionalBuffer) / 1000;
+}
+
 void TimeSync::getNTPTime()
 {
     QUdpSocket sock;
@@ -135,39 +149,54 @@ void TimeSync::getNTPTime()
     if (sock.write(data) < 0 || !sock.waitForReadyRead(3000) || sock.bytesAvailable() != 48)
         return;
 
-    data = sock.readAll();
+    data            = sock.readAll();
     qint64 seconds  = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[40])));
     qint64 fraction = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[44])));
-    qint64 newTime  = QDateTime::fromMSecsSinceEpoch(seconds * 1000ll + fraction * 1000ll / 0x100000000ll -
-                      2208988800000ll).toTime_t();
+    static int errorCount = 0;
 
-    if (newTime < 1451606400 || newTime > 4000000000)
+    if (seconds < 1 || fraction > 4290672329)
     {
+        if (errorCount > 100)
+            return;
+
+        ++errorCount;
         QThread::msleep(500);
         emit startSync();
         return;
     }
 
-    qint64 tempTimeShift = newTime - QDateTime::currentDateTime().toTime_t();
+    qint64 time = seconds * 1000ll + fraction * 1000ll / 0x100000000ll - 2208988800000ll;
 
-    if (timeShift != 0)
-        tempTimeShift = (timeShift + tempTimeShift) / 2;
+    if (time < 1547337932000 || time > 9000000000000)
+    {
+        if (errorCount > 100)
+            return;
 
-    if (tempTimeShift > 3600 || tempTimeShift < -3600)
+        ++errorCount;
+        QThread::msleep(500);
+        emit startSync();
+        return;
+    }
+
+    qint64 tempTimeShift = time - QDateTime::currentDateTime().toMSecsSinceEpoch();
+    timeShift.store(timeShift == 0 ? tempTimeShift : (timeShift + tempTimeShift) / 2);
+
+    if (timeShift > 3600 || timeShift < -3600)
     {
         static bool showMessage = true;
 
         if (showMessage)
+        {
             emit warningMessage(julyTr("TIME_SYNC_ERROR",
-                                       "Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys."));
-
-        showMessage = false;
+                                       "Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. "
+                                       "Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys."));
+            showMessage = false;
+        }
     }
-    else
-        timeShift = tempTimeShift;
 
-    getNTPTimeRetryCount++;
+    static int retryCount = 0;
+    ++retryCount;
 
-    if (getNTPTimeRetryCount < 3)
+    if (retryCount < 3)
         emit startSync();
 }

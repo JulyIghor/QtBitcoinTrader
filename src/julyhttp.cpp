@@ -267,7 +267,7 @@ void JulyHttp::saveCookies()
 
 void JulyHttp::readSocket()
 {
-    if (isDisabled)
+    if (isDisabled || requestList.isEmpty())
         return;
 
     requestTimeOut.restart();
@@ -380,7 +380,7 @@ void JulyHttp::readSocket()
                 return;
             }
 
-            retryRequest();
+            waitForReadyRead(0);
             return;
         }
 
@@ -622,7 +622,7 @@ bool JulyHttp::isReqTypePending(int val)
 
 void JulyHttp::retryRequest()
 {
-    if (isDisabled || requestList.count() == 0)
+    if (isDisabled || requestList.isEmpty())
         return;
 
     if (requestList.first().retryCount <= 0)
@@ -685,10 +685,7 @@ void JulyHttp::prepareData(int reqType, const QByteArray& method, QByteArray pos
 
 void JulyHttp::prepareDataSend()
 {
-    if (isDisabled)
-        return;
-
-    if (preparedList.count() == 0)
+    if (isDisabled || preparedList.isEmpty())
         return;
 
     for (int n = 1; n < preparedList.count(); n++)
@@ -794,7 +791,7 @@ void JulyHttp::takeRequestAt(int pos)
     packetTake.data = nullptr;
     requestList.removeAt(pos);
 
-    if (requestList.count() == 0)
+    if (requestList.isEmpty())
     {
         reqTypePending.clear();
 
@@ -808,7 +805,7 @@ void JulyHttp::takeRequestAt(int pos)
 
 void JulyHttp::takeFirstRequest()
 {
-    if (requestList.count() == 0)
+    if (requestList.isEmpty())
         return;
 
     takeRequestAt(0);
@@ -859,10 +856,7 @@ bool JulyHttp::isSocketConnected()
 
 void JulyHttp::sendPendingData()
 {
-    if (isDisabled)
-        return;
-
-    if (requestList.count() == 0)
+    if (isDisabled || requestList.isEmpty())
         return;
 
     if (!isSocketConnected())

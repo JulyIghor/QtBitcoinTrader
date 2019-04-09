@@ -29,11 +29,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QDateTime>
 #include "main.h"
 #include "julymath.h"
 #include "tradesitem.h"
 #include "timesync.h"
+#include "charts/chartsview.h"
 #include "charts/chartsmodel.h"
 
 ChartsModel::ChartsModel()
@@ -454,7 +454,7 @@ void ChartsModel::prepareBound()
     }
 }
 
-bool ChartsModel::prepareChartsData(qint16 parentWidth, qint16 parentHeight)
+bool ChartsModel::prepareChartsData(int parentWidth, int parentHeight)
 {
     if (!boundsSellDate.count())
         return false;

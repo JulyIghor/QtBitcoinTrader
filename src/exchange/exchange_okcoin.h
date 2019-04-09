@@ -52,7 +52,7 @@ private:
 
     JulyHttp* julyHttp;
 
-    quint64 lastFetchTid;
+    qint64 lastFetchTid;
 
     QList<DepthItem>* depthAsks;
     QList<DepthItem>* depthBids;
@@ -62,16 +62,16 @@ private:
 
     QTime authRequestTime;
 
-    quint32 lastPriceDate;
-    quint32 lastTickerDate;
-    quint32 startTradesDate;
-    quint32 privateNonce;
-    quint64 lastHistoryId;
+    qint64 lastPriceDate;
+    qint64 lastTickerDate;
+    qint64 startTradesDate;
+    qint64 privateNonce;
+    qint64 lastHistoryId;
 
     void clearVariables();
     void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
     void depthUpdateOrder(QString, double, double, bool);
-    void sendToApi(int reqType, QByteArray method, bool auth = false, QByteArray commands = 0);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, QByteArray commands = nullptr);
 private slots:
     void reloadDepth();
     void sslErrors(const QList<QSslError>&);

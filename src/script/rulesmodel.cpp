@@ -31,6 +31,7 @@
 
 #include "rulesmodel.h"
 #include "main.h"
+#include "timesync.h"
 #include "rulescriptparser.h"
 #include "exchange/exchange.h"
 

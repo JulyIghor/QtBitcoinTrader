@@ -36,6 +36,7 @@
 #include <QTime>
 #include "exchange/exchange.h"
 #include "main.h"
+#include "timesync.h"
 #include "time.h"
 #include <QMetaMethod>
 #include <QDoubleSpinBox>

@@ -163,10 +163,10 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
             if (amount != 0.0)
             {
                 if (holder.thanAmountFeeIndex == 1)
-                    script += " amount *= (1.0 + trader.get(\"Fee\") / 100.0);\n";
+                    script += " amount *= (1.0 + trader.get(\"" + holder.valueBSymbolCode + "\" , \"Fee\") / 100.0);\n";
 
                 if (holder.thanAmountFeeIndex == 2)
-                    script += " amount *= (1.0 - trader.get(\"Fee\") / 100.0);\n";
+                    script += " amount *= (1.0 - trader.get(\"" + holder.valueBSymbolCode + "\" , \"Fee\") / 100.0);\n";
             }
 
             if (!script.isEmpty())
@@ -184,10 +184,10 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                     script += " price " + holder.thanPricePlusMinusText + "= " + JulyMath::textFromDouble(holder.thanPrice) + ";\n";
 
                 if (holder.thanPriceFeeIndex == 1)
-                    script += " price *= ( 1.0 + trader.get(\"Fee\") / 100.0 );\n";
+                    script += " price *= ( 1.0 + trader.get(\"" + holder.valueBSymbolCode + "\" , \"Fee\") / 100.0 );\n";
 
                 if (holder.thanPriceFeeIndex == 2)
-                    script += " price *= ( 1.0 - trader.get(\"Fee\") / 100.0 );\n";
+                    script += " price *= ( 1.0 - trader.get(\"" + holder.valueBSymbolCode + "\" , \"Fee\") / 100.0 );\n";
             }
 
             if (!script.isEmpty())
@@ -325,7 +325,7 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                 if (holder.variableBFeeIndex > 0)
                 {
                     QString sign = (holder.variableBFeeIndex == 1 ? "+" : "-");
-                    indicatorB += " baseVariable " + sign + "= baseVariable*trader.get(\"" + holder.valueBSymbolCode + "\" , \"Fee\");\n";
+                    indicatorB += " baseVariable *= (1.0 " + sign + " trader.get(\"" + holder.valueBSymbolCode + "\" , \"Fee\") / 100.0);\n";
                 }
 
                 if (holder.variableBModeIndex == 0)

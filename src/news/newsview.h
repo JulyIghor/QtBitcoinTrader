@@ -48,7 +48,7 @@ private:
     Ui::NewsView ui;
     NewsModel* newsModel;
     bool loadingFinished;
-    quint32 lastUpdatedTime;
+    qint64 lastUpdatedTime;
 
 signals:
     void loadData();

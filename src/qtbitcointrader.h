@@ -55,8 +55,6 @@
 #include <QScrollArea>
 #include <time.h>
 #include <QElapsedTimer>
-#include "charts/chartsview.h"
-#include "news/newsview.h"
 #include "debugviewer.h"
 
 class Exchange;
@@ -67,6 +65,8 @@ class DockHost;
 class NetworkMenu;
 class CurrencyMenu;
 class CurrencySignLoader;
+class ChartsView;
+class NewsView;
 
 struct GroupStateItem
 {
@@ -371,7 +371,6 @@ public slots:
     void on_calcButton_clicked();
     void checkUpdate();
 
-
     void accFeeChanged(QString, double);
     void accBtcBalanceChanged(QString, double);
     void accUsdBalanceChanged(QString, double);
@@ -432,7 +431,6 @@ private slots:
     void on_buttonAddScript_clicked();
     void on_helpButton_clicked();
     void depthVisibilityChanged(bool);
-    void chartsVisibilityChanged(bool);
 
 private:
     void initDocks();
@@ -462,6 +460,7 @@ private slots:
 private:
     bool         lockedDocks;
     QAction*     actionExit;
+    QAction*     actionUpdate;
     QAction*     actionSendBugReport;
     QAction*     actionAbout;
     QAction*     actionAboutQt;
@@ -477,6 +476,7 @@ private:
     ConfigManagerDialog*    configDialog;
     DockHost*    dockHost;
     QDockWidget* dockLogo;
+    QDockWidget* dockDepth;
 };
 
 #endif // QTBITCOINTRADER_H

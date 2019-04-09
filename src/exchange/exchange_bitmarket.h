@@ -64,9 +64,9 @@ private:
 
     qint64 lastTickerDate;
     QByteArray lastTradesTid;
-    quint32 privateNonce;
-    quint32 lastHistoryId;
-    quint32 lastHistoryCount;
+    qint64 privateNonce;
+    qint64 lastHistoryId;
+    qint64 lastHistoryCount;
 
     void clearVariables();
     void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);

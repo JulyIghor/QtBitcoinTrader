@@ -29,9 +29,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "timesync.h"
 #include "iniengine.h"
 #include "exchange_binance.h"
-#include <openssl/hmac.h>
 
 Exchange_Binance::Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange(),
@@ -204,7 +204,7 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
                 if (data.size() < 10)
                     break;
 
-                qint64 time10Min = QDateTime::currentDateTime().toTime_t() - 600;
+                qint64 time10Min = TimeSync::getTimeT() - 600;
                 QStringList tradeList = QString(data).split("},{");
                 QList<TradesItem>* newTradesItems = new QList<TradesItem>;
                 int lastIndex = tradeList.count() - 1;
@@ -267,7 +267,7 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
                     depthBids = new QList<DepthItem>;
 
                     QMap<double, double> currentAsksMap;
-                    QStringList asksList = QString(getMidData("\"asks\":[[\"", "\",[]]]", &data)).split("\",[]],[\"");
+                    QStringList asksList = QString(getMidData("\"asks\":[[\"", "\"]]", &data)).split("\"],[\"");
                     double groupedPrice = 0.0;
                     double groupedVolume = 0.0;
                     int rowCounter = 0;
@@ -328,7 +328,7 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
                     lastDepthAsksMap = currentAsksMap;
 
                     QMap<double, double> currentBidsMap;
-                    QStringList bidsList = QString(getMidData("\"bids\":[[\"", "\",[]]]", &data)).split("\",[]],[\"");
+                    QStringList bidsList = QString(getMidData("\"bids\":[[\"", "\"]]", &data)).split("\"],[\"");
                     groupedPrice = 0.0;
                     groupedVolume = 0.0;
                     rowCounter = 0;
@@ -857,8 +857,7 @@ void Exchange_Binance::sendToApi(int reqType, QByteArray method, bool auth, bool
 
     if (auth)
     {
-        QByteArray data = commands + "recvWindow=30000&timestamp=" +
-                QByteArray::number(QDateTime::currentDateTime().toMSecsSinceEpoch() - 10000);
+        QByteArray data = commands + "recvWindow=30000&timestamp=" + QByteArray::number(TimeSync::getMSecs() - 10000);
         julyHttp->sendData(reqType, method + data + "&signature=" + hmacSha256(getApiSign(), data).toHex(), "", "\n\r\n");
     }
     else

@@ -86,7 +86,7 @@ void IndicatorEngine::setValueSlot(QString exchange, QString symbol, QString nam
 
         if (indicators.contains(index))
         {
-            if (indicators[index] == value)
+            if (qFuzzyCompare(indicators[index], value))
                 return;
             else
             {

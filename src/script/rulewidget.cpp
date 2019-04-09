@@ -31,6 +31,7 @@
 
 #include "rulewidget.h"
 #include "main.h"
+#include "timesync.h"
 #include <QMessageBox>
 #include <QtCore/qmath.h>
 #include <QFileDialog>

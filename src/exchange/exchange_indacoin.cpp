@@ -29,9 +29,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "exchange_indacoin.h"
-#include <openssl/hmac.h>
 #include <openssl/ecdsa.h>
+#include "timesync.h"
+#include "exchange_indacoin.h"
 
 Exchange_Indacoin::Exchange_Indacoin(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange()
@@ -47,10 +47,10 @@ Exchange_Indacoin::Exchange_Indacoin(QByteArray pRestSign, QByteArray pRestKey)
     baseValues.currentPair.priceMin = qPow(0.1, baseValues.currentPair.priceDecimals);
     baseValues.currentPair.tradeVolumeMin = 0.01;
     baseValues.currentPair.tradePriceMin = 0.1;
-    depthAsks = 0;
-    depthBids = 0;
+    depthAsks = nullptr;
+    depthBids = nullptr;
     forceDepthLoad = false;
-    julyHttp = 0;
+    julyHttp = nullptr;
     isApiDown = false;
     tickerOnly = false;
 
@@ -68,7 +68,7 @@ Exchange_Indacoin::Exchange_Indacoin(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume = false;
 
     authRequestTime.restart();
-    privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
+    privateNonce = (TimeSync::getTimeT() - 1371854884) * 10;
     lastHistoryTs = 0;
 
     connect(this, &Exchange::threadFinished, this, &Exchange_Indacoin::quitThread, Qt::DirectConnection);
@@ -103,7 +103,7 @@ void Exchange_Indacoin::clearVariables()
     lastOrders.clear();
     reloadDepth();
     lastFetchTid = 0;
-    lastFetchDate = QDateTime::currentDateTime().toTime_t() - 600;
+    lastFetchDate = TimeSync::getTimeT() - 600;
     lastTickerDate = 0;
     emit accFeeChanged(baseValues.currentPair.symbol, 0.15);
 }
@@ -213,7 +213,7 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
                 {
                     QByteArray tradeData = tradeList.at(n).toLatin1() + "}";
 
-                    quint32 currentTid = getMidData("\"tid\":", ",", &tradeData).toUInt();
+                    qint64 currentTid = getMidData("\"tid\":", ",", &tradeData).toUInt();
 
                     if (currentTid < 1000 || currentTid <= lastFetchTid)
                         continue;
@@ -405,8 +405,8 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
                     lastDepthBidsMap = currentBidsMap;
 
                     emit depthSubmitOrders(baseValues.currentPair.symbol, depthAsks, depthBids);
-                    depthAsks = 0;
-                    depthBids = 0;
+                    depthAsks = nullptr;
+                    depthBids = nullptr;
                 }
             }
             else if (debugLevel)
@@ -534,7 +534,7 @@ void Exchange_Indacoin::dataReceivedAuth(QByteArray data, int reqType)
                     if (dataList.count() == 0)
                         return;
 
-                    quint32 maxTs = 0;
+                    qint64 maxTs = 0;
                     QList<HistoryItem>* historyItems = new QList<HistoryItem>;
 
                     for (int n = 0; n < dataList.count(); n++)
@@ -657,7 +657,7 @@ void Exchange_Indacoin::depthUpdateOrder(QString symbol, double price, double am
 
     if (isAsk)
     {
-        if (depthAsks == 0)
+        if (depthAsks == nullptr)
             return;
 
         DepthItem newItem;
@@ -669,7 +669,7 @@ void Exchange_Indacoin::depthUpdateOrder(QString symbol, double price, double am
     }
     else
     {
-        if (depthBids == 0)
+        if (depthBids == nullptr)
             return;
 
         DepthItem newItem;
@@ -708,7 +708,7 @@ void Exchange_Indacoin::depthSubmitOrder(QString symbol, QMap<double, double>* c
 
 bool Exchange_Indacoin::isReplayPending(int reqType)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
         return false;
 
     return julyHttp->isReqTypePending(reqType);
@@ -860,7 +860,7 @@ QByteArray Exchange_Indacoin::ecdsaSha1(QByteArray shaKey, QByteArray& data)
 
 void Exchange_Indacoin::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
     {
         julyHttp = new JulyHttp("indacoin.com", "", this, true, true, "application/json; charset=UTF-8");
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));

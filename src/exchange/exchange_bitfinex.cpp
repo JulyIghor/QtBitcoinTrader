@@ -29,6 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "timesync.h"
 #include "exchange_bitfinex.h"
 
 Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
@@ -49,10 +50,10 @@ Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
 
     setApiKeySecret(pRestKey, pRestSign);
 
-    depthAsks = 0;
-    depthBids = 0;
+    depthAsks = nullptr;
+    depthBids = nullptr;
     forceDepthLoad = false;
-    julyHttp = 0;
+    julyHttp = nullptr;
     tickerOnly = false;
 
     currencyMapFile = "Bitfinex";
@@ -75,7 +76,7 @@ Exchange_Bitfinex::Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume = false;
 
     authRequestTime.restart();
-    privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
+    privateNonce = (TimeSync::getTimeT() - 1371854884) * 10;
 
     connect(this, &Exchange::threadFinished, this, &Exchange_Bitfinex::quitThread, Qt::DirectConnection);
 }
@@ -196,7 +197,7 @@ void Exchange_Bitfinex::secondSlot()
 
 bool Exchange_Bitfinex::isReplayPending(int reqType)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
         return false;
 
     return julyHttp->isReqTypePending(reqType);
@@ -288,7 +289,7 @@ void Exchange_Bitfinex::cancelOrder(QString, QByteArray order)
 
 void Exchange_Bitfinex::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
     {
         julyHttp = new JulyHttp("api.bitfinex.com", "X-BFX-APIKEY: " + getApiKey() + "\r\n", this);
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
@@ -330,7 +331,7 @@ void Exchange_Bitfinex::depthUpdateOrder(QString symbol, double price, double am
 
     if (isAsk)
     {
-        if (depthAsks == 0)
+        if (depthAsks == nullptr)
             return;
 
         DepthItem newItem;
@@ -342,7 +343,7 @@ void Exchange_Bitfinex::depthUpdateOrder(QString symbol, double price, double am
     }
     else
     {
-        if (depthBids == 0)
+        if (depthBids == nullptr)
             return;
 
         DepthItem newItem;
@@ -432,7 +433,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 lastTickerBuy = newTickerBuy;
             }
 
-            quint32 tickerNow = getMidData("timestamp\":\"", ".", &data).toUInt();
+            qint64 tickerNow = getMidData("timestamp\":\"", ".", &data).toUInt();
 
             if (tickerLastDate < tickerNow)
             {
@@ -839,8 +840,8 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 QList<HistoryItem>* historyItems = new QList<HistoryItem>;
                 bool firstTimestampReceived = false;
                 QStringList dataList = QString(data).split("},{");
-                quint64 currentId;
-                quint64 maxId = 0;
+                qint64 currentId;
+                qint64 maxId = 0;
 
                 for (int n = 0; n < dataList.count(); n++)
                 {

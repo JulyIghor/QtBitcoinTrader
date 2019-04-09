@@ -37,6 +37,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include "main.h"
+#include "timesync.h"
 #include "julylightchanges.h"
 #include "julyspinboxfix.h"
 #include "julyscrolluponidle.h"
@@ -53,7 +54,6 @@
 #include "script/addscriptwindow.h"
 #include "aboutdialog.h"
 #include "exchange/exchange.h"
-#include "exchange/exchange_wex.h"
 #include "exchange/exchange_bitstamp.h"
 #include "exchange/exchange_btcchina.h"
 #include "exchange/exchange_bitfinex.h"
@@ -84,6 +84,8 @@
 #include "settings/settingsdialog.h"
 #include "indicatorengine.h"
 #include "charts/chartsmodel.h"
+#include "charts/chartsview.h"
+#include "news/newsview.h"
 #include "menu/networkmenu.h"
 #include "menu/currencymenu.h"
 #include "utils/currencysignloader.h"
@@ -161,6 +163,7 @@ QtBitcoinTrader::QtBitcoinTrader() :
 
     lockedDocks(false),
     actionExit(nullptr),
+    actionUpdate(nullptr),
     actionSendBugReport(nullptr),
     actionAbout(nullptr),
     actionAboutQt(nullptr),
@@ -175,7 +178,8 @@ QtBitcoinTrader::QtBitcoinTrader() :
     menuHelp(nullptr),
     configDialog(nullptr),
     dockHost(new DockHost(this)),
-    dockLogo(nullptr)
+    dockLogo(nullptr),
+    dockDepth(nullptr)
 {
     depthLagTime.restart();
     softLagTime.restart();
@@ -620,17 +624,11 @@ void QtBitcoinTrader::setColumnResizeMode(QTableView* table, QHeaderView::Resize
 
 void QtBitcoinTrader::setupClass()
 {
-    ::config->load("");
-
     switch (exchangeId)
     {
     case 0:
         QCoreApplication::quit();
         return;//Secret Excange
-
-    case 1:
-        currentExchange = new Exchange_WEX(baseValues.restSign, baseValues.restKey);
-        break;//WEX
 
     case 2:
         currentExchange = new Exchange_Bitstamp(baseValues.restSign, baseValues.restKey);
@@ -683,6 +681,8 @@ void QtBitcoinTrader::setupClass()
     default:
         return;
     }
+
+    ::config->load("");
 
     currentExchangeThread.reset(new QThread);
     currentExchange->moveToThread(currentExchangeThread.data());
@@ -1638,19 +1638,6 @@ void QtBitcoinTrader::depthVisibilityChanged(bool visible)
 {
     if (currentExchange)
         currentExchange->depthEnabledFlag = visible || depthAsksModel->rowCount() == 0 || depthBidsModel->rowCount() == 0;
-}
-
-void QtBitcoinTrader::chartsVisibilityChanged(bool visible)
-{
-    chartsView->isVisible = visible;
-
-    if (visible)
-    {
-        if (chartsView->sizeIsChanged)
-            chartsView->refreshCharts();
-        else
-            chartsView->comeNewData();
-    }
 }
 
 void QtBitcoinTrader::trafficTotalToZero_clicked()
@@ -3398,13 +3385,6 @@ void QtBitcoinTrader::initConfigMenu()
         QAction* action = menuConfig->addAction(name);
         connect(action, &QAction::triggered, this, &QtBitcoinTrader::onMenuConfigTriggered);
     }
-
-    lockedDocks = iniSettings->value("UI/LockedDocks", false).toBool();
-
-    if (lockedDocks)
-        actionLockDocks->setChecked(true);
-
-    onActionLockDocks(lockedDocks);
 }
 
 void QtBitcoinTrader::languageChanged()
@@ -3484,9 +3464,13 @@ void QtBitcoinTrader::languageChanged()
 
     actionLockDocks->setText(julyTr("LOCK_DOCKS", "&Lock Docks"));
     actionExit->setText(julyTr("EXIT", "E&xit"));
+    actionUpdate->setText(julyTr("UPDATE", "Check for &updates..."));
     actionSendBugReport->setText(julyTr("SEND_BUG_REPORT", "&Send bug report"));
     actionAbout->setText(julyTr("ABOUT", "&About"));
-    actionAboutQt->setText(julyTr("ABOUT_QT", "&About Qt"));
+    actionAboutQt->setText(julyTr("ABOUT_QT", "About &Qt"));
+#ifndef Q_OS_MAC
+    actionUninstall->setText(julyTr("UNINSTALL", "&Uninstall"));
+#endif
     actionConfigManager->setText(julyTr("CONFIG_MANAGER", "&Save..."));
     actionSettings->setText(julyTr("CONFIG_SETTINGS", "Se&ttings"));
     actionDebug->setText(julyTr("CONFIG_DEBUG", "&Debug"));
@@ -3619,6 +3603,7 @@ void QtBitcoinTrader::depthSubmitOrders(QString symbol, QList<DepthItem>* asks, 
     int currentBidsScroll = ui.depthBidsTable->verticalScrollBar()->value();
     depthAsksModel->depthUpdateOrders(asks);
     depthBidsModel->depthUpdateOrders(bids);
+    depthVisibilityChanged(dockDepth->isVisible());
     ui.depthAsksTable->verticalScrollBar()->setValue(qMin(currentAsksScroll,
             ui.depthAsksTable->verticalScrollBar()->maximum()));
     ui.depthBidsTable->verticalScrollBar()->setValue(qMin(currentBidsScroll,
@@ -3769,11 +3754,11 @@ double QtBitcoinTrader::getAvailableUSDtoBTC(double priceToBuy)
             break;
 
         case 3:
-        {
-            double zeros = qPow(10, baseValues.currentPair.currBDecimals);
-            avUSD = ceil(avUSD / (floatFee + 1.0) * zeros) / zeros;
-            break;
-        }
+            {
+                double zeros = qPow(10, baseValues.currentPair.currBDecimals);
+                avUSD = ceil(avUSD / (floatFee + 1.0) * zeros) / zeros;
+                break;
+            }
 
         default:
             break;
@@ -3986,6 +3971,9 @@ void QtBitcoinTrader::createActions()
     actionExit->setShortcut(QKeySequence::Quit);
     connect(actionExit, SIGNAL(triggered()), this, SLOT(exitApp()));
 
+    actionUpdate = new QAction("Check for &updates...", this);
+    connect(actionUpdate, SIGNAL(triggered()), this, SLOT(checkUpdate()));
+
     actionSendBugReport = new QAction("&Send bug report", this);
     connect(actionSendBugReport, SIGNAL(triggered()), this, SLOT(onActionSendBugReport()));
 
@@ -4003,12 +3991,15 @@ void QtBitcoinTrader::createActions()
 
     actionDebug = new QAction("&Debug", this);
     connect(actionDebug, &QAction::triggered, this, &QtBitcoinTrader::onActionDebug);
+#ifndef Q_OS_MAC
 
     if (!baseValues_->portableMode)
     {
-        actionUninstall = new QAction(julyTr("UNINSTALL", "&Uninstall"), this);
+        actionUninstall = new QAction("&Uninstall", this);
         connect(actionUninstall, &QAction::triggered, this, &QtBitcoinTrader::uninstall);
     }
+
+#endif
 }
 
 void QtBitcoinTrader::createMenu()
@@ -4032,12 +4023,21 @@ void QtBitcoinTrader::createMenu()
     menuConfig = menuBar()->addMenu("&Config");
 
     menuHelp = menuBar()->addMenu("&Help");
+    menuHelp->addAction(actionUpdate);
     menuHelp->addAction(actionSendBugReport);
+    menuHelp->addSeparator();
     menuHelp->addAction(actionAbout);
     menuHelp->addAction(actionAboutQt);
 
+#ifndef Q_OS_MAC
+
     if (!baseValues_->portableMode)
+    {
+        menuHelp->addSeparator();
         menuHelp->addAction(actionUninstall);
+    }
+
+#endif
 
     ui.menubar->setStyleSheet("font-size:12px");
 }
@@ -4152,7 +4152,7 @@ void QtBitcoinTrader::moveWidgetsToDocks()
     // tabs
     QDockWidget* dockOrdersLog = createDock(ui.tabOrdersLog, "Orders Log");
     QDockWidget* dockRules = createDock(ui.tabRules, "Rules");
-    QDockWidget* dockDepth = createDock(ui.tabDepth, "Order Book");
+    dockDepth = createDock(ui.tabDepth, "Order Book");
     QDockWidget* dockLastTrades = createDock(ui.tabLastTrades, "Trades");
     QDockWidget* dockCharts = createDock(ui.tabCharts, "Charts");
     QDockWidget* dockNews = createDock(ui.tabNews, "News");
@@ -4172,9 +4172,16 @@ void QtBitcoinTrader::moveWidgetsToDocks()
     setCentralWidget(centralDockNULL);
     //centralWidget()->deleteLater();
 
-    connect(dockDepth, SIGNAL(visibilityChanged(bool)), this, SLOT(depthVisibilityChanged(bool)));
-    connect(dockCharts, SIGNAL(visibilityChanged(bool)), this, SLOT(chartsVisibilityChanged(bool)));
-    connect(dockNews, SIGNAL(visibilityChanged(bool)), newsView, SLOT(visibilityChanged(bool)));
+    connect(dockDepth,  SIGNAL(visibilityChanged(bool)), this,       SLOT(depthVisibilityChanged(bool)));
+    connect(dockCharts, SIGNAL(visibilityChanged(bool)), chartsView, SLOT(visibilityChanged(bool)));
+    connect(dockNews,   SIGNAL(visibilityChanged(bool)), newsView,   SLOT(visibilityChanged(bool)));
+
+    lockedDocks = iniSettings->value("UI/LockedDocks", false).toBool();
+
+    if (lockedDocks)
+        actionLockDocks->setChecked(true);
+
+    onActionLockDocks(lockedDocks);
 }
 
 void QtBitcoinTrader::onActionAbout()
@@ -4311,7 +4318,7 @@ void QtBitcoinTrader::exitApp()
     secondTimer.reset();
 
     saveAppState();
-    ::config->save("");
+    ::config->save("", false);
     hide();
 
     if (configDialog)

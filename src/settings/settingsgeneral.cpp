@@ -32,6 +32,7 @@
 #include "settingsgeneral.h"
 #include "main.h"
 #include "translationmessage.h"
+#include "charts/chartsview.h"
 #include <QDir>
 
 SettingsGeneral::SettingsGeneral()
@@ -129,6 +130,7 @@ void SettingsGeneral::loadOther()
     ui.confirmOpenOrderCheckBox->setChecked(iniSettings->value("UI/ConfirmOpenOrder", true).toBool());
     ui.closeToTrayCheckBox->setChecked(iniSettings->value("UI/CloseToTray", false).toBool());
     ui.optimizeInterfaceCheckBox->setChecked(iniSettings->value("UI/OptimizeInterface", false).toBool());
+    ui.useAltDomainYobitBox->setChecked(mainSettings->value("UseAlternateDomainForYobit", false).toBool());
     ui.hiDpiCheckBox->setChecked(hiDpiSettings->value("HiDPI", baseValues.defaultEnableHiDPI).toBool());
 }
 
@@ -144,6 +146,7 @@ void SettingsGeneral::saveOther()
     baseValues.mainWindow_->closeToTray = ui.closeToTrayCheckBox->isChecked();
 
     iniSettings->setValue("UI/OptimizeInterface", ui.optimizeInterfaceCheckBox->isChecked());
+    mainSettings->setValue("UseAlternateDomainForYobit", ui.useAltDomainYobitBox->isChecked());
 
     if (ui.hiDpiCheckBox->isChecked() != hiDpiSettings->value("HiDPI", baseValues.defaultEnableHiDPI).toBool())
     {
@@ -200,6 +203,7 @@ void SettingsGeneral::on_restoreDefaultsButton_clicked()
     ui.confirmOpenOrderCheckBox->setChecked(true);
     ui.closeToTrayCheckBox->setChecked(false);
     ui.optimizeInterfaceCheckBox->setChecked(false);
+    ui.useAltDomainYobitBox->setChecked(false);
     ui.hiDpiCheckBox->setChecked(baseValues.defaultEnableHiDPI);
     ui.checkForUpdatesCheckBox->setChecked(true);
     ui.checkForUpdatesBetaCheckBox->setChecked(false);

@@ -29,9 +29,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "timesync.h"
 #include "iniengine.h"
 #include "exchange_hitbtc.h"
-#include <openssl/hmac.h>
 
 Exchange_HitBTC::Exchange_HitBTC(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange(),
@@ -98,7 +98,7 @@ void Exchange_HitBTC::clearVariables()
     isFirstAccInfo = true;
     lastTickerDate = 0;
     lastTradesId = 0;
-    lastTradesDate = QDateTime::currentDateTime().toMSecsSinceEpoch() - 600000;
+    lastTradesDate = TimeSync::getMSecs() - 600000;
     lastHistoryId = 0;
     Exchange::clearVariables();
     lastHistory.clear();
@@ -204,7 +204,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
     case 109: //trades
         if (data.size() > 10)
         {
-            qint64 time10Min = QDateTime::currentDateTime().toMSecsSinceEpoch() - 600000;
+            qint64 time10Min = TimeSync::getMSecs() - 600000;
             QStringList tradeList = QString(data).split("},{");
             QList<TradesItem>* newTradesItems = new QList<TradesItem>;
 

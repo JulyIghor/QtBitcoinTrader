@@ -30,7 +30,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "logthread.h"
-#include <QDateTime>
 #include <QFile>
 #include <QApplication>
 #include "main.h"

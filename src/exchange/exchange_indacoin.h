@@ -66,15 +66,15 @@ private:
 
     QTime authRequestTime;
 
-    quint32 lastPriceDate;
+    qint64 lastPriceDate;
     qint64 lastTickerDate;
-    quint32 privateNonce;
-    quint32 lastHistoryTs;
+    qint64 privateNonce;
+    qint64 lastHistoryTs;
 
     void clearVariables();
     void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
     void depthUpdateOrder(QString, double, double, bool);
-    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = 0);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = nullptr);
 private slots:
     void reloadDepth();
     void sslErrors(const QList<QSslError>&);

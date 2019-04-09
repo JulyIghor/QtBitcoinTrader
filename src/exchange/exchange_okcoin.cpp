@@ -29,8 +29,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "timesync.h"
 #include "exchange_okcoin.h"
-#include <openssl/hmac.h>
 
 Exchange_OKCoin::Exchange_OKCoin(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange()
@@ -48,10 +48,10 @@ Exchange_OKCoin::Exchange_OKCoin(QByteArray pRestSign, QByteArray pRestKey)
     baseValues.currentPair.priceMin = qPow(0.1, baseValues.currentPair.priceDecimals);
     baseValues.currentPair.tradeVolumeMin = 0.001;
     baseValues.currentPair.tradePriceMin = 0.1;
-    depthAsks = 0;
-    depthBids = 0;
+    depthAsks = nullptr;
+    depthBids = nullptr;
     forceDepthLoad = false;
-    julyHttp = 0;
+    julyHttp = nullptr;
     isApiDown = false;
     tickerOnly = false;
     setApiKeySecret(pRestKey, pRestSign);
@@ -102,7 +102,7 @@ void Exchange_OKCoin::clearVariables()
     reloadDepth();
     lastFetchTid = 1;
     lastTickerDate = 0;
-    startTradesDate = QDateTime::currentDateTime().toTime_t() - 600;
+    startTradesDate = TimeSync::getTimeT() - 600;
 
     if (0.2 != lastFee)
         emit accFeeChanged(baseValues.currentPair.symbol, 0.2);
@@ -202,7 +202,7 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
                         lastTickerVolume = newTickerVolume;
                     }
 
-                    quint32 newTickerDate = getMidData("date\":\"", "\"", &data).toUInt();
+                    qint64 newTickerDate = getMidData("date\":\"", "\"", &data).toUInt();
 
                     if (lastTickerDate < newTickerDate)
                     {
@@ -238,7 +238,7 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
                         if (newItem.date < startTradesDate)
                             continue;
 
-                        quint64 currentTid = getMidData("\"tid\":", ",", &tradeData).toULongLong();
+                        qint64 currentTid = getMidData("\"tid\":", ",", &tradeData).toULongLong();
 
                         if (lastFetchTid >= currentTid)
                             continue;
@@ -255,9 +255,9 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
 
                         if (newItem.isValid())
                         {
-                            qint32 pos = -1;
+                            int pos = -1;
 
-                            for (qint32 i = newTradesItems->size() - 1; i >= 0; i--)
+                            for (int i = newTradesItems->size() - 1; i >= 0; i--)
                             {
                                 if (newTradesItems->at(i).date != newItem.date)
                                     break;
@@ -437,8 +437,8 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
                         lastDepthBidsMap = currentBidsMap;
 
                         emit depthSubmitOrders(baseValues.currentPair.symbol, depthAsks, depthBids);
-                        depthAsks = 0;
-                        depthBids = 0;
+                        depthAsks = nullptr;
+                        depthBids = nullptr;
                     }
                 }
                 else
@@ -547,8 +547,8 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
                         if (dataList.count() == 0)
                             return;
 
-                        quint64 currentId;
-                        quint64 maxId = 0;
+                        qint64 currentId;
+                        qint64 maxId = 0;
                         QList<HistoryItem>* historyItems = new QList<HistoryItem>;
 
                         for (int n = 0; n < dataList.count(); n++)
@@ -631,7 +631,7 @@ void Exchange_OKCoin::dataReceivedAuth(QByteArray data, int reqType)
 
             if (authErrorCount > 2)
             {
-                quint32 errorCode = getMidData("error_code\":", ",", &data).toInt();
+                qint64 errorCode = getMidData("error_code\":", ",", &data).toLongLong();
                 QString authError = "Error code: " + QByteArray::number(errorCode) + ".";
 
                 if (debugLevel)
@@ -655,7 +655,7 @@ void Exchange_OKCoin::depthUpdateOrder(QString symbol, double price, double amou
 
     if (isAsk)
     {
-        if (depthAsks == 0)
+        if (depthAsks == nullptr)
             return;
 
         DepthItem newItem;
@@ -667,7 +667,7 @@ void Exchange_OKCoin::depthUpdateOrder(QString symbol, double price, double amou
     }
     else
     {
-        if (depthBids == 0)
+        if (depthBids == nullptr)
             return;
 
         DepthItem newItem;
@@ -706,7 +706,7 @@ void Exchange_OKCoin::depthSubmitOrder(QString symbol, QMap<double, double>* cur
 
 bool Exchange_OKCoin::isReplayPending(int reqType)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
         return false;
 
     return julyHttp->isReqTypePending(reqType);
@@ -841,7 +841,7 @@ void Exchange_OKCoin::cancelOrder(QString, QByteArray order)
 
 void Exchange_OKCoin::sendToApi(int reqType, QByteArray method, bool auth, QByteArray commands)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
     {
         julyHttp = new JulyHttp("www.okcoin.cn", "Key: " + getApiKey() + "\r\n", this);
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));

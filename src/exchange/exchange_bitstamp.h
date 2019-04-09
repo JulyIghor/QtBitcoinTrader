@@ -65,15 +65,15 @@ private:
 
     QTime authRequestTime;
 
-    quint32 lastBidAskTimestamp;
+    qint64 lastBidAskTimestamp;
     qint64 lastTickerDate;
     qint64 lastTradesDate;
-    quint32 privateNonce;
+    qint64 privateNonce;
 
     void clearVariables();
     void depthSubmitOrder(QString, QMap<double, double>*, double, double, bool);
     void depthUpdateOrder(QString, double, double, bool);
-    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = 0);
+    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = nullptr);
 
 private slots:
     void reloadDepth();

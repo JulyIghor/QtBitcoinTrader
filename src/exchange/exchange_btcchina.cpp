@@ -29,6 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "timesync.h"
 #include "exchange_btcchina.h"
 
 Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
@@ -42,11 +43,11 @@ Exchange_BTCChina::Exchange_BTCChina(QByteArray pRestSign, QByteArray pRestKey)
     minimumRequestIntervalAllowed = 600;
     calculatingFeeMode = 1;
     baseValues.exchangeName = "BTC China";
-    depthAsks = 0;
-    depthBids = 0;
+    depthAsks = nullptr;
+    depthBids = nullptr;
     forceDepthLoad = false;
-    julyHttpAuth = 0;
-    julyHttpPublic = 0;
+    julyHttpAuth = nullptr;
+    julyHttpPublic = nullptr;
     tickerOnly = false;
     setApiKeySecret(pRestKey, pRestSign);
 
@@ -212,13 +213,13 @@ bool Exchange_BTCChina::isReplayPending(int reqType)
 {
     if (reqType < 200)
     {
-        if (julyHttpPublic == 0)
+        if (julyHttpPublic == nullptr)
             return false;
 
         return julyHttpPublic->isReqTypePending(reqType);
     }
 
-    if (julyHttpAuth == 0)
+    if (julyHttpAuth == nullptr)
         return false;
 
     return julyHttpAuth->isReqTypePending(reqType);
@@ -308,7 +309,7 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
 {
     if (auth)
     {
-        if (julyHttpAuth == 0)
+        if (julyHttpAuth == nullptr)
         {
             julyHttpAuth = new JulyHttp("api.btcchina.com", "", this, true, true, "application/json-rpc");
             connect(julyHttpAuth, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
@@ -330,8 +331,8 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
         QByteArray appendedHeader;
 
         static int tonceCounter = 10;
-        static quint32 lastTonce = QDateTime::currentDateTime().toTime_t();
-        quint32 newTonce = QDateTime::currentDateTime().toTime_t();
+        static qint64 lastTonce = TimeSync::getTimeT();
+        qint64 newTonce = TimeSync::getTimeT();
 
         if (lastTonce != newTonce)
         {
@@ -371,7 +372,7 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
     }
     else
     {
-        if (julyHttpPublic == 0)
+        if (julyHttpPublic == nullptr)
         {
             julyHttpPublic = new JulyHttp("data.btcchina.com", "", this, true, true, "application/json-rpc");
             connect(julyHttpPublic, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
@@ -397,7 +398,7 @@ void Exchange_BTCChina::depthUpdateOrder(QString symbol, double price, double am
 
     if (isAsk)
     {
-        if (depthAsks == 0)
+        if (depthAsks == nullptr)
             return;
 
         DepthItem newItem;
@@ -409,7 +410,7 @@ void Exchange_BTCChina::depthUpdateOrder(QString symbol, double price, double am
     }
     else
     {
-        if (depthBids == 0)
+        if (depthBids == nullptr)
             return;
 
         DepthItem newItem;
@@ -739,8 +740,8 @@ void Exchange_BTCChina::dataReceivedAuth(QByteArray data, int reqType)
                     lastDepthAsksMap = currentAsksMap;
 
                     emit depthSubmitOrders(baseValues.currentPair.symbol, depthAsks, depthBids);
-                    depthAsks = 0;
-                    depthBids = 0;
+                    depthAsks = nullptr;
+                    depthBids = nullptr;
                 }
             }
             else if (debugLevel)

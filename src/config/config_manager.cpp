@@ -120,7 +120,7 @@ void ConfigManager::sync()
     settings.sync();
 }
 
-void ConfigManager::save(const QString& name)
+void ConfigManager::save(const QString& name, bool initConfigMenu)
 {
     QStringList names = settings.value(CONFIG_NAMES).toStringList();
 
@@ -140,7 +140,9 @@ void ConfigManager::save(const QString& name)
     settings.endGroup();
 
     settings.sync();
-    emit onChanged();
+
+    if (initConfigMenu)
+        emit onChanged();
 }
 
 void ConfigManager::load(const QString& name)

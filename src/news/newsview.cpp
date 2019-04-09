@@ -53,7 +53,7 @@ void NewsView::visibilityChanged(bool visible)
 {
     if (visible && loadingFinished)
     {
-        quint32 nowTime = TimeSync::getTimeT();
+        qint64 nowTime = TimeSync::getTimeT();
 
         if (nowTime - lastUpdatedTime > 600)
         {

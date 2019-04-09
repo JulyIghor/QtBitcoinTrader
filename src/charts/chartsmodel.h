@@ -41,8 +41,8 @@ class ChartsModel : public QObject
 {
     Q_OBJECT
 public:
-    qint16 chartsWidth;
-    qint16 chartsHeight;
+    int chartsWidth;
+    int chartsHeight;
     qint32 widthAmountYAxis;
     qint32 widthPriceYAxis;
     qint16 perfomanceStep;
@@ -67,7 +67,7 @@ public:
     ChartsModel();
     ~ChartsModel();
 
-    bool prepareChartsData(qint16, qint16);
+    bool prepareChartsData(int, int);
 
 public slots:
     void addLastTrades(QList<TradesItem>*);

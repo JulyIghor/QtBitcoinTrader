@@ -43,7 +43,7 @@ class DockHost : public QObject
 
 public:
     explicit DockHost(QObject*);
-    ~DockHost();
+    ~DockHost() override;
 
 public:
     QDockWidget* createDock(QWidget* parent, QWidget* widget, const QString& title);
@@ -57,15 +57,13 @@ protected:
 private Q_SLOTS:
     void onDockActionTriggered(bool checked = false);
     void onDockTopLevelChanged();
-    void onDockVisibilityChanged();
-    void onDockFeaturesChanged(QDockWidget::DockWidgetFeatures features);
 
 private:
-    void selectTab(QDockWidget* dock);
     void adjustFloatingWindowFlags(QDockWidget* dock);
     bool isConstrained(QDockWidget* dock);
 
 private:
     QList<QWidget*> widgets;
     QDockWidget*    dockToggling;
+    bool            lastLock;
 };

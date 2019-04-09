@@ -40,6 +40,8 @@
 ChartsView::ChartsView()
     : QWidget(),
       ui(new Ui::ChartsView),
+      isChartsVisible(false),
+      sizeIsChanged(false),
       refreshTimer(new QTimer),
       perfomanceTimer(new QElapsedTimer),
       timeRefreshCharts(5000),
@@ -107,11 +109,27 @@ ChartsView::~ChartsView()
 {
 }
 
+void ChartsView::visibilityChanged(bool visible)
+{
+    isChartsVisible = visible;
+
+    if (visible)
+    {
+        if (sizeIsChanged)
+        {
+            sizeIsChanged = false;
+            refreshCharts();
+        }
+        else
+            comeNewData();
+    }
+}
+
 void ChartsView::resizeEvent(QResizeEvent* event)
 {
     event->accept();
 
-    if (!isVisible)
+    if (!isChartsVisible)
     {
         sizeIsChanged = true;
         return;
@@ -131,7 +149,7 @@ void ChartsView::resizeEvent(QResizeEvent* event)
 
 void ChartsView::comeNewData()
 {
-    if (!isVisible)
+    if (!isChartsVisible)
         return;
 
     qint32 nowTime = QTime::currentTime().msecsSinceStartOfDay();
@@ -212,7 +230,7 @@ bool ChartsView::prepareCharts()
                  11, chartsModel->graphPriceTextY.at(i) + 7);
     }
 
-    ui->graphicsView->setScene(0);
+    ui->graphicsView->setScene(nullptr);
     sceneCharts.reset(new QGraphicsScene);
     ui->graphicsView->setScene(sceneCharts.data());
 
@@ -253,7 +271,7 @@ void ChartsView::clearCharts()
 
 void ChartsView::refreshCharts()
 {
-    if (!isVisible)
+    if (!isChartsVisible)
         return;
 
     perfomanceTimer->start();
@@ -325,7 +343,7 @@ void ChartsView::refreshCharts()
         }
     }
 
-    quint32 perfDeltaTime = perfomanceTimer->elapsed();
+    qint64 perfDeltaTime = perfomanceTimer->elapsed();
 
     if (perfDeltaTime > 50 && chartsModel->perfomanceStep < 10)
         ++chartsModel->perfomanceStep;

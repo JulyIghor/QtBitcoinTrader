@@ -29,8 +29,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "timesync.h"
 #include "exchange_gocio.h"
-#include <openssl/hmac.h>
 
 Exchange_GOCio::Exchange_GOCio(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange()
@@ -45,10 +45,10 @@ Exchange_GOCio::Exchange_GOCio(QByteArray pRestSign, QByteArray pRestKey)
     baseValues.currentPair.priceMin = qPow(0.1, baseValues.currentPair.priceDecimals);
     baseValues.currentPair.tradeVolumeMin = 0.01;
     baseValues.currentPair.tradePriceMin = 0.1;
-    depthAsks = 0;
-    depthBids = 0;
+    depthAsks = nullptr;
+    depthBids = nullptr;
     forceDepthLoad = false;
-    julyHttp = 0;
+    julyHttp = nullptr;
     isApiDown = false;
     tickerOnly = false;
     setApiKeySecret(pRestKey, pRestSign);
@@ -65,7 +65,7 @@ Exchange_GOCio::Exchange_GOCio(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume = false;
 
     authRequestTime.restart();
-    privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
+    privateNonce = (TimeSync::getTimeT() - 1371854884) * 10;
 
     lastDate = "0";
     lastHistoryId = 0;
@@ -101,7 +101,7 @@ void Exchange_GOCio::clearVariables()
     lastHistory.clear();
     lastOrders.clear();
     reloadDepth();
-    lastFetchTid = QDateTime::currentDateTime().toTime_t() - 600;
+    lastFetchTid = TimeSync::getTimeT() - 600;
     lastFetchTid = -lastFetchTid;
     lastTickerDate = 0;
 }
@@ -147,7 +147,7 @@ void Exchange_GOCio::dataReceivedAuth(QByteArray data, int reqType)
 
                 double tickerLastDouble = 0.0;
 
-                quint32 newTickerDate = getMidData("\"updated\":", ",\"", &data).toUInt();
+                qint64 newTickerDate = getMidData("\"updated\":", ",\"", &data).toUInt();
 
                 if (lastTickerDate < newTickerDate)
                 {
@@ -246,7 +246,7 @@ void Exchange_GOCio::dataReceivedAuth(QByteArray data, int reqType)
                     if (lastFetchTid < 0 && newItem.date < -lastFetchTid)
                         continue;
 
-                    quint32 currentTid = getMidData("\"tid\":", ",\"", &tradeData).toUInt();
+                    qint64 currentTid = getMidData("\"tid\":", ",\"", &tradeData).toUInt();
 
                     if (currentTid < 1000 || lastFetchTid >= currentTid)
                         continue;
@@ -410,8 +410,8 @@ void Exchange_GOCio::dataReceivedAuth(QByteArray data, int reqType)
                     lastDepthBidsMap = currentBidsMap;
 
                     emit depthSubmitOrders(baseValues.currentPair.symbol, depthAsks, depthBids);
-                    depthAsks = 0;
-                    depthBids = 0;
+                    depthAsks = nullptr;
+                    depthBids = nullptr;
                 }
             }
             else if (debugLevel)
@@ -568,8 +568,8 @@ void Exchange_GOCio::dataReceivedAuth(QByteArray data, int reqType)
                     newLog.clear();
                     bool isFirstDate = true;
                     QByteArray tempDate;
-                    quint32 currentId;
-                    quint32 maxId = 0;
+                    qint64 currentId;
+                    qint64 maxId = 0;
                     QList<HistoryItem>* historyItems = new QList<HistoryItem>;
 
                     for (int n = 0; n < dataList.count(); n++)
@@ -689,7 +689,7 @@ void Exchange_GOCio::depthUpdateOrder(QString symbol, double price, double amoun
 
     if (isAsk)
     {
-        if (depthAsks == 0)
+        if (depthAsks == nullptr)
             return;
 
         DepthItem newItem;
@@ -701,7 +701,7 @@ void Exchange_GOCio::depthUpdateOrder(QString symbol, double price, double amoun
     }
     else
     {
-        if (depthBids == 0)
+        if (depthBids == nullptr)
             return;
 
         DepthItem newItem;
@@ -740,7 +740,7 @@ void Exchange_GOCio::depthSubmitOrder(QString symbol, QMap<double, double>* curr
 
 bool Exchange_GOCio::isReplayPending(int reqType)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
         return false;
 
     return julyHttp->isReqTypePending(reqType);
@@ -872,7 +872,7 @@ void Exchange_GOCio::cancelOrder(QString, QByteArray order)
 
 void Exchange_GOCio::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
     {
         julyHttp = new JulyHttp("goc.io", "Key: " + getApiKey() + "\r\n", this);
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));

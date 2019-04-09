@@ -48,8 +48,6 @@ class ChartsView : public QWidget
 {
     Q_OBJECT
 public:
-    bool isVisible;
-    bool sizeIsChanged;
     QScopedPointer<ChartsModel> chartsModel;
 
     ChartsView();
@@ -60,11 +58,14 @@ public:
 
 public slots:
     void refreshCharts();
+    void visibilityChanged(bool visible);
 
 private:
     QScopedPointer<Ui::ChartsView> ui;
-    quint16 fontHeight;
-    quint16 fontHeightHalf;
+    bool isChartsVisible;
+    bool sizeIsChanged;
+    int fontHeight;
+    int fontHeightHalf;
     QScopedPointer<QGraphicsScene> sceneCharts;
     QScopedPointer<QGraphicsScene> leftSceneCharts;
     QScopedPointer<QGraphicsScene> rightSceneCharts;

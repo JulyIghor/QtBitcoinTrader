@@ -45,26 +45,28 @@ class TimeSync : public QObject
 public:
     TimeSync();
     ~TimeSync();
-    static TimeSync* global();
-    static qint64 getTimeT();
     static void syncNow();
+    static TimeSync* global();
+    static qint64 getMSecs();
+    static qint64 getTimeT();
 
 signals:
-    void warningMessage(QString);
     void startSync();
+    void warningMessage(QString);
 
 private slots:
     void runThread();
-    void getNTPTime();
     void quitThread();
+    void getNTPTime();
+
 private:
     QScopedPointer<QThread> dateUpdateThread;
-    std::atomic<qint64> started;
+    QMutex mutex;
+    std::atomic<bool> started;
+
     qint64 startTime;
     std::atomic<qint64> timeShift;
     QScopedPointer<QElapsedTimer> additionalTimer;
-    QMutex mutex;
-    int getNTPTimeRetryCount;
 };
 
 #endif // TIMESYNC_H

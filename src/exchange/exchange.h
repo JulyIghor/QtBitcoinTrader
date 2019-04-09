@@ -43,7 +43,6 @@
 #include "orderitem.h"
 #include "tradesitem.h"
 #include "julymath.h"
-#include "timesync.h"
 #include "indicatorengine.h"
 
 struct DepthItem;
@@ -58,7 +57,7 @@ public:
     bool clearHistoryOnCurrencyChanged;
     bool exchangeTickerSupportsHiLowPrices;
     bool isDepthEnabled();
-    bool depthEnabledFlag;
+    std::atomic_bool depthEnabledFlag;
     virtual void filterAvailableUSDAmountValue(double* amount);
 
     CurrencyPairItem defaultCurrencyParams;

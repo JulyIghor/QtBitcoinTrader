@@ -29,8 +29,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "timesync.h"
 #include "exchange_bitmarket.h"
-#include <openssl/hmac.h>
 
 Exchange_BitMarket::Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange()
@@ -47,10 +47,10 @@ Exchange_BitMarket::Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey
     baseValues.currentPair.priceMin = qPow(0.1, baseValues.currentPair.priceDecimals);
     baseValues.currentPair.tradeVolumeMin = 0.01;
     baseValues.currentPair.tradePriceMin = 0.1;
-    depthAsks = 0;
-    depthBids = 0;
+    depthAsks = nullptr;
+    depthBids = nullptr;
     forceDepthLoad = false;
-    julyHttp = 0;
+    julyHttp = nullptr;
     isApiDown = false;
     tickerOnly = false;
     setApiKeySecret(pRestKey, pRestSign);
@@ -67,7 +67,7 @@ Exchange_BitMarket::Exchange_BitMarket(QByteArray pRestSign, QByteArray pRestKey
     supportsAccountVolume = false;
 
     authRequestTime.restart();
-    privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
+    privateNonce = (TimeSync::getTimeT() - 1371854884) * 10;
 
     connect(this, &Exchange::threadFinished, this, &Exchange_BitMarket::quitThread, Qt::DirectConnection);
 }
@@ -101,7 +101,7 @@ void Exchange_BitMarket::clearVariables()
     lastHistory.clear();
     lastOrders.clear();
     reloadDepth();
-    lastFetchTid = QDateTime::currentDateTime().toTime_t() - 600;
+    lastFetchTid = TimeSync::getTimeT() - 600;
     lastFetchTid = -lastFetchTid;
     lastTickerDate = 0;
     lastTradesTid.clear();
@@ -225,7 +225,7 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
                 QStringList tradeList = QString(data).split("},{");
                 QList<TradesItem>* newTradesItems = new QList<TradesItem>;
 
-                quint32 currentTid = 0;
+                qint64 currentTid = 0;
 
                 for (int n = tradeList.count() - 1; n >= 0; n--)
                 {
@@ -549,7 +549,7 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
                     if (historyData == "^")
                         break;
 
-                    quint32 count = getMidData("total\":", ",", &data).toInt();
+                    qint64 count = getMidData("total\":", ",", &data).toInt();
 
                     if (count <= lastHistoryCount)
                         break;
@@ -562,8 +562,8 @@ void Exchange_BitMarket::dataReceivedAuth(QByteArray data, int reqType)
                     if (dataList.count() == 0)
                         return;
 
-                    quint32 currentId;
-                    quint32 maxId = 0;
+                    qint64 currentId;
+                    qint64 maxId = 0;
                     QList<HistoryItem>* historyItems = new QList<HistoryItem>;
 
                     for (int n = 0; n < dataList.count(); n++)
@@ -872,7 +872,7 @@ void Exchange_BitMarket::sendToApi(int reqType, QByteArray method, bool auth, bo
 
     if (auth)
     {
-        QByteArray postData = "method=" + method + "&tonce=" + QByteArray::number(QDateTime::currentDateTime().toTime_t()) +
+        QByteArray postData = "method=" + method + "&tonce=" + QByteArray::number(TimeSync::getTimeT()) +
                               "&nonce=" + QByteArray::number(++privateNonce);
 
         if (sendNow)

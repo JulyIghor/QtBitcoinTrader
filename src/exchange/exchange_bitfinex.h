@@ -58,7 +58,7 @@ private:
 
     qint64 lastTradesDate;
     qint64 tickerLastDate;
-    quint64 lastHistoryId;
+    qint64 lastHistoryId;
 
     QList<DepthItem>* depthAsks;
     QList<DepthItem>* depthBids;
@@ -70,7 +70,7 @@ private:
 
     QTime authRequestTime;
 
-    quint32 privateNonce;
+    qint64 privateNonce;
 
     void clearVariables();
     void depthSubmitOrder(QString, QMap<double, double>*, double, double, bool);

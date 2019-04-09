@@ -29,9 +29,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "iniengine.h"
+#include "timesync.h"
 #include "exchange_bittrex.h"
-#include <openssl/hmac.h>
 
 Exchange_Bittrex::Exchange_Bittrex(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange(),
@@ -39,7 +38,7 @@ Exchange_Bittrex::Exchange_Bittrex(QByteArray pRestSign, QByteArray pRestKey)
       lastTickerTime(),
       lastTradesId(0),
       lastHistoryTime(0),
-      privateNonce((QDateTime::currentDateTime().toTime_t() - 1371854884) * 10),
+      privateNonce((TimeSync::getTimeT() - 1371854884) * 10),
       lastCanceledId(),
       julyHttp(nullptr),
       depthAsks(nullptr),
@@ -205,7 +204,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
         case 109: //trades
             {
-                qint64 time10Min = QDateTime::currentDateTime().toTime_t() - 600;
+                qint64 time10Min = TimeSync::getTimeT() - 600;
                 QStringList tradeList = QString(data).split("},{");
                 QList<TradesItem>* newTradesItems = new QList<TradesItem>;
 

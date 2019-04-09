@@ -29,9 +29,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "exchange_bitstamp.h"
+#include "timesync.h"
 #include "iniengine.h"
-#include <openssl/hmac.h>
+#include "exchange_bitstamp.h"
 
 Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange()
@@ -51,10 +51,10 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
     baseValues.currentPair.priceMin = qPow(0.1, baseValues.currentPair.priceDecimals);
     baseValues.currentPair.tradeVolumeMin = 0.01;
     baseValues.currentPair.tradePriceMin = 0.1;
-    depthAsks = 0;
-    depthBids = 0;
+    depthAsks = nullptr;
+    depthBids = nullptr;
     forceDepthLoad = false;
-    julyHttp = 0;
+    julyHttp = nullptr;
     tickerOnly = false;
     setApiKeySecret(pRestKey.split(':').last(), pRestSign);
     privateClientId = pRestKey.split(':').first();
@@ -71,7 +71,7 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
     supportsAccountVolume = false;
 
     authRequestTime.restart();
-    privateNonce = (QDateTime::currentDateTime().toTime_t() - 1371854884) * 10;
+    privateNonce = (TimeSync::getTimeT() - 1371854884) * 10;
 
     connect(this, &Exchange::threadFinished, this, &Exchange_Bitstamp::quitThread, Qt::DirectConnection);
 }
@@ -111,7 +111,7 @@ void Exchange_Bitstamp::clearVariables()
     reloadDepth();
     lastInfoReceived = false;
     lastBidAskTimestamp = 0;
-    lastTradesDate = QDateTime::currentDateTime().toTime_t() - 600;
+    lastTradesDate = TimeSync::getTimeT() - 600;
     lastTickerDate = 0;
 }
 
@@ -181,7 +181,7 @@ void Exchange_Bitstamp::secondSlot()
 
 bool Exchange_Bitstamp::isReplayPending(int reqType)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
         return false;
 
     return julyHttp->isReqTypePending(reqType);
@@ -254,7 +254,7 @@ void Exchange_Bitstamp::cancelOrder(QString, QByteArray order)
 
 void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
 {
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
     {
         julyHttp = new JulyHttp("www.bitstamp.net", "", this);
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
@@ -296,7 +296,7 @@ void Exchange_Bitstamp::depthUpdateOrder(QString symbol, double price, double am
 
     if (isAsk)
     {
-        if (depthAsks == 0)
+        if (depthAsks == nullptr)
             return;
 
         DepthItem newItem;
@@ -308,7 +308,7 @@ void Exchange_Bitstamp::depthUpdateOrder(QString symbol, double price, double am
     }
     else
     {
-        if (depthBids == 0)
+        if (depthBids == nullptr)
             return;
 
         DepthItem newItem;
@@ -333,14 +333,14 @@ void Exchange_Bitstamp::depthSubmitOrder(QString symbol, QMap<double, double>* c
     {
         (*currentMap)[priceDouble] = amount;
 
-        if (lastDepthAsksMap.value(priceDouble, 0.0) != amount)
+        if (!qFuzzyCompare(lastDepthAsksMap.value(priceDouble, 0.0), amount))
             depthUpdateOrder(symbol, priceDouble, amount, true);
     }
     else
     {
         (*currentMap)[priceDouble] = amount;
 
-        if (lastDepthBidsMap.value(priceDouble, 0.0) != amount)
+        if (!qFuzzyCompare(lastDepthBidsMap.value(priceDouble, 0.0), amount))
             depthUpdateOrder(symbol, priceDouble, amount, false);
     }
 }
@@ -372,83 +372,64 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 
         if (data.startsWith("{\"high\":"))
         {
-            quint32 tickerTimestamp = getMidData("\"timestamp\": \"", "\"", &data).toUInt();
-            QByteArray tickerHigh = getMidData("\"high\": \"", "\"", &data);
+            double tickerHigh = getMidData("\"high\": \"", "\"", &data).toDouble();
 
-            if (!tickerHigh.isEmpty())
+            if (tickerHigh > 0.0 && !qFuzzyCompare(tickerHigh, lastTickerHigh))
             {
-                double newTickerHigh = tickerHigh.toDouble();
-
-                if (newTickerHigh != lastTickerHigh)
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "High", newTickerHigh);
-
-                lastTickerHigh = newTickerHigh;
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "High", tickerHigh);
+                lastTickerHigh = tickerHigh;
             }
 
-            QByteArray tickerLow = getMidData("\"low\": \"", "\"", &data);
+            double tickerLow = getMidData("\"low\": \"", "\"", &data).toDouble();
 
-            if (!tickerLow.isEmpty())
+            if (tickerLow > 0.0 && !qFuzzyCompare(tickerLow, lastTickerLow))
             {
-                double newTickerLow = tickerLow.toDouble();
-
-                if (newTickerLow != lastTickerLow)
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Low", newTickerLow);
-
-                lastTickerLow = newTickerLow;
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Low", tickerLow);
+                lastTickerLow = tickerLow;
             }
 
-            QByteArray tickerVolume = getMidData("\"volume\": \"", "\"", &data);
+            double tickerVolume = getMidData("\"volume\": \"", "\"", &data).toDouble();
 
-            if (!tickerVolume.isEmpty())
+            if (tickerVolume > 0.0 && !qFuzzyCompare(tickerVolume, lastTickerVolume))
             {
-                double newTickerVolume = tickerVolume.toDouble();
-
-                if (newTickerVolume != lastTickerVolume)
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Volume", newTickerVolume);
-
-                lastTickerVolume = newTickerVolume;
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Volume", tickerVolume);
+                lastTickerVolume = tickerVolume;
             }
 
-            QByteArray tickerLast = getMidData("\"last\": \"", "\"", &data);
-
-            if (!tickerLast.isEmpty() && lastTickerDate < tickerTimestamp)
-            {
-                double newTickerLast = tickerLast.toDouble();
-
-                if (newTickerLast > 0.0)
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", newTickerLast);
-                    lastTickerDate = tickerTimestamp;
-                }
-            }
+            qint64 tickerTimestamp = getMidData("\"timestamp\": \"", "\"", &data).toUInt();
 
             if (tickerTimestamp > lastBidAskTimestamp)
             {
-                QByteArray tickerSell = getMidData("\"bid\": \"", "\"", &data);
+                double tickerSell = getMidData("\"bid\": \"", "\"", &data).toDouble();
 
-                if (!tickerSell.isEmpty())
+                if (tickerSell > 0.0 && !qFuzzyCompare(tickerSell, lastTickerSell))
                 {
-                    double newTickerSell = tickerSell.toDouble();
-
-                    if (newTickerSell != lastTickerSell)
-                        IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Sell", newTickerSell);
-
-                    lastTickerSell = newTickerSell;
+                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Sell", tickerSell);
+                    lastTickerSell = tickerSell;
                 }
 
-                QByteArray tickerBuy = getMidData("\"ask\": \"", "\"", &data);
+                double tickerBuy = getMidData("\"ask\": \"", "\"", &data).toDouble();
 
-                if (!tickerBuy.isEmpty())
+                if (tickerBuy > 0.0 && !qFuzzyCompare(tickerBuy, lastTickerBuy))
                 {
-                    double newTickerBuy = tickerBuy.toDouble();
-
-                    if (newTickerBuy != lastTickerBuy)
-                        IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Buy", newTickerBuy);
-
-                    lastTickerBuy = newTickerBuy;
+                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Buy", tickerBuy);
+                    lastTickerBuy = tickerBuy;
                 }
 
                 lastBidAskTimestamp = tickerTimestamp;
+            }
+
+            if (tickerTimestamp > lastTickerDate)
+            {
+                double tickerLast = getMidData("\"last\": \"", "\"", &data).toDouble();
+
+                if (tickerLast > 0.0 && !qFuzzyCompare(tickerLast, lastTickerLast))
+                {
+                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", tickerLast);
+                    lastTickerLast = tickerLast;
+                }
+
+                lastTickerDate = tickerTimestamp;
             }
         }
         else if (debugLevel)
@@ -520,7 +501,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                 depthAsks = new QList<DepthItem>;
                 depthBids = new QList<DepthItem>;
 
-                quint32 tickerTimestamp = getMidData("\"timestamp\": \"", "\"", &data).toUInt();
+                qint64 tickerTimestamp = getMidData("\"timestamp\": \"", "\"", &data).toUInt();
                 QMap<double, double> currentAsksMap;
                 QStringList asksList = QString(getMidData("\"asks\": [[", "]]", &data)).split("], [");
                 double groupedPrice = 0.0;
@@ -548,7 +529,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                         if (n == 0)
                         {
                             emit depthFirstOrder(baseValues.currentPair.symbol, priceDouble, amount, true);
-                            groupedPrice = baseValues.groupPriceValue * (int)(priceDouble / baseValues.groupPriceValue);
+                            groupedPrice = baseValues.groupPriceValue * static_cast<int>(priceDouble / baseValues.groupPriceValue);
                             groupedVolume = amount;
                         }
                         else
@@ -579,7 +560,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                 QList<double> currentAsksList = lastDepthAsksMap.keys();
 
                 for (int n = 0; n < currentAsksList.count(); n++)
-                    if (currentAsksMap.value(currentAsksList.at(n), 0) == 0)
+                    if (qFuzzyIsNull(currentAsksMap.value(currentAsksList.at(n), 0)))
                         depthUpdateOrder(baseValues.currentPair.symbol,
                                          currentAsksList.at(n), 0.0, true); //Remove price
 
@@ -608,7 +589,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                         if (n == 0)
                         {
                             emit depthFirstOrder(baseValues.currentPair.symbol, priceDouble, amount, false);
-                            groupedPrice = baseValues.groupPriceValue * (int)(priceDouble / baseValues.groupPriceValue);
+                            groupedPrice = baseValues.groupPriceValue * static_cast<int>(priceDouble / baseValues.groupPriceValue);
                             groupedVolume = amount;
                         }
                         else
@@ -639,15 +620,15 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                 QList<double> currentBidsList = lastDepthBidsMap.keys();
 
                 for (int n = 0; n < currentBidsList.count(); n++)
-                    if (currentBidsMap.value(currentBidsList.at(n), 0) == 0)
+                    if (qFuzzyIsNull(currentBidsMap.value(currentBidsList.at(n), 0)))
                         depthUpdateOrder(baseValues.currentPair.symbol,
                                          currentBidsList.at(n), 0.0, false); //Remove price
 
                 lastDepthBidsMap = currentBidsMap;
 
                 emit depthSubmitOrders(baseValues.currentPair.symbol, depthAsks, depthBids);
-                depthAsks = 0;
-                depthBids = 0;
+                depthAsks = nullptr;
+                depthBids = nullptr;
             }
         }
         else if (debugLevel)
@@ -834,7 +815,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                                 bufferCurrencies.append(bufferCurrency);
                                 bufferVolume = getMidData("\"" + bufferCurrency + "\": \"", "\"", &curLog).toDouble();
 
-                                if (bufferVolume)
+                                if (bufferVolume > 0.0)
                                 {
                                     bufferCurrency = bufferCurrency.toUpper();
                                     currentHistoryItem.volume = bufferVolume;
@@ -850,7 +831,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                                 bufferCurrencies.append(bufferCurrency);
                                 bufferVolume = getMidData("\"" + bufferCurrency + "\": \"", "\"", &curLog).toDouble();
 
-                                if (bufferVolume)
+                                if (bufferVolume > 0.0)
                                 {
                                     bufferCurrency = bufferCurrency.toUpper();
                                     currentHistoryItem.volume = bufferVolume;

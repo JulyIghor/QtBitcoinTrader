@@ -45,13 +45,13 @@ class ConfigManager :
     Q_OBJECT
 
 public:
-    explicit ConfigManager(const QString& configFileName, QObject* parent = NULL);
+    explicit ConfigManager(const QString& configFileName, QObject* parent = nullptr);
     ~ConfigManager();
 
     void sync();
 
     QStringList getConfigNames();
-    void save(const QString& name);
+    void save(const QString& name, bool initConfigMenu = true);
     void load(const QString& name);
     void remove(const QString& name);
     void translateDefaultNames();

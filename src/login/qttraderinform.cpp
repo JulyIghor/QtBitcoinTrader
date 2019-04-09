@@ -16,12 +16,17 @@ QtTraderInform::QtTraderInform(QDialog* parent)
       m_titleLayout(new QHBoxLayout()),
       m_logo(new QLabel()),
       m_title(new QLabel(julyTr("NEW_EXCHANGE_QTTRADER", "HFT exchange\nQt Trader 2.0"))),
-      m_info(new QLabel("After 3 years of\ndevelopment Centrabit\npresents our own\ncrypto exchange")),
+      m_info(new QLabel()),
       m_buttonsLayout(new QHBoxLayout()),
       m_registerButton(new QPushButton(julyTr("SIGN_UP_FOR_ACCESS", "Sign up\nfor Early Access"))),
       m_again(new QCheckBox(julyTr("DONT_SHOW_AGAIN", "Don't show again"))),
       m_againIsChecked(false)
 {
+    m_info->setTextFormat(Qt::TextFormat::RichText);
+    m_info->setOpenExternalLinks(true);
+    m_info->setText("Beta testing of the new excchange Qt Trader has started<br>"
+                    "The first wave of testers were accepted and we will send instructions by email shortly<br>"
+                    "Welcome to sign up for the second wave at <a href=\"qttrader.com\">qttrader.com</a>");
     QPixmap p("://Resources/QtTrader.png");
 
     m_logo->setFixedSize(200, 50);
