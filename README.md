@@ -46,6 +46,16 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.41
+Bitfinex API integration fixed
+- Rules generator dialog critical bug fixed when price with fee used
+- Time sync bug fixed
+- Binance orderbook table fixed
+- Removed Wex exchange
+- Added alternative domain for Yobit
+- Fixed dock panel issue caused blinks
+- Many small fixes
+
 v1.40.40
 - New exchange Poloniex
 - Fixed script language command cancel ask and bid for Binance
