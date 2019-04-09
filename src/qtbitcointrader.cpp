@@ -3469,7 +3469,10 @@ void QtBitcoinTrader::languageChanged()
     actionAbout->setText(julyTr("ABOUT", "&About"));
     actionAboutQt->setText(julyTr("ABOUT_QT", "About &Qt"));
 #ifndef Q_OS_MAC
-    actionUninstall->setText(julyTr("UNINSTALL", "&Uninstall"));
+
+    if (!baseValues_->portableMode && actionUninstall)
+        actionUninstall->setText(julyTr("UNINSTALL", "&Uninstall"));
+
 #endif
     actionConfigManager->setText(julyTr("CONFIG_MANAGER", "&Save..."));
     actionSettings->setText(julyTr("CONFIG_SETTINGS", "Se&ttings"));
@@ -4031,7 +4034,7 @@ void QtBitcoinTrader::createMenu()
 
 #ifndef Q_OS_MAC
 
-    if (!baseValues_->portableMode)
+    if (actionUninstall && !baseValues_->portableMode)
     {
         menuHelp->addSeparator();
         menuHelp->addAction(actionUninstall);
