@@ -47,7 +47,7 @@ Next ToDo:
 ## Change Log
 
 v1.40.41
-Bitfinex API integration fixed
+- Bitstamp API integration fixed
 - Rules generator dialog critical bug fixed when price with fee used
 - Time sync bug fixed
 - Binance orderbook table fixed
