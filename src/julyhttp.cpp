@@ -49,7 +49,8 @@
 JulyHttp::JulyHttp(const QString& hostN, const QByteArray& restLine, QObject* parent, const bool& secure,
                    const bool& keepAlive, const QByteArray& contentType)
     : QSslSocket(parent),
-      ignoreError(false)
+      ignoreError(false),
+      waitForReadyReadCount(0)
 {
     destroyClass = false;
     noReconnect = false;
@@ -165,8 +166,8 @@ void JulyHttp::setupSocket()
 
     setPeerVerifyMode(QSslSocket::VerifyPeer);
     connect(this, SIGNAL(readyRead()), SLOT(readSocket()));
-    connect(this, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(errorSlot(QAbstractSocket::SocketError)));
-    connect(this, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(sslErrorsSlot(const QList<QSslError>&)));
+    connect(this, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(errorSlot(QAbstractSocket::SocketError)), Qt::QueuedConnection);
+    connect(this, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(sslErrorsSlot(const QList<QSslError>&)), Qt::QueuedConnection);
 
 //    mutex.unlock();
 }
@@ -380,10 +381,15 @@ void JulyHttp::readSocket()
                 return;
             }
 
-            waitForReadyRead(0);
+            ++waitForReadyReadCount;
+
+            if (waitForReadyReadCount > baseValues.httpRetryCount)
+                retryRequest();
+
             return;
         }
 
+        waitForReadyReadCount = 0;
         readingHeader = false;
     }
 
@@ -496,13 +502,16 @@ void JulyHttp::readSocket()
             dataArray->resize(static_cast<int>(read(dataArray->data(), readSize)));
         }
 
-        if (bytesDone + bytesAvailable() + readSize == contentLength)
+        if (bytesDone +/* bytesAvailable() + */readSize == contentLength)
             allDataReaded = true;
     }
     else if (readSize > 0)
     {
         if (!dataArray)
-            dataArray.reset(new QByteArray(readAll()));
+        {
+            dataArray.reset(new QByteArray);
+            read(dataArray->data(), readSize);
+        }
     }
 
     if (dataArray)
@@ -816,7 +825,7 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
     if (ignoreError)
         return;
 
-    if ((noReconnect && noReconnectCount++ > 5))
+    if (noReconnect && noReconnectCount++ > 5)
     {
         isDisabled = true;
         return;

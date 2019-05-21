@@ -862,7 +862,14 @@ void Exchange_Indacoin::sendToApi(int reqType, QByteArray method, bool auth, boo
 {
     if (julyHttp == nullptr)
     {
-        julyHttp = new JulyHttp("indacoin.com", "", this, true, true, "application/json; charset=UTF-8");
+        if (domain.isEmpty() || port == 0)
+            julyHttp = new JulyHttp("indacoin.com", "", this, true, true, "application/json; charset=UTF-8");
+        else
+        {
+            julyHttp = new JulyHttp(domain, "", this, useSsl, true, "application/json; charset=UTF-8");
+            julyHttp->setPortForced(port);
+        }
+
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));

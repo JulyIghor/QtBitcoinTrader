@@ -35,6 +35,7 @@
 #include <QObject>
 #include <QMutex>
 #include <QHash>
+class QThread;
 
 class IndicatorEngine : public QObject
 {
@@ -44,15 +45,16 @@ public:
     ~IndicatorEngine();
 
     static IndicatorEngine* global();
-    static void setValue(QString, QString, QString, double);
-    static double getValue(QString);
+    static void setValue(const QString&, const QString&, const QString&, double);
+    static double getValue(const QString&);
 
 private:
+    QScopedPointer<QThread> m_thread;
     QMutex locker;
     QHash<QByteArray, double> indicators;
 
 private slots:
-    void setValueSlot(QString, QString, QString, double);
+    void setValueSlot(const QString&, const QString&, const QString&, double);
 
 signals:
     void indicatorChanged(QString, QString, QString, double);
@@ -63,8 +65,6 @@ signals:
     void indicatorBuyChanged(QString, double);
     void indicatorLastChanged(QString, double);
     void indicatorVolumeChanged(QString, double);
-
-    void finishThread();
 };
 
 #endif // INDICATORENGINE_H

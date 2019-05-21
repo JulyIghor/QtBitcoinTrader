@@ -805,7 +805,14 @@ void Exchange_HitBTC::sendToApi(int reqType, QByteArray method, bool auth, QByte
 {
     if (julyHttp == nullptr)
     {
-        julyHttp = new JulyHttp("api.hitbtc.com", "", this);
+        if (domain.isEmpty() || port == 0)
+            julyHttp = new JulyHttp("api.hitbtc.com", "", this);
+        else
+        {
+            julyHttp = new JulyHttp(domain, "", this, useSsl);
+            julyHttp->setPortForced(port);
+        }
+
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));

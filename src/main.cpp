@@ -36,6 +36,7 @@
 #include <QDir>
 #include <QStyle>
 #include <QStandardPaths>
+#include <QThread>
 #include <QLoggingCategory>
 #include <QApplication>
 #include <QFileInfo>
@@ -117,7 +118,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.40411";
+    appVerStr = "1.4042";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -200,6 +201,8 @@ int main(int argc, char* argv[])
     QApplication a(argc, argv);
     a.setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
 
+    QThread::currentThread()->setObjectName("Main Thread");
+
     if (QSslSocket::sslLibraryVersionString().isEmpty())
     {
         QMessageBox::critical(nullptr, "Qt Bitcoin Trader", julyTr("CANT_LOAD_OPENSSL", "Can't load OpenSSL"));
@@ -220,6 +223,10 @@ int main(int argc, char* argv[])
 
     a.setApplicationName("QtBitcoinTrader");
     a.setApplicationVersion(baseValues.appVerStr);
+
+    qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
+    qRegisterMetaType<QList<QSslError>>("QList<QSslError>");
+
 
     baseValues_->fontMetrics_ = new QFontMetrics(a.font());
 
@@ -540,6 +547,7 @@ int main(int argc, char* argv[])
 
         if (a.arguments().last().startsWith("/checkupdate"))
         {
+            a.setPalette(baseValues.appTheme.palette);
             a.setStyleSheet(baseValues.appTheme.styleSheet);
 
             QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
@@ -827,6 +835,8 @@ int main(int argc, char* argv[])
 
                     showNewPasswordDialog = false;
                 }
+                else if (noProfiles)
+                    continue;
             }
 
             PasswordDialog enterPassword;

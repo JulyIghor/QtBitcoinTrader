@@ -60,6 +60,8 @@ Exchange::Exchange()
     checkDuplicatedOID = false;
     isLastTradesTypeSupported = true;
     forceDepthLoad = false;
+    port   = 0;
+    useSsl = true;
 
     clearVariables();
 }
@@ -90,6 +92,36 @@ QByteArray Exchange::getMidData(QString a, QString b, QByteArray* data)
 
         if (endPos > -1)
             rez = data->mid(startPos + a.length(), endPos - startPos - a.length());
+    }
+
+    return rez;
+}
+
+QByteArray Exchange::getMidVal(QString a, QString b, QByteArray* data)
+{
+    QByteArray rez;
+
+    if (b.isEmpty())
+        b = ",";
+
+    int startPos = data->indexOf(a, 0);
+
+    if (startPos > -1)
+    {
+        startPos += a.length();
+
+        if (startPos < data->size() && data->at(startPos) == '\"')
+            ++startPos;
+
+        int endPos = data->indexOf(b, startPos);
+
+        if (endPos > -1)
+        {
+            if (data->at(endPos - 1) == '\"')
+                --endPos;
+
+            rez = data->mid(startPos, endPos - startPos);
+        }
     }
 
     return rez;
@@ -132,6 +164,16 @@ void Exchange::run()
         logThread->writeLogB(baseValues.exchangeName + " API Thread Started", 2);
 
     clearVariables();
+
+    QSettings iniSettings(baseValues.iniFileName, QSettings::IniFormat);
+    domain = iniSettings.value("Domain").toString();
+    port   = static_cast<quint16>(iniSettings.value("Port", 0).toUInt());
+    useSsl = iniSettings.value("SSL", true).toBool();
+
+    if (domain.startsWith("http://"))
+        domain.remove(0, 7);
+    else if (domain.startsWith("https://"))
+        domain.remove(0, 8);
 
     secondTimer.reset(new QTimer);
     secondTimer->setSingleShot(true);

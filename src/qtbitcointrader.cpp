@@ -682,9 +682,8 @@ void QtBitcoinTrader::setupClass()
         return;
     }
 
-    ::config->load("");
-
     currentExchangeThread.reset(new QThread);
+    currentExchangeThread->setObjectName("Exchange Thread");
     currentExchange->moveToThread(currentExchangeThread.data());
     connect(currentExchangeThread.data(), &QThread::started, currentExchange, &Exchange::run);
 
@@ -747,20 +746,11 @@ void QtBitcoinTrader::setupClass()
 
     ordersModel->checkDuplicatedOID = currentExchange->checkDuplicatedOID;
 
-    ui.widgetStaysOnTop->setChecked(iniSettings->value("UI/WindowOnTop", false).toBool());
-
     if (baseValues.httpRequestInterval < currentExchange->minimumRequestIntervalAllowed)
         baseValues.httpRequestInterval = currentExchange->minimumRequestIntervalAllowed;
 
     if (baseValues.httpRequestTimeout < currentExchange->minimumRequestTimeoutAllowed)
         baseValues.httpRequestTimeout = currentExchange->minimumRequestTimeoutAllowed;
-
-    iniSettings->sync();
-
-    if (!ui.widgetStaysOnTop->isChecked())
-        on_widgetStaysOnTop_toggled(ui.widgetStaysOnTop->isChecked());
-
-    currencyMenuChanged(currencyMenu->getCurrentIndex());
 
     {
         QEventLoop waitStarted;
@@ -769,9 +759,14 @@ void QtBitcoinTrader::setupClass()
         waitStarted.exec();
     }
 
-    ui.buyPercentage->setMaximumWidth(ui.buyPercentage->height());
-    ui.sellPercentage->setMaximumWidth(ui.sellPercentage->height());
+    if (!ui.widgetStaysOnTop->isChecked())
+        on_widgetStaysOnTop_toggled(ui.widgetStaysOnTop->isChecked());
 
+    ui.widgetStaysOnTop->setChecked(iniSettings->value("UI/WindowOnTop", false).toBool());
+    currencyMenuChanged(currencyMenu->getCurrentIndex());
+    languageChanged();
+    reloadScripts();
+    IndicatorEngine::global();
     int nextTheme = iniSettings->value("UI/NightMode", 0).toInt();
 
     if (nextTheme == 1)
@@ -784,12 +779,14 @@ void QtBitcoinTrader::setupClass()
     else
         ui.widgetLogo->setStyleSheet("background:white");
 
-    languageChanged();
+    ::config->load("");
 
-    reloadScripts();
+    if (isHidden())
+        show();
+
+    ui.buyPercentage->setMaximumWidth(ui.buyPercentage->height());
+    ui.sellPercentage->setMaximumWidth(ui.sellPercentage->height());
     fixDepthBidsTable();
-
-    IndicatorEngine::global();
 }
 
 void QtBitcoinTrader::addRuleByHolder(RuleHolder& holder, bool isEnabled, QString titleName, QString fileName)
@@ -3547,14 +3544,18 @@ void QtBitcoinTrader::on_rulesTabs_tabCloseRequested(int tab)
 
 void QtBitcoinTrader::on_widgetStaysOnTop_toggled(bool on)
 {
-    windowWidget->hide();
+    bool visible = isVisible();
+
+    if (visible)
+        windowWidget->hide();
 
     if (on)
         windowWidget->setWindowFlags(Qt::Window | Qt::WindowStaysOnTopHint);
     else
         windowWidget->setWindowFlags(Qt::Window);
 
-    windowWidget->show();
+    if (visible)
+        windowWidget->show();
 }
 
 void QtBitcoinTrader::depthFirstOrder(QString symbol, double price, double volume, bool isAsk)
@@ -4238,6 +4239,9 @@ void QtBitcoinTrader::onActionDebug()
         debugViewer = new DebugViewer;
     else
     {
+        if (debugViewer == nullptr)
+            debugViewer = new DebugViewer;
+
         debugViewer->setWindowState(Qt::WindowActive);
         debugViewer->activateWindow();
     }

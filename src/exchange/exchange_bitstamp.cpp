@@ -256,7 +256,14 @@ void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, boo
 {
     if (julyHttp == nullptr)
     {
-        julyHttp = new JulyHttp("www.bitstamp.net", "", this);
+        if (domain.isEmpty() || port == 0)
+            julyHttp = new JulyHttp("www.bitstamp.net", "", this);
+        else
+        {
+            julyHttp = new JulyHttp(domain, "", this, useSsl);
+            julyHttp->setPortForced(port);
+        }
+
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
@@ -644,10 +651,6 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
         if (data.startsWith("{\""))
         {
             lastInfoReceived = true;
-
-            if (debugLevel)
-                logThread->writeLog("Info: " + data);
-
             QByteArray accFee     = getMidData(baseValues.currentPair.symbol.toLower() + "_fee\": \"", "\"", &data);
             QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "_available\": \"", "\"", &data);
             QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "_available\": \"", "\"", &data);
@@ -804,8 +807,6 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 
                     if (logTypeInt == 0 || logTypeInt == 1)
                     {
-                        double bufferVolume;
-
                         for (int m = 0; m < pairList->size(); ++m)
                         {
                             bufferCurrency = pairList->at(m).currAStrLow;
@@ -813,7 +814,12 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                             if (!bufferCurrencies.contains(bufferCurrency))
                             {
                                 bufferCurrencies.append(bufferCurrency);
-                                bufferVolume = getMidData("\"" + bufferCurrency + "\": \"", "\"", &curLog).toDouble();
+                                QByteArray volStr = getMidData("\"" + bufferCurrency + "\": \"", "\"", &curLog);
+
+                                if (volStr.startsWith("-"))
+                                    volStr.remove(0, 1);
+
+                                double bufferVolume = volStr.toDouble();
 
                                 if (bufferVolume > 0.0)
                                 {
@@ -829,7 +835,12 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                             if (!bufferCurrencies.contains(bufferCurrency))
                             {
                                 bufferCurrencies.append(bufferCurrency);
-                                bufferVolume = getMidData("\"" + bufferCurrency + "\": \"", "\"", &curLog).toDouble();
+                                QByteArray volStr = getMidData("\"" + bufferCurrency + "\": \"", "\"", &curLog);
+
+                                if (volStr.startsWith("-"))
+                                    volStr.remove(0, 1);
+
+                                double bufferVolume = volStr.toDouble();
 
                                 if (bufferVolume > 0.0)
                                 {

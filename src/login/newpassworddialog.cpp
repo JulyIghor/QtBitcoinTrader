@@ -44,12 +44,14 @@ NewPasswordDialog::NewPasswordDialog(qint32 num)
 {
     exchangeNum = num;
     ui.setupUi(this);
-    setWindowTitle(windowTitle() + " v" + baseValues.appVerStr);
     ui.okButton->setEnabled(false);
+    setWindowTitle(windowTitle() + " v" + baseValues.appVerStr);
+    on_advSettingsTool_toggled(false);
+
     QSize minSizeHint = minimumSizeHint();
 
     if (mainWindow.isValidSize(&minSizeHint))
-        setFixedSize(minimumSizeHint());
+        setFixedSize(minSizeHint);
 
     setWindowFlags(Qt::WindowCloseButtonHint);
 
@@ -76,6 +78,24 @@ NewPasswordDialog::NewPasswordDialog(qint32 num)
 NewPasswordDialog::~NewPasswordDialog()
 {
 
+}
+
+void NewPasswordDialog::on_advSettingsTool_toggled(bool status)
+{
+    ui.domainLabel->setVisible(status);
+    ui.domainLine->setVisible(status);
+    ui.clearDomain->setVisible(status);
+    ui.portLabel->setVisible(status);
+    ui.portSpinBox->setVisible(status);
+    ui.sslLabel->setVisible(status);
+    ui.sslCheckBox->setVisible(status);
+
+    QSize minSizeHint = minimumSizeHint();
+
+    if (mainWindow.isValidSize(&minSizeHint))
+        setFixedSize(minSizeHint);
+
+    checkToEnableButton();
 }
 
 void NewPasswordDialog::exchangeChanged(QString name)
@@ -109,8 +129,8 @@ QString NewPasswordDialog::getRestSign()
 QString NewPasswordDialog::getRestKey()
 {
     if (clientIdEnabled)
-        return ui.clientIdLine->text().remove(QRegExp("[^a-zA-Z0-9-+/=\\d]")) + ":" + ui.restKeyLine->text().remove(
-                   QRegExp("[^a-zA-Z0-9-+/=\\d]")); //ClientID visible
+        return ui.clientIdLine->text().remove(QRegExp("[^a-zA-Z0-9-+/=\\d]")) + ":"
+                + ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9-+/=\\d]")); //ClientID visible
 
     return ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9-+/=\\d]"));
 }
@@ -229,7 +249,7 @@ int NewPasswordDialog::difficulty(QString pass, bool* resive_PasswordIsGood, QSt
             passLength = 11;
 
         quint64 PasswordsPerSecond = 500000000;
-        quint64 crackTime = qPow(passDifficulty, passLength) / PasswordsPerSecond;
+        quint64 crackTime = static_cast<quint64>(qPow(passDifficulty, passLength)) / PasswordsPerSecond;
 
         if (crackTime >= 1798389)
             *resive_PasswordIsGood = true;
@@ -380,6 +400,12 @@ void NewPasswordDialog::checkToEnableButton()
         return;
     }
 
+    if (ui.advSettingsTool->isChecked() && ui.domainLine->text().isEmpty())
+    {
+        ui.okButton->setEnabled(false);
+        return;
+    }
+
     ui.okButton->setEnabled(true);
 }
 
@@ -448,6 +474,14 @@ void NewPasswordDialog::updateIniFileName()
 
     QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
     settings.setValue("LastProfile", QFileInfo(baseValues.iniFileName).fileName());
+
+    if (ui.advSettingsTool->isChecked())
+    {
+        QSettings iniSettings(baseValues.iniFileName, QSettings::IniFormat);
+        iniSettings.setValue("Domain", ui.domainLine->text());
+        iniSettings.setValue("Port", ui.portSpinBox->value());
+        iniSettings.setValue("SSL", ui.sslCheckBox->isChecked());
+    }
 }
 
 QString NewPasswordDialog::selectedProfileName()

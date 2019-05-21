@@ -543,3 +543,8 @@ String_MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT=Ви дійсно хочете очис
 String_SEND_BUG_REPORT=&Надіслати повідомлення про помилку
 String_UPDATE=Перевірити &оновлення...
 String_UNINSTALL=&Деінсталювати
+
+String_LOCAL_TIME=Місцевий час
+String_SERVER_TIME=Час сервера
+Label_DOMAIN=Домен:
+Label_PORT=Порт:

@@ -102,6 +102,10 @@ public:
 
     QScopedPointer<QTimer> secondTimer;
 
+    QString domain;
+    quint16 port;
+    bool    useSsl;
+
     void setApiKeySecret(QByteArray key, QByteArray secret);
 
     QByteArray& getApiKey();
@@ -111,6 +115,7 @@ public:
     void translateUnicodeStr(QString* str);
     void translateUnicodeOne(QByteArray* str);
     QByteArray getMidData(QString a, QString b, QByteArray* data);
+    QByteArray getMidVal(QString a, QString b, QByteArray* data);
     void setupApi(QtBitcoinTrader*, bool tickerOnly = false);
     Exchange();
     ~Exchange();

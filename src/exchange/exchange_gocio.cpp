@@ -874,7 +874,14 @@ void Exchange_GOCio::sendToApi(int reqType, QByteArray method, bool auth, bool s
 {
     if (julyHttp == nullptr)
     {
-        julyHttp = new JulyHttp("goc.io", "Key: " + getApiKey() + "\r\n", this);
+        if (domain.isEmpty() || port == 0)
+            julyHttp = new JulyHttp("goc.io", "Key: " + getApiKey() + "\r\n", this);
+        else
+        {
+            julyHttp = new JulyHttp(domain, "Key: " + getApiKey() + "\r\n", this, useSsl);
+            julyHttp->setPortForced(port);
+        }
+
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));

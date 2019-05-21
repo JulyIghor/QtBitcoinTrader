@@ -35,7 +35,7 @@
 
 IndicatorEngine::IndicatorEngine() : QObject()
 {
-    connect(this, &IndicatorEngine::indicatorChanged, this, &IndicatorEngine::setValueSlot);
+    connect(this, &IndicatorEngine::indicatorChanged, this, &IndicatorEngine::setValueSlot, Qt::DirectConnection);
 
     connect(this, &IndicatorEngine::indicatorHighChanged, baseValues.mainWindow_, &QtBitcoinTrader::indicatorHighChanged);
     connect(this, &IndicatorEngine::indicatorLowChanged, baseValues.mainWindow_, &QtBitcoinTrader::indicatorLowChanged);
@@ -45,15 +45,20 @@ IndicatorEngine::IndicatorEngine() : QObject()
     connect(this, &IndicatorEngine::indicatorVolumeChanged,
             baseValues.mainWindow_, &QtBitcoinTrader::indicatorVolumeChanged);
 
-    QThread* indicatorEngineThread = new QThread;
-    connect(this, SIGNAL(finishThread()), indicatorEngineThread, SLOT(quit()));
-    this->moveToThread(indicatorEngineThread);
-    indicatorEngineThread->start();
+    m_thread.reset(new QThread);
+    m_thread->setObjectName("Indicator Engine");
+
+    moveToThread(m_thread.data());
+    m_thread->start();
 }
 
 IndicatorEngine::~IndicatorEngine()
 {
-    emit finishThread();
+    if (m_thread && m_thread->isRunning())
+    {
+        m_thread->quit();
+        m_thread->wait();
+    }
 }
 
 //---------------------------------------- Static ----------------------------------------
@@ -63,12 +68,12 @@ IndicatorEngine* IndicatorEngine::global()
     return &instance;
 }
 
-void IndicatorEngine::setValue(QString exchange, QString symbol, QString indicator, double value)
+void IndicatorEngine::setValue(const QString& exchange, const QString& symbol, const QString& indicator, double value)
 {
     emit IndicatorEngine::global()->indicatorChanged(exchange, symbol, indicator, value);
 }
 
-double IndicatorEngine::getValue(QString index)
+double IndicatorEngine::getValue(const QString& index)
 {
     IndicatorEngine::global()->locker.lock();
     double value = IndicatorEngine::global()->indicators[index.toLatin1()];
@@ -78,7 +83,7 @@ double IndicatorEngine::getValue(QString index)
 }
 
 //---------------------------------------- Private ----------------------------------------
-void IndicatorEngine::setValueSlot(QString exchange, QString symbol, QString name, double value)
+void IndicatorEngine::setValueSlot(const QString& exchange, const QString& symbol, const QString& name, double value)
 {
     if (exchange == baseValues.exchangeName && symbol == baseValues.currentPair.symbol)
     {

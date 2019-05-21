@@ -311,7 +311,14 @@ void Exchange_BTCChina::sendToApi(int reqType, QByteArray method, bool auth, boo
     {
         if (julyHttpAuth == nullptr)
         {
-            julyHttpAuth = new JulyHttp("api.btcchina.com", "", this, true, true, "application/json-rpc");
+            if (domain.isEmpty() || port == 0)
+                julyHttpAuth = new JulyHttp("api.btcchina.com", "", this, true, true, "application/json-rpc");
+            else
+            {
+                julyHttpAuth = new JulyHttp(domain, "", this, useSsl, true, "application/json-rpc");
+                julyHttpAuth->setPortForced(port);
+            }
+
             connect(julyHttpAuth, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
             connect(julyHttpAuth, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
             connect(julyHttpAuth, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));

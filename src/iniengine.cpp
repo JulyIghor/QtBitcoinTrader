@@ -46,6 +46,7 @@ IniEngine::IniEngine()
       currencyResourceFileName("://Resources/Currencies.ini"),
       waitForDownload(true)
 {
+    iniEngineThread->setObjectName("Ini Engine");
     connect(this, &IniEngine::loadExchangeSignal, this, &IniEngine::loadExchange);
     connect(iniEngineThread, &QThread::started, this, &IniEngine::runThread);
     moveToThread(iniEngineThread);
@@ -204,26 +205,26 @@ void IniEngine::dataReceived(QByteArray data, int reqType)
     switch (reqType)
     {
     case 170:
-    {
-        if (!existNewFile(currencyCacheFileName, data))
-            break;
-
-        if (!JulyRSA::isIniFileSigned(currencyCacheFileName))
         {
-            QFile(currencyCacheFileName).remove();
-            break;
-        }
+            if (!existNewFile(currencyCacheFileName, data))
+                break;
 
-        parseCurrency(currencyCacheFileName);
-    }
-    break;
+            if (!JulyRSA::isIniFileSigned(currencyCacheFileName))
+            {
+                QFile(currencyCacheFileName).remove();
+                break;
+            }
+
+            parseCurrency(currencyCacheFileName);
+        }
+        break;
 
     case 171:
-    {
-        existNewFile(exchangeCacheFileName, data);
-        parseExchangeCheck();
-    }
-    break;
+        {
+            existNewFile(exchangeCacheFileName, data);
+            parseExchangeCheck();
+        }
+        break;
     }
 }
 

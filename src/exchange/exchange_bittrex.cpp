@@ -759,7 +759,14 @@ void Exchange_Bittrex::sendToApi(int reqType, QByteArray method, bool auth)
 {
     if (julyHttp == nullptr)
     {
-        julyHttp = new JulyHttp("bittrex.com", "apisign:", this);
+        if (domain.isEmpty() || port == 0)
+            julyHttp = new JulyHttp("bittrex.com", "apisign:", this);
+        else
+        {
+            julyHttp = new JulyHttp(domain, "apisign:", this, useSsl);
+            julyHttp->setPortForced(port);
+        }
+
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));

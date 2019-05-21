@@ -49,6 +49,14 @@ public:
     explicit NewPasswordDialog(qint32);
     ~NewPasswordDialog();
 
+private slots:
+    void okPressed();
+    void exchangeChanged(QString);
+    void checkToEnableButton();
+    void getApiKeySecretButton();
+    int difficulty(QString, bool*, QString*);
+    void on_advSettingsTool_toggled(bool status);
+
 private:
     void setDiffBar(int);
     qint32 exchangeNum;
@@ -57,12 +65,6 @@ private:
     QString getApiUrl;
     bool isValidPassword();
     Ui::NewPasswordDialog ui;
-private slots:
-    void okPressed();
-    void exchangeChanged(QString);
-    void checkToEnableButton();
-    void getApiKeySecretButton();
-    int difficulty(QString, bool*, QString*);
 };
 
 #endif // NEWPASSWORDDIALOG_H

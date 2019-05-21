@@ -291,7 +291,14 @@ void Exchange_Bitfinex::sendToApi(int reqType, QByteArray method, bool auth, boo
 {
     if (julyHttp == nullptr)
     {
-        julyHttp = new JulyHttp("api.bitfinex.com", "X-BFX-APIKEY: " + getApiKey() + "\r\n", this);
+        if (domain.isEmpty() || port == 0)
+            julyHttp = new JulyHttp("api.bitfinex.com", "X-BFX-APIKEY: " + getApiKey() + "\r\n", this);
+        else
+        {
+            julyHttp = new JulyHttp(domain, "X-BFX-APIKEY: " + getApiKey() + "\r\n", this, useSsl);
+            julyHttp->setPortForced(port);
+        }
+
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
@@ -684,51 +691,51 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
         break;
 
     case 202: //info
-    {
-        if (!success)
-            break;
-
-        if (data.startsWith("[{\"type\""))
         {
-            lastInfoReceived = true;
+            if (!success)
+                break;
 
-            if (debugLevel)
-                logThread->writeLog("Info: " + data);
-
-            QByteArray btcBalance;
-            QByteArray usdBalance;
-
-            QStringList balances = QString(data).split("},{");
-
-            for (int n = 0; n < balances.count(); n++)
+            if (data.startsWith("[{\"type\""))
             {
-                QByteArray currentBalance = balances.at(n).toLatin1();
-                QByteArray balanceType = getMidData("type\":\"", "\"", &currentBalance);
+                lastInfoReceived = true;
 
-                if (balanceType != baseValues.currentPair.currRequestSecond)
-                    continue;
+                if (debugLevel)
+                    logThread->writeLog("Info: " + data);
 
-                QByteArray balanceCurrency = getMidData("currency\":\"", "\"", &currentBalance);
+                QByteArray btcBalance;
+                QByteArray usdBalance;
 
-                if (btcBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currAStrLow)
-                    btcBalance = getMidData("available\":\"", "\"", &currentBalance);
+                QStringList balances = QString(data).split("},{");
 
-                if (usdBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currBStrLow)
+                for (int n = 0; n < balances.count(); n++)
                 {
-                    usdBalance = getMidData("available\":\"", "\"", &currentBalance);
+                    QByteArray currentBalance = balances.at(n).toLatin1();
+                    QByteArray balanceType = getMidData("type\":\"", "\"", &currentBalance);
+
+                    if (balanceType != baseValues.currentPair.currRequestSecond)
+                        continue;
+
+                    QByteArray balanceCurrency = getMidData("currency\":\"", "\"", &currentBalance);
+
+                    if (btcBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currAStrLow)
+                        btcBalance = getMidData("available\":\"", "\"", &currentBalance);
+
+                    if (usdBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currBStrLow)
+                    {
+                        usdBalance = getMidData("available\":\"", "\"", &currentBalance);
+                    }
                 }
+
+                if (checkValue(btcBalance, lastBtcBalance))
+                    emit accBtcBalanceChanged(baseValues.currentPair.symbolSecond(), lastBtcBalance);
+
+                if (checkValue(usdBalance, lastUsdBalance))
+                    emit accUsdBalanceChanged(baseValues.currentPair.symbolSecond(), lastUsdBalance);
             }
-
-            if (checkValue(btcBalance, lastBtcBalance))
-                emit accBtcBalanceChanged(baseValues.currentPair.symbolSecond(), lastBtcBalance);
-
-            if (checkValue(usdBalance, lastUsdBalance))
-                emit accUsdBalanceChanged(baseValues.currentPair.symbolSecond(), lastUsdBalance);
+            else if (debugLevel)
+                logThread->writeLog("Invalid Info data:" + data, 2);
         }
-        else if (debugLevel)
-            logThread->writeLog("Invalid Info data:" + data, 2);
-    }
-    break;//info
+        break;//info
 
     case 204://orders
         if (!success)
@@ -759,7 +766,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 QByteArray currentOrderData = ordersList.at(n).toLatin1();
                 OrderItem currentOrder;
                 currentOrder.oid = getMidData("\"id\":", ",", &currentOrderData);
-                currentOrder.date = getMidData("timestamp\":\"", ".", &currentOrderData).toUInt();
+                currentOrder.date = getMidData("timestamp\":\"", "\"", &currentOrderData).split('.').first().toUInt();
                 currentOrder.type = getMidData("side\":\"", "\"", &currentOrderData).toLower() == "sell";
 
                 bool isCanceled = getMidData("is_cancelled\":", ",", &currentOrderData) == "true";
@@ -770,7 +777,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 else
                     currentOrder.status = 1;
 
-                currentOrder.amount = getMidData("original_amount\":\"", "\"", &currentOrderData).toDouble();
+                currentOrder.amount = getMidData("remaining_amount\":\"", "\"", &currentOrderData).toDouble();
                 currentOrder.price = getMidData("price\":\"", "\"", &currentOrderData).toDouble();
                 currentOrder.symbol = getMidData("symbol\":\"", "\"", &currentOrderData).toUpper();
 
@@ -793,18 +800,18 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 
     //  }//positions
     case 305: //order/cancel
-    {
-        if (!success)
-            break;
+        {
+            if (!success)
+                break;
 
-        QByteArray oid = getMidData("\"id\":", ",", &data);
+            QByteArray oid = getMidData("\"id\":", ",", &data);
 
-        if (!oid.isEmpty())
-            emit orderCanceled(baseValues.currentPair.symbol, oid);
-        else if (debugLevel)
-            logThread->writeLog("Invalid Order/Cancel data:" + data, 2);
-    }
-    break;//order/cancel
+            if (!oid.isEmpty())
+                emit orderCanceled(baseValues.currentPair.symbol, oid);
+            else if (debugLevel)
+                logThread->writeLog("Invalid Order/Cancel data:" + data, 2);
+        }
+        break;//order/cancel
 
     case 306: //order/buy
         if (!success || !debugLevel)
@@ -857,7 +864,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 
                     HistoryItem currentHistoryItem;
                     QByteArray logType = getMidData("\"type\":\"", "\"", &curLog);
-                    QByteArray currentTimeStamp = getMidData("\"timestamp\":\"", ".", &curLog);
+                    QByteArray currentTimeStamp = getMidData("\"timestamp\":\"", "\"", &curLog).split('.').first();
 
                     if (n == 0 || !firstTimestampReceived)
                         if (!currentTimeStamp.isEmpty())

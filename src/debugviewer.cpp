@@ -36,6 +36,7 @@
 #include <QMessageBox>
 #include <QSysInfo>
 #include "timesync.h"
+#include <QDebug>
 
 DebugViewer::DebugViewer()
     : QWidget()
@@ -49,13 +50,12 @@ DebugViewer::DebugViewer()
 
     if (baseValues.logThread_)
     {
-        baseValues.logThread_->terminate();
-        baseValues.logThread_->deleteLater();
-        baseValues.logThread_ = 0;
+        delete baseValues.logThread_;
+        baseValues.logThread_ = nullptr;
     }
 
     logThread = new LogThread(false);
-    connect(logThread, SIGNAL(sendLogSignal(QByteArray)), this, SLOT(sendLogSlot(QByteArray)));
+    connect(logThread, &LogThread::sendLogSignal, this,  &DebugViewer::sendLogSlot, Qt::QueuedConnection);
     debugLevel = 2;
     show();
 }
@@ -66,9 +66,8 @@ DebugViewer::~DebugViewer()
 
     if (logThread)
     {
-        logThread->terminate();
-        logThread->deleteLater();
-        logThread = 0;
+        delete baseValues.logThread_;
+        baseValues.logThread_ = nullptr;
     }
 }
 
@@ -100,7 +99,7 @@ void DebugViewer::on_buttonSaveAs_clicked()
 #endif
 
         if (osLine.isEmpty())
-            osLine = "OS: Some Linux\r\n";
+            osLine = "OS: Linux\r\n";
 
         writeLog.write(osLine);
         writeLog.write(ui.debugText->toPlainText().toLatin1());

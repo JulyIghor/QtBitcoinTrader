@@ -32,15 +32,16 @@
 #ifndef LOGTHREAD_H
 #define LOGTHREAD_H
 
-#include <QThread>
+#include <QObject>
+class QThread;
 
-class LogThread : public QThread
+class LogThread : public QObject
 {
     Q_OBJECT
 
 public:
-    void writeLog(QByteArray, int debugLevel = 0);
-    void writeLogB(QString mess, int dLevel = 0)
+    void writeLog(const QByteArray&, int debugLevel = 0);
+    void writeLogB(const QString& mess, int dLevel = 0)
     {
         writeLog(mess.toLatin1(), dLevel);
     }
@@ -48,11 +49,13 @@ public:
     ~LogThread();
 
 private:
+    QScopedPointer<QThread> m_thread;
     bool writeFile;
-    void run();
 signals:
     void writeLogSignal(QByteArray, int);
     void sendLogSignal(QByteArray);
+private slots:
+    void run();
 public slots:
     void writeLogSlot(QByteArray, int);
 };

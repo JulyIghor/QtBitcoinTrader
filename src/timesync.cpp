@@ -29,6 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <QTimeZone>
 #include <QThread>
 #include <QElapsedTimer>
 #include <QUdpSocket>
@@ -37,6 +38,9 @@
 #include <QMessageBox>
 #include "main.h"
 #include "timesync.h"
+
+const qint64 c_deltaTime = 3600000;
+const int c_maxErrorCount = 20;
 
 TimeSync::TimeSync()
     : QObject(),
@@ -47,6 +51,7 @@ TimeSync::TimeSync()
       timeShift(0LL),
       additionalTimer()
 {
+    dateUpdateThread->setObjectName("Time Sync");
     connect(dateUpdateThread.data(), &QThread::started, this, &TimeSync::runThread);
     connect(this, &TimeSync::startSync, this, &TimeSync::getNTPTime, Qt::QueuedConnection);
     moveToThread(dateUpdateThread.data());
@@ -138,25 +143,59 @@ qint64 TimeSync::getTimeT()
 void TimeSync::getNTPTime()
 {
     QUdpSocket sock;
-    sock.connectToHost("0.pool.ntp.org", 123);
+    static int errorCount = 0;
+
+    switch (errorCount / 4)
+    {
+    case 0:
+        sock.connectToHost("0.pool.ntp.org", 123);
+        break;
+
+    case 1:
+        sock.connectToHost("1.pool.ntp.org", 123);
+        break;
+
+    case 2:
+        sock.connectToHost("2.pool.ntp.org", 123);
+        break;
+
+    default:
+        sock.connectToHost("3.pool.ntp.org", 123);
+        break;
+    }
 
     if (!sock.waitForConnected(1000))
+    {
+        if (errorCount > c_maxErrorCount)
+            return;
+
+        ++errorCount;
+        QThread::msleep(500);
+        emit startSync();
         return;
+    }
 
     QByteArray data(48, char(0));
     *(reinterpret_cast<qint32*>(&data.data()[0])) = -100007719;
 
     if (sock.write(data) < 0 || !sock.waitForReadyRead(3000) || sock.bytesAvailable() != 48)
+    {
+        if (errorCount > c_maxErrorCount)
+            return;
+
+        ++errorCount;
+        QThread::msleep(500);
+        emit startSync();
         return;
+    }
 
     data            = sock.readAll();
     qint64 seconds  = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[40])));
     qint64 fraction = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[44])));
-    static int errorCount = 0;
 
     if (seconds < 1 || fraction > 4290672329)
     {
-        if (errorCount > 100)
+        if (errorCount > c_maxErrorCount)
             return;
 
         ++errorCount;
@@ -169,7 +208,7 @@ void TimeSync::getNTPTime()
 
     if (time < 1547337932000 || time > 9000000000000)
     {
-        if (errorCount > 100)
+        if (errorCount > c_maxErrorCount)
             return;
 
         ++errorCount;
@@ -181,15 +220,22 @@ void TimeSync::getNTPTime()
     qint64 tempTimeShift = time - QDateTime::currentDateTime().toMSecsSinceEpoch();
     timeShift.store(timeShift == 0 ? tempTimeShift : (timeShift + tempTimeShift) / 2);
 
-    if (timeShift > 3600 || timeShift < -3600)
+    if (timeShift > c_deltaTime || timeShift < -c_deltaTime)
     {
         static bool showMessage = true;
 
         if (showMessage)
         {
+            QDateTime local  = QDateTime::currentDateTime();
+            QDateTime server = QDateTime::fromMSecsSinceEpoch(getMSecs());
+
             emit warningMessage(julyTr("TIME_SYNC_ERROR",
                                        "Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. "
-                                       "Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys."));
+                                       "Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys.")
+                                + "<br><br>" + julyTr("LOCAL_TIME", "Local time") + ": " + local.toString(baseValues.dateTimeFormat)
+                                + " " + local.timeZone().displayName(local, QTimeZone::OffsetName)
+                                + "<br>" + julyTr("SERVER_TIME", "Server time") + ": " + server.toString(baseValues.dateTimeFormat)
+                                + " " + server.timeZone().displayName(server, QTimeZone::OffsetName));
             showMessage = false;
         }
     }

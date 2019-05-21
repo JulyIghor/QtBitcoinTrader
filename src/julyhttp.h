@@ -134,6 +134,8 @@ private:
     QByteArray httpHeader;
     QString hostName;
 
+    qint64 waitForReadyReadCount;
+
 private slots:
     void sslErrorsSlot(const QList<QSslError>&);
     void errorSlot(QAbstractSocket::SocketError);

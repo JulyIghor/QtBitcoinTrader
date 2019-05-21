@@ -34,27 +34,37 @@
 #include <QApplication>
 #include "main.h"
 #include "timesync.h"
+#include <QThread>
 
 LogThread::LogThread(bool wrf)
-    : QThread()
+    : QObject()
 {
     writeFile = wrf;
-    moveToThread(this);
-    start();
+
+    m_thread.reset(new QThread);
+    m_thread->setObjectName("Log Thread");
+
+    connect(m_thread.data(), &QThread::started, this, &LogThread::run);
+
+    moveToThread(m_thread.data());
+    m_thread->start();
 }
 
 LogThread::~LogThread()
 {
-
+    if (!m_thread.isNull() && m_thread->isRunning())
+    {
+        m_thread->quit();
+        m_thread->wait();
+    }
 }
 
 void LogThread::run()
 {
-    connect(this, SIGNAL(writeLogSignal(QByteArray, int)), this, SLOT(writeLogSlot(QByteArray, int)));
-    exec();
+    connect(this, &LogThread::writeLogSignal, this, &LogThread::writeLogSlot, Qt::QueuedConnection);
 }
 
-void LogThread::writeLog(QByteArray data, int dbLvl)
+void LogThread::writeLog(const QByteArray& data, int dbLvl)
 {
     if (debugLevel == 0)
         return;
@@ -67,9 +77,9 @@ void LogThread::writeLog(QByteArray data, int dbLvl)
 
 void LogThread::writeLogSlot(QByteArray data, int dbLvl)
 {
-    data = "------------------\r\n" + QDateTime::fromTime_t(
-               TimeSync::getTimeT()).toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1() + QByteArray::number(
-               dbLvl) + "\r\n" + data + "\r\n------------------\r\n\r\n";
+    data = "------------------\r\n" +
+           QDateTime::fromSecsSinceEpoch(TimeSync::getTimeT()).toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1() +
+           QByteArray::number(dbLvl) + "\r\n" + data + "\r\n------------------\r\n\r\n";
 
     if (writeFile)
     {

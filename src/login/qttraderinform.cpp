@@ -24,8 +24,8 @@ QtTraderInform::QtTraderInform(QDialog* parent)
 {
     m_info->setTextFormat(Qt::TextFormat::RichText);
     m_info->setOpenExternalLinks(true);
-    m_info->setText("Beta testing of the new excchange Qt Trader has started<br>"
-                    "The first wave of testers were accepted and we will send instructions by email shortly<br>"
+    m_info->setText("Beta testing of the new excchange Qt Trader has started<br><br>"
+                    "The first wave of testers were accepted<br><br>"
                     "Welcome to sign up for the second wave at <a href=\"qttrader.com\">qttrader.com</a>");
     QPixmap p("://Resources/QtTrader.png");
 

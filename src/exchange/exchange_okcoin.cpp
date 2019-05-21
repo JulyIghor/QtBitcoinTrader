@@ -843,7 +843,14 @@ void Exchange_OKCoin::sendToApi(int reqType, QByteArray method, bool auth, QByte
 {
     if (julyHttp == nullptr)
     {
-        julyHttp = new JulyHttp("www.okcoin.cn", "Key: " + getApiKey() + "\r\n", this);
+        if (domain.isEmpty() || port == 0)
+            julyHttp = new JulyHttp("www.okcoin.cn", "Key: " + getApiKey() + "\r\n", this);
+        else
+        {
+            julyHttp = new JulyHttp(domain, "Key: " + getApiKey() + "\r\n", this, useSsl);
+            julyHttp->setPortForced(port);
+        }
+
         connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
