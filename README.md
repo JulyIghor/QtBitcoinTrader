@@ -46,6 +46,16 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.42 Released!
+
+- Fixed start window position
+- Removed duplicated info in log view
+- Fixed Own transactions display in Bitstamp
+- Fixed problem with false time
+- Added option to change hostname and port for exchange profile
+- Fixed wrong order amount for Bitfinex, when order partly filled
+- Minor UI fixes, fixed crash in log view
+
 v1.40.41
 - Bitstamp API integration fixed
 - Rules generator dialog critical bug fixed when price with fee used
