@@ -46,6 +46,19 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.43 Released!
+
+- Request interval now can be set less than 0.5 seconds
+- Fixed bug when timers wasn't stopped on group stop
+- Fixed crash when open Debug dialog
+- Fixed incorrect fee value in Bitfinex
+- Fixed filter open orders in Bitfinex
+- Fixed tray icon in Linux
+- Fixed bug caused long delay after network down
+- Fixed on top mode for dock widgets
+- Fixed bug when password was incorrectly detected as weak
+- Currency pairs synchronized in all exchanges
+
 v1.40.42 Released!
 
 - Fixed start window position
