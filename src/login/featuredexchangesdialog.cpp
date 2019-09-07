@@ -47,7 +47,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
 {
     ui->setupUi(this);
     ui->okButton->setEnabled(false);
-    setWindowFlags(Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::WindowCloseButtonHint | Qt::MSWindowsFixedSizeDialogHint);
     setWindowTitle("Qt Bitcoin Trader v" + baseValues.appVerStr + " - " + julyTr("FEATURED_EXCHANGES",
                    "Featured Exchanges"));
 
@@ -260,7 +260,7 @@ void FeaturedExchangesDialog::on_okButton_clicked()
         return;
     }
 
-    accept();
+//    accept();
 }
 
 void FeaturedExchangesDialog::on_otherExchangesButton_clicked()

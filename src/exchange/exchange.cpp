@@ -339,7 +339,7 @@ bool Exchange::checkValue(QByteArray& valueStr, double& lastValue)
     if (!qFuzzyIsNull(value) && value < 0.0)
         return false;
 
-    if(qFuzzyCompare(value + 1.0, lastValue + 1.0))
+    if (qFuzzyCompare(value + 1.0, lastValue + 1.0))
         return false;
 
     lastValue = value;

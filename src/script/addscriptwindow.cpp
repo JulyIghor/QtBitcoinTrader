@@ -117,14 +117,6 @@ AddScriptWindow::~AddScriptWindow()
     delete ui;
 }
 
-QString AddScriptWindow::scriptFileName()
-{
-    if (ui->checkUseFile->isChecked())
-        return ui->scriptFileName->text();
-
-    return "";
-}
-
 void AddScriptWindow::on_openFile_clicked()
 {
     QString lastRulesDir = mainWindow.iniSettings->value("UI/LastRulesPath", baseValues.desktopLocation).toString();
@@ -203,6 +195,8 @@ void AddScriptWindow::on_buttonAddScript_clicked()
 
     if (ui->checkExistingScript->isChecked())
         copyFromExistingScript = ui->existingScriptList->itemData(ui->existingScriptList->currentIndex()).toString();
+    else if (ui->checkUseFile->isChecked())
+        copyFromExistingScript = ui->scriptFileName->text();
 
     accept();
 }

@@ -31,7 +31,6 @@
 
 #include "config_manager.h"
 
-#include <QDebug>
 #include <QString>
 #include <QApplication>
 #include <QDesktopWidget>

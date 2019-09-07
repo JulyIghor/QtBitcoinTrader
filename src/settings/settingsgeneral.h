@@ -41,7 +41,7 @@ class SettingsGeneral : public QWidget
     Q_OBJECT
 
 public:
-    SettingsGeneral();
+    explicit SettingsGeneral(QWidget* parent);
     ~SettingsGeneral();
     Ui::SettingsGeneral ui;
 

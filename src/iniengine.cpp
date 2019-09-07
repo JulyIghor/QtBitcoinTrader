@@ -34,6 +34,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include "main.h"
+#include "exchange/exchange.h"
 #include "julyhttp.h"
 #include "julyrsa.h"
 #include "iniengine.h"
@@ -126,7 +127,7 @@ void IniEngine::runThread()
     julyHttp->secondTimer->stop();
     julyHttp->noReconnect = true;
     julyHttp->ignoreError = true;
-    julyHttp->sendData(170, "GET /Downloads/QBT_Resources/Currencies.ini", 0, 0, 0);
+    julyHttp->sendData(170, "GET /Downloads/QBT_Resources/Currencies.ini", nullptr, nullptr, 0);
     julyHttp->destroyClass = true;
 }
 
@@ -272,7 +273,7 @@ void IniEngine::loadExchange(QString exchangeIniFileName)
             QFile(exchangeCacheFileName).remove();
     }
 
-    if (julyHttp == 0)
+    if (julyHttp == nullptr)
     {
         julyHttp = new JulyHttp("centrabit.com", "", this, true, false);
         connect(julyHttp, &JulyHttp::dataReceived, this, &IniEngine::dataReceived);
@@ -283,7 +284,7 @@ void IniEngine::loadExchange(QString exchangeIniFileName)
 
     checkTimer->start();
     julyHttp->destroyClass = false;
-    julyHttp->sendData(171, "GET /Downloads/QBT_Resources/Exchanges/" + exchangeIniFileName.toLatin1() + ".ini", 0, 0, 0);
+    julyHttp->sendData(171, "GET /Downloads/QBT_Resources/Exchanges/" + exchangeIniFileName.toLatin1() + ".ini", nullptr, nullptr, 0);
     julyHttp->destroyClass = true;
 
     if (waitForDownload)
@@ -320,7 +321,7 @@ void IniEngine::parseExchange(QString exchangeFileName)
     QStringList symbolList = settingsParams.childGroups();
     exchangePairs.clear();
 
-    for (int n = 0; n < symbolList.count(); n++)
+    for (int n = 0; n < symbolList.count(); ++n)
     {
         CurrencyPairItem currentPair = defaultExchangeParams;
         currentPair.name = settingsParams.value(symbolList.at(n) + "/Symbol", "").toByteArray();
@@ -328,9 +329,14 @@ void IniEngine::parseExchange(QString exchangeFileName)
         if (currentPair.name.length() < 5)
             continue;
 
+        int twoDotsIndex = currentPair.name.indexOf(':');
+
+        if (twoDotsIndex > -1)
+            currentPair.name.replace(twoDotsIndex, 1, '/');
+
         currentPair.setSymbol(currentPair.name.toLatin1());
 
-        if (currentPair.name.indexOf('/') == -1)
+        if (currentPair.name.size() == 6 && currentPair.name.indexOf('/') == -1)
             currentPair.name.insert(3, "/");
 
         currentPair.currRequestSecond = settingsParams.value(symbolList.at(n) + "/RequestSecond", "").toByteArray();
@@ -357,15 +363,57 @@ void IniEngine::parseExchange(QString exchangeFileName)
     {
         waitTimer->stop();
         julyHttp->deleteLater();
-        julyHttp = 0;
+        julyHttp = nullptr;
     }
 
     waitForDownload = false;
 }
 
+void IniEngine::loadPairs(QStringList* pairsList)
+{
+    exchangePairs.clear();
+
+    for (int n = 0; n < pairsList->size(); ++n)
+    {
+        QByteArray pairData = pairsList->at(n).toUtf8();
+        CurrencyPairItem currentPair = defaultExchangeParams;
+        currentPair.name = Exchange::getMidData("Symbol\":\"", "\"", &pairData);
+
+        if (currentPair.name.length() < 5)
+            continue;
+
+        int twoDotsIndex = currentPair.name.indexOf(':');
+
+        if (twoDotsIndex > -1)
+            currentPair.name.replace(twoDotsIndex, 1, '/');
+
+        currentPair.setSymbol(currentPair.name.toLatin1());
+
+        if (currentPair.name.size() == 6 && currentPair.name.indexOf('/') == -1)
+            currentPair.name.insert(3, "/");
+
+        currentPair.currRequestSecond = Exchange::getMidData("RequestSecond\":\"", "\"", &pairData);
+        currentPair.currRequestPair   = Exchange::getMidData("Request\":\"", "\"", &pairData);
+
+        if (currentPair.currRequestPair.isEmpty())
+            continue;
+
+        currentPair.priceMin       = Exchange::getMidData("PriceMin\":\"", "\"", &pairData).toDouble();
+        currentPair.tradeVolumeMin = Exchange::getMidData("TradeVolumeMin\":\"", "\"", &pairData).toDouble();
+        currentPair.tradePriceMin  = Exchange::getMidData("TradePriceMin\":\"", "\"", &pairData).toDouble();
+        currentPair.tradeTotalMin  = Exchange::getMidData("TradeTotalMin\":\"", "\"", &pairData).toDouble();
+        currentPair.currADecimals  = Exchange::getMidData("ItemDecimals\":\"", "\"", &pairData).toInt();
+        currentPair.priceDecimals  = Exchange::getMidData("PriceDecimals\":\"", "\"", &pairData).toInt();
+        currentPair.currBDecimals  = Exchange::getMidData("ValueDecimals\":\"", "\"", &pairData).toInt();
+        exchangePairs.append(currentPair);
+    }
+
+    delete pairsList;
+}
+
 IniEngine* IniEngine::global()
 {
-    static IniEngine* instance = 0;
+    static IniEngine* instance = nullptr;
 
     if (instance)
         return instance;
@@ -373,7 +421,7 @@ IniEngine* IniEngine::global()
     static QMutex mut;
     QMutexLocker lock(&mut);
 
-    if (instance == 0)
+    if (instance == nullptr)
         instance = new IniEngine;
 
     return instance;

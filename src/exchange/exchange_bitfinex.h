@@ -58,7 +58,8 @@ private:
 
     qint64 lastTradesDate;
     qint64 tickerLastDate;
-    qint64 lastHistoryId;
+    quint64 lastHistoryId;
+    quint64 lastHistoryTime;
 
     QList<DepthItem>* depthAsks;
     QList<DepthItem>* depthBids;

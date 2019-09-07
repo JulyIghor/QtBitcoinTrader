@@ -79,6 +79,9 @@ void CurrencyMenu::setPairs(const QStringList& newCurrencyPairs)
     if (newCurrencyPairs.isEmpty())
         return;
 
+    for (int i = 0; i < currencyPairs.size(); ++i)
+        ui->currencyLayout->itemAt(i)->widget()->deleteLater();
+
     currentIndex = 0;
     currencyPairs = newCurrencyPairs;
 

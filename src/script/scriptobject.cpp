@@ -898,14 +898,14 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
     if (haveTimer)
         secondSlot();
 
+    if (!testMode)
+        setRunning(true);
+
     if (pendingStop)
     {
         setRunning(false);
         return true;
     }
-
-    if (!testMode)
-        setRunning(true);
 
     if (engine->hasUncaughtException())
     {

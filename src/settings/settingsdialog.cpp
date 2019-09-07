@@ -38,15 +38,15 @@ SettingsDialog::SettingsDialog()
 {
     ui.setupUi(this);
     ui.scrollAreaWidgetContents->setBackgroundRole(QPalette::Base);
-    setWindowFlags(Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::WindowCloseButtonHint | Qt::MSWindowsFixedSizeDialogHint);
     listLayout = new QVBoxLayout;
     setWindowTitle(julyTr("SETTINGS_TITLE", "Settings Dialog"));
 
-    settingsGeneral = new SettingsGeneral;
+    settingsGeneral = new SettingsGeneral(this);
     addDialog(julyTr("GENERAL", "General"), "settings_global_32x32.png", settingsGeneral);
-    settingsNetworkProxy = new SettingsNetworkProxy;
+    settingsNetworkProxy = new SettingsNetworkProxy(this);
     addDialog(julyTr("NETWORK", "Network"), "settings_network_32x32.png", settingsNetworkProxy);
-    settingsDecimals = new SettingsDecimals;
+    settingsDecimals = new SettingsDecimals(this);
     addDialog(julyTr("DECIMALS", "Decimals"), "settings_decimals_32x32.png", settingsDecimals);
 
     configureNameList();

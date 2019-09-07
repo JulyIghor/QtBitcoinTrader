@@ -36,7 +36,6 @@
 #include <QMessageBox>
 #include <QSysInfo>
 #include "timesync.h"
-#include <QDebug>
 
 DebugViewer::DebugViewer()
     : QWidget()

@@ -33,7 +33,7 @@
 
 SettingsDialogListElement::SettingsDialogListElement(SettingsDialog* tempParent, qint32 tempIndex, QString name,
         QString icon)
-    : QWidget()
+    : QWidget(tempParent)
 {
     ui.setupUi(this);
     ui.textListLabel->setText(name);

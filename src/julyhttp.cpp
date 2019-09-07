@@ -510,7 +510,8 @@ void JulyHttp::readSocket()
         if (!dataArray)
         {
             dataArray.reset(new QByteArray);
-            read(dataArray->data(), readSize);
+            dataArray->resize(static_cast<int>(readSize));
+            dataArray->resize(static_cast<int>(read(dataArray->data(), readSize)));
         }
     }
 
@@ -792,6 +793,9 @@ void JulyHttp::takeRequestAt(int pos)
 {
     if (requestList.count() <= pos)
         return;
+
+    if (pos == 0)
+        currentPendingRequest = nullptr;
 
     PacketItem packetTake = requestList.at(pos);
     reqTypePending[packetTake.reqType] = reqTypePending.value(packetTake.reqType, 1) - 1;

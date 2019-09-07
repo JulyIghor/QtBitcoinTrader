@@ -35,8 +35,8 @@
 #include "charts/chartsview.h"
 #include <QDir>
 
-SettingsGeneral::SettingsGeneral()
-    : QWidget()
+SettingsGeneral::SettingsGeneral(QWidget* parent)
+    : QWidget(parent)
 {
     ui.setupUi(this);
     iniSettings = new QSettings(baseValues.iniFileName, QSettings::IniFormat, this);

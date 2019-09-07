@@ -51,7 +51,7 @@ QtTraderInform::QtTraderInform(QDialog* parent)
 
     setLayout(m_mainLayout.data());
     setWindowTitle(julyTr("NEW_EXCHANGE", "HFT exchange"));
-    setWindowFlags(Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::WindowCloseButtonHint | Qt::MSWindowsFixedSizeDialogHint);
 
     setFixedSize(minimumSizeHint());
 

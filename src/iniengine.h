@@ -59,6 +59,7 @@ public:
     static QString getPairSymbol(int);
     static QString getPairSymbolSecond(int);
     static int getPairsCount();
+    void loadPairs(QStringList* pairsList);
 
 signals:
     void loadExchangeSignal(QString);
@@ -88,7 +89,7 @@ private:
     void parseCurrency(QString);
     void parseExchange(QString);
     void parseExchangeCheck();
-    void exitFromProgram();
+    [[noreturn]] void exitFromProgram();
 };
 
 #endif // INIENGINE_H

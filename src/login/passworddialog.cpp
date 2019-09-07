@@ -47,7 +47,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
     newProfile = false;
     ui.setupUi(this);
     setWindowTitle(windowTitle() + " v" + baseValues.appVerStr);
-    setWindowFlags(Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::WindowCloseButtonHint | Qt::MSWindowsFixedSizeDialogHint);
     ui.okButton->setEnabled(false);
 
     QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
@@ -95,7 +95,8 @@ PasswordDialog::PasswordDialog(QWidget* parent)
             continue;
         }
 
-        QString currentLogo = logosMap.value(settIni.value("Profile/ExchangeId", 0).toInt());
+        int exchangeId = settIni.value("Profile/ExchangeId", -1).toInt();
+        QString currentLogo = logosMap.value(exchangeId);
 
         if (!QFile::exists(currentLogo))
             currentLogo = ":/Resources/Exchanges/Logos/Unknown.png";
@@ -155,16 +156,16 @@ PasswordDialog::PasswordDialog(QWidget* parent)
         groupboxLayout->addWidget(logoButton);
     }
 
-    QSize minSizeHint = minimumSizeHint();
-
-    if (mainWindow.isValidSize(&minSizeHint))
-        setFixedSize(minimumSizeHint());
-
     if (settings.value("HidePasswordDescription", false).toBool())
         ui.descriptionGroupBox->setChecked(false);
 
     connect(TimeSync::global(), SIGNAL(warningMessage(QString)), this, SLOT(showTimeMessage(QString)));
     TimeSync::syncNow();
+
+    QSize minSizeHint = minimumSizeHint();
+
+    if (mainWindow.isValidSize(&minSizeHint))
+        setFixedSize(minimumSizeHint());
 }
 
 PasswordDialog::~PasswordDialog()
@@ -238,6 +239,48 @@ void PasswordDialog::resetDataSlot()
         return;
 
     resetData = true;
+
+    QString iniToRemove = getIniFilePath();
+
+    if (QFile::exists(iniToRemove))
+    {
+        QSettings rmSettings(iniToRemove, QSettings::IniFormat);
+
+        if (rmSettings.value("Profile/ExchangeId", -1).toInt() == 0)
+        {
+            int indexPoint = iniToRemove.lastIndexOf('.');
+            QString rmFolder = indexPoint > -1 ? iniToRemove.left(indexPoint) : "";
+
+            if (!rmFolder.isEmpty() && QFile::exists(rmFolder))
+            {
+                QString qtConfig = rmFolder + "/QtTrader.cfg";
+
+                if (QFile::exists(qtConfig))
+                    QFile::remove(qtConfig);
+
+                QStringList qtIniToRemove = QDir(rmFolder).entryList(QStringList() << "*.ini");
+
+                Q_FOREACH (QString qtIniFile, qtIniToRemove)
+                    QFile::remove(rmFolder + "/" + qtIniFile);
+            }
+
+            QDir().rmdir(rmFolder);
+        }
+
+        QFile::remove(iniToRemove);
+        QString scriptFolder = baseValues.scriptFolder + "/" + QFileInfo(iniToRemove).completeBaseName() + "/";
+
+        if (QFile::exists(scriptFolder))
+        {
+            QStringList filesToRemove = QDir(scriptFolder).entryList(QStringList() << "*.JLS" << "*.JLR");
+
+            Q_FOREACH (QString curFile, filesToRemove)
+                QFile::remove(scriptFolder + curFile);
+
+            QDir().rmdir(scriptFolder);
+        }
+    }
+
     accept();
 }
 

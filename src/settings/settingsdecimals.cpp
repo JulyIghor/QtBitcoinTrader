@@ -32,8 +32,8 @@
 #include "settingsdecimals.h"
 #include "main.h"
 
-SettingsDecimals::SettingsDecimals()
-    : QWidget()
+SettingsDecimals::SettingsDecimals(QWidget* parent)
+    : QWidget(parent)
 {
     ui.setupUi(this);
     decimalsSettings = new QSettings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);

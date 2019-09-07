@@ -460,7 +460,7 @@ String_RULE_LASTTRADE_CHANGED=Любой ордер маркета выполн�
 Label_AMOUNT=Объем:
 String_LOCK_DOCKS=&Блокировать перетаскивание
 String_EXIT=В&ыход
-String_ABOUT=&О программе
+String_ABOUT=&О программе Qt Bitcoin Trader
 String_ABOUT_QT=О &Qt
 String_CONFIG_MANAGER=&Сохранить...
 String_CONFIG_SETTINGS=&Настройки
@@ -541,7 +541,7 @@ String_CAN_NOT_WRITE_TO_FOLDER=Не могу записать в папку
 String_MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT=Вы действительно хотите очистить скрипт?
 
 String_SEND_BUG_REPORT=&Отправить отчет об ошибке
-String_UPDATE=Проверить &обновления...
+String_UPDATE=Проверить &обновления
 String_UNINSTALL=&Деинсталлировать
 
 String_LOCAL_TIME=Местное время

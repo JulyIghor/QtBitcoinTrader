@@ -126,6 +126,7 @@ public:
     void reloadLanguage(QString preferedLangFile = "");
     void fixAllChildButtonsAndLabels(QWidget* par);
     void fixDecimals(QWidget* par);
+    void fixAllCurrencyLabels(QWidget* par);
     void fillAllBtcLabels(QWidget* par, QString curName);
     void fillAllUsdLabels(QWidget* par, QString curName);
 
@@ -172,6 +173,8 @@ public:
 
     double getVolumeByPrice(QString symbol, double price, bool isAsk);
     double getPriceByVolume(QString symbol, double size, bool isAsk);
+
+    void fixWidthComboBoxGroupByPrice();
 
     bool closeToTray;
 
@@ -415,6 +418,7 @@ public slots:
     void on_sellTotalBtcAllIn_clicked();
     void on_sellTotalBtcHalfIn_clicked();
     void on_sellTotalBtc_valueChanged(double);
+    void setPairs(QStringList* pairsList);
 signals:
     void indicatorEventSignal(QString symbol, QString name, double value);
     void themeChanged();

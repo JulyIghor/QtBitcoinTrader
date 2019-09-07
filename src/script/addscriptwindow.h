@@ -44,7 +44,6 @@ class AddScriptWindow : public QDialog
     Q_OBJECT
 
 public:
-    QString scriptFileName();
     QString getCopyFromFile();
     QString copyFromExistingScript;
     QString scriptName;

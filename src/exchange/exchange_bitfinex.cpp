@@ -118,7 +118,8 @@ void Exchange_Bitfinex::clearVariables()
     tickerLastDate = 0;
     lastTradesDate = 0;
     lastTradesDateCache = "0";
-    lastHistoryId = 0;
+    lastHistoryId = 0LL;
+    lastHistoryTime = 0LL;
 }
 
 void Exchange_Bitfinex::clearValues()
@@ -847,8 +848,9 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                 QList<HistoryItem>* historyItems = new QList<HistoryItem>;
                 bool firstTimestampReceived = false;
                 QStringList dataList = QString(data).split("},{");
-                qint64 currentId;
-                qint64 maxId = 0;
+                quint64 currentId;
+                quint64 lastId = 0LL;
+                quint64 lastTime = 0LL;
 
                 for (int n = 0; n < dataList.count(); n++)
                 {
@@ -856,15 +858,20 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
 
                     currentId = getMidData("order_id\":", "}", &curLog).toULongLong();
 
-                    if (currentId <= lastHistoryId)
+                    if (currentId == lastHistoryId)
                         break;
 
-                    if (n == 0)
-                        maxId = currentId;
-
-                    HistoryItem currentHistoryItem;
-                    QByteArray logType = getMidData("\"type\":\"", "\"", &curLog);
                     QByteArray currentTimeStamp = getMidData("\"timestamp\":\"", "\"", &curLog).split('.').first();
+                    quint64 currentTimeStampInt = currentTimeStamp.toULongLong();
+
+                    if (currentTimeStampInt < lastHistoryTime)
+                        break;
+
+                    if (lastId == 0LL)
+                        lastId = currentId;
+
+                    if (lastTime == 0LL)
+                        lastTime = currentTimeStampInt;
 
                     if (n == 0 || !firstTimestampReceived)
                         if (!currentTimeStamp.isEmpty())
@@ -872,6 +879,9 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                             historyLastTimestamp = currentTimeStamp;
                             firstTimestampReceived = true;
                         }
+
+                    HistoryItem currentHistoryItem;
+                    QByteArray logType = getMidData("\"type\":\"", "\"", &curLog);
 
                     if (logType == "Sell")
                         currentHistoryItem.type = 1;
@@ -899,8 +909,11 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
                     }
                 }
 
-                if (maxId > lastHistoryId)
-                    lastHistoryId = maxId;
+                if (lastId != 0LL && lastId != lastHistoryId)
+                    lastHistoryId = lastId;
+
+                if (lastTime != 0LL && lastTime != lastHistoryTime)
+                    lastHistoryTime = lastTime;
 
                 emit historyChanged(historyItems);
             }
@@ -914,7 +927,7 @@ void Exchange_Bitfinex::dataReceivedAuth(QByteArray data, int reqType)
         if (!success)
             break;
 
-        if (data.startsWith("[{\"maker_fees"))
+        if (data.startsWith("[{\""))
         {
             bool feeInit = false;
             double newFee(0.0);

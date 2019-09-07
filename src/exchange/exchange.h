@@ -114,7 +114,7 @@ public:
     virtual void clearVariables();
     void translateUnicodeStr(QString* str);
     void translateUnicodeOne(QByteArray* str);
-    QByteArray getMidData(QString a, QString b, QByteArray* data);
+    static QByteArray getMidData(QString a, QString b, QByteArray* data);
     QByteArray getMidVal(QString a, QString b, QByteArray* data);
     void setupApi(QtBitcoinTrader*, bool tickerOnly = false);
     Exchange();

@@ -65,7 +65,7 @@ public:
 private:
     int dateWidth = 0;
     int typeWidth = 0;
-    quint32 lastDate;
+    qint64 lastDate;
     int columnsCount;
     QStringList headerLabels;
     QStringList typesLabels;

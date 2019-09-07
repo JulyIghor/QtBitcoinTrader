@@ -124,7 +124,10 @@ void HistoryModel::historyChanged(QList<HistoryItem>* histList)
                 itemsList.last().dateInt;
     }
 
-    quint32 maxListDate = 0;
+    if (itemsList.isEmpty() && histList->count())
+        (*histList)[histList->count() - 1].displayFullDate = true;
+
+    qint64 maxListDate = 0;
 
     for (int n = histList->count() - 1; n >= 0; n--)
     {

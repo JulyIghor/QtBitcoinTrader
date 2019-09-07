@@ -41,7 +41,7 @@ class SettingsDecimals : public QWidget
     Q_OBJECT
 
 public:
-    SettingsDecimals();
+    explicit SettingsDecimals(QWidget* parent);
     ~SettingsDecimals();
     Ui::SettingsDecimals ui;
 

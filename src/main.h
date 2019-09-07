@@ -63,10 +63,17 @@
 #include "currencypairitem.h"
 
 class Exchange;
+class QProcess;
 
 struct BaseValues
 {
-    void Construct();
+    BaseValues();
+    void selectSystemLanguage();
+    void initHiDpi();
+    void initValues(QApplication& a);
+    bool initAppDataDir(QApplication& a);
+    void initThemes(QApplication& a);
+    void initSettings();
 
     bool portableMode = false;
 
@@ -110,7 +117,9 @@ struct BaseValues
     int depthCountLimit;
     int httpRetryCount;
     int httpRequestInterval;
+    int minimumRequestInterval;
     int httpRequestTimeout;
+    int minimumRequestTimeout;
     QAtomicInt feeDecimals;
     Exchange* currentExchange_;
     QString scriptFolder;

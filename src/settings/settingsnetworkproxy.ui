@@ -198,6 +198,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="echoMode">
+         <enum>QLineEdit::Password</enum>
+        </property>
        </widget>
       </item>
       <item row="6" column="0">
@@ -432,13 +435,13 @@
          </size>
         </property>
         <property name="minimum">
-         <number>500</number>
+         <number>50</number>
         </property>
         <property name="maximum">
          <number>15000</number>
         </property>
         <property name="singleStep">
-         <number>100</number>
+         <number>50</number>
         </property>
        </widget>
       </item>

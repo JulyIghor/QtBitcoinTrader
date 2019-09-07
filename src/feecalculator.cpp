@@ -46,6 +46,7 @@ FeeCalculator::FeeCalculator()
     Q_FOREACH (QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())
         new JulySpinBoxFix(spinBox);
 
+    mainWindow.fixAllCurrencyLabels(this);
     mainWindow.fillAllBtcLabels(this, baseValues.currentPair.currAStr);
     mainWindow.fillAllUsdLabels(this, baseValues.currentPair.currBStr);
     mainWindow.fixDecimals(this);

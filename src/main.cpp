@@ -50,6 +50,7 @@
 #include <QStyleFactory>
 #include "login/passworddialog.h"
 #include "login/newpassworddialog.h"
+#include "exchange/exchange.h"
 #include "login/featuredexchangesdialog.h"
 #include "login/allexchangesdialog.h"
 #include "login/qttraderinform.h"
@@ -66,46 +67,12 @@
 #include "qsystemdetection.h"
 
 #ifdef Q_OS_WIN
-    #include <Windows.h>
+    #include <windows.h>
 #endif
 
 BaseValues* baseValues_;
 
-void selectSystemLanguage()
-{
-    QString sysLocale = QLocale().name().toLower();
-
-    if (sysLocale.startsWith("de"))
-        baseValues.defaultLangFile = ":/Resources/Language/German.lng";
-    else if (sysLocale.startsWith("fr"))
-        baseValues.defaultLangFile = ":/Resources/Language/French.lng";
-    else if (sysLocale.startsWith("zh"))
-        baseValues.defaultLangFile = ":/Resources/Language/Chinese.lng";
-    else if (sysLocale.startsWith("ru"))
-        baseValues.defaultLangFile = ":/Resources/Language/Russian.lng";
-    else if (sysLocale.startsWith("uk"))
-        baseValues.defaultLangFile = ":/Resources/Language/Ukrainian.lng";
-    else if (sysLocale.startsWith("pl"))
-        baseValues.defaultLangFile = ":/Resources/Language/Polish.lng";
-    else if (sysLocale.startsWith("nl"))
-        baseValues.defaultLangFile = ":/Resources/Language/Dutch.lng";
-    else if (sysLocale.startsWith("es"))
-        baseValues.defaultLangFile = ":/Resources/Language/Spanish.lng";
-    else if (sysLocale.startsWith("nb"))
-        baseValues.defaultLangFile = ":/Resources/Language/Norwegian.lng";
-    else if (sysLocale.startsWith("bg"))
-        baseValues.defaultLangFile = ":/Resources/Language/Bulgarian.lng";
-    else if (sysLocale.startsWith("cs"))
-        baseValues.defaultLangFile = ":/Resources/Language/Czech.lng";
-    else if (sysLocale.startsWith("tr"))
-        baseValues.defaultLangFile = ":/Resources/Language/Turkish.lng";
-    else if (sysLocale.startsWith("it"))
-        baseValues.defaultLangFile = ":/Resources/Language/Italiano.lng";
-    else
-        baseValues.defaultLangFile = ":/Resources/Language/English.lng";
-}
-
-void BaseValues::Construct()
+BaseValues::BaseValues()
 {
     forceDotInSpinBoxes = true;
     scriptsThatUseOrderBookCount = 0;
@@ -118,7 +85,7 @@ void BaseValues::Construct()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4042";
+    appVerStr = "1.4043";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -131,7 +98,7 @@ void BaseValues::Construct()
 
     appVerLastReal = appVerReal;
 
-    logThread = nullptr;
+    logThread_ = nullptr;
 
     highResolutionDisplay = true;
     timeFormat = QLocale().timeFormat(QLocale::LongFormat).replace(" ", "").replace("t", "");
@@ -152,7 +119,7 @@ void BaseValues::Construct()
     upArrow = QByteArray::fromBase64("4oaR");
     downArrow = QByteArray::fromBase64("4oaT");
 
-    if (baseValues.supportsUtfUI)
+    if (supportsUtfUI)
     {
         upArrowNoUtf8 = upArrow;
         downArrowNoUtf8 = downArrow;
@@ -164,50 +131,262 @@ void BaseValues::Construct()
     }
 
     httpRequestInterval = 400;
+    minimumRequestInterval = 400;
     httpRequestTimeout = 5000;
+    minimumRequestTimeout = 5000;
     httpRetryCount = 5;
     apiDownCount = 0;
     groupPriceValue = 0.0;
     defaultHeightForRow_ = 22;
 
+    tempLocation = QStandardPaths::standardLocations(QStandardPaths::TempLocation).first().replace('\\', '/') + "/";
+    desktopLocation = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first().replace('\\', '/') + "/";
+    logFileName = QLatin1String("QtBitcoinTrader.log");
+    iniFileName = QLatin1String("QtBitcoinTrader.ini");
+
     selectSystemLanguage();
 }
 
-int main(int argc, char* argv[])
+void BaseValues::selectSystemLanguage()
 {
-    QScopedPointer<JulyLockFile> julyLock(nullptr);
+    QString sysLocale = QLocale().name().toLower();
 
-    QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
+    if (sysLocale.startsWith("de"))
+        defaultLangFile = ":/Resources/Language/German.lng";
+    else if (sysLocale.startsWith("fr"))
+        defaultLangFile = ":/Resources/Language/French.lng";
+    else if (sysLocale.startsWith("zh"))
+        defaultLangFile = ":/Resources/Language/Chinese.lng";
+    else if (sysLocale.startsWith("ru"))
+        defaultLangFile = ":/Resources/Language/Russian.lng";
+    else if (sysLocale.startsWith("uk"))
+        defaultLangFile = ":/Resources/Language/Ukrainian.lng";
+    else if (sysLocale.startsWith("pl"))
+        defaultLangFile = ":/Resources/Language/Polish.lng";
+    else if (sysLocale.startsWith("nl"))
+        defaultLangFile = ":/Resources/Language/Dutch.lng";
+    else if (sysLocale.startsWith("es"))
+        defaultLangFile = ":/Resources/Language/Spanish.lng";
+    else if (sysLocale.startsWith("nb"))
+        defaultLangFile = ":/Resources/Language/Norwegian.lng";
+    else if (sysLocale.startsWith("bg"))
+        defaultLangFile = ":/Resources/Language/Bulgarian.lng";
+    else if (sysLocale.startsWith("cs"))
+        defaultLangFile = ":/Resources/Language/Czech.lng";
+    else if (sysLocale.startsWith("tr"))
+        defaultLangFile = ":/Resources/Language/Turkish.lng";
+    else if (sysLocale.startsWith("it"))
+        defaultLangFile = ":/Resources/Language/Italiano.lng";
+    else
+        defaultLangFile = ":/Resources/Language/English.lng";
+}
 
-    baseValues_ = new BaseValues;
-    baseValues_->Construct();
-
+void BaseValues::initHiDpi()
+{
 #ifdef Q_OS_LINUX
-    baseValues.defaultEnableHiDPI = false;
+    defaultEnableHiDPI = false;
 #else
-    baseValues.defaultEnableHiDPI = true;
+    defaultEnableHiDPI = true;
 #endif
 
     QSettings hiDpiSettings("Centrabit", "Qt Bitcoin Trader");
 
-    if (hiDpiSettings.value("HiDPI", baseValues.defaultEnableHiDPI).toBool())
+    if (hiDpiSettings.value("HiDPI", defaultEnableHiDPI).toBool())
     {
         QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     }
     else
         QApplication::setAttribute(Qt::AA_Use96Dpi);
+}
 
-    QApplication a(argc, argv);
-    a.setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
+bool BaseValues::initAppDataDir(QApplication& a)
+{
+    bool portableModeSupported(false);
+#ifdef Q_OS_MAC
+
+    if (!a.applicationDirPath().startsWith("/Applications/"))
+        portableModeSupported = true;
+
+#endif
+#ifdef Q_OS_WIN
+    portableModeSupported = true;
+#endif
+#ifdef QTBUILDTARGETLINUX64
+    portableModeSupported = true;
+#endif
+    QString systemAppDataDir(QStandardPaths::standardLocations(QStandardPaths::DataLocation).first());
+#ifdef Q_OS_WIN
+    systemAppDataDir.replace('\\', '/');
+#endif
+
+    if (portableModeSupported)
+    {
+        QString portableAppDataDir(a.applicationDirPath() + QLatin1String("/QtBitcoinTrader.data"));
+#ifdef Q_OS_WIN
+
+        if (QFile::exists(a.applicationDirPath() + QLatin1String("/QtBitcoinTrader")) &&
+            QFileInfo(a.applicationDirPath() + QLatin1String("/QtBitcoinTrader")).isDir())
+            QFile::rename(a.applicationDirPath() + QLatin1String("/QtBitcoinTrader"), portableAppDataDir);
+
+#endif
+        appDataDir = systemAppDataDir;
+
+        if (!QFile::exists(portableAppDataDir) && !QFile::exists(appDataDir))
+        {
+            julyTranslator.loadFromFile(defaultLangFile);
+            DataFolderChuseDialog chuseStorageLocation(appDataDir, portableAppDataDir);
+
+            if (chuseStorageLocation.exec() == QDialog::Rejected)
+                return false;
+
+            if (chuseStorageLocation.isPortable)
+                QDir().mkdir(portableAppDataDir);
+            else
+            {
+                QDir().mkdir(systemAppDataDir);
+                QString installedBin = systemAppDataDir + "/QtBitcoinTrader";
+                const QString desktopLocation(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
+#ifdef Q_OS_WIN
+                installedBin.append(".exe");
+#else
+                installedBin.append(".bin");
+#endif
+
+                QFile::Permissions selfPerms = QFile(a.applicationFilePath()).permissions();
+
+                if (a.applicationFilePath().startsWith(desktopLocation))
+                    QFile::rename(a.applicationFilePath(), installedBin);
+                else
+                    QFile::copy(a.applicationFilePath(), installedBin);
+
+                if (QFile::exists(installedBin))
+                {
+                    QFile(installedBin).setPermissions(selfPerms);
+#ifdef Q_OS_WIN
+                    {
+                        QString desktopFile(desktopLocation + "/Qt Bitcoin Trader.lnk");
+                        QFile::link(installedBin, desktopFile);
+                        QProcess proc;
+                        proc.startDetached(installedBin, QStringList() << "/installed");
+                        proc.waitForStarted(3000);
+                        return false;
+                    }
+#endif
+#ifdef Q_OS_LINUX
+                    {
+                        QString desktopFile(desktopLocation + "/Qt Bitcoin Trader.desktop");
+                        QString desktopIconFile(systemAppDataDir + "/QtBitcoinTrader.png");
+                        {
+                            QByteArray iconData;
+                            QFile rF(":/Resources/QtBitcoinTrader.png");
+                            rF.open(QFile::ReadOnly);
+                            QFile wF(desktopIconFile);
+
+                            if (wF.open(QFile::WriteOnly))
+                            {
+                                wF.write(rF.readAll());
+                                wF.close();
+                            }
+
+                            rF.close();
+                        }
+                        {
+                            QFile wF(desktopFile);
+
+                            if (wF.open(QFile::WriteOnly))
+                            {
+                                wF.write("[Desktop Entry]\n"
+                                         "Encoding=UTF-8\n"
+                                         "Name=Qt Bitcoin Trader\n"
+                                         "GenericName=Secure Multi Trading Client\n"
+                                         "Exec=\"" + installedBin.toUtf8() + "\"\n"
+                                         "Icon=" + desktopIconFile.toUtf8() + "\n"
+                                         "Terminal=false\n"
+                                         "Type=Application\n"
+                                         "Categories=Qt;Office;Finance;\n");
+                                wF.close();
+                            }
+                        }
+                        QProcess proc;
+                        proc.startDetached(installedBin, QStringList() << "/installed");
+                        proc.waitForStarted(3000);
+                        return false;
+                    }
+#endif
+                }
+            }
+
+        }
+
+        if (QFile::exists(portableAppDataDir))
+        {
+            portableMode = true;
+            appDataDir = portableAppDataDir;
+        }
+
+        if (!QFile::exists(appDataDir + "/Language"))
+            QDir().mkpath(appDataDir + "/Language");
+
+        if (!QFile::exists(appDataDir))
+        {
+            QMessageBox::warning(nullptr, "Qt Bitcoin Trader",
+                                 julyTr("CAN_NOT_WRITE_TO_FOLDER", "Can not write to folder") +
+                                 ": \"" + appDataDir + "\"");
+            return false;
+        }
+    }
+    else
+    {
+        appDataDir = systemAppDataDir;
+        QString oldAppDataDir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first() + "/.config/QtBitcoinTrader";
+
+        if (!QFile::exists(appDataDir) && oldAppDataDir != appDataDir && QFile::exists(oldAppDataDir))
+        {
+            QFile::rename(oldAppDataDir, appDataDir);
+
+            if (QFile::exists(oldAppDataDir))
+            {
+                if (!QFile::exists(appDataDir))
+                    QDir().mkpath(appDataDir);
+
+                QStringList fileList = QDir(oldAppDataDir).entryList();
+
+                for (int n = 0; n < fileList.count(); n++)
+                    if (fileList.at(n).length() > 2)
+                    {
+                        QFile::copy(oldAppDataDir + fileList.at(n), appDataDir + fileList.at(n));
+
+                        if (QFile::exists(oldAppDataDir + fileList.at(n)))
+                            QFile::remove(oldAppDataDir + fileList.at(n));
+                    }
+            }
+        }
+
+        if (!QFile::exists(appDataDir))
+            QDir().mkpath(appDataDir);
+
+        if (!QFile::exists(appDataDir))
+        {
+            QMessageBox::warning(nullptr, "Qt Bitcoin Trader",
+                                 julyTr("CAN_NOT_WRITE_TO_FOLDER", "Can not write to folder") +
+                                 ": \"" + appDataDir + "\"");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void BaseValues::initValues(QApplication& a)
+{
+    qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
+    qRegisterMetaType<QList<QSslError>>("QList<QSslError>");
 
     QThread::currentThread()->setObjectName("Main Thread");
 
-    if (QSslSocket::sslLibraryVersionString().isEmpty())
-    {
-        QMessageBox::critical(nullptr, "Qt Bitcoin Trader", julyTr("CANT_LOAD_OPENSSL", "Can't load OpenSSL"));
-        return 0;
-    }
+    a.setWindowIcon(QIcon(":/Resources/QtBitcoinTrader.png"));
+    a.setApplicationVersion(appVerStr);
 
     QTranslator qTranslator;
     qTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
@@ -219,22 +398,169 @@ int main(int argc, char* argv[])
     a.setFont(font);
 #endif
 
+    fontMetrics_ = new QFontMetrics(a.font());
+    scriptFolder = appDataDir + "/Scripts/";
+
+    if (QFile::exists(a.applicationFilePath() + ".upd"))
+        QFile::remove(a.applicationFilePath() + ".upd");
+
+    if (QFile::exists(a.applicationFilePath() + ".bkp"))
+        QFile::remove(a.applicationFilePath() + ".bkp");
+}
+
+void BaseValues::initThemes(QApplication& a)
+{
     a.setStyle(QStyleFactory::create("Fusion"));
 
-    a.setApplicationName("QtBitcoinTrader");
-    a.setApplicationVersion(baseValues.appVerStr);
+    if (QFile::exists(appDataDir + "/Themes"))
+    {
+        themeFolder = appDataDir + "/Themes";
 
-    qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
-    qRegisterMetaType<QList<QSslError>>("QList<QSslError>");
+        if (!QFile::exists(themeFolder + "/Dark.thm"))
+            QFile::copy("://Resources/Themes/Dark.thm", themeFolder + "/Dark.thm");
+
+        if (!QFile::exists(themeFolder + "/Light.thm"))
+            QFile::copy("://Resources/Themes/Light.thm", themeFolder + "/Light.thm");
+
+        if (!QFile::exists(themeFolder + "/Gray.thm"))
+            QFile::copy("://Resources/Themes/Gray.thm", themeFolder + "/Gray.thm");
+    }
+    else
+        themeFolder = "://Resources/Themes";
+
+    appThemeLight.palette = a.palette();
+    appThemeDark.palette = a.palette();
+    appThemeGray.palette = a.palette();
+
+    appThemeLight.loadTheme("Light");
+    appThemeDark.loadTheme("Dark");
+    appThemeGray.loadTheme("Gray");
+    appTheme = appThemeLight;
+
+    osStyle = a.style()->objectName();
+
+    a.setPalette(appTheme.palette);
+    a.setStyleSheet(appTheme.styleSheet);
+}
+
+void BaseValues::initSettings()
+{
+    QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
+
+    settingsMain.beginGroup("Proxy");
+    bool proxyEnabled = settingsMain.value("Enabled", true).toBool();
+    bool proxyAuto = settingsMain.value("Auto", true).toBool();
+    QString proxyHost = settingsMain.value("Host", "127.0.0.1").toString();
+    quint16 proxyPort = static_cast<quint16>(settingsMain.value("Port", 1234).toUInt());
+    QString proxyUser = settingsMain.value("User", "username").toString();
+    QString proxyPassword = settingsMain.value("Password", "password").toString();
+    QNetworkProxy::ProxyType proxyType;
+
+    if (settingsMain.value("Type", "HttpProxy").toString() == "Socks5Proxy")
+        proxyType = QNetworkProxy::Socks5Proxy;
+    else
+        proxyType = QNetworkProxy::HttpProxy;
+
+    settingsMain.setValue("Enabled", proxyEnabled);
+    settingsMain.setValue("Auto", proxyAuto);
+    settingsMain.setValue("Host", proxyHost);
+    settingsMain.setValue("Port", proxyPort);
+    settingsMain.setValue("User", proxyUser);
+    settingsMain.setValue("Password", proxyPassword);
+    settingsMain.endGroup();
+
+    QNetworkProxy proxy;
+
+    if (proxyEnabled)
+    {
+        if (proxyAuto)
+        {
+            QList<QNetworkProxy> proxyList = QNetworkProxyFactory::systemProxyForQuery(QNetworkProxyQuery(QUrl("https://")));
+
+            if (proxyList.count())
+                proxy = proxyList.first();
+        }
+        else
+        {
+            proxy.setHostName(proxyHost);
+            proxy.setUser(proxyUser);
+            proxy.setPort(proxyPort);
+            proxy.setPassword(proxyPassword);
+            proxy.setType(proxyType);
+        }
+
+        QNetworkProxy::setApplicationProxy(proxy);
+    }
+
+    appVerLastReal = settingsMain.value("Version", 1.0).toDouble();
+
+    if (!qFuzzyCompare(appVerLastReal + 1.0, appVerReal + 1.0))
+    {
+        settingsMain.setValue("Version", appVerReal);
+        QStringList cacheFiles = QDir(appDataDir + "/cache").entryList(QStringList("*.cache"), QDir::Files);
+
+        for (int i = 0; i < cacheFiles.count(); ++i)
+            QFile(appDataDir + "/cache/" + cacheFiles.at(i)).remove();
+
+        if (qFuzzyIsNull(appVerLastReal))
+            appVerLastReal = appVerReal;
+    }
+
+    appVerIsBeta = settingsMain.value("CheckForUpdatesBeta", false).toBool();
+    use24HourTimeFormat = settingsMain.value("Use24HourTimeFormat", true).toBool();
 
 
-    baseValues_->fontMetrics_ = new QFontMetrics(a.font());
+    settingsMain.beginGroup("Decimals");
+    decimalsAmountMyTransactions = settingsMain.value("AmountMyTransactions", 8).toInt();
+    decimalsPriceMyTransactions = settingsMain.value("PriceMyTransactions", 8).toInt();
+    decimalsTotalMyTransactions = settingsMain.value("TotalMyTransactions", 8).toInt();
+    decimalsAmountOrderBook = settingsMain.value("AmountOrderBook", 8).toInt();
+    decimalsPriceOrderBook = settingsMain.value("PriceOrderBook", 8).toInt();
+    decimalsTotalOrderBook = settingsMain.value("TotalOrderBook", 8).toInt();
+    decimalsAmountLastTrades = settingsMain.value("AmountLastTrades", 8).toInt();
+    decimalsPriceLastTrades = settingsMain.value("PriceLastTrades", 8).toInt();
+    decimalsTotalLastTrades = settingsMain.value("TotalLastTrades", 8).toInt();
+    settingsMain.endGroup();
 
-    baseValues.tempLocation = QStandardPaths::standardLocations(QStandardPaths::TempLocation).first().replace('\\', '/') + "/";
-    baseValues.desktopLocation = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first().replace('\\', '/') + "/";
+    {
+        if (!QFile::exists(appDataDir + "/Language"))
+            QDir().mkpath(appDataDir + "/Language");
+
+        QString langFile = settingsMain.value("LanguageFile", "").toString();
+
+        if (langFile.isEmpty() || !QFile::exists(langFile))
+            langFile = defaultLangFile;
+
+        julyTranslator.loadFromFile(langFile);
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    if (QSslSocket::sslLibraryVersionString().isEmpty())
+    {
+        QMessageBox::critical(nullptr, "Qt Bitcoin Trader", julyTr("CANT_LOAD_OPENSSL", "Can't load OpenSSL"));
+        return 0;
+    }
+
+    QScopedPointer<JulyLockFile> julyLock(nullptr);
+    QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
+    baseValues_ = new BaseValues();
+    baseValues.initHiDpi();
+    QApplication a(argc, argv);
 
     if (argc > 1)
     {
+#ifdef Q_OS_LINUX
+
+        if (a.arguments().contains("/test"))
+        {
+            qDebug().noquote() << "(-: OK :-)";
+            return 0;
+        }
+
+#endif
+
         if (a.arguments().contains("/uninstall"))
         {
             QThread::msleep(2000);
@@ -282,274 +608,19 @@ int main(int argc, char* argv[])
         }
     }
 
-    {
-        bool portableModeSupported(false);
-#ifdef Q_OS_MAC
+    a.setApplicationName("QtBitcoinTrader");
 
-        if (!a.applicationDirPath().startsWith("/Applications/"))
-            portableModeSupported = true;
+    if (!baseValues.initAppDataDir(a))
+        return 0;
 
-#endif
-#ifdef Q_OS_WIN
-        portableModeSupported = true;
-#endif
-#ifdef QTBUILDTARGETLINUX64
-        portableModeSupported = true;
-#endif
-        QString systemAppDataDir(QStandardPaths::standardLocations(QStandardPaths::DataLocation).first());
-#ifdef Q_OS_WIN
-        systemAppDataDir.replace('\\', '/');
-#endif
-
-        if (portableModeSupported)
-        {
-            QString portableAppDataDir(a.applicationDirPath() + QLatin1String("/QtBitcoinTrader.data"));
-#ifdef Q_OS_WIN
-
-            if (QFile::exists(a.applicationDirPath() + QLatin1String("/QtBitcoinTrader")) &&
-                QFileInfo(a.applicationDirPath() + QLatin1String("/QtBitcoinTrader")).isDir())
-                QFile::rename(a.applicationDirPath() + QLatin1String("/QtBitcoinTrader"), portableAppDataDir);
-
-#endif
-            appDataDir = systemAppDataDir;
-
-            if (!QFile::exists(portableAppDataDir) && !QFile::exists(appDataDir))
-            {
-                julyTranslator.loadFromFile(baseValues.defaultLangFile);
-                DataFolderChuseDialog chuseStorageLocation(appDataDir, portableAppDataDir);
-
-                if (chuseStorageLocation.exec() == QDialog::Rejected)
-                    return 0;
-
-                if (chuseStorageLocation.isPortable)
-                    QDir().mkdir(portableAppDataDir);
-                else
-                {
-                    QDir().mkdir(systemAppDataDir);
-                    QString installedBin = systemAppDataDir + "/QtBitcoinTrader";
-                    const QString desktopLocation(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
-#ifdef Q_OS_WIN
-                    installedBin.append(".exe");
-#else
-                    installedBin.append(".bin");
-#endif
-
-                    QFile::Permissions selfPerms = QFile(a.applicationFilePath()).permissions();
-
-                    if (a.applicationFilePath().startsWith(desktopLocation))
-                        QFile::rename(a.applicationFilePath(), installedBin);
-                    else
-                        QFile::copy(a.applicationFilePath(), installedBin);
-
-                    if (QFile::exists(installedBin))
-                    {
-                        QFile(installedBin).setPermissions(selfPerms);
-#ifdef Q_OS_WIN
-                        {
-                            QString desktopFile(desktopLocation + "/Qt Bitcoin Trader.lnk");
-                            QFile::link(installedBin, desktopFile);
-                            QProcess proc;
-                            proc.startDetached(installedBin, QStringList() << "/installed");
-                            proc.waitForStarted(3000);
-                            return 0;
-                        }
-#endif
-#ifdef Q_OS_LINUX
-                        {
-                            QString desktopFile(desktopLocation + "/Qt Bitcoin Trader.desktop");
-                            QString desktopIconFile(systemAppDataDir + "/QtBitcoinTrader.png");
-                            {
-                                QByteArray iconData;
-                                QFile rF(":/Resources/QtBitcoinTrader.png");
-                                rF.open(QFile::ReadOnly);
-                                QFile wF(desktopIconFile);
-
-                                if (wF.open(QFile::WriteOnly))
-                                {
-                                    wF.write(rF.readAll());
-                                    wF.close();
-                                }
-
-                                rF.close();
-                            }
-                            {
-                                QFile wF(desktopFile);
-
-                                if (wF.open(QFile::WriteOnly))
-                                {
-                                    wF.write("[Desktop Entry]\n"
-                                             "Encoding=UTF-8\n"
-                                             "Name=Qt Bitcoin Trader\n"
-                                             "GenericName=Secure Multi Trading Client\n"
-                                             "Exec=\"" + installedBin.toUtf8() + "\"\n"
-                                             "Icon=" + desktopIconFile.toUtf8() + "\n"
-                                             "Terminal=false\n"
-                                             "Type=Application\n"
-                                             "Categories=Qt;Office;Finance;\n");
-                                    wF.close();
-                                }
-                            }
-                            QProcess proc;
-                            proc.startDetached(installedBin, QStringList() << "/installed");
-                            proc.waitForStarted(3000);
-                            return 0;
-                        }
-#endif
-                    }
-                }
-
-            }
-
-            if (QFile::exists(portableAppDataDir))
-            {
-                baseValues_->portableMode = true;
-                appDataDir = portableAppDataDir;
-            }
-
-            if (!QFile::exists(appDataDir + "/Language"))
-                QDir().mkpath(appDataDir + "/Language");
-
-            if (!QFile::exists(appDataDir))
-            {
-                QMessageBox::warning(nullptr, "Qt Bitcoin Trader",
-                                     julyTr("CAN_NOT_WRITE_TO_FOLDER", "Can not write to folder") +
-                                     ": \"" + appDataDir + "\"");
-                return 0;
-            }
-        }
-        else
-        {
-            appDataDir = systemAppDataDir;
-            QString oldAppDataDir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first() + "/.config/QtBitcoinTrader";
-
-            if (!QFile::exists(appDataDir) && oldAppDataDir != appDataDir && QFile::exists(oldAppDataDir))
-            {
-                QFile::rename(oldAppDataDir, appDataDir);
-
-                if (QFile::exists(oldAppDataDir))
-                {
-                    if (!QFile::exists(appDataDir))
-                        QDir().mkpath(appDataDir);
-
-                    QStringList fileList = QDir(oldAppDataDir).entryList();
-
-                    for (int n = 0; n < fileList.count(); n++)
-                        if (fileList.at(n).length() > 2)
-                        {
-                            QFile::copy(oldAppDataDir + fileList.at(n), appDataDir + fileList.at(n));
-
-                            if (QFile::exists(oldAppDataDir + fileList.at(n)))
-                                QFile::remove(oldAppDataDir + fileList.at(n));
-                        }
-                }
-            }
-
-            if (!QFile::exists(appDataDir))
-                QDir().mkpath(appDataDir);
-
-            if (!QFile::exists(appDataDir))
-            {
-                QMessageBox::warning(nullptr, "Qt Bitcoin Trader",
-                                     julyTr("CAN_NOT_WRITE_TO_FOLDER", "Can not write to folder") +
-                                     ": \"" + appDataDir + "\"");
-                return 0;
-            }
-        }
-    }
-
-    TimeSync::global();
-
-    if (QFile::exists(appDataDir + "/Themes"))
-    {
-        baseValues.themeFolder = appDataDir + "/Themes";
-
-        if (!QFile::exists(baseValues.themeFolder + "/Dark.thm"))
-            QFile::copy("://Resources/Themes/Dark.thm", baseValues.themeFolder + "/Dark.thm");
-
-        if (!QFile::exists(baseValues.themeFolder + "/Light.thm"))
-            QFile::copy("://Resources/Themes/Light.thm", baseValues.themeFolder + "/Light.thm");
-
-        if (!QFile::exists(baseValues.themeFolder + "/Gray.thm"))
-            QFile::copy("://Resources/Themes/Gray.thm", baseValues.themeFolder + "/Gray.thm");
-    }
-    else
-        baseValues.themeFolder = "://Resources/Themes";
-
-    baseValues.appThemeLight.palette = a.palette();
-    baseValues.appThemeDark.palette = a.palette();
-    baseValues.appThemeGray.palette = a.palette();
-
-    baseValues.appThemeLight.loadTheme("Light");
-    baseValues.appThemeDark.loadTheme("Dark");
-    baseValues.appThemeGray.loadTheme("Gray");
-    baseValues.appTheme = baseValues.appThemeLight;
-
-    QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
-    settingsMain.beginGroup("Proxy");
-
-    bool proxyEnabled = settingsMain.value("Enabled", true).toBool();
-    bool proxyAuto = settingsMain.value("Auto", true).toBool();
-    QString proxyHost = settingsMain.value("Host", "127.0.0.1").toString();
-    quint16 proxyPort = static_cast<quint16>(settingsMain.value("Port", 1234).toUInt());
-    QString proxyUser = settingsMain.value("User", "username").toString();
-    QString proxyPassword = settingsMain.value("Password", "password").toString();
-
-    QNetworkProxy::ProxyType proxyType;
-
-    if (settingsMain.value("Type", "HttpProxy").toString() == "Socks5Proxy")
-        proxyType = QNetworkProxy::Socks5Proxy;
-    else
-        proxyType = QNetworkProxy::HttpProxy;
-
-    settingsMain.setValue("Enabled", proxyEnabled);
-    settingsMain.setValue("Auto", proxyAuto);
-    settingsMain.setValue("Host", proxyHost);
-    settingsMain.setValue("Port", proxyPort);
-    settingsMain.setValue("User", proxyUser);
-    settingsMain.setValue("Password", proxyPassword);
-
-    settingsMain.endGroup();
-
-    QNetworkProxy proxy;
-
-    if (proxyEnabled)
-    {
-        if (proxyAuto)
-        {
-            QList<QNetworkProxy> proxyList = QNetworkProxyFactory::systemProxyForQuery(QNetworkProxyQuery(QUrl("https://")));
-
-            if (proxyList.count())
-                proxy = proxyList.first();
-        }
-        else
-        {
-            proxy.setHostName(proxyHost);
-            proxy.setUser(proxyUser);
-            proxy.setPort(proxyPort);
-            proxy.setPassword(proxyPassword);
-            proxy.setType(proxyType);
-        }
-
-        QNetworkProxy::setApplicationProxy(proxy);
-    }
+    baseValues.initValues(a);
+    baseValues.initThemes(a);
+    baseValues.initSettings();
 
     if (argc > 1)
     {
-#ifdef Q_OS_LINUX
-
-        if (a.arguments().contains("/test"))
-        {
-            qDebug().noquote() << "(-: OK :-)";
-            return 0;
-        }
-
-#endif
-
         if (a.arguments().last().startsWith("/checkupdate"))
         {
-            a.setPalette(baseValues.appTheme.palette);
-            a.setStyleSheet(baseValues.appTheme.styleSheet);
-
             QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
             QString langFile = settings.value("LanguageFile", "").toString();
 
@@ -563,65 +634,10 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (QFile::exists(a.applicationFilePath() + ".upd"))
-        QFile::remove(a.applicationFilePath() + ".upd");
-
-    if (QFile::exists(a.applicationFilePath() + ".bkp"))
-        QFile::remove(a.applicationFilePath() + ".bkp");
+    IniEngine::global();
+    TimeSync::global();
 
     {
-        baseValues.appVerLastReal = settingsMain.value("Version", 1.0).toDouble();
-
-        if (!qFuzzyCompare(baseValues.appVerLastReal + 1.0, baseValues.appVerReal + 1.0))
-        {
-            settingsMain.setValue("Version", baseValues.appVerReal);
-            QStringList cacheFiles = QDir(appDataDir + "/cache").entryList(QStringList("*.cache"), QDir::Files);
-
-            for (int i = 0; i < cacheFiles.count(); ++i)
-                QFile(appDataDir + "/cache/" + cacheFiles.at(i)).remove();
-
-            if (qFuzzyIsNull(baseValues.appVerLastReal))
-                baseValues.appVerLastReal = baseValues.appVerReal;
-        }
-
-        IniEngine::global();
-
-        baseValues_->appVerIsBeta = settingsMain.value("CheckForUpdatesBeta", false).toBool();
-        baseValues_->use24HourTimeFormat = settingsMain.value("Use24HourTimeFormat", true).toBool();
-
-        baseValues.scriptFolder = appDataDir + "/Scripts/";
-        baseValues.osStyle = a.style()->objectName();
-
-        a.setPalette(baseValues.appTheme.palette);
-        a.setStyleSheet(baseValues.appTheme.styleSheet);
-
-        settingsMain.beginGroup("Decimals");
-        baseValues.decimalsAmountMyTransactions = settingsMain.value("AmountMyTransactions", 8).toInt();
-        baseValues.decimalsPriceMyTransactions = settingsMain.value("PriceMyTransactions", 8).toInt();
-        baseValues.decimalsTotalMyTransactions = settingsMain.value("TotalMyTransactions", 8).toInt();
-        baseValues.decimalsAmountOrderBook = settingsMain.value("AmountOrderBook", 8).toInt();
-        baseValues.decimalsPriceOrderBook = settingsMain.value("PriceOrderBook", 8).toInt();
-        baseValues.decimalsTotalOrderBook = settingsMain.value("TotalOrderBook", 8).toInt();
-        baseValues.decimalsAmountLastTrades = settingsMain.value("AmountLastTrades", 8).toInt();
-        baseValues.decimalsPriceLastTrades = settingsMain.value("PriceLastTrades", 8).toInt();
-        baseValues.decimalsTotalLastTrades = settingsMain.value("TotalLastTrades", 8).toInt();
-        settingsMain.endGroup();
-
-        baseValues.logFileName = QLatin1String("QtBitcoinTrader.log");
-        baseValues.iniFileName = QLatin1String("QtBitcoinTrader.ini");
-
-        {
-            if (!QFile::exists(appDataDir + "/Language"))
-                QDir().mkpath(appDataDir + "/Language");
-
-            QString langFile = settingsMain.value("LanguageFile", "").toString();
-
-            if (langFile.isEmpty() || !QFile::exists(langFile))
-                langFile = baseValues.defaultLangFile;
-
-            julyTranslator.loadFromFile(langFile);
-        }
-
         bool tryDecrypt = true;
         bool showNewPasswordDialog = false;
 
@@ -675,6 +691,20 @@ int main(int argc, char* argv[])
                         continue;
 
                     exchangeNumber = allExchanges.exchangeNum;
+                }
+
+                if (exchangeNumber == 0)
+                {
+                    QMessageBox msgBox;
+                    msgBox.setIcon(QMessageBox::Question);
+                    msgBox.setWindowTitle("Qt Bitcoin Trader");
+                    msgBox.setText(julyTr("AGREE_CLOSED_SOURCE", "Do you agree to download the enclosed application?"));
+                    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
+                    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
+
+                    if (msgBox.exec() == QMessageBox::No)
+                        continue;
                 }
 
                 NewPasswordDialog newPassword(exchangeNumber);
@@ -829,8 +859,8 @@ int main(int argc, char* argv[])
                         break;
                     }
 
-                    settings.setValue("EncryptedData/ApiKeySign", QString(encryptedData.toBase64()));
                     settings.setValue("Profile/Name", newPassword.selectedProfileName());
+                    settings.setValue("EncryptedData/ApiKeySign", QString(encryptedData.toBase64()));
                     settings.sync();
 
                     showNewPasswordDialog = false;
@@ -845,27 +875,7 @@ int main(int argc, char* argv[])
                 return 0;
 
             if (enterPassword.resetData)
-            {
-                QString iniToRemove = enterPassword.getIniFilePath();
-
-                if (QFile::exists(iniToRemove))
-                {
-                    QFile::remove(iniToRemove);
-                    QString scriptFolder = baseValues.scriptFolder + "/" + QFileInfo(iniToRemove).completeBaseName() + "/";
-
-                    if (QFile::exists(scriptFolder))
-                    {
-                        QStringList filesToRemove = QDir(scriptFolder).entryList(QStringList() << "*.JLS" << "*.JLR");
-
-                        Q_FOREACH (QString curFile, filesToRemove)
-                            QFile::remove(scriptFolder + curFile);
-
-                        QDir().rmdir(scriptFolder);
-                    }
-                }
-
                 continue;
-            }
 
             if (enterPassword.newProfile)
             {
@@ -896,6 +906,9 @@ int main(int argc, char* argv[])
                                           "This profile is already used by another instance.<br>API does not allow to run two instances with same key sign pair.<br>Please create new profile if you want to use two instances."));
                     msgBox.setStandardButtons(QMessageBox::Ok);
                     msgBox.setDefaultButton(QMessageBox::Ok);
+                    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
+                    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
+
                     msgBox.exec();
 
                     tryPassword.clear();
@@ -948,9 +961,12 @@ int main(int argc, char* argv[])
         if (debugLevel)
         {
             baseValues.logThread_ = new LogThread;
-            logThread->writeLog("Proxy settings: " + proxy.hostName().toUtf8() + ":" + QByteArray::number(
-                                    proxy.port()) + " " + proxy.user().toUtf8());
+            logThread->writeLog("Proxy settings: " + QNetworkProxy::applicationProxy().hostName().toUtf8() +
+                                ":" + QByteArray::number(QNetworkProxy::applicationProxy().port()) +
+                                " " + QNetworkProxy::applicationProxy().user().toUtf8());
         }
+
+        QSettings settingsMain(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
 
         if (settingsMain.value("ShowQtTraderInform2", true).toBool())
         {
@@ -972,6 +988,6 @@ int main(int argc, char* argv[])
     }
 
     baseValues.mainWindow_->setupClass();
-
-    return a.exec();
+    int rezult = a.exec();
+    return rezult;
 }

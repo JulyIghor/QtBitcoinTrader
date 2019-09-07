@@ -46,15 +46,8 @@ NewPasswordDialog::NewPasswordDialog(qint32 num)
     ui.setupUi(this);
     ui.okButton->setEnabled(false);
     setWindowTitle(windowTitle() + " v" + baseValues.appVerStr);
+    setWindowFlags(Qt::WindowCloseButtonHint | Qt::MSWindowsFixedSizeDialogHint);
     on_advSettingsTool_toggled(false);
-
-    QSize minSizeHint = minimumSizeHint();
-
-    if (mainWindow.isValidSize(&minSizeHint))
-        setFixedSize(minSizeHint);
-
-    setWindowFlags(Qt::WindowCloseButtonHint);
-
     julyTranslator.translateUi(this);
 
     QSettings listSettings(":/Resources/Exchanges/List.ini", QSettings::IniFormat);
@@ -63,7 +56,7 @@ NewPasswordDialog::NewPasswordDialog(qint32 num)
     if (exchangeIdText.length() == 1)
         exchangeIdText.prepend("0");
 
-    exchangeName = listSettings.value(exchangeIdText + "/Name").toString();
+    exchangeName = listSettings.value(exchangeIdText + "/Name").toString().replace(' ', "");
     QString logo = listSettings.value(exchangeIdText + "/Logo").toString();
     getApiUrl = listSettings.value(exchangeIdText + "/GetApiUrl").toString();
     clientIdEnabled = listSettings.value(exchangeIdText + "/ClientID", false).toBool();
@@ -73,6 +66,11 @@ NewPasswordDialog::NewPasswordDialog(qint32 num)
     logo = logo.insert(logo.lastIndexOf("."), "_Big");
     ui.exchangeLogoLabel->setPixmap(QPixmap(":/Resources/Exchanges/Logos/" + logo));
     exchangeChanged(exchangeName);
+
+    QSize minSizeHint = minimumSizeHint();
+
+    if (mainWindow.isValidSize(&minSizeHint))
+        setFixedSize(minSizeHint);
 }
 
 NewPasswordDialog::~NewPasswordDialog()
@@ -100,6 +98,16 @@ void NewPasswordDialog::on_advSettingsTool_toggled(bool status)
 
 void NewPasswordDialog::exchangeChanged(QString name)
 {
+    if (exchangeNum == 0)
+    {
+        ui.groupBoxApiKeyAndSecret->hide();
+        ui.getApiKeySecretButton->hide();
+        ui.mainGridLayout->removeWidget(ui.groupBoxApiKeyAndSecret);
+        ui.mainGridLayout->removeWidget(ui.profileGroupBox);
+        ui.mainGridLayout->addWidget(ui.profileGroupBox, 0, 0, 1, 2);
+        return;
+    }
+
     ui.groupBoxApiKeyAndSecret->setTitle(julyTr("API_KEY_AND_SECRET", "%1 API key and Secret").arg(name));
 
     if (clientIdEnabled)
@@ -143,6 +151,13 @@ void NewPasswordDialog::getApiKeySecretButton()
 int NewPasswordDialog::getExchangeId()
 {
     return exchangeNum;
+}
+
+QString NewPasswordDialog::getFileName()
+{
+    QString fileName = exchangeName + "_" + ui.profileNameEdit->text();
+    fileName.replace(' ', '_');
+    return fileName;
 }
 
 void NewPasswordDialog::setDiffBar(int val)
@@ -249,7 +264,9 @@ int NewPasswordDialog::difficulty(QString pass, bool* resive_PasswordIsGood, QSt
             passLength = 11;
 
         quint64 PasswordsPerSecond = 500000000;
-        quint64 crackTime = static_cast<quint64>(qPow(passDifficulty, passLength)) / PasswordsPerSecond;
+        double crackTimeD = qPow(passDifficulty, passLength) / PasswordsPerSecond;
+        quint64 crackTime = crackTimeD >= std::numeric_limits<quint64>::max() ?
+                    std::numeric_limits<quint64>::max() : static_cast<quint64>(crackTimeD);
 
         if (crackTime >= 1798389)
             *resive_PasswordIsGood = true;
@@ -393,8 +410,9 @@ void NewPasswordDialog::checkToEnableButton()
         return;
     }
 
-    if (ui.restSignLine->text().isEmpty() || ui.restKeyLine->text().isEmpty() || (ui.clientIdLine->isVisible() &&
-            ui.clientIdLine->text().isEmpty()))
+    if (ui.groupBoxApiKeyAndSecret->isVisible() &&
+            (ui.restSignLine->text().isEmpty() || ui.restKeyLine->text().isEmpty() ||
+             (ui.clientIdLine->isVisible() && ui.clientIdLine->text().isEmpty())))
     {
         ui.okButton->setEnabled(false);
         return;
@@ -467,8 +485,7 @@ void NewPasswordDialog::updateIniFileName()
         baseValues.iniFileName = appDataDir + "/QtBitcoinTrader.ini";
     else
     {
-        baseValues.iniFileName = exchangeName + "_" + ui.profileNameEdit->text() + ".ini";
-        baseValues.iniFileName.replace(' ', '_');
+        baseValues.iniFileName = getFileName() + ".ini";
         baseValues.iniFileName.prepend(appDataDir + "/");
     }
 
@@ -478,9 +495,9 @@ void NewPasswordDialog::updateIniFileName()
     if (ui.advSettingsTool->isChecked())
     {
         QSettings iniSettings(baseValues.iniFileName, QSettings::IniFormat);
-        iniSettings.setValue("Domain", ui.domainLine->text());
-        iniSettings.setValue("Port", ui.portSpinBox->value());
-        iniSettings.setValue("SSL", ui.sslCheckBox->isChecked());
+        iniSettings.setValue("Network/Domain", ui.domainLine->text());
+        iniSettings.setValue("Network/Port", ui.portSpinBox->value());
+        iniSettings.setValue("Network/SSL", ui.sslCheckBox->isChecked());
     }
 }
 

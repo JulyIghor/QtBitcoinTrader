@@ -37,9 +37,10 @@
 
 DockHost::DockHost(QObject* parent) :
     QObject(parent),
-    widgets(),
+    docks(),
     dockToggling(nullptr),
-    lastLock(false)
+    lastLock(false),
+    staysOnTop(false)
 {
     //
 }
@@ -69,7 +70,7 @@ QDockWidget* DockHost::createDock(QWidget* parent, QWidget* widget, const QStrin
 
     dock->installEventFilter(this);
 
-    widgets << widget;
+    docks << dock;
     return dock;
 }
 
@@ -80,10 +81,8 @@ void DockHost::lockDocks(bool lock)
 
     lastLock = lock;
 
-    Q_FOREACH (QWidget* widget, widgets)
+    Q_FOREACH (QDockWidget* dock, docks)
     {
-        QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
-
         if (dock)
         {
             if (lock)
@@ -112,10 +111,8 @@ void DockHost::lockDocks(bool lock)
 
 void DockHost::setFloatingVisible(bool visible)
 {
-    Q_FOREACH (QWidget* widget, widgets)
+    Q_FOREACH (QDockWidget* dock, docks)
     {
-        QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
-
         if (dock && dock->isFloating())
             dock->setVisible(visible);
     }
@@ -178,6 +175,9 @@ void DockHost::adjustFloatingWindowFlags(QDockWidget* dock)
         if (!isConstrained(dock))
             flags |= Qt::WindowMinMaxButtonsHint;
 
+        if (staysOnTop)
+            flags |= Qt::WindowStaysOnTopHint;
+
         bool isDockVisible = dock->isVisible();
         dock->setWindowFlags(flags);
 
@@ -192,13 +192,24 @@ bool DockHost::isConstrained(QDockWidget* dock)
     return size.width() != QWIDGETSIZE_MAX || size.height() != QWIDGETSIZE_MAX;
 }
 
-void DockHost::closeFloatingWindow()
+void DockHost::hideFloatingWindow()
 {
-    Q_FOREACH (QWidget* widget, widgets)
+    Q_FOREACH (QDockWidget* dock, docks)
     {
-        QDockWidget* dock = static_cast<QDockWidget*>(widget->parentWidget());
-
         if (dock && dock->isFloating())
-            dock->deleteLater();
+            dock->hide();
+    }
+}
+
+void DockHost::setStaysOnTop(bool state)
+{
+    if (state == staysOnTop)
+        return;
+
+    staysOnTop = state;
+
+    Q_FOREACH (QDockWidget* dock, docks)
+    {
+        adjustFloatingWindowFlags(dock);
     }
 }

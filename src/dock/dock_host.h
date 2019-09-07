@@ -49,7 +49,8 @@ public:
     QDockWidget* createDock(QWidget* parent, QWidget* widget, const QString& title);
     void lockDocks(bool lock);
     void setFloatingVisible(bool visible);
-    void closeFloatingWindow();
+    void hideFloatingWindow();
+    void setStaysOnTop(bool state);
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event) Q_DECL_OVERRIDE;
@@ -63,7 +64,8 @@ private:
     bool isConstrained(QDockWidget* dock);
 
 private:
-    QList<QWidget*> widgets;
-    QDockWidget*    dockToggling;
-    bool            lastLock;
+    QList<QDockWidget*> docks;
+    QDockWidget*        dockToggling;
+    bool                lastLock;
+    bool                staysOnTop;
 };

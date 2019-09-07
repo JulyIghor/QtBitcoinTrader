@@ -461,7 +461,7 @@ Label_AMOUNT=Amount:
 Label_GROUP_NAME=Group Name:
 String_LOCK_DOCKS=&Lock Docks
 String_EXIT=E&xit
-String_ABOUT=&About
+String_ABOUT=&About Qt Bitcoin Trader
 String_ABOUT_QT=About &Qt
 String_CONFIG_MANAGER=&Save...
 String_CONFIG_SETTINGS=Se&ttings
@@ -545,7 +545,7 @@ String_SEND_BUG_REPORT=&Send bug report
 String_CONFIRM_UNINSTALL=Are you sure to uninstall Application?<br>All configs, scripts, rules will be deleted
 String_QT_BITCOIN_TRADER_UNINSTALLED=Qt Bitcoin Trader completely uninstalled
 String_QT_BITCOIN_TRADER_INSTALLED=Qt Bitcoin Trader installed into system folder<br>Launch shortcut have been placed in your Desktop folder<br>To uninstall it you can use menu Help->Uninstall<br>You can now delete installation file
-String_UPDATE=Check for &updates...
+String_UPDATE=Check for &updates
 String_UNINSTALL=&Uninstall
 
 String_LOCAL_TIME=Local time

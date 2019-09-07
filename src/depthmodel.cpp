@@ -34,8 +34,9 @@
 #include <QTimer>
 #include "julymath.h"
 
-DepthModel::DepthModel(bool isAskData)
-    : QAbstractItemModel()
+DepthModel::DepthModel(QComboBox* _groupComboBox, bool isAskData)
+    : QAbstractItemModel(),
+      groupComboBox(_groupComboBox)
 {
     widthPriceTitle = 75;
     widthVolumeTitle = 75;
@@ -46,7 +47,7 @@ DepthModel::DepthModel(bool isAskData)
     widthPrice = 75;
     widthVolume = 75;
     widthSize = 75;
-    somethingChanged = true;
+    somethingChanged = false;
     isAsk = isAskData;
     originalIsAsk = isAsk;
     columnsCount = 5;
@@ -376,8 +377,6 @@ void DepthModel::calculateSize()
     if (!somethingChanged)
         return;
 
-    somethingChanged = true;
-
     double maxPrice = 0.0;
     double maxVolume = 0.0;
     double maxTotal = 0.0;
@@ -561,6 +560,15 @@ void DepthModel::fixTitleWidths()
     widthPriceTitle = textFontWidth(headerLabels.at(0)) + 20 + curBSize;
     widthVolumeTitle = textFontWidth(headerLabels.at(1)) + 20 + curASize;
     widthSizeTitle = textFontWidth(headerLabels.at(3)) + 20 + curASize;
+
+    if (widthPriceTitle > widthPrice)
+        widthPrice = widthPriceTitle;
+
+    if (widthVolumeTitle > widthVolume)
+        widthVolume = widthVolumeTitle;
+
+    if (widthSizeTitle > widthSize)
+        widthSize = widthSizeTitle;
 }
 
 void DepthModel::setHorizontalHeaderLabels(QStringList list)
@@ -590,13 +598,98 @@ void DepthModel::depthFirstOrder(double price, double volume)
         emit dataChanged(index(0, 0), index(0, 1));
 }
 
+QString DepthModel::chopLastZero(const QString& text)
+{
+    if (text.isEmpty())
+        return text;
+
+    int i = text.size() - 1;
+
+    for (; i >= 0; --i)
+        if (text.at(i) != '0')
+            break;
+
+    if (i > 0)
+        if (text.at(i) == '.')
+            --i;
+
+    return text.left(i + 1);
+}
+
+void DepthModel::initGroupList(double price)
+{
+    if (groupComboBox->count() > 2)
+        return;
+
+    int    degree = 0;
+    double minVal = 1E-8;
+    price /= minVal;
+
+    while (price >= 10)
+    {
+        ++degree;
+        price /= 10;
+    }
+
+    if (price >= 5)
+        price = 5;
+    else if (price >= 2)
+        price = 2;
+    else
+        price = 1;
+
+    double lastStep = -1.0;
+    int    uiIndex  = -1;
+    groupComboBox->blockSignals(true);
+
+    if (groupComboBox->count() == 2)
+    {
+        lastStep = groupComboBox->itemData(1).toDouble();
+        groupComboBox->removeItem(1);
+    }
+    else if (groupComboBox->count() == 0)
+        groupComboBox->addItem(julyTr("DONT_GROUP", "None"), double(0));
+
+    for (int i = degree; i >= 0 && groupComboBox->count() < 12; --i)
+    {
+        for (int j = qRound(price); j > 0; --j)
+        {
+            double priceD = j * minVal;
+
+            for (int k = 0; k < i; ++k)
+                priceD *= 10;
+
+            groupComboBox->insertItem(1, chopLastZero(QString::number(priceD, 'f', 8)), priceD);
+
+            if (priceD == lastStep)
+                uiIndex = groupComboBox->count() - 1;
+
+            if (j == 5)
+                j -= 2;
+        }
+
+        price = 5.0;
+    }
+
+    if (uiIndex > 0 && uiIndex < groupComboBox->count())
+        groupComboBox->setCurrentIndex(uiIndex);
+
+    groupComboBox->blockSignals(false);
+    mainWindow.fixWidthComboBoxGroupByPrice();
+}
+
 void DepthModel::depthUpdateOrders(QList<DepthItem>* items)
 {
     if (items == nullptr)
         return;
 
+    bool somethingChangedBefore = somethingChanged;
+
     for (int n = 0; n < items->count(); n++)
         depthUpdateOrder(items->at(n));
+
+    if (somethingChangedBefore == false && somethingChanged == true && items->count())
+        initGroupList(items->first().price);
 
     delete items;
     calculateSize();

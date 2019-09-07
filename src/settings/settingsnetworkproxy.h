@@ -41,7 +41,7 @@ class SettingsNetworkProxy : public QWidget
     Q_OBJECT
 
 public:
-    SettingsNetworkProxy();
+    explicit SettingsNetworkProxy(QWidget* parent);
     ~SettingsNetworkProxy();
     Ui::SettingsNetworkProxy ui;
 

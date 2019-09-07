@@ -35,8 +35,8 @@
 #include "settingsnetworkproxy.h"
 #include "main.h"
 
-SettingsNetworkProxy::SettingsNetworkProxy()
-    : QWidget()
+SettingsNetworkProxy::SettingsNetworkProxy(QWidget* parent)
+    : QWidget(parent)
 {
     ui.setupUi(this);
     ui.typeComboBox->addItem("Http", "HttpProxy");
@@ -152,8 +152,8 @@ void SettingsNetworkProxy::loadNetwork()
 {
     ui.apiDownCounterMaxSpinBox->setValue(networkSettings->value("Network/ApiDownCounterMax", 5).toInt());
     ui.httpRetryCountSpinBox->setValue(networkSettings->value("Network/HttpRetryCount", 8).toInt());
-    ui.httpRequestsIntervalSpinBox->setValue(networkSettings->value("Network/HttpRequestsInterval", 500).toInt());
-    ui.httpRequestsTimeoutSpinBox->setValue(networkSettings->value("Network/HttpRequestsTimeout", 4001).toInt());
+    ui.httpRequestsIntervalSpinBox->setValue(networkSettings->value("Network/HttpRequestsInterval", baseValues.minimumRequestInterval).toInt());
+    ui.httpRequestsTimeoutSpinBox->setValue(networkSettings->value("Network/HttpRequestsTimeout", baseValues.minimumRequestTimeout).toInt());
 }
 
 void SettingsNetworkProxy::saveNetwork()
@@ -193,8 +193,8 @@ void SettingsNetworkProxy::on_restoreDefaultsButton_clicked()
 
     ui.apiDownCounterMaxSpinBox->setValue(5);
     ui.httpRetryCountSpinBox->setValue(8);
-    ui.httpRequestsIntervalSpinBox->setValue(500);
-    ui.httpRequestsTimeoutSpinBox->setValue(4000);
+    ui.httpRequestsIntervalSpinBox->setValue(baseValues.minimumRequestInterval);
+    ui.httpRequestsTimeoutSpinBox->setValue(baseValues.minimumRequestTimeout);
 
     ui.restoreDefaultsButton->setEnabled(false);
 }

@@ -4,6 +4,7 @@
         <file>Resources/Sound/800.wav</file>
         <file>Resources/CentrabitDay.png</file>
         <file>Resources/CentrabitNight.png</file>
+        <file>Resources/Exchanges/Logos/QtTrader.png</file>
         <file>Resources/Exchanges/Logos/Bitstamp.png</file>
         <file>Resources/Exchanges/Logos/Unknown.png</file>
         <file>Resources/Exchanges/Logos/Bitfinex.png</file>
@@ -14,6 +15,7 @@
         <file>Resources/Exchanges/Logos/OKCoin.png</file>
         <file>Resources/Exchanges/Logos/YObit.png</file>
         <file>Resources/Exchanges/Logos/Binance.png</file>
+        <file>Resources/Exchanges/Logos/QtTrader_Big.png</file>
         <file>Resources/Exchanges/Logos/Bitstamp_Big.png</file>
         <file>Resources/Exchanges/Logos/Bitfinex_Big.png</file>
         <file>Resources/Exchanges/Logos/BTCChina_Big.png</file>
@@ -86,6 +88,8 @@
         <file>Resources/CurrencySign/XPM.png</file>
         <file>Resources/CurrencySign/DRK.png</file>
         <file>Resources/CurrencySign/UAH.png</file>
+        <file>Resources/CurrencySign/USDS.png</file>
+        <file>Resources/CurrencySign/USDT.png</file>
         <file>Resources/Swap.png</file>
         <file>Resources/Public.key</file>
         <file>Resources/QtBitcoinTrader.png</file>
@@ -127,7 +131,6 @@
         <file>Resources/CurrencySign/BCC.png</file>
         <file>Resources/CurrencySign/BCU.png</file>
         <file>Resources/CurrencySign/NEO.png</file>
-        <file>Resources/Exchanges/Logos/QtTrader_Big.png</file>
         <file>Resources/Exchanges/QtTrader.ini</file>
         <file>Resources/QtTraderDay.png</file>
         <file>Resources/QtTraderNight.png</file>
