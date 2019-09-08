@@ -218,7 +218,7 @@ void Exchange::clearVariables()
     lastUsdBalance = 0.0;
     lastAvUsdBalance = 0.0;
     lastVolume = 0.0;
-    lastFee = 0.0;
+    lastFee = -1.0;
 }
 
 void Exchange::filterAvailableUSDAmountValue(double*)
