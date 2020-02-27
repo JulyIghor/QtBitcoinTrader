@@ -41,7 +41,7 @@
 #include "scriptobject.h"
 #include "julymath.h"
 #include <QComboBox>
-#include <QDoubleSpinBox>
+#include "utils/traderspinbox.h"
 #include "rulewidget.h"
 #include "iniengine.h"
 
@@ -940,8 +940,8 @@ void AddRuleDialog::on_fillFromBuyPanel_clicked()
     ui->thanPriceFee->setCurrentIndex(0);
     ui->thanType->setCurrentIndex(1);
     ui->thanPriceType->setCurrentIndex(ui->thanPriceType->count() - 1);
-    ui->thanAmount->setValue(mainWindow.ui.buyTotalBtc->value());
-    ui->thanPriceValue->setValue(mainWindow.ui.buyPricePerCoin->value());
+    ui->thanAmount->setValue(mainWindow.buyTotalBtc->value());
+    ui->thanPriceValue->setValue(mainWindow.buyPricePerCoin->value());
 }
 
 void AddRuleDialog::on_fillFromSellPanel_clicked()
@@ -952,8 +952,8 @@ void AddRuleDialog::on_fillFromSellPanel_clicked()
     ui->thanPriceFee->setCurrentIndex(0);
     ui->thanType->setCurrentIndex(0);
     ui->thanPriceType->setCurrentIndex(ui->thanPriceType->count() - 1);
-    ui->thanAmount->setValue(mainWindow.ui.sellTotalBtc->value());
-    ui->thanPriceValue->setValue(mainWindow.ui.sellPricePerCoin->value());
+    ui->thanAmount->setValue(mainWindow.sellTotalBtc->value());
+    ui->thanPriceValue->setValue(mainWindow.sellPricePerCoin->value());
 }
 
 void AddRuleDialog::on_valueBSymbol_currentIndexChanged(int index)

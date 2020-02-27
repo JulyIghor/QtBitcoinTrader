@@ -35,6 +35,8 @@
 #include <QDialog>
 #include "ui_feecalculator.h"
 
+class TraderSpinBox;
+
 class FeeCalculator : public QDialog
 {
     Q_OBJECT
@@ -59,6 +61,16 @@ private slots:
     void feeChanged(double);
 
 private:
+    void setupWidgets();
+
+private:
+    TraderSpinBox* buyTotalBtcBox;
+    TraderSpinBox* buyPriceBox;
+    TraderSpinBox* totalPaidBox;
+    TraderSpinBox* btcReceivedBox;
+    TraderSpinBox* sellPriceBox;
+    TraderSpinBox* feeValueBox;
+
     double buy;
     double buyPrice;
     double buySum;

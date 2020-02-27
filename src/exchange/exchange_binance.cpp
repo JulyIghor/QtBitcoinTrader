@@ -36,6 +36,7 @@
 Exchange_Binance::Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey)
     : Exchange(),
       isFirstAccInfo(true),
+      isValidApiKey(true),
       sslErrorCounter(0),
       lastTickerId(0),
       lastTradesId(0),
@@ -97,6 +98,7 @@ void Exchange_Binance::quitThread()
 void Exchange_Binance::clearVariables()
 {
     isFirstAccInfo = true;
+    isValidApiKey = true;
     lastTickerId = 0;
     lastTradesId = 0;
     lastHistoryId = 0;
@@ -138,6 +140,9 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
     if (!success)
         errorString = getMidData("msg\":\"", "\"", &data);
 
+    if (isValidApiKey)
+        if (data == "{\"code\":-2015,\"msg\":\"Invalid API-key, IP, or permissions for action.\"}")
+            isValidApiKey = false;
 
     switch (reqType)
     {
@@ -580,7 +585,7 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
 
                         QByteArray data                = getMidData("\"time\":",    ",",  &logData);
                         data.chop(3);
-                        currentHistoryItem.dateTimeInt = data.toUInt();
+                        currentHistoryItem.dateTimeInt = data.toLongLong();
                         currentHistoryItem.price       = getMidData("\"price\":\"", "\"", &logData).toDouble();
                         currentHistoryItem.volume      = getMidData("\"qty\":\"",   "\"", &logData).toDouble();
 
@@ -728,8 +733,13 @@ void Exchange_Binance::secondSlot()
         case 2:
             if (!isReplayPending(109))
             {
-                QByteArray fromId = lastTradesId ? "&fromId=" + QByteArray::number(lastTradesId + 1) : "";
-                sendToApi(109, "v1/historicalTrades?symbol=" + baseValues.currentPair.currRequestPair + fromId, false, false);
+                if (isValidApiKey)
+                {
+                    QByteArray fromId = lastTradesId ? "&fromId=" + QByteArray::number(lastTradesId + 1) : "";
+                    sendToApi(109, "v1/historicalTrades?symbol=" + baseValues.currentPair.currRequestPair + fromId, false, false);
+                }
+                else
+                    sendToApi(109, "v3/trades?symbol=" + baseValues.currentPair.currRequestPair, false, true);
             }
 
             break;

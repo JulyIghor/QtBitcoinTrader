@@ -32,7 +32,7 @@
 #include "socket.h"
 
 #ifdef Q_OS_WIN
-    #include <Windows.h>
+    #include <windows.h>
 #else
     #include <sys/types.h>
     #include <sys/socket.h>

@@ -55,9 +55,11 @@ RuleWidget::RuleWidget(QString fileName)
     QSettings loadRule(fileName, QSettings::IniFormat);
     loadRule.beginGroup("JLRuleGroup");
     groupName = loadRule.value("Name", "Unknown").toString();
+    rulesModel = new RulesModel(groupName);
     ui.limitRowsValue->setValue(loadRule.value("LogRowsCount", 20).toInt());
     ui.ruleBeep->setChecked(loadRule.value("BeepOnDone", false).toBool());
     ui.notes->setPlainText(loadRule.value("Notes", "").toString());
+    ui.ruleConcurrentMode->setChecked(loadRule.value("ConcurrentMode", false).toBool());
     loadRule.endGroup();
 
     ordersCancelTime = QTime(1, 0, 0, 0);
@@ -68,7 +70,6 @@ RuleWidget::RuleWidget(QString fileName)
     ui.rulesNoMessage->setVisible(true);
     ui.rulesTabs->setVisible(false);
 
-    rulesModel = new RulesModel(groupName);
     connect(rulesModel, SIGNAL(writeLog(QString)), this, SLOT(writeLog(QString)));
     rulesModel->setParent(this);
     ui.rulesTable->setModel(rulesModel);
@@ -215,6 +216,7 @@ void RuleWidget::saveRulesData()
     saveScript.setValue("LogRowsCount", ui.limitRowsValue->value());
     saveScript.setValue("Notes", ui.notes->toPlainText());
     saveScript.setValue("BeepOnDone", ui.ruleBeep->isChecked());
+    saveScript.setValue("ConcurrentMode", ui.ruleConcurrentMode->isChecked());
     saveScript.endGroup();
 
     for (int n = 0; n < rulesModel->holderList.count(); n++)

@@ -823,7 +823,7 @@ void Exchange_HitBTC::sendToApi(int reqType, QByteArray method, bool auth, QByte
 
     if (auth)
         julyHttp->sendData(reqType, method, commands,
-                           "Authorization: Basic " + (getApiKey() + ':' + getApiSign()).toBase64() + "=\r\n");
+                           "Authorization: Basic " + (getApiKey() + ':' + getApiSign()).toBase64() + "\r\n");
     else
         julyHttp->sendData(reqType, "GET /api/2/public/" + method);
 }

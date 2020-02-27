@@ -412,7 +412,7 @@ void NewPasswordDialog::checkToEnableButton()
 
     if (ui.groupBoxApiKeyAndSecret->isVisible() &&
             (ui.restSignLine->text().isEmpty() || ui.restKeyLine->text().isEmpty() ||
-             (ui.clientIdLine->isVisible() && ui.clientIdLine->text().isEmpty())))
+             (ui.clientIdLine->isVisible() && !ui.advSettingsTool->isChecked() && ui.clientIdLine->text().isEmpty())))
     {
         ui.okButton->setEnabled(false);
         return;

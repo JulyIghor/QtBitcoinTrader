@@ -29,6 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "utils/traderspinbox.h"
 #include "feecalculator.h"
 #include "main.h"
 #include "julyspinboxfix.h"
@@ -37,9 +38,16 @@
 
 FeeCalculator::FeeCalculator()
     : QDialog(),
+      buyTotalBtcBox(new TraderSpinBox(this)),
+      buyPriceBox(new TraderSpinBox(this)),
+      totalPaidBox(new TraderSpinBox(this)),
+      btcReceivedBox(new TraderSpinBox(this)),
+      sellPriceBox(new TraderSpinBox(this)),
+      feeValueBox(new TraderSpinBox(this)),
       locked(true)
 {
     ui.setupUi(this);
+    setupWidgets();
     setAttribute(Qt::WA_DeleteOnClose, true);
     setWindowFlags(Qt::WindowCloseButtonHint);
 
@@ -51,26 +59,26 @@ FeeCalculator::FeeCalculator()
     mainWindow.fillAllUsdLabels(this, baseValues.currentPair.currBStr);
     mainWindow.fixDecimals(this);
 
-    ui.feeValue->setValue(mainWindow.ui.accountFee->value());
-    ui.feeValue->setDecimals(baseValues.feeDecimals);
-    fee = 1 - (ui.feeValue->value() / 100);
+    feeValueBox->setValue(mainWindow.ui.accountFee->value());
+    feeValueBox->setDecimals(baseValues.feeDecimals);
+    fee = 1 - (feeValueBox->value() / 100);
 
     buyPrice = IndicatorEngine::getValue(baseValues.exchangeName + '_' + baseValues.currentPair.symbol + "_Sell");
-    ui.buyPrice->setValue(buyPrice);
+    buyPriceBox->setValue(buyPrice);
     double btcVal = mainWindow.getAvailableUSD() / buyPrice;
 
     if (btcVal < baseValues.currentPair.tradeVolumeMin)
         btcVal = baseValues.currentPair.tradeVolumeMin;
 
     buy = btcVal;
-    ui.buyTotalBtc->setValue(buy);
+    buyTotalBtcBox->setValue(buy);
 
-    ui.buyBtcLayout->addWidget(new JulySpinBoxPicker(ui.buyTotalBtc));
-    ui.buyPriceLayout->addWidget(new JulySpinBoxPicker(ui.buyPrice));
-    ui.sellPriceLayout->addWidget(new JulySpinBoxPicker(ui.sellPrice));
-    ui.feeLayout->addWidget(new JulySpinBoxPicker(ui.feeValue));
-    ui.totalPaidLayout->addWidget(new JulySpinBoxPicker(ui.totalPaid));
-    ui.receivedLayout->addWidget(new JulySpinBoxPicker(ui.btcReceived));
+    ui.buyBtcLayout->addWidget(new JulySpinBoxPicker(buyTotalBtcBox));
+    ui.buyPriceLayout->addWidget(new JulySpinBoxPicker(buyPriceBox));
+    ui.sellPriceLayout->addWidget(new JulySpinBoxPicker(sellPriceBox));
+    ui.feeLayout->addWidget(new JulySpinBoxPicker(feeValueBox));
+    ui.totalPaidLayout->addWidget(new JulySpinBoxPicker(totalPaidBox));
+    ui.receivedLayout->addWidget(new JulySpinBoxPicker(btcReceivedBox));
 
     setZeroProfitPrice();
     locked = false;
@@ -130,7 +138,7 @@ void FeeCalculator::setZeroProfitPrice()
 {
     sellPrice = buyPrice / fee / fee;
     locked = true;
-    ui.sellPrice->setValue(sellPrice);
+    sellPriceBox->setValue(sellPrice);
     locked = false;
     sellCalc();
 }
@@ -150,9 +158,9 @@ void FeeCalculator::buyCalc()
     buyFee = buy - buyRez;
 
     locked = true;
-    ui.totalPaid->setValue(buySum);
+    totalPaidBox->setValue(buySum);
     ui.buyFee->setValue(buyFee);
-    ui.btcReceived->setValue(buyRez);
+    btcReceivedBox->setValue(buyRez);
     locked = false;
 
     sellCalc();
@@ -176,7 +184,7 @@ void FeeCalculator::buyPriceChanged(double val)
     buySum = buy * buyPrice;
 
     locked = true;
-    ui.totalPaid->setValue(buySum);
+    totalPaidBox->setValue(buySum);
     locked = false;
 }
 
@@ -191,9 +199,9 @@ void FeeCalculator::buyTotalPaidChanged(double val)
     buyFee = buy - buyRez;
 
     locked = true;
-    ui.buyTotalBtc->setValue(buy);
+    buyTotalBtcBox->setValue(buy);
     ui.buyFee->setValue(buyFee);
-    ui.btcReceived->setValue(buyRez);
+    btcReceivedBox->setValue(buyRez);
     locked = false;
 
     sellCalc();
@@ -210,8 +218,8 @@ void FeeCalculator::buyBtcReceivedChanged(double val)
     buyFee = buy - buyRez;
 
     locked = true;
-    ui.buyTotalBtc->setValue(buy);
-    ui.totalPaid->setValue(buySum);
+    buyTotalBtcBox->setValue(buy);
+    totalPaidBox->setValue(buySum);
     ui.buyFee->setValue(buyFee);
     locked = false;
 
@@ -246,4 +254,49 @@ void FeeCalculator::feeChanged(double val)
 {
     fee = 1 - (val / 100);
     buyCalc();
+}
+
+void FeeCalculator::setupWidgets()
+{
+    buyTotalBtcBox->setAccessibleName("BTC");
+    buyTotalBtcBox->setDecimals(8);
+    buyTotalBtcBox->setMaximum(999999999.0);
+    ui.buyBtcLayout->addWidget(buyTotalBtcBox);
+
+    buyPriceBox->setAccessibleName("PRICE");
+    buyPriceBox->setDecimals(5);
+    buyPriceBox->setMinimum(0.01);
+    buyPriceBox->setMaximum(999999999.0);
+    ui.buyPriceLayout->addWidget(buyPriceBox);
+
+    totalPaidBox->setAccessibleName("USD");
+    totalPaidBox->setDecimals(5);
+    totalPaidBox->setMaximum(999999999.0);
+    ui.totalPaidLayout->addWidget(totalPaidBox);
+
+    btcReceivedBox->setAccessibleName("BTC");
+    btcReceivedBox->setDecimals(8);
+    btcReceivedBox->setMaximum(999999999.0);
+    ui.receivedLayout->addWidget(btcReceivedBox);
+
+    sellPriceBox->setAccessibleName("PRICE");
+    sellPriceBox->setDecimals(5);
+    sellPriceBox->setMinimum(0.00001);
+    sellPriceBox->setMaximum(999999999.0);
+    ui.sellPriceLayout->addWidget(sellPriceBox);
+
+    feeValueBox->setMinimumWidth(0);
+    feeValueBox->setAlignment(Qt::AlignCenter | Qt::AlignHCenter);
+    feeValueBox->setSuffix(" %");
+    feeValueBox->setDecimals(2);
+    feeValueBox->setMaximum(10.0);
+    feeValueBox->setValue(0.6);
+    ui.feeLayout->addWidget(feeValueBox);
+
+    connect(buyTotalBtcBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyBtcChanged);
+    connect(buyPriceBox,    QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyPriceChanged);
+    connect(totalPaidBox,   QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyTotalPaidChanged);
+    connect(btcReceivedBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyBtcReceivedChanged);
+    connect(sellPriceBox,   QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::sellPriceChanged);
+    connect(feeValueBox,    QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::feeChanged);
 }

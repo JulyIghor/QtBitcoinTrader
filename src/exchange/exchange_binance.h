@@ -65,6 +65,7 @@ private:
 
 private:
     bool isFirstAccInfo;
+    bool isValidApiKey;
     int  sslErrorCounter;
 
     qint64 lastTickerId;

@@ -43,9 +43,6 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
-        <property name="buddy">
-         <cstring>buyTotalBtc</cstring>
-        </property>
        </widget>
       </item>
       <item row="0" column="2">
@@ -59,9 +56,6 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
-        <property name="buddy">
-         <cstring>buyPrice</cstring>
-        </property>
        </widget>
       </item>
       <item row="0" column="4">
@@ -74,9 +68,6 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
-        </property>
-        <property name="buddy">
-         <cstring>totalPaid</cstring>
         </property>
        </widget>
       </item>
@@ -106,9 +97,6 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
-        </property>
-        <property name="buddy">
-         <cstring>btcReceived</cstring>
         </property>
        </widget>
       </item>
@@ -146,43 +134,6 @@
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
-          </property>
-          <property name="buddy">
-           <cstring>buyTotalBtc</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="buyTotalBtc">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="accessibleName">
-           <string>BTC</string>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>8</number>
-          </property>
-          <property name="minimum">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
           </property>
          </widget>
         </item>
@@ -255,46 +206,6 @@
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
-          <property name="buddy">
-           <cstring>buyPrice</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="buyPrice">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="whatsThis">
-           <string/>
-          </property>
-          <property name="accessibleName">
-           <string>PRICE</string>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
          </widget>
         </item>
        </layout>
@@ -365,46 +276,6 @@
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
-          </property>
-          <property name="buddy">
-           <cstring>totalPaid</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="totalPaid">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="whatsThis">
-           <string/>
-          </property>
-          <property name="accessibleName">
-           <string>USD</string>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
           </property>
          </widget>
         </item>
@@ -488,7 +359,7 @@
         <item row="0" column="1">
          <widget class="QDoubleSpinBox" name="buyFee">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -591,43 +462,6 @@
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
-          <property name="buddy">
-           <cstring>btcReceived</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="btcReceived">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="accessibleName">
-           <string>BTC</string>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>8</number>
-          </property>
-          <property name="minimum">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
          </widget>
         </item>
        </layout>
@@ -658,9 +492,6 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
-        </property>
-        <property name="buddy">
-         <cstring>sellPrice</cstring>
         </property>
        </widget>
       </item>
@@ -758,7 +589,7 @@
         <item row="0" column="1">
          <widget class="QDoubleSpinBox" name="sellBtc">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -867,46 +698,6 @@
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
-          <property name="buddy">
-           <cstring>sellPrice</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="sellPrice">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="whatsThis">
-           <string/>
-          </property>
-          <property name="accessibleName">
-           <string>PRICE</string>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>0.000010000000000</double>
-          </property>
-          <property name="maximum">
-           <double>999999999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
          </widget>
         </item>
        </layout>
@@ -986,7 +777,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="sellAmount">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1106,7 +897,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="sellFee">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1226,7 +1017,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="sellFiatReceived">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1309,49 +1100,6 @@
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
-          <property name="buddy">
-           <cstring>feeValue</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="feeValue">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="prefix">
-           <string/>
-          </property>
-          <property name="suffix">
-           <string> %</string>
-          </property>
-          <property name="decimals">
-           <number>2</number>
-          </property>
-          <property name="minimum">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>10.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>0.600000000000000</double>
-          </property>
          </widget>
         </item>
        </layout>
@@ -1399,7 +1147,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="profitLoss">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1520,119 +1268,17 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
-  <tabstop>buyTotalBtc</tabstop>
-  <tabstop>buyPrice</tabstop>
-  <tabstop>totalPaid</tabstop>
   <tabstop>buyFee</tabstop>
-  <tabstop>btcReceived</tabstop>
   <tabstop>sellBtc</tabstop>
-  <tabstop>sellPrice</tabstop>
   <tabstop>sellAmount</tabstop>
   <tabstop>sellFee</tabstop>
   <tabstop>sellFiatReceived</tabstop>
   <tabstop>profitLoss</tabstop>
-  <tabstop>feeValue</tabstop>
  </tabstops>
  <resources>
   <include location="QtResource.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>buyTotalBtc</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>FeeCalculator</receiver>
-   <slot>buyBtcChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>119</x>
-     <y>56</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>146</x>
-     <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buyPrice</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>FeeCalculator</receiver>
-   <slot>buyPriceChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>227</x>
-     <y>53</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>239</x>
-     <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>totalPaid</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>FeeCalculator</receiver>
-   <slot>buyTotalPaidChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>408</x>
-     <y>55</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>408</x>
-     <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btcReceived</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>FeeCalculator</receiver>
-   <slot>buyBtcReceivedChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>765</x>
-     <y>56</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>697</x>
-     <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sellPrice</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>FeeCalculator</receiver>
-   <slot>sellPriceChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>273</x>
-     <y>102</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>0</x>
-     <y>106</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>feeValue</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>FeeCalculator</receiver>
-   <slot>feeChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>133</x>
-     <y>150</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>149</x>
-     <y>180</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>profitLoss</sender>
    <signal>valueChanged(double)</signal>

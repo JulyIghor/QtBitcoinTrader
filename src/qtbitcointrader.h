@@ -56,6 +56,7 @@
 #include <time.h>
 #include <QElapsedTimer>
 #include "debugviewer.h"
+#include <QTextToSpeech>
 
 class Exchange;
 class QDockWidget;
@@ -67,13 +68,14 @@ class CurrencyMenu;
 class CurrencySignLoader;
 class ChartsView;
 class NewsView;
+class TraderSpinBox;
 
 struct GroupStateItem
 {
-    GroupStateItem(QString& newName, bool& newEnabled)
+    GroupStateItem(const QString& newName, bool newEnabled):
+        name(newName),
+        enabled(newEnabled)
     {
-        enabled = newEnabled;
-        name = newName;
         elapsed.restart();
     }
     QString name;
@@ -94,7 +96,7 @@ public:
     QStringList getScriptGroupsNames();
     int getOpenOrdersCount(int all = 0);
     void fixTableViews(QWidget* wid);
-    double getIndicatorValue(QString);
+    double getIndicatorValue(const QString&);
     QMap<QString, QDoubleSpinBox*> indicatorsMap;
 
     bool feeCalculatorSingleInstance;
@@ -130,7 +132,7 @@ public:
     void fillAllBtcLabels(QWidget* par, QString curName);
     void fillAllUsdLabels(QWidget* par, QString curName);
 
-    QByteArray getMidData(QString a, QString b, QByteArray* data);
+    QByteArray getMidData(const QString& a, QString b, QByteArray* data);
     QtBitcoinTrader();
     ~QtBitcoinTrader();
 
@@ -145,8 +147,8 @@ public:
     void blinkWindow();
 
     bool confirmOpenOrder;
-    void apiSellSend(QString symbol, double btc, double price);
-    void apiBuySend(QString symbol, double btc, double price);
+    void apiSellSend(const QString& symbol, double btc, double price);
+    void apiBuySend(const QString& symbol, double btc, double price);
 
     QTime lastRuleExecutedTime;
 
@@ -169,10 +171,10 @@ public:
     void setColumnResizeMode(QTableView*, int, QHeaderView::ResizeMode);
     void setColumnResizeMode(QTableView*, QHeaderView::ResizeMode);
 
-    void clearPendingGroup(QString);
+    void clearPendingGroup(const QString&);
 
-    double getVolumeByPrice(QString symbol, double price, bool isAsk);
-    double getPriceByVolume(QString symbol, double size, bool isAsk);
+    double getVolumeByPrice(const QString& symbol, double price, bool isAsk);
+    double getPriceByVolume(const QString& symbol, double size, bool isAsk);
 
     void fixWidthComboBoxGroupByPrice();
 
@@ -267,13 +269,13 @@ private:
     QScopedPointer<CurrencySignLoader> currencySignLoader;
 
 public slots:
-    void sendIndicatorEvent(QString symbol, QString name, double value);
+    void sendIndicatorEvent(const QString& symbol, QString name, double value);
 
-    void setRuleTabRunning(QString, bool);
-    void startApplication(QString, QStringList);
-    void setGroupRunning(QString name, bool enabled);
-    void setGroupState(QString name, bool enabled);
-    bool getIsGroupRunning(QString name);
+    void setRuleTabRunning(const QString&, bool);
+    void startApplication(const QString&, QStringList);
+    void setGroupRunning(const QString& name, bool enabled);
+    void setGroupState(const QString& name, bool enabled);
+    bool getIsGroupRunning(const QString& name);
 
     void reloadScripts();
     void on_buyPercentage_clicked();
@@ -284,9 +286,9 @@ public slots:
     void on_buttonNight_clicked();
     void ordersFilterChanged();
     void cancelOrderByXButton();
-    void cancelPairOrders(QString);
-    void cancelAskOrders(QString);
-    void cancelBidOrders(QString);
+    void cancelPairOrders(const QString&);
+    void cancelAskOrders(const QString&);
+    void cancelBidOrders(const QString&);
 
     void repeatBuySellOrder();
     void repeatBuyOrder();
@@ -302,13 +304,13 @@ public slots:
     void on_rulesTabs_tabCloseRequested(int);
     void on_buttonAddRuleGroup_clicked();
 
-    void availableAmountChanged(QString, double);
+    void availableAmountChanged(const QString&, double);
     void precentBidsChanged(double);
     void depthRequested();
     void depthRequestReceived();
     void on_swapDepth_clicked();
     void checkValidOrdersButtons();
-    void cancelOrder(QString, QByteArray);
+    void cancelOrder(const QString&, QByteArray);
     void volumeAmountChanged(double, double);
     void setLastTrades10MinVolume(double);
     void on_depthAutoResize_toggled(bool);
@@ -320,9 +322,9 @@ public slots:
     void tradesDoubleClicked(QModelIndex);
     void setDataPending(bool);
     void anyDataReceived();
-    void depthFirstOrder(QString, double, double, bool);
-    void depthSubmitOrders(QString, QList<DepthItem>*, QList<DepthItem>*);
-    void showErrorMessage(QString);
+    void depthFirstOrder(const QString&, double, double, bool);
+    void depthSubmitOrders(const QString&, QList<DepthItem>*, QList<DepthItem>*);
+    void showErrorMessage(const QString&);
     void saveAppState();
     void on_widgetStaysOnTop_toggled(bool);
     void setSoftLagValue(int);
@@ -333,13 +335,13 @@ public slots:
     void setTradesScrollBarValue(int);
     void tabTradesIndexChanged(int);
     void tabTradesScrollUp();
-    void addLastTrades(QString symbol, QList<TradesItem>* newItems);
+    void addLastTrades(const QString& symbol, QList<TradesItem>* newItems);
 
-    void sayText(QString);
+    void sayText(const QString&);
 
     void loginChanged(QString);
 
-    void orderBookChanged(QString, QList<OrderItem>* orders);
+    void orderBookChanged(const QString&, QList<OrderItem>* orders);
 
     void setApiDown(bool);
 
@@ -348,10 +350,10 @@ public slots:
     void updateLogTable();
     void historyChanged(QList<HistoryItem>*);
 
-    void accLastSellChanged(QString, double);
-    void accLastBuyChanged(QString, double);
+    void accLastSellChanged(const QString&, double);
+    void accLastBuyChanged(const QString&, double);
 
-    void orderCanceled(QString, QByteArray);
+    void orderCanceled(const QString&, QByteArray);
     void ordersIsAvailable();
     void ordersIsEmpty();
 
@@ -359,13 +361,9 @@ public slots:
     void on_zeroSellThanBuyProfit_clicked();
     void on_zeroBuyThanSellProfit_clicked();
     void profitSellThanBuy();
-    void on_sellThanBuySpinBox_valueChanged(double);
-    void on_sellThanBuySpinBoxPrec_valueChanged(double);
     void profitSellThanBuyCalc();
     void profitBuyThanSellCalc();
     void profitBuyThanSell();
-    void on_profitLossSpinBox_valueChanged(double);
-    void on_profitLossSpinBoxPrec_valueChanged(double);
 
     void buttonNewWindow();
 
@@ -374,16 +372,16 @@ public slots:
     void on_calcButton_clicked();
     void checkUpdate();
 
-    void accFeeChanged(QString, double);
-    void accBtcBalanceChanged(QString, double);
-    void accUsdBalanceChanged(QString, double);
+    void accFeeChanged(const QString&, double);
+    void accBtcBalanceChanged(const QString&, double);
+    void accUsdBalanceChanged(const QString&, double);
 
-    void indicatorHighChanged(QString, double);
-    void indicatorLowChanged(QString, double);
-    void indicatorSellChanged(QString, double);
-    void indicatorLastChanged(QString, double);
-    void indicatorBuyChanged(QString, double);
-    void indicatorVolumeChanged(QString, double);
+    void indicatorHighChanged(const QString&, double);
+    void indicatorLowChanged(const QString&, double);
+    void indicatorSellChanged(const QString&, double);
+    void indicatorLastChanged(const QString&, double);
+    void indicatorBuyChanged(const QString&, double);
+    void indicatorVolumeChanged(const QString&, double);
 
 
     void on_accountUSD_valueChanged(double);
@@ -401,31 +399,25 @@ public slots:
     void cancelAllCurrentPairOrders();
     void on_accountFee_valueChanged(double);
 
-    void on_buyTotalBtc_valueChanged(double);
-    void on_buyPricePerCoin_valueChanged(double);
     void on_buyTotalBtcAllIn_clicked();
     void on_buyTotalBtcHalfIn_clicked();
     void on_buyPriceAsMarketAsk_clicked();
     void on_buyPriceAsMarketLastPrice_clicked();
     void buyBitcoinsButton();
-    void on_buyTotalSpend_valueChanged(double);
 
     void sellBitcoinButton();
-    void on_sellAmountToReceive_valueChanged(double);
-    void on_sellPricePerCoin_valueChanged(double);
     void on_sellPriceAsMarketBid_clicked();
     void on_sellPricePerCoinAsMarketLastPrice_clicked();
     void on_sellTotalBtcAllIn_clicked();
     void on_sellTotalBtcHalfIn_clicked();
-    void on_sellTotalBtc_valueChanged(double);
     void setPairs(QStringList* pairsList);
 signals:
-    void indicatorEventSignal(QString symbol, QString name, double value);
+    void indicatorEventSignal(const QString& symbol, QString name, double value);
     void themeChanged();
     void reloadDepth();
-    void cancelOrderByOid(QString, QByteArray);
-    void apiSell(QString symbol, double btc, double price);
-    void apiBuy(QString symbol, double btc, double price);
+    void cancelOrderByOid(const QString&, QByteArray);
+    void apiSell(const QString& symbol, double btc, double price);
+    void apiBuy(const QString& symbol, double btc, double price);
     void getHistory(bool);
     void clearValues();
     void clearCharts();
@@ -437,6 +429,7 @@ private slots:
     void depthVisibilityChanged(bool);
 
 private:
+    QScopedPointer<QTextToSpeech> ttsEngine;
     void initDocks();
     void createActions();
     void createMenu();
@@ -445,6 +438,7 @@ private:
     void translateTab(QWidget* tab);
     void lockLogo(bool lock);
     void initConfigMenu();
+    void setupWidgets();
 
     QScopedPointer<QThread> currentExchangeThread;
 
@@ -481,6 +475,30 @@ private:
     DockHost*    dockHost;
     QDockWidget* dockLogo;
     QDockWidget* dockDepth;
+
+public:
+    TraderSpinBox* buyTotalSpend;
+    TraderSpinBox* buyPricePerCoin;
+    TraderSpinBox* buyTotalBtc;
+    TraderSpinBox* profitLossSpinBox;
+    TraderSpinBox* profitLossSpinBoxPrec;
+    TraderSpinBox* sellTotalBtc;
+    TraderSpinBox* sellPricePerCoin;
+    TraderSpinBox* sellAmountToReceive;
+    TraderSpinBox* sellThanBuySpinBox;
+    TraderSpinBox* sellThanBuySpinBoxPrec;
+
+private slots:
+    void buyTotalSpend_valueChanged(double);
+    void buyPricePerCoin_valueChanged(double);
+    void buyTotalBtc_valueChanged(double);
+    void profitLossSpinBox_valueChanged(double);
+    void profitLossSpinBoxPrec_valueChanged(double);
+    void sellTotalBtc_valueChanged(double);
+    void sellPricePerCoin_valueChanged(double);
+    void sellAmountToReceive_valueChanged(double);
+    void sellThanBuySpinBox_valueChanged(double);
+    void sellThanBuySpinBoxPrec_valueChanged(double);
 };
 
 #endif // QTBITCOINTRADER_H
