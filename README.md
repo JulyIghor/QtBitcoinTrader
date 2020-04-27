@@ -45,6 +45,11 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.51 Released!
+
+- Fixed hitbtc balance
+- Fixed binance balance
+
 v1.40.50 Released!
 
 - Fixed hitbtc authorization bug

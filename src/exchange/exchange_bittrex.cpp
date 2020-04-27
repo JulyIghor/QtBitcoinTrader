@@ -385,8 +385,8 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
         case 202: //info
             {
-                QByteArray btcBalance = getMidData("\"Currency\":\"" + baseValues.currentPair.currAStr, "}", &data);
-                QByteArray usdBalance = getMidData("\"Currency\":\"" + baseValues.currentPair.currBStr, "}", &data);
+                QByteArray btcBalance = getMidData("\"Currency\":\"" + baseValues.currentPair.currAStr + "\"", "}", &data);
+                QByteArray usdBalance = getMidData("\"Currency\":\"" + baseValues.currentPair.currBStr + "\"", "}", &data);
                 btcBalance = getMidData("\"Available\":", ",", &btcBalance);
                 usdBalance = getMidData("\"Available\":", ",", &usdBalance);
 

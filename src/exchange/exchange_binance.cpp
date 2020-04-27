@@ -408,7 +408,7 @@ void Exchange_Binance::dataReceivedAuth(QByteArray data, int reqType)
                 if (!success)
                     break;
 
-                QByteArray fundsData = getMidData("\"balances\":[{", "}]}", &data);
+                QByteArray fundsData = getMidData("\"balances\":[{", "}],\"", &data);
                 QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStr + "\",\"free\":\"", "\"", &fundsData);
                 QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStr + "\",\"free\":\"", "\"", &fundsData);
 

@@ -399,8 +399,8 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
     case 202: //info
         if (data.size() > 10)
         {
-            QByteArray btcBalance = getMidData("\"currency\":\"" + baseValues.currentPair.currAStr, "}", &data);
-            QByteArray usdBalance = getMidData("\"currency\":\"" + baseValues.currentPair.currBStr, "}", &data);
+            QByteArray btcBalance = getMidData("\"currency\":\"" + baseValues.currentPair.currAStr + "\"", "}", &data);
+            QByteArray usdBalance = getMidData("\"currency\":\"" + baseValues.currentPair.currBStr + "\"", "}", &data);
             btcBalance = getMidData("\"available\":\"", "\"", &btcBalance);
             usdBalance = getMidData("\"available\":\"", "\"", &usdBalance);
 
