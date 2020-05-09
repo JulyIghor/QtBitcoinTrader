@@ -49,6 +49,7 @@ macx {
 }
 
 CONFIG(static) {
+linux: QTPLUGIN.platforms+=qvnc qxcb
     QTPLUGIN.mediaservice=-
     QTPLUGIN.playlistformats=-
     QTPLUGIN.position=-

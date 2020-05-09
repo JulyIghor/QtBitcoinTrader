@@ -45,6 +45,12 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.52 Released!
+
+- Enabled experimental vnc server on a Linux
+- Fixed yobit api, if you ever get nonce error, re-create API keys
+- Improved minimum request interval for Binance to prevent IP bans
+
 v1.40.51 Released!
 
 - Fixed hitbtc balance

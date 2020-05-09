@@ -55,7 +55,7 @@ Exchange_Binance::Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey)
     baseValues.currentPair.setSymbol("BTCUSD");
     baseValues.currentPair.currRequestPair = "btc_usd";
     baseValues.currentPair.priceDecimals = 3;
-    minimumRequestIntervalAllowed = 500;
+    minimumRequestIntervalAllowed = 600;
     baseValues.currentPair.priceMin = qPow(0.1, baseValues.currentPair.priceDecimals);
     baseValues.currentPair.tradeVolumeMin = 0.01;
     baseValues.currentPair.tradePriceMin = 0.1;

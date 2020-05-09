@@ -69,6 +69,10 @@ Exchange_YObit::Exchange_YObit(QByteArray pRestSign, QByteArray pRestKey)
 
     authRequestTime.restart();
     privateNonce = (TimeSync::getTimeT() - 1371854884) * 10;
+
+    while (privateNonce > 2140000000)
+        privateNonce -= 2140000000;
+
     lastHistoryId = 0;
 
     QSettings mainSettings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
