@@ -59,10 +59,10 @@ QColor AppTheme::getColor(const QString& str) const
 {
     QStringList colorList = str.split(",");
 
-    if (colorList.count() < 3)
+    if (colorList.size() < 3)
         return Qt::black;
 
-    if (colorList.count() < 4)
+    if (colorList.size() < 4)
         colorList << "255";
 
     return QColor(colorList.at(0).toInt(), colorList.at(1).toInt(), colorList.at(2).toInt(), colorList.at(3).toInt());
@@ -76,11 +76,11 @@ void AppTheme::loadTheme(const QString& name)
     QStringList colorList = themeLoad.childKeys();
     themeLoad.endGroup();
 
-    for (int n = 0; n < colorList.count(); n++)
+    for (int n = 0; n < colorList.size(); n++)
     {
         QStringList split_ = colorList.at(n).split("_");
 
-        if (split_.count() < 2)
+        if (split_.size() < 2)
             continue;
 
         split_.removeFirst();
@@ -97,11 +97,11 @@ void AppTheme::loadTheme(const QString& name)
     colorList = themeLoad.childKeys();
     themeLoad.endGroup();
 
-    for (int n = 0; n < colorList.count(); n++)
+    for (int n = 0; n < colorList.size(); n++)
     {
         QStringList split_ = colorList.at(n).split("_");
 
-        if (split_.count() < 2)
+        if (split_.size() < 2)
             continue;
 
         split_.removeFirst();
@@ -118,11 +118,11 @@ void AppTheme::loadTheme(const QString& name)
     colorList = themeLoad.childKeys();
     themeLoad.endGroup();
 
-    for (int n = 0; n < colorList.count(); n++)
+    for (int n = 0; n < colorList.size(); n++)
     {
         QStringList split_ = colorList.at(n).split("_");
 
-        if (split_.count() < 2)
+        if (split_.size() < 2)
             continue;
 
         split_.removeFirst();

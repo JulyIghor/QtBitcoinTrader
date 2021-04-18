@@ -47,7 +47,7 @@ public:
     void fixTitleWidths();
     int itemsCount()
     {
-        return volumeList.count();
+        return volumeList.size();
     }
     void calculateSize();
     void clear();

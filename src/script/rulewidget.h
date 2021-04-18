@@ -44,16 +44,16 @@ class RuleWidget : public QWidget
 public:
     void addRuleByHolder(RuleHolder& holder, bool isEnabled);
     bool isBeepOnDone();
-    void currencyChanged();
+    void currencyChanged() const;
     void updateStyleSheets();
     void saveRulesData();
-    bool haveWorkingRules();
-    bool haveAnyRules();
+    bool haveWorkingRules() const;
+    bool haveAnyRules() const;
     bool removeGroup();
     void languageChanged();
     Ui::RuleWidget ui;
     RulesModel* rulesModel;
-    explicit RuleWidget(QString filePath);
+    explicit RuleWidget(const QString& filePath);
     ~RuleWidget();
 
 private:
@@ -73,7 +73,7 @@ public slots:
     void on_ruleDown_clicked();
     void rulesMenuRequested(const QPoint&);
     void ruleDisableEnableMenuFix();
-    void on_ruleConcurrentMode_toggled(bool);
+    void on_ruleConcurrentMode_toggled(bool) const;
     void ruleEnableSelected();
     void ruleDisableSelected();
     void ruleEnableAll();

@@ -77,9 +77,9 @@ QByteArray JulyRSA::getSignature(const QByteArray& data, const QByteArray& keyAr
 
     QByteArray result;
 
-    for (int n = 0; n < dataList.count(); n++)
+    for (int n = 0; n < dataList.size(); n++)
     {
-        unsigned char* finalData = static_cast < unsigned char*>(malloc(static_cast<size_t>(rsaSize)));
+        auto* finalData = static_cast < unsigned char*>(malloc(static_cast<size_t>(rsaSize)));
         int outSize = RSA_public_decrypt(dataList.at(n).size(), (unsigned char*)dataList.at(n).constData(), finalData, rsa,
                                          RSA_PKCS1_PADDING);
         result.append(QByteArray((char*)finalData, outSize));
@@ -108,7 +108,7 @@ bool JulyRSA::isIniFileSigned(const QString& fileName)
     int signGroupPos = -1;
     QByteArray signData;
 
-    for (int n = fileDataList.count() - 1; n >= 0; n--)
+    for (int n = fileDataList.size() - 1; n >= 0; n--)
     {
         if (fileDataList.at(n).startsWith("[RSA2048Sign]"))
         {

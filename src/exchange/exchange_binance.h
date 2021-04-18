@@ -39,28 +39,28 @@ class Exchange_Binance : public Exchange
     Q_OBJECT
 
 public:
-    Exchange_Binance(QByteArray pRestSign, QByteArray pRestKey);
+    Exchange_Binance(const QByteArray &pRestSign, const QByteArray &pRestKey);
     ~Exchange_Binance();
 
 public slots:
     void clearValues();
     void getHistory(bool);
-    void buy(QString, double, double);
-    void sell(QString, double, double);
-    void cancelOrder(QString, QByteArray);
+    void buy(const QString&, double, double);
+    void sell(const QString&, double, double);
+    void cancelOrder(const QString&, const QByteArray&);
 
 private slots:
     void reloadDepth();
     void sslErrors(const QList<QSslError>&);
-    void dataReceivedAuth(QByteArray, int);
+    void dataReceivedAuth(const QByteArray&, int, int);
     void secondSlot();
     void quitThread();
 
 private:
     void clearVariables();
-    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double, double, bool);
-    void sendToApi(int reqType, QByteArray method, bool auth = false, bool simple = false, QByteArray commands = nullptr);
+    void depthSubmitOrder(const QString&, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(const QString&, double, double, bool);
+    void sendToApi(int reqType, const QByteArray& method, bool auth = false, bool simple = false, const QByteArray& commands = QByteArray());
     bool isReplayPending(int);
 
 private:

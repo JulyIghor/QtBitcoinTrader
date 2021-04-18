@@ -47,7 +47,7 @@ public:
 
 private:
     bool forceUpdate;
-    QByteArray getMidData(QString a, QString b, QByteArray* data);
+    QByteArray getMidData(const QString& a, QString b, QByteArray* data);
     bool downloaded100;
     bool feedbackMessage;
     QTimer* timeOutTimer;
@@ -66,7 +66,7 @@ private:
     Ui::UpdaterDialog ui;
 private slots:
     void invalidData(bool);
-    void dataReceived(QByteArray, int);
+    void dataReceived(QByteArray, int, int);
     void exitSlot();
     void dataProgress(int);
     void buttonUpdate();

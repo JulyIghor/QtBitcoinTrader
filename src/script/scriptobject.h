@@ -55,7 +55,7 @@ public:
         return isRunningFlag;
     }
     bool stopScript();
-    bool executeScript(QString, bool);
+    bool executeScript(const QString&, bool);
     explicit ScriptObject(const QString& scriptName);
     ~ScriptObject();
     QStringList indicatorList;
@@ -74,8 +74,8 @@ private:
     bool pendingStop;
     void setRunning(bool);
     bool isRunningFlag;
-    bool replaceString(const QString& what, const QString& to, QString& text, bool skipFirstLeft);
-    QString sourceToScript(QString);
+    bool replaceString(const QString& what, const QString& to, QString& text, bool skipFirstLeft) const;
+    QString sourceToScript(const QString&)const;
     QScriptEngine* engine;
     QStringList functionNames;
     QList<QDoubleSpinBox*> spinBoxList;
@@ -88,6 +88,7 @@ private:
     QHash<quint32, QString> arrayFileReadResult;
     quint32 fileOperationNumber;
     qint32 fileOpenCount;
+    void sayPrivate(const QString& _text_) const;
 public slots:
     void sendEvent(const QString& symbol, const QString& name, double value);
     void sendEvent(const QString& name, double value);
@@ -103,10 +104,9 @@ public slots:
     void logClear();
     void test(int);
 
-    void beep();
+    void beep() const;
     void playWav(const QString& _filePath_);
 
-    void say(const QString& _text_);
     void say(int);
     void say(double);
     void say(const QVariant&);
@@ -118,8 +118,8 @@ public slots:
     void say(const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&);
 
     void groupDone();
-    void groupStart(QString _name_);
-    void groupStop(QString _name_);
+    void groupStart(const QString& _name_);
+    void groupStop(const QString& _name_);
     void groupStop();
     bool groupIsRunning(const QString& _name_);
 
@@ -134,10 +134,10 @@ public slots:
     void sell(const QString& symbol, double amount, double price);
     void buy(double amount, double price);
     void buy(const QString& symbol, double amount, double price);
-    void cancelOrders(const QString& symbol);
+    void cancelOrders(const QString& symbolR);
     void cancelOrders();
-    void cancelAsks(const QString& symbol);
-    void cancelBids(const QString& symbol);
+    void cancelAsks(const QString& symbolR);
+    void cancelBids(const QString& symbolR);
     void cancelAsks();
     void cancelBids();
 
@@ -175,7 +175,7 @@ private slots:
 signals:
     void eventSignal(const QString& symbol, const QString& name, double value);
     void startAppSignal(QString, QStringList);
-    void setGroupEnabled(QString name, bool enabled);
+    void setGroupEnabled(const QString& name, bool enabled);
     void setGroupDone(QString);
     void runningChanged(bool);
     void errorHappend(int, QString);

@@ -48,7 +48,7 @@ public:
     QMap<QString, QString>spinBoxMap;
     QMap<QString, QString>stringMap;
 
-    QString lastFile()
+    const QString& lastFile() const
     {
         return lastLangFile;
     }
@@ -65,11 +65,11 @@ public:
     void loadMapFromUi(QWidget* wid);
     void translateUi(QWidget* wid);
 
-    QString translateButton(const QString& tid, const QString& defaultText);
-    QString translateLabel(const QString& tid, const QString& defaultText);
-    QString translateCheckBox(const QString& tid, const QString& defaultText);
-    QString translateGroupBox(const QString& tid, const QString& defaultText);
-    QString translateSpinBox(const QString& tid, const QString& defaultText);
+    QString translateButton(const QString& tid, const QString& defaultText) const;
+    QString translateLabel(const QString& tid, const QString& defaultText) const;
+    QString translateCheckBox(const QString& tid, const QString& defaultText) const;
+    QString translateGroupBox(const QString& tid, const QString& defaultText) const;
+    QString translateSpinBox(const QString& tid, const QString& defaultText) const;
     QString translateString(const QString& tid, const QString& defaultText);
 private:
     QString lastLangFile;

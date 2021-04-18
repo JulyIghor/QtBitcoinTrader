@@ -59,7 +59,7 @@ JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox* parentSB, int minWid)
     connect(parentSB, SIGNAL(valueChanged(QString)), this, SLOT(widthFix(QString)));
 }
 
-void JulySpinBoxFix::widthFix(QString text)
+void JulySpinBoxFix::widthFix(const QString& text)
 {
     if (pMinimumWidth == 0)
         parentSpinBox->setMinimumWidth(textFontWidth(text) + spinMargin);

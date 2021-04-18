@@ -58,7 +58,7 @@ int JulyTranslator::loadFromFile(const QString& fileName)
 
 void JulyTranslator::fillMapsFromList(const QStringList& list)
 {
-    for (int n = 0; n < list.count(); n++)
+    for (int n = 0; n < list.size(); n++)
     {
         QString currentRow = list.at(n);
 
@@ -121,7 +121,7 @@ QStringList JulyTranslator::getMapList(QMap<QString, QString>* map, QString pref
 {
     QStringList mapTids = map->keys();
 
-    for (int n = 0; n < mapTids.count(); n++)
+    for (int n = 0; n < mapTids.size(); n++)
     {
         mapTids[n] = prefix + mapTids.at(n) + "=" + map->value(mapTids.at(n), "");
         mapTids[n].replace("\n", "<br>");
@@ -132,23 +132,23 @@ QStringList JulyTranslator::getMapList(QMap<QString, QString>* map, QString pref
     return mapTids;
 }
 
-QString JulyTranslator::translateButton(const QString& tid, const QString& defaultText)
+QString JulyTranslator::translateButton(const QString& tid, const QString& defaultText) const
 {
     return buttonMap.value(tid, defaultText);
 }
-QString JulyTranslator::translateLabel(const QString& tid, const QString& defaultText)
+QString JulyTranslator::translateLabel(const QString& tid, const QString& defaultText) const
 {
     return labelMap.value(tid, defaultText);
 }
-QString JulyTranslator::translateCheckBox(const QString& tid, const QString& defaultText)
+QString JulyTranslator::translateCheckBox(const QString& tid, const QString& defaultText) const
 {
     return checkBoxMap.value(tid, defaultText);
 }
-QString JulyTranslator::translateGroupBox(const QString& tid, const QString& defaultText)
+QString JulyTranslator::translateGroupBox(const QString& tid, const QString& defaultText) const
 {
     return groupBoxMap.value(tid, defaultText);
 }
-QString JulyTranslator::translateSpinBox(const QString& tid, const QString& defaultText)
+QString JulyTranslator::translateSpinBox(const QString& tid, const QString& defaultText) const
 {
     return spinBoxMap.value(tid, defaultText);
 }
@@ -157,7 +157,7 @@ QString JulyTranslator::translateString(const QString& tid, const QString& defau
 {
     QString result = stringMap.value(tid, defaultText);
 
-    if (stringMap.values(tid).count() == 0)
+    if (stringMap.values(tid).empty())
         stringMap[tid] = defaultText;
 
     return result;
@@ -165,80 +165,75 @@ QString JulyTranslator::translateString(const QString& tid, const QString& defau
 
 void JulyTranslator::loadMapFromUi(QWidget* par)
 {
-    Q_FOREACH (QPushButton* curButton, par->findChildren<QPushButton*>())
+    for (QPushButton* curButton : par->findChildren<QPushButton*>())
         if (!curButton->accessibleName().isEmpty())
             buttonMap[curButton->accessibleName()] = curButton->text().replace("\n", "<br>").replace("\r", "");
 
-    Q_FOREACH (QToolButton* curButton, par->findChildren<QToolButton*>())
+    for (QToolButton* curButton : par->findChildren<QToolButton*>())
         if (!curButton->accessibleName().isEmpty())
             buttonMap[curButton->accessibleName()] = curButton->text().replace("\n", "<br>").replace("\r", "");
 
-    Q_FOREACH (QCheckBox* curCheckBox, par->findChildren<QCheckBox*>())
+    for (QCheckBox* curCheckBox : par->findChildren<QCheckBox*>())
         if (!curCheckBox->accessibleName().isEmpty())
             checkBoxMap[curCheckBox->accessibleName()] = curCheckBox->text().replace("\n", "<br>").replace("\r", "");
 
-    Q_FOREACH (QRadioButton* curCheckBox, par->findChildren<QRadioButton*>())
+    for (QRadioButton* curCheckBox : par->findChildren<QRadioButton*>())
         if (!curCheckBox->accessibleName().isEmpty())
             checkBoxMap[curCheckBox->accessibleName()] = curCheckBox->text().replace("\n", "<br>").replace("\r", "");
 
-    Q_FOREACH (QLabel* curLabel, par->findChildren<QLabel*>())
+    for (QLabel* curLabel : par->findChildren<QLabel*>())
         if (!curLabel->accessibleName().isEmpty())
             labelMap[curLabel->accessibleName()] = curLabel->text().replace("\n", "<br>").replace("\r", "");
 
-    Q_FOREACH (QGroupBox* curGroupBox, par->findChildren<QGroupBox*>())
+    for (QGroupBox* curGroupBox : par->findChildren<QGroupBox*>())
         if (!curGroupBox->accessibleName().isEmpty())
             groupBoxMap[curGroupBox->accessibleName()] = curGroupBox->title().replace("\n", "<br>").replace("\r", "");
 
-    Q_FOREACH (QDoubleSpinBox* curSpinBox, par->findChildren<QDoubleSpinBox*>())
+    for (QDoubleSpinBox* curSpinBox : par->findChildren<QDoubleSpinBox*>())
         if (!curSpinBox->accessibleName().isEmpty())
             spinBoxMap[curSpinBox->accessibleName()] = curSpinBox->suffix();
 }
 
 void JulyTranslator::translateUi(QWidget* par)
 {
-    if (par == 0)
+    if (par == nullptr)
         return;
 
-    Q_FOREACH (QPushButton* curButton, par->findChildren<QPushButton*>())
+    for (QPushButton* curButton : par->findChildren<QPushButton*>())
         if (!curButton->accessibleName().isEmpty())
             curButton->setText(translateButton(curButton->accessibleName(), curButton->text()));
 
-    Q_FOREACH (QToolButton* curButton, par->findChildren<QToolButton*>())
+    for (QToolButton* curButton : par->findChildren<QToolButton*>())
         if (!curButton->accessibleName().isEmpty())
             curButton->setText(translateButton(curButton->accessibleName(), curButton->text()));
 
-    Q_FOREACH (QCheckBox* curCheckBox, par->findChildren<QCheckBox*>())
+    for (QCheckBox* curCheckBox : par->findChildren<QCheckBox*>())
         if (!curCheckBox->accessibleName().isEmpty())
             curCheckBox->setText(translateCheckBox(curCheckBox->accessibleName(), curCheckBox->text()));
 
-    Q_FOREACH (QRadioButton* curCheckBox, par->findChildren<QRadioButton*>())
+    for (QRadioButton* curCheckBox : par->findChildren<QRadioButton*>())
         if (!curCheckBox->accessibleName().isEmpty())
             curCheckBox->setText(translateCheckBox(curCheckBox->accessibleName(), curCheckBox->text()));
 
-    Q_FOREACH (QLabel* curLabel, par->findChildren<QLabel*>())
+    for (QLabel* curLabel : par->findChildren<QLabel*>())
         if (!curLabel->accessibleName().isEmpty())
             curLabel->setText(translateLabel(curLabel->accessibleName(), curLabel->text()));
 
-    Q_FOREACH (QGroupBox* curGroupBox, par->findChildren<QGroupBox*>())
+    for (QGroupBox* curGroupBox : par->findChildren<QGroupBox*>())
         if (!curGroupBox->accessibleName().isEmpty())
             curGroupBox->setTitle(translateGroupBox(curGroupBox->accessibleName(), curGroupBox->title()));
 
-    Q_FOREACH (QDoubleSpinBox* curSpinBox, par->findChildren<QDoubleSpinBox*>())
+    for (QDoubleSpinBox* curSpinBox : par->findChildren<QDoubleSpinBox*>())
         if (!curSpinBox->accessibleName().isEmpty())
             curSpinBox->setSuffix(translateSpinBox(curSpinBox->accessibleName(), curSpinBox->suffix()));
 
-    Q_FOREACH (QWidget* curWidget, par->findChildren<QWidget*>())
+    for (QWidget* curWidget : par->findChildren<QWidget*>())
     {
-        QDockWidget* dock = static_cast<QDockWidget*>(curWidget->parentWidget());
+        auto* dock = static_cast<QDockWidget*>(curWidget->parentWidget());
 
-        if (dock)
-        {
-            if (!curWidget->accessibleName().isEmpty())
-            {
-                QString key = curWidget->accessibleName();
-                QString s = translateGroupBox(key, dock->windowTitle());
-                dock->setWindowTitle(s);
-            }
-        }
+        if (dock == nullptr || curWidget->accessibleName().isEmpty())
+            continue;
+
+        dock->setWindowTitle(translateGroupBox(curWidget->accessibleName(), dock->windowTitle()));
     }
 }

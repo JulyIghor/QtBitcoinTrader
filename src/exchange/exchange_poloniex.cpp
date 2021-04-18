@@ -32,7 +32,7 @@
 #include "timesync.h"
 #include "exchange_poloniex.h"
 
-Exchange_Poloniex::Exchange_Poloniex(QByteArray pRestSign, QByteArray pRestKey)
+Exchange_Poloniex::Exchange_Poloniex(const QByteArray &pRestSign, const QByteArray &pRestKey)
     : Exchange(),
       isFirstAccInfo(true),
       lastTradesId(0),
@@ -83,13 +83,13 @@ void Exchange_Poloniex::quitThread()
 {
     clearValues();
 
-    if (depthAsks)
+    
         delete depthAsks;
 
-    if (depthBids)
+    
         delete depthBids;
 
-    if (julyHttp)
+    
         delete julyHttp;
 }
 
@@ -121,8 +121,11 @@ void Exchange_Poloniex::reloadDepth()
     Exchange::reloadDepth();
 }
 
-void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
+void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, int pairChangeCount)
 {
+    if (pairChangeCount != m_pairChangeCount)
+        return;
+
     if (debugLevel)
         logThread->writeLog("RCV: " + data);
 
@@ -203,9 +206,9 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
         {
             qint64 time10Min = TimeSync::getTimeT() - 600;
             QStringList tradeList = QString(data).split("},{");
-            QList<TradesItem>* newTradesItems = new QList<TradesItem>;
+            auto* newTradesItems = new QList<TradesItem>;
 
-            for (int n = tradeList.count() - 1; n >= 0; --n)
+            for (int n = tradeList.size() - 1; n >= 0; --n)
             {
                 QByteArray tradeData = tradeList.at(n).toLatin1();
                 TradesItem newItem;
@@ -240,7 +243,7 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
                     logThread->writeLog("Invalid trades fetch data line:" + tradeData, 2);
             }
 
-            if (newTradesItems->count())
+            if (!newTradesItems->empty())
                 emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
             else
                 delete newTradesItems;
@@ -263,14 +266,14 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
             double groupedVolume = 0.0;
             int rowCounter = 0;
 
-            for (int n = 0; n < asksList.count(); n++)
+            for (int n = 0; n < asksList.size(); n++)
             {
                 if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                     break;
 
                 QStringList currentPair = asksList.at(n).split("\",");
 
-                if (currentPair.count() != 2)
+                if (currentPair.size() != 2)
                     continue;
 
                 double priceDouble = currentPair.first().toDouble();
@@ -291,7 +294,7 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
                         if (matchCurrentGroup)
                             groupedVolume += amount;
 
-                        if (!matchCurrentGroup || n == asksList.count() - 1)
+                        if (!matchCurrentGroup || n == asksList.size() - 1)
                         {
                             depthSubmitOrder(baseValues.currentPair.symbol,
                                              &currentAsksMap, groupedPrice + baseValues.groupPriceValue, groupedVolume, true);
@@ -311,7 +314,7 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
 
             QList<double> currentAsksList = lastDepthAsksMap.keys();
 
-            for (int n = 0; n < currentAsksList.count(); n++)
+            for (int n = 0; n < currentAsksList.size(); n++)
                 if (qFuzzyIsNull(currentAsksMap.value(currentAsksList.at(n), 0)))
                     depthUpdateOrder(baseValues.currentPair.symbol,
                                      currentAsksList.at(n), 0.0, true);
@@ -324,14 +327,14 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
             groupedVolume = 0.0;
             rowCounter = 0;
 
-            for (int n = 0; n < bidsList.count(); n++)
+            for (int n = 0; n < bidsList.size(); n++)
             {
                 if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                     break;
 
                 QStringList currentPair = bidsList.at(n).split("\",");
 
-                if (currentPair.count() != 2)
+                if (currentPair.size() != 2)
                     continue;
 
                 double priceDouble = currentPair.first().toDouble();
@@ -352,7 +355,7 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
                         if (matchCurrentGroup)
                             groupedVolume += amount;
 
-                        if (!matchCurrentGroup || n == asksList.count() - 1)
+                        if (!matchCurrentGroup || n == asksList.size() - 1)
                         {
                             depthSubmitOrder(baseValues.currentPair.symbol,
                                              &currentBidsMap, groupedPrice - baseValues.groupPriceValue, groupedVolume, false);
@@ -372,7 +375,7 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
 
             QList<double> currentBidsList = lastDepthBidsMap.keys();
 
-            for (int n = 0; n < currentBidsList.count(); n++)
+            for (int n = 0; n < currentBidsList.size(); n++)
                 if (qFuzzyIsNull(currentBidsMap.value(currentBidsList.at(n), 0)))
                     depthUpdateOrder(baseValues.currentPair.symbol,
                                      currentBidsList.at(n), 0.0, false);
@@ -430,9 +433,9 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
             {
                 lastOrders = data;
                 QStringList ordersPairList = QString(data).split("],");
-                QList<OrderItem>* orders = new QList<OrderItem>;
+                auto* orders = new QList<OrderItem>;
 
-                for (int n = 0; n < ordersPairList.count(); ++n)
+                for (int n = 0; n < ordersPairList.size(); ++n)
                 {
                     QByteArray pairData = ordersPairList.at(n).toLatin1();
 
@@ -447,7 +450,7 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
                     QByteArray symbol = pair.last() + '/' + pair.first();
                     QStringList ordersList = QString(pairData).split("},{");
 
-                    for (int m = 0; m < ordersList.count(); ++m)
+                    for (int m = 0; m < ordersList.size(); ++m)
                     {
                         QByteArray orderData = ordersList.at(m).toLatin1();
                         OrderItem currentOrder;
@@ -467,7 +470,7 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
                     }
                 }
 
-                if (orders->count())
+                if (!orders->empty())
                     emit orderBookChanged(baseValues.currentPair.symbol, orders);
                 else
                 {
@@ -511,9 +514,9 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
 
                 QStringList historyList = QString(data).split("},{");
                 qint64 maxTime = 0;
-                QList<HistoryItem>* historyItems = new QList<HistoryItem>;
+                auto* historyItems = new QList<HistoryItem>;
 
-                for (int n = 0; n < historyList.count(); ++n)
+                for (int n = 0; n < historyList.size(); ++n)
                 {
                     QByteArray logData(historyList.at(n).toLatin1());
 
@@ -608,7 +611,7 @@ void Exchange_Poloniex::dataReceivedAuth(QByteArray data, int reqType)
     }
 }
 
-void Exchange_Poloniex::depthUpdateOrder(QString symbol, double price, double amount, bool isAsk)
+void Exchange_Poloniex::depthUpdateOrder(const QString& symbol, double price, double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
         return;
@@ -639,7 +642,7 @@ void Exchange_Poloniex::depthUpdateOrder(QString symbol, double price, double am
     }
 }
 
-void Exchange_Poloniex::depthSubmitOrder(QString symbol, QMap<double, double>* currentMap, double priceDouble,
+void Exchange_Poloniex::depthSubmitOrder(const QString& symbol, QMap<double, double>* currentMap, double priceDouble,
                                     double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
@@ -749,7 +752,7 @@ void Exchange_Poloniex::getHistory(bool force)
         sendToApi(203, "returnFeeInfo", true);
 }
 
-void Exchange_Poloniex::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
+void Exchange_Poloniex::buy(const QString& symbol, double apiBtcToBuy, double apiPriceToBuy)
 {
     if (tickerOnly)
         return;
@@ -770,7 +773,7 @@ void Exchange_Poloniex::buy(QString symbol, double apiBtcToBuy, double apiPriceT
     sendToApi(306, "buy&" + data, true);
 }
 
-void Exchange_Poloniex::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
+void Exchange_Poloniex::sell(const QString& symbol, double apiBtcToSell, double apiPriceToSell)
 {
     if (tickerOnly)
         return;
@@ -791,7 +794,7 @@ void Exchange_Poloniex::sell(QString symbol, double apiBtcToSell, double apiPric
     sendToApi(306, "sell&" + data, true);
 }
 
-void Exchange_Poloniex::cancelOrder(QString, QByteArray order)
+void Exchange_Poloniex::cancelOrder(const QString& /*unused*/, const QByteArray& order)
 {
     if (tickerOnly)
         return;
@@ -804,7 +807,7 @@ void Exchange_Poloniex::cancelOrder(QString, QByteArray order)
     sendToApi(305, "cancelOrder&" + data, true);
 }
 
-void Exchange_Poloniex::sendToApi(int reqType, QByteArray method, bool auth)
+void Exchange_Poloniex::sendToApi(int reqType, const QByteArray &method, bool auth)
 {
     if (julyHttp == nullptr)
     {
@@ -821,19 +824,19 @@ void Exchange_Poloniex::sendToApi(int reqType, QByteArray method, bool auth)
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
         connect(julyHttp, SIGNAL(errorSignal(QString)), baseValues_->mainWindow_, SLOT(showErrorMessage(QString)));
         connect(julyHttp, SIGNAL(sslErrorSignal(const QList<QSslError>&)), this, SLOT(sslErrors(const QList<QSslError>&)));
-        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceivedAuth(QByteArray, int)));
+        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceivedAuth(const QByteArray&, int, int)));
     }
 
     if (auth)
     {
         QByteArray postData = "command=" + method + "&nonce=" + QByteArray::number(++privateNonce);
 
-        julyHttp->sendData(reqType, "POST /tradingApi", postData,
+        julyHttp->sendData(reqType, m_pairChangeCount, "POST /tradingApi", postData,
                            "Sign: " + hmacSha512(getApiSign(), postData).toHex() + "\r\n");
     }
     else
     {
-        julyHttp->sendData(reqType, "GET /public?command=" + method);
+        julyHttp->sendData(reqType, m_pairChangeCount, "GET /public?command=" + method);
     }
 }
 
@@ -841,7 +844,7 @@ void Exchange_Poloniex::sslErrors(const QList<QSslError>& errors)
 {
     QStringList errorList;
 
-    for (int n = 0; n < errors.count(); n++)
+    for (int n = 0; n < errors.size(); n++)
         errorList << errors.at(n).errorString();
 
     if (debugLevel)

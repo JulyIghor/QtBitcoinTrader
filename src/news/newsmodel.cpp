@@ -75,10 +75,10 @@ void NewsModel::quit()
 
 void NewsModel::loadData()
 {
-    julyHttp->sendData(100, "GET /TraderNews/");
+    julyHttp->sendData(100, 0, "GET /TraderNews/");
 }
 
-void NewsModel::dataReceived(QByteArray data, int reqType)
+void NewsModel::dataReceived(QByteArray data, int reqType, int /*unused*/)
 {
     if (reqType == 100)
         emit setHtmlData(data);

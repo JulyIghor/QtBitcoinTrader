@@ -36,7 +36,7 @@
 
 namespace Ui
 {
-class FeaturedExchangesDialog;
+    class FeaturedExchangesDialog;
 }
 
 class FeaturedExchangesDialog : public QDialog
@@ -50,7 +50,7 @@ public:
     qint32 exchangeNum;     // Exchange; -1 is error; -2 is show all exchange
 
 public slots:
-    void on_okButton_clicked();
+    void on_okButton_clicked() const;
 
 private:
     QByteArray cacheData;
@@ -58,13 +58,13 @@ private:
     QStringList featuredExchangesList;
     QStringList allExchangesList;
     QList<qint32> featuredExchangesListIndex;
-    QString loadCurrencies(QString);
-    QString fixLogo(QString);
+    QString loadCurrencies(const QString&);
+    QString fixLogo(const QString&);
     QString fixURL(QString);
     void removeNotValidExchanges();
 
 private slots:
-    void dataReceived(QByteArray, int);
+    void dataReceived(const QByteArray&, int, int);
     void on_otherExchangesButton_clicked();
 };
 

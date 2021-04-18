@@ -55,12 +55,8 @@
 #include "aboutdialog.h"
 #include "exchange/exchange.h"
 #include "exchange/exchange_bitstamp.h"
-#include "exchange/exchange_btcchina.h"
 #include "exchange/exchange_bitfinex.h"
-#include "exchange/exchange_gocio.h"
 #include "exchange/exchange_indacoin.h"
-#include "exchange/exchange_bitmarket.h"
-#include "exchange/exchange_okcoin.h"
 #include "exchange/exchange_yobit.h"
 #include "exchange/exchange_binance.h"
 #include "exchange/exchange_bittrex.h"
@@ -91,6 +87,7 @@
 #include "utils/currencysignloader.h"
 #include "utils/traderspinbox.h"
 #include "iniengine.h"
+#include <QScreen>
 
 #ifdef Q_OS_WIN
     #ifdef SAPI_ENABLED
@@ -191,6 +188,9 @@ QtBitcoinTrader::QtBitcoinTrader() :
     sellThanBuySpinBox(new TraderSpinBox(this)),
     sellThanBuySpinBoxPrec(new TraderSpinBox(this))
 {
+    historyForceUpdate.start();
+    speedTestTime.start();
+    lastMessageTime.start();
     depthLagTime.restart();
     softLagTime.restart();
 
@@ -326,7 +326,7 @@ QtBitcoinTrader::QtBitcoinTrader() :
     ui.gssboProfitLayout->addWidget(new JulySpinBoxPicker(sellThanBuySpinBox));
     ui.gsboProfitPercLayout->addWidget(new JulySpinBoxPicker(sellThanBuySpinBoxPrec));
 
-    Q_FOREACH (QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())
+    for (QDoubleSpinBox* spinBox : findChildren<QDoubleSpinBox*>())
     {
         new JulySpinBoxFix(spinBox);
 
@@ -462,13 +462,13 @@ QtBitcoinTrader::QtBitcoinTrader() :
     int defaultMinHeight = qMax(720, minimumSizeHint().height());
 
     baseValues.highResolutionDisplay = false;
-    int screenCount = QApplication::desktop()->screenCount();
+    int screenCount = QApplication::screens().count();
 
     QRect currScrRect;
 
     for (int n = 0; n < screenCount; n++)
     {
-        currScrRect = QApplication::desktop()->availableGeometry(n);
+        currScrRect = QApplication::screens().at(n)->availableGeometry();
 
         if (currScrRect.width() > defaultMinWidth && currScrRect.height() > defaultMinHeight)
         {
@@ -568,7 +568,7 @@ QtBitcoinTrader::~QtBitcoinTrader()
 
 void QtBitcoinTrader::fixTableViews(QWidget* wid)
 {
-    Q_FOREACH (QTableView* tables, wid->findChildren<QTableView*>())
+    for (QTableView* tables : wid->findChildren<QTableView*>())
     {
         QFont tableFont = tables->font();
         tableFont.setFixedPitch(true);
@@ -611,29 +611,13 @@ void QtBitcoinTrader::setupClass()
         currentExchange = new Exchange_Bitstamp(baseValues.restSign, baseValues.restKey);
         break;//Bitstamp
 
-    case 3:
-        currentExchange = new Exchange_BTCChina(baseValues.restSign, baseValues.restKey);
-        break;//BTC China
-
     case 4:
         currentExchange = new Exchange_Bitfinex(baseValues.restSign, baseValues.restKey);
         break;//Bitfinex
 
-    case 5:
-        currentExchange = new Exchange_GOCio(baseValues.restSign, baseValues.restKey);
-        break;//GOCio
-
     case 6:
         currentExchange = new Exchange_Indacoin(baseValues.restSign, baseValues.restKey);
         break;//Indacoin
-
-    case 8:
-        currentExchange = new Exchange_BitMarket(baseValues.restSign, baseValues.restKey);
-        break;//BitMarket
-
-    case 9:
-        currentExchange = new Exchange_OKCoin(baseValues.restSign, baseValues.restKey);
-        break;//OKCoin
 
     case 10:
         currentExchange = new Exchange_YObit(baseValues.restSign, baseValues.restKey);
@@ -789,31 +773,24 @@ void QtBitcoinTrader::setupClass()
     }
 }
 
-void QtBitcoinTrader::addRuleByHolder(RuleHolder& holder, bool isEnabled, QString titleName, QString fileName)
+void QtBitcoinTrader::addRuleByHolder(RuleHolder& holder, bool isEnabled, QString titleName)
 {
     int findNameTab = -1;
-    int findFileTab = -1;
 
     for (int n = 0; n < ui.rulesTabs->count(); n++)
     {
         QWidget* currentWidget = ui.rulesTabs->widget(n);
 
-        if (currentWidget->windowTitle() == titleName)
+        if (!titleName.isEmpty() && currentWidget->windowTitle() == titleName)
             findNameTab = n;
 
-        if (currentWidget->property("FileName").toString() == fileName)
-            findFileTab = n;
-
-        if (findFileTab > -1)
+        if (findNameTab > -1)
             break;
     }
 
-    if (findFileTab == -1)
-        findFileTab = findNameTab;
-
-    if (findFileTab > -1)
+    if (findNameTab > -1)
     {
-        QWidget* currentWidget = ui.rulesTabs->widget(findFileTab);
+        QWidget* currentWidget = ui.rulesTabs->widget(findNameTab);
 
         if (currentWidget->property("GroupType").toString() == QLatin1String("Rule"))
             (static_cast<RuleWidget*>(currentWidget))->addRuleByHolder(holder, isEnabled);
@@ -828,23 +805,21 @@ void QtBitcoinTrader::addRuleByHolder(RuleHolder& holder, bool isEnabled, QStrin
         while (QFile::exists(nameTemplate.arg(ruleN)))
             ruleN++;
 
-        fileName = nameTemplate.arg(ruleN);
-
-        ScriptWidget* newRule = new ScriptWidget(titleName, fileName);
-        findFileTab = ui.rulesTabs->count();
-        ui.rulesTabs->insertTab(findFileTab, newRule, newRule->windowTitle());
+        ScriptWidget* newRule = new ScriptWidget(titleName, nameTemplate.arg(ruleN));
+        findNameTab = ui.rulesTabs->count();
+        ui.rulesTabs->insertTab(findNameTab, newRule, newRule->windowTitle());
         newRule->replaceScript(RuleScriptParser::holderToScript(holder, false));
     }
 
-    if (findFileTab > -1 && findFileTab < ui.rulesTabs->count())
-        ui.rulesTabs->setCurrentIndex(findFileTab);
+    if (findNameTab > -1 && findNameTab < ui.rulesTabs->count())
+        ui.rulesTabs->setCurrentIndex(findNameTab);
 }
 
 QStringList QtBitcoinTrader::getRuleGroupsNames()
 {
     QStringList rezult;
 
-    Q_FOREACH (RuleWidget* ruleWidget, ui.tabRules->findChildren<RuleWidget*>())
+    for (RuleWidget* ruleWidget : ui.tabRules->findChildren<RuleWidget*>())
         if (ruleWidget)
             rezult << ruleWidget->windowTitle();
 
@@ -855,7 +830,7 @@ QStringList QtBitcoinTrader::getScriptGroupsNames()
 {
     QStringList rezult;
 
-    Q_FOREACH (ScriptWidget* scriptWidget, ui.tabRules->findChildren<ScriptWidget*>())
+    for (ScriptWidget* scriptWidget : ui.tabRules->findChildren<ScriptWidget*>())
         if (scriptWidget)
             rezult << scriptWidget->windowTitle();
 
@@ -893,7 +868,7 @@ void QtBitcoinTrader::setGroupState(const QString& name, bool enabled)
 
 void QtBitcoinTrader::clearPendingGroup(const QString& name)
 {
-    for (int n = pendingGroupStates.count() - 1; n >= 0; n--)
+    for (int n = pendingGroupStates.size() - 1; n >= 0; n--)
         if (pendingGroupStates.at(n).name == name)
             pendingGroupStates.removeAt(n);
 }
@@ -979,7 +954,7 @@ void QtBitcoinTrader::tableCopyContextMenuRequested(QPoint point)
     if (table == nullptr)
         return;
 
-    int selectedCount = table->selectionModel()->selectedRows().count();
+    int selectedCount = table->selectionModel()->selectedRows().size();
 
     if (selectedCount == 0)
         return;
@@ -1016,7 +991,7 @@ int QtBitcoinTrader::getOpenOrdersCount(int all)//-1: asks, 0 all, 1: bids
 
 void QtBitcoinTrader::repeatSelectedOrderByType(int type, bool availableOnly)
 {
-    if (lastCopyTable == nullptr || lastCopyTable->selectionModel()->selectedRows().count() != 1)
+    if (lastCopyTable == nullptr || lastCopyTable->selectionModel()->selectedRows().size() != 1)
         return;
 
     int row = lastCopyTable->selectionModel()->selectedRows().first().row();
@@ -1128,12 +1103,12 @@ void QtBitcoinTrader::copyInfoFromTable(QTableView* table, QAbstractItemModel* m
 {
     QModelIndexList selectedRows = table->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.size() == 0)
         return;
 
     QStringList copyData;
 
-    for (int n = 0; n < selectedRows.count(); n++)
+    for (int n = 0; n < selectedRows.size(); n++)
     {
         bool getToolTip = false;
 
@@ -1156,10 +1131,10 @@ void QtBitcoinTrader::copySelectedRow()
 
     QModelIndexList selectedRows = lastCopyTable->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.size() == 0)
         return;
 
-    for (int n = 0; n < selectedRows.count(); n++)
+    for (int n = 0; n < selectedRows.size(); n++)
     {
         QString currentText = selectedRows.at(n).data(Qt::StatusTipRole).toString();
 
@@ -1190,7 +1165,7 @@ void QtBitcoinTrader::on_buttonAddRuleGroup_clicked()
 
     QStringList rulesListLoad = ruleGroup.groupsList;
 
-    if (rulesListLoad.count())
+    if (rulesListLoad.size())
     {
         ui.rulesTabs->setVisible(true);
         ui.rulesNoMessage->setVisible(false);
@@ -1224,9 +1199,9 @@ void QtBitcoinTrader::on_buttonAddScript_clicked()
 
 void QtBitcoinTrader::reloadScripts()
 {
-    for (QString currentFile : QDir(baseValues.scriptFolder).entryList(QStringList() << "*.JLS" << "*.JLR"))
+    for (const QString& currentFilePath : QDir(baseValues.scriptFolder).entryList(QStringList() << "*.JLS" << "*.JLR"))
     {
-        currentFile.prepend(baseValues.scriptFolder);
+        QString currentFile = baseValues.scriptFolder + currentFilePath;
 
         QString suffix = QFileInfo(currentFile).suffix().toUpper();
 
@@ -1421,7 +1396,7 @@ void QtBitcoinTrader::trayActivated(QSystemTrayIcon::ActivationReason reazon)
     {
         QList<QAction*> tList = trayMenu->actions();
 
-        for (int n = 0; n < tList.count(); n++)
+        for (int n = 0; n < tList.size(); n++)
             tList.at(n)->setText(julyTr(tList.at(n)->whatsThis(), tList.at(n)->text()));
 
         trayMenu->exec();
@@ -1492,7 +1467,7 @@ void QtBitcoinTrader::addLastTrades(const QString& symbol, QList<TradesItem>* ne
         return;
     }
 
-    int newRowsCount = newItems->count();
+    int newRowsCount = newItems->size();
     tradesModel->addNewTrades(newItems);
 
     tradesModel->updateTotalBTC();
@@ -1537,7 +1512,7 @@ void QtBitcoinTrader::depthRequestReceived()
 
 void QtBitcoinTrader::secondSlot()
 {
-    while (pendingGroupStates.count() && pendingGroupStates.first().elapsed.elapsed() >= 100)
+    while (pendingGroupStates.size() && pendingGroupStates.first().elapsed.elapsed() >= 100)
     {
         setGroupState(pendingGroupStates.first().name, pendingGroupStates.first().enabled);
         pendingGroupStates.removeFirst();
@@ -1558,15 +1533,11 @@ void QtBitcoinTrader::secondSlot()
             ui.depthLag->setValue(currentElapsed / 1000.0);
     }
 
-    static QTime historyForceUpdate(0, 0, 0, 0);
-
     if (historyForceUpdate.elapsed() >= 15000)
     {
         historyForceUpdate.restart();
         emit getHistory(true);
     }
-
-    static QTime speedTestTime(0, 0, 0, 0);
 
     if (speedTestTime.elapsed() >= 500)
     {
@@ -1577,17 +1548,17 @@ void QtBitcoinTrader::secondSlot()
         baseValues.trafficTotal += baseValues.trafficSpeed;
         updateTrafficTotalValue();
 
-        while (halfSecondsList.count() > 10)
+        while (halfSecondsList.size() > 10)
             halfSecondsList.removeFirst();
 
         static double avSpeed;
         avSpeed = 0.0;
 
-        for (int n = 0; n < halfSecondsList.count(); n++)
+        for (int n = 0; n < halfSecondsList.size(); n++)
             avSpeed += halfSecondsList.at(n);
 
-        if (halfSecondsList.count())
-            avSpeed = avSpeed * 2.0 / halfSecondsList.count();
+        if (halfSecondsList.size())
+            avSpeed = avSpeed * 2.0 / halfSecondsList.size();
 
         ui.trafficSpeed->setValue(avSpeed);
         baseValues.trafficSpeed = 0;
@@ -1723,7 +1694,7 @@ void QtBitcoinTrader::setTradesScrollBarValue(int val)
 
 void QtBitcoinTrader::fixAllCurrencyLabels(QWidget* par)
 {
-    Q_FOREACH (QLabel* label, par->findChildren<QLabel*>())
+    for (QLabel* label : par->findChildren<QLabel*>())
         if (label->accessibleDescription() == "USD_ICON" || label->accessibleDescription() == "BTC_ICON")
         {
             label->setMaximumSize(20, 20);
@@ -1737,7 +1708,7 @@ void QtBitcoinTrader::fillAllUsdLabels(QWidget* par, QString curName)
     QPixmap btcPixmap;
     currencySignLoader->getCurrencySign(curName, btcPixmap);
 
-    Q_FOREACH (QLabel* labels, par->findChildren<QLabel*>())
+    for (QLabel* labels : par->findChildren<QLabel*>())
         if (labels->accessibleDescription() == "USD_ICON")
         {
             labels->setPixmap(btcPixmap);
@@ -1750,7 +1721,7 @@ void QtBitcoinTrader::fillAllBtcLabels(QWidget* par, QString curName)
     QPixmap btcPixmap;
     currencySignLoader->getCurrencySign(curName, btcPixmap);
 
-    Q_FOREACH (QLabel* labels, par->findChildren<QLabel*>())
+    for (QLabel* labels : par->findChildren<QLabel*>())
     {
         if (labels->accessibleDescription() == "BTC_ICON")
         {
@@ -1793,20 +1764,13 @@ void QtBitcoinTrader::makeRitchValue(QString* text)
     text->prepend(buff);
 }
 
-void QtBitcoinTrader::reloadLanguage(QString preferedLangFile)
+void QtBitcoinTrader::reloadLanguage(const QString& preferedLangFile)
 {
     constructorFinished = false;
 
-    if (preferedLangFile.isEmpty())
-        preferedLangFile = julyTranslator.lastFile();
+    QString preferedLangFilePath = (preferedLangFile.isEmpty() || !QFile::exists(preferedLangFile)) ? julyTranslator.lastFile() : preferedLangFile;
 
-    if (!QFile::exists(preferedLangFile))
-        preferedLangFile.clear();
-
-    if (preferedLangFile.isEmpty())
-        preferedLangFile = baseValues.defaultLangFile;
-
-    julyTranslator.loadFromFile(preferedLangFile);
+    julyTranslator.loadFromFile(preferedLangFilePath);
     constructorFinished = true;
 
     languageChanged();
@@ -1814,24 +1778,24 @@ void QtBitcoinTrader::reloadLanguage(QString preferedLangFile)
 
 void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget* par)
 {
-    Q_FOREACH (QPushButton* pushButtons, par->findChildren<QPushButton*>())
+    for (QPushButton* pushButtons : par->findChildren<QPushButton*>())
         if (!pushButtons->text().isEmpty())
             pushButtons->setMinimumWidth(qMin(pushButtons->maximumWidth(), textFontWidth(pushButtons->text()) + 10));
 
-    Q_FOREACH (QToolButton* toolButtons, par->findChildren<QToolButton*>())
+    for (QToolButton* toolButtons : par->findChildren<QToolButton*>())
         if (!toolButtons->text().isEmpty())
             toolButtons->setMinimumWidth(toolButtons->minimumSizeHint().width());
 
-    Q_FOREACH (QCheckBox* checkBoxes, par->findChildren<QCheckBox*>())
+    for (QCheckBox* checkBoxes : par->findChildren<QCheckBox*>())
         checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(), textFontWidth(checkBoxes->text()) + 20));
 
-    Q_FOREACH (QLabel* labels, par->findChildren<QLabel*>())
+    for (QLabel* labels : par->findChildren<QLabel*>())
         if (labels->text().length() && labels->text().at(0) != '<' && labels->accessibleDescription() != "IGNORED")
             labels->setMinimumWidth(qMin(labels->maximumWidth(), textFontWidth(labels->text())));
 
     fixDecimals(this);
 
-    Q_FOREACH (QWidget* widget, par->findChildren<QWidget*>())
+    for (QWidget* widget : par->findChildren<QWidget*>())
     {
         if (widget->accessibleName() == "LOGOBUTTON")
         {
@@ -1866,7 +1830,7 @@ void QtBitcoinTrader::fixAllChildButtonsAndLabels(QWidget* par)
 
 void QtBitcoinTrader::fixDecimals(QWidget* par)
 {
-    Q_FOREACH (QDoubleSpinBox* spinBox, par->findChildren<QDoubleSpinBox*>())
+    for (QDoubleSpinBox* spinBox : par->findChildren<QDoubleSpinBox*>())
     {
         if (!spinBox->whatsThis().isEmpty())
             continue;
@@ -1898,22 +1862,11 @@ void QtBitcoinTrader::fixDecimals(QWidget* par)
     }
 }
 
-void QtBitcoinTrader::loginChanged(QString text)
+void QtBitcoinTrader::loginChanged(const QString& text)
 {
-    if (text == " ")
-        text = profileName;
-
-    ui.accountLoginLabel->setText(text);
-    ui.accountLoginLabel->setMinimumWidth(textFontWidth(text) + 20);
-}
-
-void QtBitcoinTrader::setPairs(QStringList* pairsList)
-{
-    if (pairsList)
-        IniEngine::global()->loadPairs(pairsList);
-
-    setCurrencyPairsList();
-    QTimer::singleShot(1, currentExchange, SLOT(secondSlot()));
+    const QString& profileNameText = text.compare(QLatin1String(" ")) ? text : profileName;
+    ui.accountLoginLabel->setText(profileNameText);
+    ui.accountLoginLabel->setMinimumWidth(textFontWidth(profileNameText) + 20);
 }
 
 void QtBitcoinTrader::setCurrencyPairsList()
@@ -1978,10 +1931,10 @@ void QtBitcoinTrader::currencyMenuChanged(int val)
         setSpinValue(ui.accountBTC, 0.0);
         setSpinValue(ui.accountUSD, 0.0);
 
-        Q_FOREACH (RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())
+        for (RuleWidget* currentGroup: ui.tabRules->findChildren<RuleWidget*>())
             currentGroup->currencyChanged();
 
-        Q_FOREACH (ScriptWidget* currentGroup, ui.tabRules->findChildren<ScriptWidget*>())
+        for (ScriptWidget* currentGroup: ui.tabRules->findChildren<ScriptWidget*>())
             currentGroup->currencyChanged();
 
         return;
@@ -2040,7 +1993,7 @@ void QtBitcoinTrader::currencyMenuChanged(int val)
 
     static int firstLoad = 0;
 
-    if (firstLoad++ > 1)
+    if (++firstLoad > 1)
     {
         firstLoad = 3;
         emit clearValues();
@@ -2262,11 +2215,11 @@ void QtBitcoinTrader::setApiDown(bool)
 
 QString QtBitcoinTrader::clearData(QString data)
 {
-    while (data.count() && (data.at(0) == '{' || data.at(0) == '[' || data.at(0) == '\"'))
+    while (data.size() && (data.at(0) == '{' || data.at(0) == '[' || data.at(0) == '\"'))
         data.remove(0, 1);
 
-    while (data.count() && (data.at(data.length() - 1) == '}' || data.at(data.length() - 1) == ']' ||
-                            data.at(data.length() - 1) == '\"'))
+    while (data.size() && (data.at(data.length() - 1) == '}' || data.at(data.length() - 1) == ']' ||
+                           data.at(data.length() - 1) == '\"'))
         data.remove(data.length() - 1, 1);
 
     return data;
@@ -2404,11 +2357,6 @@ void QtBitcoinTrader::orderBookChanged(const QString& symbol, QList<OrderItem>* 
 
 void QtBitcoinTrader::showErrorMessage(const QString& message)
 {
-    static QTime lastMessageTime;
-
-    if (lastMessageTime.isNull())
-        lastMessageTime.start();
-
     if (!showingMessage && lastMessageTime.elapsed() > 10000)
     {
         showingMessage = true;
@@ -2486,7 +2434,7 @@ void QtBitcoinTrader::translateUnicodeStr(QString* str)
         str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
 }
 
-void QtBitcoinTrader::cancelOrder(const QString& symbol, QByteArray oid)
+void QtBitcoinTrader::cancelOrder(const QString& symbol, const QByteArray& oid)
 {
     emit cancelOrderByOid(symbol, oid);
 }
@@ -2546,10 +2494,10 @@ void QtBitcoinTrader::on_ordersCancelSelected_clicked()
 {
     QModelIndexList selectedRows = ui.ordersTable->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.size() == 0)
         return;
 
-    for (int n = 0; n < selectedRows.count(); n++)
+    for (int n = 0; n < selectedRows.size(); n++)
     {
         QByteArray oid = selectedRows.at(n).data(Qt::UserRole).toByteArray();
 
@@ -2616,7 +2564,7 @@ void QtBitcoinTrader::on_buttonNight_clicked()
     buyTotalSpend_valueChanged(buyTotalSpend->value());
     sellTotalBtc_valueChanged(sellTotalBtc->value());
 
-    Q_FOREACH (RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())
+    for (RuleWidget* currentGroup : ui.tabRules->findChildren<RuleWidget*>())
         currentGroup->updateStyleSheets();
 
     if (baseValues.currentTheme == 2)
@@ -2849,7 +2797,7 @@ void QtBitcoinTrader::buyTotalSpend_valueChanged(double val)
     checkValidBuyButtons();
 }
 
-void QtBitcoinTrader::sendIndicatorEvent(const QString& symbol, QString name, double val)
+void QtBitcoinTrader::sendIndicatorEvent(const QString& symbol, const QString& name, double val)
 {
     emit indicatorEventSignal(symbol, name, val);
 }
@@ -2900,7 +2848,7 @@ void QtBitcoinTrader::checkValidBuyButtons()
 void QtBitcoinTrader::checkValidOrdersButtons()
 {
     ui.ordersCancelAllButton->setEnabled(ordersModel->rowCount());
-    ui.ordersCancelSelected->setEnabled(ui.ordersTable->selectionModel()->selectedRows().count());
+    ui.ordersCancelSelected->setEnabled(ui.ordersTable->selectionModel()->selectedRows().size());
 }
 
 void QtBitcoinTrader::on_buyTotalBtcAllIn_clicked()
@@ -2940,7 +2888,7 @@ void QtBitcoinTrader::on_buyPriceAsMarketLastPrice_clicked()
 
 bool QtBitcoinTrader::hasWorkingRules()
 {
-    Q_FOREACH (RuleWidget* group, ui.tabRules->findChildren<RuleWidget*>())
+    for (RuleWidget* group : ui.tabRules->findChildren<RuleWidget*>())
     {
         if (group)
         {
@@ -2949,7 +2897,7 @@ bool QtBitcoinTrader::hasWorkingRules()
         }
     }
 
-    Q_FOREACH (ScriptWidget* group, ui.tabRules->findChildren<ScriptWidget*>())
+    for (ScriptWidget* group : ui.tabRules->findChildren<ScriptWidget*>())
     {
         if (group)
         {
@@ -3371,7 +3319,7 @@ void QtBitcoinTrader::initConfigMenu()
     menuConfig->addAction(actionConfigManager);
     menuConfig->addSeparator();
 
-    Q_FOREACH (const QString& name, ::config->getConfigNames())
+    for (const QString& name : ::config->getConfigNames())
     {
         QAction* action = menuConfig->addAction(name);
         connect(action, &QAction::triggered, this, &QtBitcoinTrader::onMenuConfigTriggered);
@@ -3420,7 +3368,7 @@ void QtBitcoinTrader::languageChanged()
     ui.widgetBuy->parentWidget()->setWindowTitle(julyTr("GROUPBOX_BUY", "Buy %1").arg(curCurrencyName));
     ui.widgetSell->parentWidget()->setWindowTitle(julyTr("GROUPBOX_SELL", "Sell %1").arg(curCurrencyName));
 
-    Q_FOREACH (QToolButton* toolButton, findChildren<QToolButton*>())
+    for (QToolButton* toolButton : findChildren<QToolButton*>())
         if (toolButton->accessibleDescription() == "TOGGLE_SOUND")
             toolButton->setToolTip(julyTr("TOGGLE_SOUND", "Toggle sound notification on value change"));
 
@@ -3446,11 +3394,11 @@ void QtBitcoinTrader::languageChanged()
 
     ui.tradesBidsPrecent->setToolTip(julyTr("10_MIN_BIDS_VOLUME", "(10 min Bids Volume)/(10 min Asks Volume)*100"));
 
-    Q_FOREACH (RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())
+    for (RuleWidget* currentGroup : ui.tabRules->findChildren<RuleWidget*>())
         if (currentGroup)
             currentGroup->languageChanged();
 
-    Q_FOREACH (ScriptWidget* currentGroup, ui.tabRules->findChildren<ScriptWidget*>())
+    for (ScriptWidget* currentGroup : ui.tabRules->findChildren<ScriptWidget*>())
         if (currentGroup)
             currentGroup->languageChanged();
 
@@ -3612,17 +3560,13 @@ void QtBitcoinTrader::depthSubmitOrders(const QString& symbol, QList<DepthItem>*
 
 void QtBitcoinTrader::saveAppState()
 {
-    Q_FOREACH (RuleWidget* currentGroup, ui.tabRules->findChildren<RuleWidget*>())
+    for (RuleWidget* currentGroup : ui.tabRules->findChildren<RuleWidget*>())
         if (currentGroup)
-        {
             currentGroup->saveRulesData();
-        }
 
-    Q_FOREACH (ScriptWidget* currentGroup, ui.tabRules->findChildren<ScriptWidget*>())
+    for (ScriptWidget* currentGroup : ui.tabRules->findChildren<ScriptWidget*>())
         if (currentGroup)
-        {
             currentGroup->saveScriptToFile();
-        }
 
     if (trayIcon)
         trayIcon->hide();
@@ -3680,10 +3624,10 @@ void QtBitcoinTrader::fixWidthComboBoxGroupByPrice()
     int width = textFontWidth(ui.comboBoxGroupByPrice->itemText(0));
 
     if (ui.comboBoxGroupByPrice->count() > 1)
-        int width = qMax(textFontWidth(ui.comboBoxGroupByPrice->itemText(ui.comboBoxGroupByPrice->count() - 1)), width);
+        width = qMax(textFontWidth(ui.comboBoxGroupByPrice->itemText(ui.comboBoxGroupByPrice->count() - 1)), width);
 
     if (ui.comboBoxGroupByPrice->count() > 2)
-        int width = qMax(textFontWidth(ui.comboBoxGroupByPrice->itemText(1)), width);
+        width = qMax(textFontWidth(ui.comboBoxGroupByPrice->itemText(1)), width);
 
     int bonus = static_cast<int>(ui.comboBoxGroupByPrice->height() * 1.1);
     ui.comboBoxGroupByPrice->setMinimumWidth(width + bonus);
@@ -3724,9 +3668,9 @@ void QtBitcoinTrader::on_depthAutoResize_toggled(bool on)
 double QtBitcoinTrader::getAvailableBTC()
 {
     if (currentExchange->balanceDisplayAvailableAmount)
-        return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value(), baseValues.currentPair.currADecimals, true);
+        return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value(), baseValues.currentPair.currADecimals, false);
 
-    return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value() - ui.ordersTotalBTC->value(), baseValues.currentPair.currADecimals, true);
+    return JulyMath::cutDoubleDecimalsCopy(ui.accountBTC->value() - ui.ordersTotalBTC->value(), baseValues.currentPair.currADecimals, false);
 }
 
 double QtBitcoinTrader::getAvailableUSD()
@@ -3741,7 +3685,7 @@ double QtBitcoinTrader::getAvailableUSD()
     else
         amountToReturn = ui.accountUSD->value() - ui.ordersTotalUSD->value();
 
-    amountToReturn = JulyMath::cutDoubleDecimalsCopy(amountToReturn, baseValues.currentPair.currBDecimals, true);
+    amountToReturn = JulyMath::cutDoubleDecimalsCopy(amountToReturn, baseValues.currentPair.currBDecimals, false);
 
     if (currentExchange->exchangeSupportsAvailableAmount)
         amountToReturn = qMin(availableAmount, amountToReturn);

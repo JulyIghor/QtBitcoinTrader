@@ -53,8 +53,9 @@ DockHost::~DockHost()
 QDockWidget* DockHost::createDock(QWidget* parent, QWidget* widget, const QString& title)
 {
     static int counter = 0;
-    QDockWidget* dock = new QDockWidget(parent);
+    auto* dock = new QDockWidget(parent);
     dock->setObjectName(QString("dock%1").arg(++counter));
+    dock->setProperty("Title", title);
 
     QMargins widgetMargins = widget->layout()->contentsMargins();
     widgetMargins.setTop(widgetMargins.top() + 2);
@@ -81,7 +82,7 @@ void DockHost::lockDocks(bool lock)
 
     lastLock = lock;
 
-    Q_FOREACH (QDockWidget* dock, docks)
+    for (QDockWidget* dock : docks)
     {
         if (dock)
         {
@@ -111,7 +112,7 @@ void DockHost::lockDocks(bool lock)
 
 void DockHost::setFloatingVisible(bool visible)
 {
-    Q_FOREACH (QDockWidget* dock, docks)
+    for (QDockWidget* dock : docks)
     {
         if (dock && dock->isFloating())
             dock->setVisible(visible);
@@ -120,7 +121,7 @@ void DockHost::setFloatingVisible(bool visible)
 
 bool DockHost::eventFilter(QObject* obj, QEvent* event)
 {
-    QDockWidget* dock = static_cast<QDockWidget*>(obj);
+    auto* dock = static_cast<QDockWidget*>(obj);
 
     if (dock && dock->isFloating() && event->type() == QEvent::NonClientAreaMouseButtonDblClick)
     {
@@ -137,8 +138,8 @@ bool DockHost::eventFilter(QObject* obj, QEvent* event)
 void DockHost::onDockActionTriggered(bool checked)
 {
     Q_UNUSED(checked);
-    QAction* action = static_cast<QAction*>(sender());
-    QDockWidget* dock = static_cast<QDockWidget*>(action->parent());
+    auto* action = static_cast<QAction*>(sender());
+    auto* dock = static_cast<QDockWidget*>(action->parent());
 
     if (dock)
     {
@@ -157,10 +158,15 @@ void DockHost::onDockActionTriggered(bool checked)
 
 void DockHost::onDockTopLevelChanged()
 {
-    QDockWidget* dock = static_cast<QDockWidget*>(sender());
+    auto* dock = static_cast<QDockWidget*>(sender());
 
     if (dock->isFloating())
+    {
         adjustFloatingWindowFlags(dock);
+        dock->setWindowTitle(dock->property("Title").toString() + " - Qt Bitcoin Trader");
+    }
+    else
+        dock->setWindowTitle(dock->property("Title").toString());
 }
 
 void DockHost::adjustFloatingWindowFlags(QDockWidget* dock)
@@ -194,7 +200,7 @@ bool DockHost::isConstrained(QDockWidget* dock)
 
 void DockHost::hideFloatingWindow()
 {
-    Q_FOREACH (QDockWidget* dock, docks)
+    for (QDockWidget* dock : docks)
     {
         if (dock && dock->isFloating())
             dock->hide();
@@ -208,7 +214,7 @@ void DockHost::setStaysOnTop(bool state)
 
     staysOnTop = state;
 
-    Q_FOREACH (QDockWidget* dock, docks)
+    for (QDockWidget* dock : docks)
     {
         adjustFloatingWindowFlags(dock);
     }

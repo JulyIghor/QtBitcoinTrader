@@ -40,7 +40,7 @@
 #include <QTimer>
 #include "timesync.h"
 
-JulyLockFile::JulyLockFile(QString imageName, QString tempDir)
+JulyLockFile::JulyLockFile(const QString& imageName, QString tempDir)
     : QObject()
 {
     qsrand(QDateTime::fromTime_t(TimeSync::getTimeT()).time().msecsTo(QTime(23, 59, 59, 999)));
@@ -104,7 +104,7 @@ JulyLockFile::JulyLockFile(QString imageName, QString tempDir)
         }
     }
 
-    QTimer* minuteTimer = new QTimer(this);
+    auto* minuteTimer = new QTimer(this);
     connect(minuteTimer, SIGNAL(timeout()), this, SLOT(updateLockFile()));
     minuteTimer->start(60000);
     updateLockFile();
@@ -148,7 +148,7 @@ void JulyLockFile::updateLockFile()
         lockSocket->close();
 }
 
-bool JulyLockFile::isLocked()
+bool JulyLockFile::isLocked() const
 {
     return isLockedFile;
 }

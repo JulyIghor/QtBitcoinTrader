@@ -35,9 +35,10 @@
 #include <QStringList>
 #include <QTime>
 #include "exchange/exchange.h"
+#include "iniengine.h"
 #include "main.h"
 #include "timesync.h"
-#include "time.h"
+#include <ctime>
 #include <QMetaMethod>
 #include <QDoubleSpinBox>
 #include <QScriptEngine>
@@ -88,7 +89,7 @@ ScriptObject::ScriptObject(const QString& _scriptName) :
         addCommand(currentCommand, parameters);
     }
 
-    Q_FOREACH (QDoubleSpinBox* spinBox, mainWindow.indicatorsMap.values())
+    for (QDoubleSpinBox* spinBox : mainWindow.indicatorsMap.values())
     {
         QString scriptName = spinBox->whatsThis();
 
@@ -264,7 +265,7 @@ void ScriptObject::timerCreate(int milliseconds, const QString& command, bool on
         return;
     }
 
-    QTimer* newTimer = new QTimer(this);
+    auto* newTimer = new QTimer(this);
     timerMap.insert(newTimer, true);
     newTimer->setSingleShot(once);
     newTimer->setProperty("Command", command);
@@ -285,7 +286,7 @@ void ScriptObject::timer(double seconds, const QString& command)
 
 void ScriptObject::timerOut()
 {
-    QTimer* senderTimer = qobject_cast<QTimer*>(sender());
+    auto* senderTimer = qobject_cast<QTimer*>(sender());
 
     if (senderTimer == nullptr)
         return;
@@ -323,7 +324,7 @@ double ScriptObject::get(const QString& symbol, const QString& indicator)
     if (indicatorLower == QLatin1String("openbidscount"))
         return getOpenBidsCount();
 
-    QString symbolCopy = symbol;
+    QString symbolCopy = IniEngine::checkSymbol(symbol);
 
     if (indicator.length() >= 8 && indicatorLower.startsWith(QLatin1String("balance")))
         symbolCopy.clear();
@@ -360,10 +361,10 @@ void ScriptObject::startApp(const QString& name, const QStringList& list)
 
     emit startAppSignal(name, list);
 
-    writeLog(julyTr("START_APPLICATION", "Start application: %1").arg(list.count() ? name + " " + list.join(" ") : name));
+    writeLog(julyTr("START_APPLICATION", "Start application: %1").arg(!list.empty() ? name + " " + list.join(" ") : name));
 }
 
-void ScriptObject::beep()
+void ScriptObject::beep() const
 {
     if (testMode)
         return;
@@ -385,7 +386,7 @@ void ScriptObject::playWav(const QString& fileName)
     mainWindow.playWav(fileName, false);
 }
 
-void ScriptObject::say(const QString& text)
+void ScriptObject::sayPrivate(const QString& text) const
 {
     if (!testMode)
         mainWindow.sayText(text);
@@ -439,7 +440,7 @@ void ScriptObject::say(const QVariantList& list)
 
     QString text;
 
-    for (int n = 0; n < list.count(); n++)
+    for (int n = 0; n < list.size(); n++)
     {
         if (list.at(n).type() == QVariant::Double)
         {
@@ -453,23 +454,22 @@ void ScriptObject::say(const QVariantList& list)
         else
             text += list.at(n).toString();
 
-        if (n < list.count() - 1)
+        if (n < list.size() - 1)
             text += QLatin1Char(' ');
     }
 
-    say(text);
+    sayPrivate(text);
 }
 
-void ScriptObject::groupStart(QString name)
+void ScriptObject::groupStart(const QString& name)
 {
     if (testMode)
         return;
 
-    if (name.isEmpty())
-        name = scriptName;
+    const QString& nameValue = name.isEmpty() ? scriptName : name;
 
-    log("Start group: \"" + name + "\"");
-    emit setGroupEnabled(name, true);
+    log("Start group: \"" + nameValue + "\"");
+    emit setGroupEnabled(nameValue, true);
 }
 
 void ScriptObject::groupStop()
@@ -490,15 +490,14 @@ void ScriptObject::groupDone()
     setRunning(false);
 }
 
-void ScriptObject::groupStop(QString name)
+void ScriptObject::groupStop(const QString& name)
 {
     if (testMode)
         return;
 
-    if (name.isEmpty())
-        name = scriptName;
+    const QString& nameValue = name.isEmpty() ? scriptName : name;
 
-    log("Stop group: \"" + name + "\"");
+    log("Stop group: \"" + nameValue + "\"");
 
     if (name == scriptName)
     {
@@ -528,7 +527,7 @@ void ScriptObject::addCommand(const QString& name, QList<QByteArray> parameters)
         commandsList << "trader." + name;
         QString params;
 
-        for (int n = 0; n < parameters.count(); n++)
+        for (int n = 0; n < parameters.size(); n++)
         {
             if (parameters.at(n).isEmpty())
                 continue;
@@ -568,7 +567,7 @@ void ScriptObject::buy(const QString& symbolR, double amount, double price)
     if (symbol.isEmpty())
         symbol = baseValues.currentPair.symbolSecond();
     else
-        symbol = symbol.toUpper();
+        symbol = IniEngine::checkSymbol(symbol.toUpper());
 
     if (!testMode)
         mainWindow.apiBuySend(symbol, amount, price);
@@ -583,7 +582,7 @@ void ScriptObject::sell(const QString& symbolR, double amount, double price)
     if (symbol.isEmpty())
         symbol = baseValues.currentPair.symbolSecond();
     else
-        symbol = symbol.toUpper();
+        symbol = IniEngine::checkSymbol(symbol.toUpper());
 
     if (!testMode)
         mainWindow.apiSellSend(symbol, amount, price);
@@ -599,8 +598,10 @@ void ScriptObject::cancelOrders()
     log("Cancel all orders");
 }
 
-void ScriptObject::cancelOrders(const QString& symbol)
+void ScriptObject::cancelOrders(const QString& symbolR)
 {
+    QString symbol = IniEngine::checkSymbol(symbolR);
+
     if (!testMode)
         mainWindow.cancelPairOrders(symbol);
 
@@ -624,16 +625,20 @@ void ScriptObject::cancelBids()
         mainWindow.cancelBidOrders("");
 }
 
-void ScriptObject::cancelAsks(const QString& symbol)
+void ScriptObject::cancelAsks(const QString& symbolR)
 {
+    QString symbol = IniEngine::checkSymbol(symbolR);
+
     log("Cancel all " + symbol + " asks");
 
     if (!testMode)
         mainWindow.cancelAskOrders(symbol);
 }
 
-void ScriptObject::cancelBids(const QString& symbol)
+void ScriptObject::cancelBids(const QString& symbolR)
 {
+    QString symbol = IniEngine::checkSymbol(symbolR);
+
     log("Cancel all " + symbol + " bids");
 
     if (!testMode)
@@ -673,7 +678,7 @@ void ScriptObject::log(const QVariantList& list)
 
     QString logText;
 
-    for (int n = 0; n < list.count(); n++)
+    for (int n = 0; n < list.size(); n++)
     {
         if (n != 0)
             logText.append(QLatin1Char(' '));
@@ -798,8 +803,8 @@ void ScriptObject::deleteEngine()
         return;
 
     if (!testMode)
-        Q_FOREACH (QDoubleSpinBox* spinBox, spinBoxList)
-            disconnect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(indicatorValueChanged(double)));
+        for (QDoubleSpinBox* spinBox : spinBoxList)
+            disconnect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ScriptObject::indicatorValueChanged);
 
     if (testMode)
     {
@@ -853,7 +858,7 @@ bool ScriptObject::stopScript()
     return true;
 }
 
-bool ScriptObject::executeScript(QString script, bool _testMode)
+bool ScriptObject::executeScript(const QString& script, bool _testMode)
 {
     setRunning(false);
 
@@ -887,13 +892,33 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
         scriptWantsOrderBookData = script.contains("trader.get(\"Asks", Qt::CaseInsensitive) ||
                                    script.contains("trader.get('Asks", Qt::CaseInsensitive) || script.contains("trader.get(\"Bids", Qt::CaseInsensitive) ||
                                    script.contains("trader.get('Bids", Qt::CaseInsensitive);
+
+        bool scriptContainsBalance = script.contains("Balance", Qt::CaseInsensitive);
+
+        for (QDoubleSpinBox* spinBox : spinBoxList)
+        {
+            QString spinProperty = spinBox->property("ScriptName").toString();
+            bool needConnect = anyValue;
+
+            if (!needConnect && spinProperty.contains("BALANCE", Qt::CaseInsensitive) && scriptContainsBalance)
+                needConnect = true;
+
+            if (!needConnect)
+                needConnect = script.contains(spinProperty, Qt::CaseInsensitive);
+
+            if (!needConnect)
+                continue;
+
+            double spinValue = spinBox->value();
+            QString symbolTemp = baseValues.currentPair.symbolSecond();
+            initValueChangedPrivate(symbolTemp, spinProperty, spinValue, testMode);
+        }
     }
     else
         scriptWantsOrderBookData = false;
 
-    script = sourceToScript(script);
     pendingStop = false;
-    QScriptValue handler = engine->evaluate(script);
+    QScriptValue handler = engine->evaluate(sourceToScript(script));
 
     if (haveTimer)
         secondSlot();
@@ -926,7 +951,7 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
 
         bool scriptContainsBalance = script.contains("Balance", Qt::CaseInsensitive);
 
-        Q_FOREACH (QDoubleSpinBox* spinBox, spinBoxList)
+        for (QDoubleSpinBox* spinBox : spinBoxList)
         {
             QString spinProperty = spinBox->property("ScriptName").toString();
             bool needConnect = anyValue;
@@ -940,17 +965,17 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
             if (!needConnect)
             {
                 if (!testMode)
-                    disconnect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(indicatorValueChanged(double)));
+                    disconnect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ScriptObject::indicatorValueChanged);
 
                 continue;
             }
 
             double spinValue = spinBox->value();
             QString symbolTemp = baseValues.currentPair.symbolSecond();
-            initValueChangedPrivate(symbolTemp, spinProperty, spinValue, testMode);
+            initValueChangedPrivate(symbolTemp, spinProperty, spinValue, true);
 
             if (!testMode)
-                connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(indicatorValueChanged(double)));
+                connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ScriptObject::indicatorValueChanged);
         }
     }
 
@@ -962,11 +987,12 @@ bool ScriptObject::executeScript(QString script, bool _testMode)
     return true;
 }
 
-QString ScriptObject::sourceToScript(QString text)
+QString ScriptObject::sourceToScript(const QString& textValue) const
 {
-    if (text.isEmpty())
-        return text;
+    if (textValue.isEmpty())
+        return textValue;
 
+    QString text = textValue;
     text.replace("\" ,", "\",");
     text.replace("' ,", "',");
     text.replace("\\", "\\\\");
@@ -999,7 +1025,7 @@ QString ScriptObject::sourceToScript(QString text)
     return text;
 }
 
-bool ScriptObject::replaceString(const QString& what, const QString& to, QString& text, bool skipFirstLeft)
+bool ScriptObject::replaceString(const QString& what, const QString& to, QString& text, bool skipFirstLeft) const
 {
     int indexOf_what = text.indexOf(what, 0, Qt::CaseInsensitive);
 

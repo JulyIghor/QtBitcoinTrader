@@ -49,7 +49,7 @@ NetworkMenu::~NetworkMenu()
     delete ui;
 }
 
-void NetworkMenu::setSuffix(QString suf)
+void NetworkMenu::setSuffix(const QString& suf)
 {
     ui->trafficTotal->setSuffix(suf);
 }
@@ -79,11 +79,11 @@ void NetworkMenu::on_trafficTotalToZero_clicked()
     emit trafficTotalToZero_clicked();
 }
 
-void NetworkMenu::mouseReleaseEvent(QMouseEvent*)
+void NetworkMenu::mouseReleaseEvent(QMouseEvent* /*unused*/)
 {
 }
 
-void NetworkMenu::showEvent(QShowEvent*)
+void NetworkMenu::showEvent(QShowEvent* /*event*/)
 {
     resize(minimumSizeHint());
     move(pos().x() + parentButton->width() - width(), pos().y());

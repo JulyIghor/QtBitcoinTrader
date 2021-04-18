@@ -43,7 +43,7 @@ AddScriptWindow::AddScriptWindow(QWidget* parent) :
     ui->setupUi(this);
     setWindowFlags(Qt::WindowCloseButtonHint);
 
-    Q_FOREACH (ScriptWidget* currentScript, mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
+    for (ScriptWidget* currentScript : mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
         ui->existingScriptList->addItem(currentScript->windowTitle(), currentScript->property("FileName"));
 
 
@@ -176,7 +176,7 @@ void AddScriptWindow::onGroupContentChanged(bool on)
     checkValidButton();
 }
 
-void AddScriptWindow::on_scriptName_textChanged(QString)
+void AddScriptWindow::on_scriptName_textChanged(QString /*unused*/)
 {
     checkValidButton();
 }

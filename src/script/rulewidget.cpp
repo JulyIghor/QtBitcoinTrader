@@ -41,7 +41,7 @@
 #include "exchange/exchange.h"
 #include "utils/utils.h"
 
-RuleWidget::RuleWidget(QString fileName)
+RuleWidget::RuleWidget(const QString& fileName)
     : QWidget()
 {
     ui.setupUi(this);
@@ -100,9 +100,7 @@ RuleWidget::RuleWidget(QString fileName)
 
     setWindowTitle(groupName);
 
-    QStringList rulesList = loadRule.childGroups();
-
-    Q_FOREACH (QString group, rulesList)
+    for (const QString& group : loadRule.childGroups())
     {
         if (!group.startsWith("Rule_"))
             continue;
@@ -219,7 +217,7 @@ void RuleWidget::saveRulesData()
     saveScript.setValue("ConcurrentMode", ui.ruleConcurrentMode->isChecked());
     saveScript.endGroup();
 
-    for (int n = 0; n < rulesModel->holderList.count(); n++)
+    for (int n = 0; n < rulesModel->holderList.size(); n++)
         RuleScriptParser::writeHolderToSettings(rulesModel->holderList[n], saveScript, "Rule_" + QString::number(n + 101));
 
     saveScript.sync();
@@ -248,10 +246,10 @@ void RuleWidget::on_ruleAddButton_clicked()
     if (!holder.isValid())
         return;
 
-    mainWindow.addRuleByHolder(holder, ruleWindow.isRuleEnabled(), ruleWindow.getGroupName(), "");
+    mainWindow.addRuleByHolder(holder, ruleWindow.isRuleEnabled(), ruleWindow.getGroupName());
 }
 
-void RuleWidget::on_ruleConcurrentMode_toggled(bool on)
+void RuleWidget::on_ruleConcurrentMode_toggled(bool on) const
 {
     rulesModel->isConcurrentMode = on;
 }
@@ -260,7 +258,7 @@ void RuleWidget::on_ruleEditButton_clicked()
 {
     QModelIndexList selectedRows = ui.rulesTable->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.empty())
         return;
 
     int curRow = selectedRows.first().row();
@@ -289,7 +287,7 @@ void RuleWidget::on_ruleEditButton_clicked()
         saveRulesData();
     }
     else
-        mainWindow.addRuleByHolder(holder, ruleWindow.isRuleEnabled(), ruleWindow.getGroupName(), "");
+        mainWindow.addRuleByHolder(holder, ruleWindow.isRuleEnabled(), ruleWindow.getGroupName());
 }
 
 void RuleWidget::on_ruleRemoveAll_clicked()
@@ -327,7 +325,7 @@ void RuleWidget::on_ruleRemove_clicked()
 
     QModelIndexList selectedRows = ui.rulesTable->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.empty())
         return;
 
     int curRow = selectedRows.first().row();
@@ -346,7 +344,7 @@ void RuleWidget::ruleDisableEnableMenuFix()
     bool haveRules_ = rulesModel->rowCount() > 0;
     QModelIndexList selectedRows = ui.rulesTable->selectionModel()->selectedRows();
 
-    int selectedRulesCount = selectedRows.count();
+    int selectedRulesCount = selectedRows.size();
     bool ifSelectedOneRuleIsItEnabled = selectedRulesCount == 1;
 
     if (ifSelectedOneRuleIsItEnabled)
@@ -366,17 +364,17 @@ void RuleWidget::ruleDisableEnableMenuFix()
     rulesEnableDisableMenu->actions().at(3)->setEnabled(haveRules_);
 }
 
-bool RuleWidget::haveWorkingRules()
+bool RuleWidget::haveWorkingRules() const
 {
     return rulesModel->haveWorkingRule();
 }
 
-bool RuleWidget::haveAnyRules()
+bool RuleWidget::haveAnyRules() const
 {
     return rulesModel->rowCount() > 0;
 }
 
-void RuleWidget::currencyChanged()
+void RuleWidget::currencyChanged() const
 {
     if (baseValues.currentExchange_->multiCurrencyTradeSupport)
         return;
@@ -386,7 +384,7 @@ void RuleWidget::currencyChanged()
 
 void RuleWidget::checkValidRulesButtons()
 {
-    int selectedCount = ui.rulesTable->selectionModel()->selectedRows().count();
+    int selectedCount = ui.rulesTable->selectionModel()->selectedRows().size();
     ui.ruleEditButton->setEnabled(selectedCount == 1);
     ui.ruleRemove->setEnabled(selectedCount);
     rulesEnableDisableMenu->actions().at(0)->setEnabled(selectedCount);
@@ -407,7 +405,7 @@ void RuleWidget::on_ruleUp_clicked()
 {
     QModelIndexList selectedRows = ui.rulesTable->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.empty())
         return;
 
     int curRow = selectedRows.first().row();
@@ -423,7 +421,7 @@ void RuleWidget::on_ruleDown_clicked()
 {
     QModelIndexList selectedRows = ui.rulesTable->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.empty())
         return;
 
     int curRow = selectedRows.first().row();
@@ -458,7 +456,7 @@ void RuleWidget::ruleEnableSelected()
 {
     QModelIndexList selectedRows = ui.rulesTable->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.empty())
         return;
 
     int curRow = selectedRows.first().row();
@@ -475,7 +473,7 @@ void RuleWidget::ruleDisableSelected()
 {
     QModelIndexList selectedRows = ui.rulesTable->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.empty())
         return;
 
     int curRow = selectedRows.first().row();
@@ -499,7 +497,7 @@ void RuleWidget::ruleEnableAll()
 
 void RuleWidget::ruleEnableAllSlot()
 {
-    for (int curRow = 0; curRow < rulesModel->holderList.count(); curRow++)
+    for (int curRow = 0; curRow < rulesModel->holderList.size(); curRow++)
     {
         if (rulesModel->getStateByRow(curRow) == 1)
             continue;
@@ -547,7 +545,7 @@ void RuleWidget::on_ruleSave_clicked()
     saveScript.setValue("Name", groupName);
     saveScript.endGroup();
 
-    for (int n = 0; n < rulesModel->holderList.count(); n++)
+    for (int n = 0; n < rulesModel->holderList.size(); n++)
         RuleScriptParser::writeHolderToSettings(rulesModel->holderList[n], saveScript, "Rule_" + QString::number(n + 101));
 
     saveScript.sync();

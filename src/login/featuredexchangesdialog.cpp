@@ -64,7 +64,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
         QElapsedTimer elapsedRequest;
         elapsedRequest.restart();
 
-        httpGet->sendData(145, "GET /?Object=General&Method=FeaturedExchanges", nullptr, nullptr, 0);
+        httpGet->sendData(145, 0, "GET /?Object=General&Method=FeaturedExchanges", nullptr, nullptr, 0);
         httpGet->destroyClass = true;
 
         int counter = 0;
@@ -80,7 +80,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
         cacheData.clear();
     }
 
-    for (int n = featuredExchangesList.count() - 1; n >= 0; n--)
+    for (int n = featuredExchangesList.size() - 1; n >= 0; n--)
     {
         if (featuredExchangesList.at(n).isEmpty())
             featuredExchangesList.removeAt(n);
@@ -100,7 +100,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
         settings.setValue("LastFeaturedExchanges", featuredExchangesList);
     }
 
-    for (int n = featuredExchangesList.count() - 1; n >= 0; n--)
+    for (int n = featuredExchangesList.size() - 1; n >= 0; n--)
     {
         if (featuredExchangesList.at(n).isEmpty())
             featuredExchangesList.removeAt(n);
@@ -108,7 +108,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
             featuredExchangesList[n].prepend("0");
     }
 
-    if (featuredExchangesList.count() == 0)
+    if (featuredExchangesList.empty())
     {
         exchangeNum = -3;
         return;
@@ -118,10 +118,10 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
 
     qint32 countCol = 3;
 
-    if (featuredExchangesList.count() <= 4)
+    if (featuredExchangesList.size() <= 4)
         countCol = 2;
 
-    for (int i = 0; i < featuredExchangesList.count(); i++)
+    for (int i = 0; i < featuredExchangesList.size(); i++)
     {
         QString currentName = listSettings.value(featuredExchangesList.at(i) + "/Name").toString();
         QString currentLogo = fixLogo(listSettings.value(featuredExchangesList.at(i) + "/Logo").toString());
@@ -130,10 +130,10 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
         if (currentName.isEmpty() || currentLogo.isEmpty() || currentURL.isEmpty())
             continue;
 
-        ExchangeButton* exchangeItem = new ExchangeButton(currentLogo, loadCurrencies(currentName), currentURL,
+        auto* exchangeItem = new ExchangeButton(currentLogo, loadCurrencies(currentName), currentURL,
                 featuredExchangesListIndex.at(i), this);
 
-        if (countCol == 3 && i == featuredExchangesList.count() - 1 && (i - qFloor(i / countCol)*countCol) == 0)
+        if (countCol == 3 && i == featuredExchangesList.size() - 1 && (i - qFloor(i / countCol)*countCol) == 0)
             i++;
 
         ui->gridLayoutExchange->addWidget(exchangeItem, qFloor(i / countCol), i - qFloor(i / countCol)*countCol,
@@ -153,18 +153,18 @@ FeaturedExchangesDialog::~FeaturedExchangesDialog()
 
 }
 
-void FeaturedExchangesDialog::dataReceived(QByteArray data, int)
+void FeaturedExchangesDialog::dataReceived(const QByteArray& data, int /*unused*/, int /*unused*/)
 {
     cacheData = data;
 }
 
 void FeaturedExchangesDialog::removeNotValidExchanges()
 {
-    for (int i = 0; i < featuredExchangesList.count(); i++)
+    for (int i = 0; i < featuredExchangesList.size(); i++)
     {
         bool isValid = false;
 
-        for (int j = 0; j < allExchangesList.count(); j++)
+        for (int j = 0; j < allExchangesList.size(); j++)
         {
             if (featuredExchangesList.at(i) == allExchangesList.at(j))
             {
@@ -182,15 +182,20 @@ void FeaturedExchangesDialog::removeNotValidExchanges()
     }
 }
 
-QString FeaturedExchangesDialog::loadCurrencies(QString name)
+QString FeaturedExchangesDialog::loadCurrencies(const QString& name)
 {
-    QString nameIni = name.remove(" ").remove("-").remove(".");
+    QString nameIni = name;
+    nameIni.remove(" ");
+    nameIni.remove("-");
+    nameIni.remove(".");
     QSettings listSettings(":/Resources/Exchanges/" + nameIni + ".ini", QSettings::IniFormat);
     QStringList exchangesList = listSettings.childGroups();
     QString currencies = "";
-    QString currencies12, currencies1, currencies2;
+    QString currencies12;
+    QString currencies1;
+    QString currencies2;
 
-    for (int n = 0; n < exchangesList.count(); n++)
+    for (int n = 0; n < exchangesList.size(); n++)
     {
         currencies12 = listSettings.value(exchangesList.at(n) + "/Symbol").toString();
         int posSplitter = currencies12.indexOf('/');
@@ -223,12 +228,16 @@ void FeaturedExchangesDialog::selectExchange(qint32 num)
     ui->okButton->setEnabled(true);
 }
 
-QString FeaturedExchangesDialog::fixLogo(QString currentLogo)
+QString FeaturedExchangesDialog::fixLogo(const QString& currentLogo)
 {
     qint32 dotPosition = currentLogo.lastIndexOf(".");
 
     if (dotPosition >= 0)
-        return currentLogo.insert(dotPosition, "_Big");
+    {
+        QString currentLogoCopy = currentLogo;
+        currentLogoCopy.insert(dotPosition, "_Big");
+        return currentLogoCopy;
+    }
 
     return currentLogo;
 }
@@ -252,7 +261,7 @@ QString FeaturedExchangesDialog::fixURL(QString currentURL)
     return currentURL;
 }
 
-void FeaturedExchangesDialog::on_okButton_clicked()
+void FeaturedExchangesDialog::on_okButton_clicked() const
 {
     if (exchangeNum == 0)
     {

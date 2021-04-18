@@ -55,7 +55,7 @@ signals:
     void writeLogSignal(QByteArray, int);
     void sendLogSignal(QByteArray);
 private slots:
-    void run();
+    void run() const;
 public slots:
     void writeLogSlot(QByteArray, int);
 };

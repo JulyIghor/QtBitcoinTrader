@@ -42,7 +42,7 @@ class ExchangeButton : public QWidget
     Q_OBJECT
 
 public:
-    ExchangeButton(QString, QString, QString, qint32, FeaturedExchangesDialog*);
+    ExchangeButton(const QString&, const QString&, const QString&, qint32, FeaturedExchangesDialog*);
     ~ExchangeButton();
     qint32 exchangeNum;
 
@@ -51,9 +51,9 @@ private:
     void mouseReleaseEvent(QMouseEvent* event);
     void mouseDoubleClickEvent(QMouseEvent* event);
     FeaturedExchangesDialog* parrentForm;
-    void setLogo(QString);
-    void setCurrencies(QString);
-    void setURL(QString);
+    void setLogo(const QString&);
+    void setCurrencies(const QString&);
+    void setURL(const QString&);
 };
 
 #endif // EXCHANGEBUTTON_H

@@ -48,7 +48,7 @@ JulyLightChanges::JulyLightChanges(QDoubleSpinBox* parent)
 
 JulyLightChanges::~JulyLightChanges()
 {
-    if (changeTimer)
+    
         delete changeTimer;
 }
 

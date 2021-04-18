@@ -45,10 +45,9 @@ public:
     static bool writeHolderToSettings(RuleHolder& holder, QSettings& settings, QString section);
     static RuleHolder readHolderFromFile(QString& data, QString section);
     static RuleHolder readHolderFromSettings(QSettings& settings, QString section);
-signals:
 
-public slots:
-
+private:
+    static void fixCurrency(QString& currency, const QString removedText);
 };
 
 #endif // RULESCRIPTPARSER_H

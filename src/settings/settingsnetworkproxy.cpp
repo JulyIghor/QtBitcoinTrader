@@ -79,12 +79,12 @@ void SettingsNetworkProxy::allSetStatus()
     ui.typeComboBox->setEnabled(manualProxy);
 }
 
-void SettingsNetworkProxy::on_enabledCheckBox_stateChanged(int)
+void SettingsNetworkProxy::on_enabledCheckBox_stateChanged(int /*unused*/)
 {
     allSetStatus();
 }
 
-void SettingsNetworkProxy::on_autoCheckBox_stateChanged(int)
+void SettingsNetworkProxy::on_autoCheckBox_stateChanged(int /*unused*/)
 {
     allSetStatus();
 }
@@ -126,7 +126,7 @@ void SettingsNetworkProxy::activateProxy()
         {
             QList<QNetworkProxy> proxyList = QNetworkProxyFactory::systemProxyForQuery(QNetworkProxyQuery(QUrl("https://")));
 
-            if (proxyList.count())
+            if (!proxyList.empty())
                 proxy = proxyList.first();
         }
         else

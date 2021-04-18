@@ -127,11 +127,11 @@ void IniEngine::runThread()
     julyHttp->secondTimer->stop();
     julyHttp->noReconnect = true;
     julyHttp->ignoreError = true;
-    julyHttp->sendData(170, "GET /Downloads/QBT_Resources/Currencies.ini", nullptr, nullptr, 0);
+    julyHttp->sendData(170, 0, "GET /Downloads/QBT_Resources/Currencies.ini", nullptr, nullptr, 0);
     julyHttp->destroyClass = true;
 }
 
-bool IniEngine::existNewFile(QString cacheFileName, QByteArray& data)
+bool IniEngine::existNewFile(const QString& cacheFileName, const QByteArray& data)
 {
     QFile cacheFile(cacheFileName);
 
@@ -165,12 +165,12 @@ bool IniEngine::existNewFile(QString cacheFileName, QByteArray& data)
     return true;
 }
 
-void IniEngine::parseCurrency(QString currencyFileName)
+void IniEngine::parseCurrency(const QString& currencyFileName)
 {
     QSettings settingsCurrencies(currencyFileName, QSettings::IniFormat);
     QStringList currenciesList = settingsCurrencies.childGroups();
 
-    for (int n = 0; n < currenciesList.count(); n++)
+    for (int n = 0; n < currenciesList.size(); n++)
     {
         QString symbol = currenciesList.at(n);
 
@@ -198,7 +198,7 @@ void IniEngine::parseCurrency(QString currencyFileName)
     }
 }
 
-void IniEngine::dataReceived(QByteArray data, int reqType)
+void IniEngine::dataReceived(const QByteArray& data, int reqType, int /*unused*/)
 {
     if (!waitForDownload)
         return;
@@ -229,7 +229,7 @@ void IniEngine::dataReceived(QByteArray data, int reqType)
     }
 }
 
-void IniEngine::loadExchangeLock(QString exchangeIniFileName, CurrencyPairItem& tempDefaultExchangeParams)
+void IniEngine::loadExchangeLock(const QString& exchangeIniFileName, CurrencyPairItem& tempDefaultExchangeParams)
 {
     IniEngine* instance = IniEngine::global();
     instance->defaultExchangeParams = tempDefaultExchangeParams;
@@ -241,7 +241,7 @@ void IniEngine::loadExchangeLock(QString exchangeIniFileName, CurrencyPairItem& 
     }
 }
 
-void IniEngine::loadExchange(QString exchangeIniFileName)
+void IniEngine::loadExchange(const QString& exchangeIniFileName)
 {
     exchangeCacheFileName = appDataDir + "/cache/" + exchangeIniFileName + ".cache";
     exchangeResourceFileName = ":/Resources/Exchanges/" + exchangeIniFileName + ".ini";
@@ -284,7 +284,9 @@ void IniEngine::loadExchange(QString exchangeIniFileName)
 
     checkTimer->start();
     julyHttp->destroyClass = false;
-    julyHttp->sendData(171, "GET /Downloads/QBT_Resources/Exchanges/" + exchangeIniFileName.toLatin1() + ".ini", nullptr, nullptr, 0);
+    julyHttp->sendData(171, 0,
+                       "GET /Downloads/QBT_Resources/Exchanges/" + exchangeIniFileName.toLatin1() + ".ini",
+                       nullptr, nullptr, 0);
     julyHttp->destroyClass = true;
 
     if (waitForDownload)
@@ -315,13 +317,28 @@ void IniEngine::parseExchangeCheck()
     }
 }
 
-void IniEngine::parseExchange(QString exchangeFileName)
+const QString& IniEngine::checkSymbol(const QString& symbol)
+{
+    if (symbol.contains("/"))
+        return symbol;
+
+    auto iPairs = IniEngine::global()->exchangeAltPairs.find(symbol.toUpper());
+
+    if (iPairs == IniEngine::global()->exchangeAltPairs.end())
+        return symbol;
+
+    return iPairs.value();
+}
+
+void IniEngine::parseExchange(const QString& exchangeFileName)
 {
     QSettings settingsParams(exchangeFileName, QSettings::IniFormat);
     QStringList symbolList = settingsParams.childGroups();
     exchangePairs.clear();
+    exchangeAltPairs.clear();
+    symbolByRequest.clear();
 
-    for (int n = 0; n < symbolList.count(); ++n)
+    for (int n = 0; n < symbolList.size(); ++n)
     {
         CurrencyPairItem currentPair = defaultExchangeParams;
         currentPair.name = settingsParams.value(symbolList.at(n) + "/Symbol", "").toByteArray();
@@ -357,6 +374,8 @@ void IniEngine::parseExchange(QString exchangeFileName)
         currentPair.currADecimals = settingsParams.value(symbolList.at(n) + "/ItemDecimals").toInt();
         currentPair.currBDecimals = settingsParams.value(symbolList.at(n) + "/ValueDecimals").toInt();
         exchangePairs.append(currentPair);
+        exchangeAltPairs[currentPair.currAStr.toUpper() + currentPair.currBStr.toUpper()] = currentPair.name;
+        symbolByRequest[currentPair.currRequestPair] = currentPair.symbol;
     }
 
     if (julyHttp)
@@ -369,47 +388,47 @@ void IniEngine::parseExchange(QString exchangeFileName)
     waitForDownload = false;
 }
 
-void IniEngine::loadPairs(QStringList* pairsList)
-{
-    exchangePairs.clear();
+//void IniEngine::loadPairs(QStringList* pairsList)
+//{
+//    exchangePairs.clear();
 
-    for (int n = 0; n < pairsList->size(); ++n)
-    {
-        QByteArray pairData = pairsList->at(n).toUtf8();
-        CurrencyPairItem currentPair = defaultExchangeParams;
-        currentPair.name = Exchange::getMidData("Symbol\":\"", "\"", &pairData);
+//    for (int n = 0; n < pairsList->size(); ++n)
+//    {
+//        QByteArray pairData = pairsList->at(n).toUtf8();
+//        CurrencyPairItem currentPair = defaultExchangeParams;
+//        currentPair.name = Exchange::getMidData("Symbol\":\"", "\"", &pairData);
 
-        if (currentPair.name.length() < 5)
-            continue;
+//        if (currentPair.name.length() < 5)
+//            continue;
 
-        int twoDotsIndex = currentPair.name.indexOf(':');
+//        int twoDotsIndex = currentPair.name.indexOf(':');
 
-        if (twoDotsIndex > -1)
-            currentPair.name.replace(twoDotsIndex, 1, '/');
+//        if (twoDotsIndex > -1)
+//            currentPair.name.replace(twoDotsIndex, 1, '/');
 
-        currentPair.setSymbol(currentPair.name.toLatin1());
+//        currentPair.setSymbol(currentPair.name.toLatin1());
 
-        if (currentPair.name.size() == 6 && currentPair.name.indexOf('/') == -1)
-            currentPair.name.insert(3, "/");
+//        if (currentPair.name.size() == 6 && currentPair.name.indexOf('/') == -1)
+//            currentPair.name.insert(3, "/");
 
-        currentPair.currRequestSecond = Exchange::getMidData("RequestSecond\":\"", "\"", &pairData);
-        currentPair.currRequestPair   = Exchange::getMidData("Request\":\"", "\"", &pairData);
+//        currentPair.currRequestSecond = Exchange::getMidData("RequestSecond\":\"", "\"", &pairData);
+//        currentPair.currRequestPair   = Exchange::getMidData("Request\":\"", "\"", &pairData);
 
-        if (currentPair.currRequestPair.isEmpty())
-            continue;
+//        if (currentPair.currRequestPair.isEmpty())
+//            continue;
 
-        currentPair.priceMin       = Exchange::getMidData("PriceMin\":\"", "\"", &pairData).toDouble();
-        currentPair.tradeVolumeMin = Exchange::getMidData("TradeVolumeMin\":\"", "\"", &pairData).toDouble();
-        currentPair.tradePriceMin  = Exchange::getMidData("TradePriceMin\":\"", "\"", &pairData).toDouble();
-        currentPair.tradeTotalMin  = Exchange::getMidData("TradeTotalMin\":\"", "\"", &pairData).toDouble();
-        currentPair.currADecimals  = Exchange::getMidData("ItemDecimals\":\"", "\"", &pairData).toInt();
-        currentPair.priceDecimals  = Exchange::getMidData("PriceDecimals\":\"", "\"", &pairData).toInt();
-        currentPair.currBDecimals  = Exchange::getMidData("ValueDecimals\":\"", "\"", &pairData).toInt();
-        exchangePairs.append(currentPair);
-    }
+//        currentPair.priceMin       = Exchange::getMidData("PriceMin\":\"", "\"", &pairData).toDouble();
+//        currentPair.tradeVolumeMin = Exchange::getMidData("TradeVolumeMin\":\"", "\"", &pairData).toDouble();
+//        currentPair.tradePriceMin  = Exchange::getMidData("TradePriceMin\":\"", "\"", &pairData).toDouble();
+//        currentPair.tradeTotalMin  = Exchange::getMidData("TradeTotalMin\":\"", "\"", &pairData).toDouble();
+//        currentPair.currADecimals  = Exchange::getMidData("ItemDecimals\":\"", "\"", &pairData).toInt();
+//        currentPair.priceDecimals  = Exchange::getMidData("PriceDecimals\":\"", "\"", &pairData).toInt();
+//        currentPair.currBDecimals  = Exchange::getMidData("ValueDecimals\":\"", "\"", &pairData).toInt();
+//        exchangePairs.append(currentPair);
+//    }
 
-    delete pairsList;
-}
+//    delete pairsList;
+//}
 
 IniEngine* IniEngine::global()
 {
@@ -427,7 +446,7 @@ IniEngine* IniEngine::global()
     return instance;
 }
 
-CurrencyInfo IniEngine::getCurrencyInfo(QString symbol)
+CurrencyInfo IniEngine::getCurrencyInfo(const QString& symbol)
 {
     return IniEngine::global()->currencyMap.value(symbol, CurrencyInfo("$"));
 }
@@ -439,37 +458,38 @@ QList<CurrencyPairItem>* IniEngine::getPairs()
 
 QString IniEngine::getPairName(int index)
 {
-    if (index >= 0 && index < IniEngine::global()->exchangePairs.count())
+    if (index >= 0 && index < IniEngine::global()->exchangePairs.size())
         return IniEngine::global()->exchangePairs.at(index).name;
-    else
-        return "";
+            return "";
 }
 
 QString IniEngine::getPairRequest(int index)
 {
-    if (index >= 0 && index < IniEngine::global()->exchangePairs.count())
+    if (index >= 0 && index < IniEngine::global()->exchangePairs.size())
         return IniEngine::global()->exchangePairs.at(index).currRequestPair;
-    else
-        return "";
+            return "";
 }
 
 QString IniEngine::getPairSymbol(int index)
 {
-    if (index >= 0 && index < IniEngine::global()->exchangePairs.count())
+    if (index >= 0 && index < IniEngine::global()->exchangePairs.size())
         return IniEngine::global()->exchangePairs.at(index).symbol;
-    else
-        return "";
+            return "";
 }
 
 QString IniEngine::getPairSymbolSecond(int index)
 {
-    if (index >= 0 && index < IniEngine::global()->exchangePairs.count())
+    if (index >= 0 && index < IniEngine::global()->exchangePairs.size())
         return IniEngine::global()->exchangePairs.at(index).symbolSecond();
-    else
-        return "";
+            return "";
 }
 
 int IniEngine::getPairsCount()
 {
-    return IniEngine::global()->exchangePairs.count();
+    return IniEngine::global()->exchangePairs.size();
+}
+
+QString IniEngine::getSymbolByRequest(const QString& request)
+{
+    return IniEngine::global()->symbolByRequest.value(request);
 }

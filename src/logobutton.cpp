@@ -51,7 +51,7 @@ LogoButton::~LogoButton()
 
 }
 
-void LogoButton::setImage(QString image)
+void LogoButton::setImage(const QString& image)
 {
     QPixmap logoDay(image);
     logoSize = logoDay.size();

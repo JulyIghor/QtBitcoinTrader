@@ -45,6 +45,18 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.53 Released!
+
+- Fixed critical bug causing missing public trade history items
+- Fixed bug when zero/incorrect balance reached script/rules events
+- Fixed missing script events/wrong rule state for Bitfinex
+- Fixed own trade history items missing for Bitfinex
+- Fixed rounding of buy/sell total calculations
+- Fixed Hitbtc exchange api keys impossible to add
+- Fixed translation issues. French language updated
+- Optimized memory usage
+- Removed exchanges bitmarket.pl, okcoin.cn, btcchina.com, goc.io
+
 v1.40.52 Released!
 
 - Enabled experimental vnc server on a Linux

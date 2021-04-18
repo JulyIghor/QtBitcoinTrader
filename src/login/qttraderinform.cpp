@@ -100,7 +100,7 @@ void QtTraderInform::againToggled(bool checked)
     m_againIsChecked = checked;
 }
 
-bool QtTraderInform::dontShowAgain()
+bool QtTraderInform::dontShowAgain() const
 {
     return m_againIsChecked;
 }

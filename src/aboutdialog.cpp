@@ -58,7 +58,7 @@ TranslationAbout::TranslationAbout(QWidget* par)
         groupboxLayout->setContentsMargins(0, 0, 0, 0);
         groupboxLayout->setSpacing(0);
         ui.LogoGroupBox->setLayout(groupboxLayout);
-        LogoButton* logoButton = new LogoButton(true);
+        auto* logoButton = new LogoButton(true);
         groupboxLayout->addWidget(logoButton);
     }
 
@@ -91,7 +91,7 @@ void TranslationAbout::showWindow()
 void TranslationAbout::createTranslation()
 {
     accept();
-    TranslationDialog* translationDialog = new TranslationDialog;
+    auto* translationDialog = new TranslationDialog;
     translationDialog->setWindowFlags(windowFlags());
     translationDialog->show();
 }

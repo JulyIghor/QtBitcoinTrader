@@ -53,7 +53,7 @@ AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum)
     allExchangesModel = new AllExchangesModel;
     ui.exchangesTableView->setModel(allExchangesModel);
 
-    for (int n = startIndex; n < exchangesList.count(); n++)
+    for (int n = startIndex; n < exchangesList.size(); n++)
     {
         QString currentName = listSettings.value(exchangesList.at(n) + "/Name").toString();
 
@@ -74,12 +74,12 @@ AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum)
     mainWindow.fixTableViews(this);
 
     ui.exchangesTableView->setMinimumHeight(
-        ui.exchangesTableView->verticalHeader()->defaultSectionSize() * exchangesList.count());
+        ui.exchangesTableView->verticalHeader()->defaultSectionSize() * exchangesList.size());
 }
 
 AllExchangesDialog::~AllExchangesDialog()
 {
-    if (allExchangesModel)
+    
         delete allExchangesModel;
 }
 
@@ -113,15 +113,20 @@ void AllExchangesDialog::on_exchangesTableView_doubleClicked()
     accept();
 }
 
-QString AllExchangesDialog::loadCurrencies(QString name)
+QString AllExchangesDialog::loadCurrencies(const QString& name)
 {
-    QString nameIni = name.remove(" ").remove("-").remove(".");
+    QString nameIni = name;
+    nameIni.remove(" ");
+    nameIni.remove("-");
+    nameIni.remove(".");
     QSettings listSettings(":/Resources/Exchanges/" + nameIni + ".ini", QSettings::IniFormat);
     QStringList pairsList = listSettings.childGroups();
     QString currencies = "";
-    QString currencies12, currencies1, currencies2;
+    QString currencies12;
+    QString currencies1;
+    QString currencies2;
 
-    for (int n = 0; n < pairsList.count(); n++)
+    for (int n = 0; n < pairsList.size(); n++)
     {
         currencies12 = listSettings.value(pairsList.at(n) + "/Symbol").toString();
         int posSplitter = currencies12.indexOf('/');
@@ -152,7 +157,7 @@ void AllExchangesDialog::selectionExchange()
 {
     QModelIndexList selectedRows = ui.exchangesTableView->selectionModel()->selectedRows();
 
-    if (selectedRows.count() == 0)
+    if (selectedRows.empty())
         return;
 
     int curRow = selectedRows.first().row();

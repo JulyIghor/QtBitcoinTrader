@@ -49,7 +49,7 @@ class QtTraderInform : public QDialog
 public:
     explicit QtTraderInform(QDialog* parent = nullptr);
     ~QtTraderInform();
-    bool dontShowAgain();
+    bool dontShowAgain() const;
 
 private slots:
     void againToggled(bool checked);

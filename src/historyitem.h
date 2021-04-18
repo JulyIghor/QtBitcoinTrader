@@ -56,6 +56,7 @@ public:
     QString totalStr;
 
     QString symbol;
+    QString currRequestSecond;
 
     int type; //0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
 

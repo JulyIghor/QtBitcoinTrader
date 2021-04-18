@@ -51,7 +51,7 @@ FeeCalculator::FeeCalculator()
     setAttribute(Qt::WA_DeleteOnClose, true);
     setWindowFlags(Qt::WindowCloseButtonHint);
 
-    Q_FOREACH (QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())
+    for (QDoubleSpinBox* spinBox : findChildren<QDoubleSpinBox*>())
         new JulySpinBoxFix(spinBox);
 
     mainWindow.fixAllCurrencyLabels(this);

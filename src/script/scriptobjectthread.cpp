@@ -52,33 +52,29 @@ ScriptObjectThread::~ScriptObjectThread()
     }
 }
 
-void ScriptObjectThread::performFileWrite(QString path, QByteArray data)
+void ScriptObjectThread::performFileWrite(const QString& path, const QByteArray& data)
 {
     QFile dataFile(path);
 
     if (!dataFile.open(QIODevice::WriteOnly | QIODevice::Text))
         return;
 
-    data.append('\n');
-    dataFile.write(data);
-
+    dataFile.write(data + "\n");
     dataFile.close();
 }
 
-void ScriptObjectThread::performFileAppend(QString path, QByteArray data)
+void ScriptObjectThread::performFileAppend(const QString& path, const QByteArray& data)
 {
     QFile dataFile(path);
 
     if (!dataFile.open(QIODevice::Append | QIODevice::Text))
         return;
 
-    data.append('\n');
-    dataFile.write(data);
-
+    dataFile.write(data + "\n");
     dataFile.close();
 }
 
-void ScriptObjectThread::performFileReadLine(QString path, qint64 seek, quint32 fileOperationNumber)
+void ScriptObjectThread::performFileReadLine(const QString& path, qint64 seek, quint32 fileOperationNumber)
 {
     if (seek == -1 && positions.contains(path))
     {
@@ -117,7 +113,7 @@ void ScriptObjectThread::performFileReadLine(QString path, qint64 seek, quint32 
     dataFile.close();
 }
 
-void ScriptObjectThread::performFileReadLineSimple(QString path, quint32 fileOperationNumber)
+void ScriptObjectThread::performFileReadLineSimple(const QString& path, quint32 fileOperationNumber)
 {
     qint64 seek = 0;
 
@@ -158,7 +154,7 @@ void ScriptObjectThread::performFileReadLineSimple(QString path, quint32 fileOpe
     dataFile.close();
 }
 
-void ScriptObjectThread::performFileRead(QString path, qint64 size, quint32 fileOperationNumber)
+void ScriptObjectThread::performFileRead(const QString& path, qint64 size, quint32 fileOperationNumber)
 {
     QFile dataFile(path);
 
@@ -174,7 +170,7 @@ void ScriptObjectThread::performFileRead(QString path, qint64 size, quint32 file
     dataFile.close();
 }
 
-void ScriptObjectThread::performFileReadAll(QString path, quint32 fileOperationNumber)
+void ScriptObjectThread::performFileReadAll(const QString& path, quint32 fileOperationNumber)
 {
     QFile dataFile(path);
 

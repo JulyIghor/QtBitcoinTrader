@@ -59,19 +59,19 @@ void TradesModel::clear()
     endResetModel();
 }
 
-int TradesModel::rowCount(const QModelIndex&) const
+int TradesModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    return itemsList.count();
+    return itemsList.size();
 }
 
-int TradesModel::columnCount(const QModelIndex&) const
+int TradesModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return columnsCount;
 }
 
 void TradesModel::removeFirst()
 {
-    if (itemsList.count() == 0)
+    if (itemsList.empty())
         return;
 
     itemsList.removeFirst();
@@ -81,7 +81,7 @@ void TradesModel::removeDataOlderThen(qint64 date)
 {
     lastRemoveDate = date;
 
-    if (itemsList.count() == 0)
+    if (itemsList.empty())
     {
         updateTotalBTC();
         return;
@@ -89,7 +89,7 @@ void TradesModel::removeDataOlderThen(qint64 date)
 
     int removeUpToIndex = -1;
 
-    for (int n = 0; n < itemsList.count(); n++)
+    for (int n = 0; n < itemsList.size(); n++)
     {
         if (date <= itemsList.at(n).date)
             break;
@@ -107,7 +107,7 @@ void TradesModel::removeDataOlderThen(qint64 date)
 
     endRemoveRows();
 
-    if (itemsList.count() == 0)
+    if (itemsList.empty())
         clear();
 
     updateTotalBTC();
@@ -118,9 +118,9 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    int currentRow = itemsList.count() - index.row() - 1;
+    int currentRow = itemsList.size() - index.row() - 1;
 
-    if (currentRow < 0 || currentRow >= itemsList.count())
+    if (currentRow < 0 || currentRow >= itemsList.size())
         return QVariant();
 
     if (role == Qt::WhatsThisRole)
@@ -318,8 +318,7 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
             {
                 if (itemsList.at(currentRow).direction == 1)
                     return upArrowStr;
-                else
-                    return downArrowStr;
+                                    return downArrowStr;
             }
 
             return QVariant();
@@ -391,7 +390,7 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (headerLabels.count() != columnsCount)
+    if (headerLabels.size() != columnsCount)
         return QVariant();
 
     switch (section)
@@ -415,7 +414,7 @@ void TradesModel::updateTotalBTC()
     double summ = 0.0;
     double bidsSumm = 0.0;
 
-    for (int n = 0; n < itemsList.count(); n++)
+    for (int n = 0; n < itemsList.size(); n++)
     {
         summ += itemsList.at(n).amount;
 
@@ -434,14 +433,14 @@ void TradesModel::updateTotalBTC()
     emit trades10MinVolumeChanged(summ);
 }
 
-Qt::ItemFlags TradesModel::flags(const QModelIndex&) const
+Qt::ItemFlags TradesModel::flags(const QModelIndex& /*index*/) const
 {
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 void TradesModel::setHorizontalHeaderLabels(QStringList list)
 {
-    if (list.count() != columnsCount)
+    if (list.size() != columnsCount)
         return;
 
     textAsk = julyTr("ORDER_TYPE_ASK", "ask");
@@ -464,7 +463,7 @@ QModelIndex TradesModel::index(int row, int column, const QModelIndex& parent) c
     return createIndex(row, column);
 }
 
-QModelIndex TradesModel::parent(const QModelIndex&) const
+QModelIndex TradesModel::parent(const QModelIndex& /*child*/) const
 {
     return QModelIndex();
 }
@@ -473,7 +472,7 @@ void TradesModel::addNewTrades(QList<TradesItem>* newItems)
 {
     QList<TradesItem> verifedItems;
 
-    for (int n = 0; n < newItems->count(); n++)
+    for (int n = 0; n < newItems->size(); n++)
     {
         if (newItems->at(n).date < 200 || newItems->at(n).symbol != baseValues.currentPair.symbol ||
             newItems->at(n).date <= lastRemoveDate)
@@ -513,10 +512,10 @@ void TradesModel::addNewTrades(QList<TradesItem>* newItems)
         backSwitcher = !backSwitcher;
     }
 
-    if (verifedItems.count() > 0)
+    if (!verifedItems.empty())
     {
-        verifedItems[verifedItems.count() - 1].displayFullDate = true;
-        beginInsertRows(QModelIndex(), 0, verifedItems.count() - 1);
+        verifedItems[verifedItems.size() - 1].displayFullDate = true;
+        beginInsertRows(QModelIndex(), 0, verifedItems.size() - 1);
         itemsList << verifedItems;
         endInsertRows();
     }
@@ -527,9 +526,9 @@ void TradesModel::addNewTrades(QList<TradesItem>* newItems)
 
 double TradesModel::getRowPrice(int row)
 {
-    row = itemsList.count() - row - 1;
+    row = itemsList.size() - row - 1;
 
-    if (row < 0 || row >= itemsList.count())
+    if (row < 0 || row >= itemsList.size())
         return 0.0;
 
     return itemsList.at(row).price;
@@ -537,9 +536,9 @@ double TradesModel::getRowPrice(int row)
 
 double TradesModel::getRowVolume(int row)
 {
-    row = itemsList.count() - row - 1;
+    row = itemsList.size() - row - 1;
 
-    if (row < 0 || row >= itemsList.count())
+    if (row < 0 || row >= itemsList.size())
         return 0.0;
 
     return itemsList.at(row).amount;
@@ -547,9 +546,9 @@ double TradesModel::getRowVolume(int row)
 
 int TradesModel::getRowType(int row)
 {
-    row = itemsList.count() - row - 1;
+    row = itemsList.size() - row - 1;
 
-    if (row < 0 || row >= itemsList.count())
+    if (row < 0 || row >= itemsList.size())
         return true;
 
     return itemsList.at(row).orderType;

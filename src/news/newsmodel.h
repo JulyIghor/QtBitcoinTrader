@@ -52,7 +52,7 @@ signals:
 private slots:
     void run();
     void quit();
-    void dataReceived(QByteArray, int);
+    void dataReceived(QByteArray, int, int);
     void destroyedJulyHttp();
 
 private:

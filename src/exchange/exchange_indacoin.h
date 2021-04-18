@@ -39,7 +39,7 @@ class Exchange_Indacoin : public Exchange
     Q_OBJECT
 
 public:
-    Exchange_Indacoin(QByteArray pRestSign, QByteArray pRestKey);
+    Exchange_Indacoin(const QByteArray& pRestSign, const QByteArray& pRestKey);
     ~Exchange_Indacoin();
 
 private:
@@ -64,29 +64,27 @@ private:
     QMap<double, double> lastDepthAsksMap;
     QMap<double, double> lastDepthBidsMap;
 
-    QTime authRequestTime;
-
     qint64 lastPriceDate;
     qint64 lastTickerDate;
     qint64 privateNonce;
     qint64 lastHistoryTs;
 
     void clearVariables();
-    void depthSubmitOrder(QString, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
-    void depthUpdateOrder(QString, double, double, bool);
-    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = nullptr);
+    void depthSubmitOrder(const QString&, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
+    void depthUpdateOrder(const QString&, double, double, bool);
+    void sendToApi(int reqType, const QByteArray& method, bool auth = false, bool sendNow = true, QByteArray commands = nullptr);
 private slots:
     void reloadDepth();
     void sslErrors(const QList<QSslError>&);
-    void dataReceivedAuth(QByteArray, int);
+    void dataReceivedAuth(const QByteArray&, int, int);
     void secondSlot();
     void quitThread();
 public slots:
     void clearValues();
     void getHistory(bool);
-    void buy(QString, double, double);
-    void sell(QString, double, double);
-    void cancelOrder(QString, QByteArray);
+    void buy(const QString&, double, double);
+    void sell(const QString&, double, double);
+    void cancelOrder(const QString&, const QByteArray&);
 };
 
 #endif // EXCHANGE_INDACOIN_H

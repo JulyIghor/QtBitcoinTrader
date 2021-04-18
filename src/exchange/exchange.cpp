@@ -62,6 +62,7 @@ Exchange::Exchange()
     forceDepthLoad = false;
     port   = 0;
     useSsl = true;
+    m_pairChangeCount = 1;
 
     clearVariables();
 }
@@ -72,23 +73,20 @@ Exchange::~Exchange()
         logThread->writeLogB(baseValues.exchangeName + " API Thread Deleted", 2);
 }
 
-bool Exchange::isDepthEnabled()
+bool Exchange::isDepthEnabled() const
 {
     return depthEnabledFlag || baseValues.scriptsThatUseOrderBookCount;
 }
 
-QByteArray Exchange::getMidData(QString a, QString b, QByteArray* data)
+QByteArray Exchange::getMidData(const QString& a, const QString& b, const QByteArray* data)
 {
     QByteArray rez;
-
-    if (b.isEmpty())
-        b = "\",";
 
     int startPos = data->indexOf(a, 0);
 
     if (startPos > -1)
     {
-        int endPos = data->indexOf(b, startPos + a.length());
+        int endPos = data->indexOf(b.isEmpty() ? "\"," : b, startPos + a.length());
 
         if (endPos > -1)
             rez = data->mid(startPos + a.length(), endPos - startPos - a.length());
@@ -97,12 +95,9 @@ QByteArray Exchange::getMidData(QString a, QString b, QByteArray* data)
     return rez;
 }
 
-QByteArray Exchange::getMidVal(QString a, QString b, QByteArray* data)
+QByteArray Exchange::getMidVal(const QString& a, const QString& b, const QByteArray* data)
 {
     QByteArray rez;
-
-    if (b.isEmpty())
-        b = ",";
 
     int startPos = data->indexOf(a, 0);
 
@@ -113,7 +108,7 @@ QByteArray Exchange::getMidVal(QString a, QString b, QByteArray* data)
         if (startPos < data->size() && data->at(startPos) == '\"')
             ++startPos;
 
-        int endPos = data->indexOf(b, startPos);
+        int endPos = data->indexOf(b.isEmpty() ? "," : b, startPos);
 
         if (endPos > -1)
         {
@@ -133,7 +128,7 @@ void Exchange::translateUnicodeStr(QString* str)
     int pos = 0;
 
     while ((pos = rx.indexIn(*str, pos)) != -1)
-        str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(0, 16)));
+        str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
 }
 
 void Exchange::translateUnicodeOne(QByteArray* str)
@@ -143,14 +138,14 @@ void Exchange::translateUnicodeOne(QByteArray* str)
 
     QStringList bytesList = QString(*str).split("\\u");
 
-    if (bytesList.count())
+    if (!bytesList.empty())
         bytesList.removeFirst();
     else
         return;
 
     QString strToReturn;
 
-    for (int n = 0; n < bytesList.count(); n++)
+    for (int n = 0; n < bytesList.size(); n++)
         if (bytesList.at(n).length() > 3)
             strToReturn += "\\u" + bytesList.at(n).left(4);
 
@@ -196,7 +191,7 @@ void Exchange::secondSlot()
         secondTimer->start(baseValues.httpRequestInterval);
 }
 
-void Exchange::dataReceivedAuth(QByteArray, int)
+void Exchange::dataReceivedAuth(const QByteArray& /*unused*/, int /*unused*/, int /*unused*/)
 {
 }
 
@@ -219,9 +214,11 @@ void Exchange::clearVariables()
     lastAvUsdBalance = 0.0;
     lastVolume = 0.0;
     lastFee = -1.0;
+
+    ++m_pairChangeCount;
 }
 
-void Exchange::filterAvailableUSDAmountValue(double*)
+void Exchange::filterAvailableUSDAmountValue(double* /*unused*/)
 {
 
 }
@@ -234,8 +231,8 @@ void Exchange::setupApi(QtBitcoinTrader* mainClass, bool tickOnly)//Execute only
     if (!tickerOnly)
     {
         connect(mainClass, SIGNAL(apiBuy(QString, double, double)), this, SLOT(buy(QString, double, double)));
-        connect(mainClass, SIGNAL(apiSell(QString, double, double)), this, SLOT(sell(QString, double, double)));
-        connect(mainClass, SIGNAL(cancelOrderByOid(QString, QByteArray)), this, SLOT(cancelOrder(QString, QByteArray)));
+        connect(mainClass, SIGNAL(apiSell(QString, double, double)), this, SLOT(sell(const QString&, double, double)));
+        connect(mainClass, SIGNAL(cancelOrderByOid(QString, QByteArray)), this, SLOT(cancelOrder(const QString&, const QByteArray&)));
         connect(mainClass, SIGNAL(getHistory(bool)), this, SLOT(getHistory(bool)));
 
         connect(this, SIGNAL(orderBookChanged(QString, QList<OrderItem>*)), mainClass, SLOT(orderBookChanged(QString,
@@ -300,19 +297,19 @@ void Exchange::clearValues()
 
 }
 
-void Exchange::getHistory(bool)
+void Exchange::getHistory(bool /*unused*/)
 {
 }
 
-void Exchange::buy(QString, double, double)
+void Exchange::buy(const QString& /*unused*/, double /*unused*/, double /*unused*/)
 {
 }
 
-void Exchange::sell(QString, double, double)
+void Exchange::sell(const QString& /*unused*/, double /*unused*/, double /*unused*/)
 {
 }
 
-void Exchange::cancelOrder(QString, QByteArray)
+void Exchange::cancelOrder(const QString& /*unused*/, const QByteArray& /*unused*/)
 {
 }
 
@@ -320,7 +317,7 @@ void Exchange::sslErrors(const QList<QSslError>& errors)
 {
     QStringList errorList;
 
-    for (int n = 0; n < errors.count(); n++)
+    for (int n = 0; n < errors.size(); n++)
         errorList << errors.at(n).errorString();
 
     if (debugLevel)
@@ -331,9 +328,6 @@ void Exchange::sslErrors(const QList<QSslError>& errors)
 
 bool Exchange::checkValue(QByteArray& valueStr, double& lastValue)
 {
-    if (valueStr.isEmpty())
-        return false;
-
     double value = valueStr.toDouble();
 
     if (!qFuzzyIsNull(value) && value < 0.0)

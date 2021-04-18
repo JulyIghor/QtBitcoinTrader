@@ -168,7 +168,7 @@ void ChartsView::drawText(QGraphicsScene* scene, QString text, qint16 x, qint16 
 {
     if (style.size())
     {
-        QGraphicsTextItem* textItem = new QGraphicsTextItem();
+        auto* textItem = new QGraphicsTextItem();
         textItem->setHtml("<span style='" + style + "'>" + text + "</span>");
         textItem->setPos(x, y);
         textItem->setTransform(QTransform::fromScale(1, -1));
@@ -176,7 +176,7 @@ void ChartsView::drawText(QGraphicsScene* scene, QString text, qint16 x, qint16 
     }
     else
     {
-        QGraphicsSimpleTextItem* textItem = new QGraphicsSimpleTextItem(text);
+        auto* textItem = new QGraphicsSimpleTextItem(text);
         textItem->setPos(x, y);
         textItem->setTransform(QTransform::fromScale(1, -1));
         scene->addItem(textItem);
@@ -199,7 +199,7 @@ bool ChartsView::prepareCharts()
     bottomSceneCharts->setSceneRect(1, -fontHeight - 5,
                                     ui->bottomGraphicsView->width(), ui->bottomGraphicsView->height());
 
-    for (qint32 i = 0; i < chartsModel->graphDateText.count(); ++i)
+    for (qint32 i = 0; i < chartsModel->graphDateText.size(); ++i)
     {
         drawText(bottomSceneCharts.data(), chartsModel->graphDateText.at(i),
                  chartsModel->graphDateTextX.at(i) - 12 + chartsModel->widthAmountYAxis, -4);
@@ -209,7 +209,7 @@ bool ChartsView::prepareCharts()
     ui->leftGraphicsView->setFixedWidth(chartsModel->widthAmountYAxis);
     leftSceneCharts->setSceneRect(1, -5, ui->leftGraphicsView->width(), ui->leftGraphicsView->height());
 
-    for (qint32 i = 0; i < chartsModel->graphAmountText.count(); ++i)
+    for (qint32 i = 0; i < chartsModel->graphAmountText.size(); ++i)
     {
         leftSceneCharts->addLine(ui->leftGraphicsView->width() - 4, chartsModel->graphAmountTextY.at(i),
                                  ui->leftGraphicsView->width(), chartsModel->graphAmountTextY.at(i),
@@ -222,7 +222,7 @@ bool ChartsView::prepareCharts()
     ui->rightGraphicsView->setFixedWidth(chartsModel->widthPriceYAxis);
     rightSceneCharts->setSceneRect(1, -5, ui->rightGraphicsView->width(), ui->rightGraphicsView->height());
 
-    for (qint32 i = 0; i < chartsModel->graphPriceText.count(); ++i)
+    for (qint32 i = 0; i < chartsModel->graphPriceText.size(); ++i)
     {
         rightSceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i),
                                   5, chartsModel->graphPriceTextY.at(i), QPen("#777777"));
@@ -241,13 +241,13 @@ bool ChartsView::prepareCharts()
     sceneCharts->addLine(0, 0, 0, graphHeight, QPen("#777777"));
     sceneCharts->addLine(graphWidth, 0, graphWidth, graphHeight, QPen("#777777"));
 
-    for (qint32 i = 0; i < chartsModel->graphDateText.count(); ++i)
+    for (qint32 i = 0; i < chartsModel->graphDateText.size(); ++i)
     {
         sceneCharts->addLine(chartsModel->graphDateTextX.at(i), -5,
                              chartsModel->graphDateTextX.at(i), 0, QPen("#777777"));
     }
 
-    for (qint32 i = 1; i < chartsModel->graphPriceText.count(); ++i)
+    for (qint32 i = 1; i < chartsModel->graphPriceText.size(); ++i)
     {
         sceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i),
                              graphWidth - 1, chartsModel->graphPriceTextY.at(i), QPen("#DDDDDD"));
@@ -287,40 +287,40 @@ void ChartsView::refreshCharts()
         return;
     }
 
-    for (qint32 i = 0; i < chartsModel->graphAmountY.count(); ++i)
+    for (qint32 i = 0; i < chartsModel->graphAmountY.size(); ++i)
     {
         drawRect(chartsModel->graphAmountX.at(i), chartsModel->graphAmountY.at(i));
     }
 
     QPolygonF boundsPolygon;
 
-    for (qint32 i = 0; i < chartsModel->graphBoundsSellX.count(); ++i)
+    for (qint32 i = 0; i < chartsModel->graphBoundsSellX.size(); ++i)
     {
         boundsPolygon << QPointF(chartsModel->graphBoundsSellX.at(i),
                                  chartsModel->graphBoundsSellY.at(i));
     }
 
-    for (qint32 i = chartsModel->graphBoundsBuyX.count() - 1; i >= 0; --i)
+    for (qint32 i = chartsModel->graphBoundsBuyX.size() - 1; i >= 0; --i)
     {
         boundsPolygon << QPointF(chartsModel->graphBoundsBuyX.at(i),
                                  chartsModel->graphBoundsBuyY.at(i));
     }
 
-    if (boundsPolygon.count())
+    if (!boundsPolygon.empty())
         sceneCharts->addPolygon(boundsPolygon, QPen("#4000FF00"), QBrush("#4000FF00"));
 
     QPolygonF tradesPolygon;
 
-    if (chartsModel->graphTradesX.count())
+    if (!chartsModel->graphTradesX.empty())
     {
-        for (qint32 i = 0; i < chartsModel->graphTradesX.count(); ++i)
+        for (qint32 i = 0; i < chartsModel->graphTradesX.size(); ++i)
         {
             tradesPolygon << QPointF(chartsModel->graphTradesX.at(i),
                                      chartsModel->graphTradesY.at(i));
         }
     }
 
-    if (tradesPolygon.count())
+    if (!tradesPolygon.empty())
     {
         QPainterPath tradesPath;
         tradesPath.addPolygon(tradesPolygon);
@@ -329,9 +329,9 @@ void ChartsView::refreshCharts()
 
     QPen pen;
 
-    if (chartsModel->graphTradesX.count())
+    if (!chartsModel->graphTradesX.empty())
     {
-        for (qint32 i = 0; i < chartsModel->graphTradesX.count(); ++i)
+        for (qint32 i = 0; i < chartsModel->graphTradesX.size(); ++i)
         {
             if (chartsModel->graphTradesType[i] == 1)
                 pen = QPen("#FF0000");

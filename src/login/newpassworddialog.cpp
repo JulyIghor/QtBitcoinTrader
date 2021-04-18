@@ -96,7 +96,7 @@ void NewPasswordDialog::on_advSettingsTool_toggled(bool status)
     checkToEnableButton();
 }
 
-void NewPasswordDialog::exchangeChanged(QString name)
+void NewPasswordDialog::exchangeChanged(const QString& name)
 {
     if (exchangeNum == 0)
     {
@@ -131,16 +131,16 @@ QString NewPasswordDialog::getPassword()
 
 QString NewPasswordDialog::getRestSign()
 {
-    return ui.restSignLine->text().remove(QRegExp("[^a-zA-Z0-9-+/=\\d]"));
+    return ui.restSignLine->text().remove(QRegExp("[^a-zA-Z0-9+-=_]"));
 }
 
 QString NewPasswordDialog::getRestKey()
 {
     if (clientIdEnabled)
-        return ui.clientIdLine->text().remove(QRegExp("[^a-zA-Z0-9-+/=\\d]")) + ":"
-                + ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9-+/=\\d]")); //ClientID visible
+        return ui.clientIdLine->text().remove(QRegExp("[^a-zA-Z0-9+-=_]")) + ":"
+                + ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9+-=_]")); //ClientID visible
 
-    return ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9-+/=\\d]"));
+    return ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9+-=_]"));
 }
 
 void NewPasswordDialog::getApiKeySecretButton()
@@ -148,7 +148,7 @@ void NewPasswordDialog::getApiKeySecretButton()
     QDesktopServices::openUrl(QUrl(getApiUrl));
 }
 
-int NewPasswordDialog::getExchangeId()
+int NewPasswordDialog::getExchangeId() const
 {
     return exchangeNum;
 }
@@ -189,7 +189,7 @@ void NewPasswordDialog::setDiffBar(int val)
     ui.bar3->setStyleSheet(val > 2 ? style : styleWhite);
 }
 
-int NewPasswordDialog::difficulty(QString pass, bool* resive_PasswordIsGood, QString* resive_Message)
+int NewPasswordDialog::difficulty(const QString& pass, bool* resive_PasswordIsGood, QString* resive_Message)
 {
     QString Message = "";
     qint32 diff = 0UL;                      // Difficulty level
@@ -380,8 +380,7 @@ void NewPasswordDialog::checkToEnableButton()
         ui.okButton->setEnabled(false);
         return;
     }
-    else
-        ui.confirmLabel->setStyleSheet("");
+            ui.confirmLabel->setStyleSheet("");
 
     if (!diff_t)
     {

@@ -49,7 +49,7 @@ void TranslationMessage::on_createTranslationButton_clicked()
 {
     this->close();
 
-    TranslationDialog* translationDialog = new TranslationDialog;
+    auto* translationDialog = new TranslationDialog;
     translationDialog->setWindowFlags(windowFlags());
     translationDialog->show();
 }

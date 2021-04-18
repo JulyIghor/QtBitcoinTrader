@@ -59,7 +59,7 @@ LogThread::~LogThread()
     }
 }
 
-void LogThread::run()
+void LogThread::run() const
 {
     connect(this, &LogThread::writeLogSignal, this, &LogThread::writeLogSlot, Qt::QueuedConnection);
 }

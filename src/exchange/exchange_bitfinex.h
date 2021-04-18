@@ -39,7 +39,7 @@ class Exchange_Bitfinex : public Exchange
     Q_OBJECT
 
 public:
-    Exchange_Bitfinex(QByteArray pRestSign, QByteArray pRestKey);
+    Exchange_Bitfinex(const QByteArray& pRestSign, const QByteArray& pRestKey);
     ~Exchange_Bitfinex();
 
 private:
@@ -68,24 +68,22 @@ private:
 
     QString apiLogin;
 
-    QTime authRequestTime;
-
     qint64 privateNonce;
 
     void clearVariables();
-    void depthSubmitOrder(QString, QMap<double, double>*, double, double, bool);
-    void depthUpdateOrder(QString, double, double, bool);
-    void sendToApi(int reqType, QByteArray method, bool auth = false, bool sendNow = true, QByteArray commands = nullptr);
+    void depthSubmitOrder(const QString&, QMap<double, double>*, double, double, bool);
+    void depthUpdateOrder(const QString&, double, double, bool);
+    void sendToApi(int reqType, const QByteArray& method, bool auth = false, bool sendNow = true, QByteArray commands = nullptr);
 private slots:
     void secondSlot();
 public slots:
-    void dataReceivedAuth(QByteArray, int);
+    void dataReceivedAuth(const QByteArray&, int, int);
     void reloadDepth();
     void clearValues();
     void getHistory(bool);
-    void buy(QString, double, double);
-    void sell(QString, double, double);
-    void cancelOrder(QString, QByteArray);
+    void buy(const QString&, double, double);
+    void sell(const QString&, double, double);
+    void cancelOrder(const QString&, const QByteArray&);
     void quitThread();
 };
 

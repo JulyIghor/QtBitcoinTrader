@@ -33,7 +33,7 @@
 #include "iniengine.h"
 #include "exchange_bitstamp.h"
 
-Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
+Exchange_Bitstamp::Exchange_Bitstamp(const QByteArray& pRestSign, const QByteArray& pRestKey)
     : Exchange()
 {
     clearOpenOrdersOnCurrencyChanged = true;
@@ -70,7 +70,6 @@ Exchange_Bitstamp::Exchange_Bitstamp(QByteArray pRestSign, QByteArray pRestKey)
     supportsLoginIndicator = true;
     supportsAccountVolume = false;
 
-    authRequestTime.restart();
     privateNonce = (TimeSync::getTimeT() - 1371854884) * 10;
 
     connect(this, &Exchange::threadFinished, this, &Exchange_Bitstamp::quitThread, Qt::DirectConnection);
@@ -84,13 +83,13 @@ void Exchange_Bitstamp::quitThread()
 {
     clearValues();
 
-    if (depthAsks)
+    
         delete depthAsks;
 
-    if (depthBids)
+    
         delete depthBids;
 
-    if (julyHttp)
+    
         delete julyHttp;
 }
 void Exchange_Bitstamp::filterAvailableUSDAmountValue(double* amount)
@@ -199,7 +198,7 @@ void Exchange_Bitstamp::getHistory(bool force)
         sendToApi(208, "v2/user_transactions/", true, true);
 }
 
-void Exchange_Bitstamp::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
+void Exchange_Bitstamp::buy(const QString& symbol, double apiBtcToBuy, double apiPriceToBuy)
 {
     if (tickerOnly)
         return;
@@ -211,7 +210,7 @@ void Exchange_Bitstamp::buy(QString symbol, double apiBtcToBuy, double apiPriceT
         return;
 
     QByteArray params = "amount=" + JulyMath::byteArrayFromDouble(apiBtcToBuy, pairItem.currADecimals, 0)
-            + "&price=" + JulyMath::byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0);
+                        + "&price=" + JulyMath::byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0);
 
     if (debugLevel)
         logThread->writeLog("Buy: " + params, 2);
@@ -219,7 +218,7 @@ void Exchange_Bitstamp::buy(QString symbol, double apiBtcToBuy, double apiPriceT
     sendToApi(306, "v2/buy/" + baseValues.currentPair.currRequestPair.toLower() + "/", true, true, params);
 }
 
-void Exchange_Bitstamp::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
+void Exchange_Bitstamp::sell(const QString& symbol, double apiBtcToSell, double apiPriceToSell)
 {
     if (tickerOnly)
         return;
@@ -231,7 +230,7 @@ void Exchange_Bitstamp::sell(QString symbol, double apiBtcToSell, double apiPric
         return;
 
     QByteArray params = "amount=" + JulyMath::byteArrayFromDouble(apiBtcToSell, pairItem.currADecimals, 0)
-            + "&price=" + JulyMath::byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0);
+                        + "&price=" + JulyMath::byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0);
 
     if (debugLevel)
         logThread->writeLog("Sell: " + params, 2);
@@ -239,7 +238,7 @@ void Exchange_Bitstamp::sell(QString symbol, double apiBtcToSell, double apiPric
     sendToApi(307, "v2/sell/" + baseValues.currentPair.currRequestPair.toLower() + "/", true, true, params);
 }
 
-void Exchange_Bitstamp::cancelOrder(QString, QByteArray order)
+void Exchange_Bitstamp::cancelOrder(const QString& /*unused*/, const QByteArray& order)
 {
     if (tickerOnly)
         return;
@@ -252,7 +251,7 @@ void Exchange_Bitstamp::cancelOrder(QString, QByteArray order)
     sendToApi(305, "v2/cancel_order/", true, true, "id=" + order);
 }
 
-void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, bool sendNow, QByteArray commands)
+void Exchange_Bitstamp::sendToApi(int reqType, const QByteArray& method, bool auth, bool sendNow, QByteArray commands)
 {
     if (julyHttp == nullptr)
     {
@@ -269,7 +268,7 @@ void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, boo
         connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
         connect(julyHttp, SIGNAL(errorSignal(QString)), baseValues_->mainWindow_, SLOT(showErrorMessage(QString)));
         connect(julyHttp, SIGNAL(sslErrorSignal(const QList<QSslError>&)), this, SLOT(sslErrors(const QList<QSslError>&)));
-        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceivedAuth(QByteArray, int)));
+        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceivedAuth(const QByteArray&, int, int)));
     }
 
     if (auth)
@@ -282,21 +281,21 @@ void Exchange_Bitstamp::sendToApi(int reqType, QByteArray method, bool auth, boo
             postData.append("&" + commands);
 
         if (sendNow)
-            julyHttp->sendData(reqType, "POST /api/" + method, postData);
+            julyHttp->sendData(reqType, m_pairChangeCount, "POST /api/" + method, postData);
         else
-            julyHttp->prepareData(reqType, "POST /api/" + method, postData);
+            julyHttp->prepareData(reqType, m_pairChangeCount, "POST /api/" + method, postData);
 
     }
     else
     {
         if (sendNow)
-            julyHttp->sendData(reqType, "GET /api/" + method);
+            julyHttp->sendData(reqType, m_pairChangeCount, "GET /api/" + method);
         else
-            julyHttp->prepareData(reqType, "GET /api/" + method);
+            julyHttp->prepareData(reqType, m_pairChangeCount, "GET /api/" + method);
     }
 }
 
-void Exchange_Bitstamp::depthUpdateOrder(QString symbol, double price, double amount, bool isAsk)
+void Exchange_Bitstamp::depthUpdateOrder(const QString& symbol, double price, double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
         return;
@@ -327,7 +326,7 @@ void Exchange_Bitstamp::depthUpdateOrder(QString symbol, double price, double am
     }
 }
 
-void Exchange_Bitstamp::depthSubmitOrder(QString symbol, QMap<double, double>* currentMap, double priceDouble,
+void Exchange_Bitstamp::depthSubmitOrder(const QString& symbol, QMap<double, double>* currentMap, double priceDouble,
         double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
@@ -360,8 +359,11 @@ void Exchange_Bitstamp::reloadDepth()
     Exchange::reloadDepth();
 }
 
-void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
+void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, int pairChangeCount)
 {
+    if (pairChangeCount != m_pairChangeCount)
+        return;
+
     if (debugLevel)
         logThread->writeLog("RCV: " + data);
 
@@ -450,9 +452,9 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
             if (data.startsWith("[{\"date\":"))
             {
                 QStringList tradeList = QString(data).split("}, {");
-                QList<TradesItem>* newTradesItems = new QList<TradesItem>;
+                auto* newTradesItems = new QList<TradesItem>;
 
-                for (int n = tradeList.count() - 1; n >= 0; n--)
+                for (int n = tradeList.size() - 1; n >= 0; n--)
                 {
                     QByteArray tradeData = tradeList.at(n).toLatin1();
                     TradesItem newItem;
@@ -484,7 +486,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                         logThread->writeLog("Invalid trades fetch data line:" + tradeData, 2);
                 }
 
-                if (newTradesItems->count())
+                if (!newTradesItems->empty())
                     emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
                 else
                     delete newTradesItems;
@@ -517,7 +519,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                 if (updateTicker)
                     lastBidAskTimestamp = tickerTimestamp;
 
-                for (int n = 0; n < asksList.count(); n++)
+                for (int n = 0; n < asksList.size(); n++)
                 {
                     if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                         break;
@@ -544,7 +546,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                             if (matchCurrentGroup)
                                 groupedVolume += amount;
 
-                            if (!matchCurrentGroup || n == asksList.count() - 1)
+                            if (!matchCurrentGroup || n == asksList.size() - 1)
                             {
                                 depthSubmitOrder(baseValues.currentPair.symbol,
                                                  &currentAsksMap, groupedPrice + baseValues.groupPriceValue, groupedVolume, true);
@@ -564,7 +566,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 
                 QList<double> currentAsksList = lastDepthAsksMap.keys();
 
-                for (int n = 0; n < currentAsksList.count(); n++)
+                for (int n = 0; n < currentAsksList.size(); n++)
                     if (qFuzzyIsNull(currentAsksMap.value(currentAsksList.at(n), 0)))
                         depthUpdateOrder(baseValues.currentPair.symbol,
                                          currentAsksList.at(n), 0.0, true); //Remove price
@@ -577,7 +579,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                 groupedVolume = 0.0;
                 rowCounter = 0;
 
-                for (int n = 0; n < bidsList.count(); n++)
+                for (int n = 0; n < bidsList.size(); n++)
                 {
                     if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                         break;
@@ -604,7 +606,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                             if (matchCurrentGroup)
                                 groupedVolume += amount;
 
-                            if (!matchCurrentGroup || n == bidsList.count() - 1)
+                            if (!matchCurrentGroup || n == bidsList.size() - 1)
                             {
                                 depthSubmitOrder(baseValues.currentPair.symbol,
                                                  &currentBidsMap, groupedPrice - baseValues.groupPriceValue, groupedVolume, false);
@@ -624,7 +626,7 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
 
                 QList<double> currentBidsList = lastDepthBidsMap.keys();
 
-                for (int n = 0; n < currentBidsList.count(); n++)
+                for (int n = 0; n < currentBidsList.size(); n++)
                     if (qFuzzyIsNull(currentBidsMap.value(currentBidsList.at(n), 0)))
                         depthUpdateOrder(baseValues.currentPair.symbol,
                                          currentBidsList.at(n), 0.0, false); //Remove price
@@ -642,38 +644,38 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
         break;
 
     case 202: //balance
-    {
-        if (!success)
-            break;
-
-        if (data.startsWith("{\""))
         {
-            lastInfoReceived = true;
-            QByteArray accFee     = getMidData(baseValues.currentPair.symbol.toLower() + "_fee\": \"", "\"", &data);
-            QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "_available\": \"", "\"", &data);
-            QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "_available\": \"", "\"", &data);
+            if (!success)
+                break;
 
-            if (checkValue(accFee, accountFee))
-                emit accFeeChanged(baseValues.currentPair.symbol, accountFee);
-
-            if (checkValue(btcBalance, lastBtcBalance))
-                emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
-
-            if (checkValue(usdBalance, lastUsdBalance))
-                emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
-
-            static bool balanceSent = false;
-
-            if (!balanceSent)
+            if (data.startsWith("{\""))
             {
-                balanceSent = true;
-                emit loginChanged(privateClientId);
+                lastInfoReceived = true;
+                QByteArray accFee     = getMidData(baseValues.currentPair.currRequestPair.toLower() + "_fee\": \"", "\"", &data);
+                QByteArray btcBalance = getMidData("\"" + baseValues.currentPair.currAStrLow + "_available\": \"", "\"", &data);
+                QByteArray usdBalance = getMidData("\"" + baseValues.currentPair.currBStrLow + "_available\": \"", "\"", &data);
+
+                if (checkValue(accFee, accountFee))
+                    emit accFeeChanged(baseValues.currentPair.symbol, accountFee);
+
+                if (checkValue(btcBalance, lastBtcBalance))
+                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
+
+                if (checkValue(usdBalance, lastUsdBalance))
+                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
+
+                static bool balanceSent = false;
+
+                if (!balanceSent)
+                {
+                    balanceSent = true;
+                    emit loginChanged(privateClientId);
+                }
             }
+            else if (debugLevel)
+                logThread->writeLog("Invalid Info data:" + data, 2);
         }
-        else if (debugLevel)
-            logThread->writeLog("Invalid Info data:" + data, 2);
-    }
-    break;//balance
+        break;//balance
 
     case 204://open_orders
         if (!success)
@@ -692,16 +694,10 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
             {
                 lastOrders = data;
 
-                if (data.size() > 3)
-                {
-                    data.remove(0, 2);
-                    data.remove(data.size() - 2, 2);
-                }
+                QStringList ordersList = QString(data.size() > 3 ? data.mid(2, data.size() - 4) : data).split("}, {");
+                auto* orders = new QList<OrderItem>;
 
-                QStringList ordersList = QString(data).split("}, {");
-                QList<OrderItem>* orders = new QList<OrderItem>;
-
-                for (int n = 0; n < ordersList.count(); n++)
+                for (int n = 0; n < ordersList.size(); n++)
                 {
                     OrderItem currentOrder;
                     QByteArray currentOrderData = ordersList.at(n).toLatin1();
@@ -731,32 +727,33 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
         break;//open_orders
 
     case 305: //cancel_order
-    {
-        if (!success)
-            break;
-
-        if (data.contains("\"id\""))
         {
-            QByteArray id = getMidData("\"id\": ", ",", &data);
+            if (!success)
+                break;
 
-            if (id.size())
-                emit orderCanceled(baseValues.currentPair.symbol, id);
+            if (data.contains("\"id\""))
+            {
+                QByteArray id = getMidData("\"id\": ", ",", &data);
 
-            if (debugLevel)
-                logThread->writeLog("Order canceled:" + id, 2);
+                if (id.size())
+                    emit orderCanceled(baseValues.currentPair.symbol, id);
+
+                if (debugLevel)
+                    logThread->writeLog("Order canceled:" + id, 2);
+            }
+
+            if (!cancelingOrderIDs.isEmpty())
+            {
+                if (data == "true")
+                    emit orderCanceled(baseValues.currentPair.symbol, cancelingOrderIDs.first());
+
+                if (debugLevel)
+                    logThread->writeLog("Order canceled:" + cancelingOrderIDs.first(), 2);
+
+                cancelingOrderIDs.removeFirst();
+            }
         }
-        if (!cancelingOrderIDs.isEmpty())
-        {
-            if (data == "true")
-                emit orderCanceled(baseValues.currentPair.symbol, cancelingOrderIDs.first());
-
-            if (debugLevel)
-                logThread->writeLog("Order canceled:" + cancelingOrderIDs.first(), 2);
-
-            cancelingOrderIDs.removeFirst();
-        }
-    }
-    break;//cancel_order
+        break;//cancel_order
 
     case 306: //order/buy
         if (!success || !debugLevel)
@@ -793,12 +790,12 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                 if (data == "[]")
                     break;
 
-                QList<HistoryItem>* historyItems = new QList<HistoryItem>;
+                auto* historyItems = new QList<HistoryItem>;
                 QString newLog(data);
                 QStringList dataList = newLog.split("}, {");
                 newLog.clear();
 
-                for (int n = 0; n < dataList.count(); n++)
+                for (int n = 0; n < dataList.size(); n++)
                 {
                     HistoryItem currentHistoryItem;
                     QByteArray curLog(dataList.at(n).toLatin1());
@@ -867,19 +864,17 @@ void Exchange_Bitstamp::dataReceivedAuth(QByteArray data, int reqType)
                     }
                     else if (logTypeInt == 2) //Market Trade
                     {
-                        for (int m = 0; m < IniEngine::getPairsCount(); ++m)
+                        for (int m = 0; m < pairList->size(); ++m)
                         {
-                            QString request = IniEngine::getPairRequest(m).toLower();
+                            QString request = pairList->at(m).currAStrLow + "_" + pairList->at(m).currBStrLow;
 
-                            if (request.count() < 5)
+                            if (request.size() < 5)
                                 continue;
-
-                            request.insert(3, '_');
 
                             if (curLog.indexOf(request) != -1)
                             {
                                 currentHistoryItem.price = getMidData(request + "\": ", ",", &curLog).toDouble();
-                                currentHistoryItem.symbol = IniEngine::getPairSymbol(m);
+                                currentHistoryItem.symbol = pairList->at(m).symbol;
                                 firstCurrency = request.left(request.indexOf('_'));
                                 break;
                             }
@@ -991,7 +986,7 @@ void Exchange_Bitstamp::sslErrors(const QList<QSslError>& errors)
 {
     QStringList errorList;
 
-    for (int n = 0; n < errors.count(); n++)
+    for (int n = 0; n < errors.size(); n++)
         errorList << errors.at(n).errorString();
 
     if (debugLevel)

@@ -56,8 +56,8 @@ public:
     bool clearOpenOrdersOnCurrencyChanged;
     bool clearHistoryOnCurrencyChanged;
     bool exchangeTickerSupportsHiLowPrices;
-    bool isDepthEnabled();
-    std::atomic_bool depthEnabledFlag;
+    bool isDepthEnabled() const;
+    std::atomic_bool depthEnabledFlag{};
     virtual void filterAvailableUSDAmountValue(double* amount);
 
     CurrencyPairItem defaultCurrencyParams;
@@ -106,6 +106,8 @@ public:
     quint16 port;
     bool    useSsl;
 
+    int m_pairChangeCount;
+
     void setApiKeySecret(QByteArray key, QByteArray secret);
 
     QByteArray& getApiKey();
@@ -114,8 +116,8 @@ public:
     virtual void clearVariables();
     void translateUnicodeStr(QString* str);
     void translateUnicodeOne(QByteArray* str);
-    static QByteArray getMidData(QString a, QString b, QByteArray* data);
-    QByteArray getMidVal(QString a, QString b, QByteArray* data);
+    static QByteArray getMidData(const QString& a, const QString& b, const QByteArray* data);
+    QByteArray getMidVal(const QString& a, const QString& b, const QByteArray* data);
     void setupApi(QtBitcoinTrader*, bool tickerOnly = false);
     Exchange();
     ~Exchange();
@@ -159,13 +161,13 @@ private slots:
     void quitExchange();
 public slots:
     virtual void secondSlot();
-    virtual void dataReceivedAuth(QByteArray, int);
+    virtual void dataReceivedAuth(const QByteArray&, int, int);
     virtual void reloadDepth();
     virtual void clearValues();
     virtual void getHistory(bool);
-    virtual void buy(QString, double, double);
-    virtual void sell(QString, double, double);
-    virtual void cancelOrder(QString, QByteArray);
+    virtual void buy(const QString&, double, double);
+    virtual void sell(const QString&, double, double);
+    virtual void cancelOrder(const QString&, const QByteArray&);
 
     void run();
 

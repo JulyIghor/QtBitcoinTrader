@@ -40,8 +40,8 @@ class PasswordDialog : public QDialog
     Q_OBJECT
 
 public:
-    QString lockFilePath(QString);
-    bool isProfileLocked(QString);
+    QString lockFilePath(const QString&);
+    bool isProfileLocked(const QString&);
     QString getPassword();
     bool resetData;
     bool newProfile;
@@ -52,9 +52,9 @@ public:
 private slots:
     void resetDataSlot();
     void addNewProfile();
-    void checkToEnableButton(QString);
+    void checkToEnableButton(const QString&);
     void on_descriptionGroupBox_toggled(bool arg1);
-    void showTimeMessage(QString);
+    void showTimeMessage(const QString&);
 
 private:
     void accept();

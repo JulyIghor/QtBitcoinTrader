@@ -60,10 +60,7 @@ bool RuleHolder::isValidSymbol(const QString& symbol)
     CurrencyPairItem pairItem;
     pairItem = baseValues.currencyPairMap.value(symbol.toUpper(), pairItem);
 
-    if (pairItem.symbol.isEmpty())
-        return false;
-
-    return true;
+    return !pairItem.symbol.isEmpty();
 }
 
 bool RuleHolder::isValidPlusMinus(const QString& plusMinus)

@@ -73,8 +73,8 @@ TranslationDialog::TranslationDialog(QWidget* parent)
     int currentRow = 0;
     QWidget* lastWidget = authorAbout;
 
-    for (int n = 0; n < lineEdits.count(); n++)
-        if (lineEdits[n]->isChanged() == false)
+    for (int n = 0; n < lineEdits.size(); n++)
+        if (!lineEdits[n]->isChanged())
         {
             TranslationLine* nextWidget = lineEdits[n];
             gridLayout->addWidget(nextWidget, currentRow++, 0);
@@ -82,8 +82,8 @@ TranslationDialog::TranslationDialog(QWidget* parent)
             lastWidget = nextWidget;
         }
 
-    for (int n = 0; n < lineEdits.count(); n++)
-        if (lineEdits[n]->isChanged() == true)
+    for (int n = 0; n < lineEdits.size(); n++)
+        if (lineEdits[n]->isChanged())
         {
             TranslationLine* nextWidget = lineEdits[n];
             gridLayout->addWidget(nextWidget, currentRow++, 0);
@@ -104,7 +104,7 @@ TranslationDialog::TranslationDialog(QWidget* parent)
 
 TranslationDialog::~TranslationDialog()
 {
-    if (gridLayout)
+    
         delete gridLayout;
 
     if (baseValues.mainWindow_)
@@ -151,12 +151,12 @@ void TranslationDialog::fillLayoutByMap(QMap<QString, QString>* cMap, QString su
 {
     QStringList currentIdList = dMap->keys();
 
-    for (int n = 0; n < currentIdList.count(); n++)
+    for (int n = 0; n < currentIdList.size(); n++)
     {
         if (currentIdList.at(n).startsWith("LANGUAGE_"))
             continue;
 
-        TranslationLine* newEdit = new TranslationLine;
+        auto* newEdit = new TranslationLine;
         QString defText = dMap->value(currentIdList.at(n), "");
         newEdit->setDefaultText(defText);
         newEdit->setToolTip(defText.replace("<br>", "\n"));
@@ -177,7 +177,7 @@ void TranslationDialog::applyButton()
 {
     QStringList resultList;
 
-    for (int n = 0; n < lineEdits.count(); n++)
+    for (int n = 0; n < lineEdits.size(); n++)
     {
         QString curText = lineEdits.at(n)->getValidText();
 
@@ -212,7 +212,7 @@ void TranslationDialog::saveAsButton()
 {
     applyButton();
 
-    if (ui.buttonSaveAs->isEnabled() == false)
+    if (!ui.buttonSaveAs->isEnabled())
         return;
 
     QString fileName = QFileDialog::getSaveFileName(this, julyTr("SAVE_TRANSLATION", "Save Translation"),
@@ -228,23 +228,23 @@ void TranslationDialog::saveAsButton()
     QFile::copy(julyTranslator.lastFile(), fileName);
 }
 
-void TranslationDialog::searchLang(QString filterText)
+void TranslationDialog::searchLang(const QString& filterText)
 {
     if (filterText.isEmpty())
     {
-        for (int n = 0; n < lineEdits.count(); n++)
+        for (int n = 0; n < lineEdits.size(); n++)
             lineEdits[n]->setVisible(true);
     }
     else
     {
         QStringList langFilter = filterText.split(" ");
 
-        for (int n = 0; n < lineEdits.count(); n++)
+        for (int n = 0; n < lineEdits.size(); n++)
         {
             QString curText = lineEdits[n]->getValidText();
             bool containsText = true;
 
-            for (int k = 0; k < langFilter.count(); k++)
+            for (int k = 0; k < langFilter.size(); k++)
                 if (!curText.contains(langFilter.at(k), Qt::CaseInsensitive))
                     containsText = false;
 

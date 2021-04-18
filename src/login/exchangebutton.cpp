@@ -31,7 +31,7 @@
 
 #include "exchangebutton.h"
 
-ExchangeButton::ExchangeButton(QString logo, QString currencies, QString url, qint32 num,
+ExchangeButton::ExchangeButton(const QString& logo, const QString& currencies, const QString& url, qint32 num,
                                FeaturedExchangesDialog* toParrentForm)
     : QWidget()
 {
@@ -74,25 +74,21 @@ void ExchangeButton::mouseDoubleClickEvent(QMouseEvent* event)
     parrentForm->on_okButton_clicked();
 }
 
-void ExchangeButton::setLogo(QString logo)
+void ExchangeButton::setLogo(const QString& logo)
 {
     ui.imageLabel->setPixmap(QPixmap(":/Resources/Exchanges/Logos/" + logo));
     ui.imageLabel->setFixedSize(180, 50);
 }
 
-void ExchangeButton::setCurrencies(QString currencies)
+void ExchangeButton::setCurrencies(const QString& currencies)
 {
     ui.currenciesLabel->setToolTip(currencies);
-
-    if (currencies.length() > 28)
-        currencies = currencies.left(28) + " ...";
-
-    ui.currenciesLabel->setText(currencies);
+    ui.currenciesLabel->setText(currencies.length() > 28 ? currencies.left(28) + " ..." : currencies);
     ui.currenciesLabel->setWordWrap(true);
     ui.currenciesLabel->setFixedSize(180, 14);
 }
 
-void ExchangeButton::setURL(QString url)
+void ExchangeButton::setURL(const QString& url)
 {
     ui.urlLabel->setText("<a href=\"" + url + "\" title=\"" + url + "\">" + url + "</a>");
     ui.urlLabel->setToolTip(url);

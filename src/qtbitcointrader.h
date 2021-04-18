@@ -90,7 +90,7 @@ class QtBitcoinTrader : public QMainWindow
 public:
     Ui::QtBitcoinTraderClass ui;
 
-    void addRuleByHolder(RuleHolder& holder, bool isEnabled, QString titleName, QString fileName);
+    void addRuleByHolder(RuleHolder& holder, bool isEnabled, QString titleName);
 
     QStringList getRuleGroupsNames();
     QStringList getScriptGroupsNames();
@@ -125,7 +125,7 @@ public:
 
         return true;
     }
-    void reloadLanguage(QString preferedLangFile = "");
+    void reloadLanguage(const QString& preferedLangFile = "");
     void fixAllChildButtonsAndLabels(QWidget* par);
     void fixDecimals(QWidget* par);
     void fixAllCurrencyLabels(QWidget* par);
@@ -208,8 +208,8 @@ private:
     void ruleTotalToBuyBSValueChanged();
     void ruleAmountToReceiveBSValueChanged();
     bool isDataPending;
-    QTime softLagTime;
-    QTime depthLagTime;
+    QElapsedTimer softLagTime;
+    QElapsedTimer depthLagTime;
     bool waitingDepthLag;
 
     QMenu* trayMenu;
@@ -268,8 +268,12 @@ private:
     CurrencyMenu* currencyMenu;
     QScopedPointer<CurrencySignLoader> currencySignLoader;
 
+    QElapsedTimer historyForceUpdate;
+    QElapsedTimer speedTestTime;
+    QElapsedTimer lastMessageTime;
+
 public slots:
-    void sendIndicatorEvent(const QString& symbol, QString name, double value);
+    void sendIndicatorEvent(const QString& symbol, const QString& name, double value);
 
     void setRuleTabRunning(const QString&, bool);
     void startApplication(const QString&, QStringList);
@@ -310,7 +314,7 @@ public slots:
     void depthRequestReceived();
     void on_swapDepth_clicked();
     void checkValidOrdersButtons();
-    void cancelOrder(const QString&, QByteArray);
+    void cancelOrder(const QString&, const QByteArray&);
     void volumeAmountChanged(double, double);
     void setLastTrades10MinVolume(double);
     void on_depthAutoResize_toggled(bool);
@@ -339,7 +343,7 @@ public slots:
 
     void sayText(const QString&);
 
-    void loginChanged(QString);
+    void loginChanged(const QString&);
 
     void orderBookChanged(const QString&, QList<OrderItem>* orders);
 
@@ -410,12 +414,11 @@ public slots:
     void on_sellPricePerCoinAsMarketLastPrice_clicked();
     void on_sellTotalBtcAllIn_clicked();
     void on_sellTotalBtcHalfIn_clicked();
-    void setPairs(QStringList* pairsList);
 signals:
-    void indicatorEventSignal(const QString& symbol, QString name, double value);
+    void indicatorEventSignal(const QString& symbol, const QString& name, double value);
     void themeChanged();
     void reloadDepth();
-    void cancelOrderByOid(const QString&, QByteArray);
+    void cancelOrderByOid(const QString&, const QByteArray&);
     void apiSell(const QString& symbol, double btc, double price);
     void apiBuy(const QString& symbol, double btc, double price);
     void getHistory(bool);

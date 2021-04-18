@@ -45,7 +45,7 @@
 #include "rulewidget.h"
 #include "iniengine.h"
 
-AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
+AddRuleDialog::AddRuleDialog(const QString& grName, QWidget* par) :
     QDialog(par),
     saveClicked(false),
     groupName(grName),
@@ -64,7 +64,7 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
 
     ui->sayCode->insertItem(ui->sayCode->count(), julyTr("NOT_USED", "Not Used"), "");
 
-    Q_FOREACH (QDoubleSpinBox* spinBox, mainWindow.findChildren<QDoubleSpinBox*>())
+    for (QDoubleSpinBox* spinBox : mainWindow.findChildren<QDoubleSpinBox*>())
     {
         QString scriptName = spinBox->whatsThis();
 
@@ -161,12 +161,12 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
     on_thanSymbol_currentIndexChanged(ui->thanSymbol->currentIndex());
     on_valueASymbol_currentIndexChanged(ui->valueASymbol->currentIndex());
 
-    Q_FOREACH (QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())
+    for (QDoubleSpinBox* spinBox : findChildren<QDoubleSpinBox*>())
         new JulySpinBoxFix(spinBox);
 
     QString baseSymbol = baseValues.currentPair.symbolSecond();
 
-    Q_FOREACH (QComboBox* comboBox, findChildren<QComboBox*>())
+    for (QComboBox* comboBox : findChildren<QComboBox*>())
     {
         if (comboBox->accessibleName() != "SYMBOL")
             continue;
@@ -190,17 +190,17 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
 
     ui->thanAmountFee->setCurrentIndex(2);
 
-    Q_FOREACH (QComboBox* comboBox, findChildren<QComboBox*>())
-        connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(reCacheCode()));
+    for (QComboBox* comboBox : findChildren<QComboBox*>())
+        connect(comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AddRuleDialog::reCacheCode);
 
-    Q_FOREACH (QDoubleSpinBox* spinBox, findChildren<QDoubleSpinBox*>())
-        connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(reCacheCode()));
+    for (QDoubleSpinBox* spinBox : findChildren<QDoubleSpinBox*>())
+        connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this,  &AddRuleDialog::reCacheCode);
 
-    Q_FOREACH (QCheckBox* checkBox, findChildren<QCheckBox*>())
-        connect(checkBox, SIGNAL(toggled(bool)), this, SLOT(reCacheCode()));
+    for (QCheckBox* checkBox : findChildren<QCheckBox*>())
+        connect(checkBox, &QCheckBox::toggled, this, &AddRuleDialog::reCacheCode);
 
-    Q_FOREACH (QRadioButton* checkBox, findChildren<QRadioButton*>())
-        connect(checkBox, SIGNAL(toggled(bool)), this, SLOT(reCacheCode()));
+    for (QRadioButton* checkBox : findChildren<QRadioButton*>())
+        connect(checkBox, &QRadioButton::toggled, this, &AddRuleDialog::reCacheCode);
 
     setWindowFlags(Qt::WindowCloseButtonHint);
     setWindowTitle(julyTranslator.translateButton("ADD_RULE", "Add Rule"));
@@ -208,8 +208,8 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
     julyTranslator.translateUi(this);
 
     int selectedRow = -1;
-    RuleWidget* parentRuleWidget = qobject_cast<RuleWidget*>(par);
-    ScriptWidget* parentScriptWidget = qobject_cast<ScriptWidget*>(par);
+    auto* parentRuleWidget = qobject_cast<RuleWidget*>(par);
+    auto* parentScriptWidget = qobject_cast<ScriptWidget*>(par);
 
     for (RuleWidget* currentGroup : mainWindow.ui.tabRules->findChildren<RuleWidget*>())
     {
@@ -222,7 +222,7 @@ AddRuleDialog::AddRuleDialog(QString grName, QWidget* par) :
         ui->groupName->addItem(currentGroup->windowTitle(), currentGroup->property("FileName").toString());
     }
 
-    Q_FOREACH (ScriptWidget* currentGroup, mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
+    for (ScriptWidget* currentGroup : mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
     {
         if (currentGroup == nullptr)
             continue;
@@ -323,7 +323,7 @@ void AddRuleDialog::fillByHolder(RuleHolder& holder, bool running)
     ruleIsEnabled = running;
 }
 
-bool AddRuleDialog::isRuleEnabled()
+bool AddRuleDialog::isRuleEnabled() const
 {
     return ruleIsEnabled;
 }
@@ -585,7 +585,7 @@ void AddRuleDialog::fixSize(bool fitToWindow)
         resize(qMax(preferedSize.width(), minWidth), qMax(preferedSize.height(), 250));
 }
 
-void AddRuleDialog::on_variableA_currentIndexChanged(int)
+void AddRuleDialog::on_variableA_currentIndexChanged(int /*unused*/)
 {
     QString variableAType = comboCurrentData(ui->variableA);
 
@@ -671,7 +671,7 @@ void AddRuleDialog::on_playButton_clicked()
         {
             QString currentCode = comboCurrentData(ui->sayCode);
 
-            Q_FOREACH (QDoubleSpinBox* spin, usedSpinBoxes)
+            for (QDoubleSpinBox* spin : usedSpinBoxes)
                 if (spin->whatsThis() == currentCode)
                 {
                     int detectDoublePoint = 0;
@@ -813,7 +813,7 @@ void AddRuleDialog::on_thanPricePercent_toggled(bool checked)
 
 void AddRuleDialog::on_variableBPercentButton_clicked()
 {
-    PercentPicker* percentPicker = new PercentPicker(ui->variableBExact, 100.0);
+    auto* percentPicker = new PercentPicker(ui->variableBExact, 100.0);
     QPoint execPos = ui->whenValueGroupBox->mapToGlobal(ui->variableBPercentButton->geometry().center());
     execPos.setX(execPos.x() - percentPicker->width() / 2);
     execPos.setY(execPos.y() - percentPicker->width());
@@ -822,7 +822,7 @@ void AddRuleDialog::on_variableBPercentButton_clicked()
 
 void AddRuleDialog::on_thanAmountPercentButton_clicked()
 {
-    PercentPicker* percentPicker = new PercentPicker(ui->thanAmount, 100.0);
+    auto* percentPicker = new PercentPicker(ui->thanAmount, 100.0);
     QPoint execPos = ui->actionGroupBox->mapToGlobal(ui->thanAmountPercentButton->geometry().center());
     execPos.setX(execPos.x() - percentPicker->width() / 2);
     execPos.setY(execPos.y() - percentPicker->width());
@@ -831,29 +831,29 @@ void AddRuleDialog::on_thanAmountPercentButton_clicked()
 
 void AddRuleDialog::on_thanPricePercentButton_clicked()
 {
-    PercentPicker* percentPicker = new PercentPicker(ui->thanPriceValue, 100.0);
+    auto* percentPicker = new PercentPicker(ui->thanPriceValue, 100.0);
     QPoint execPos = ui->actionGroupBox->mapToGlobal(ui->thanPricePercentButton->geometry().center());
     execPos.setX(execPos.x() - percentPicker->width() / 2);
     execPos.setY(execPos.y() - percentPicker->width());
     percentPicker->exec(execPos);
 }
 
-void AddRuleDialog::on_variableBFee_currentIndexChanged(int)
+void AddRuleDialog::on_variableBFee_currentIndexChanged(int /*unused*/)
 {
     fixSize();
 }
 
-void AddRuleDialog::on_thanAmountFee_currentIndexChanged(int)
+void AddRuleDialog::on_thanAmountFee_currentIndexChanged(int /*unused*/)
 {
     fixSize();
 }
 
-void AddRuleDialog::on_thanPriceFee_currentIndexChanged(int)
+void AddRuleDialog::on_thanPriceFee_currentIndexChanged(int /*unused*/)
 {
     fixSize();
 }
 
-void AddRuleDialog::on_thanText_textChanged(const QString&)
+void AddRuleDialog::on_thanText_textChanged(const QString& /*unused*/)
 {
     reCacheCode();
 }

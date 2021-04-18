@@ -48,7 +48,7 @@ private:
     int spinMargin;
     QDoubleSpinBox* parentSpinBox;
 private slots:
-    void widthFix(QString);
+    void widthFix(const QString&);
 };
 
 #endif // JULYSPINBOXFIX_H

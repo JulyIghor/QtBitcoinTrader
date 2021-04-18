@@ -63,7 +63,8 @@ TimeSync::~TimeSync()
     if (dateUpdateThread && dateUpdateThread->isRunning())
     {
         dateUpdateThread->quit();
-        dateUpdateThread->wait();
+        dateUpdateThread->wait(1);
+        dateUpdateThread->terminate();
     }
 }
 
@@ -104,7 +105,7 @@ TimeSync* TimeSync::global()
     static QMutex mutexGlobal;
     QMutexLocker lock(&mutexGlobal);
 
-    while (instance.started == false)
+    while (!instance.started)
         QThread::msleep(100);
 
     created = 1;
@@ -131,7 +132,7 @@ qint64 TimeSync::getTimeT()
     TimeSync* timeSync = TimeSync::global();
 
     if (timeSync->additionalTimer == nullptr)
-        return QDateTime::currentDateTime().toTime_t();
+        return QDateTime::currentDateTimeUtc().toTime_t();
 
     timeSync->mutex.lock();
     qint64 additionalBuffer = timeSync->additionalTimer->elapsed();
@@ -204,7 +205,7 @@ void TimeSync::getNTPTime()
         return;
     }
 
-    qint64 time = seconds * 1000ll + fraction * 1000ll / 0x100000000ll - 2208988800000ll;
+    qint64 time = seconds * 1000LL + fraction * 1000LL / 0x100000000LL - 2208988800000LL;
 
     if (time < 1547337932000 || time > 9000000000000)
     {

@@ -47,15 +47,15 @@ private:
     QHash<QString, qint64> positions;
     QScopedPointer<QThread> m_thread;
 public slots:
-    void performFileWrite(QString, QByteArray);
-    void performFileAppend(QString, QByteArray);
-    void performFileReadLine(QString, qint64, quint32);
-    void performFileReadLineSimple(QString, quint32);
-    void performFileRead(QString, qint64, quint32);
-    void performFileReadAll(QString, quint32);
+    void performFileWrite(const QString&, const QByteArray&);
+    void performFileAppend(const QString&, const QByteArray&);
+    void performFileReadLine(const QString&, qint64, quint32);
+    void performFileReadLineSimple(const QString&, quint32);
+    void performFileRead(const QString&, qint64, quint32);
+    void performFileReadAll(const QString&, quint32);
 
 signals:
-    void fileReadResult(QByteArray, quint32);
+    void fileReadResult(const QByteArray&, quint32);
 };
 
 #endif // SCRIPTOBJECTTHREAD_H

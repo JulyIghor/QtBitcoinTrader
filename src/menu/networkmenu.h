@@ -38,7 +38,7 @@ class QToolButton;
 
 namespace Ui
 {
-class NetworkMenu;
+    class NetworkMenu;
 }
 
 class NetworkMenu : public QMenu
@@ -52,7 +52,7 @@ public:
     void setNetworkTotal(int);
     int getNetworkTotalMaximum();
     void setNetworkTotalMaximum(int);
-    void setSuffix(QString);
+    void setSuffix(const QString&);
 
 signals:
     void trafficTotalToZero_clicked();

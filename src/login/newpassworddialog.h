@@ -40,7 +40,7 @@ class NewPasswordDialog : public QDialog
     Q_OBJECT
 
 public:
-    int getExchangeId();
+    int getExchangeId() const;
     QString getFileName();
     QString selectedProfileName();
     void updateIniFileName();
@@ -52,10 +52,10 @@ public:
 
 private slots:
     void okPressed();
-    void exchangeChanged(QString);
+    void exchangeChanged(const QString&);
     void checkToEnableButton();
     void getApiKeySecretButton();
-    int difficulty(QString, bool*, QString*);
+    int difficulty(const QString&, bool*, QString*);
     void on_advSettingsTool_toggled(bool status);
 
 private:

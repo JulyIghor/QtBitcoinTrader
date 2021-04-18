@@ -49,10 +49,10 @@ class AddRuleDialog : public QDialog
 public:
     bool saveClicked;
     QString getGroupName();
-    bool isRuleEnabled();
+    bool isRuleEnabled() const;
     RuleHolder getRuleHolder();
     void fillByHolder(RuleHolder&, bool enabled);
-    explicit AddRuleDialog(QString groupName, QWidget* parent = 0);
+    explicit AddRuleDialog(const QString& groupName, QWidget* parent = 0);
     ~AddRuleDialog();
 
 private slots:

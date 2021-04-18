@@ -368,6 +368,12 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
             {
                 currAStr = holder.valueASymbolCode.left(posSplitter);
                 currBStr = holder.valueASymbolCode.right(holder.valueASymbolCode.size() - posSplitter - 1);
+
+                if (currBStr.size() > 7)
+                {
+                    fixCurrency(currBStr, "trading");
+                    fixCurrency(currBStr, "exchange");
+                }
             }
 
             if (eventName.endsWith("A", Qt::CaseInsensitive))
@@ -390,4 +396,10 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
     }
 
     return script;
+}
+
+void RuleScriptParser::fixCurrency(QString& currency, const QString removedText)
+{
+    if (currency.endsWith(removedText))
+        currency.chop(removedText.size());
 }

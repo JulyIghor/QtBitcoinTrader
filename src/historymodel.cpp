@@ -63,7 +63,7 @@ void HistoryModel::loadLastPrice()
     bool haveLastBuy = false;
     bool haveLastSell = false;
 
-    for (int n = 0; n < itemsList.count(); n++)
+    for (int n = 0; n < itemsList.size(); n++)
         if (itemsList.at(n).symbol == baseValues.currentPair.symbol)
         {
             if (!haveLastSell && itemsList.at(n).type == 1)
@@ -88,7 +88,7 @@ void HistoryModel::historyChanged(QList<HistoryItem>* histList)
     bool haveLastBuy = false;
     bool haveLastSell = false;
 
-    for (int n = 0; n < histList->count(); n++)
+    for (int n = 0; n < histList->size(); n++)
         if (histList->at(n).symbol == baseValues.currentPair.symbol)
         {
             if (!haveLastSell && histList->at(n).type == 1)
@@ -107,34 +107,34 @@ void HistoryModel::historyChanged(QList<HistoryItem>* histList)
                 break;
         }
 
-    while (histList->count() && histList->last().dateTimeInt <= lastDate)
+    while (!histList->empty() && histList->last().dateTimeInt <= lastDate)
         histList->removeLast();
 
-    if (histList->count() == 0)
+    if (histList->empty())
     {
         delete histList;
         return;
     }
 
-    beginInsertRows(QModelIndex(), 0, histList->count() - 1);
+    beginInsertRows(QModelIndex(), 0, histList->size() - 1);
 
-    if (histList->count() && itemsList.count())
+    if (!histList->empty() && !itemsList.empty())
     {
-        (*histList)[histList->count() - 1].displayFullDate = histList->at(histList->count() - 1).dateInt !=
+        (*histList)[histList->size() - 1].displayFullDate = histList->at(histList->size() - 1).dateInt !=
                 itemsList.last().dateInt;
     }
 
-    if (itemsList.isEmpty() && histList->count())
-        (*histList)[histList->count() - 1].displayFullDate = true;
+    if (itemsList.isEmpty() && !histList->empty())
+        (*histList)[histList->size() - 1].displayFullDate = true;
 
     qint64 maxListDate = 0;
 
-    for (int n = histList->count() - 1; n >= 0; n--)
+    for (int n = histList->size() - 1; n >= 0; n--)
     {
         if (maxListDate < histList->at(n).dateTimeInt)
             maxListDate = histList->at(n).dateTimeInt;
 
-        if (n != histList->count() - 1)
+        if (n != histList->size() - 1)
             (*histList)[n].displayFullDate = histList->at(n).dateInt != histList->at(n + 1).dateInt;
 
         itemsList << histList->at(n);
@@ -144,7 +144,8 @@ void HistoryModel::historyChanged(QList<HistoryItem>* histList)
         if (lastDateMap.value(itemsList.last().symbol, 0UL) <= itemsList.last().dateInt)
         {
             lastDateMap[itemsList.last().symbol] = itemsList.last().dateInt;
-            mainWindow.sendIndicatorEvent(itemsList.last().symbol, QLatin1String("MyLastTrade"), itemsList.last().volume);
+            mainWindow.sendIndicatorEvent(itemsList.last().symbol + itemsList.last().currRequestSecond,
+                                          QLatin1String("MyLastTrade"), itemsList.last().volume);
         }
     }
 
@@ -158,9 +159,9 @@ void HistoryModel::historyChanged(QList<HistoryItem>* histList)
 
 double HistoryModel::getRowPrice(int row)
 {
-    row = itemsList.count() - row - 1;
+    row = itemsList.size() - row - 1;
 
-    if (row < 0 || row >= itemsList.count())
+    if (row < 0 || row >= itemsList.size())
         return 0.0;
 
     return itemsList.at(row).price;
@@ -168,9 +169,9 @@ double HistoryModel::getRowPrice(int row)
 
 double HistoryModel::getRowVolume(int row)
 {
-    row = itemsList.count() - row - 1;
+    row = itemsList.size() - row - 1;
 
-    if (row < 0 || row >= itemsList.count())
+    if (row < 0 || row >= itemsList.size())
         return 0.0;
 
     return itemsList.at(row).volume;
@@ -178,29 +179,29 @@ double HistoryModel::getRowVolume(int row)
 
 int HistoryModel::getRowType(int row)
 {
-    row = itemsList.count() - row - 1;
+    row = itemsList.size() - row - 1;
 
-    if (row < 0 || row >= itemsList.count())
+    if (row < 0 || row >= itemsList.size())
         return 0.0;
 
     return itemsList.at(row).type;
 }
 
-int HistoryModel::rowCount(const QModelIndex&) const
+int HistoryModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    return itemsList.count();
+    return itemsList.size();
 }
 
-int HistoryModel::columnCount(const QModelIndex&) const
+int HistoryModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return columnsCount;
 }
 
 QVariant HistoryModel::data(const QModelIndex& index, int role) const
 {
-    int currentRow = itemsList.count() - index.row() - 1;
+    int currentRow = itemsList.size() - index.row() - 1;
 
-    if (currentRow < 0 || currentRow >= itemsList.count())
+    if (currentRow < 0 || currentRow >= itemsList.size())
         return QVariant();
 
     if (role == Qt::WhatsThisRole)
@@ -349,21 +350,21 @@ QVariant HistoryModel::headerData(int section, Qt::Orientation orientation, int 
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (headerLabels.count() != columnsCount)
+    if (headerLabels.size() != columnsCount)
         return QVariant();
 
     return headerLabels.at(section);
 }
 
 
-Qt::ItemFlags HistoryModel::flags(const QModelIndex&) const
+Qt::ItemFlags HistoryModel::flags(const QModelIndex& /*index*/) const
 {
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 void HistoryModel::setHorizontalHeaderLabels(QStringList list)
 {
-    if (list.count() != columnsCount)
+    if (list.size() != columnsCount)
         return;
 
     typesLabels[1] = julyTr("LOG_SOLD", "sold");
@@ -374,7 +375,7 @@ void HistoryModel::setHorizontalHeaderLabels(QStringList list)
 
     typeWidth = 0;
 
-    for (int n = 1; n < typesLabels.count(); n++)
+    for (int n = 1; n < typesLabels.size(); n++)
         typeWidth = qMax(typeWidth, textFontWidth(typesLabels.at(n)));
 
     typeWidth = qMax(typeWidth, textFontWidth(list.at(2)));
@@ -396,7 +397,7 @@ QModelIndex HistoryModel::index(int row, int column, const QModelIndex& parent) 
     return createIndex(row, column);
 }
 
-QModelIndex HistoryModel::parent(const QModelIndex&) const
+QModelIndex HistoryModel::parent(const QModelIndex& /*child*/) const
 {
     return QModelIndex();
 }

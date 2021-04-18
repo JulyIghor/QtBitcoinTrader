@@ -42,7 +42,7 @@ JulySpinBoxPicker::JulySpinBoxPicker(QDoubleSpinBox* parent, double* forceMinVal
 {
     internalMinimumValue = intMinV;
 
-    if (internalMinimumValue > 0.0 && forceMinValue == 0)
+    if (internalMinimumValue > 0.0 && forceMinValue == nullptr)
         forceMinimumValue = &internalMinimumValue;
     else
         forceMinimumValue = forceMinValue;

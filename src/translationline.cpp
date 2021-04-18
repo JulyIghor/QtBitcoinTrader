@@ -92,10 +92,13 @@ void TranslationLine::fixSize()
 }
 
 
-void TranslationLine::setDefaultText(QString defText)
+void TranslationLine::setDefaultText(const QString& defText)
 {
     if (defText != "yyyy-MM-dd HH:mm:ss" && defText != baseValues.exchangeName + ":")
-        defaultText = defText.replace("<br>", "\n");
+    {
+        defaultText = defText;
+        defaultText.replace("<br>", "\n");
+    }
 }
 
 void TranslationLine::setItemText(QString text)

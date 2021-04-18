@@ -41,7 +41,7 @@ class OrdersModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    int getAsksCount();
+    int getAsksCount() const;
     int getRowNum(int row);
     QByteArray getRowOid(int row);
     quint32 getRowDate(int row);
@@ -55,12 +55,12 @@ public:
     QMap<double, bool> currentBidsPrices;
 
     bool checkDuplicatedOID;
-    void ordersCancelAll(QString pair = 0);
-    void ordersCancelBids(QString pair = 0);
-    void ordersCancelAsks(QString pair = 0);
+    void ordersCancelAll(const QString& pair = 0);
+    void ordersCancelBids(const QString& pair = 0);
+    void ordersCancelAsks(const QString& pair = 0);
     void setOrderCanceled(QByteArray);
 
-    void filterSymbolChanged(QString filterSymbol = "");
+    void filterSymbolChanged(const QString& filterSymbol = "");
 
     void clear();
 
@@ -84,7 +84,7 @@ public:
     QList<OrderItem> orders;
 
 signals:
-    void cancelOrder(QString, QByteArray);
+    void cancelOrder(const QString&, const QByteArray&);
     void ordersIsAvailable();
     void volumeAmountChanged(double, double);
 

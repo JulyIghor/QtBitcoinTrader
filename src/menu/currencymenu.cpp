@@ -53,18 +53,17 @@ CurrencyMenu::~CurrencyMenu()
     delete ui;
 }
 
-void CurrencyMenu::on_filterLine_textChanged(QString filter)
+void CurrencyMenu::on_filterLine_textChanged(const QString& filter)
 {
     if (currencyPairs.size() != ui->currencyLayout->count())
         return;
 
-    filter = filter.toUpper();
     setCurrencyVisible = false;
     ui->scrollArea->hide();
 
     for (int i = 0; i < currencyPairs.size(); ++i)
     {
-        bool bufferVisible = currencyPairs.at(i).contains(filter);
+        bool bufferVisible = currencyPairs.at(i).contains(filter, Qt::CaseInsensitive);
         ui->currencyLayout->itemAt(i)->widget()->setVisible(bufferVisible);
 
         if (bufferVisible && !setCurrencyVisible)
@@ -106,7 +105,7 @@ int CurrencyMenu::count()
     return currencyPairs.size();
 }
 
-int CurrencyMenu::getCurrentIndex()
+int CurrencyMenu::getCurrentIndex() const
 {
     return currentIndex;
 }
@@ -122,7 +121,7 @@ void CurrencyMenu::setCurrentIndex(const int newCurrentIndex)
     emit currencyMenuChanged(currentIndex);
 }
 
-void CurrencyMenu::showEvent(QShowEvent*)
+void CurrencyMenu::showEvent(QShowEvent* /*event*/)
 {
     currencyResize();
 }
@@ -175,6 +174,6 @@ void CurrencyMenu::currencySelect(const int newCurrentIndex)
     hide();
 }
 
-void CurrencyMenu::mouseReleaseEvent(QMouseEvent*)
+void CurrencyMenu::mouseReleaseEvent(QMouseEvent* /*unused*/)
 {
 }

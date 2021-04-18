@@ -33,7 +33,7 @@
 #include "iniengine.h"
 #include "exchange_hitbtc.h"
 
-Exchange_HitBTC::Exchange_HitBTC(QByteArray pRestSign, QByteArray pRestKey)
+Exchange_HitBTC::Exchange_HitBTC(const QByteArray &pRestSign, const QByteArray &pRestKey)
     : Exchange(),
       isFirstAccInfo(true),
       lastTickerDate(0),
@@ -83,13 +83,13 @@ void Exchange_HitBTC::quitThread()
 {
     clearValues();
 
-    if (depthAsks)
+    
         delete depthAsks;
 
-    if (depthBids)
+    
         delete depthBids;
 
-    if (julyHttp)
+    
         delete julyHttp;
 }
 
@@ -122,8 +122,11 @@ void Exchange_HitBTC::reloadDepth()
     Exchange::reloadDepth();
 }
 
-void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
+void Exchange_HitBTC::dataReceivedAuth(const QByteArray& data, int reqType, int pairChangeCount)
 {
+    if (pairChangeCount != m_pairChangeCount)
+        return;
+
     if (debugLevel)
         logThread->writeLog("RCV: " + data);
 
@@ -206,9 +209,9 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
         {
             qint64 time10Min = TimeSync::getMSecs() - 600000;
             QStringList tradeList = QString(data).split("},{");
-            QList<TradesItem>* newTradesItems = new QList<TradesItem>;
+            auto* newTradesItems = new QList<TradesItem>;
 
-            for (int n = tradeList.count() - 1; n >= 0; --n)
+            for (int n = tradeList.size() - 1; n >= 0; --n)
             {
                 QByteArray tradeData = tradeList.at(n).toLatin1();
 
@@ -251,7 +254,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
                 }
             }
 
-            if (newTradesItems->count())
+            if (!newTradesItems->empty())
                 emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
             else
                 delete newTradesItems;
@@ -275,14 +278,14 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
                 double groupedVolume = 0.0;
                 int rowCounter = 0;
 
-                for (int n = 0; n < asksList.count(); n++)
+                for (int n = 0; n < asksList.size(); n++)
                 {
                     if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                         break;
 
                     QStringList currentPair = asksList.at(n).split("\",\"size\":\"");
 
-                    if (currentPair.count() != 2)
+                    if (currentPair.size() != 2)
                         continue;
 
                     double price  = currentPair.first().toDouble();
@@ -303,7 +306,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
                             if (matchCurrentGroup)
                                 groupedVolume += amount;
 
-                            if (!matchCurrentGroup || n == asksList.count() - 1)
+                            if (!matchCurrentGroup || n == asksList.size() - 1)
                             {
                                 depthSubmitOrder(baseValues.currentPair.symbol,
                                                  &currentAsksMap, groupedPrice + baseValues.groupPriceValue, groupedVolume, true);
@@ -322,7 +325,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
 
                 QList<double> currentAsksList = lastDepthAsksMap.keys();
 
-                for (int n = 0; n < currentAsksList.count(); n++)
+                for (int n = 0; n < currentAsksList.size(); n++)
                     if (qFuzzyIsNull(currentAsksMap.value(currentAsksList.at(n), 0)))
                         depthUpdateOrder(baseValues.currentPair.symbol,
                                          currentAsksList.at(n), 0.0, true);
@@ -335,14 +338,14 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
                 groupedVolume = 0.0;
                 rowCounter = 0;
 
-                for (int n = 0; n < bidsList.count(); n++)
+                for (int n = 0; n < bidsList.size(); n++)
                 {
                     if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                         break;
 
                     QStringList currentPair = bidsList.at(n).split("\",\"size\":\"");
 
-                    if (currentPair.count() != 2)
+                    if (currentPair.size() != 2)
                         continue;
 
                     double price  = currentPair.first().toDouble();
@@ -363,7 +366,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
                             if (matchCurrentGroup)
                                 groupedVolume += amount;
 
-                            if (!matchCurrentGroup || n == asksList.count() - 1)
+                            if (!matchCurrentGroup || n == asksList.size() - 1)
                             {
                                 depthSubmitOrder(baseValues.currentPair.symbol,
                                                  &currentBidsMap, groupedPrice - baseValues.groupPriceValue, groupedVolume, false);
@@ -382,7 +385,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
 
                 QList<double> currentBidsList = lastDepthBidsMap.keys();
 
-                for (int n = 0; n < currentBidsList.count(); n++)
+                for (int n = 0; n < currentBidsList.size(); n++)
                     if (qFuzzyIsNull(currentBidsMap.value(currentBidsList.at(n), 0)))
                         depthUpdateOrder(baseValues.currentPair.symbol,
                                          currentBidsList.at(n), 0.0, false);
@@ -424,9 +427,9 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
             }
 
             QStringList ordersList = QString(data).split("},{");
-            QList<OrderItem>* orders = new QList<OrderItem>;
+            auto* orders = new QList<OrderItem>;
 
-            for (int n = 0; n < ordersList.count(); ++n)
+            for (int n = 0; n < ordersList.size(); ++n)
             {
                 OrderItem currentOrder;
                 QByteArray currentOrderData = ordersList.at(n).toLatin1();
@@ -449,7 +452,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
                 QByteArray request  = getMidData("\"symbol\":\"",        "\"", &currentOrderData);
                 QList<CurrencyPairItem>* pairs = IniEngine::getPairs();
 
-                for (int i = 0; i < pairs->count(); ++i)
+                for (int i = 0; i < pairs->size(); ++i)
                 {
                     if (pairs->at(i).currRequestPair == request)
                     {
@@ -462,7 +465,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
                     (*orders) << currentOrder;
             }
 
-            if (orders->count())
+            if (!orders->empty())
                 emit orderBookChanged(baseValues.currentPair.symbol, orders);
             else
                 delete orders;
@@ -501,9 +504,9 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
 
                 QStringList historyList = QString(data).split("},{");
                 qint64 maxId = 0;
-                QList<HistoryItem>* historyItems = new QList<HistoryItem>;
+                auto* historyItems = new QList<HistoryItem>;
 
-                for (int n = 0; n < historyList.count(); ++n)
+                for (int n = 0; n < historyList.size(); ++n)
                 {
                     QByteArray logData(historyList.at(n).toLatin1());
 
@@ -520,7 +523,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
                     QByteArray request  = getMidData("\"symbol\":\"", "\"", &logData);
                     QList<CurrencyPairItem>* pairs = IniEngine::getPairs();
 
-                    for (int i = 0; i < pairs->count(); ++i)
+                    for (int i = 0; i < pairs->size(); ++i)
                     {
                         if (pairs->at(i).currRequestPair == request)
                         {
@@ -613,7 +616,7 @@ void Exchange_HitBTC::dataReceivedAuth(QByteArray data, int reqType)
     }
 }
 
-void Exchange_HitBTC::depthUpdateOrder(QString symbol, double price, double amount, bool isAsk)
+void Exchange_HitBTC::depthUpdateOrder(const QString& symbol, double price, double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
         return;
@@ -644,7 +647,7 @@ void Exchange_HitBTC::depthUpdateOrder(QString symbol, double price, double amou
     }
 }
 
-void Exchange_HitBTC::depthSubmitOrder(QString symbol, QMap<double, double>* currentMap, double priceDouble,
+void Exchange_HitBTC::depthSubmitOrder(const QString& symbol, QMap<double, double>* currentMap, double priceDouble,
                                     double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
@@ -748,7 +751,7 @@ void Exchange_HitBTC::getHistory(bool force)
         sendToApi(210, "GET /api/2/trading/fee/" + baseValues.currentPair.currRequestPair, true);
 }
 
-void Exchange_HitBTC::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
+void Exchange_HitBTC::buy(const QString& symbol, double apiBtcToBuy, double apiPriceToBuy)
 {
     if (tickerOnly)
         return;
@@ -769,7 +772,7 @@ void Exchange_HitBTC::buy(QString symbol, double apiBtcToBuy, double apiPriceToB
     sendToApi(306, "POST /api/2/order", true, data);
 }
 
-void Exchange_HitBTC::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
+void Exchange_HitBTC::sell(const QString& symbol, double apiBtcToSell, double apiPriceToSell)
 {
     if (tickerOnly)
         return;
@@ -790,7 +793,7 @@ void Exchange_HitBTC::sell(QString symbol, double apiBtcToSell, double apiPriceT
     sendToApi(307, "POST /api/2/order", true, data);
 }
 
-void Exchange_HitBTC::cancelOrder(QString, QByteArray order)
+void Exchange_HitBTC::cancelOrder(const QString& /*unused*/, const QByteArray& order)
 {
     if (tickerOnly)
         return;
@@ -801,7 +804,7 @@ void Exchange_HitBTC::cancelOrder(QString, QByteArray order)
     sendToApi(305, "DELETE /api/2/order/" + order, true);
 }
 
-void Exchange_HitBTC::sendToApi(int reqType, QByteArray method, bool auth, QByteArray commands)
+void Exchange_HitBTC::sendToApi(int reqType, const QByteArray &method, bool auth, QByteArray commands)
 {
     if (julyHttp == nullptr)
     {
@@ -818,21 +821,21 @@ void Exchange_HitBTC::sendToApi(int reqType, QByteArray method, bool auth, QByte
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
         connect(julyHttp, SIGNAL(errorSignal(QString)), baseValues_->mainWindow_, SLOT(showErrorMessage(QString)));
         connect(julyHttp, SIGNAL(sslErrorSignal(const QList<QSslError>&)), this, SLOT(sslErrors(const QList<QSslError>&)));
-        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceivedAuth(QByteArray, int)));
+        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceivedAuth(const QByteArray&, int, int)));
     }
 
     if (auth)
-        julyHttp->sendData(reqType, method, commands,
+        julyHttp->sendData(reqType, m_pairChangeCount, method, commands,
                            "Authorization: Basic " + (getApiKey() + ':' + getApiSign()).toBase64() + "\r\n");
     else
-        julyHttp->sendData(reqType, "GET /api/2/public/" + method);
+        julyHttp->sendData(reqType, m_pairChangeCount, "GET /api/2/public/" + method);
 }
 
 void Exchange_HitBTC::sslErrors(const QList<QSslError>& errors)
 {
     QStringList errorList;
 
-    for (int n = 0; n < errors.count(); n++)
+    for (int n = 0; n < errors.size(); n++)
         errorList << errors.at(n).errorString();
 
     if (debugLevel)

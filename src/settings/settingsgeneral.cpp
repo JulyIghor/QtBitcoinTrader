@@ -50,7 +50,7 @@ SettingsGeneral::SettingsGeneral(QWidget* parent)
 
     ui.revertChangesButton->setEnabled(false);
     ui.saveButton->setEnabled(false);
-    ui.forceSyncPairsButton->setEnabled(QDir(appDataDir + "/cache").entryList(QStringList("*.cache"), QDir::Files).count() != 0);
+    ui.forceSyncPairsButton->setEnabled(!QDir(appDataDir + "/cache").entryList(QStringList("*.cache"), QDir::Files).empty());
 
 #ifdef Q_OS_MAC
     ui.closeToTrayLabel->setVisible(false);
@@ -72,14 +72,14 @@ void SettingsGeneral::loadLanguage()
     resLanguage.open(QIODevice::ReadOnly);
     QStringList resourceLanguages = QString(resLanguage.readAll().replace("\r", "")).split("\n");
 
-    for (int n = 0; n < resourceLanguages.count(); n++)
+    for (int n = 0; n < resourceLanguages.size(); n++)
         if (!resourceLanguages.at(n).isEmpty())
             langList << ":/Resources/Language/" + resourceLanguages.at(n);
 
     QStringList folderLangList = QDir(appDataDir + "/Language", "*.lng").entryList();
     folderLangList.sort();
 
-    for (int n = 0; n < folderLangList.count(); n++)
+    for (int n = 0; n < folderLangList.size(); n++)
         langList << appDataDir + "/Language/" + folderLangList.at(n);
 
     int selectedLangId = -1;
@@ -94,7 +94,7 @@ void SettingsGeneral::loadLanguage()
 
     ui.languageComboBox->clear();
 
-    for (int n = 0; n < langList.count(); n++)
+    for (int n = 0; n < langList.size(); n++)
     {
         JulyTranslator translateName;
         translateName.loadFromFile(langList.at(n));
@@ -250,7 +250,7 @@ void SettingsGeneral::on_forceSyncPairsButton_clicked()
 {
     QStringList cacheFiles = QDir(appDataDir + "/cache").entryList(QStringList("*.cache"), QDir::Files);
 
-    for (int i = 0; i < cacheFiles.count(); ++i)
+    for (int i = 0; i < cacheFiles.size(); ++i)
         QFile(appDataDir + "/cache/" + cacheFiles.at(i)).remove();
 
     ui.forceSyncPairsButton->setEnabled(false);

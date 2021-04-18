@@ -45,7 +45,7 @@
 #include "timesync.h"
 #include "utils/utils.h"
 
-ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFrom) :
+ScriptWidget::ScriptWidget(const QString& gName, const QString& _fileName, const QString& fileCopyFrom) :
     QWidget(),
     ui(new Ui::ScriptWidget)
 {
@@ -55,10 +55,6 @@ ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFro
     ui->clearFon->setVisible(false);
     ui->scriptTabWidget->setCurrentIndex(0);
     setAttribute(Qt::WA_DeleteOnClose, true);
-
-    setProperty("FileName", fileName);
-    setProperty("GroupType", "Script");
-
     scriptName = gName;
 
     if (fileName.isEmpty() || !QFile::exists(fileName))
@@ -74,6 +70,9 @@ ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFro
         }
         while (QFile::exists(fileName));
     }
+
+    setProperty("FileName", fileName);
+    setProperty("GroupType", "Script");
 
     if (!fileCopyFrom.isEmpty() && QFile::exists(fileCopyFrom))
     {
@@ -113,18 +112,18 @@ ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFro
     ui->insertFunction->setMenu(&insertFunctionMenu);
     ui->insertCommand->setMenu(&insertCommandMenu);
 
-    Q_FOREACH (QString value, scriptObject->indicatorList)
+    for (const QString& value : scriptObject->indicatorList)
         insertEventMenu.addAction(NewEventsAction(value));
 
-    for (int n = 0; n < scriptObject->commandsList.count(); n++)
+    for (int n = 0; n < scriptObject->commandsList.size(); n++)
         insertCommandMenu.addAction(NewFunctionsAction(scriptObject->commandsList.at(n), scriptObject->argumentsList.at(n)));
 
-    for (int n = 0; n < scriptObject->functionsList.count(); n++)
+    for (int n = 0; n < scriptObject->functionsList.size(); n++)
         insertFunctionMenu.addAction(NewFunctionsAction(scriptObject->functionsList.at(n)));
 
     menuButtons << ui->insertEvents << ui->insertFunction << ui->insertCommand;
 
-    Q_FOREACH (QToolButton* button, menuButtons)
+    for (QToolButton* button : menuButtons)
         button->installEventFilter(this);
 
     setWindowTitle(scriptName);
@@ -133,15 +132,15 @@ ScriptWidget::ScriptWidget(QString gName, QString _fileName, QString fileCopyFro
     on_limitRowsValue_valueChanged(ui->limitRowsValue->value());
 
     //QStringList eventList;
-    //Q_FOREACH(QAction *currentAction,insertEventMenu.actions())
+    //for(QAction *currentAction: insertEventMenu.actions())
     //  eventList<<currentAction->text();
 
     //QStringList functionList;
-    //Q_FOREACH(QAction *currentAction,insertFunctionMenu.actions())
+    //for(QAction *currentAction: insertFunctionMenu.actions())
     //  functionList<<currentAction->text();
 
     //QStringList commandList;
-    //Q_FOREACH(QAction *currentAction,insertCommandMenu.actions())
+    //for(QAction *currentAction: insertCommandMenu.actions())
     //  commandList<<currentAction->text();
 
     //qDebug()<<"Events:\n"<<eventList.join("\n")<<"\nFunctions:\n"<<functionList.join("\n")<<"\nCommands:\n"<<commandList.join("\n");
@@ -179,19 +178,19 @@ void ScriptWidget::languageChanged()
     ui->stateLabel->setText(isRunning() ? julyTr("SCRIPT_RUNNING", "Running") : julyTr("SCRIPT_STOPPED", "Stopped"));
     ui->buttonStartStop->setText(isRunning() ? julyTr("SCRIPT_STOP", "Stop") : julyTr("SCRIPT_START", "Start"));
 
-//    Q_FOREACH(QAction *action,insertEventMenu.actions())
+//    for(QAction *action: insertEventMenu.actions())
 //        action->setToolTip(julyTr("SCRIPT_ACTION_EVENT_"+action->property("TranslationName").toString(),action->text()));
 
-//    Q_FOREACH(QAction *action,insertCommandMenu.actions())
+//    for(QAction *action: insertCommandMenu.actions())
 //        action->setToolTip(julyTr("SCRIPT_ACTION_"+action->property("TranslationName").toString(),action->text()));
 
-//    Q_FOREACH(QAction *action,insertFunctionMenu.actions())
+//    for(QAction *action: insertFunctionMenu.actions())
 //        action->setToolTip(julyTr("SCRIPT_ACTION_"+action->property("TranslationName").toString(),action->text()));
 }
 
 void ScriptWidget::currencyChanged()
 {
-    Q_FOREACH (QAction* action, insertEventMenu.actions())
+    for (QAction* action : insertEventMenu.actions())
     {
         QString trString = action->property("TranslationName").toString();
 
@@ -207,7 +206,7 @@ void ScriptWidget::currencyChanged()
         }
     }
 
-    Q_FOREACH (QAction* action, insertFunctionMenu.actions())
+    for (QAction* action : insertFunctionMenu.actions())
     {
         QString trString = action->property("TranslationName").toString();
 
@@ -218,7 +217,7 @@ void ScriptWidget::currencyChanged()
     }
 }
 
-void ScriptWidget::insertFilePath(QString description, QString mask)
+void ScriptWidget::insertFilePath(const QString& description, const QString& mask)
 {
     QString lastRulesDir = mainWindow.iniSettings->value("UI/LastRulesPath", baseValues.desktopLocation).toString();
 
@@ -246,9 +245,9 @@ bool ScriptWidget::isRunning()
     return scriptObject->isRunning();
 }
 
-QAction* ScriptWidget::NewFunctionsAction(QString name, QString params)
+QAction* ScriptWidget::NewFunctionsAction(const QString& name, QString params)
 {
-    QAction* action = new QAction(this);
+    auto* action = new QAction(this);
 
     if (!params.isEmpty() || name.at(name.size() - 1) != QLatin1Char(')'))
         params = "(" + params + ")";
@@ -262,9 +261,9 @@ QAction* ScriptWidget::NewFunctionsAction(QString name, QString params)
     return action;
 }
 
-QAction* ScriptWidget::NewEventsAction(QString name)
+QAction* ScriptWidget::NewEventsAction(const QString& name)
 {
-    QAction* action = new QAction(this);
+    auto* action = new QAction(this);
     action->setText(name + "()");
     action->setToolTip(action->text());
     action->setProperty("TranslationName", "SCRIPT_ACTION_EVENT_" + name.toUpper().replace("\").", "_").replace(".",
@@ -276,9 +275,9 @@ QAction* ScriptWidget::NewEventsAction(QString name)
 
 void ScriptWidget::addFunctionClicked()
 {
-    QAction* action = qobject_cast<QAction*>(sender());
+    auto* action = qobject_cast<QAction*>(sender());
 
-    if (action == 0)
+    if (action == nullptr)
         return;
 
     QString command = action->property("ScriptName").toString();
@@ -351,7 +350,7 @@ void ScriptWidget::addFunctionClicked()
     }
 }
 
-void ScriptWidget::replaceScript(QString code)
+void ScriptWidget::replaceScript(const QString& code)
 {
     setRunning(false);
     ui->sourceCode->setPlainText(code);
@@ -359,7 +358,7 @@ void ScriptWidget::replaceScript(QString code)
 
 void ScriptWidget::addEventsClicked()
 {
-    QAction* action = qobject_cast<QAction*>(sender());
+    auto* action = qobject_cast<QAction*>(sender());
 
     if (action == nullptr)
         return;
@@ -433,7 +432,7 @@ bool ScriptWidget::eventFilter(QObject* obj, QEvent* event)
 {
     if (event->type() == QEvent::Enter)
     {
-        QToolButton* enteredToolButton = qobject_cast<QToolButton*>(obj);
+        auto* enteredToolButton = qobject_cast<QToolButton*>(obj);
 
         if (enteredToolButton)
             for (QToolButton* button : menuButtons)
@@ -583,7 +582,7 @@ void ScriptWidget::on_limitRowsValue_valueChanged(int val)
     QSettings(fileName, QSettings::IniFormat).setValue("JLScript/LogRowsCount", val);
 }
 
-void ScriptWidget::errorHappend(int lineNumber, QString errorText)
+void ScriptWidget::errorHappend(int lineNumber, const QString& errorText)
 {
     if (lineNumber > -1)
     {
@@ -671,6 +670,6 @@ void ScriptWidget::on_ruleAddButton_clicked()
     if (!holder.isValid())
         return;
 
-    mainWindow.addRuleByHolder(holder, ruleWindow.isRuleEnabled(), ruleWindow.getGroupName(), "");
+    mainWindow.addRuleByHolder(holder, ruleWindow.isRuleEnabled(), ruleWindow.getGroupName());
     writeConsole("Script replaced by Rule: \"" + holder.description + "\"");
 }

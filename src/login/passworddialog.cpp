@@ -67,7 +67,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
     QSettings listSettings(":/Resources/Exchanges/List.ini", QSettings::IniFormat);
     QStringList exchangesList = listSettings.childGroups();
 
-    for (int n = 0; n < exchangesList.count(); n++)
+    for (int n = 0; n < exchangesList.size(); n++)
     {
         QString currentLogo = listSettings.value(exchangesList.at(n) + "/Logo").toString();
 
@@ -82,9 +82,9 @@ PasswordDialog::PasswordDialog(QWidget* parent)
 
     QStringList settingsList = QDir(appDataDir, "*.ini").entryList();
 
-    for (int n = 0; n < settingsList.count(); n++)
+    for (int n = 0; n < settingsList.size(); n++)
     {
-        if (scriptsOldPlace.count())
+        if (!scriptsOldPlace.empty())
             iniNames << QFileInfo(settingsList.at(n)).completeBaseName();
 
         QSettings settIni(appDataDir + "/" + settingsList.at(n), QSettings::IniFormat);
@@ -112,18 +112,17 @@ PasswordDialog::PasswordDialog(QWidget* parent)
             firstUnlockedProfileIndex = n - 1;
     }
 
-    if (iniNames.count())
+    if (!iniNames.empty())
     {
-        Q_FOREACH (QString scriptFolderName, iniNames)
+        for (const QString& scriptFolderName : iniNames)
         {
-            scriptFolderName = baseValues.scriptFolder + scriptFolderName + "/";
-            QDir().mkpath(scriptFolderName);
+            QDir().mkpath(baseValues.scriptFolder + scriptFolderName);
 
-            Q_FOREACH (QString curScript, scriptsOldPlace)
-                QFile::copy(baseValues.scriptFolder + curScript, scriptFolderName + curScript);
+            for (const QString& curScript : scriptsOldPlace)
+                QFile::copy(baseValues.scriptFolder + curScript, baseValues.scriptFolder + scriptFolderName + "/" + curScript);
         }
 
-        Q_FOREACH (QString curScript, scriptsOldPlace)
+        for (const QString& curScript : scriptsOldPlace)
             QFile::remove(baseValues.scriptFolder + curScript);
     }
 
@@ -152,7 +151,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
         groupboxLayout->setContentsMargins(0, 0, 0, 0);
         groupboxLayout->setSpacing(0);
         ui.LogoGroupBox->setLayout(groupboxLayout);
-        LogoButton* logoButton = new LogoButton(true);
+        auto* logoButton = new LogoButton(true);
         groupboxLayout->addWidget(logoButton);
     }
 
@@ -172,13 +171,13 @@ PasswordDialog::~PasswordDialog()
 {
 }
 
-QString PasswordDialog::lockFilePath(QString name)
+QString PasswordDialog::lockFilePath(const QString& name)
 {
     return baseValues.tempLocation + "/QtBitcoinTrader_lock_" + QString(QCryptographicHash::hash(QString(
                 appDataDir + "/" + QFileInfo(name).fileName()).toUtf8(), QCryptographicHash::Sha1).toHex());
 }
 
-bool PasswordDialog::isProfileLocked(QString name)
+bool PasswordDialog::isProfileLocked(const QString& name)
 {
     QString lockFileP = lockFilePath(name);
 
@@ -260,7 +259,7 @@ void PasswordDialog::resetDataSlot()
 
                 QStringList qtIniToRemove = QDir(rmFolder).entryList(QStringList() << "*.ini");
 
-                Q_FOREACH (QString qtIniFile, qtIniToRemove)
+                for (const QString& qtIniFile : qtIniToRemove)
                     QFile::remove(rmFolder + "/" + qtIniFile);
             }
 
@@ -272,9 +271,7 @@ void PasswordDialog::resetDataSlot()
 
         if (QFile::exists(scriptFolder))
         {
-            QStringList filesToRemove = QDir(scriptFolder).entryList(QStringList() << "*.JLS" << "*.JLR");
-
-            Q_FOREACH (QString curFile, filesToRemove)
+            for (const QString& curFile : QDir(scriptFolder).entryList(QStringList() << "*.JLS" << "*.JLR"))
                 QFile::remove(scriptFolder + curFile);
 
             QDir().rmdir(scriptFolder);
@@ -284,12 +281,12 @@ void PasswordDialog::resetDataSlot()
     accept();
 }
 
-void PasswordDialog::checkToEnableButton(QString pass)
+void PasswordDialog::checkToEnableButton(const QString& pass)
 {
     ui.okButton->setEnabled(pass.length());
 }
 
-void PasswordDialog::on_descriptionGroupBox_toggled(bool)
+void PasswordDialog::on_descriptionGroupBox_toggled(bool /*unused*/)
 {
     ui.descriptionGroupBox->setVisible(false);
 
@@ -300,7 +297,7 @@ void PasswordDialog::on_descriptionGroupBox_toggled(bool)
     setFixedHeight(minSizeHint.height());
 }
 
-void PasswordDialog::showTimeMessage(QString message)
+void PasswordDialog::showTimeMessage(const QString& message)
 {
     QMessageBox::warning(this, julyTr("TIME_ERROR", "Time error"), message);
 }

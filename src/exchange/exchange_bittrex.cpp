@@ -32,7 +32,7 @@
 #include "timesync.h"
 #include "exchange_bittrex.h"
 
-Exchange_Bittrex::Exchange_Bittrex(QByteArray pRestSign, QByteArray pRestKey)
+Exchange_Bittrex::Exchange_Bittrex(const QByteArray &pRestSign, const QByteArray &pRestKey)
     : Exchange(),
       isFirstAccInfo(true),
       lastTickerTime(),
@@ -84,13 +84,13 @@ void Exchange_Bittrex::quitThread()
 {
     clearValues();
 
-    if (depthAsks)
+    
         delete depthAsks;
 
-    if (depthBids)
+    
         delete depthBids;
 
-    if (julyHttp)
+    
         delete julyHttp;
 }
 
@@ -124,8 +124,11 @@ void Exchange_Bittrex::reloadDepth()
     Exchange::reloadDepth();
 }
 
-void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
+void Exchange_Bittrex::dataReceivedAuth(const QByteArray& data, int reqType, int pairChangeCount)
 {
+    if (pairChangeCount != m_pairChangeCount)
+        return;
+
     if (debugLevel)
         logThread->writeLog("RCV: " + data);
 
@@ -206,9 +209,9 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
             {
                 qint64 time10Min = TimeSync::getTimeT() - 600;
                 QStringList tradeList = QString(data).split("},{");
-                QList<TradesItem>* newTradesItems = new QList<TradesItem>;
+                auto* newTradesItems = new QList<TradesItem>;
 
-                for (int n = tradeList.count() - 1; n >= 0; --n)
+                for (int n = tradeList.size() - 1; n >= 0; --n)
                 {
                     QByteArray tradeData = tradeList.at(n).toLatin1();
                     qint64 currentTid = getMidData("\"Id\":", ",", &tradeData).toLongLong();
@@ -237,7 +240,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
                         logThread->writeLog("Invalid trades fetch data line:" + tradeData, 2);
                 }
 
-                if (newTradesItems->count())
+                if (!newTradesItems->empty())
                     emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
                 else
                     delete newTradesItems;
@@ -260,14 +263,14 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
                     double groupedVolume = 0.0;
                     int rowCounter = 0;
 
-                    for (int n = 0; n < asksList.count(); n++)
+                    for (int n = 0; n < asksList.size(); n++)
                     {
                         if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                             break;
 
                         QStringList currentPair = asksList.at(n).split(",\"Rate\":");
 
-                        if (currentPair.count() != 2)
+                        if (currentPair.size() != 2)
                             continue;
 
                         double priceDouble = currentPair.last().toDouble();
@@ -288,7 +291,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
                                 if (matchCurrentGroup)
                                     groupedVolume += amount;
 
-                                if (!matchCurrentGroup || n == asksList.count() - 1)
+                                if (!matchCurrentGroup || n == asksList.size() - 1)
                                 {
                                     depthSubmitOrder(baseValues.currentPair.symbol,
                                                      &currentAsksMap, groupedPrice + baseValues.groupPriceValue, groupedVolume, true);
@@ -308,7 +311,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
                     QList<double> currentAsksList = lastDepthAsksMap.keys();
 
-                    for (int n = 0; n < currentAsksList.count(); n++)
+                    for (int n = 0; n < currentAsksList.size(); n++)
                         if (qFuzzyIsNull(currentAsksMap.value(currentAsksList.at(n), 0)))
                             depthUpdateOrder(baseValues.currentPair.symbol,
                                              currentAsksList.at(n), 0.0, true);
@@ -321,14 +324,14 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
                     groupedVolume = 0.0;
                     rowCounter = 0;
 
-                    for (int n = 0; n < bidsList.count(); n++)
+                    for (int n = 0; n < bidsList.size(); n++)
                     {
                         if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                             break;
 
                         QStringList currentPair = bidsList.at(n).split(",\"Rate\":");
 
-                        if (currentPair.count() != 2)
+                        if (currentPair.size() != 2)
                             continue;
 
                         double priceDouble = currentPair.last().toDouble();
@@ -349,7 +352,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
                                 if (matchCurrentGroup)
                                     groupedVolume += amount;
 
-                                if (!matchCurrentGroup || n == asksList.count() - 1)
+                                if (!matchCurrentGroup || n == asksList.size() - 1)
                                 {
                                     depthSubmitOrder(baseValues.currentPair.symbol,
                                                      &currentBidsMap, groupedPrice - baseValues.groupPriceValue, groupedVolume, false);
@@ -369,7 +372,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
                     QList<double> currentBidsList = lastDepthBidsMap.keys();
 
-                    for (int n = 0; n < currentBidsList.count(); n++)
+                    for (int n = 0; n < currentBidsList.size(); n++)
                         if (qFuzzyIsNull(currentBidsMap.value(currentBidsList.at(n), 0)))
                             depthUpdateOrder(baseValues.currentPair.symbol,
                                              currentBidsList.at(n), 0.0, false);
@@ -411,9 +414,9 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
                     }
 
                     QStringList ordersList = QString(data).split("},{");
-                    QList<OrderItem>* orders = new QList<OrderItem>;
+                    auto* orders = new QList<OrderItem>;
 
-                    for (int n = 0; n < ordersList.count(); ++n)
+                    for (int n = 0; n < ordersList.size(); ++n)
                     {
                         OrderItem currentOrder;
                         QByteArray currentOrderData = ordersList.at(n).toLatin1();
@@ -438,7 +441,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
                             (*orders) << currentOrder;
                     }
 
-                    if (orders->count())
+                    if (!orders->empty())
                         emit orderBookChanged(baseValues.currentPair.symbol, orders);
                     else
                         delete orders;
@@ -479,9 +482,9 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
 
                     QStringList historyList = QString(data).split("},{");
                     qint64 maxTime = 0;
-                    QList<HistoryItem>* historyItems = new QList<HistoryItem>;
+                    auto* historyItems = new QList<HistoryItem>;
 
-                    for (int n = 0; n < historyList.count(); ++n)
+                    for (int n = 0; n < historyList.size(); ++n)
                     {
                         QByteArray logData(historyList.at(n).toLatin1());
 
@@ -567,7 +570,7 @@ void Exchange_Bittrex::dataReceivedAuth(QByteArray data, int reqType)
     }
 }
 
-void Exchange_Bittrex::depthUpdateOrder(QString symbol, double price, double amount, bool isAsk)
+void Exchange_Bittrex::depthUpdateOrder(const QString& symbol, double price, double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
         return;
@@ -598,7 +601,7 @@ void Exchange_Bittrex::depthUpdateOrder(QString symbol, double price, double amo
     }
 }
 
-void Exchange_Bittrex::depthSubmitOrder(QString symbol, QMap<double, double>* currentMap, double priceDouble,
+void Exchange_Bittrex::depthSubmitOrder(const QString& symbol, QMap<double, double>* currentMap, double priceDouble,
                                     double amount, bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
@@ -699,7 +702,7 @@ void Exchange_Bittrex::getHistory(bool force)
         sendToApi(208, "account/getorderhistory?market=" + baseValues.currentPair.currRequestPair + "&", true);
 }
 
-void Exchange_Bittrex::buy(QString symbol, double apiBtcToBuy, double apiPriceToBuy)
+void Exchange_Bittrex::buy(const QString& symbol, double apiBtcToBuy, double apiPriceToBuy)
 {
     if (tickerOnly)
         return;
@@ -720,7 +723,7 @@ void Exchange_Bittrex::buy(QString symbol, double apiBtcToBuy, double apiPriceTo
     sendToApi(306, "market/buylimit?" + data, true);
 }
 
-void Exchange_Bittrex::sell(QString symbol, double apiBtcToSell, double apiPriceToSell)
+void Exchange_Bittrex::sell(const QString& symbol, double apiBtcToSell, double apiPriceToSell)
 {
     if (tickerOnly)
         return;
@@ -741,7 +744,7 @@ void Exchange_Bittrex::sell(QString symbol, double apiBtcToSell, double apiPrice
     sendToApi(307, "market/selllimit?" + data, true);
 }
 
-void Exchange_Bittrex::cancelOrder(QString, QByteArray order)
+void Exchange_Bittrex::cancelOrder(const QString& /*unused*/, const QByteArray& order)
 {
     if (tickerOnly)
         return;
@@ -755,7 +758,7 @@ void Exchange_Bittrex::cancelOrder(QString, QByteArray order)
     sendToApi(305, "market/cancel?" + data, true);
 }
 
-void Exchange_Bittrex::sendToApi(int reqType, QByteArray method, bool auth)
+void Exchange_Bittrex::sendToApi(int reqType, const QByteArray &method, bool auth)
 {
     if (julyHttp == nullptr)
     {
@@ -772,7 +775,7 @@ void Exchange_Bittrex::sendToApi(int reqType, QByteArray method, bool auth)
         connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
         connect(julyHttp, SIGNAL(errorSignal(QString)), baseValues_->mainWindow_, SLOT(showErrorMessage(QString)));
         connect(julyHttp, SIGNAL(sslErrorSignal(const QList<QSslError>&)), this, SLOT(sslErrors(const QList<QSslError>&)));
-        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceivedAuth(QByteArray, int)));
+        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceivedAuth(const QByteArray&, int, int)));
     }
 
     if (auth)
@@ -781,11 +784,11 @@ void Exchange_Bittrex::sendToApi(int reqType, QByteArray method, bool auth)
         QByteArray url  = "https://bittrex.com" + path;
         QByteArray sign = hmacSha512(getApiSign(), url).toHex();
 
-        julyHttp->sendData(reqType, "GET " + path, "", sign + "\r\n\r\n");
+        julyHttp->sendData(reqType, m_pairChangeCount, "GET " + path, "", sign + "\r\n\r\n");
     }
     else
     {
-        julyHttp->sendData(reqType, "GET /api/v1.1/public/" + method);
+        julyHttp->sendData(reqType, m_pairChangeCount, "GET /api/v1.1/public/" + method);
     }
 }
 
@@ -793,7 +796,7 @@ void Exchange_Bittrex::sslErrors(const QList<QSslError>& errors)
 {
     QStringList errorList;
 
-    for (int n = 0; n < errors.count(); n++)
+    for (int n = 0; n < errors.size(); n++)
         errorList << errors.at(n).errorString();
 
     if (debugLevel)

@@ -43,11 +43,11 @@ class CurrencySignLoader : public QObject
 public:
     CurrencySignLoader();
     ~CurrencySignLoader();
-    void getCurrencySign(QString, QPixmap&);
+    void getCurrencySign(const QString&, QPixmap&);
 
 private:
     QMap<QString, QPixmap> currencySign;
-    void createIcon(QString);
+    void createIcon(const QString&);
 };
 
 #endif // CURRENCYSIGNLOADER_H

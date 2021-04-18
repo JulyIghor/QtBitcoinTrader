@@ -42,7 +42,7 @@ AddRuleGroup::AddRuleGroup(QWidget* parent)
     ui.setupUi(this);
     setWindowFlags(Qt::WindowCloseButtonHint);
 
-    Q_FOREACH (RuleWidget* currentGroup, mainWindow.ui.tabRules->findChildren<RuleWidget*>())
+    for (RuleWidget* currentGroup : mainWindow.ui.tabRules->findChildren<RuleWidget*>())
         ui.existingRulesList->addItem(currentGroup->windowTitle(), currentGroup->property("FileName").toString());
 
     QString groupLabel = julyTr("RULE_GROUP", "Group");
@@ -168,9 +168,9 @@ void AddRuleGroup::on_ruleOpen_clicked()
     mainWindow.iniSettings->setValue("UI/LastRulesPath", QFileInfo(fileNameOpen).dir().path());
     mainWindow.iniSettings->sync();
 
-    ui.groupNameGroupbox->setEnabled(groupsList.count() <= 1);
+    ui.groupNameGroupbox->setEnabled(groupsList.size() <= 1);
 
-    if (groupsList.count() == 1)
+    if (groupsList.size() == 1)
         ui.groupName->setText(groupsList.first().split("==>").first());
 }
 
@@ -193,7 +193,7 @@ void AddRuleGroup::on_buttonAddRule_clicked()
         QSettings loadRules(filePath, QSettings::IniFormat);
         QStringList rulesList = loadRules.childGroups();
 
-        Q_FOREACH (QString group, rulesList)
+        for (const QString& group : rulesList)
         {
             if (!group.startsWith("Rule_"))
                 continue;
@@ -218,7 +218,7 @@ void AddRuleGroup::on_buttonAddRule_clicked()
     saveScript.setValue("Name", groupName);
     saveScript.endGroup();
 
-    for (int n = 0; n < holderList.count(); n++)
+    for (int n = 0; n < holderList.size(); n++)
         RuleScriptParser::writeHolderToSettings(holderList[n], saveScript, "Rule_" + QString::number(n + 101));
 
     saveScript.sync();
@@ -232,7 +232,7 @@ void AddRuleGroup::on_buttonAddRule_clicked()
     }
 }
 
-void AddRuleGroup::on_groupName_textChanged(QString)
+void AddRuleGroup::on_groupName_textChanged(QString /*unused*/)
 {
     checkValidButton();
 }

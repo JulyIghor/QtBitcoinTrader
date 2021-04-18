@@ -55,17 +55,17 @@ QModelIndex AllExchangesModel::index(int row, int column, const QModelIndex& par
     return createIndex(row, column);
 }
 
-QModelIndex AllExchangesModel::parent(const QModelIndex&) const
+QModelIndex AllExchangesModel::parent(const QModelIndex& /*child*/) const
 {
     return QModelIndex();
 }
 
-int AllExchangesModel::rowCount(const QModelIndex&) const
+int AllExchangesModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return rowsCount;
 }
 
-int AllExchangesModel::columnCount(const QModelIndex&) const
+int AllExchangesModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return columnsCount;
 }
@@ -97,7 +97,7 @@ QVariant AllExchangesModel::headerData(int section, Qt::Orientation orientation,
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (headerList.count() != columnsCount)
+    if (headerList.size() != columnsCount)
         return QVariant();
 
     if (orientation == Qt::Horizontal)

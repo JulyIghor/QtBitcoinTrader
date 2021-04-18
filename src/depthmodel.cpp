@@ -61,7 +61,7 @@ DepthModel::~DepthModel()
 double& DepthModel::sizeListAt(int row)
 {
     if (!originalIsAsk)
-        return sizeList[sizeList.count() - row - 1];
+        return sizeList[sizeList.size() - row - 1];
 
     return sizeList[row];
 }
@@ -69,7 +69,7 @@ double& DepthModel::sizeListAt(int row)
 double DepthModel::sizeListGet(int row) const
 {
     if (!originalIsAsk)
-        return sizeList[sizeList.count() - row - 1];
+        return sizeList[sizeList.size() - row - 1];
 
     return sizeList[row];
 }
@@ -77,37 +77,37 @@ double DepthModel::sizeListGet(int row) const
 void DepthModel::sizeListRemoveAt(int row)
 {
     if (!originalIsAsk)
-        sizeList.removeAt(sizeList.count() - row - 1);
+        sizeList.removeAt(sizeList.size() - row - 1);
     else
         sizeList.removeAt(row);
 }
 
 double DepthModel::getPriceByVolume(double amount)
 {
-    if (sizeList.count() == 0)
+    if (sizeList.empty())
         return 0.0;
 
     int outside = 1;
-    int currentIndex = qLowerBound(sizeList.begin(), sizeList.end(), amount) - sizeList.begin();
+    int currentIndex = std::lower_bound(sizeList.begin(), sizeList.end(), amount) - sizeList.begin();
 
     if (currentIndex < 0)
         return 0.0;
 
-    if (currentIndex >= sizeList.count())
+    if (currentIndex >= sizeList.size())
     {
-        currentIndex = sizeList.count() - 1;
+        currentIndex = sizeList.size() - 1;
         outside = -1;
     }
 
     if (!originalIsAsk)
-        currentIndex = priceList.count() - currentIndex - 1;
+        currentIndex = priceList.size() - currentIndex - 1;
 
     return priceList.at(currentIndex) * outside;
 }
 
 double DepthModel::getVolumeByPrice(double price, bool isAsk)
 {
-    if (priceList.count() == 0)
+    if (priceList.empty())
         return 0.0;
 
     int currentIndex;
@@ -115,20 +115,20 @@ double DepthModel::getVolumeByPrice(double price, bool isAsk)
 
     if (isAsk)
     {
-        currentIndex = qUpperBound(priceList.begin(), priceList.end(), price) - priceList.begin();
+        currentIndex = std::upper_bound(priceList.begin(), priceList.end(), price) - priceList.begin();
         --currentIndex;
 
         if (currentIndex < 0)
             return 0.0;
 
-        if (currentIndex >= priceList.count() - 1 && price > priceList.last())
+        if (currentIndex >= priceList.size() - 1 && price > priceList.last())
             outside = -1;
     }
     else
     {
-        currentIndex = qLowerBound(priceList.begin(), priceList.end(), price) - priceList.begin();
+        currentIndex = std::lower_bound(priceList.begin(), priceList.end(), price) - priceList.begin();
 
-        if (currentIndex >= priceList.count())
+        if (currentIndex >= priceList.size())
             return 0.0;
 
         if (currentIndex == 0 && price < priceList[0])
@@ -138,12 +138,12 @@ double DepthModel::getVolumeByPrice(double price, bool isAsk)
     return sizeListAt(currentIndex) * outside;
 }
 
-int DepthModel::rowCount(const QModelIndex&) const
+int DepthModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    return priceList.count() + grouped;
+    return priceList.size() + grouped;
 }
 
-int DepthModel::columnCount(const QModelIndex&) const
+int DepthModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return columnsCount;
 }
@@ -196,21 +196,21 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
         switch (indexColumn)
         {
-            case 0: //Price
-                firstRowText = JulyMath::textFromDouble(groupedPrice);
+        case 0: //Price
+            firstRowText = JulyMath::textFromDouble(groupedPrice);
 
-                if (role == Qt::ToolTipRole)
-                    firstRowText.prepend(baseValues.currentPair.currBSign);
+            if (role == Qt::ToolTipRole)
+                firstRowText.prepend(baseValues.currentPair.currBSign);
 
-                break;
+            break;
 
-            case 1: //Volume
-                firstRowText = JulyMath::textFromDouble(groupedVolume, baseValues.currentPair.currADecimals);
+        case 1: //Volume
+            firstRowText = JulyMath::textFromDouble(groupedVolume, baseValues.currentPair.currADecimals);
 
-                if (role == Qt::ToolTipRole)
-                    firstRowText.prepend(baseValues.currentPair.currASign);
+            if (role == Qt::ToolTipRole)
+                firstRowText.prepend(baseValues.currentPair.currASign);
 
-                break;
+            break;
         }
 
         if (firstRowText.isEmpty())
@@ -222,11 +222,11 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
     if (grouped)
         currentRow -= grouped;
 
-    if (currentRow < 0 || currentRow >= priceList.count())
+    if (currentRow < 0 || currentRow >= priceList.size())
         return QVariant();
 
     if (!originalIsAsk)
-        currentRow = priceList.count() - currentRow - 1;
+        currentRow = priceList.size() - currentRow - 1;
 
     if (role == Qt::StatusTipRole)
     {
@@ -234,13 +234,13 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
         switch (directionList.at(currentRow))
         {
-            case -1:
-                direction = downArrowStr + "\t";
-                break;
+        case -1:
+            direction = downArrowStr + "\t";
+            break;
 
-            case 1:
-                direction = upArrowStr + "\t";
-                break;
+        case 1:
+            direction = upArrowStr + "\t";
+            break;
         }
 
         return baseValues.currentPair.currBSign + priceListStr.at(currentRow) + "\t" + baseValues.currentPair.currASign +
@@ -303,57 +303,57 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
     switch (indexColumn)
     {
-        case 0://Price
+    case 0://Price
+        if (role == Qt::ToolTipRole)
+            baseValues.currentPair.currBSign + priceListStr.at(currentRow);
+
+        return priceListStr.at(currentRow);
+        break;
+
+    case 1:
+        {
+            //Volume
+            if (volumeList.at(currentRow) <= 0.0)
+                return QVariant();
+
             if (role == Qt::ToolTipRole)
-                baseValues.currentPair.currBSign + priceListStr.at(currentRow);
+                baseValues.currentPair.currASign + volumeListStr.at(currentRow);
 
-            return priceListStr.at(currentRow);
-            break;
+            return volumeListStr.at(currentRow);
+        }
+        break;
 
-        case 1:
+    case 2:
+        {
+            //Direction
+            switch (directionList.at(currentRow))
             {
-                //Volume
-                if (volumeList.at(currentRow) <= 0.0)
-                    return QVariant();
+            case -1:
+                return downArrowStr;
 
-                if (role == Qt::ToolTipRole)
-                    baseValues.currentPair.currASign + volumeListStr.at(currentRow);
+            case 1:
+                return upArrowStr;
 
-                return volumeListStr.at(currentRow);
+            default:
+                return QVariant();
             }
-            break;
+        }
 
-        case 2:
-            {
-                //Direction
-                switch (directionList.at(currentRow))
-                {
-                    case -1:
-                        return downArrowStr;
+    case 3:
+        {
+            //Size
+            if (sizeListGet(currentRow) <= 0.0)
+                return QVariant();
 
-                    case 1:
-                        return upArrowStr;
+            if (role == Qt::ToolTipRole)
+                baseValues.currentPair.currASign + sizeListStr.at(currentRow);
 
-                    default:
-                        return QVariant();
-                }
-            }
+            return sizeListStr.at(currentRow);
+        }
+        break;
 
-        case 3:
-            {
-                //Size
-                if (sizeListGet(currentRow) <= 0.0)
-                    return QVariant();
-
-                if (role == Qt::ToolTipRole)
-                    baseValues.currentPair.currASign + sizeListStr.at(currentRow);
-
-                return sizeListStr.at(currentRow);
-            }
-            break;
-
-        default:
-            break;
+    default:
+        break;
     }
 
     if (!returnText.isEmpty())
@@ -369,7 +369,7 @@ void DepthModel::reloadVisibleItems()
 
 void DepthModel::delayedReloadVisibleItems()
 {
-    emit dataChanged(index(0, 0), index(priceList.count() - 1, columnsCount - 1));
+    emit dataChanged(index(0, 0), index(priceList.size() - 1, columnsCount - 1));
 }
 
 void DepthModel::calculateSize()
@@ -386,12 +386,12 @@ void DepthModel::calculateSize()
 
     if (originalIsAsk)
     {
-        for (int n = 0; n < priceList.count(); n++)
+        for (int n = 0; n < priceList.size(); n++)
         {
             int currentRow = n;
 
             if (!originalIsAsk)
-                currentRow = priceList.count() - currentRow - 1;
+                currentRow = priceList.size() - currentRow - 1;
 
             totalSize += volumeList.at(currentRow);
             totalPrice += volumeList.at(currentRow) * priceList.at(currentRow);
@@ -408,12 +408,12 @@ void DepthModel::calculateSize()
     }
     else
     {
-        for (int n = priceList.count() - 1; n >= 0; n--)
+        for (int n = priceList.size() - 1; n >= 0; n--)
         {
             int currentRow = n;
 
             if (originalIsAsk)
-                currentRow = priceList.count() - currentRow - 1;
+                currentRow = priceList.size() - currentRow - 1;
 
             totalSize += volumeList.at(currentRow);
             totalPrice += volumeList.at(currentRow) * priceList.at(currentRow);
@@ -441,7 +441,7 @@ void DepthModel::calculateSize()
     if (isAsk)
         sizeColumn = 1;
 
-    emit dataChanged(index(0, sizeColumn), index(priceList.count() - 1, sizeColumn));
+    emit dataChanged(index(0, sizeColumn), index(priceList.size() - 1, sizeColumn));
 }
 
 QModelIndex DepthModel::index(int row, int column, const QModelIndex& parent) const
@@ -452,7 +452,7 @@ QModelIndex DepthModel::index(int row, int column, const QModelIndex& parent) co
     return createIndex(row, column);
 }
 
-QModelIndex DepthModel::parent(const QModelIndex&) const
+QModelIndex DepthModel::parent(const QModelIndex& /*child*/) const
 {
     return QModelIndex();
 }
@@ -480,7 +480,7 @@ void DepthModel::clear()
 Qt::ItemFlags DepthModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
-        return 0;
+        return nullptr;
 
     if (grouped)
     {
@@ -519,14 +519,14 @@ QVariant DepthModel::headerData(int section, Qt::Orientation orientation, int ro
     {
         switch (indexColumn)
         {
-            case 0:
-                return QSize(widthPrice, defaultHeightForRow); //Price
+        case 0:
+            return QSize(widthPrice, defaultHeightForRow); //Price
 
-            case 1:
-                return QSize(widthVolume, defaultHeightForRow); //Volume
+        case 1:
+            return QSize(widthVolume, defaultHeightForRow); //Volume
 
-            case 3:
-                return QSize(widthSize, defaultHeightForRow); //Size
+        case 3:
+            return QSize(widthSize, defaultHeightForRow); //Size
         }
 
         return QVariant();
@@ -535,19 +535,19 @@ QVariant DepthModel::headerData(int section, Qt::Orientation orientation, int ro
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (headerLabels.count() != columnsCount)
+    if (headerLabels.size() != columnsCount)
         return QVariant();
 
     switch (indexColumn)
     {
-        case 0:
-            return headerLabels.at(indexColumn) + QLatin1String(" ") + baseValues.currentPair.currBSign;
+    case 0:
+        return headerLabels.at(indexColumn) + QLatin1String(" ") + baseValues.currentPair.currBSign;
 
-        case 1:
-            return headerLabels.at(indexColumn) + QLatin1String(" ") + baseValues.currentPair.currASign;
+    case 1:
+        return headerLabels.at(indexColumn) + QLatin1String(" ") + baseValues.currentPair.currASign;
 
-        case 3:
-            return headerLabels.at(indexColumn) + QLatin1String(" ") + baseValues.currentPair.currASign;
+    case 3:
+        return headerLabels.at(indexColumn) + QLatin1String(" ") + baseValues.currentPair.currASign;
     }
 
     return headerLabels.at(indexColumn);
@@ -573,7 +573,7 @@ void DepthModel::fixTitleWidths()
 
 void DepthModel::setHorizontalHeaderLabels(QStringList list)
 {
-    if (list.count() != columnsCount)
+    if (list.size() != columnsCount)
         return;
 
     headerLabels = list;
@@ -685,10 +685,10 @@ void DepthModel::depthUpdateOrders(QList<DepthItem>* items)
 
     bool somethingChangedBefore = somethingChanged;
 
-    for (int n = 0; n < items->count(); n++)
+    for (int n = 0; n < items->size(); n++)
         depthUpdateOrder(items->at(n));
 
-    if (somethingChangedBefore == false && somethingChanged == true && items->count())
+    if (!somethingChangedBefore && somethingChanged && !items->empty())
         initGroupList(items->first().price);
 
     delete items;
@@ -703,8 +703,8 @@ void DepthModel::depthUpdateOrder(DepthItem item)
     if (price == 0.0)
         return;
 
-    int currentIndex = qLowerBound(priceList.begin(), priceList.end(), price) - priceList.begin();
-    bool matchListRang = currentIndex > -1 && priceList.count() > currentIndex;
+    int currentIndex = std::lower_bound(priceList.begin(), priceList.end(), price) - priceList.begin();
+    bool matchListRang = currentIndex > -1 && priceList.size() > currentIndex;
 
     if (volume == 0.0)
     {
@@ -773,9 +773,9 @@ double DepthModel::rowPrice(int row)
     row -= grouped;
 
     if (!originalIsAsk)
-        row = priceList.count() - row - 1;
+        row = priceList.size() - row - 1;
 
-    if (row < 0 || row >= priceList.count())
+    if (row < 0 || row >= priceList.size())
         return 0.0;
 
     return priceList.at(row);
@@ -794,9 +794,9 @@ double DepthModel::rowVolume(int row)
     row -= grouped;
 
     if (!originalIsAsk)
-        row = priceList.count() - row - 1;
+        row = priceList.size() - row - 1;
 
-    if (row < 0 || row >= priceList.count())
+    if (row < 0 || row >= priceList.size())
         return 0.0;
 
     return volumeList.at(row);
@@ -810,9 +810,9 @@ double DepthModel::rowSize(int row)
     row -= grouped;
 
     if (!originalIsAsk)
-        row = priceList.count() - row - 1;
+        row = priceList.size() - row - 1;
 
-    if (row < 0 || row >= priceList.count())
+    if (row < 0 || row >= priceList.size())
         return 0.0;
 
     return sizeListAt(row);

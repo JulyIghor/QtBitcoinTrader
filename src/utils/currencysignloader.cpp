@@ -45,7 +45,7 @@ CurrencySignLoader::~CurrencySignLoader()
 
 }
 
-void CurrencySignLoader::createIcon(QString text)
+void CurrencySignLoader::createIcon(const QString& text)
 {
     int fontSize;
     QString textTop;
@@ -119,7 +119,7 @@ void CurrencySignLoader::createIcon(QString text)
     currencySign.insert(text, pixmap);
 }
 
-void CurrencySignLoader::getCurrencySign(QString currency, QPixmap& sign)
+void CurrencySignLoader::getCurrencySign(const QString& currency, QPixmap& sign)
 {
     QString currencyFile = "://Resources/CurrencySign/" + currency + ".png";
 

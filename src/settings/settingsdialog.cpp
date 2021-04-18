@@ -67,17 +67,17 @@ bool SettingsDialog::isSettingsSaved()
 {
     switch (ui.settingsStackedWidget->currentIndex())
     {
-        case 0:
-            return !settingsGeneral->ui.saveButton->isEnabled();
+    case 0:
+        return !settingsGeneral->ui.saveButton->isEnabled();
 
-        case 1:
-            return !settingsNetworkProxy->ui.saveButton->isEnabled();
+    case 1:
+        return !settingsNetworkProxy->ui.saveButton->isEnabled();
 
-        case 2:
-            return !settingsDecimals->ui.saveButton->isEnabled();
+    case 2:
+        return !settingsDecimals->ui.saveButton->isEnabled();
 
-        default:
-            break;
+    default:
+        break;
     }
 
     return true;
@@ -87,20 +87,20 @@ void SettingsDialog::settingsSave()
 {
     switch (ui.settingsStackedWidget->currentIndex())
     {
-        case 0:
-            settingsGeneral->on_saveButton_clicked();
-            return;
+    case 0:
+        settingsGeneral->on_saveButton_clicked();
+        return;
 
-        case 1:
-            settingsNetworkProxy->on_saveButton_clicked();
-            return;
+    case 1:
+        settingsNetworkProxy->on_saveButton_clicked();
+        return;
 
-        case 2:
-            settingsDecimals->on_saveButton_clicked();
-            return;
+    case 2:
+        settingsDecimals->on_saveButton_clicked();
+        return;
 
-        default:
-            return;
+    default:
+        return;
     }
 }
 
@@ -108,20 +108,20 @@ void SettingsDialog::settingsDiscard()
 {
     switch (ui.settingsStackedWidget->currentIndex())
     {
-        case 0:
-            settingsGeneral->on_revertChangesButton_clicked();
-            return;
+    case 0:
+        settingsGeneral->on_revertChangesButton_clicked();
+        return;
 
-        case 1:
-            settingsNetworkProxy->on_revertChangesButton_clicked();
-            return;
+    case 1:
+        settingsNetworkProxy->on_revertChangesButton_clicked();
+        return;
 
-        case 2:
-            settingsDecimals->on_revertChangesButton_clicked();
-            return;
+    case 2:
+        settingsDecimals->on_revertChangesButton_clicked();
+        return;
 
-        default:
-            return;
+    default:
+        return;
     }
 }
 
@@ -145,17 +145,17 @@ void SettingsDialog::configureNameList()
     listLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
     ui.scrollAreaWidgetContents->setLayout(listLayout);
 
-    if (listListElement.size())
+    if (!listListElement.empty())
         listListElement.at(0)->selectedItem();
 
     resizeNameList();
 }
 
-void SettingsDialog::addDialog(QString name, QString icon, QWidget* widget)
+void SettingsDialog::addDialog(const QString& name, const QString& icon, QWidget* widget)
 {
     ui.settingsStackedWidget->addWidget(widget);
 
-    SettingsDialogListElement* listElement = new SettingsDialogListElement(this, listListElement.size(), name, icon);
+    auto* listElement = new SettingsDialogListElement(this, listListElement.size(), name, icon);
     listListElement.append(listElement);
     listLayout->addWidget(listElement);
 }
@@ -187,19 +187,19 @@ void SettingsDialog::clickOnList(qint32 index)
 
         switch (closeMsgBox.exec())
         {
-            case QMessageBox::Save:
-                settingsSave();
-                break;
+        case QMessageBox::Save:
+            settingsSave();
+            break;
 
-            case QMessageBox::Discard:
-                settingsDiscard();
-                break;
+        case QMessageBox::Discard:
+            settingsDiscard();
+            break;
 
-            case QMessageBox::Cancel:
-                return;
+        case QMessageBox::Cancel:
+            return;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
@@ -227,19 +227,19 @@ void SettingsDialog::closeEvent(QCloseEvent* event)
 
     switch (closeMsgBox.exec())
     {
-        case QMessageBox::Save:
-            settingsSave();
-            break;
+    case QMessageBox::Save:
+        settingsSave();
+        break;
 
-        case QMessageBox::No:
-            break;
+    case QMessageBox::No:
+        break;
 
-        case QMessageBox::Cancel:
-            event->ignore();
-            break;
+    case QMessageBox::Cancel:
+        event->ignore();
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 }
 

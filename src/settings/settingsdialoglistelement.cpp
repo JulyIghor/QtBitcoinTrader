@@ -31,8 +31,8 @@
 
 #include "settingsdialoglistelement.h"
 
-SettingsDialogListElement::SettingsDialogListElement(SettingsDialog* tempParent, qint32 tempIndex, QString name,
-        QString icon)
+SettingsDialogListElement::SettingsDialogListElement(SettingsDialog* tempParent, qint32 tempIndex, const QString& name,
+        const QString& icon)
     : QWidget(tempParent)
 {
     ui.setupUi(this);
@@ -44,7 +44,7 @@ SettingsDialogListElement::SettingsDialogListElement(SettingsDialog* tempParent,
     index = tempIndex;
 
     QFontMetrics fontMetrics(ui.textListLabel->font());
-    width = fontMetrics.width(name) + ui.iconListLabel->pixmap()->width() + 17;
+    width = fontMetrics.horizontalAdvance(name) + ui.iconListLabel->pixmap()->width() + 17;
     setFixedHeight(qMax(fontMetrics.height(), ui.iconListLabel->pixmap()->height()) + 10);
 }
 

@@ -63,7 +63,7 @@ private:
     SettingsDecimals* settingsDecimals;
     void resizeNameList();
     void configureNameList();
-    void addDialog(QString, QString, QWidget*);
+    void addDialog(const QString&, const QString&, QWidget*);
     void closeEvent(QCloseEvent*);
     bool isSettingsSaved();
     void settingsSave();

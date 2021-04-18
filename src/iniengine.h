@@ -34,6 +34,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <QHash>
 #include <atomic>
 #include "currencyinfo.h"
 #include "currencypairitem.h"
@@ -51,23 +52,25 @@ public:
     IniEngine();
     ~IniEngine();
     static IniEngine* global();
-    static CurrencyInfo getCurrencyInfo(QString);
-    static void loadExchangeLock(QString, CurrencyPairItem&);
+    static CurrencyInfo getCurrencyInfo(const QString&);
+    static void loadExchangeLock(const QString&, CurrencyPairItem&);
     static QList<CurrencyPairItem>* getPairs();
     static QString getPairName(int);
     static QString getPairRequest(int);
     static QString getPairSymbol(int);
     static QString getPairSymbolSecond(int);
     static int getPairsCount();
-    void loadPairs(QStringList* pairsList);
+//    void loadPairs(QStringList* pairsList);
+    static const QString& checkSymbol(const QString& symbol);
+    static QString getSymbolByRequest(const QString& request);
 
 signals:
-    void loadExchangeSignal(QString);
+    void loadExchangeSignal(const QString&);
 
 private slots:
     void runThread();
-    void dataReceived(QByteArray, int);
-    void loadExchange(QString);
+    void dataReceived(const QByteArray&, int, int);
+    void loadExchange(const QString&);
     void checkWait();
 
 private:
@@ -82,12 +85,14 @@ private:
     QString exchangeResourceFileName;
     CurrencyPairItem defaultExchangeParams;
     QList<CurrencyPairItem> exchangePairs;
+    QHash<QString, QString> exchangeAltPairs;
+    QHash<QString, QString> symbolByRequest;
     std::atomic<bool> waitForDownload;
     QTimer* waitTimer;
     QElapsedTimer* checkTimer;
-    bool existNewFile(QString, QByteArray&);
-    void parseCurrency(QString);
-    void parseExchange(QString);
+    bool existNewFile(const QString&, const QByteArray&);
+    void parseCurrency(const QString&);
+    void parseExchange(const QString&);
     void parseExchangeCheck();
     [[noreturn]] void exitFromProgram();
 };

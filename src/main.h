@@ -36,7 +36,7 @@
 #include "julytranslator.h"
 #include "logthread.h"
 
-#define textFontWidth(text) baseValues_->fontMetrics_->width(text)
+#define textFontWidth(text) baseValues_->fontMetrics_->horizontalAdvance(text)
 #define debugLevel (baseValues_->debugLevel_)
 #define appDataDir (baseValues_->appDataDir_)
 #define grouped (baseValues_->groupPriceValue>0.0?2:0)

@@ -47,7 +47,7 @@ public:
     }
     QString getValidText();
     void setItemText(QString);
-    void setDefaultText(QString defText);
+    void setDefaultText(const QString& defText);
     explicit TranslationLine(QWidget* parent = 0);
     ~TranslationLine();
 private:

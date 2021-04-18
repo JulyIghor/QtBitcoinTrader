@@ -52,7 +52,7 @@ CurrencyMenuCell::~CurrencyMenuCell()
     delete ui;
 }
 
-void CurrencyMenuCell::mousePressEvent(QMouseEvent*)
+void CurrencyMenuCell::mousePressEvent(QMouseEvent* /*event*/)
 {
     parentMenu->currencySelect(index);
 }

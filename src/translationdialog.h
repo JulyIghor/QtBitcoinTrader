@@ -58,7 +58,7 @@ public slots:
     void deleteTranslationButton();
     void lineTextChanged();
     void fixLayout();
-    void searchLang(QString);
+    void searchLang(const QString&);
     void applyButton();
     void saveAsButton();
 };

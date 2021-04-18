@@ -56,19 +56,19 @@ OrdersModel::~OrdersModel()
 
 }
 
-int OrdersModel::rowCount(const QModelIndex&) const
+int OrdersModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    return oidList.count();
+    return oidList.size();
 }
 
-int OrdersModel::columnCount(const QModelIndex&) const
+int OrdersModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return columnsCount;
 }
 
 void OrdersModel::clear()
 {
-    if (oidList.count() == 0)
+    if (oidList.empty())
     {
         ordersCountChanged();
         ordersAsksCountChanged();
@@ -108,12 +108,12 @@ void OrdersModel::clear()
     ordersBidsCountChanged();
 }
 
-int OrdersModel::getAsksCount()
+int OrdersModel::getAsksCount() const
 {
     return asksCount;
 }
 
-void OrdersModel::filterSymbolChanged(QString filterSymbol)
+void OrdersModel::filterSymbolChanged(const QString& filterSymbol)
 {
     static QString s_filterSymbol;
     double sumCurrA = 0.0;
@@ -143,7 +143,7 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
     currentAsksPrices.clear();
     currentBidsPrices.clear();
 
-    if (ordersRcv->count() == 0)
+    if (ordersRcv->empty())
     {
         delete ordersRcv;
         emit volumeAmountChanged(0.0, 0.0);
@@ -159,7 +159,7 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
 
     QHash<QByteArray, bool> existingOids;
 
-    for (int n = 0; n < ordersRcv->count(); n++)
+    for (int n = 0; n < ordersRcv->size(); n++)
     {
         bool isAsk = ordersRcv->at(n).type;
 
@@ -181,15 +181,15 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
         if (checkDuplicatedOID)
             (*ordersRcv)[n].date = oidMapForCheckingDuplicates.value(ordersRcv->at(n).oid, ordersRcv->at(n).date);
 
-        int currentIndex = qLowerBound(dateList.begin(), dateList.end(), ordersRcv->at(n).date) - dateList.begin();
-        int currentIndexUpper = qUpperBound(dateList.begin(), dateList.end(), ordersRcv->at(n).date) - dateList.begin();
+        int currentIndex = std::lower_bound(dateList.begin(), dateList.end(), ordersRcv->at(n).date) - dateList.begin();
+        int currentIndexUpper = std::upper_bound(dateList.begin(), dateList.end(), ordersRcv->at(n).date) - dateList.begin();
 
-        bool matchListRang = currentIndex > -1 && dateList.count() > currentIndex;
+        bool matchListRang = currentIndex > -1 && dateList.size() > currentIndex;
 
         if (matchListRang && oidList.at(currentIndex) != ordersRcv->at(n).oid)
             while (oidList.at(currentIndex) != ordersRcv->at(n).oid && currentIndex < currentIndexUpper)
             {
-                if (currentIndex + 1 > -1 && dateList.count() > currentIndex + 1)
+                if (currentIndex + 1 > -1 && dateList.size() > currentIndex + 1)
                     currentIndex++;
                 else
                     break;
@@ -248,8 +248,8 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
 
     asksCount = newAsksCount;
 
-    for (int n = oidList.count() - 1; n >= 0; n--) //Removing Order
-        if (existingOids.value(oidList.at(n), false) == false)
+    for (int n = oidList.size() - 1; n >= 0; n--) //Removing Order
+        if (!existingOids.value(oidList.at(n), false))
         {
             beginRemoveRows(QModelIndex(), n, n);
 
@@ -273,15 +273,15 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
 
     delete ordersRcv;
 
-    if (haveOrders == false)
+    if (!haveOrders)
     {
         emit ordersIsAvailable();
         haveOrders = true;
     }
 
-    countWidth = qMax(textFontWidth(QString::number(oidList.count() + 1)) + 6, defaultHeightForRow);
+    countWidth = qMax(textFontWidth(QString::number(oidList.size() + 1)) + 6, defaultHeightForRow);
     filterSymbolChanged();
-    emit dataChanged(index(0, 0), index(oidList.count() - 1, columnsCount - 1));
+    emit dataChanged(index(0, 0), index(oidList.size() - 1, columnsCount - 1));
 
     ordersCountChanged();
     ordersAsksCountChanged();
@@ -290,9 +290,9 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
 
 void OrdersModel::ordersCountChanged()
 {
-    if (oidList.count() != lastOrdersCount)
+    if (oidList.size() != lastOrdersCount)
     {
-        lastOrdersCount = oidList.count();
+        lastOrdersCount = oidList.size();
         mainWindow.sendIndicatorEvent(baseValues.currentPair.symbol, "OpenOrdersCount", lastOrdersCount);
     }
 }
@@ -308,7 +308,7 @@ void OrdersModel::ordersAsksCountChanged()
 
 void OrdersModel::ordersBidsCountChanged()
 {
-    int openBidsCount = oidList.count() - asksCount;
+    int openBidsCount = oidList.size() - asksCount;
 
     if (openBidsCount != lastBidsCount)
     {
@@ -322,9 +322,9 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    int currentRow = oidList.count() - index.row() - 1;
+    int currentRow = oidList.size() - index.row() - 1;
 
-    if (currentRow < 0 || currentRow >= oidList.count())
+    if (currentRow < 0 || currentRow >= oidList.size())
         return QVariant();
 
     if (role == Qt::WhatsThisRole)
@@ -349,32 +349,32 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
     {
         switch (indexColumn)
         {
-            case -1:
-                return oidList.count() - currentRow;
+        case -1:
+            return oidList.size() - currentRow;
 
-            case 0:
-                return dateList.at(currentRow);
+        case 0:
+            return dateList.at(currentRow);
 
-            case 1:
-                return typesList.at(currentRow);
+        case 1:
+            return typesList.at(currentRow);
 
-            case 2:
-                return statusList.at(currentRow);
+        case 2:
+            return statusList.at(currentRow);
 
-            case 3:
-                return amountList.at(currentRow);
+        case 3:
+            return amountList.at(currentRow);
 
-            case 4:
-                return priceList.at(currentRow);
+        case 4:
+            return priceList.at(currentRow);
 
-            case 5:
-                return totalList.at(currentRow);
+        case 5:
+            return totalList.at(currentRow);
 
-            case 6:
-                return oidList.at(currentRow);
+        case 6:
+            return oidList.at(currentRow);
         }
 
-        return oidList.count() - currentRow;
+        return oidList.size() - currentRow;
     }
 
     if (role == Qt::StatusTipRole)
@@ -383,25 +383,25 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
 
         switch (statusList.at(currentRow))
         {
-            case 0:
-                copyText += textStatusList.at(0) + "\t";
-                break;
+        case 0:
+            copyText += textStatusList.at(0) + "\t";
+            break;
 
-            case 1:
-                copyText += textStatusList.at(1) + "\t";
-                break;
+        case 1:
+            copyText += textStatusList.at(1) + "\t";
+            break;
 
-            case 2:
-                copyText += textStatusList.at(2) + "\t";
-                break;
+        case 2:
+            copyText += textStatusList.at(2) + "\t";
+            break;
 
-            case 3:
-                copyText += textStatusList.at(3) + "\t";
-                break;
+        case 3:
+            copyText += textStatusList.at(3) + "\t";
+            break;
 
-            default:
-                copyText += textStatusList.at(4) + "\t";
-                break;
+        default:
+            copyText += textStatusList.at(4) + "\t";
+            break;
         }
 
         copyText += amountStrList.at(currentRow) + "\t";
@@ -422,11 +422,11 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
     {
         switch (indexColumn)
         {
-            case 1:
-                return typesList.at(currentRow) ? baseValues.appTheme.red : baseValues.appTheme.blue;
+        case 1:
+            return typesList.at(currentRow) ? baseValues.appTheme.red : baseValues.appTheme.blue;
 
-            default:
-                break;
+        default:
+            break;
         }
 
         return baseValues.appTheme.black;
@@ -436,18 +436,18 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
     {
         switch (statusList.at(currentRow))
         {
-            case 0:
-                return baseValues.appTheme.lightRed;
+        case 0:
+            return baseValues.appTheme.lightRed;
 
-            case 2: //return baseValues.appTheme.lightGreen;
-            case 3:
-                return baseValues.appTheme.lightRedGreen;
+        case 2: //return baseValues.appTheme.lightGreen;
+        case 3:
+            return baseValues.appTheme.lightRedGreen;
 
-            case 4:
-                return baseValues.appTheme.red;
+        case 4:
+            return baseValues.appTheme.red;
 
-            default:
-                break;
+        default:
+            break;
         }
 
         return QVariant();
@@ -455,121 +455,121 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
 
     switch (indexColumn)
     {
-        case -1://Counter
+    case -1://Counter
+        {
+            if (role == Qt::ToolTipRole)
+                return oidList.at(currentRow);
+
+            return oidList.size() - currentRow;
+        }
+        break;
+
+    case 0:
+        {
+            //Date
+            return dateStrList.at(currentRow);
+        }
+        break;
+
+    case 1:
+        {
+            //Type
+            return typesList.at(currentRow) ? textAsk : textBid;
+        }
+        break;
+
+    case 2:
+        {
+            //Status
+            switch (statusList.at(currentRow))
             {
-                if (role == Qt::ToolTipRole)
-                    return oidList.at(currentRow);
+            case 0:
+                return textStatusList.at(0);
+                break;
 
-                return oidList.count() - currentRow;
+            case 1:
+                return textStatusList.at(1);
+                break;
+
+            case 2:
+                return textStatusList.at(2);
+                break;
+
+            case 3:
+                return textStatusList.at(3);
+                break;
+
+            default:
+                return textStatusList.at(4);
+                break;
             }
-            break;
+        }
+        break;
 
-        case 0:
-            {
-                //Date
-                return dateStrList.at(currentRow);
-            }
-            break;
+    case 3:
+        {
+            //Amount
+            return amountStrList.at(currentRow);
+        }
+        break;
 
-        case 1:
-            {
-                //Type
-                return typesList.at(currentRow) ? textAsk : textBid;
-            }
-            break;
+    case 4:
+        {
+            //Price
+            return priceStrList.at(currentRow);
+        }
+        break;
 
-        case 2:
-            {
-                //Status
-                switch (statusList.at(currentRow))
-                {
-                    case 0:
-                        return textStatusList.at(0);
-                        break;
+    case 5:
+        {
+            //Total
+            return totalStrList.at(currentRow);
+        }
+        break;
 
-                    case 1:
-                        return textStatusList.at(1);
-                        break;
+    case 6:
+        {
+            //X
+            return QVariant();
+        }
 
-                    case 2:
-                        return textStatusList.at(2);
-                        break;
-
-                    case 3:
-                        return textStatusList.at(3);
-                        break;
-
-                    default:
-                        return textStatusList.at(4);
-                        break;
-                }
-            }
-            break;
-
-        case 3:
-            {
-                //Amount
-                return amountStrList.at(currentRow);
-            }
-            break;
-
-        case 4:
-            {
-                //Price
-                return priceStrList.at(currentRow);
-            }
-            break;
-
-        case 5:
-            {
-                //Total
-                return totalStrList.at(currentRow);
-            }
-            break;
-
-        case 6:
-            {
-                //X
-                return QVariant();
-            }
-
-        default:
-            break;
+    default:
+        break;
     }
 
     return QVariant();
 }
 
-void OrdersModel::ordersCancelAll(QString pair)
+void OrdersModel::ordersCancelAll(const QString& pair)
 {
-    for (int n = oidList.count() - 1; n >= 0; n--)
+    for (int n = oidList.size() - 1; n >= 0; n--)
         if (statusList.at(n))
         {
-            if(symbolList.at(n) == pair)
+            if (symbolList.at(n) == pair)
                 emit cancelOrder(pair, oidList.at(n));
             else if (pair.isEmpty())
                 emit cancelOrder(symbolList.at(n), oidList.at(n));
         }
 }
 
-void OrdersModel::ordersCancelBids(QString pair)
+void OrdersModel::ordersCancelBids(const QString& pair)
 {
-    for (int n = oidList.count() - 1; n >= 0; n--)
-        if (statusList.at(n) && typesList.at(n) == false)
+    for (int n = oidList.size() - 1; n >= 0; n--)
+        if (statusList.at(n) && !typesList.at(n))
         {
-            if(symbolList.at(n) == pair)
+            if (symbolList.at(n) == pair)
                 emit cancelOrder(pair, oidList.at(n));
             else if (pair.isEmpty())
                 emit cancelOrder(symbolList.at(n), oidList.at(n));
         }
 }
 
-void OrdersModel::ordersCancelAsks(QString pair)
+void OrdersModel::ordersCancelAsks(const QString& pair)
 {
-    for (int n = oidList.count() - 1; n >= 0; n--)
-        if (statusList.at(n) && typesList.at(n) == true)
+    for (int n = oidList.size() - 1; n >= 0; n--)
+        if (statusList.at(n) && typesList.at(n))
         {
-            if(symbolList.at(n) == pair)
+            if (symbolList.at(n) == pair)
                 emit cancelOrder(pair, oidList.at(n));
             else if (pair.isEmpty())
                 emit cancelOrder(symbolList.at(n), oidList.at(n));
@@ -578,7 +578,7 @@ void OrdersModel::ordersCancelAsks(QString pair)
 
 void OrdersModel::setOrderCanceled(QByteArray oid)
 {
-    for (int n = 0; n < oidList.count(); n++)
+    for (int n = 0; n < oidList.size(); n++)
         if (oidList.at(n) == oid)
         {
             statusList[n] = 0;
@@ -594,7 +594,7 @@ void OrdersModel::setOrderCanceled(QByteArray oid)
             break;
         }
 
-    emit dataChanged(index(0, 0), index(oidList.count() - 1, columnsCount - 1));
+    emit dataChanged(index(0, 0), index(oidList.size() - 1, columnsCount - 1));
 }
 
 QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -609,20 +609,20 @@ QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int r
     {
         switch (section)
         {
-            case 0:
-                return QSize(countWidth, defaultHeightForRow); //Counter
+        case 0:
+            return QSize(countWidth, defaultHeightForRow); //Counter
 
-            case 1:
-                return QSize(dateWidth, defaultHeightForRow); //Date
+        case 1:
+            return QSize(dateWidth, defaultHeightForRow); //Date
 
-            case 2:
-                return QSize(typeWidth, defaultHeightForRow); //Type
+        case 2:
+            return QSize(typeWidth, defaultHeightForRow); //Type
 
-            case 3:
-                return QSize(statusWidth, defaultHeightForRow); //Status
+        case 3:
+            return QSize(statusWidth, defaultHeightForRow); //Status
 
-            case 7:
-                return QSize(defaultHeightForRow, defaultHeightForRow); //X
+        case 7:
+            return QSize(defaultHeightForRow, defaultHeightForRow); //X
         }
 
         return QVariant();
@@ -631,13 +631,13 @@ QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int r
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (headerLabels.count() != columnsCount)
+    if (headerLabels.size() != columnsCount)
         return QVariant();
 
     return headerLabels.at(section);
 }
 
-Qt::ItemFlags OrdersModel::flags(const QModelIndex&) const
+Qt::ItemFlags OrdersModel::flags(const QModelIndex& /*index*/) const
 {
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
@@ -646,7 +646,7 @@ void OrdersModel::setHorizontalHeaderLabels(QStringList list)
 {
     list << "-";
 
-    if (list.count() != columnsCount)
+    if (list.size() != columnsCount)
         return;
 
     textAsk = julyTr("ORDER_TYPE_ASK", "ask");
@@ -680,63 +680,63 @@ QModelIndex OrdersModel::index(int row, int column, const QModelIndex& parent) c
     return createIndex(row, column);
 }
 
-QModelIndex OrdersModel::parent(const QModelIndex&) const
+QModelIndex OrdersModel::parent(const QModelIndex& /*child*/) const
 {
     return QModelIndex();
 }
 
 int OrdersModel::getRowNum(int row)
 {
-    if (row < 0 || row >= oidList.count())
+    if (row < 0 || row >= oidList.size())
         return 0;
 
-    return oidList.count() - row - 1;
+    return oidList.size() - row - 1;
 }
 quint32 OrdersModel::getRowDate(int row)
 {
-    if (row < 0 || row >= dateList.count())
+    if (row < 0 || row >= dateList.size())
         return 0;
 
     return dateList.at(getRowNum(row));
 }
 QByteArray OrdersModel::getRowOid(int row)
 {
-    if (row < 0 || row >= oidList.count())
-        return 0;
+    if (row < 0 || row >= oidList.size())
+        return nullptr;
 
     return oidList.at(getRowNum(row));
 }
 int OrdersModel::getRowType(int row)
 {
-    if (row < 0 || row >= typesList.count())
+    if (row < 0 || row >= typesList.size())
         return 0;
 
     return typesList.at(getRowNum(row)) ? 1 : 0;
 }
 int OrdersModel::getRowStatus(int row)
 {
-    if (row < 0 || row >= statusList.count())
+    if (row < 0 || row >= statusList.size())
         return 0;
 
     return statusList.at(getRowNum(row));
 }
 double OrdersModel::getRowPrice(int row)
 {
-    if (row < 0 || row >= priceList.count())
+    if (row < 0 || row >= priceList.size())
         return 0.0;
 
     return priceList.at(getRowNum(row));
 }
 double OrdersModel::getRowVolume(int row)
 {
-    if (row < 0 || row >= amountList.count())
+    if (row < 0 || row >= amountList.size())
         return 0.0;
 
     return amountList.at(getRowNum(row));
 }
 double OrdersModel::getRowTotal(int row)
 {
-    if (row < 0 || row >= statusList.count())
+    if (row < 0 || row >= statusList.size())
         return 0;
 
     return statusList.at(getRowNum(row));

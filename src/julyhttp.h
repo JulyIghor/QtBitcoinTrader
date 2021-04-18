@@ -36,7 +36,7 @@
 #include <QSslSocket>
 #include <QTime>
 #include <QNetworkCookie>
-
+#include <QElapsedTimer>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
@@ -46,6 +46,7 @@ struct PacketItem
 {
     QByteArray* data = nullptr;
     int reqType = 0;
+    int pairChangeCount = 0;
     int retryCount = 0;
     bool skipOnce = false;
 };
@@ -66,11 +67,11 @@ public:
     void clearPendingData();
     void reConnect(bool forceAbort = true);
     bool isReqTypePending(int);
-    void sendData(int reqType, const QByteArray& method, QByteArray postData = nullptr, const QByteArray& restSignLine = nullptr,
-                  const int& forceRetryCount = -1);
+    void sendData(int reqType, int pairChangeCount, const QByteArray& method, QByteArray postData = nullptr,
+                  const QByteArray& restSignLine = nullptr, const int& forceRetryCount = -1);
 
-    void prepareData(int reqType, const QByteArray& method, QByteArray postData = nullptr, const QByteArray& restSignLine = nullptr,
-                     const int& forceRetryCount = -1);
+    void prepareData(int reqType, int pairChangeCount, const QByteArray& method, QByteArray postData = nullptr,
+                     const QByteArray& restSignLine = nullptr, const int& forceRetryCount = -1);
     void prepareDataSend();
     void prepareDataClear();
 
@@ -122,7 +123,7 @@ private:
     void clearRequest();
     void retryRequest();
 
-    QTime requestTimeOut;
+    QElapsedTimer requestTimeOut;
     QList<PacketItem>requestList;
     QMap<int, int> reqTypePending;
 
@@ -149,7 +150,7 @@ signals:
     void errorSignal(QString);
     void sslErrorSignal(const QList<QSslError>&);
     void apiDown(bool);
-    void dataReceived(QByteArray, int);
+    void dataReceived(QByteArray, int, int);
 };
 
 #endif // JULYHTTP_H

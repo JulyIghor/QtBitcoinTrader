@@ -93,12 +93,11 @@ void IndicatorEngine::setValueSlot(const QString& exchange, const QString& symbo
         {
             if (qFuzzyCompare(indicators[index], value))
                 return;
-            else
-            {
-                locker.lock();
+            
+                            locker.lock();
                 indicators[index] = value;
                 locker.unlock();
-            }
+           
         }
         else
         {

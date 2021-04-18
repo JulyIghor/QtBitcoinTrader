@@ -102,11 +102,11 @@ JulyHttp::JulyHttp(const QString& hostN, const QByteArray& restLine, QObject* pa
         baseValues.customCookies.append(" ");
         QStringList cookieListStr = baseValues.customCookies.split("; ");
 
-        for (int n = 0; n < cookieListStr.count(); n++)
+        for (int n = 0; n < cookieListStr.size(); n++)
         {
             QStringList nameValue = cookieListStr.at(n).split("=");
 
-            if (nameValue.count() != 2 || nameValue.first().isEmpty() || nameValue.last().isEmpty())
+            if (nameValue.size() != 2 || nameValue.first().isEmpty() || nameValue.last().isEmpty())
                 continue;
 
             cookiesMap.insert(nameValue.first().toLatin1(), nameValue.last().toLatin1());
@@ -132,7 +132,7 @@ void JulyHttp::setupSocket()
 //    mutex.lock();
 //    static QList<QSslCertificate> certs;
 
-//    if (certs.count() == 0)
+//    if (certs.size() == 0)
 //    {
 //        QFile readCerts(":/Resources/CertBase.cer");
 
@@ -174,7 +174,7 @@ void JulyHttp::setupSocket()
 
 void JulyHttp::clearPendingData()
 {
-    for (int n = requestList.count() - 1; n >= 0; n--)
+    for (int n = requestList.size() - 1; n >= 0; n--)
         takeRequestAt(n);
 
     reConnect();
@@ -246,11 +246,10 @@ void JulyHttp::setApiDown(bool httpError)
 
 void JulyHttp::saveCookies()
 {
-    QByteArray currentCookie;
     cookieLine.clear();
     int cookiesCount = 0;
 
-    Q_FOREACH (QByteArray name, cookiesMap.keys())
+    for (const QByteArray& name : cookiesMap.keys())
     {
         if (cookiesCount > 0)
             cookieLine.append("; ");
@@ -313,7 +312,7 @@ void JulyHttp::readSocket()
                 if (currentLineLow.startsWith("http/1.1 "))
                 {
                     if (currentLineLow.length() > 12)
-                        httpState = currentLineLow.mid(9, 3).toInt();
+                        httpState = currentLineLow.midRef(9, 3).toInt();
 
                     if (debugLevel && httpState != 200)
                     {
@@ -358,7 +357,7 @@ void JulyHttp::readSocket()
                 {
                     QStringList pairList = currentLineLow.split(":");
 
-                    if (pairList.count() == 2)
+                    if (pairList.size() == 2)
                         contentLength = pairList.last().trimmed().toUInt();
                 }
                 else if (currentLineLow.startsWith(QLatin1String("connection")) &&
@@ -535,7 +534,7 @@ void JulyHttp::readSocket()
 
     if (allDataReaded)
     {
-        if (!buffer.isEmpty() && requestList.count())
+        if (!buffer.isEmpty() && !requestList.empty())
         {
             if (contentGzipped)
                 gzipUncompress(&buffer);
@@ -546,13 +545,13 @@ void JulyHttp::readSocket()
             if (debugLevel && buffer.isEmpty())
                 logThread->writeLog("Response is EMPTY", 2);
 
-            emit dataReceived(buffer, requestList.first().reqType);
+            emit dataReceived(buffer, requestList.first().reqType, requestList.first().pairChangeCount);
         }
 
         waitingReplay = false;
         readingHeader = true;
 
-        if (requestList.count())
+        if (!requestList.empty())
             requestList[0].retryCount = 0;
 
         takeFirstRequest();
@@ -656,13 +655,13 @@ void JulyHttp::clearRequest()
     endOfPacket = false;
 }
 
-void JulyHttp::prepareData(int reqType, const QByteArray& method, QByteArray postData, const QByteArray& restSignLine,
-                           const int& forceRetryCount)
+void JulyHttp::prepareData(int reqType, int pairChangeCount, const QByteArray& method, QByteArray postData,
+                           const QByteArray& restSignLine, const int& forceRetryCount)
 {
     if (isDisabled)
         return;
 
-    QByteArray* data = new QByteArray(method + httpHeader + cookieLine);
+    auto* data = new QByteArray(method + httpHeader + cookieLine);
 
     if (!restSignLine.isEmpty())
         data->append(restKeyLine + restSignLine);
@@ -677,6 +676,7 @@ void JulyHttp::prepareData(int reqType, const QByteArray& method, QByteArray pos
     PacketItem newPacket;
     newPacket.data = data;
     newPacket.reqType = reqType;
+    newPacket.pairChangeCount = pairChangeCount;
     newPacket.retryCount = 0;
     newPacket.skipOnce = false;
 
@@ -698,18 +698,18 @@ void JulyHttp::prepareDataSend()
     if (isDisabled || preparedList.isEmpty())
         return;
 
-    for (int n = 1; n < preparedList.count(); n++)
+    for (int n = 1; n < preparedList.size(); n++)
     {
         preparedList[0].data->append(*(preparedList[n].data)) + "\r\n\r\n";
         preparedList[n].skipOnce = true;
     }
 
-    for (int n = 0; n < preparedList.count(); n++)
+    for (int n = 0; n < preparedList.size(); n++)
         requestList << preparedList.at(n);
 
     preparedList.clear();
 
-    if (isDataPending != true)
+    if (!isDataPending)
     {
         emit setDataPending(true);
         isDataPending = true;
@@ -721,25 +721,25 @@ void JulyHttp::prepareDataClear()
     if (isDisabled)
         return;
 
-    for (int n = 0; n < preparedList.count(); n++)
+    for (int n = 0; n < preparedList.size(); n++)
     {
         PacketItem preparingPacket = preparedList.at(n);
         reqTypePending[preparingPacket.reqType] = reqTypePending.value(preparingPacket.reqType, 1) - 1;
 
-        if (preparingPacket.data)
+        
             delete preparingPacket.data;
     }
 
     preparedList.clear();
 }
 
-void JulyHttp::sendData(int reqType, const QByteArray& method, QByteArray postData, const QByteArray& restSignLine,
-                        const int& forceRetryCount)
+void JulyHttp::sendData(int reqType, int pairChangeCount, const QByteArray& method, QByteArray postData,
+                        const QByteArray& restSignLine, const int& forceRetryCount)
 {
     if (isDisabled)
         return;
 
-    QByteArray* data = new QByteArray(method + httpHeader + cookieLine);
+    auto* data = new QByteArray(method + httpHeader + cookieLine);
 
     if (!restSignLine.isEmpty())
         data->append(restKeyLine + restSignLine);
@@ -754,13 +754,14 @@ void JulyHttp::sendData(int reqType, const QByteArray& method, QByteArray postDa
         data->append("\r\n");
 
     if (reqType > 300)
-        for (int n = requestList.count() - 1; n >= 1; n--)
-            if (requestList.at(n).reqType < 300 && requestList[n].skipOnce != true)
+        for (int n = requestList.size() - 1; n >= 1; n--)
+            if (requestList.at(n).reqType < 300 && !requestList[n].skipOnce)
                 takeRequestAt(n);
 
     PacketItem newPacket;
     newPacket.data = data;
     newPacket.reqType = reqType;
+    newPacket.pairChangeCount = pairChangeCount;
     newPacket.retryCount = 0;
     newPacket.skipOnce = false;
 
@@ -779,7 +780,7 @@ void JulyHttp::sendData(int reqType, const QByteArray& method, QByteArray postDa
 
     requestList << newPacket;
 
-    if (isDataPending != true)
+    if (!isDataPending)
     {
         emit setDataPending(true);
         isDataPending = true;
@@ -791,7 +792,7 @@ void JulyHttp::sendData(int reqType, const QByteArray& method, QByteArray postDa
 
 void JulyHttp::takeRequestAt(int pos)
 {
-    if (requestList.count() <= pos)
+    if (requestList.size() <= pos)
         return;
 
     if (pos == 0)
@@ -808,7 +809,7 @@ void JulyHttp::takeRequestAt(int pos)
     {
         reqTypePending.clear();
 
-        if (isDataPending != false)
+        if (isDataPending)
         {
             emit setDataPending(false);
             isDataPending = false;
@@ -906,9 +907,8 @@ void JulyHttp::sendPendingData()
     {
         if (requestTimeOut.elapsed() < ((noReconnect && noReconnectCount++ > 5) ? 1000 : baseValues.httpRequestTimeout))
             return;
-        else
-        {
-            if (debugLevel)
+        
+                    if (debugLevel)
                 logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(
                                         baseValues.httpRequestTimeout).toLatin1(), 2);
 
@@ -920,7 +920,7 @@ void JulyHttp::sendPendingData()
                 retryRequest();
                 return;
             }
-        }
+       
     }
     else
     {
@@ -939,7 +939,7 @@ void JulyHttp::sendPendingData()
 
     if (currentPendingRequest)
     {
-        if (requestList.first().skipOnce == true)
+        if (requestList.first().skipOnce)
             requestList[0].skipOnce = false;
         else
         {

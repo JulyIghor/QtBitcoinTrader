@@ -49,9 +49,9 @@ public:
     int getStateByRow(int row);
     bool isRowPaused(int row);
     void restoreRulesFromString(QString);
-    bool haveWorkingRule();
+    bool haveWorkingRule() const;
     bool isConcurrentMode;
-    explicit RulesModel(QString groupName);
+    explicit RulesModel(const QString& groupName);
     ~RulesModel();
 
     void disableAll();
@@ -77,16 +77,16 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 private slots:
-    void writeLogSlot(QString);
+    void writeLogSlot(const QString&);
     void runningChanged(bool);
-    void setGroupDone(QString);
+    void setGroupDone(const QString&);
 private:
     void swapRows(int, int);
     bool lastRuleGroupIsRunning;
     int runningCount;
     void checkRuleGroupIsRunning();
     QString groupName;
-    void setStateByName(QString, int);
+    void setStateByName(const QString&, int);
     quint32 lastRuleId;
     QList<ScriptObject*> scriptList;
     QList<int> stateList;

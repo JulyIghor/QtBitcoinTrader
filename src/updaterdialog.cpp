@@ -85,7 +85,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
     ui.againAutoUpdateCheckBox->setChecked(autoUpdate);
     setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
 
-    Q_FOREACH (QGroupBox* groupBox, this->findChildren<QGroupBox*>())
+    for (QGroupBox* groupBox : this->findChildren<QGroupBox*>())
     {
         if (groupBox->accessibleName() == "LOGOBUTTON")
         {
@@ -97,7 +97,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
                 groupboxLayout->setContentsMargins(0, 0, 0, 0);
                 groupboxLayout->setSpacing(0);
                 groupBox->setLayout(groupboxLayout);
-                LogoButton* logoButton = new LogoButton(true);
+                auto* logoButton = new LogoButton(true);
                 groupboxLayout->addWidget(logoButton);
             }
         }
@@ -111,7 +111,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
     httpGet->noReconnect = true;
     timeOutTimer = new QTimer(this);
     connect(timeOutTimer, SIGNAL(timeout()), this, SLOT(exitSlot()));
-    connect(httpGet, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceived(QByteArray, int)));
+    connect(httpGet, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceived(QByteArray, int, int)));
 
 #ifdef Q_OS_WIN
     QByteArray osString = "Win";
@@ -166,7 +166,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
     }
 
     reqStr.append("&MD5=" + md5);
-    httpGet->sendData(140, "POST /", reqStr);
+    httpGet->sendData(140, 0, "POST /", reqStr);
 
     timeOutTimer->start(60000);
 }
@@ -177,7 +177,7 @@ UpdaterDialog::~UpdaterDialog()
     settings.setValue("AutoUpdate", ui.againAutoUpdateCheckBox->isChecked());
 }
 
-QByteArray UpdaterDialog::getMidData(QString a, QString b, QByteArray* data)
+QByteArray UpdaterDialog::getMidData(const QString& a, QString b, QByteArray* data)
 {
     QByteArray rez;
 
@@ -197,7 +197,7 @@ QByteArray UpdaterDialog::getMidData(QString a, QString b, QByteArray* data)
     return rez;
 }
 
-void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType)
+void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unused*/)
 {
     timeOutTimer->stop();
 
@@ -291,7 +291,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType)
             QMap<QString, QString>versionsMap;
             QStringList dataList = QString(dataReceived).split("\n");
 
-            for (int n = 0; n < dataList.count(); n++)
+            for (int n = 0; n < dataList.size(); n++)
             {
                 QString varData = dataList.at(n);
                 int splitPos = varData.indexOf('=');
@@ -511,7 +511,7 @@ void UpdaterDialog::buttonUpdate()
     ui.buttonUpdate->setEnabled(false);
     QStringList tempList = updateLink.split("//");
 
-    if (tempList.count() != 2)
+    if (tempList.size() != 2)
     {
         downloadError(6);
         return;
@@ -520,7 +520,7 @@ void UpdaterDialog::buttonUpdate()
     QString protocol = tempList.first();
     tempList = tempList.last().split("/");
 
-    if (tempList.count() == 0)
+    if (tempList.empty())
     {
         downloadError(7);
         return;
@@ -540,10 +540,10 @@ void UpdaterDialog::buttonUpdate()
     httpGetFile = new JulyHttp(domain, nullptr, this, protocol.startsWith("https"), false);
     connect(httpGetFile, SIGNAL(apiDown(bool)), this, SLOT(invalidData(bool)));
     connect(httpGetFile, SIGNAL(dataProgress(int)), this, SLOT(dataProgress(int)));
-    connect(httpGetFile, SIGNAL(dataReceived(QByteArray, int)), this, SLOT(dataReceived(QByteArray, int)));
+    connect(httpGetFile, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceived(QByteArray, int, int)));
     httpGetFile->noReconnect = true;
 
-    httpGetFile->sendData(120, "GET " + updateLink.toLatin1());
+    httpGetFile->sendData(120, 0, "GET " + updateLink.toLatin1());
 }
 
 void UpdaterDialog::invalidData(bool err)

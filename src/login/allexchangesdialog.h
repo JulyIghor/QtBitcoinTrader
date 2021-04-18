@@ -49,7 +49,7 @@ private:
     int startIndex;
     Ui::AllExchangesDialog ui;
     AllExchangesModel* allExchangesModel;
-    QString loadCurrencies(QString);
+    QString loadCurrencies(const QString&);
 
 private slots:
     void on_okButton_clicked();

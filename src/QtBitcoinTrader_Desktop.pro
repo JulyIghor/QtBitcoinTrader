@@ -106,11 +106,7 @@ HEADERS += $${PWD}/script/addrulegroup.h \
            $${PWD}/exchange/exchange.h \
            $${PWD}/exchange/exchange_bitfinex.h \
            $${PWD}/exchange/exchange_bitstamp.h \
-           $${PWD}/exchange/exchange_btcchina.h \
-           $${PWD}/exchange/exchange_gocio.h \
            $${PWD}/exchange/exchange_indacoin.h \
-           $${PWD}/exchange/exchange_bitmarket.h \
-           $${PWD}/exchange/exchange_okcoin.h \
            $${PWD}/exchange/exchange_yobit.h \
            $${PWD}/exchange/exchange_binance.h \
            $${PWD}/exchange/exchange_bittrex.h \
@@ -228,11 +224,7 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
           $${PWD}/exchange/exchange.cpp \
           $${PWD}/exchange/exchange_bitfinex.cpp \
           $${PWD}/exchange/exchange_bitstamp.cpp \
-          $${PWD}/exchange/exchange_btcchina.cpp \
-          $${PWD}/exchange/exchange_gocio.cpp \
           $${PWD}/exchange/exchange_indacoin.cpp \
-          $${PWD}/exchange/exchange_bitmarket.cpp \
-          $${PWD}/exchange/exchange_okcoin.cpp \
           $${PWD}/exchange/exchange_yobit.cpp \
           $${PWD}/exchange/exchange_binance.cpp \
           $${PWD}/exchange/exchange_bittrex.cpp \

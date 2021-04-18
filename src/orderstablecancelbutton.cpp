@@ -50,7 +50,7 @@ void OrdersTableCancelButton::paint(QPainter* painter, const QStyleOptionViewIte
 {
     if (parentTable && !mainWindow.currentlyAddingOrders)
     {
-        QPushButton* buttonCancel = dynamic_cast<QPushButton*>(parentTable->indexWidget(index));
+        auto* buttonCancel = dynamic_cast<QPushButton*>(parentTable->indexWidget(index));
 
         if (!buttonCancel)
         {

@@ -114,11 +114,11 @@ void DebugViewer::sendLogSlot(QByteArray text)
 {
     QStringList filterData(QString(text).split("\r\n"));
 
-    for (int n = 0; n < filterData.count(); n++)
+    for (int n = 0; n < filterData.size(); n++)
         if (filterData.at(n).startsWith("Cookie", Qt::CaseInsensitive))
             filterData[n] = "Cookie: THERE_WAS_A_COOKIE";
 
-    if (savingFile == false && ui.checkEnabled->isChecked())
+    if (!savingFile && ui.checkEnabled->isChecked())
         ui.debugText->appendPlainText(filterData.join("\n"));
 }
 

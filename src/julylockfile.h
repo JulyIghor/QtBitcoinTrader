@@ -42,8 +42,8 @@ class JulyLockFile : public QObject
     Q_OBJECT
 
 public:
-    bool isLocked();
-    explicit JulyLockFile(QString imageName, QString tempDir = "");
+    bool isLocked() const;
+    explicit JulyLockFile(const QString& imageName, QString tempDir = "");
     ~JulyLockFile();
     void free();
 

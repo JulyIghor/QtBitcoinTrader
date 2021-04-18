@@ -38,7 +38,7 @@ class QToolButton;
 
 namespace Ui
 {
-class CurrencyMenu;
+    class CurrencyMenu;
 }
 
 class CurrencyMenu : public QMenu
@@ -50,7 +50,7 @@ public:
     ~CurrencyMenu();
     void setPairs(const QStringList&);
     int count();
-    int getCurrentIndex();
+    int getCurrentIndex() const;
     void setCurrentIndex(const int);
     void currencySelect(const int);
 
@@ -58,7 +58,7 @@ signals:
     void currencyMenuChanged(int);
 
 private slots:
-    void on_filterLine_textChanged(QString);
+    void on_filterLine_textChanged(const QString&);
 
 private:
     Ui::CurrencyMenu* ui;
