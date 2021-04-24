@@ -45,6 +45,10 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.54 Released!
+- Fixed trader.say(..) script command
+- Fixed crash on unix systems
+
 v1.40.53 Released!
 
 - Fixed critical bug causing missing public trade history items
