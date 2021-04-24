@@ -52,7 +52,7 @@ TimeSync::TimeSync()
       additionalTimer()
 {
     dateUpdateThread->setObjectName("Time Sync");
-    connect(dateUpdateThread.data(), &QThread::started, this, &TimeSync::runThread);
+    connect(dateUpdateThread.data(), &QThread::started, this, &TimeSync::runThread, Qt::DirectConnection);
     connect(this, &TimeSync::startSync, this, &TimeSync::getNTPTime, Qt::QueuedConnection);
     moveToThread(dateUpdateThread.data());
     dateUpdateThread->start();
@@ -63,8 +63,7 @@ TimeSync::~TimeSync()
     if (dateUpdateThread && dateUpdateThread->isRunning())
     {
         dateUpdateThread->quit();
-        dateUpdateThread->wait(1);
-        dateUpdateThread->terminate();
+        dateUpdateThread->wait();
     }
 }
 
@@ -97,19 +96,6 @@ void TimeSync::syncNow()
 TimeSync* TimeSync::global()
 {
     static TimeSync instance;
-    static QAtomicInt created = 0;
-
-    if (created)
-        return &instance;
-
-    static QMutex mutexGlobal;
-    QMutexLocker lock(&mutexGlobal);
-
-    while (!instance.started)
-        QThread::msleep(100);
-
-    created = 1;
-
     return &instance;
 }
 

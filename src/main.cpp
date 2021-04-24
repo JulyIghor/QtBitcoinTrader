@@ -70,6 +70,33 @@
 #include <windows.h>
 #endif
 
+#ifdef Q_OS_UNIX
+#include <initializer_list>
+#include <signal.h>
+void quitOnSignals(std::initializer_list<int> quitSignals)
+{
+    auto handler = [](int sig) -> void
+    {
+        qDebug().noquote() << QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss") << "Shutdown signal received" << sig;
+        QCoreApplication::quit();
+    };
+
+    sigset_t blocking_mask;
+    sigemptyset(&blocking_mask);
+
+    for (auto sig : quitSignals)
+        sigaddset(&blocking_mask, sig);
+
+    struct sigaction sa;
+    sa.sa_handler = handler;
+    sa.sa_mask = blocking_mask;
+    sa.sa_flags = 0;
+
+    for (auto sig : quitSignals)
+        sigaction(sig, &sa, nullptr);
+}
+#endif
+
 BaseValues* baseValues_;
 
 BaseValues::BaseValues()
@@ -634,6 +661,9 @@ int main(int argc, char* argv[])
             julyTranslator.loadFromFile(langFile);
             QTimer::singleShot(1000000, &a, &QCoreApplication::quit);
             UpdaterDialog updater(a.arguments().last() != "/checkupdate");
+#ifdef Q_OS_UNIX
+            quitOnSignals({SIGHUP, SIGQUIT, SIGABRT, SIGTERM, SIGXCPU, SIGXFSZ, SIGINT});
+#endif
             return a.exec();
         }
     }
@@ -970,6 +1000,10 @@ int main(int argc, char* argv[])
     }
 
     baseValues.mainWindow_->setupClass();
+
+#ifdef Q_OS_UNIX
+    quitOnSignals({SIGHUP, SIGQUIT, SIGABRT, SIGTERM, SIGXCPU, SIGXFSZ, SIGINT});
+#endif
     int rezult = a.exec();
     return rezult;
 }

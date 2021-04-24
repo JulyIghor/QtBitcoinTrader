@@ -432,18 +432,8 @@ void IniEngine::parseExchange(const QString& exchangeFileName)
 
 IniEngine* IniEngine::global()
 {
-    static IniEngine* instance = nullptr;
-
-    if (instance)
-        return instance;
-
-    static QMutex mut;
-    QMutexLocker lock(&mut);
-
-    if (instance == nullptr)
-        instance = new IniEngine;
-
-    return instance;
+    static IniEngine instance;
+    return &instance;
 }
 
 CurrencyInfo IniEngine::getCurrencyInfo(const QString& symbol)
