@@ -386,7 +386,7 @@ void ScriptObject::playWav(const QString& fileName)
     mainWindow.playWav(fileName, false);
 }
 
-void ScriptObject::sayPrivate(const QString& text) const
+void ScriptObject::say(const QString& text)
 {
     if (!testMode)
         mainWindow.sayText(text);
@@ -458,7 +458,7 @@ void ScriptObject::say(const QVariantList& list)
             text += QLatin1Char(' ');
     }
 
-    sayPrivate(text);
+    say(text);
 }
 
 void ScriptObject::groupStart(const QString& name)

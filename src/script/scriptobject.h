@@ -62,6 +62,7 @@ public:
     QStringList functionsList;
     QStringList argumentsList;
     QStringList commandsList;
+
 private:
     void initValueChangedPrivate(const QString& symbol, QString& scriptNameInd, double& val, bool forceEmit = false);
     void deleteEngine();
@@ -75,7 +76,7 @@ private:
     void setRunning(bool);
     bool isRunningFlag;
     bool replaceString(const QString& what, const QString& to, QString& text, bool skipFirstLeft) const;
-    QString sourceToScript(const QString&)const;
+    QString sourceToScript(const QString&) const;
     QScriptEngine* engine;
     QStringList functionNames;
     QList<QDoubleSpinBox*> spinBoxList;
@@ -88,7 +89,6 @@ private:
     QHash<quint32, QString> arrayFileReadResult;
     quint32 fileOperationNumber;
     qint32 fileOpenCount;
-    void sayPrivate(const QString& _text_) const;
 public slots:
     void sendEvent(const QString& symbol, const QString& name, double value);
     void sendEvent(const QString& name, double value);
@@ -107,6 +107,7 @@ public slots:
     void beep() const;
     void playWav(const QString& _filePath_);
 
+    void say(const QString& _text_);
     void say(int);
     void say(double);
     void say(const QVariant&);
