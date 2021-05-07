@@ -45,6 +45,10 @@ Next ToDo:
 
 ## Change Log
 
+v1.40.55 Released!
+- Fixed trader.groupStop(..) script command
+- Synchronized currency pairs
+
 v1.40.54 Released!
 - Fixed trader.say(..) script command
 - Fixed crash on unix systems

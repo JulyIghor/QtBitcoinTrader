@@ -499,13 +499,13 @@ void ScriptObject::groupStop(const QString& name)
 
     log("Stop group: \"" + nameValue + "\"");
 
-    if (name == scriptName)
+    if (nameValue == scriptName)
     {
         pendingStop = true;
         setRunning(false);
     }
     else
-        emit setGroupEnabled(name, false);
+        emit setGroupEnabled(nameValue, false);
 }
 
 void ScriptObject::addIndicator(QDoubleSpinBox* spinBox, QString value)
