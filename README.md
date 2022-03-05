@@ -46,6 +46,7 @@ Next ToDo:
 ## Change Log
 
 v1.41.00 Released!
+
 - Fixed time syncronization in Binance
 - Translation fixes, added Korean language
 - Fixed bug in trade history of Bittrex exchange
