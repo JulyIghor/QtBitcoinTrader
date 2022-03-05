@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,13 +29,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QDesktopServices>
-#include <QSettings>
 #include "allexchangesdialog.h"
 #include "main.h"
+#include <QDesktopServices>
+#include <QSettings>
 
-AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum)
-    : QDialog()
+AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum) : QDialog()
 {
     startIndex = 0;
     exchangeNum = -1;
@@ -66,21 +65,18 @@ AllExchangesDialog::AllExchangesDialog(int featuredExchangesNum)
     mainWindow.setColumnResizeMode(ui.exchangesTableView, 0, QHeaderView::ResizeToContents);
     mainWindow.setColumnResizeMode(ui.exchangesTableView, 1, QHeaderView::Stretch);
 
-    connect(ui.exchangesTableView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-            this, SLOT(selectionExchange()));
+    connect(ui.exchangesTableView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AllExchangesDialog::selectionExchange);
 
     julyTranslator.translateUi(this);
 
     mainWindow.fixTableViews(this);
 
-    ui.exchangesTableView->setMinimumHeight(
-        ui.exchangesTableView->verticalHeader()->defaultSectionSize() * exchangesList.size());
+    ui.exchangesTableView->setMinimumHeight(ui.exchangesTableView->verticalHeader()->defaultSectionSize() * exchangesList.size());
 }
 
 AllExchangesDialog::~AllExchangesDialog()
 {
-    
-        delete allExchangesModel;
+    delete allExchangesModel;
 }
 
 void AllExchangesDialog::on_okButton_clicked()

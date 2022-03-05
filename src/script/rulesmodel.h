@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@
 #ifndef RULESMODEL_H
 #define RULESMODEL_H
 
-#include <QAbstractItemModel>
-#include <QStringList>
 #include "ruleholder.h"
 #include "scriptobject.h"
+#include <QAbstractItemModel>
+#include <QStringList>
 
 class RulesModel : public QAbstractItemModel
 {
@@ -80,6 +80,7 @@ private slots:
     void writeLogSlot(const QString&);
     void runningChanged(bool);
     void setGroupDone(const QString&);
+
 private:
     void swapRows(int, int);
     bool lastRuleGroupIsRunning;

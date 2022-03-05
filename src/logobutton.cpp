@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -34,8 +34,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-LogoButton::LogoButton(bool isCentrabit, QWidget* parent)
-    : QWidget(parent)
+LogoButton::LogoButton(bool isCentrabit, QWidget* parent) : QWidget(parent)
 {
     ui.setupUi(this);
     setCursor(Qt::PointingHandCursor);
@@ -48,7 +47,6 @@ LogoButton::LogoButton(bool isCentrabit, QWidget* parent)
 
 LogoButton::~LogoButton()
 {
-
 }
 
 void LogoButton::setImage(const QString& image)
@@ -87,6 +85,5 @@ void LogoButton::resizeEvent(QResizeEvent* event)
     event->accept();
     QSize newSize = logoSize;
     newSize.scale(size(), Qt::KeepAspectRatio);
-    ui.logo->setGeometry((width() - newSize.width()) / 2 + 1, (height() - newSize.height()) / 2, newSize.width() - 2,
-                         newSize.height());
+    ui.logo->setGeometry((width() - newSize.width()) / 2 + 1, (height() - newSize.height()) / 2, newSize.width() - 2, newSize.height());
 }

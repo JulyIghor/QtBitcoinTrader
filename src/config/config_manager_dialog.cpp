@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,28 +30,24 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "config_manager_dialog.h"
-#include "ui_config_manager_dialog.h"
 #include "config_manager.h"
+#include "ui_config_manager_dialog.h"
 
-
-ConfigManagerDialog::ConfigManagerDialog(QWidget* parent) :
-    QDialog(parent),
-    ui(new Ui::ConfigManagerDialog),
-    nameChanging(false)
+ConfigManagerDialog::ConfigManagerDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ConfigManagerDialog), nameChanging(false)
 {
     ui->setupUi(this);
 
     ui->editName->setFocus();
 
-    connect(ui->btnSave,   &QPushButton::clicked, this, &ConfigManagerDialog::onBtnConfigSave);
-    connect(ui->btnLoad,   &QPushButton::clicked, this, &ConfigManagerDialog::onBtnConfigLoad);
+    connect(ui->btnSave, &QPushButton::clicked, this, &ConfigManagerDialog::onBtnConfigSave);
+    connect(ui->btnLoad, &QPushButton::clicked, this, &ConfigManagerDialog::onBtnConfigLoad);
     connect(ui->btnRemove, &QPushButton::clicked, this, &ConfigManagerDialog::onBtnConfigRemove);
-    connect(ui->btnClose,  &QPushButton::clicked, this, &ConfigManagerDialog::close);
-    connect(ui->editName,  &QLineEdit::textChanged,          this, &ConfigManagerDialog::onNameTextChanged);
+    connect(ui->btnClose, &QPushButton::clicked, this, &ConfigManagerDialog::close);
+    connect(ui->editName, &QLineEdit::textChanged, this, &ConfigManagerDialog::onNameTextChanged);
     connect(ui->listNames, &QListWidget::currentTextChanged, this, &ConfigManagerDialog::onNameListCurrentTextChanged);
-    connect(ui->listNames, &QListWidget::itemClicked,        this, &ConfigManagerDialog::onNameListItemClicked);
-    connect(ui->listNames, &QListWidget::itemDoubleClicked,  this, &ConfigManagerDialog::onNameListItemDoubleClicked);
-    connect(::config,      &ConfigManager::onChanged,        this, &ConfigManagerDialog::onConfigChanged);
+    connect(ui->listNames, &QListWidget::itemClicked, this, &ConfigManagerDialog::onNameListItemClicked);
+    connect(ui->listNames, &QListWidget::itemDoubleClicked, this, &ConfigManagerDialog::onNameListItemDoubleClicked);
+    connect(::config, &ConfigManager::onChanged, this, &ConfigManagerDialog::onConfigChanged);
 
     ui->listNames->clear();
     ui->listNames->addItems(::config->getConfigNames());

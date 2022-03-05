@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,13 +30,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "settingsgeneral.h"
+#include "charts/chartsview.h"
 #include "main.h"
 #include "translationmessage.h"
-#include "charts/chartsview.h"
 #include <QDir>
 
-SettingsGeneral::SettingsGeneral(QWidget* parent)
-    : QWidget(parent)
+SettingsGeneral::SettingsGeneral(QWidget* parent) : QWidget(parent)
 {
     ui.setupUi(this);
     iniSettings = new QSettings(baseValues.iniFileName, QSettings::IniFormat, this);
@@ -198,8 +197,8 @@ void SettingsGeneral::on_revertChangesButton_clicked()
 
 void SettingsGeneral::on_restoreDefaultsButton_clicked()
 {
-    ui.languageComboBox->setCurrentIndex(ui.languageComboBox->findData(baseValues.defaultLangFile, Qt::UserRole,
-                                         Qt::MatchExactly | Qt::MatchCaseSensitive));
+    ui.languageComboBox->setCurrentIndex(
+        ui.languageComboBox->findData(baseValues.defaultLangFile, Qt::UserRole, Qt::MatchExactly | Qt::MatchCaseSensitive));
     ui.confirmOpenOrderCheckBox->setChecked(true);
     ui.closeToTrayCheckBox->setChecked(false);
     ui.optimizeInterfaceCheckBox->setChecked(false);

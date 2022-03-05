@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "julyrsa.h"
-#include <QFile>
 #include <QCryptographicHash>
+#include <QFile>
 
 QByteArray JulyRSA::getSignature(const QByteArray& data, const QByteArray& keyArray)
 {
@@ -45,9 +45,9 @@ QByteArray JulyRSA::getSignature(const QByteArray& data, const QByteArray& keyAr
     {
         BIO* errBIO = BIO_new(BIO_s_mem());
         ERR_print_errors(errBIO);
-        //char* errData;
-        //long errSize = BIO_get_mem_data(errBIO, &errData);
-        // QByteArray errorString(errData, static_cast<int>(errSize));
+        // char* errData;
+        // long errSize = BIO_get_mem_data(errBIO, &errData);
+        //  QByteArray errorString(errData, static_cast<int>(errSize));
         BIO_free(errBIO);
         BIO_free(bioKey);
         RSA_free(rsa);
@@ -79,9 +79,9 @@ QByteArray JulyRSA::getSignature(const QByteArray& data, const QByteArray& keyAr
 
     for (int n = 0; n < dataList.size(); n++)
     {
-        auto* finalData = static_cast < unsigned char*>(malloc(static_cast<size_t>(rsaSize)));
-        int outSize = RSA_public_decrypt(dataList.at(n).size(), (unsigned char*)dataList.at(n).constData(), finalData, rsa,
-                                         RSA_PKCS1_PADDING);
+        auto* finalData = static_cast<unsigned char*>(malloc(static_cast<size_t>(rsaSize)));
+        int outSize =
+            RSA_public_decrypt(dataList.at(n).size(), (unsigned char*)dataList.at(n).constData(), finalData, rsa, RSA_PKCS1_PADDING);
         result.append(QByteArray((char*)finalData, outSize));
         free(finalData);
     }

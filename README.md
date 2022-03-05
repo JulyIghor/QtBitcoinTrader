@@ -45,6 +45,15 @@ Next ToDo:
 
 ## Change Log
 
+v1.41.00 Released!
+- Fixed time syncronization in Binance
+- Translation fixes, added Korean language
+- Fixed bug in trade history of Bittrex exchange
+- Improved request interval limits for Poloniex
+- Qt 6 support, using QJSEngine instead of QtScript
+- Optimized CPU usage
+- Updated currency pairs list
+
 v1.40.55 Released!
 
 - Fixed trader.groupStop(..) script command

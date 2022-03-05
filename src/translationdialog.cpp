@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,19 +31,18 @@
 
 #include "translationdialog.h"
 #include "main.h"
-#include <QMessageBox>
-#include <QFileDialog>
 #include <QDesktopServices>
+#include <QFileDialog>
+#include <QMessageBox>
 #include <QTimer>
 
-TranslationDialog::TranslationDialog(QWidget* parent)
-    : QDialog(parent)
+TranslationDialog::TranslationDialog(QWidget* parent) : QDialog(parent)
 {
     ui.setupUi(this);
     ui.buttonSaveAs->setEnabled(false);
     setWindowFlags(Qt::Window);
     setAttribute(Qt::WA_DeleteOnClose, true);
-    //setFixedSize(size());
+    // setFixedSize(size());
 
     julyTranslator.translateUi(this);
 
@@ -104,8 +103,8 @@ TranslationDialog::TranslationDialog(QWidget* parent)
 
 TranslationDialog::~TranslationDialog()
 {
-    
-        delete gridLayout;
+
+    delete gridLayout;
 
     if (baseValues.mainWindow_)
         mainWindow.addPopupDialog(-1);
@@ -131,12 +130,11 @@ void TranslationDialog::deleteTranslationButton()
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setWindowTitle(julyTr("MESSAGE_CONFIRM_DELETE_TRANSLATION", "Please confirm removing file"));
     msgBox.setText(julyTr("MESSAGE_CONFIRM_DELETE_TRANSLATION_TEXT", "Are you sure to delete translation file?"));
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Yes);
-    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
-    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
 
-    if (msgBox.exec() != QMessageBox::Yes)
+    auto buttonYes = msgBox.addButton(julyTr("YES", "Yes"), QMessageBox::YesRole);
+    msgBox.addButton(julyTr("NO", "No"), QMessageBox::NoRole);
+    msgBox.exec();
+    if (msgBox.clickedButton() != buttonYes)
         return;
 
     if (QFile::exists(julyTranslator.lastFile()))
@@ -147,7 +145,7 @@ void TranslationDialog::deleteTranslationButton()
     close();
 }
 
-void TranslationDialog::fillLayoutByMap(QMap<QString, QString>* cMap, QString subName, QMap<QString, QString>* dMap)
+void TranslationDialog::fillLayoutByMap(QMap<QString, QString>* cMap, const QString& subName, QMap<QString, QString>* dMap)
 {
     QStringList currentIdList = dMap->keys();
 
@@ -162,7 +160,7 @@ void TranslationDialog::fillLayoutByMap(QMap<QString, QString>* cMap, QString su
         newEdit->setToolTip(defText.replace("<br>", "\n"));
         newEdit->setWindowTitle(subName + currentIdList.at(n));
         newEdit->setItemText(cMap->value(currentIdList.at(n), ""));
-        connect(newEdit, SIGNAL(lineTextChanged()), this, SLOT(lineTextChanged()));
+        connect(newEdit, &TranslationLine::lineTextChanged, this, &TranslationDialog::lineTextChanged);
         lineEdits << newEdit;
     }
 }
@@ -193,7 +191,7 @@ void TranslationDialog::applyButton()
 
     resultList << "String_LANGUAGE_NAME=" + ui.languageName->text();
     resultList << "String_LANGUAGE_AUTHOR=" + authorAbout->getValidText();
-    QString localeName = locale().name(); //if(localeName.contains("_"))localeName.split("_").first();
+    QString localeName = locale().name(); // if(localeName.contains("_"))localeName.split("_").first();
     resultList << "String_LANGUAGE_LOCALE=" + localeName;
     QFile writeFile(appDataDir + "/Language/Custom.lng");
     writeFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
@@ -215,9 +213,12 @@ void TranslationDialog::saveAsButton()
     if (!ui.buttonSaveAs->isEnabled())
         return;
 
-    QString fileName = QFileDialog::getSaveFileName(this, julyTr("SAVE_TRANSLATION", "Save Translation"),
-                       baseValues.desktopLocation + "/" + ui.languageName->text().replace("/", "_").replace("\\", "").replace(":",
-                               "").replace("?", "") + ".lng", "(*.lng)");
+    QString fileName = QFileDialog::getSaveFileName(
+        this,
+        julyTr("SAVE_TRANSLATION", "Save Translation"),
+        baseValues.desktopLocation + "/" + ui.languageName->text().replace("/", "_").replace("\\", "").replace(":", "").replace("?", "") +
+            ".lng",
+        "(*.lng)");
 
     if (fileName.isEmpty())
         return;

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,25 +32,51 @@
 #include "sound.h"
 
 #ifdef Q_OS_WIN
-    #include <windows.h>
+#include <windows.h>
 #else
-    #include <QSound>
+#if QT_VERSION <= 0x060000
+#include <QSound>
+#else
+#include <QDebug>
 #endif
+#endif
+#include "procdestructor.h"
 
 namespace Platform
 {
-
-
-void playSound(const QString& path)
-{
+    void playSound(const QString& path)
+    {
 #ifdef Q_OS_WIN
-    PlaySound((LPCWSTR) path.utf16(), NULL, SND_ASYNC);
+        PlaySound((LPCWSTR)path.utf16(), NULL, SND_ASYNC);
 #else
-    static QSound soundInstance("", nullptr);
-    soundInstance.stop();
-    soundInstance.play(path);
+#if QT_VERSION <= 0x060000
+        static QSound soundInstance("", nullptr);
+        soundInstance.stop();
+        soundInstance.play(path);
+#else
+#ifdef Q_OS_MAC
+        std::unique_ptr<QProcess> proc(new QProcess);
+        proc->start("afplay", QStringList() << path);
+        if (proc->waitForStarted(3000))
+        {
+            static ProcDestructor procHolder;
+            procHolder.addProc(proc.release());
+        }
+        else
+            qDebug().noquote() << "Failed to play" << path;
+#else
+        std::unique_ptr<QProcess> proc(new QProcess);
+        proc->start("play", QStringList() << "-q" << path);
+        if (proc->waitForStarted(3000))
+        {
+            static ProcDestructor procHolder;
+            procHolder.addProc(proc.release());
+        }
+        else
+            qDebug().noquote() << "Failed to play" << path;
 #endif
-}
+#endif
+#endif
+    }
 
-
-}
+} // namespace Platform

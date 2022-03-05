@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,41 +30,27 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "scriptobject.h"
-#include <QVariant>
-#include <QVariantList>
-#include <QStringList>
-#include <QTime>
 #include "exchange/exchange.h"
 #include "iniengine.h"
 #include "main.h"
 #include "timesync.h"
-#include <ctime>
-#include <QMetaMethod>
 #include <QDoubleSpinBox>
-#include <QScriptEngine>
-#include <QScriptValueIterator>
+#include <QMetaMethod>
+#include <QStringList>
+#include <QTime>
+#include <QVariant>
+#include <QVariantList>
+#include <ctime>
 
-ScriptObject::ScriptObject(const QString& _scriptName) :
-    QObject()
+ScriptObject::ScriptObject(const QString& _scriptName) : QObject(), scriptName(_scriptName)
 {
-    scriptWantsOrderBookData = false;
-    haveTimer = false;
-    secondTimer = nullptr;
-    pendingStop = false;
-    testResult = 0;
-    scriptName = _scriptName;
-    isRunningFlag = false;
-    engine = nullptr;
-    testMode = true;
-
     for (int n = staticMetaObject.methodOffset(); n < staticMetaObject.methodCount(); n++)
     {
-        if (staticMetaObject.method(n).methodType() != QMetaMethod::Slot ||
-            staticMetaObject.method(n).access() != QMetaMethod::Public)
+        if (staticMetaObject.method(n).methodType() != QMetaMethod::Slot || staticMetaObject.method(n).access() != QMetaMethod::Public)
             continue;
 
         QString currentCommand;
-#if QT_VERSION<0x050000
+#if QT_VERSION < 0x050000
         currentCommand = QString::fromLocal8Bit(staticMetaObject.method(n).signature());
         currentCommand = currentCommand.split("(").first();
 #else
@@ -122,38 +108,29 @@ ScriptObject::ScriptObject(const QString& _scriptName) :
     indicatorList.removeDuplicates();
     functionsList.removeDuplicates();
 
-    connect(this, SIGNAL(setGroupEnabled(QString, bool)), baseValues.mainWindow_, SLOT(setGroupRunning(QString, bool)));
-    connect(this, SIGNAL(startAppSignal(QString, QStringList)), baseValues.mainWindow_, SLOT(startApplication(QString,
-            QStringList)));
+    connect(this, &ScriptObject::setGroupEnabled, baseValues.mainWindow_, &QtBitcoinTrader::setGroupRunning);
+    connect(this, &ScriptObject::startAppSignal, baseValues.mainWindow_, &QtBitcoinTrader::startApplication);
 
-    connect(baseValues.mainWindow_, SIGNAL(indicatorEventSignal(QString, QString, double)), this,
-            SLOT(initValueChanged(QString, QString, double)));
-    connect(this, SIGNAL(eventSignal(QString, QString, double)), baseValues.mainWindow_, SLOT(sendIndicatorEvent(QString,
-            QString, double)));
+    connect(baseValues.mainWindow_, &QtBitcoinTrader::indicatorEventSignal, this, &ScriptObject::initValueChanged);
+    connect(this, &ScriptObject::eventSignal, baseValues.mainWindow_, &QtBitcoinTrader::sendIndicatorEvent);
 
     secondTimer = new QTimer(this);
     secondTimer->setSingleShot(true);
-    connect(secondTimer, SIGNAL(timeout()), this, SLOT(secondSlot()));
+    connect(secondTimer, &QTimer::timeout, this, &ScriptObject::secondSlot);
 
-    connect(this, SIGNAL(performFileWrite(QString, QByteArray)), &performThread, SLOT(performFileWrite(QString,
-            QByteArray)));
-    connect(this, SIGNAL(performFileAppend(QString, QByteArray)), &performThread, SLOT(performFileAppend(QString,
-            QByteArray)));
-    connect(this, SIGNAL(performFileReadLine(QString, qint64, quint32)), &performThread, SLOT(performFileReadLine(QString,
-            qint64, quint32)));
-    connect(this, SIGNAL(performFileReadLineSimple(QString, quint32)), &performThread,
-            SLOT(performFileReadLineSimple(QString, quint32)));
-    connect(this, SIGNAL(performFileRead(QString, qint64, quint32)), &performThread, SLOT(performFileRead(QString, qint64,
-            quint32)));
-    connect(this, SIGNAL(performFileReadAll(QString, quint32)), &performThread, SLOT(performFileReadAll(QString, quint32)));
-    connect(&performThread, SIGNAL(fileReadResult(QByteArray, quint32)), this, SLOT(fileReadResult(QByteArray, quint32)));
+    connect(this, &ScriptObject::performFileWrite, &performThread, &ScriptObjectThread::performFileWrite);
+    connect(this, &ScriptObject::performFileAppend, &performThread, &ScriptObjectThread::performFileAppend);
+    connect(this, &ScriptObject::performFileReadLine, &performThread, &ScriptObjectThread::performFileReadLine);
+    connect(this, &ScriptObject::performFileReadLineSimple, &performThread, &ScriptObjectThread::performFileReadLineSimple);
+    connect(this, &ScriptObject::performFileRead, &performThread, &ScriptObjectThread::performFileRead);
+    connect(this, &ScriptObject::performFileReadAll, &performThread, &ScriptObjectThread::performFileReadAll);
+    connect(&performThread, &ScriptObjectThread::fileReadResult, this, &ScriptObject::fileReadResult);
     fileOperationNumber = 0;
     fileOpenCount = 0;
 }
 
 ScriptObject::~ScriptObject()
 {
-
 }
 
 void ScriptObject::sendEvent(const QString& name, double value)
@@ -270,7 +247,7 @@ void ScriptObject::timerCreate(int milliseconds, const QString& command, bool on
     newTimer->setSingleShot(once);
     newTimer->setProperty("Command", command);
     newTimer->setProperty("DeleteMe", once);
-    connect(newTimer, SIGNAL(timeout()), this, SLOT(timerOut()));
+    connect(newTimer, &QTimer::timeout, this, &ScriptObject::timerOut);
     newTimer->start(milliseconds);
 }
 
@@ -302,7 +279,7 @@ void ScriptObject::timerOut()
     if (command.isEmpty())
         return;
 
-    if (engine == nullptr)
+    if (!engine)
         return;
 
     engine->evaluate(command.replace("\\", "\\\\"));
@@ -374,6 +351,11 @@ void ScriptObject::beep() const
 
 void ScriptObject::playWav(const QString& fileName)
 {
+    play(fileName);
+}
+
+void ScriptObject::play(const QString& fileName)
+{
     if (testMode)
         return;
 
@@ -383,7 +365,7 @@ void ScriptObject::playWav(const QString& fileName)
         return;
     }
 
-    mainWindow.playWav(fileName, false);
+    mainWindow.play(fileName, false);
 }
 
 void ScriptObject::say(const QString& text)
@@ -419,7 +401,11 @@ void ScriptObject::say(const QVariant& text1, const QVariant& text2, const QVari
 {
     say(QVariantList() << text1 << text2 << text3 << text4 << text5);
 }
-void ScriptObject::say(const QVariant& text1, const QVariant& text2, const QVariant& text3, const QVariant& text4, const QVariant& text5,
+void ScriptObject::say(const QVariant& text1,
+                       const QVariant& text2,
+                       const QVariant& text3,
+                       const QVariant& text4,
+                       const QVariant& text5,
                        const QVariant& text6)
 {
     say(QVariantList() << text1 << text2 << text3 << text4 << text5 << text6);
@@ -442,9 +428,9 @@ void ScriptObject::say(const QVariantList& list)
 
     for (int n = 0; n < list.size(); n++)
     {
-        if (list.at(n).type() == QVariant::Double)
+        if (list.at(n).userType() == QMetaType::Double)
         {
-            QString number = JulyMath::textFromDouble(list.at(n).toDouble(), 8, 0);
+            QString number = JulyMath::textFromDoubleStr(list.at(n).toDouble(), 8, 0);
 
             if (detectDoublePoint == 2)
                 number.replace(QLatin1Char('.'), QLatin1Char(','));
@@ -666,11 +652,16 @@ void ScriptObject::log(const QVariant& arg1, const QVariant& arg2, const QVarian
 {
     log(QVariantList() << arg1 << arg2 << arg3 << arg4 << arg5);
 }
-void ScriptObject::log(const QVariant& arg1, const QVariant& arg2, const QVariant& arg3, const QVariant& arg4, const QVariant& arg5,
+void ScriptObject::log(const QVariant& arg1,
+                       const QVariant& arg2,
+                       const QVariant& arg3,
+                       const QVariant& arg4,
+                       const QVariant& arg5,
                        const QVariant& arg6)
 {
     log(QVariantList() << arg1 << arg2 << arg3 << arg4 << arg5 << arg6);
 }
+
 void ScriptObject::log(const QVariantList& list)
 {
     if (testMode)
@@ -683,7 +674,7 @@ void ScriptObject::log(const QVariantList& list)
         if (n != 0)
             logText.append(QLatin1Char(' '));
 
-        if (list.at(n).type() == QVariant::Double)
+        if (list.at(n).userType() == QMetaType::Double)
             logText.append(JulyMath::textFromDouble(list.at(n).toDouble(), 8, 0));
         else
             logText.append(list.at(n).toString());
@@ -691,19 +682,20 @@ void ScriptObject::log(const QVariantList& list)
 
     log(logText);
 }
+
 void ScriptObject::log(const QVariant& arg1)
 {
     if (testMode)
         return;
 
-    if (arg1.type() == QVariant::Double)
+    if (arg1.userType() == QMetaType::Double)
     {
         QString result;
         bool ok;
         double doubleVal = arg1.toDouble(&ok);
 
         if (ok)
-            result = JulyMath::textFromDouble(doubleVal, 8, 0);
+            result = JulyMath::textFromDoubleStr(doubleVal, 8, 0);
         else
         {
             quint64 uLongVal = arg1.toULongLong(&ok);
@@ -720,7 +712,7 @@ void ScriptObject::log(const QVariant& arg1)
         emit writeLog(arg1.toString());
 }
 
-void ScriptObject::initValueChangedPrivate(const QString& symbol, QString& scriptNameInd, double& val, bool forceEmit)
+void ScriptObject::initValueChangedPrivate(const QString& symbol, QString& scriptNameInd, double val, bool forceEmit)
 {
     QString prependName;
 
@@ -806,6 +798,8 @@ void ScriptObject::deleteEngine()
         for (QDoubleSpinBox* spinBox : spinBoxList)
             disconnect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ScriptObject::indicatorValueChanged);
 
+    engine->blockSignals(true);
+#ifdef QT_SCRIPT_LIB
     if (testMode)
     {
         QScriptValueIterator it(engine->globalObject());
@@ -816,9 +810,8 @@ void ScriptObject::deleteEngine()
             it.setValue(0);
         }
     }
-
-    engine->deleteLater();
-    engine = nullptr;
+#endif
+    engine.reset();
 
     if (!testMode && scriptWantsOrderBookData)
     {
@@ -831,7 +824,8 @@ void ScriptObject::setRunning(bool on)
 {
     if (!testMode && !on)
     {
-        secondTimer->stop();
+        if (secondTimer)
+            secondTimer->stop();
     }
 
     if (on == isRunningFlag)
@@ -869,14 +863,14 @@ bool ScriptObject::executeScript(const QString& script, bool _testMode)
     }
 
     if (engine)
-    {
         deleteEngine();
-    }
 
     testMode = _testMode;
-    engine = new QScriptEngine;
-
-    QScriptValue scriptValue = engine->newQObject(this);
+    engine.reset(new JSEngine);
+    JSValue scriptValue = engine->newQObject(this);
+#ifndef QT_SCRIPT_LIB
+    engine->setObjectOwnership(this, JSEngine::CppOwnership);
+#endif
     engine->globalObject().setProperty("trader", scriptValue);
 
     bool anyValue = script.contains("trader.on(\"AnyValue\").changed()", Qt::CaseInsensitive) ||
@@ -889,9 +883,9 @@ bool ScriptObject::executeScript(const QString& script, bool _testMode)
         if (scriptWantsOrderBookData && baseValues.scriptsThatUseOrderBookCount > 0)
             baseValues.scriptsThatUseOrderBookCount--;
 
-        scriptWantsOrderBookData = script.contains("trader.get(\"Asks", Qt::CaseInsensitive) ||
-                                   script.contains("trader.get('Asks", Qt::CaseInsensitive) || script.contains("trader.get(\"Bids", Qt::CaseInsensitive) ||
-                                   script.contains("trader.get('Bids", Qt::CaseInsensitive);
+        scriptWantsOrderBookData =
+            script.contains("trader.get(\"Asks", Qt::CaseInsensitive) || script.contains("trader.get('Asks", Qt::CaseInsensitive) ||
+            script.contains("trader.get(\"Bids", Qt::CaseInsensitive) || script.contains("trader.get('Bids", Qt::CaseInsensitive);
 
         bool scriptContainsBalance = script.contains("Balance", Qt::CaseInsensitive);
 
@@ -918,7 +912,7 @@ bool ScriptObject::executeScript(const QString& script, bool _testMode)
         scriptWantsOrderBookData = false;
 
     pendingStop = false;
-    QScriptValue handler = engine->evaluate(sourceToScript(script));
+    JSValue handler = engine->evaluate(sourceToScript(script));
 
     if (haveTimer)
         secondSlot();
@@ -931,12 +925,17 @@ bool ScriptObject::executeScript(const QString& script, bool _testMode)
         setRunning(false);
         return true;
     }
-
+#ifdef QT_SCRIPT_LIB
     if (engine->hasUncaughtException())
     {
         int lineNumber = engine->uncaughtExceptionLineNumber();
         QString errorText = engine->uncaughtException().toString() + " (Line:" + QString::number(lineNumber) + ")";
-
+#else
+    if (handler.errorType() != JSValue::NoError)
+    {
+        int lineNumber = handler.property(QLatin1String("lineNumber")).toInt();
+        QString errorText = handler.toString() + " (Line:" + QString::number(lineNumber) + ")";
+#endif
         emit errorHappend(lineNumber, errorText);
 
         if (!testMode)
@@ -1007,11 +1006,11 @@ QString ScriptObject::sourceToScript(const QString& textValue) const
 
     text.replace(").changed()", ")", Qt::CaseInsensitive);
 
-    while (replaceString("trader.on('",
-                         "trader['valueChanged(QString,QString,double)'].connect(function(symbol,name,value){if(name=='", text, true));
+    while (replaceString("trader.on('", "trader.valueChanged.connect(function(symbol,name,value){if(name=='", text, true))
+        ;
 
-    while (replaceString("trader.on(\"",
-                         "trader['valueChanged(QString,QString,double)'].connect(function(symbol,name,value){if(name==\"", text, true));
+    while (replaceString("trader.on(\"", "trader.valueChanged.connect(function(symbol,name,value){if(name==\"", text, true))
+        ;
 
     text.replace("trader.get(\"AsksPrice\",", "trader.getAsksPriceByVol(", Qt::CaseInsensitive);
     text.replace("trader.get(\"AsksVolume\",", "trader.getAsksVolByPrice(", Qt::CaseInsensitive);
@@ -1064,8 +1063,7 @@ bool ScriptObject::replaceString(const QString& what, const QString& to, QString
         }
 
         curPos++;
-    }
-    while (curPos < text.length());
+    } while (curPos < text.length());
 
     if (rightPos == -1)
         return false;
@@ -1087,7 +1085,7 @@ void ScriptObject::fileWrite(const QVariant& path, const QVariant& data)
 
     QString result;
 
-    if (data.type() == QVariant::Double)
+    if (data.userType() == QMetaType::Double)
     {
         bool ok;
         double doubleVal = data.toDouble(&ok);
@@ -1117,7 +1115,7 @@ void ScriptObject::fileAppend(const QVariant& path, const QVariant& data)
 
     QString result;
 
-    if (data.type() == QVariant::Double)
+    if (data.userType() == QMetaType::Double)
     {
         bool ok;
         double doubleVal = data.toDouble(&ok);
@@ -1210,7 +1208,7 @@ QVariant ScriptObject::fileReadAll(const QVariant& path)
 
 QVariant ScriptObject::dateTimeString()
 {
-    return QDateTime::fromTime_t(TimeSync::getTimeT()).toString(baseValues.dateTimeFormat);
+    return QDateTime::fromSecsSinceEpoch(TimeSync::getTimeT()).toString(baseValues.dateTimeFormat);
 }
 
 void ScriptObject::fileReadResult(const QByteArray& data, quint32 tempFileOperationNumber)

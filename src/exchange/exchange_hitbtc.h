@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ class Exchange_HitBTC : public Exchange
     Q_OBJECT
 
 public:
-    Exchange_HitBTC(const QByteArray &pRestSign, const QByteArray &pRestKey);
+    Exchange_HitBTC(const QByteArray& pRestSign, const QByteArray& pRestKey);
     ~Exchange_HitBTC();
 
 public slots:
@@ -60,7 +60,7 @@ private:
     void clearVariables();
     void depthSubmitOrder(const QString&, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
     void depthUpdateOrder(const QString&, double, double, bool);
-    void sendToApi(int reqType, const QByteArray &method, bool auth = false, QByteArray commands = nullptr);
+    void sendToApi(int reqType, const QByteArray& method, bool auth = false, QByteArray commands = nullptr);
     bool isReplayPending(int);
 
 private:

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -33,13 +33,11 @@
 #include "main.h"
 #include <QStandardPaths>
 
-DataFolderChuseDialog::DataFolderChuseDialog(QString systemPath, QString localPath)
-    : QDialog()
+DataFolderChuseDialog::DataFolderChuseDialog(QString systemPath, QString localPath) : QDialog()
 {
     isPortable = false;
     ui.setupUi(this);
     setWindowFlags(Qt::WindowCloseButtonHint);
-
 
 #ifdef Q_OS_WIN
     systemPath.replace('/', '\\');
@@ -58,15 +56,14 @@ DataFolderChuseDialog::DataFolderChuseDialog(QString systemPath, QString localPa
 
     ui.buttonUseSystemFolder->setText(julyTr("USE_SYSTEM_FOLDER", "Store your data in system folder") + "\n\n" + systemPath);
     ui.buttonUsePortableMode->setToolTip(systemPath);
-    ui.buttonUsePortableMode->setText(julyTr("USE_PORTABLE_MODE",
-                                      "Enable portable mode. Store your data in same folder as executable file"));
+    ui.buttonUsePortableMode->setText(
+        julyTr("USE_PORTABLE_MODE", "Enable portable mode. Store your data in same folder as executable file"));
     ui.buttonUsePortableMode->setToolTip(localPath);
     setFixedSize(minimumSizeHint().width() + 40, qMax(minimumSizeHint().height(), 150));
 }
 
 DataFolderChuseDialog::~DataFolderChuseDialog()
 {
-
 }
 
 void DataFolderChuseDialog::on_buttonUsePortableMode_clicked()

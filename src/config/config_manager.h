@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,16 +31,13 @@
 
 #pragma once
 
-#include <QObject>
 #include <QList>
+#include <QObject>
 #include <QSettings>
-
 
 class QSettings;
 
-
-class ConfigManager :
-    public QObject
+class ConfigManager : public QObject
 {
     Q_OBJECT
 
@@ -57,8 +54,8 @@ public:
     void translateDefaultNames();
     void restoreState();
 
-    QStringList       defaultNames;
-    QStringList       defaultNamesTr;
+    QStringList defaultNames;
+    QStringList defaultNamesTr;
     QList<QByteArray> defaultGeometry;
     QList<QByteArray> defaultState;
 
@@ -67,7 +64,7 @@ Q_SIGNALS:
     void onChanged();
 
 private:
-    QSettings               settings;
+    QSettings settings;
     QHash<QString, QVariant> settingsCache;
     QByteArray lastRestoreState;
     QByteArray lastRestoreGeometry;

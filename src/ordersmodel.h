@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,9 +32,9 @@
 #ifndef ORDERSMODEL_H
 #define ORDERSMODEL_H
 
+#include "orderitem.h"
 #include <QAbstractItemModel>
 #include <QStringList>
-#include "orderitem.h"
 
 class OrdersModel : public QAbstractItemModel
 {

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,15 +31,15 @@
 
 #ifndef MAIN_H
 #define MAIN_H
-#include "qtextstream.h"
-#include <QFontMetrics>
 #include "julytranslator.h"
 #include "logthread.h"
+#include "qtextstream.h"
+#include <QFontMetrics>
 
 #define textFontWidth(text) baseValues_->fontMetrics_->horizontalAdvance(text)
 #define debugLevel (baseValues_->debugLevel_)
 #define appDataDir (baseValues_->appDataDir_)
-#define grouped (baseValues_->groupPriceValue>0.0?2:0)
+#define grouped (baseValues_->groupPriceValue > 0.0 ? 2 : 0)
 #define mainWindow (*baseValues_->mainWindow_)
 #define logThread (baseValues_->logThread_)
 
@@ -53,14 +53,46 @@
 #define upArrowNoUtfStr baseValues_->upArrowNoUtf8
 #define downArrowNoUtfStr baseValues_->downArrowNoUtf8
 
-#define hmacSha512(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha512(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), static_cast<size_t>(baseString.size()), nullptr, nullptr)),64)
-#define hmacSha384(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha384(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), static_cast<size_t>(baseString.size()), nullptr, nullptr)),48)
-#define hmacSha256(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha256(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), static_cast<size_t>(baseString.size()), nullptr, nullptr)),32)
-#define hmacSha1(key, baseString) QByteArray(reinterpret_cast<const char *>(HMAC(EVP_sha1(),key.constData(), key.size(), reinterpret_cast<const unsigned char *>(baseString.constData()), static_cast<size_t>(baseString.size()), nullptr, nullptr)),20)
+#define hmacSha512(key, baseString) \
+    QByteArray(reinterpret_cast<const char*>(HMAC(EVP_sha512(), \
+                                                  key.constData(), \
+                                                  key.size(), \
+                                                  reinterpret_cast<const unsigned char*>(baseString.constData()), \
+                                                  static_cast<size_t>(baseString.size()), \
+                                                  nullptr, \
+                                                  nullptr)), \
+               64)
+#define hmacSha384(key, baseString) \
+    QByteArray(reinterpret_cast<const char*>(HMAC(EVP_sha384(), \
+                                                  key.constData(), \
+                                                  key.size(), \
+                                                  reinterpret_cast<const unsigned char*>(baseString.constData()), \
+                                                  static_cast<size_t>(baseString.size()), \
+                                                  nullptr, \
+                                                  nullptr)), \
+               48)
+#define hmacSha256(key, baseString) \
+    QByteArray(reinterpret_cast<const char*>(HMAC(EVP_sha256(), \
+                                                  key.constData(), \
+                                                  key.size(), \
+                                                  reinterpret_cast<const unsigned char*>(baseString.constData()), \
+                                                  static_cast<size_t>(baseString.size()), \
+                                                  nullptr, \
+                                                  nullptr)), \
+               32)
+#define hmacSha1(key, baseString) \
+    QByteArray(reinterpret_cast<const char*>(HMAC(EVP_sha1(), \
+                                                  key.constData(), \
+                                                  key.size(), \
+                                                  reinterpret_cast<const unsigned char*>(baseString.constData()), \
+                                                  static_cast<size_t>(baseString.size()), \
+                                                  nullptr, \
+                                                  nullptr)), \
+               20)
 
-#include "qtbitcointrader.h"
 #include "apptheme.h"
 #include "currencypairitem.h"
+#include "qtbitcointrader.h"
 
 class Exchange;
 class QProcess;
@@ -105,7 +137,7 @@ struct BaseValues
     AppTheme appThemeDark;
     AppTheme appThemeGray;
     AppTheme appTheme;
-    int debugLevel_;//0: Disabled; 1: Debug; 2: Log
+    int debugLevel_; // 0: Disabled; 1: Debug; 2: Log
     bool supportsUtfUI;
     bool highResolutionDisplay;
     int defaultHeightForRow_;

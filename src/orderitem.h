@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@ struct OrderItem
     QByteArray oid;
     qint64 date;
     QString dateStr;
-    bool type;//true=Ask, false=Bid
-    int status;//0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
+    bool type;  // true=Ask, false=Bid
+    int status; // 0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
     double amount;
     QString amountStr;
     double price;

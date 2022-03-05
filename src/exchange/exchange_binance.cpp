@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -86,14 +86,11 @@ void Exchange_Binance::quitThread()
 {
     clearValues();
 
-    
-        delete depthAsks;
+    delete depthAsks;
 
-    
-        delete depthBids;
+    delete depthBids;
 
-    
-        delete julyHttp;
+    delete julyHttp;
 }
 
 void Exchange_Binance::clearVariables()
@@ -875,17 +872,17 @@ void Exchange_Binance::sendToApi(int reqType, const QByteArray& method, bool aut
             julyHttp->setPortForced(port);
         }
 
-        connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
-        connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
-        connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
-        connect(julyHttp, SIGNAL(errorSignal(QString)), baseValues_->mainWindow_, SLOT(showErrorMessage(QString)));
-        connect(julyHttp, SIGNAL(sslErrorSignal(const QList<QSslError>&)), this, SLOT(sslErrors(const QList<QSslError>&)));
-        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceivedAuth(const QByteArray&, int, int)));
+        connect(julyHttp, &JulyHttp::anyDataReceived, baseValues_->mainWindow_, &QtBitcoinTrader::anyDataReceived);
+        connect(julyHttp, &JulyHttp::apiDown, baseValues_->mainWindow_, &QtBitcoinTrader::setApiDown);
+        connect(julyHttp, &JulyHttp::setDataPending, baseValues_->mainWindow_, &QtBitcoinTrader::setDataPending);
+        connect(julyHttp, &JulyHttp::errorSignal, baseValues_->mainWindow_, &QtBitcoinTrader::showErrorMessage);
+        connect(julyHttp, &JulyHttp::sslErrorSignal, this, &Exchange::sslErrors);
+        connect(julyHttp, &JulyHttp::dataReceived, this, &Exchange::dataReceivedAuth);
     }
 
     if (auth)
     {
-        QByteArray data = commands + "recvWindow=30000&timestamp=" + QByteArray::number(TimeSync::getMSecs() - 10000);
+        QByteArray data = commands + "recvWindow=59000&timestamp=" + QByteArray::number(TimeSync::getMSecs() - 23000);
         julyHttp->sendData(
             reqType, m_pairChangeCount, method + data + "&signature=" + hmacSha256(getApiSign(), data).toHex(), "", "\n\r\n");
     }

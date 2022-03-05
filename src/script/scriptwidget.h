@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,9 +32,9 @@
 #ifndef SCRIPTWIDGET_H
 #define SCRIPTWIDGET_H
 
-#include <QWidget>
-#include <QScriptEngine>
 #include <QMenu>
+#include <QWidget>
+#include <memory>
 
 class QToolButton;
 class ScriptObject;
@@ -51,7 +51,9 @@ public:
     void replaceScript(const QString&);
     void setRunning(bool on);
     bool isRunning();
-    explicit ScriptWidget(const QString& name, const QString& filePathSave = QLatin1String(), const QString& fileCopyFrom = QLatin1String());
+    explicit ScriptWidget(const QString& name,
+                          const QString& filePathSave = QLatin1String(),
+                          const QString& fileCopyFrom = QLatin1String());
     ~ScriptWidget();
     bool executeScript(const QString& script, bool testMode);
     QString getFilePath();
@@ -93,10 +95,10 @@ private:
     QMenu insertCommandMenu;
     QMenu insertFunctionMenu;
 
-    ScriptObject* scriptObject;
+    std::unique_ptr<ScriptObject> scriptObject;
     QString scriptName;
     QString fileName;
-    Ui::ScriptWidget* ui;
+    std::unique_ptr<Ui::ScriptWidget> ui;
 signals:
     void setRuleTabRunning(QString, bool);
 };

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,23 +29,23 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QThread>
-#include <QMutex>
-#include <QFileInfo>
-#include <QDir>
-#include "main.h"
+#include "iniengine.h"
 #include "exchange/exchange.h"
 #include "julyhttp.h"
 #include "julyrsa.h"
-#include "iniengine.h"
+#include "main.h"
+#include <QDir>
+#include <QFileInfo>
+#include <QMutex>
+#include <QThread>
 
-IniEngine::IniEngine()
-    : QObject(),
-      iniEngineThread(new QThread),
-      julyHttp(nullptr),
-      currencyCacheFileName(appDataDir + "/cache/currencies.cache"),
-      currencyResourceFileName("://Resources/Currencies.ini"),
-      waitForDownload(true)
+IniEngine::IniEngine() :
+    QObject(),
+    iniEngineThread(new QThread),
+    julyHttp(nullptr),
+    currencyCacheFileName(appDataDir + "/cache/currencies.cache"),
+    currencyResourceFileName("://Resources/Currencies.ini"),
+    waitForDownload(true)
 {
     iniEngineThread->setObjectName("Ini Engine");
     connect(this, &IniEngine::loadExchangeSignal, this, &IniEngine::loadExchange);
@@ -284,9 +284,7 @@ void IniEngine::loadExchange(const QString& exchangeIniFileName)
 
     checkTimer->start();
     julyHttp->destroyClass = false;
-    julyHttp->sendData(171, 0,
-                       "GET /Downloads/QBT_Resources/Exchanges/" + exchangeIniFileName.toLatin1() + ".ini",
-                       nullptr, nullptr, 0);
+    julyHttp->sendData(171, 0, "GET /Downloads/QBT_Resources/Exchanges/" + exchangeIniFileName.toLatin1() + ".ini", nullptr, nullptr, 0);
     julyHttp->destroyClass = true;
 
     if (waitForDownload)
@@ -388,9 +386,9 @@ void IniEngine::parseExchange(const QString& exchangeFileName)
     waitForDownload = false;
 }
 
-//void IniEngine::loadPairs(QStringList* pairsList)
+// void IniEngine::loadPairs(QStringList* pairsList)
 //{
-//    exchangePairs.clear();
+//     exchangePairs.clear();
 
 //    for (int n = 0; n < pairsList->size(); ++n)
 //    {
@@ -450,28 +448,28 @@ QString IniEngine::getPairName(int index)
 {
     if (index >= 0 && index < IniEngine::global()->exchangePairs.size())
         return IniEngine::global()->exchangePairs.at(index).name;
-            return "";
+    return "";
 }
 
 QString IniEngine::getPairRequest(int index)
 {
     if (index >= 0 && index < IniEngine::global()->exchangePairs.size())
         return IniEngine::global()->exchangePairs.at(index).currRequestPair;
-            return "";
+    return "";
 }
 
 QString IniEngine::getPairSymbol(int index)
 {
     if (index >= 0 && index < IniEngine::global()->exchangePairs.size())
         return IniEngine::global()->exchangePairs.at(index).symbol;
-            return "";
+    return "";
 }
 
 QString IniEngine::getPairSymbolSecond(int index)
 {
     if (index >= 0 && index < IniEngine::global()->exchangePairs.size())
         return IniEngine::global()->exchangePairs.at(index).symbolSecond();
-            return "";
+    return "";
 }
 
 int IniEngine::getPairsCount()

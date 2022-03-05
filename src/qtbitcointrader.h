@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -34,29 +34,28 @@
 
 #include <QMainWindow>
 
-#include "ui_qtbitcointrader.h"
-#include "depthmodel.h"
-#include <QCloseEvent>
-#include <QSortFilterProxyModel>
-#include <QSystemTrayIcon>
-#include <QSettings>
-#include <QMenu>
-#include <QTime>
-#include "tradesmodel.h"
-#include "ordersmodel.h"
-#include "orderitem.h"
-#include "historymodel.h"
-#include <QKeyEvent>
 #include "currencypairitem.h"
+#include "debugviewer.h"
+#include "depthmodel.h"
+#include "feecalculator.h"
+#include "historymodel.h"
+#include "orderitem.h"
+#include "ordersmodel.h"
+#include "percentpicker.h"
 #include "script/rulewidget.h"
 #include "script/scriptwidget.h"
-#include "feecalculator.h"
-#include "percentpicker.h"
-#include <QScrollArea>
-#include <time.h>
+#include "tradesmodel.h"
+#include "ui_qtbitcointrader.h"
+#include <QCloseEvent>
 #include <QElapsedTimer>
-#include "debugviewer.h"
-#include <QTextToSpeech>
+#include <QKeyEvent>
+#include <QMenu>
+#include <QScrollArea>
+#include <QSettings>
+#include <QSortFilterProxyModel>
+#include <QSystemTrayIcon>
+#include <QTime>
+#include <time.h>
 
 class Exchange;
 class QDockWidget;
@@ -72,9 +71,7 @@ class TraderSpinBox;
 
 struct GroupStateItem
 {
-    GroupStateItem(const QString& newName, bool newEnabled):
-        name(newName),
-        enabled(newEnabled)
+    GroupStateItem(const QString& newName, bool newEnabled) : name(newName), enabled(newEnabled)
     {
         elapsed.restart();
     }
@@ -143,7 +140,7 @@ public:
     QSettings* iniSettings;
     bool isValidSoftLag;
     void beep(bool noBlink = false);
-    void playWav(const QString&, bool noBlink = false);
+    void play(const QString&, bool noBlink = false);
     void blinkWindow();
 
     bool confirmOpenOrder;
@@ -184,6 +181,7 @@ public:
     NewsView* newsView = nullptr;
 
     QScopedPointer<QTimer> secondTimer;
+
 private:
     QList<GroupStateItem> pendingGroupStates;
 
@@ -222,7 +220,9 @@ private:
     int lastLoadedCurrency;
 
     bool constructorFinished;
-    void reject() {}
+    void reject()
+    {
+    }
     QString clearData(QString data);
 
     QString appDir;
@@ -247,8 +247,6 @@ private:
     bool profitSellThanBuyChangedUnlocked;
 
     DebugViewer* debugViewer;
-
-    void translateUnicodeStr(QString* str);
 
     void checkIsTabWidgetVisible();
 
@@ -387,7 +385,6 @@ public slots:
     void indicatorBuyChanged(const QString&, double);
     void indicatorVolumeChanged(const QString&, double);
 
-
     void on_accountUSD_valueChanged(double);
     void on_accountBTC_valueChanged(double);
     void on_marketBid_valueChanged(double);
@@ -432,7 +429,6 @@ private slots:
     void depthVisibilityChanged(bool);
 
 private:
-    QScopedPointer<QTextToSpeech> ttsEngine;
     void initDocks();
     void createActions();
     void createMenu();
@@ -459,23 +455,23 @@ private slots:
     void exitApp();
 
 private:
-    bool         lockedDocks;
-    QAction*     actionExit;
-    QAction*     actionUpdate;
-    QAction*     actionSendBugReport;
-    QAction*     actionAbout;
-    QAction*     actionAboutQt;
-    QAction*     actionLockDocks;
-    QAction*     actionConfigManager;
-    QAction*     actionSettings;
-    QAction*     actionDebug;
-    QAction*     actionUninstall;
-    QMenu*       menuFile;
-    QMenu*       menuView;
-    QMenu*       menuConfig;
-    QMenu*       menuHelp;
-    ConfigManagerDialog*    configDialog;
-    DockHost*    dockHost;
+    bool lockedDocks;
+    QAction* actionExit;
+    QAction* actionUpdate;
+    QAction* actionSendBugReport;
+    QAction* actionAbout;
+    QAction* actionAboutQt;
+    QAction* actionLockDocks;
+    QAction* actionConfigManager;
+    QAction* actionSettings;
+    QAction* actionDebug;
+    QAction* actionUninstall;
+    QMenu* menuFile;
+    QMenu* menuView;
+    QMenu* menuConfig;
+    QMenu* menuHelp;
+    ConfigManagerDialog* configDialog;
+    DockHost* dockHost;
     QDockWidget* dockLogo;
     QDockWidget* dockDepth;
 

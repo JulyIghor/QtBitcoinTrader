@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,10 +30,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "settingsdialoglistelement.h"
+#include <QPixmap>
 
-SettingsDialogListElement::SettingsDialogListElement(SettingsDialog* tempParent, qint32 tempIndex, const QString& name,
-        const QString& icon)
-    : QWidget(tempParent)
+SettingsDialogListElement::SettingsDialogListElement(SettingsDialog* tempParent,
+                                                     qint32 tempIndex,
+                                                     const QString& name,
+                                                     const QString& icon) :
+    QWidget(tempParent)
 {
     ui.setupUi(this);
     ui.textListLabel->setText(name);
@@ -44,8 +47,13 @@ SettingsDialogListElement::SettingsDialogListElement(SettingsDialog* tempParent,
     index = tempIndex;
 
     QFontMetrics fontMetrics(ui.textListLabel->font());
+#if QT_VERSION < 0x060000
     width = fontMetrics.horizontalAdvance(name) + ui.iconListLabel->pixmap()->width() + 17;
     setFixedHeight(qMax(fontMetrics.height(), ui.iconListLabel->pixmap()->height()) + 10);
+#else
+    width = fontMetrics.horizontalAdvance(name) + ui.iconListLabel->pixmap().width() + 17;
+    setFixedHeight(qMax(fontMetrics.height(), ui.iconListLabel->pixmap().height()) + 10);
+#endif
 }
 
 SettingsDialogListElement::~SettingsDialogListElement()

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "tradesitem.h"
-#include "main.h"
 #include "julymath.h"
+#include "main.h"
 
 TradesItem::TradesItem()
 {
@@ -47,7 +47,7 @@ TradesItem::TradesItem()
 
 void TradesItem::cacheStrings()
 {
-    QDateTime itemDate = QDateTime::fromTime_t(date);
+    QDateTime itemDate = QDateTime::fromSecsSinceEpoch(date);
 
     if (baseValues_->use24HourTimeFormat)
     {
@@ -75,8 +75,7 @@ void TradesItem::cacheStrings()
         amountStr = JulyMath::textFromDouble(amount, baseValues.decimalsAmountLastTrades);
 
     if (amount > 0.0 && price > 0.0)
-        totalStr = JulyMath::textFromDouble(price * amount, qMin(baseValues.currentPair.currBDecimals,
-                                            baseValues.decimalsTotalLastTrades));
+        totalStr = JulyMath::textFromDouble(price * amount, qMin(baseValues.currentPair.currBDecimals, baseValues.decimalsTotalLastTrades));
 }
 
 bool TradesItem::isValid()

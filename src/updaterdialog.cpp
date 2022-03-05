@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,32 +30,32 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "updaterdialog.h"
-#include <QMessageBox>
-#include "main.h"
-#include "julyrsa.h"
-#include <QCryptographicHash>
-#include <QMessageBox>
-#include <QClipboard>
-#include <QDesktopServices>
-#include <QUrl>
-#include <QProcess>
-#include <QFile>
-#include "logobutton.h"
 #include "julymath.h"
+#include "julyrsa.h"
+#include "logobutton.h"
+#include "main.h"
+#include <QClipboard>
+#include <QCryptographicHash>
+#include <QDesktopServices>
+#include <QFile>
+#include <QMessageBox>
+#include <QProcess>
+#include <QUrl>
 
 #ifdef Q_OS_WIN
-    #include "windows.h"
+#include "windows.h"
 #endif
 
-UpdaterDialog::UpdaterDialog(bool fbMess)
-    : QDialog()
+UpdaterDialog::UpdaterDialog(bool fbMess) : QDialog()
 {
     forceUpdate = false;
 
 #ifdef Q_OS_WIN
 #ifndef QTBUILDTARGETWIN64
 
-    if (QSysInfo::windowsVersion() >  QSysInfo::WV_XP)
+#if QT_VERSION < 0x060000
+    if (QSysInfo::windowsVersion() > QSysInfo::WV_XP)
+#endif
     {
         _SYSTEM_INFO sysinfo;
         GetNativeSystemInfo(&sysinfo);
@@ -110,13 +110,15 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
 
     httpGet->noReconnect = true;
     timeOutTimer = new QTimer(this);
-    connect(timeOutTimer, SIGNAL(timeout()), this, SLOT(exitSlot()));
-    connect(httpGet, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceived(QByteArray, int, int)));
+    connect(timeOutTimer, &QTimer::timeout, this, &UpdaterDialog::exitSlot);
+    connect(httpGet, &JulyHttp::dataReceived, this, &UpdaterDialog::dataReceived);
 
 #ifdef Q_OS_WIN
     QByteArray osString = "Win";
 
-    if (QSysInfo::windowsVersion() >  QSysInfo::WV_XP)
+#if QT_VERSION < 0x060000
+    if (QSysInfo::windowsVersion() > QSysInfo::WV_XP)
+#endif
     {
         _SYSTEM_INFO sysinfo;
         GetNativeSystemInfo(&sysinfo);
@@ -154,7 +156,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
         reqStr.append("&Version=" + JulyMath::byteArrayFromDouble(baseValues.appVerReal * 100000, 0));
 
     reqStr.append("&OS=" + osString);
-    reqStr.append("&Locale=" + QLocale().name());
+    reqStr.append("&Locale=" + QLocale().name().toLatin1());
 
     QString md5;
     QFile readSelf(QApplication::applicationFilePath());
@@ -165,7 +167,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess)
         readSelf.close();
     }
 
-    reqStr.append("&MD5=" + md5);
+    reqStr.append("&MD5=" + md5.toLatin1());
     httpGet->sendData(140, 0, "POST /", reqStr);
 
     timeOutTimer->start(60000);
@@ -184,11 +186,11 @@ QByteArray UpdaterDialog::getMidData(const QString& a, QString b, QByteArray* da
     if (b.isEmpty())
         b = "\",";
 
-    int startPos = data->indexOf(a, 0);
+    int startPos = data->indexOf(a.toLatin1(), 0);
 
     if (startPos > -1)
     {
-        int endPos = data->indexOf(b, startPos + a.length());
+        int endPos = data->indexOf(b.toLatin1(), startPos + a.length());
 
         if (endPos > -1)
             rez = data->mid(startPos + a.length(), endPos - startPos - a.length());
@@ -233,7 +235,9 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unu
 #ifdef Q_OS_WIN
             os = "Win";
 
-            if (QSysInfo::windowsVersion() >  QSysInfo::WV_XP)
+#if QT_VERSION < 0x060000
+            if (QSysInfo::windowsVersion() > QSysInfo::WV_XP)
+#endif
             {
                 _SYSTEM_INFO sysinfo;
                 GetNativeSystemInfo(&sysinfo);
@@ -262,10 +266,8 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unu
             if (!versionSignature.isEmpty())
                 versionSignature = QByteArray::fromBase64(versionSignature);
 
-            QByteArray versionSha1 = QCryptographicHash::hash(os.toUtf8() +
-                                     updateVersion.toUtf8() +
-                                     updateChangeLog.toUtf8() +
-                                     updateLink.toUtf8(), QCryptographicHash::Sha1);
+            QByteArray versionSha1 = QCryptographicHash::hash(
+                os.toUtf8() + updateVersion.toUtf8() + updateChangeLog.toUtf8() + updateLink.toUtf8(), QCryptographicHash::Sha1);
 
             QFile readPublicKey(":/Resources/Public.key");
 
@@ -288,7 +290,7 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unu
 
         if (reqType == 120)
         {
-            QMap<QString, QString>versionsMap;
+            QMap<QString, QString> versionsMap;
             QStringList dataList = QString(dataReceived).split("\n");
 
             for (int n = 0; n < dataList.size(); n++)
@@ -310,7 +312,9 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unu
 #ifdef Q_OS_WIN
             QString os = "Win32";
 
-            if (QSysInfo::windowsVersion() >  QSysInfo::WV_XP)
+#if QT_VERSION < 0x060000
+            if (QSysInfo::windowsVersion() > QSysInfo::WV_XP)
+#endif
             {
                 _SYSTEM_INFO sysinfo;
                 GetNativeSystemInfo(&sysinfo);
@@ -452,9 +456,11 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unu
                 if (!testOut.contains("(-: OK :-)"))
                 {
                     QFile::remove(updBin);
-                    QMessageBox::critical(this, windowTitle(),
-                                          "Looks like new version of app have dependency problems. Please download latest version from http://sourceforge.net/projects/bitcointrader and fix it manually\n\n"
-                                          + QString::fromUtf8(testOut));
+                    QMessageBox::critical(
+                        this,
+                        windowTitle(),
+                        "Looks like new version of app have dependency problems. Please download latest version from http://sourceforge.net/projects/bitcointrader and fix it manually\n\n" +
+                            QString::fromUtf8(testOut));
                     downloadErrorFile(11);
                     return;
                 }
@@ -473,9 +479,11 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unu
 
             if (!QFile::exists(curBin))
             {
-                QMessageBox::critical(this, windowTitle(),
-                                      "Critical error. Please reinstall application. Download it from http://sourceforge.net/projects/bitcointrader/<br>File not exists: "
-                                      + curBin + "<br>" + updBin);
+                QMessageBox::critical(
+                    this,
+                    windowTitle(),
+                    "Critical error. Please reinstall application. Download it from http://sourceforge.net/projects/bitcointrader/<br>File not exists: " +
+                        curBin + "<br>" + updBin);
                 downloadErrorFile(5);
                 return;
             }
@@ -488,8 +496,10 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unu
 #endif
 
             if (!autoUpdate)
-                QMessageBox::information(this, windowTitle(), julyTr("UPDATED_SUCCESSFULLY",
-                                         "Application updated successfully. Please restart application to apply changes."));
+                QMessageBox::information(
+                    this,
+                    windowTitle(),
+                    julyTr("UPDATED_SUCCESSFULLY", "Application updated successfully. Please restart application to apply changes."));
 
             QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
             settings.setValue("UpdateCheckRetryCount", 0);
@@ -538,9 +548,9 @@ void UpdaterDialog::buttonUpdate()
     updateLink.remove(0, removeLength);
 
     httpGetFile = new JulyHttp(domain, nullptr, this, protocol.startsWith("https"), false);
-    connect(httpGetFile, SIGNAL(apiDown(bool)), this, SLOT(invalidData(bool)));
-    connect(httpGetFile, SIGNAL(dataProgress(int)), this, SLOT(dataProgress(int)));
-    connect(httpGetFile, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceived(QByteArray, int, int)));
+    connect(httpGetFile, &JulyHttp::apiDown, this, &UpdaterDialog::invalidData);
+    connect(httpGetFile, &JulyHttp::dataProgress, this, &UpdaterDialog::dataProgress);
+    connect(httpGetFile, &JulyHttp::dataReceived, this, &UpdaterDialog::dataReceived);
     httpGetFile->noReconnect = true;
 
     httpGetFile->sendData(120, 0, "GET " + updateLink.toLatin1());
@@ -557,8 +567,10 @@ void UpdaterDialog::downloadError(int val)
     if (downloaded100)
         return;
 
-    QMessageBox::warning(this, windowTitle(), julyTr("DOWNLOAD_ERROR",
-                         "Download error. Please try again.") + "<br>" + httpGet->errorString() + "<br>CODE: " + QString::number(val));
+    QMessageBox::warning(this,
+                         windowTitle(),
+                         julyTr("DOWNLOAD_ERROR", "Download error. Please try again.") + "<br>" + httpGet->errorString() +
+                             "<br>CODE: " + QString::number(val));
 
     QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
     settings.setValue("UpdateCheckRetryCount", settings.value("UpdateCheckRetryCount", 0).toInt() + 1);
@@ -571,8 +583,10 @@ void UpdaterDialog::downloadErrorFile(int val)
     if (downloaded100)
         return;
 
-    QMessageBox::warning(this, windowTitle(), julyTr("DOWNLOAD_ERROR",
-                         "Download error. Please try again.") + "<br>" + httpGetFile->errorString() + "<br>CODE: " + QString::number(val));
+    QMessageBox::warning(this,
+                         windowTitle(),
+                         julyTr("DOWNLOAD_ERROR", "Download error. Please try again.") + "<br>" + httpGetFile->errorString() +
+                             "<br>CODE: " + QString::number(val));
 
     QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
     settings.setValue("UpdateCheckRetryCount", settings.value("UpdateCheckRetryCount", 0).toInt() + 1);

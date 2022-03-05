@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,21 +29,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "main.h"
-#include "julymath.h"
-#include "tradesitem.h"
-#include "timesync.h"
-#include "charts/chartsview.h"
 #include "charts/chartsmodel.h"
+#include "charts/chartsview.h"
+#include "julymath.h"
+#include "main.h"
+#include "timesync.h"
+#include "tradesitem.h"
 
-ChartsModel::ChartsModel()
-    : QObject(),
-      perfomanceStep(1),
-      intervalDate(60),
-      intervalCount(10),
-      fontMetrics(new QFontMetrics(QApplication::font()))
+ChartsModel::ChartsModel() :
+    QObject(), perfomanceStep(1), intervalDate(60), intervalCount(10), fontMetrics(new QFontMetrics(QApplication::font()))
 {
-
 }
 
 ChartsModel::~ChartsModel()
@@ -57,9 +52,9 @@ void ChartsModel::addLastTrades(QList<TradesItem>* newItems)
         if (!tradesDate.empty() && tradesDate.last() > newItems->at(n).date)
             continue;
 
-        tradesDate .append(newItems->at(n).date);
+        tradesDate.append(newItems->at(n).date);
         tradesPrice.append(newItems->at(n).price);
-        tradesType .append(newItems->at(n).orderType);
+        tradesType.append(newItems->at(n).orderType);
 
         if (!amountDate.empty() && newItems->at(n).date < (amountDate.last() + intervalDate))
             amountPrice.last() += newItems->at(n).amount;
@@ -79,27 +74,27 @@ void ChartsModel::addBound(double price, bool type)
 {
     if (type)
     {
-        boundsSellDate .append(TimeSync::getTimeT());
+        boundsSellDate.append(TimeSync::getTimeT());
         boundsSellPrice.append(price);
     }
     else
     {
-        boundsBuyDate .append(TimeSync::getTimeT());
+        boundsBuyDate.append(TimeSync::getTimeT());
         boundsBuyPrice.append(price);
     }
 }
 
 void ChartsModel::clearCharts()
 {
-    amountDate .clear();
+    amountDate.clear();
     amountPrice.clear();
-    tradesDate .clear();
+    tradesDate.clear();
     tradesPrice.clear();
-    tradesType .clear();
-    boundsSellDate .clear();
+    tradesType.clear();
+    boundsSellDate.clear();
     boundsSellPrice.clear();
-    boundsBuyDate  .clear();
-    boundsBuyPrice .clear();
+    boundsBuyDate.clear();
+    boundsBuyPrice.clear();
 }
 
 double ChartsModel::stepRound(double step)
@@ -178,25 +173,25 @@ double ChartsModel::axisRound(double old_x, double old_step)
 
 void ChartsModel::prepareInit()
 {
-    graphDateText .clear();
+    graphDateText.clear();
     graphDateTextX.clear();
-    graphAmountText .clear();
+    graphAmountText.clear();
     graphAmountTextY.clear();
-    graphPriceText .clear();
+    graphPriceText.clear();
     graphPriceTextY.clear();
 
     graphAmountX.clear();
     graphAmountY.clear();
-    graphTradesX   .clear();
-    graphTradesY   .clear();
+    graphTradesX.clear();
+    graphTradesY.clear();
     graphTradesType.clear();
     graphBoundsSellX.clear();
     graphBoundsSellY.clear();
     graphBoundsBuyX.clear();
     graphBoundsBuyY.clear();
 
-    nowTime        = TimeSync::getTimeT();
-    graphLastDate  = int(nowTime / intervalDate) * intervalDate + intervalDate;
+    nowTime = TimeSync::getTimeT();
+    graphLastDate = int(nowTime / intervalDate) * intervalDate + intervalDate;
     graphFirstDate = graphLastDate - intervalDate * 10;
 }
 
@@ -207,7 +202,7 @@ void ChartsModel::prepareXAxis()
     for (quint32 i = graphFirstDate; i <= graphLastDate; i += intervalDate)
     {
         graphDateTextX.append(qRound64(graphXScale * (i - graphFirstDate)));
-        graphDateText .append(QDateTime::fromTime_t(i).toString("h:mm"));
+        graphDateText.append(QDateTime::fromSecsSinceEpoch(i).toString("h:mm"));
     }
 }
 
@@ -218,14 +213,13 @@ void ChartsModel::prepareAmountYAxis()
 
     if (iAmountFirst < amountDate.size())
     {
-        amountMax    = amountPrice.at(std::max_element(amountPrice.begin() + iAmountFirst,
-                                      amountPrice.end()) - amountPrice.begin());
+        amountMax = amountPrice.at(std::max_element(amountPrice.begin() + iAmountFirst, amountPrice.end()) - amountPrice.begin());
         amountYScale = double(chartsHeight) * 0.9 / amountMax;
         double amountStepY = stepRound(amountMax / 5);
 
         for (double amountY = 0; amountY < amountMax; amountY += amountStepY)
         {
-            graphAmountText .append(baseValues.currentPair.currASign + " " + JulyMath::textFromDouble(amountY, 8, 0));
+            graphAmountText.append(baseValues.currentPair.currASign + QLatin1String(" ") + JulyMath::textFromDoubleStr(amountY, 8, 0));
             graphAmountTextY.append(qRound64(amountYScale * amountY));
             widthAmountYAxis = qMax(fontMetrics->horizontalAdvance(graphAmountText.last()), widthAmountYAxis);
         }
@@ -251,9 +245,9 @@ void ChartsModel::preparePriceMinMax()
     priceInit = false;
     priceMin = -1;
     priceMax = -1;
-    iTradesFirst     = std::lower_bound(tradesDate.begin(),     tradesDate.end(),     graphFirstDate) - tradesDate.begin();
+    iTradesFirst = std::lower_bound(tradesDate.begin(), tradesDate.end(), graphFirstDate) - tradesDate.begin();
     iBoundsSellFirst = std::lower_bound(boundsSellDate.begin(), boundsSellDate.end(), graphFirstDate) - boundsSellDate.begin();
-    iBoundsBuyFirst  = std::lower_bound(boundsBuyDate.begin(),  boundsBuyDate.end(),  graphFirstDate) - boundsBuyDate.begin();
+    iBoundsBuyFirst = std::lower_bound(boundsBuyDate.begin(), boundsBuyDate.end(), graphFirstDate) - boundsBuyDate.begin();
 
     double temp;
     QList<double> min;
@@ -279,14 +273,14 @@ void ChartsModel::preparePriceMinMax()
         if (tempIBoundsSellFirst > 0)
             --tempIBoundsSellFirst;
 
-        temp = boundsSellPrice.at(std::min_element(boundsSellPrice.begin() + tempIBoundsSellFirst,
-                                  boundsSellPrice.end()) - boundsSellPrice.begin());
+        temp = boundsSellPrice.at(std::min_element(boundsSellPrice.begin() + tempIBoundsSellFirst, boundsSellPrice.end()) -
+                                  boundsSellPrice.begin());
 
         if (temp > 0)
             min.push_back(temp);
 
-        temp = boundsSellPrice.at(std::max_element(boundsSellPrice.begin() + tempIBoundsSellFirst,
-                                  boundsSellPrice.end()) - boundsSellPrice.begin());
+        temp = boundsSellPrice.at(std::max_element(boundsSellPrice.begin() + tempIBoundsSellFirst, boundsSellPrice.end()) -
+                                  boundsSellPrice.begin());
 
         if (temp > 0)
             max.push_back(temp);
@@ -299,8 +293,8 @@ void ChartsModel::preparePriceMinMax()
         if (tempIBoundsBuyFirst > 0)
             --tempIBoundsBuyFirst;
 
-        temp = boundsBuyPrice.at(std::min_element(boundsBuyPrice.begin() + tempIBoundsBuyFirst,
-                                 boundsBuyPrice.end()) - boundsBuyPrice.begin());
+        temp = boundsBuyPrice.at(std::min_element(boundsBuyPrice.begin() + tempIBoundsBuyFirst, boundsBuyPrice.end()) -
+                                 boundsBuyPrice.begin());
 
         if (temp > 0)
         {
@@ -310,8 +304,7 @@ void ChartsModel::preparePriceMinMax()
                 min.last() = qMin(min.last(), temp);
         }
 
-        temp = boundsBuyPrice.at(std::max_element(boundsBuyPrice.begin() + iBoundsBuyFirst,
-                                 boundsBuyPrice.end()) - boundsBuyPrice.begin());
+        temp = boundsBuyPrice.at(std::max_element(boundsBuyPrice.begin() + iBoundsBuyFirst, boundsBuyPrice.end()) - boundsBuyPrice.begin());
 
         if (temp > 0)
         {
@@ -347,7 +340,7 @@ void ChartsModel::preparePriceMinMax()
         priceMax += deltaPrice;
 
         priceStepY = stepRound((priceMax - priceMin) / 5);
-        priceMin   = axisRound(priceMin, priceStepY);
+        priceMin = axisRound(priceMin, priceStepY);
     }
 }
 
@@ -361,7 +354,7 @@ void ChartsModel::preparePriceYAxis()
 
         for (double priceY = priceMin; priceY < priceMax; priceY += priceStepY)
         {
-            graphPriceText .append(baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(priceY, 8, 0));
+            graphPriceText.append(baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(priceY, 8, 0));
             graphPriceTextY.append(qRound64(priceYScale * (priceY - priceMin)));
             widthPriceYAxis = qMax(fontMetrics->horizontalAdvance(graphPriceText.last()), widthPriceYAxis);
         }
@@ -377,7 +370,7 @@ void ChartsModel::preparePrice()
 
     for (qint32 i = iTradesFirst; i < tradesDate.size(); ++i)
     {
-        qint16 x = qRound64(graphXScale * (tradesDate .at(i) - graphFirstDate));
+        qint16 x = qRound64(graphXScale * (tradesDate.at(i) - graphFirstDate));
         qint16 y = qRound64(priceYScale * (tradesPrice.at(i) - priceMin));
 
         if (!graphTradesX.empty())

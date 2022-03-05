@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,18 +30,17 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "passworddialog.h"
-#include "main.h"
-#include <QDir>
-#include <QSettings>
-#include <QMessageBox>
-#include <QDesktopServices>
-#include <QCryptographicHash>
-#include "logobutton.h"
-#include "timesync.h"
 #include "julyrsa.h"
+#include "logobutton.h"
+#include "main.h"
+#include "timesync.h"
+#include <QCryptographicHash>
+#include <QDesktopServices>
+#include <QDir>
+#include <QMessageBox>
+#include <QSettings>
 
-PasswordDialog::PasswordDialog(QWidget* parent)
-    : QDialog(parent)
+PasswordDialog::PasswordDialog(QWidget* parent) : QDialog(parent)
 {
     resetData = false;
     newProfile = false;
@@ -59,8 +58,10 @@ PasswordDialog::PasswordDialog(QWidget* parent)
 
     if (!JulyRSA::isIniFileSigned(":/Resources/Exchanges/List.ini"))
     {
-        QMessageBox::warning(nullptr, windowTitle(),
-                             julyTr("PROGRAM_CORRUPTED", "The program is corrupted. Download from the official site https://centrabit.com."));
+        QMessageBox::warning(
+            nullptr,
+            windowTitle(),
+            julyTr("PROGRAM_CORRUPTED", "The program is corrupted. Download from the official site https://centrabit.com."));
         exit(0);
     }
 
@@ -77,7 +78,9 @@ PasswordDialog::PasswordDialog(QWidget* parent)
         logosMap.insert(exchangesList.at(n).toInt(), ":/Resources/Exchanges/Logos/" + currentLogo);
     }
 
-    QStringList scriptsOldPlace = QDir(baseValues.scriptFolder).entryList(QStringList() << "*.JLR" << "*.JLS");
+    QStringList scriptsOldPlace = QDir(baseValues.scriptFolder)
+                                      .entryList(QStringList() << "*.JLR"
+                                                               << "*.JLS");
     QStringList iniNames;
 
     QStringList settingsList = QDir(appDataDir, "*.ini").entryList();
@@ -101,8 +104,8 @@ PasswordDialog::PasswordDialog(QWidget* parent)
         if (!QFile::exists(currentLogo))
             currentLogo = ":/Resources/Exchanges/Logos/Unknown.png";
 
-        ui.profileComboBox->addItem(QIcon(currentLogo), settIni.value("Profile/Name",
-                                    QFileInfo(settingsList.at(n)).fileName()).toString(), settingsList.at(n));
+        ui.profileComboBox->addItem(
+            QIcon(currentLogo), settIni.value("Profile/Name", QFileInfo(settingsList.at(n)).fileName()).toString(), settingsList.at(n));
         bool isProfLocked = isProfileLocked(settingsList.at(n));
 
         if (!isProfLocked && lastProfileIndex == -1 && lastProfile == settingsList.at(n))
@@ -142,7 +145,6 @@ PasswordDialog::PasswordDialog(QWidget* parent)
     foreach (QCheckBox* checkBoxes, findChildren<QCheckBox*>())
         checkBoxes->setMinimumWidth(qMin(checkBoxes->maximumWidth(), textFontWidth(checkBoxes->text()) + 20));
 
-
     QLayout* groupboxLayout = ui.LogoGroupBox->layout();
 
     if (groupboxLayout == nullptr)
@@ -158,7 +160,7 @@ PasswordDialog::PasswordDialog(QWidget* parent)
     if (settings.value("HidePasswordDescription", false).toBool())
         ui.descriptionGroupBox->setChecked(false);
 
-    connect(TimeSync::global(), SIGNAL(warningMessage(QString)), this, SLOT(showTimeMessage(QString)));
+    connect(TimeSync::global(), &TimeSync::warningMessage, this, &PasswordDialog::showTimeMessage);
     TimeSync::syncNow();
 
     QSize minSizeHint = minimumSizeHint();
@@ -173,8 +175,9 @@ PasswordDialog::~PasswordDialog()
 
 QString PasswordDialog::lockFilePath(const QString& name)
 {
-    return baseValues.tempLocation + "/QtBitcoinTrader_lock_" + QString(QCryptographicHash::hash(QString(
-                appDataDir + "/" + QFileInfo(name).fileName()).toUtf8(), QCryptographicHash::Sha1).toHex());
+    return baseValues.tempLocation + "/QtBitcoinTrader_lock_" +
+           QString(
+               QCryptographicHash::hash(QString(appDataDir + "/" + QFileInfo(name).fileName()).toUtf8(), QCryptographicHash::Sha1).toHex());
 }
 
 bool PasswordDialog::isProfileLocked(const QString& name)
@@ -227,14 +230,12 @@ void PasswordDialog::resetDataSlot()
     QMessageBox msgBox(this);
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setWindowTitle(windowTitle());
-    msgBox.setText(julyTr("CONFIRM_DELETE_PROFILE",
-                          "Are you sure to delete \"%1\" profile?").arg(ui.profileComboBox->currentText()));
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Yes);
-    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
-    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
+    msgBox.setText(julyTr("CONFIRM_DELETE_PROFILE", "Are you sure to delete \"%1\" profile?").arg(ui.profileComboBox->currentText()));
 
-    if (msgBox.exec() != QMessageBox::Yes)
+    auto buttonYes = msgBox.addButton(julyTr("YES", "Yes"), QMessageBox::YesRole);
+    msgBox.addButton(julyTr("NO", "No"), QMessageBox::NoRole);
+    msgBox.exec();
+    if (msgBox.clickedButton() != buttonYes)
         return;
 
     resetData = true;
@@ -271,7 +272,9 @@ void PasswordDialog::resetDataSlot()
 
         if (QFile::exists(scriptFolder))
         {
-            for (const QString& curFile : QDir(scriptFolder).entryList(QStringList() << "*.JLS" << "*.JLR"))
+            for (const QString& curFile : QDir(scriptFolder)
+                                              .entryList(QStringList() << "*.JLS"
+                                                                       << "*.JLR"))
                 QFile::remove(scriptFolder + curFile);
 
             QDir().rmdir(scriptFolder);

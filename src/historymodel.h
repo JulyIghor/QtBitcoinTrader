@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,9 +32,9 @@
 #ifndef HISTORYMODEL_H
 #define HISTORYMODEL_H
 
+#include "historyitem.h"
 #include <QAbstractItemModel>
 #include <QStringList>
-#include "historyitem.h"
 
 class HistoryModel : public QAbstractItemModel
 {
@@ -62,6 +62,7 @@ public:
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
+
 private:
     int dateWidth = 0;
     int typeWidth = 0;
@@ -71,7 +72,7 @@ private:
     QStringList typesLabels;
 
     QList<HistoryItem> itemsList;
-    //typesList; 0=General, 1=Buy, 2=Sell, 3=Widthdraw, 4=Found
+    // typesList; 0=General, 1=Buy, 2=Sell, 3=Widthdraw, 4=Found
 signals:
     void accLastSellChanged(QString, double);
     void accLastBuyChanged(QString, double);

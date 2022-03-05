@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,18 +32,18 @@
 #ifndef EXCHANGE_H
 #define EXCHANGE_H
 
-#include <QThread>
-#include <QTimer>
-#include <QTime>
-#include <openssl/hmac.h>
-#include "main.h"
-#include <QtCore/qmath.h>
-#include "qtbitcointrader.h"
-#include "julyhttp.h"
-#include "orderitem.h"
-#include "tradesitem.h"
-#include "julymath.h"
 #include "indicatorengine.h"
+#include "julyhttp.h"
+#include "julymath.h"
+#include "main.h"
+#include "orderitem.h"
+#include "qtbitcointrader.h"
+#include "tradesitem.h"
+#include <QThread>
+#include <QTime>
+#include <QTimer>
+#include <QtCore/qmath.h>
+#include <openssl/hmac.h>
 
 struct DepthItem;
 
@@ -65,7 +65,7 @@ public:
     int minimumRequestIntervalAllowed;
     int minimumRequestTimeoutAllowed;
     double decAmountFromOpenOrder;
-    int calculatingFeeMode;//0: direct multiply; 1: rounded by decimals; 3: real fee
+    int calculatingFeeMode; // 0: direct multiply; 1: rounded by decimals; 3: real fee
     bool buySellAmountExcludedFee;
 
     CurrencyPairItem currencyPairInfo;
@@ -104,18 +104,16 @@ public:
 
     QString domain;
     quint16 port;
-    bool    useSsl;
+    bool useSsl;
 
     int m_pairChangeCount;
 
-    void setApiKeySecret(QByteArray key, QByteArray secret);
+    void setApiKeySecret(const QByteArray& key, const QByteArray& secret);
 
     QByteArray& getApiKey();
     QByteArray getApiSign();
 
     virtual void clearVariables();
-    void translateUnicodeStr(QString* str);
-    void translateUnicodeOne(QByteArray* str);
     static QByteArray getMidData(const QString& a, const QString& b, const QByteArray* data);
     QByteArray getMidVal(const QString& a, const QString& b, const QByteArray* data);
     void setupApi(QtBitcoinTrader*, bool tickerOnly = false);
@@ -157,9 +155,9 @@ signals:
     void apiDownChanged(bool);
     void softLagChanged(int);
 private slots:
-    void sslErrors(const QList<QSslError>&);
     void quitExchange();
 public slots:
+    void sslErrors(const QList<QSslError>&);
     virtual void secondSlot();
     virtual void dataReceivedAuth(const QByteArray&, int, int);
     virtual void reloadDepth();

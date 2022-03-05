@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "apptheme.h"
-#include <QSettings>
 #include "main.h"
+#include <QSettings>
 
 AppTheme::AppTheme()
 {
@@ -89,8 +89,7 @@ void AppTheme::loadTheme(const QString& name)
         if (colNum < 0 || colNum >= 20)
             continue;
 
-        palette.setColor(QPalette::Normal, QPalette::ColorRole(colNum),
-                         getColor(themeLoad.value("Normal/" + colorList.at(n)).toString()));
+        palette.setColor(QPalette::Normal, QPalette::ColorRole(colNum), getColor(themeLoad.value("Normal/" + colorList.at(n)).toString()));
     }
 
     themeLoad.beginGroup("Disabled");
@@ -110,8 +109,8 @@ void AppTheme::loadTheme(const QString& name)
         if (colNum < 0 || colNum >= 20)
             continue;
 
-        palette.setColor(QPalette::Disabled, QPalette::ColorRole(colNum),
-                         getColor(themeLoad.value("Disabled/" + colorList.at(n)).toString()));
+        palette.setColor(
+            QPalette::Disabled, QPalette::ColorRole(colNum), getColor(themeLoad.value("Disabled/" + colorList.at(n)).toString()));
     }
 
     themeLoad.beginGroup("Inactive");
@@ -131,8 +130,8 @@ void AppTheme::loadTheme(const QString& name)
         if (colNum < 0 || colNum >= 20)
             continue;
 
-        palette.setColor(QPalette::Inactive, QPalette::ColorRole(colNum),
-                         getColor(themeLoad.value("Inactive/" + colorList.at(n)).toString()));
+        palette.setColor(
+            QPalette::Inactive, QPalette::ColorRole(colNum), getColor(themeLoad.value("Inactive/" + colorList.at(n)).toString()));
     }
 
     altRowColor = palette.color(QPalette::AlternateBase);
@@ -155,25 +154,48 @@ void AppTheme::loadTheme(const QString& name)
 
     palette.setColor(QPalette::Text, black);
 
-    styleSheet = "QHeaderView::section {color: " + black.name() + ";}"
-                 "QToolButton {color: " + black.name() + ";}"
-                 "QPushButton {color: " + black.name() + ";}"
-                 "QGroupBox {background: rgba(255,255,255,60); color: " + black.name() + "; border: 1px solid " + gray.name() +
+    styleSheet = "QHeaderView::section {color: " + black.name() +
+                 ";}"
+                 "QToolButton {color: " +
+                 black.name() +
+                 ";}"
+                 "QPushButton {color: " +
+                 black.name() +
+                 ";}"
+                 "QGroupBox {background: rgba(255,255,255,60); color: " +
+                 black.name() + "; border: 1px solid " + gray.name() +
                  ";border-radius: 3px;margin-top: 8px;}"
-                 "QGroupBox:title {subcontrol-origin: margin; position: relative; left: 6px; color: " + black.name() +
-                 "; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 transparent, stop: 0.45 " + white.name() +
-                 ", stop: 0.5 " + white.name() + ", stop: 0.55 " + white.name() +
-                 ", stop: 1.0 transparent);  padding-left: 2px;} QLabel {color: " + black.name() + ";}"
-                 "QTabBar::tab {color: " + black.name() + ";}"
-                 "QRadioButton {color: " + black.name() + ";}"
-                 "QDoubleSpinBox {background: " + white.name() + ";}"
-                 "QTextEdit {background: " + white.name() + ";}"
-                 "QPlainTextEdit {background: " + white.name() + ";}"
-                 "QCheckBox {color: " + black.name() + ";}"
-                 "QLineEdit {color: " + black.name() + "; background: " + white.name() + "; border: 1px solid " + gray.name() + ";}"
-                 "*[IsDockable] {background: rgba(255,255,255,40); border: 1px solid " + gray.name() +
+                 "QGroupBox:title {subcontrol-origin: margin; position: relative; left: 6px; color: " +
+                 black.name() + "; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 transparent, stop: 0.45 " +
+                 white.name() + ", stop: 0.5 " + white.name() + ", stop: 0.55 " + white.name() +
+                 ", stop: 1.0 transparent);  padding-left: 2px;} QLabel {color: " + black.name() +
+                 ";}"
+                 "QTabBar::tab {color: " +
+                 black.name() +
+                 ";}"
+                 "QRadioButton {color: " +
+                 black.name() +
+                 ";}"
+                 "QDoubleSpinBox {background: " +
+                 white.name() +
+                 ";}"
+                 "QTextEdit {background: " +
+                 white.name() +
+                 ";}"
+                 "QPlainTextEdit {background: " +
+                 white.name() +
+                 ";}"
+                 "QCheckBox {color: " +
+                 black.name() +
+                 ";}"
+                 "QLineEdit {color: " +
+                 black.name() + "; background: " + white.name() + "; border: 1px solid " + gray.name() +
+                 ";}"
+                 "*[IsDockable] {background: rgba(255,255,255,40); border: 1px solid " +
+                 gray.name() +
                  "; border-radius: 3px;margin-top:2px}"
-                 "QDockWidget::title {background: rgba(255,255,255,100); border: 1px solid " + gray.name() +
+                 "QDockWidget::title {background: rgba(255,255,255,100); border: 1px solid " +
+                 gray.name() +
                  "; border-radius: 2px; padding:3px; text-align: left center;}"
                  "QDockWidget::close-button {top:2px;right:3px}"
                  "QDockWidget::float-button {top:2px;right:18px}";

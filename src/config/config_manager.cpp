@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,17 +31,15 @@
 
 #include "config_manager.h"
 
-#include <QString>
-#include <QApplication>
-#include <QDesktopWidget>
 #include "main.h"
 #include "timesync.h"
-
+#include <QApplication>
+#include <QScreen>
+#include <QString>
 
 static const QLatin1String CONFIG_PREFIX("Config.");
 static const QLatin1String CONFIG_NAME("ConfigName");
 static const QLatin1String CONFIG_NAMES("Config/Names");
-
 
 static QString sectionName(const QString& name)
 {
@@ -53,8 +51,7 @@ ConfigManager* config;
 // --- ConfigManager ----------------------------------------------------------
 
 ConfigManager::ConfigManager(const QString& configFileName, QObject* parent) :
-    QObject(parent),
-    settings(configFileName, QSettings::IniFormat)
+    QObject(parent), settings(configFileName, QSettings::IniFormat)
 {
     defaultNames.append("Default Workspace");
     static const char geometryBuffer0[] =
@@ -148,7 +145,7 @@ void ConfigManager::load(const QString& name)
 {
     qint16 index = defaultNamesTr.indexOf(name);
 
-    if (index > - 1)
+    if (index > -1)
     {
         lastRestoreGeometry = defaultGeometry[index];
         lastRestoreState = defaultState[index];
@@ -171,7 +168,7 @@ void ConfigManager::load(const QString& name)
 
     if (names.isEmpty())
     {
-        if (QApplication::desktop()->screenGeometry().width() < 1210)
+        if (!QApplication::screens().isEmpty() && QApplication::screens().first()->geometry().width() < 1210)
             load(defaultNamesTr[1]);
         else
             load(defaultNamesTr[0]);
@@ -193,7 +190,7 @@ void ConfigManager::load(const QString& name)
 
     settings.beginGroup(sectionName(name));
     QByteArray geometry = settings.value("Geometry", defaultGeometry[0]).toByteArray();
-    QByteArray state    = settings.value("State",    defaultState[0]).toByteArray();
+    QByteArray state = settings.value("State", defaultState[0]).toByteArray();
     lastRestoreGeometry = geometry;
     lastRestoreState = state;
     lastRestoreTime = TimeSync::getTimeT();

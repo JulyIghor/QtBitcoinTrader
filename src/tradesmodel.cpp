@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,7 @@
 #include "tradesmodel.h"
 #include "main.h"
 
-TradesModel::TradesModel()
-    : QAbstractItemModel()
+TradesModel::TradesModel() : QAbstractItemModel()
 {
     lastPrecentBids = 0.0;
     lastRemoveDate = 0;
@@ -45,7 +44,6 @@ TradesModel::TradesModel()
 
 TradesModel::~TradesModel()
 {
-
 }
 
 void TradesModel::clear()
@@ -129,18 +127,18 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
 
         switch (itemsList.at(currentRow).orderType)
         {
-            case -1:
-                typeText = textBid;
-                break;
+        case -1:
+            typeText = textBid;
+            break;
 
-            case 1:
-                typeText = textAsk;
-                break;
+        case 1:
+            typeText = textAsk;
+            break;
         }
 
-        return itemsList.at(currentRow).dateStr + " " + baseValues.currentPair.currASign + itemsList.at(
-                   currentRow).amountStr + " " + typeText + " " + (itemsList.at(currentRow).direction == 1 ? upArrowStr : downArrowStr) +
-               " " + baseValues.currentPair.currBSign + itemsList.at(currentRow).priceStr + " " + baseValues.currentPair.currBSign +
+        return itemsList.at(currentRow).dateStr + " " + baseValues.currentPair.currASign + itemsList.at(currentRow).amountStr + " " +
+               typeText + " " + (itemsList.at(currentRow).direction == 1 ? upArrowStr : downArrowStr) + " " +
+               baseValues.currentPair.currBSign + itemsList.at(currentRow).priceStr + " " + baseValues.currentPair.currBSign +
                itemsList.at(currentRow).totalStr;
     }
 
@@ -152,13 +150,13 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
 
         switch (itemsList.at(currentRow).orderType)
         {
-            case -1:
-                lineText += "\t" + textBid;
-                break;
+        case -1:
+            lineText += "\t" + textBid;
+            break;
 
-            case 1:
-                lineText += "\t" + textAsk;
-                break;
+        case 1:
+            lineText += "\t" + textAsk;
+            break;
         }
 
         if (itemsList.at(currentRow).price > 0.0)
@@ -210,11 +208,11 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
     {
         switch (indexColumn)
         {
-            case 1:
-                return baseValues.appTheme.gray;
-                break;
+        case 1:
+            return baseValues.appTheme.gray;
+            break;
 
-            case 2:
+        case 2:
             {
                 double amount = itemsList.at(currentRow).amount;
                 double smallValue = baseValues.currentPair.currAInfo.valueSmall;
@@ -241,21 +239,21 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
             }
             break;
 
-            case 3:
-                switch (itemsList.at(currentRow).orderType)
-                {
-                    case -1:
-                        return baseValues.appTheme.blue;
+        case 3:
+            switch (itemsList.at(currentRow).orderType)
+            {
+            case -1:
+                return baseValues.appTheme.blue;
 
-                    case 1:
-                        return baseValues.appTheme.red;
-
-                    default:
-                        return baseValues.appTheme.black;
-                }
+            case 1:
+                return baseValues.appTheme.red;
 
             default:
-                break;
+                return baseValues.appTheme.black;
+            }
+
+        default:
+            break;
         }
 
         return baseValues.appTheme.black;
@@ -268,9 +266,9 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
 
     switch (indexColumn)
     {
-        case 1:
+    case 1:
         {
-            //Date
+            // Date
             if (role == Qt::ToolTipRole || itemsList.at(currentRow).displayFullDate)
                 return itemsList.at(currentRow).dateStr;
 
@@ -278,9 +276,9 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
             break;
         }
 
-        case 2:
+    case 2:
         {
-            //Volume
+            // Volume
             if (itemsList.at(currentRow).amount <= 0.0)
                 return QVariant();
 
@@ -291,26 +289,26 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
         }
         break;
 
-        case 3:
+    case 3:
         {
-            //Type
+            // Type
             switch (itemsList.at(currentRow).orderType)
             {
-                case -1:
-                    return textBid;
+            case -1:
+                return textBid;
 
-                case 1:
-                    return textAsk;
+            case 1:
+                return textAsk;
 
-                default:
-                    return QVariant();
+            default:
+                return QVariant();
             }
         }
         break;
 
-        case 4:
+    case 4:
         {
-            //Direction
+            // Direction
             if (itemsList.at(currentRow).price <= 0.0)
                 return QVariant();
 
@@ -318,16 +316,16 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
             {
                 if (itemsList.at(currentRow).direction == 1)
                     return upArrowStr;
-                                    return downArrowStr;
+                return downArrowStr;
             }
 
             return QVariant();
         }
         break;
 
-        case 5:
+    case 5:
         {
-            //Price
+            // Price
             if (itemsList.at(currentRow).price <= 0.0)
                 return QVariant();
 
@@ -338,9 +336,9 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
         }
         break;
 
-        case 6:
+    case 6:
         {
-            //Total
+            // Total
             if (itemsList.at(currentRow).price <= 0.0)
                 return QVariant();
 
@@ -350,8 +348,8 @@ QVariant TradesModel::data(const QModelIndex& index, int role) const
             return itemsList.at(currentRow).totalStr;
         }
 
-        default:
-            break;
+    default:
+        break;
     }
 
     return QVariant();
@@ -377,11 +375,11 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
     {
         switch (section)
         {
-            case 1:
-                return QSize(dateWidth, defaultHeightForRow); //Date
+        case 1:
+            return QSize(dateWidth, defaultHeightForRow); // Date
 
-            case 3:
-                return QSize(typeWidth, defaultHeightForRow); //Type
+        case 3:
+            return QSize(typeWidth, defaultHeightForRow); // Type
         }
 
         return QVariant();
@@ -395,15 +393,15 @@ QVariant TradesModel::headerData(int section, Qt::Orientation orientation, int r
 
     switch (section)
     {
-        case 2:
-            return headerLabels.at(section) + " " + baseValues.currentPair.currASign;
+    case 2:
+        return headerLabels.at(section) + " " + baseValues.currentPair.currASign;
 
-        case 5:
-        case 6:
-            return headerLabels.at(section) + " " + baseValues.currentPair.currBSign;
+    case 5:
+    case 6:
+        return headerLabels.at(section) + " " + baseValues.currentPair.currBSign;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     return headerLabels.at(section);
@@ -443,11 +441,12 @@ void TradesModel::setHorizontalHeaderLabels(QStringList list)
     if (list.size() != columnsCount)
         return;
 
-    textAsk = julyTr("ORDER_TYPE_ASK", "ask");
-    textBid = julyTr("ORDER_TYPE_BID", "bid");
-    dateWidth = qMax(qMax(textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(23, 59, 59,
-                                        999)).toString(baseValues.dateTimeFormat)), textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(12, 59, 59,
-                                                999)).toString(baseValues.dateTimeFormat))), textFontWidth(list.at(0))) + 10;
+    textAsk = julyTr("ORDER_TYPE_ASK", "sell");
+    textBid = julyTr("ORDER_TYPE_BID", "buy");
+    dateWidth = qMax(qMax(textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(23, 59, 59, 999)).toString(baseValues.dateTimeFormat)),
+                          textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(12, 59, 59, 999)).toString(baseValues.dateTimeFormat))),
+                     textFontWidth(list.at(0))) +
+                10;
     typeWidth = qMax(qMax(textFontWidth(textAsk), textFontWidth(textBid)), textFontWidth(list.at(2))) + 10;
 
     headerLabels = list;
@@ -474,8 +473,7 @@ void TradesModel::addNewTrades(QList<TradesItem>* newItems)
 
     for (int n = 0; n < newItems->size(); n++)
     {
-        if (newItems->at(n).date < 200 || newItems->at(n).symbol != baseValues.currentPair.symbol ||
-            newItems->at(n).date <= lastRemoveDate)
+        if (newItems->at(n).date < 200 || newItems->at(n).symbol != baseValues.currentPair.symbol || newItems->at(n).date <= lastRemoveDate)
             continue;
 
         if (lastPrice > newItems->at(n).price)
@@ -492,9 +490,9 @@ void TradesModel::addNewTrades(QList<TradesItem>* newItems)
             {
                 if (newItems->at(n).price < mainWindow.meridianPrice)
                     (*newItems)[n].orderType = 1;
-                else (*newItems)[n].orderType = -1;
+                else
+                    (*newItems)[n].orderType = -1;
             }
-
         }
 
         static bool backSwitcher = false;
@@ -520,7 +518,7 @@ void TradesModel::addNewTrades(QList<TradesItem>* newItems)
         endInsertRows();
     }
 
-    //emit addChartsData(newItems);
+    // emit addChartsData(newItems);
     emit addChartsTrades(newItems);
 }
 

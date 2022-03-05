@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,20 +29,17 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "currencysignloader.h"
 #include <QFile>
 #include <QFontMetrics>
 #include <QPainter>
-#include "currencysignloader.h"
 
-CurrencySignLoader::CurrencySignLoader() :
-    QObject()
+CurrencySignLoader::CurrencySignLoader() : QObject()
 {
-
 }
 
 CurrencySignLoader::~CurrencySignLoader()
 {
-
 }
 
 void CurrencySignLoader::createIcon(const QString& text)
@@ -58,7 +55,7 @@ void CurrencySignLoader::createIcon(const QString& text)
             QFont font("Arial", fontSize);
             QFontMetrics fm(font);
 
-            if (fm.width(text) <= 20)
+            if (fm.boundingRect(text).width() <= 20)
                 break;
         }
     }
@@ -73,7 +70,7 @@ void CurrencySignLoader::createIcon(const QString& text)
             QFont font("Arial", fontSize);
             QFontMetrics fm(font);
 
-            if (fm.width(textTop) <= 20 && fm.width(textBottom))
+            if (fm.boundingRect(textTop).width() <= 20 && fm.boundingRect(textBottom).width())
                 break;
         }
     }
@@ -84,14 +81,14 @@ void CurrencySignLoader::createIcon(const QString& text)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QColor(255, 255, 255, 255));
     painter.setFont(QFont("Arial", fontSize));
-    //painter.drawRect(0, 0, 20, 20);
+    // painter.drawRect(0, 0, 20, 20);
 
     if (text.size() < 4)
     {
         QFont font("Arial", fontSize);
         QFontMetrics fm(font);
 
-        int x = (20 - fm.width(text)) / 2;
+        int x = (20 - fm.boundingRect(text).width()) / 2;
         int y = (20 - fontSize) / 2;
 
         painter.drawText(x + 1, 21 - y, text);
@@ -103,11 +100,11 @@ void CurrencySignLoader::createIcon(const QString& text)
         QFont font("Arial", fontSize);
         QFontMetrics fm(font);
 
-        int x = (20 - fm.width(textTop)) / 2;
+        int x = (20 - fm.boundingRect(textTop).width()) / 2;
         int y = (9 - fontSize) / 2;
         painter.drawText(x + 1, 10 - y, textTop);
 
-        int x2 = (20 - fm.width(textBottom)) / 2;
+        int x2 = (20 - fm.boundingRect(textBottom).width()) / 2;
         int y2 = (9 - fontSize) / 2;
         painter.drawText(x2 + 1, 21 - y2, textBottom);
 

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,13 +30,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "depthmodel.h"
+#include "julymath.h"
 #include "main.h"
 #include <QTimer>
-#include "julymath.h"
 
-DepthModel::DepthModel(QComboBox* _groupComboBox, bool isAskData)
-    : QAbstractItemModel(),
-      groupComboBox(_groupComboBox)
+DepthModel::DepthModel(QComboBox* _groupComboBox, bool isAskData) : QAbstractItemModel(), groupComboBox(_groupComboBox)
 {
     widthPriceTitle = 75;
     widthVolumeTitle = 75;
@@ -55,7 +53,6 @@ DepthModel::DepthModel(QComboBox* _groupComboBox, bool isAskData)
 
 DepthModel::~DepthModel()
 {
-
 }
 
 double& DepthModel::sizeListAt(int row)
@@ -196,7 +193,7 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
         switch (indexColumn)
         {
-        case 0: //Price
+        case 0: // Price
             firstRowText = JulyMath::textFromDouble(groupedPrice);
 
             if (role == Qt::ToolTipRole)
@@ -204,7 +201,7 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
             break;
 
-        case 1: //Volume
+        case 1: // Volume
             firstRowText = JulyMath::textFromDouble(groupedVolume, baseValues.currentPair.currADecimals);
 
             if (role == Qt::ToolTipRole)
@@ -303,7 +300,7 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
     switch (indexColumn)
     {
-    case 0://Price
+    case 0: // Price
         if (role == Qt::ToolTipRole)
             baseValues.currentPair.currBSign + priceListStr.at(currentRow);
 
@@ -312,7 +309,7 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
     case 1:
         {
-            //Volume
+            // Volume
             if (volumeList.at(currentRow) <= 0.0)
                 return QVariant();
 
@@ -325,7 +322,7 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
     case 2:
         {
-            //Direction
+            // Direction
             switch (directionList.at(currentRow))
             {
             case -1:
@@ -341,7 +338,7 @@ QVariant DepthModel::data(const QModelIndex& index, int role) const
 
     case 3:
         {
-            //Size
+            // Size
             if (sizeListGet(currentRow) <= 0.0)
                 return QVariant();
 
@@ -398,8 +395,8 @@ void DepthModel::calculateSize()
 
             sizeListAt(currentRow) = totalSize;
             sizePriceList[currentRow] = totalPrice;
-            sizeListStr[currentRow] = JulyMath::textFromDouble(totalSize, qMin(baseValues.currentPair.currADecimals,
-                                      baseValues.decimalsTotalOrderBook));
+            sizeListStr[currentRow] =
+                JulyMath::textFromDouble(totalSize, qMin(baseValues.currentPair.currADecimals, baseValues.decimalsTotalOrderBook));
 
             maxPrice = qMax(maxPrice, priceList.at(currentRow));
             maxVolume = qMax(maxVolume, volumeList.at(currentRow));
@@ -419,8 +416,8 @@ void DepthModel::calculateSize()
             totalPrice += volumeList.at(currentRow) * priceList.at(currentRow);
             sizeListAt(currentRow) = totalSize;
             sizePriceList[currentRow] = totalPrice;
-            sizeListStr[currentRow] = JulyMath::textFromDouble(totalSize, qMin(baseValues.currentPair.currADecimals,
-                                      baseValues.decimalsTotalOrderBook));
+            sizeListStr[currentRow] =
+                JulyMath::textFromDouble(totalSize, qMin(baseValues.currentPair.currADecimals, baseValues.decimalsTotalOrderBook));
 
             maxPrice = qMax(maxPrice, priceList.at(currentRow));
             maxVolume = qMax(maxVolume, volumeList.at(currentRow));
@@ -480,7 +477,7 @@ void DepthModel::clear()
 Qt::ItemFlags DepthModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
-        return nullptr;
+        return Qt::NoItemFlags;
 
     if (grouped)
     {
@@ -520,13 +517,13 @@ QVariant DepthModel::headerData(int section, Qt::Orientation orientation, int ro
         switch (indexColumn)
         {
         case 0:
-            return QSize(widthPrice, defaultHeightForRow); //Price
+            return QSize(widthPrice, defaultHeightForRow); // Price
 
         case 1:
-            return QSize(widthVolume, defaultHeightForRow); //Volume
+            return QSize(widthVolume, defaultHeightForRow); // Volume
 
         case 3:
-            return QSize(widthSize, defaultHeightForRow); //Size
+            return QSize(widthSize, defaultHeightForRow); // Size
         }
 
         return QVariant();
@@ -621,7 +618,7 @@ void DepthModel::initGroupList(double price)
     if (groupComboBox->count() > 2)
         return;
 
-    int    degree = 0;
+    int degree = 0;
     double minVal = 1E-8;
     price /= minVal;
 
@@ -639,7 +636,7 @@ void DepthModel::initGroupList(double price)
         price = 1;
 
     double lastStep = -1.0;
-    int    uiIndex  = -1;
+    int uiIndex = -1;
     groupComboBox->blockSignals(true);
 
     if (groupComboBox->count() == 2)
@@ -708,7 +705,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 
     if (volume == 0.0)
     {
-        //Remove item
+        // Remove item
         if (matchListRang)
         {
             beginRemoveRows(QModelIndex(), currentIndex + grouped, currentIndex + grouped);
@@ -729,7 +726,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
 
     if (matchListRang && priceList.at(currentIndex) == price)
     {
-        //Update
+        // Update
         if (volumeList.at(currentIndex) == volume)
             return;
 
@@ -745,7 +742,7 @@ void DepthModel::depthUpdateOrder(DepthItem item)
     }
     else
     {
-        //Insert
+        // Insert
         beginInsertRows(QModelIndex(), currentIndex + grouped, currentIndex + grouped);
         priceList.insert(currentIndex, price);
         volumeList.insert(currentIndex, volume);

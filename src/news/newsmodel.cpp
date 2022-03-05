@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,13 +29,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QThread>
 #include "news/newsmodel.h"
+#include <QThread>
 
-NewsModel::NewsModel()
-    : QObject(),
-      downloadThread(new QThread),
-      runningJulyHttp(false)
+NewsModel::NewsModel() : QObject(), downloadThread(new QThread), runningJulyHttp(false)
 {
     downloadThread->setObjectName("News Model");
     connect(downloadThread.data(), &QThread::started, this, &NewsModel::run);
@@ -64,7 +61,7 @@ void NewsModel::run()
     connect(QThread::currentThread(), &QThread::finished, this, &NewsModel::quit, Qt::DirectConnection);
     julyHttp.reset(new JulyHttp("centrabit.com", "", this));
     connect(julyHttp.data(), &JulyHttp::dataReceived, this, &NewsModel::dataReceived);
-    connect(julyHttp.data(), &JulyHttp::destroyed,    this, &NewsModel::destroyedJulyHttp);
+    connect(julyHttp.data(), &JulyHttp::destroyed, this, &NewsModel::destroyedJulyHttp);
     runningJulyHttp = true;
 }
 

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "julytranslator.h"
-#include <QPushButton>
+#include "main.h"
 #include <QCheckBox>
-#include <QLabel>
-#include <QGroupBox>
+#include <QDockWidget>
 #include <QDoubleSpinBox>
 #include <QFile>
-#include <QDockWidget>
-#include "main.h"
+#include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
 
 int JulyTranslator::loadFromFile(const QString& fileName)
 {
@@ -157,7 +157,7 @@ QString JulyTranslator::translateString(const QString& tid, const QString& defau
 {
     QString result = stringMap.value(tid, defaultText);
 
-    if (stringMap.values(tid).empty())
+    if (stringMap.find(tid) == stringMap.end())
         stringMap[tid] = defaultText;
 
     return result;

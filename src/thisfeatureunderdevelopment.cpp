@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,22 +32,20 @@
 #include "thisfeatureunderdevelopment.h"
 #include "main.h"
 
-ThisFeatureUnderDevelopment::ThisFeatureUnderDevelopment(QWidget* parent)
-    : QDialog(parent)
+ThisFeatureUnderDevelopment::ThisFeatureUnderDevelopment(QWidget* parent) : QDialog(parent)
 {
     ui.setupUi(this);
     setWindowFlags(Qt::WindowCloseButtonHint);
     themeChanged();
-    connect(baseValues.mainWindow_, SIGNAL(themeChanged()), this, SLOT(themeChanged()));
+    connect(baseValues.mainWindow_, &QtBitcoinTrader::themeChanged, this, &ThisFeatureUnderDevelopment::themeChanged);
 }
 
 ThisFeatureUnderDevelopment::~ThisFeatureUnderDevelopment()
 {
-
 }
 
 void ThisFeatureUnderDevelopment::themeChanged()
 {
-    ui.labelNotAvailable->setStyleSheet("background: " + baseValues.appTheme.white.name() +
-                                        "; border-radius: 8px; border: 1px solid " + baseValues.appTheme.gray.name());
+    ui.labelNotAvailable->setStyleSheet("background: " + baseValues.appTheme.white.name() + "; border-radius: 8px; border: 1px solid " +
+                                        baseValues.appTheme.gray.name());
 }

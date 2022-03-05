@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QThread>
 #include "indicatorengine.h"
 #include "main.h"
+#include <QThread>
 
 IndicatorEngine::IndicatorEngine() : QObject()
 {
@@ -42,8 +42,7 @@ IndicatorEngine::IndicatorEngine() : QObject()
     connect(this, &IndicatorEngine::indicatorSellChanged, baseValues.mainWindow_, &QtBitcoinTrader::indicatorSellChanged);
     connect(this, &IndicatorEngine::indicatorBuyChanged, baseValues.mainWindow_, &QtBitcoinTrader::indicatorBuyChanged);
     connect(this, &IndicatorEngine::indicatorLastChanged, baseValues.mainWindow_, &QtBitcoinTrader::indicatorLastChanged);
-    connect(this, &IndicatorEngine::indicatorVolumeChanged,
-            baseValues.mainWindow_, &QtBitcoinTrader::indicatorVolumeChanged);
+    connect(this, &IndicatorEngine::indicatorVolumeChanged, baseValues.mainWindow_, &QtBitcoinTrader::indicatorVolumeChanged);
 
     m_thread.reset(new QThread);
     m_thread->setObjectName("Indicator Engine");
@@ -93,11 +92,10 @@ void IndicatorEngine::setValueSlot(const QString& exchange, const QString& symbo
         {
             if (qFuzzyCompare(indicators[index], value))
                 return;
-            
-                            locker.lock();
-                indicators[index] = value;
-                locker.unlock();
-           
+
+            locker.lock();
+            indicators[index] = value;
+            locker.unlock();
         }
         else
         {

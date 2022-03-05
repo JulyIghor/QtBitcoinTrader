@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,15 +32,16 @@
 #include "newpassworddialog.h"
 #include "main.h"
 #include <QDesktopServices>
-#include <QUrl>
 #include <QFile>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
-#include <QFileInfo>
+#include <QUrl>
 #include <QtCore/qmath.h>
 
-NewPasswordDialog::NewPasswordDialog(qint32 num)
-    : QDialog()
+static const QRegularExpression validChars("[^a-zA-Z0-9+-=_]");
+
+NewPasswordDialog::NewPasswordDialog(qint32 num) : QDialog()
 {
     exchangeNum = num;
     ui.setupUi(this);
@@ -75,7 +76,6 @@ NewPasswordDialog::NewPasswordDialog(qint32 num)
 
 NewPasswordDialog::~NewPasswordDialog()
 {
-
 }
 
 void NewPasswordDialog::on_advSettingsTool_toggled(bool status)
@@ -131,16 +131,15 @@ QString NewPasswordDialog::getPassword()
 
 QString NewPasswordDialog::getRestSign()
 {
-    return ui.restSignLine->text().remove(QRegExp("[^a-zA-Z0-9+-=_]"));
+    return ui.restSignLine->text().remove(validChars);
 }
 
 QString NewPasswordDialog::getRestKey()
 {
     if (clientIdEnabled)
-        return ui.clientIdLine->text().remove(QRegExp("[^a-zA-Z0-9+-=_]")) + ":"
-                + ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9+-=_]")); //ClientID visible
+        return ui.clientIdLine->text().remove(validChars) + ":" + ui.restKeyLine->text().remove(validChars); // ClientID visible
 
-    return ui.restKeyLine->text().remove(QRegExp("[^a-zA-Z0-9+-=_]"));
+    return ui.restKeyLine->text().remove(validChars);
 }
 
 void NewPasswordDialog::getApiKeySecretButton()
@@ -192,8 +191,8 @@ void NewPasswordDialog::setDiffBar(int val)
 int NewPasswordDialog::difficulty(const QString& pass, bool* resive_PasswordIsGood, QString* resive_Message)
 {
     QString Message = "";
-    qint32 diff = 0UL;                      // Difficulty level
-    qint32 passLength = pass.length();  // Password length
+    qint32 diff = 0UL;                 // Difficulty level
+    qint32 passLength = pass.length(); // Password length
 
     if (passLength)
     {
@@ -265,16 +264,17 @@ int NewPasswordDialog::difficulty(const QString& pass, bool* resive_PasswordIsGo
 
         quint64 PasswordsPerSecond = 500000000;
         double crackTimeD = qPow(passDifficulty, passLength) / PasswordsPerSecond;
-        quint64 crackTime = crackTimeD >= std::numeric_limits<quint64>::max() ?
-                    std::numeric_limits<quint64>::max() : static_cast<quint64>(crackTimeD);
+        quint64 crackTime = crackTimeD >= std::numeric_limits<quint64>::max() ? std::numeric_limits<quint64>::max() :
+                                                                                static_cast<quint64>(crackTimeD);
 
         if (crackTime >= 1798389)
             *resive_PasswordIsGood = true;
-        else *resive_PasswordIsGood = false;
+        else
+            *resive_PasswordIsGood = false;
 
         if (crackTime < 60)
         {
-            Message = julyTr("ONE_DAY_DIFFICULTY", "Less than 1 day");      //les 1 day
+            Message = julyTr("ONE_DAY_DIFFICULTY", "Less than 1 day"); // les 1 day
 
             if (passLength < 3)
                 diff = 1;
@@ -380,7 +380,7 @@ void NewPasswordDialog::checkToEnableButton()
         ui.okButton->setEnabled(false);
         return;
     }
-            ui.confirmLabel->setStyleSheet("");
+    ui.confirmLabel->setStyleSheet("");
 
     if (!diff_t)
     {
@@ -410,8 +410,8 @@ void NewPasswordDialog::checkToEnableButton()
     }
 
     if (ui.groupBoxApiKeyAndSecret->isVisible() &&
-            (ui.restSignLine->text().isEmpty() || ui.restKeyLine->text().isEmpty() ||
-             (ui.clientIdLine->isVisible() && !ui.advSettingsTool->isChecked() && ui.clientIdLine->text().isEmpty())))
+        (ui.restSignLine->text().isEmpty() || ui.restKeyLine->text().isEmpty() ||
+         (ui.clientIdLine->isVisible() && !ui.advSettingsTool->isChecked() && ui.clientIdLine->text().isEmpty())))
     {
         ui.okButton->setEnabled(false);
         return;
@@ -466,8 +466,8 @@ bool NewPasswordDialog::isValidPassword()
             if (!containsDownCase && pass.at(n).isLetter() && pass.at(n).isLower())
                 containsDownCase = true;
 
-            if ((containsLetter && containsDigit && containsSpec) || (containsLetter && containsDigit && containsUpCase &&
-                    containsDownCase))
+            if ((containsLetter && containsDigit && containsSpec) ||
+                (containsLetter && containsDigit && containsUpCase && containsDownCase))
             {
                 isValidPassword = true;
                 break;
@@ -517,6 +517,9 @@ void NewPasswordDialog::okPressed()
     if (diff_t)
         accept();
     else
-        QMessageBox::warning(this, "Qt Bitcoin Trader", julyTranslator.translateLabel("TR00100",
-                             "Your password must be at least 8 characters and contain letters, digits, and special characters."));
+        QMessageBox::warning(
+            this,
+            "Qt Bitcoin Trader",
+            julyTranslator.translateLabel(
+                "TR00100", "Your password must be at least 8 characters and contain letters, digits, and special characters."));
 }

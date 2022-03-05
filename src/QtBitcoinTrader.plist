@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleVersion</key>
-        <string>1.40.55</string>
+        <string>1.41.00</string>
 	<key>CFBundleName</key>
 	<string>Qt Bitcoin Trader</string>
 	<key>CFBundleIconFile</key>

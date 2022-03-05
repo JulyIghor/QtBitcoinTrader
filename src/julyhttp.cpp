@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,26 +31,28 @@
 
 #include "julyhttp.h"
 #include "main.h"
-#include <QTimer>
-#include <zlib.h>
 #include <QFile>
 #include <QMutex>
+#include <QTimer>
 #include <QWaitCondition>
+#include <zlib.h>
 
 #ifdef Q_OS_WIN
-    #include <winsock2.h>
+#include <winsock2.h>
 #else
-    #include <sys/socket.h>
-    #include <fcntl.h>
-    #include <netdb.h>
-    #include <net/if.h>
+#include <fcntl.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <sys/socket.h>
 #endif
 
-JulyHttp::JulyHttp(const QString& hostN, const QByteArray& restLine, QObject* parent, const bool& secure,
-                   const bool& keepAlive, const QByteArray& contentType)
-    : QSslSocket(parent),
-      ignoreError(false),
-      waitForReadyReadCount(0)
+JulyHttp::JulyHttp(const QString& hostN,
+                   const QByteArray& restLine,
+                   QObject* parent,
+                   const bool& secure,
+                   const bool& keepAlive,
+                   const QByteArray& contentType) :
+    QSslSocket(parent), ignoreError(false), waitForReadyReadCount(0)
 {
     destroyClass = false;
     noReconnect = false;
@@ -76,11 +78,11 @@ JulyHttp::JulyHttp(const QString& hostN, const QByteArray& restLine, QObject* pa
     httpHeader.append(" HTTP/1.1\r\n");
 
     if (baseValues.customUserAgent.length() > 0)
-        httpHeader.append("User-Agent: " + baseValues.customUserAgent + "\r\n");
+        httpHeader.append("User-Agent: " + baseValues.customUserAgent.toLatin1() + "\r\n");
     else
         httpHeader.append("User-Agent: Qt Bitcoin Trader v" + baseValues.appVerStr + "\r\n");
 
-    httpHeader.append("Host: " + hostName + "\r\n");
+    httpHeader.append("Host: " + hostName.toLatin1() + "\r\n");
     httpHeader.append("Accept: */*\r\n");
 
     if (baseValues.gzipEnabled)
@@ -116,7 +118,7 @@ JulyHttp::JulyHttp(const QString& hostN, const QByteArray& restLine, QObject* pa
     saveCookies();
 
     secondTimer = new QTimer(this);
-    connect(secondTimer, SIGNAL(timeout()), this, SLOT(sendPendingData()));
+    connect(secondTimer, &QTimer::timeout, this, &JulyHttp::sendPendingData);
     secondTimer->start(300);
 }
 
@@ -128,48 +130,48 @@ JulyHttp::~JulyHttp()
 
 void JulyHttp::setupSocket()
 {
-//    static QMutex mutex;
-//    mutex.lock();
-//    static QList<QSslCertificate> certs;
+    //    static QMutex mutex;
+    //    mutex.lock();
+    //    static QList<QSslCertificate> certs;
 
-//    if (certs.size() == 0)
-//    {
-//        QFile readCerts(":/Resources/CertBase.cer");
+    //    if (certs.size() == 0)
+    //    {
+    //        QFile readCerts(":/Resources/CertBase.cer");
 
-//        if (readCerts.open(QIODevice::ReadOnly))
-//        {
-//            QByteArray certData = readCerts.readAll() + "{SPLIT}";
-//            readCerts.close();
+    //        if (readCerts.open(QIODevice::ReadOnly))
+    //        {
+    //            QByteArray certData = readCerts.readAll() + "{SPLIT}";
+    //            readCerts.close();
 
-//            do
-//            {
-//                int nextCert = certData.indexOf("{SPLIT}");
+    //            do
+    //            {
+    //                int nextCert = certData.indexOf("{SPLIT}");
 
-//                if (nextCert > -1)
-//                {
-//                    QByteArray currentCert = certData.left(nextCert);
-//                    QSslCertificate derCert(currentCert, QSsl::Der);
+    //                if (nextCert > -1)
+    //                {
+    //                    QByteArray currentCert = certData.left(nextCert);
+    //                    QSslCertificate derCert(currentCert, QSsl::Der);
 
-//                    if (!derCert.isNull())
-//                        certs << derCert;
+    //                    if (!derCert.isNull())
+    //                        certs << derCert;
 
-//                    certData.remove(0, nextCert + 7);
-//                }
-//                else
-//                    certData.clear();
-//            }
-//            while (certData.size());
-//        }
-//    }
+    //                    certData.remove(0, nextCert + 7);
+    //                }
+    //                else
+    //                    certData.clear();
+    //            }
+    //            while (certData.size());
+    //        }
+    //    }
 
-//    setCaCertificates(certs);
+    //    setCaCertificates(certs);
 
     setPeerVerifyMode(QSslSocket::VerifyPeer);
-    connect(this, SIGNAL(readyRead()), SLOT(readSocket()));
-    connect(this, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(errorSlot(QAbstractSocket::SocketError)), Qt::QueuedConnection);
-    connect(this, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(sslErrorsSlot(const QList<QSslError>&)), Qt::QueuedConnection);
+    connect(this, &JulyHttp::readyRead, this, &JulyHttp::readSocket);
+    connect(this, &JulyHttp::errorOccurred, this, &JulyHttp::errorSlot, Qt::QueuedConnection);
+    connect(this, QOverload<const QList<QSslError>&>::of(&JulyHttp::sslErrors), this, &JulyHttp::sslErrorsSlot, Qt::QueuedConnection);
 
-//    mutex.unlock();
+    //    mutex.unlock();
 }
 
 void JulyHttp::clearPendingData()
@@ -198,7 +200,7 @@ void JulyHttp::abortSocket()
 void JulyHttp::reconnectSocket(bool forceAbort)
 {
     if (destroyClass)
-        return;//{qDebug("delete reconnectSocket1"); delete this; qDebug("delete reconnectSocket2");}
+        return; //{qDebug("delete reconnectSocket1"); delete this; qDebug("delete reconnectSocket2");}
 
     if (isDisabled)
         return;
@@ -217,8 +219,10 @@ void JulyHttp::reconnectSocket(bool forceAbort)
 
 #ifdef Q_OS_WIN
         setsockopt(static_cast<SOCKET>(this->socketDescriptor()),
-                   SOL_SOCKET, SO_RCVTIMEO,
-                   (const char*)&baseValues.httpRequestTimeout, sizeof(int));
+                   SOL_SOCKET,
+                   SO_RCVTIMEO,
+                   (const char*)&baseValues.httpRequestTimeout,
+                   sizeof(int));
 #else
         struct timeval vtime;
         vtime.tv_sec = baseValues.httpRequestTimeout / 1000;
@@ -312,7 +316,7 @@ void JulyHttp::readSocket()
                 if (currentLineLow.startsWith("http/1.1 "))
                 {
                     if (currentLineLow.length() > 12)
-                        httpState = currentLineLow.midRef(9, 3).toInt();
+                        httpState = currentLineLow.mid(9, 3).toInt();
 
                     if (debugLevel && httpState != 200)
                     {
@@ -350,8 +354,7 @@ void JulyHttp::readSocket()
                         }
                     }
                 }
-                else if (currentLineLow.startsWith("transfer-encoding") &&
-                         currentLineLow.endsWith("chunked\r\n"))
+                else if (currentLineLow.startsWith("transfer-encoding") && currentLineLow.endsWith("chunked\r\n"))
                     chunkedSize = 0;
                 else if (currentLineLow.startsWith(QLatin1String("content-length")))
                 {
@@ -360,11 +363,9 @@ void JulyHttp::readSocket()
                     if (pairList.size() == 2)
                         contentLength = pairList.last().trimmed().toUInt();
                 }
-                else if (currentLineLow.startsWith(QLatin1String("connection")) &&
-                         currentLineLow.endsWith(QLatin1String("close\r\n")))
+                else if (currentLineLow.startsWith(QLatin1String("connection")) && currentLineLow.endsWith(QLatin1String("close\r\n")))
                     connectionClose = true;
-                else if (currentLineLow.startsWith(QLatin1String("content-encoding")) &&
-                         currentLineLow.contains(QLatin1String("gzip")))
+                else if (currentLineLow.startsWith(QLatin1String("content-encoding")) && currentLineLow.contains(QLatin1String("gzip")))
                     contentGzipped = true;
             }
         }
@@ -438,8 +439,7 @@ void JulyHttp::readSocket()
             {
                 QString currentLine = readLine();
 
-                if (currentLine == QLatin1String("\r\n") ||
-                    currentLine == QLatin1String("\n"))
+                if (currentLine == QLatin1String("\r\n") || currentLine == QLatin1String("\n"))
                     chunkedSize = -1;
             }
 
@@ -501,7 +501,7 @@ void JulyHttp::readSocket()
             dataArray->resize(static_cast<int>(read(dataArray->data(), readSize)));
         }
 
-        if (bytesDone +/* bytesAvailable() + */readSize == contentLength)
+        if (bytesDone + /* bytesAvailable() + */ readSize == contentLength)
             allDataReaded = true;
     }
     else if (readSize > 0)
@@ -617,8 +617,7 @@ void JulyHttp::gzipUncompress(QByteArray* data)
         }
 
         result.append(out, CHUNK_SIZE - static_cast<int>(strm.avail_out));
-    }
-    while (strm.avail_out == 0);
+    } while (strm.avail_out == 0);
 
     inflateEnd(&strm);
     (*data) = result;
@@ -655,8 +654,12 @@ void JulyHttp::clearRequest()
     endOfPacket = false;
 }
 
-void JulyHttp::prepareData(int reqType, int pairChangeCount, const QByteArray& method, QByteArray postData,
-                           const QByteArray& restSignLine, const int& forceRetryCount)
+void JulyHttp::prepareData(int reqType,
+                           int pairChangeCount,
+                           const QByteArray& method,
+                           QByteArray postData,
+                           const QByteArray& restSignLine,
+                           const int& forceRetryCount)
 {
     if (isDisabled)
         return;
@@ -726,15 +729,18 @@ void JulyHttp::prepareDataClear()
         PacketItem preparingPacket = preparedList.at(n);
         reqTypePending[preparingPacket.reqType] = reqTypePending.value(preparingPacket.reqType, 1) - 1;
 
-        
-            delete preparingPacket.data;
+        delete preparingPacket.data;
     }
 
     preparedList.clear();
 }
 
-void JulyHttp::sendData(int reqType, int pairChangeCount, const QByteArray& method, QByteArray postData,
-                        const QByteArray& restSignLine, const int& forceRetryCount)
+void JulyHttp::sendData(int reqType,
+                        int pairChangeCount,
+                        const QByteArray& method,
+                        QByteArray postData,
+                        const QByteArray& restSignLine,
+                        const int& forceRetryCount)
 {
     if (isDisabled)
         return;
@@ -836,8 +842,7 @@ void JulyHttp::errorSlot(QAbstractSocket::SocketError socketError)
         return;
     }
 
-    if (socketError != QAbstractSocket::RemoteHostClosedError &&
-        socketError != QAbstractSocket::UnfinishedSocketOperationError)
+    if (socketError != QAbstractSocket::RemoteHostClosedError && socketError != QAbstractSocket::UnfinishedSocketOperationError)
         setApiDown(true);
 
     if (debugLevel)
@@ -907,20 +912,19 @@ void JulyHttp::sendPendingData()
     {
         if (requestTimeOut.elapsed() < ((noReconnect && noReconnectCount++ > 5) ? 1000 : baseValues.httpRequestTimeout))
             return;
-        
-                    if (debugLevel)
-                logThread->writeLog(QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(
-                                        baseValues.httpRequestTimeout).toLatin1(), 2);
 
-            reconnectSocket(true);
-            setApiDown(true);
+        if (debugLevel)
+            logThread->writeLog(
+                QString("Request timeout: %0>%1").arg(requestTimeOut.elapsed()).arg(baseValues.httpRequestTimeout).toLatin1(), 2);
 
-            if (requestList.first().retryCount > 0)
-            {
-                retryRequest();
-                return;
-            }
-       
+        reconnectSocket(true);
+        setApiDown(true);
+
+        if (requestList.first().retryCount > 0)
+        {
+            retryRequest();
+            return;
+        }
     }
     else
     {

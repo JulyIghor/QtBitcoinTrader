@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ BaseValues::BaseValues()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4055";
+    appVerStr = "1.4100";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)
@@ -136,11 +136,13 @@ BaseValues::BaseValues()
     supportsUtfUI = true;
     debugLevel_ = 0;
 
+#if QT_VERSION < 0x060000
 #ifdef Q_WS_WIN
 
     if (QSysInfo::windowsVersion() <= QSysInfo::WV_XP)
         supportsUtfUI = false;
 
+#endif
 #endif
 
     upArrow = QByteArray::fromBase64("4oaR");
@@ -242,7 +244,7 @@ bool BaseValues::initAppDataDir(QApplication& a)
 #ifdef QTBUILDTARGETLINUX64
     portableModeSupported = true;
 #endif
-    QString systemAppDataDir(QStandardPaths::standardLocations(QStandardPaths::DataLocation).first());
+    QString systemAppDataDir(QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
 #ifdef Q_OS_WIN
     systemAppDataDir.replace('\\', '/');
 #endif
@@ -613,7 +615,7 @@ int main(int argc, char* argv[])
 #endif
 
 #endif
-            QDir appdataDir(QStandardPaths::standardLocations(QStandardPaths::DataLocation).first());
+            QDir appdataDir(QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
 
             if (appdataDir.exists())
                 appdataDir.removeRecursively();
@@ -733,11 +735,10 @@ int main(int argc, char* argv[])
                     msgBox.setIcon(QMessageBox::Question);
                     msgBox.setWindowTitle("Qt Bitcoin Trader");
                     msgBox.setText(julyTr("AGREE_CLOSED_SOURCE", "Do you agree to download the enclosed application?"));
-                    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-                    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
-                    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
-
-                    if (msgBox.exec() == QMessageBox::No)
+                    auto buttonYes = msgBox.addButton(julyTr("YES", "Yes"), QMessageBox::YesRole);
+                    msgBox.addButton(julyTr("NO", "No"), QMessageBox::NoRole);
+                    msgBox.exec();
+                    if (msgBox.clickedButton() != buttonYes)
                         continue;
                 }
 
@@ -910,9 +911,6 @@ int main(int argc, char* argv[])
                         "This profile is already used by another instance.<br>API does not allow to run two instances with same key sign pair.<br>Please create new profile if you want to use two instances."));
                     msgBox.setStandardButtons(QMessageBox::Ok);
                     msgBox.setDefaultButton(QMessageBox::Ok);
-                    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
-                    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
-
                     msgBox.exec();
 
                     tryPassword.clear();

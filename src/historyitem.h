@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public:
     HistoryItem();
 
     bool displayFullDate;
-    qint64  dateTimeInt;
+    qint64 dateTimeInt;
     quint32 dateInt;
     QString dateTimeStr;
     QString timeStr;
@@ -58,7 +58,7 @@ public:
     QString symbol;
     QString currRequestSecond;
 
-    int type; //0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
+    int type; // 0=General, 1=Sell, 2=Buy, 3=Fee, 4=Deposit, 5=Withdraw
 
     void cacheStrings();
 

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -33,22 +33,39 @@
 #define SCRIPTOBJECT_H
 
 #include <QObject>
-class QScriptContext;
-class QScriptEngine;
-class QScriptValue;
+
+#ifdef QT_SCRIPT_LIB
+#include <QScriptEngine>
+#include <QScriptValue>
+#include <QScriptValueIterator>
+
+typedef QScriptEngine JSEngine;
+typedef QScriptValue JSValue;
+typedef QScriptValueIterator JSValueIterator;
+#else
+#include <QJSEngine>
+#include <QJSValue>
+#include <QJSValueIterator>
+
+typedef QJSEngine JSEngine;
+typedef QJSValue JSValue;
+typedef QJSValueIterator JSValueIterator;
+#endif
+
 class QDoubleSpinBox;
-#include <QVariant>
+
+#include "scriptobjectthread.h"
 #include <QString>
-class QScriptEngine;
 #include <QStringList>
 #include <QTimer>
-#include "scriptobjectthread.h"
+#include <QVariant>
+#include <memory>
 
 class ScriptObject : public QObject
 {
     Q_OBJECT
 public:
-    int testResult;
+    int testResult = 00;
     QString scriptName;
     bool isRunning()
     {
@@ -64,31 +81,33 @@ public:
     QStringList commandsList;
 
 private:
-    void initValueChangedPrivate(const QString& symbol, QString& scriptNameInd, double& val, bool forceEmit = false);
+    void initValueChangedPrivate(const QString& symbol, QString& scriptNameInd, double val, bool forceEmit = false);
     void deleteEngine();
-    bool scriptWantsOrderBookData;
+    bool scriptWantsOrderBookData = false;
     void timerCreate(int milliseconds, const QString& command, bool once);
     QMap<QTimer*, bool> timerMap;
     double orderBookInfo(const QString& symbol, double& value, bool isAsk, bool getPrice);
-    bool haveTimer;
-    QTimer* secondTimer;
-    bool pendingStop;
+    bool haveTimer = false;
+    QTimer* secondTimer = nullptr;
+    bool pendingStop = false;
     void setRunning(bool);
-    bool isRunningFlag;
+    bool isRunningFlag = false;
     bool replaceString(const QString& what, const QString& to, QString& text, bool skipFirstLeft) const;
     QString sourceToScript(const QString&) const;
-    QScriptEngine* engine;
+    std::unique_ptr<JSEngine> engine;
     QStringList functionNames;
     QList<QDoubleSpinBox*> spinBoxList;
     void addIndicator(QDoubleSpinBox* spinbox, QString value);
     void addCommand(const QString&, QList<QByteArray>);
     void addFunction(const QString& name);
-    bool testMode;
+    bool testMode = true;
     QMap<QString, double> indicatorsMap;
     ScriptObjectThread performThread;
     QHash<quint32, QString> arrayFileReadResult;
     quint32 fileOperationNumber;
     qint32 fileOpenCount;
+    void log(const QVariantList&);
+    void say(const QVariantList&);
 public slots:
     void sendEvent(const QString& symbol, const QString& name, double value);
     void sendEvent(const QString& name, double value);
@@ -100,18 +119,17 @@ public slots:
     void log(const QVariant&, const QVariant&, const QVariant&, const QVariant&);
     void log(const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&);
     void log(const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&, const QVariant&);
-    void log(const QVariantList&);
     void logClear();
     void test(int);
 
     void beep() const;
     void playWav(const QString& _filePath_);
+    void play(const QString& _filePath_);
 
     void say(const QString& _text_);
     void say(int);
     void say(double);
     void say(const QVariant&);
-    void say(const QVariantList&);
     void say(const QVariant&, const QVariant&);
     void say(const QVariant&, const QVariant&, const QVariant&);
     void say(const QVariant&, const QVariant&, const QVariant&, const QVariant&);

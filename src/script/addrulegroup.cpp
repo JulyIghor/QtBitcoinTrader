@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,13 +31,12 @@
 
 #include "addrulegroup.h"
 #include "main.h"
+#include "rulescriptparser.h"
 #include "thisfeatureunderdevelopment.h"
 #include <QFileDialog>
-#include "rulescriptparser.h"
 #include <QMessageBox>
 
-AddRuleGroup::AddRuleGroup(QWidget* parent)
-    : QDialog(parent)
+AddRuleGroup::AddRuleGroup(QWidget* parent) : QDialog(parent)
 {
     ui.setupUi(this);
     setWindowFlags(Qt::WindowCloseButtonHint);
@@ -70,7 +69,6 @@ AddRuleGroup::AddRuleGroup(QWidget* parent)
 
     mainWindow.fixAllChildButtonsAndLabels(this);
     julyTranslator.translateUi(this);
-
 
     resize(width(), minimumSizeHint().height());
     setFixedHeight(height());
@@ -108,7 +106,6 @@ AddRuleGroup::AddRuleGroup(QWidget* parent)
 
 AddRuleGroup::~AddRuleGroup()
 {
-
 }
 
 void AddRuleGroup::onGroupContentChanged(bool on)
@@ -140,8 +137,7 @@ void AddRuleGroup::on_ruleOpen_clicked()
     if (!QFile::exists(lastRulesDir))
         lastRulesDir = baseValues.desktopLocation;
 
-    QString fileNameOpen = QFileDialog::getOpenFileName(this, julyTr("OPEN_GOUP", "Open Rules Group"), lastRulesDir,
-                           "(*.JLR)");
+    QString fileNameOpen = QFileDialog::getOpenFileName(this, julyTr("OPEN_GOUP", "Open Rules Group"), lastRulesDir, "(*.JLR)");
 
     if (fileNameOpen.isEmpty())
     {
@@ -151,7 +147,7 @@ void AddRuleGroup::on_ruleOpen_clicked()
 
     QString scriptNameFile = QSettings(fileNameOpen, QSettings::IniFormat).value("JLRuleGroup/Name", "").toString();
     {
-        //Validate saved file
+        // Validate saved file
         if (scriptNameFile.isEmpty())
         {
             QMessageBox::warning(this, windowTitle(), julyTr("OPEN_INVALID_SCRIPT", "Invalid script \"%1\"").arg(fileNameOpen));

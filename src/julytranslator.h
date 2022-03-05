@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@
 #ifndef JULYTRANSLATOR_H
 #define JULYTRANSLATOR_H
 
-#include <QObject>
 #include <QMap>
+#include <QObject>
 #include <QWidget>
 
 class JulyTranslator : public QObject
@@ -41,12 +41,12 @@ class JulyTranslator : public QObject
     Q_OBJECT
 
 public:
-    QMap<QString, QString>labelMap;
-    QMap<QString, QString>groupBoxMap;
-    QMap<QString, QString>checkBoxMap;
-    QMap<QString, QString>buttonMap;
-    QMap<QString, QString>spinBoxMap;
-    QMap<QString, QString>stringMap;
+    QMap<QString, QString> labelMap;
+    QMap<QString, QString> groupBoxMap;
+    QMap<QString, QString> checkBoxMap;
+    QMap<QString, QString> buttonMap;
+    QMap<QString, QString> spinBoxMap;
+    QMap<QString, QString> stringMap;
 
     const QString& lastFile() const
     {
@@ -71,6 +71,7 @@ public:
     QString translateGroupBox(const QString& tid, const QString& defaultText) const;
     QString translateSpinBox(const QString& tid, const QString& defaultText) const;
     QString translateString(const QString& tid, const QString& defaultText);
+
 private:
     QString lastLangFile;
     bool fillMapsFromLine(QMap<QString, QString>* map, QString line, const QString& prefix);

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "julyaes256.h"
-#include <openssl/evp.h>
 #include <openssl/aes.h>
+#include <openssl/evp.h>
 
 QByteArray JulyAES256::sha256(const QByteArray& text)
 {
@@ -63,9 +63,13 @@ QByteArray JulyAES256::encrypt(const QByteArray& data, const QByteArray& passwor
     dataBuff.resize(data.size() + AES_BLOCK_SIZE);
     EVP_CIPHER_CTX* evpCipherCtx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init(evpCipherCtx);
-    EVP_EncryptInit(evpCipherCtx, EVP_aes_256_cbc(), reinterpret_cast<const unsigned char*>(sha256(password).data()),
+    EVP_EncryptInit(evpCipherCtx,
+                    EVP_aes_256_cbc(),
+                    reinterpret_cast<const unsigned char*>(sha256(password).data()),
                     reinterpret_cast<const unsigned char*>(sha256("JulyAES" + password).data()));
-    EVP_EncryptUpdate(evpCipherCtx, reinterpret_cast<unsigned char*>(dataBuff.data()), &outLen,
+    EVP_EncryptUpdate(evpCipherCtx,
+                      reinterpret_cast<unsigned char*>(dataBuff.data()),
+                      &outLen,
                       reinterpret_cast<const unsigned char*>(data.data()),
                       data.size());
     int tempLen = outLen;
@@ -84,9 +88,13 @@ QByteArray JulyAES256::decrypt(const QByteArray& data, const QByteArray& passwor
     dataBuff.resize(data.size() + AES_BLOCK_SIZE);
     EVP_CIPHER_CTX* evpCipherCtx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init(evpCipherCtx);
-    EVP_DecryptInit(evpCipherCtx, EVP_aes_256_cbc(), reinterpret_cast<const unsigned char*>(sha256(password).data()),
+    EVP_DecryptInit(evpCipherCtx,
+                    EVP_aes_256_cbc(),
+                    reinterpret_cast<const unsigned char*>(sha256(password).data()),
                     reinterpret_cast<const unsigned char*>(sha256("JulyAES" + password).data()));
-    EVP_DecryptUpdate(evpCipherCtx, reinterpret_cast<unsigned char*>(dataBuff.data()), &outLen,
+    EVP_DecryptUpdate(evpCipherCtx,
+                      reinterpret_cast<unsigned char*>(dataBuff.data()),
+                      &outLen,
                       reinterpret_cast<const unsigned char*>(data.data()),
                       data.size());
     int tempLen = outLen;

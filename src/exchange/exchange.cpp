@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "exchange.h"
-#include "main.h"
-#include "depthitem.h"
-#include <QFile>
 #include "currencypairitem.h"
+#include "depthitem.h"
 #include "iniengine.h"
+#include "main.h"
+#include <QFile>
 
-Exchange::Exchange()
-    : QObject()
+Exchange::Exchange() : QObject()
 {
     multiCurrencyTradeSupport = false;
     exchangeDisplayOnlyCurrentPairOpenOrders = false;
@@ -60,7 +59,7 @@ Exchange::Exchange()
     checkDuplicatedOID = false;
     isLastTradesTypeSupported = true;
     forceDepthLoad = false;
-    port   = 0;
+    port = 0;
     useSsl = true;
     m_pairChangeCount = 1;
 
@@ -82,11 +81,11 @@ QByteArray Exchange::getMidData(const QString& a, const QString& b, const QByteA
 {
     QByteArray rez;
 
-    int startPos = data->indexOf(a, 0);
+    int startPos = data->indexOf(a.toLatin1(), 0);
 
     if (startPos > -1)
     {
-        int endPos = data->indexOf(b.isEmpty() ? "\"," : b, startPos + a.length());
+        int endPos = data->indexOf(b.isEmpty() ? "\"," : b.toLatin1(), startPos + a.length());
 
         if (endPos > -1)
             rez = data->mid(startPos + a.length(), endPos - startPos - a.length());
@@ -99,7 +98,7 @@ QByteArray Exchange::getMidVal(const QString& a, const QString& b, const QByteAr
 {
     QByteArray rez;
 
-    int startPos = data->indexOf(a, 0);
+    int startPos = data->indexOf(a.toLatin1(), 0);
 
     if (startPos > -1)
     {
@@ -108,7 +107,7 @@ QByteArray Exchange::getMidVal(const QString& a, const QString& b, const QByteAr
         if (startPos < data->size() && data->at(startPos) == '\"')
             ++startPos;
 
-        int endPos = data->indexOf(b.isEmpty() ? "," : b, startPos);
+        int endPos = data->indexOf(b.isEmpty() ? "," : b.toLatin1(), startPos);
 
         if (endPos > -1)
         {
@@ -122,37 +121,6 @@ QByteArray Exchange::getMidVal(const QString& a, const QString& b, const QByteAr
     return rez;
 }
 
-void Exchange::translateUnicodeStr(QString* str)
-{
-    const QRegExp rx("(\\\\u[0-9a-fA-F]{4})");
-    int pos = 0;
-
-    while ((pos = rx.indexIn(*str, pos)) != -1)
-        str->replace(pos++, 6, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
-}
-
-void Exchange::translateUnicodeOne(QByteArray* str)
-{
-    if (!str->contains("\\u"))
-        return;
-
-    QStringList bytesList = QString(*str).split("\\u");
-
-    if (!bytesList.empty())
-        bytesList.removeFirst();
-    else
-        return;
-
-    QString strToReturn;
-
-    for (int n = 0; n < bytesList.size(); n++)
-        if (bytesList.at(n).length() > 3)
-            strToReturn += "\\u" + bytesList.at(n).left(4);
-
-    translateUnicodeStr(&strToReturn);
-    *str = strToReturn.toLatin1();
-}
-
 void Exchange::run()
 {
     if (debugLevel)
@@ -162,7 +130,7 @@ void Exchange::run()
 
     QSettings iniSettings(baseValues.iniFileName, QSettings::IniFormat);
     domain = iniSettings.value("Domain").toString();
-    port   = static_cast<quint16>(iniSettings.value("Port", 0).toUInt());
+    port = static_cast<quint16>(iniSettings.value("Port", 0).toUInt());
     useSsl = iniSettings.value("SSL", true).toBool();
 
     if (domain.startsWith("http://"))
@@ -220,53 +188,46 @@ void Exchange::clearVariables()
 
 void Exchange::filterAvailableUSDAmountValue(double* /*unused*/)
 {
-
 }
 
-void Exchange::setupApi(QtBitcoinTrader* mainClass, bool tickOnly)//Execute only once
+void Exchange::setupApi(QtBitcoinTrader* mainClass, bool tickOnly) // Execute only once
 {
     IniEngine::loadExchangeLock(currencyMapFile, defaultCurrencyParams);
     tickerOnly = tickOnly;
 
     if (!tickerOnly)
     {
-        connect(mainClass, SIGNAL(apiBuy(QString, double, double)), this, SLOT(buy(QString, double, double)));
-        connect(mainClass, SIGNAL(apiSell(QString, double, double)), this, SLOT(sell(const QString&, double, double)));
-        connect(mainClass, SIGNAL(cancelOrderByOid(QString, QByteArray)), this, SLOT(cancelOrder(const QString&, const QByteArray&)));
-        connect(mainClass, SIGNAL(getHistory(bool)), this, SLOT(getHistory(bool)));
+        connect(mainClass, &QtBitcoinTrader::apiBuy, this, &Exchange::buy);
+        connect(mainClass, &QtBitcoinTrader::apiSell, this, &Exchange::sell);
+        connect(mainClass, &QtBitcoinTrader::cancelOrderByOid, this, &Exchange::cancelOrder);
+        connect(mainClass, &QtBitcoinTrader::getHistory, this, &Exchange::getHistory);
 
-        connect(this, SIGNAL(orderBookChanged(QString, QList<OrderItem>*)), mainClass, SLOT(orderBookChanged(QString,
-                QList<OrderItem>*)));
-        connect(this, SIGNAL(historyChanged(QList<HistoryItem>*)), mainClass, SLOT(historyChanged(QList<HistoryItem>*)));
-        connect(this, SIGNAL(orderCanceled(QString, QByteArray)), mainClass, SLOT(orderCanceled(QString, QByteArray)));
-        connect(this, SIGNAL(ordersIsEmpty()), mainClass, SLOT(ordersIsEmpty()));
+        connect(this, &Exchange::orderBookChanged, mainClass, &QtBitcoinTrader::orderBookChanged);
+        connect(this, &Exchange::historyChanged, mainClass, &QtBitcoinTrader::historyChanged);
+        connect(this, &Exchange::orderCanceled, mainClass, &QtBitcoinTrader::orderCanceled);
+        connect(this, &Exchange::ordersIsEmpty, mainClass, &QtBitcoinTrader::ordersIsEmpty);
     }
 
-    connect(this, SIGNAL(depthRequested()), mainClass, SLOT(depthRequested()));
-    connect(this, SIGNAL(depthRequestReceived()), mainClass, SLOT(depthRequestReceived()));
-    connect(this, SIGNAL(depthSubmitOrders(QString, QList<DepthItem>*, QList<DepthItem>*)), mainClass,
-            SLOT(depthSubmitOrders(QString, QList<DepthItem>*, QList<DepthItem>*)));
-    connect(this, SIGNAL(depthFirstOrder(QString, double, double, bool)), mainClass, SLOT(depthFirstOrder(QString, double,
-            double, bool)));
-    connect(this, SIGNAL(showErrorMessage(QString)), mainClass, SLOT(showErrorMessage(QString)));
+    connect(this, &Exchange::depthRequested, mainClass, &QtBitcoinTrader::depthRequested);
+    connect(this, &Exchange::depthRequestReceived, mainClass, &QtBitcoinTrader::depthRequestReceived);
+    connect(this, &Exchange::depthSubmitOrders, mainClass, &QtBitcoinTrader::depthSubmitOrders);
+    connect(this, &Exchange::depthFirstOrder, mainClass, &QtBitcoinTrader::depthFirstOrder);
+    connect(this, &Exchange::showErrorMessage, mainClass, &QtBitcoinTrader::showErrorMessage);
 
-    connect(this, SIGNAL(availableAmountChanged(QString, double)), mainClass, SLOT(availableAmountChanged(QString,
-            double)));
-    connect(mainClass, SIGNAL(clearValues()), this, SLOT(clearValues()));
-    connect(mainClass, SIGNAL(reloadDepth()), this, SLOT(reloadDepth()));
+    connect(this, &Exchange::availableAmountChanged, mainClass, &QtBitcoinTrader::availableAmountChanged);
+    connect(mainClass, &QtBitcoinTrader::clearValues, this, &Exchange::clearValues);
+    connect(mainClass, &QtBitcoinTrader::reloadDepth, this, &Exchange::reloadDepth);
 
-    connect(this, SIGNAL(accVolumeChanged(double)), mainClass->ui.accountVolume, SLOT(setValue(double)));
-    connect(this, SIGNAL(accFeeChanged(QString, double)), mainClass, SLOT(accFeeChanged(QString, double)));
-    connect(this, SIGNAL(accBtcBalanceChanged(QString, double)), mainClass, SLOT(accBtcBalanceChanged(QString, double)));
-    connect(this, SIGNAL(accUsdBalanceChanged(QString, double)), mainClass, SLOT(accUsdBalanceChanged(QString, double)));
+    connect(this, &Exchange::accVolumeChanged, mainClass->ui.accountVolume, &QDoubleSpinBox::setValue);
+    connect(this, &Exchange::accFeeChanged, mainClass, &QtBitcoinTrader::accFeeChanged);
+    connect(this, &Exchange::accBtcBalanceChanged, mainClass, &QtBitcoinTrader::accBtcBalanceChanged);
+    connect(this, &Exchange::accUsdBalanceChanged, mainClass, &QtBitcoinTrader::accUsdBalanceChanged);
 
-    connect(this, SIGNAL(loginChanged(QString)), mainClass, SLOT(loginChanged(QString)));
-
-    connect(this, SIGNAL(addLastTrades(QString, QList<TradesItem>*)), mainClass, SLOT(addLastTrades(QString,
-            QList<TradesItem>*)));
+    connect(this, &Exchange::loginChanged, mainClass, &QtBitcoinTrader::loginChanged);
+    connect(this, &Exchange::addLastTrades, mainClass, &QtBitcoinTrader::addLastTrades);
 }
 
-void Exchange::setApiKeySecret(QByteArray key, QByteArray secret)
+void Exchange::setApiKeySecret(const QByteArray& key, const QByteArray& secret)
 {
     if (!apiKeyChars.isEmpty())
         return;
@@ -294,7 +255,6 @@ QByteArray Exchange::getApiSign()
 
 void Exchange::clearValues()
 {
-
 }
 
 void Exchange::getHistory(bool /*unused*/)

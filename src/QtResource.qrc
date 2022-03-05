@@ -95,6 +95,7 @@
         <file>Resources/Language/Bulgarian.lng</file>
         <file>Resources/Language/Czech.lng</file>
         <file>Resources/Language/Turkish.lng</file>
+        <file>Resources/Language/Korean.lng</file>
         <file>Resources/Language/LangList.ini</file>
         <file>Resources/Themes/Gray.thm</file>
         <file>Resources/Gray.png</file>
@@ -132,6 +133,5 @@
         <file>Resources/Exchanges/Poloniex.ini</file>
         <file>Resources/Exchanges/Logos/Poloniex.png</file>
         <file>Resources/Exchanges/Logos/Poloniex_Big.png</file>
-        <file>Resources/Language/Korean.lng</file>
     </qresource>
 </RCC>

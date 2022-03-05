@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "logthread.h"
-#include <QFile>
-#include <QApplication>
 #include "main.h"
 #include "timesync.h"
+#include <QApplication>
+#include <QFile>
 #include <QThread>
 
-LogThread::LogThread(bool wrf)
-    : QObject()
+LogThread::LogThread(bool wrf) : QObject()
 {
     writeFile = wrf;
 
@@ -70,15 +69,14 @@ void LogThread::writeLog(const QByteArray& data, int dbLvl)
         return;
 
     if (debugLevel == 2 && dbLvl != 2)
-        return;//0: Disabled; 1: Debug; 2: Log
+        return; // 0: Disabled; 1: Debug; 2: Log
 
     emit writeLogSignal(data, dbLvl);
 }
 
 void LogThread::writeLogSlot(QByteArray data, int dbLvl)
 {
-    data = "------------------\r\n" +
-           QDateTime::fromSecsSinceEpoch(TimeSync::getTimeT()).toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1() +
+    data = "------------------\r\n" + QDateTime::fromSecsSinceEpoch(TimeSync::getTimeT()).toString("yyyy-MM-dd HH:mm:ss LVL:").toLatin1() +
            QByteArray::number(dbLvl) + "\r\n" + data + "\r\n------------------\r\n\r\n";
 
     if (writeFile)

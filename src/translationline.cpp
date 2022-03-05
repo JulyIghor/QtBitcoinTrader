@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,11 +30,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "translationline.h"
-#include <QTextDocument>
 #include "main.h"
+#include <QTextDocument>
 
-TranslationLine::TranslationLine(QWidget* parent)
-    : QTextEdit(parent)
+TranslationLine::TranslationLine(QWidget* parent) : QTextEdit(parent)
 {
     fixingSize = false;
     setWordWrapMode(QTextOption::WrapAnywhere);
@@ -43,12 +42,11 @@ TranslationLine::TranslationLine(QWidget* parent)
     setMinimumWidth(100);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    connect(this, SIGNAL(textChanged()), this, SLOT(textChangedSlot()));
+    connect(this, &TranslationLine::textChanged, this, &TranslationLine::textChangedSlot);
 }
 
 TranslationLine::~TranslationLine()
 {
-
 }
 
 void TranslationLine::focusInEvent(QFocusEvent* e)
@@ -90,7 +88,6 @@ void TranslationLine::fixSize()
 
     fixingSize = false;
 }
-
 
 void TranslationLine::setDefaultText(const QString& defText)
 {

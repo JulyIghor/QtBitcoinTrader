@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,9 +31,12 @@
 
 #include "exchangebutton.h"
 
-ExchangeButton::ExchangeButton(const QString& logo, const QString& currencies, const QString& url, qint32 num,
-                               FeaturedExchangesDialog* toParrentForm)
-    : QWidget()
+ExchangeButton::ExchangeButton(const QString& logo,
+                               const QString& currencies,
+                               const QString& url,
+                               qint32 num,
+                               FeaturedExchangesDialog* toParrentForm) :
+    QWidget()
 {
     parrentForm = toParrentForm;
     ui.setupUi(this);
@@ -47,7 +50,6 @@ ExchangeButton::ExchangeButton(const QString& logo, const QString& currencies, c
 
 ExchangeButton::~ExchangeButton()
 {
-
 }
 
 void ExchangeButton::mouseReleaseEvent(QMouseEvent* event)
@@ -61,7 +63,8 @@ void ExchangeButton::mouseReleaseEvent(QMouseEvent* event)
             exchangeButton->ui.widgetButton->setStyleSheet("#widgetButton{}");
         }
 
-        ui.widgetButton->setStyleSheet("#widgetButton{background:rgba(0,0,0,7%);border-left:1px solid #333;border-top:1px solid #333;border-right:1px solid #fff;border-bottom:1px solid #fff}");
+        ui.widgetButton->setStyleSheet(
+            "#widgetButton{background:rgba(0,0,0,7%);border-left:1px solid #333;border-top:1px solid #333;border-right:1px solid #fff;border-bottom:1px solid #fff}");
         parrentForm->selectExchange(exchangeNum);
     }
 }

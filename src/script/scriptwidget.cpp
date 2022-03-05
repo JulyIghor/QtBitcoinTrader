@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,24 +30,22 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "scriptwidget.h"
-#include "main.h"
-#include "ui_scriptwidget.h"
-#include <QScriptEngine>
-#include "scriptobject.h"
-#include <QTabWidget>
-#include <QAction>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QToolButton>
-#include <QDesktopServices>
-#include <QUrl>
 #include "addruledialog.h"
+#include "main.h"
+#include "scriptobject.h"
 #include "timesync.h"
+#include "ui_scriptwidget.h"
 #include "utils/utils.h"
+#include <QAction>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QTabWidget>
+#include <QToolButton>
+#include <QUrl>
 
 ScriptWidget::ScriptWidget(const QString& gName, const QString& _fileName, const QString& fileCopyFrom) :
-    QWidget(),
-    ui(new Ui::ScriptWidget)
+    QWidget(), ui(new Ui::ScriptWidget)
 {
     fileName = _fileName;
     ui->setupUi(this);
@@ -67,8 +65,7 @@ ScriptWidget::ScriptWidget(const QString& gName, const QString& _fileName, const
         do
         {
             fileName = baseValues.scriptFolder + "Script_" + QString::number(curNum++) + ".JLS";
-        }
-        while (QFile::exists(fileName));
+        } while (QFile::exists(fileName));
     }
 
     setProperty("FileName", fileName);
@@ -100,13 +97,12 @@ ScriptWidget::ScriptWidget(const QString& gName, const QString& _fileName, const
         loadScript.sync();
     }
 
-    scriptObject = new ScriptObject(scriptName);
-    connect(scriptObject, SIGNAL(writeLog(QString)), this, SLOT(writeConsole(QString)));
-    connect(scriptObject, SIGNAL(logClearSignal()), this, SLOT(clearLog()));
-    connect(scriptObject, SIGNAL(runningChanged(bool)), this, SLOT(setRunningUi(bool)));
-    connect(scriptObject, SIGNAL(errorHappend(int, QString)), this, SLOT(errorHappend(int, QString)));
-    connect(this, SIGNAL(setRuleTabRunning(QString, bool)), baseValues_->mainWindow_, SLOT(setRuleTabRunning(QString,
-            bool)));
+    scriptObject.reset(new ScriptObject(scriptName));
+    connect(scriptObject.get(), &ScriptObject::writeLog, this, &ScriptWidget::writeConsole);
+    connect(scriptObject.get(), &ScriptObject::logClearSignal, this, &ScriptWidget::clearLog);
+    connect(scriptObject.get(), &ScriptObject::runningChanged, this, &ScriptWidget::setRunningUi);
+    connect(scriptObject.get(), &ScriptObject::errorHappend, this, &ScriptWidget::errorHappend);
+    connect(this, &ScriptWidget::setRuleTabRunning, baseValues_->mainWindow_, &QtBitcoinTrader::setRuleTabRunning);
 
     ui->insertEvents->setMenu(&insertEventMenu);
     ui->insertFunction->setMenu(&insertFunctionMenu);
@@ -131,19 +127,19 @@ ScriptWidget::ScriptWidget(const QString& gName, const QString& _fileName, const
 
     on_limitRowsValue_valueChanged(ui->limitRowsValue->value());
 
-    //QStringList eventList;
-    //for(QAction *currentAction: insertEventMenu.actions())
-    //  eventList<<currentAction->text();
+    // QStringList eventList;
+    // for(QAction *currentAction: insertEventMenu.actions())
+    //   eventList<<currentAction->text();
 
-    //QStringList functionList;
-    //for(QAction *currentAction: insertFunctionMenu.actions())
-    //  functionList<<currentAction->text();
+    // QStringList functionList;
+    // for(QAction *currentAction: insertFunctionMenu.actions())
+    //   functionList<<currentAction->text();
 
-    //QStringList commandList;
-    //for(QAction *currentAction: insertCommandMenu.actions())
-    //  commandList<<currentAction->text();
+    // QStringList commandList;
+    // for(QAction *currentAction: insertCommandMenu.actions())
+    //   commandList<<currentAction->text();
 
-    //qDebug()<<"Events:\n"<<eventList.join("\n")<<"\nFunctions:\n"<<functionList.join("\n")<<"\nCommands:\n"<<commandList.join("\n");
+    // qDebug()<<"Events:\n"<<eventList.join("\n")<<"\nFunctions:\n"<<functionList.join("\n")<<"\nCommands:\n"<<commandList.join("\n");
 
     languageChanged();
     currencyChanged();
@@ -158,9 +154,6 @@ ScriptWidget::~ScriptWidget()
 {
     if (!fileName.isEmpty())
         saveScriptToFile(fileName);
-
-    delete scriptObject;
-    delete ui;
 }
 
 void ScriptWidget::languageChanged()
@@ -178,14 +171,14 @@ void ScriptWidget::languageChanged()
     ui->stateLabel->setText(isRunning() ? julyTr("SCRIPT_RUNNING", "Running") : julyTr("SCRIPT_STOPPED", "Stopped"));
     ui->buttonStartStop->setText(isRunning() ? julyTr("SCRIPT_STOP", "Stop") : julyTr("SCRIPT_START", "Start"));
 
-//    for(QAction *action: insertEventMenu.actions())
-//        action->setToolTip(julyTr("SCRIPT_ACTION_EVENT_"+action->property("TranslationName").toString(),action->text()));
+    //    for(QAction *action: insertEventMenu.actions())
+    //        action->setToolTip(julyTr("SCRIPT_ACTION_EVENT_"+action->property("TranslationName").toString(),action->text()));
 
-//    for(QAction *action: insertCommandMenu.actions())
-//        action->setToolTip(julyTr("SCRIPT_ACTION_"+action->property("TranslationName").toString(),action->text()));
+    //    for(QAction *action: insertCommandMenu.actions())
+    //        action->setToolTip(julyTr("SCRIPT_ACTION_"+action->property("TranslationName").toString(),action->text()));
 
-//    for(QAction *action: insertFunctionMenu.actions())
-//        action->setToolTip(julyTr("SCRIPT_ACTION_"+action->property("TranslationName").toString(),action->text()));
+    //    for(QAction *action: insertFunctionMenu.actions())
+    //        action->setToolTip(julyTr("SCRIPT_ACTION_"+action->property("TranslationName").toString(),action->text()));
 }
 
 void ScriptWidget::currencyChanged()
@@ -254,10 +247,10 @@ QAction* ScriptWidget::NewFunctionsAction(const QString& name, QString params)
 
     action->setText(name + params);
     action->setToolTip(action->text());
-    action->setProperty("TranslationName", "SCRIPT_ACTION_" + name.toUpper().replace("\").", "_").replace(".",
-                        "_").replace("(\"", "_").replace("\")", ""));
+    action->setProperty("TranslationName",
+                        "SCRIPT_ACTION_" + name.toUpper().replace("\").", "_").replace(".", "_").replace("(\"", "_").replace("\")", ""));
     action->setProperty("ScriptName", name);
-    connect(action, SIGNAL(triggered()), this, SLOT(addFunctionClicked()));
+    connect(action, &QAction::triggered, this, &ScriptWidget::addFunctionClicked);
     return action;
 }
 
@@ -266,10 +259,11 @@ QAction* ScriptWidget::NewEventsAction(const QString& name)
     auto* action = new QAction(this);
     action->setText(name + "()");
     action->setToolTip(action->text());
-    action->setProperty("TranslationName", "SCRIPT_ACTION_EVENT_" + name.toUpper().replace("\").", "_").replace(".",
-                        "_").replace("(\"", "_").replace("\")", ""));
+    action->setProperty("TranslationName",
+                        "SCRIPT_ACTION_EVENT_" +
+                            name.toUpper().replace("\").", "_").replace(".", "_").replace("(\"", "_").replace("\")", ""));
     action->setProperty("ScriptName", name);
-    connect(action, SIGNAL(triggered()), this, SLOT(addEventsClicked()));
+    connect(action, &QAction::triggered, this, &ScriptWidget::addEventsClicked);
     return action;
 }
 
@@ -394,8 +388,8 @@ void ScriptWidget::addEventsClicked()
 
     if (cursorPos > 0 && cursorPos < plainText.length() - 1)
     {
-        bool validPlaceToInsert = cursorPos > 0 && cursorPos < plainText.length() &&
-                                  plainText.at(cursorPos - 1) == QLatin1Char('\n') && plainText.at(cursorPos) == QLatin1Char('\n');
+        bool validPlaceToInsert = cursorPos > 0 && cursorPos < plainText.length() && plainText.at(cursorPos - 1) == QLatin1Char('\n') &&
+                                  plainText.at(cursorPos) == QLatin1Char('\n');
 
         int countLeft = 0;
         int countRight = 0;
@@ -552,7 +546,7 @@ void ScriptWidget::writeConsole(QString text)
 {
     text.replace("\\n", "<br>");
     text.replace("\\t", "    ");
-    text.prepend(QDateTime::fromTime_t(TimeSync::getTimeT()).time().toString(baseValues.timeFormat) + "> ");
+    text.prepend(QDateTime::fromSecsSinceEpoch(TimeSync::getTimeT()).time().toString(baseValues.timeFormat) + "> ");
     ui->statusLabel->setText(text);
     ui->consoleOutput->appendHtml(text);
 }
@@ -564,12 +558,12 @@ void ScriptWidget::on_buttonClear_clicked()
         QMessageBox msgBox(this);
         msgBox.setIcon(QMessageBox::Question);
         msgBox.setWindowTitle("Qt Bitcoin Trader");
-        msgBox.setText(julyTr("MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT", "Do you really want to clear the scrypt?"));
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
-        msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
+        msgBox.setText(julyTr("MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT", "Do you really want to clear the script?"));
 
-        if (msgBox.exec() == QMessageBox::Yes)
+        auto buttonYes = msgBox.addButton(julyTr("YES", "Yes"), QMessageBox::YesRole);
+        msgBox.addButton(julyTr("NO", "No"), QMessageBox::NoRole);
+        msgBox.exec();
+        if (msgBox.clickedButton() == buttonYes)
             ui->sourceCode->clear();
     }
     else
@@ -607,9 +601,11 @@ void ScriptWidget::on_scriptSave_clicked()
     if (!QFile::exists(lastDir))
         lastDir = baseValues.desktopLocation;
 
-    QString fileName = QFileDialog::getSaveFileName(this, julyTr("SAVE_SCRIPT", "Save Script"),
-                       lastDir + "/" + QString(scriptName).replace("/", "_").replace("\\", "").replace(":", "").replace("?", "") + ".JLS",
-                       "JL Script (*.JLS)");
+    QString fileName = QFileDialog::getSaveFileName(
+        this,
+        julyTr("SAVE_SCRIPT", "Save Script"),
+        lastDir + "/" + QString(scriptName).replace("/", "_").replace("\\", "").replace(":", "").replace("?", "") + ".JLS",
+        "JL Script (*.JLS)");
 
     if (fileName.isEmpty())
         return;

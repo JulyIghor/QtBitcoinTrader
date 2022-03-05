@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -58,16 +58,16 @@ private:
     QScopedPointer<QVBoxLayout> m_mainLayout;
 
     QScopedPointer<QHBoxLayout> m_titleLayout;
-    QScopedPointer<QLabel>      m_logo;
-    QScopedPointer<QLabel>      m_title;
+    QScopedPointer<QLabel> m_logo;
+    QScopedPointer<QLabel> m_title;
 
-    QScopedPointer<QLabel>      m_info;
+    QScopedPointer<QLabel> m_info;
 
     QScopedPointer<QHBoxLayout> m_buttonsLayout;
     QScopedPointer<QPushButton> m_registerButton;
-    QScopedPointer<QCheckBox>   m_again;
+    QScopedPointer<QCheckBox> m_again;
 
-    bool                        m_againIsChecked;
+    bool m_againIsChecked;
 };
 
 #endif

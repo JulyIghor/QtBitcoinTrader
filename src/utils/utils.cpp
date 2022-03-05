@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,17 +31,17 @@
 
 #include "utils.h"
 
-#include <QFileInfo>
-#include <QDir>
-#include <QWidget>
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QDir>
+#include <QFileInfo>
 #include <QLayout>
+#include <QScreen>
+#include <QWidget>
 
 QString changeFileExt(const QString& fileName, const QString& ext)
 {
     QFileInfo fileInfo(fileName);
-    return fileInfo.path() + "/" + fileInfo.baseName()  + ext;
+    return fileInfo.path() + "/" + fileInfo.baseName() + ext;
 }
 
 QString adjustPathSeparators(const QString& path)
@@ -74,7 +74,7 @@ QString slash(const QString& path1, const QString& path2, const QString& path3)
 
 void adjustWidgetGeometry(QWidget* widget)
 {
-    QRect workarea = QApplication::desktop()->availableGeometry(widget);
+    QRect workarea = QApplication::screenAt(widget->mapToGlobal(widget->geometry().center()))->availableGeometry();
     QRect bounds = widget->frameGeometry();
     int delta;
 
@@ -110,20 +110,14 @@ void recursiveUpdateLayouts(const QObject* object)
         if (widget->layout()->spacing() > 0)
             widget->layout()->setSpacing(widget->layout()->spacing() / 2);
 
-        if (widget->layout()->margin() > 0)
-            widget->layout()->setMargin(3);
+        if (widget->layout()->contentsMargins().top() > 0)
+            widget->layout()->setContentsMargins(3, 3, 3, 3);
 
-        if (widget->layout()->margin() == -1)
+        if (widget->layout()->contentsMargins().top() == -1)
             widget->layout()->setContentsMargins(3, 5, 3, 3);
     }
 
-    QObjectList children = object->children();
-
-    foreach (const QObject* child, children)
-    {
-        const QWidget* widget = qobject_cast<const QWidget*>(child);
-
-        if (widget)
-            recursiveUpdateLayouts(widget);
-    }
+    for (const QObject* child : object->children())
+        if (const QWidget* wd = qobject_cast<const QWidget*>(child))
+            recursiveUpdateLayouts(wd);
 }

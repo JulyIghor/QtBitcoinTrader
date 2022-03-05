@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,19 +30,18 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rulewidget.h"
-#include "main.h"
-#include "timesync.h"
-#include <QMessageBox>
-#include <QtCore/qmath.h>
-#include <QFileDialog>
-#include <QDesktopServices>
-#include "rulescriptparser.h"
 #include "addruledialog.h"
 #include "exchange/exchange.h"
+#include "main.h"
+#include "rulescriptparser.h"
+#include "timesync.h"
 #include "utils/utils.h"
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QtCore/qmath.h>
 
-RuleWidget::RuleWidget(const QString& fileName)
-    : QWidget()
+RuleWidget::RuleWidget(const QString& fileName) : QWidget()
 {
     ui.setupUi(this);
     ui.rulesTabs->setCurrentIndex(0);
@@ -70,31 +69,30 @@ RuleWidget::RuleWidget(const QString& fileName)
     ui.rulesNoMessage->setVisible(true);
     ui.rulesTabs->setVisible(false);
 
-    connect(rulesModel, SIGNAL(writeLog(QString)), this, SLOT(writeLog(QString)));
+    connect(rulesModel, &RulesModel::writeLog, this, &RuleWidget::writeLog);
     rulesModel->setParent(this);
     ui.rulesTable->setModel(rulesModel);
     mainWindow.setColumnResizeMode(ui.rulesTable, 0, QHeaderView::ResizeToContents);
     mainWindow.setColumnResizeMode(ui.rulesTable, 1, QHeaderView::Stretch);
 
-    connect(rulesModel, SIGNAL(ruleDone()), this, SLOT(ruleDone()));
+    connect(rulesModel, &RulesModel::ruleDone, this, &RuleWidget::ruleDone);
 
-    connect(ui.rulesTable->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this,
-            SLOT(checkValidRulesButtons()));
+    connect(ui.rulesTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &RuleWidget::checkValidRulesButtons);
     ui.rulesTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui.rulesTable, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(rulesMenuRequested(const QPoint&)));
+    connect(ui.rulesTable, &QTableView::customContextMenuRequested, this, &RuleWidget::rulesMenuRequested);
 
     rulesEnableDisableMenu = new QMenu;
     rulesEnableDisableMenu->addAction("Enable Selected");
-    connect(rulesEnableDisableMenu->actions().last(), SIGNAL(triggered(bool)), this, SLOT(ruleEnableSelected()));
+    connect(rulesEnableDisableMenu->actions().last(), &QAction::triggered, this, &RuleWidget::ruleEnableSelected);
     rulesEnableDisableMenu->addAction("Disable Selected");
-    connect(rulesEnableDisableMenu->actions().last(), SIGNAL(triggered(bool)), this, SLOT(ruleDisableSelected()));
+    connect(rulesEnableDisableMenu->actions().last(), &QAction::triggered, this, &RuleWidget::ruleDisableSelected);
     rulesEnableDisableMenu->addSeparator();
     rulesEnableDisableMenu->addAction("Enable All");
-    connect(rulesEnableDisableMenu->actions().last(), SIGNAL(triggered(bool)), this, SLOT(ruleEnableAll()));
+    connect(rulesEnableDisableMenu->actions().last(), &QAction::triggered, this, &RuleWidget::ruleEnableAll);
     rulesEnableDisableMenu->addAction("Disable All");
-    connect(rulesEnableDisableMenu->actions().last(), SIGNAL(triggered(bool)), this, SLOT(ruleDisableAll()));
+    connect(rulesEnableDisableMenu->actions().last(), &QAction::triggered, this, &RuleWidget::ruleDisableAll);
     ui.ruleEnableDisable->setMenu(rulesEnableDisableMenu);
-    connect(rulesEnableDisableMenu, SIGNAL(aboutToShow()), this, SLOT(ruleDisableEnableMenuFix()));
+    connect(rulesEnableDisableMenu, &QMenu::aboutToShow, this, &RuleWidget::ruleDisableEnableMenuFix);
 
     languageChanged();
 
@@ -133,7 +131,7 @@ void RuleWidget::writeLog(QString text)
 {
     text.replace("\\n", "<br>");
     text.replace("\\t", "    ");
-    text.prepend(QDateTime::fromTime_t(TimeSync::getTimeT()).time().toString(baseValues.timeFormat) + "> ");
+    text.prepend(QDateTime::fromSecsSinceEpoch(TimeSync::getTimeT()).time().toString(baseValues.timeFormat) + "> ");
     ui.consoleOutput->appendHtml(text);
 }
 
@@ -155,8 +153,8 @@ void RuleWidget::ruleDone()
 
 void RuleWidget::updateStyleSheets()
 {
-    ui.rulesNoMessage->setStyleSheet("font-size:27px; border: 1px solid gray; background: " +
-                                     baseValues.appTheme.white.name() + "; color: " + baseValues.appTheme.gray.name());
+    ui.rulesNoMessage->setStyleSheet("font-size:27px; border: 1px solid gray; background: " + baseValues.appTheme.white.name() +
+                                     "; color: " + baseValues.appTheme.gray.name());
 }
 
 bool RuleWidget::removeGroup()
@@ -182,9 +180,8 @@ void RuleWidget::languageChanged()
     ui.rulesTabs->setTabText(1, julyTr("CONSOLE_OUT", "Console output"));
     ui.rulesTabs->setTabText(2, julyTr("SCRIPT_NOTES", "Notes"));
 
-    rulesModel->setHorizontalHeaderLabels(QStringList() << julyTr("RULES_T_STATE", "State") << julyTr("RULES_T_DESCR",
-                                          "Description"));
-    //Removed <<julyTr("RULES_T_ACTION","Action")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("RULES_T_PRICE","Price"));
+    rulesModel->setHorizontalHeaderLabels(QStringList() << julyTr("RULES_T_STATE", "State") << julyTr("RULES_T_DESCR", "Description"));
+    // Removed <<julyTr("RULES_T_ACTION","Action")<<julyTr("ORDERS_AMOUNT","Amount")<<julyTr("RULES_T_PRICE","Price"));
 
     rulesEnableDisableMenu->actions().at(0)->setText(julyTr("RULE_ENABLE", "Enable Selected"));
     rulesEnableDisableMenu->actions().at(1)->setText(julyTr("RULE_DISABLE", "Disable Selected"));
@@ -296,12 +293,11 @@ void RuleWidget::on_ruleRemoveAll_clicked()
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setWindowTitle(julyTr("APPLICATION_TITLE", windowTitle()));
     msgBox.setText(julyTr("RULE_CONFIRM_REMOVE_ALL", "Are you sure to remove all rules?"));
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Yes);
-    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
-    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
 
-    if (msgBox.exec() != QMessageBox::Yes)
+    auto buttonYes = msgBox.addButton(julyTr("YES", "Yes"), QMessageBox::YesRole);
+    msgBox.addButton(julyTr("NO", "No"), QMessageBox::NoRole);
+    msgBox.exec();
+    if (msgBox.clickedButton() != buttonYes)
         return;
 
     rulesModel->clear();
@@ -315,12 +311,11 @@ void RuleWidget::on_ruleRemove_clicked()
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setWindowTitle(julyTr("APPLICATION_TITLE", windowTitle()));
     msgBox.setText(julyTr("RULE_CONFIRM_REMOVE", "Are you sure to remove this rule?"));
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Yes);
-    msgBox.setButtonText(QMessageBox::Yes, julyTr("YES", "Yes"));
-    msgBox.setButtonText(QMessageBox::No, julyTr("NO", "No"));
 
-    if (msgBox.exec() != QMessageBox::Yes)
+    auto buttonYes = msgBox.addButton(julyTr("YES", "Yes"), QMessageBox::YesRole);
+    msgBox.addButton(julyTr("NO", "No"), QMessageBox::NoRole);
+    msgBox.exec();
+    if (msgBox.clickedButton() != buttonYes)
         return;
 
     QModelIndexList selectedRows = ui.rulesTable->selectionModel()->selectedRows();
@@ -442,14 +437,14 @@ bool RuleWidget::agreeRuleImmediately(QString text)
     QMessageBox msgBox(baseValues.mainWindow_);
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setWindowTitle(windowTitle());
-    msgBox.setText(julyTr("INVALID_RULE_CHECK",
-                          "This rule will be executed instantly.<br>This means that you make a mistake.<br>Please check values you entered.") +
-                   "<br><br>\"" + text + "\"");
-    msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.setButtonText(QMessageBox::Ok, julyTr("RULE_ENABLE", "Enable Rule"));
-    msgBox.setButtonText(QMessageBox::Cancel, julyTranslator.translateButton("TRCANCEL", "Cancel"));
-    return msgBox.exec() == QMessageBox::Ok;
+    msgBox.setText(
+        julyTr("INVALID_RULE_CHECK",
+               "This rule will be executed instantly.<br>This means that you make a mistake.<br>Please check values you entered.") +
+        "<br><br>\"" + text + "\"");
+    auto buttonYes = msgBox.addButton(julyTr("RULE_ENABLE", "Enable"), QMessageBox::YesRole);
+    msgBox.addButton(julyTr("TRCANCEL", "Cancel"), QMessageBox::NoRole);
+    msgBox.exec();
+    return msgBox.clickedButton() == buttonYes;
 }
 
 void RuleWidget::ruleEnableSelected()
@@ -465,7 +460,7 @@ void RuleWidget::ruleEnableSelected()
         if (!agreeRuleImmediately(rulesModel->holderList.at(curRow).description))
             return;
 
-    rulesModel->setRuleStateByRow(curRow, 1); //Enable
+    rulesModel->setRuleStateByRow(curRow, 1); // Enable
     checkValidRulesButtons();
 }
 
@@ -478,15 +473,15 @@ void RuleWidget::ruleDisableSelected()
 
     int curRow = selectedRows.first().row();
 
-    if (!rulesModel->isConcurrentMode && curRow < rulesModel->rowCount() - 1 &&
-        rulesModel->getStateByRow(curRow + 1) == 1 && !rulesModel->isRowPaused(curRow))
+    if (!rulesModel->isConcurrentMode && curRow < rulesModel->rowCount() - 1 && rulesModel->getStateByRow(curRow + 1) == 1 &&
+        !rulesModel->isRowPaused(curRow))
     {
         if (rulesModel->testRuleByRow(curRow + 1, true))
             if (!agreeRuleImmediately(rulesModel->holderList.at(curRow + 1).description))
                 return;
     }
 
-    rulesModel->setRuleStateByRow(curRow, 0); //Disable
+    rulesModel->setRuleStateByRow(curRow, 0); // Disable
     checkValidRulesButtons();
 }
 
@@ -526,9 +521,11 @@ void RuleWidget::on_ruleSave_clicked()
     if (!QFile::exists(lastRulesDir))
         lastRulesDir = baseValues.desktopLocation;
 
-    QString fileName = QFileDialog::getSaveFileName(baseValues.mainWindow_, julyTr("SAVE_GOUP", "Save Rules Group"),
-                       lastRulesDir + "/" + QString(groupName).replace("/", "_").replace("\\", "").replace(":", "").replace("?", "") + ".JLR",
-                       "JL Ruels (*.JLR)");
+    QString fileName = QFileDialog::getSaveFileName(
+        baseValues.mainWindow_,
+        julyTr("SAVE_GOUP", "Save Rules Group"),
+        lastRulesDir + "/" + QString(groupName).replace("/", "_").replace("\\", "").replace(":", "").replace("?", "") + ".JLR",
+        "JL Ruels (*.JLR)");
 
     if (fileName.isEmpty())
         return;

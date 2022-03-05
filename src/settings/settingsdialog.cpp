@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,12 +29,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QMessageBox>
 #include "settingsdialog.h"
 #include "main.h"
+#include <QMessageBox>
 
-SettingsDialog::SettingsDialog()
-    : QDialog()
+SettingsDialog::SettingsDialog() : QDialog()
 {
     ui.setupUi(this);
     ui.scrollAreaWidgetContents->setBackgroundRole(QPalette::Base);
@@ -178,29 +177,16 @@ void SettingsDialog::clickOnList(qint32 index)
         QMessageBox closeMsgBox;
         closeMsgBox.setWindowTitle(julyTr("SETTINGS_MODIFIED", "The settings has been modified"));
         closeMsgBox.setText(julyTr("SETTINGS_WANT_SAVE_CHANGES", "Do you want to save your changes?"));
-        closeMsgBox.setStandardButtons(QMessageBox::Save | QMessageBox::No | QMessageBox::Cancel);
-        closeMsgBox.setDefaultButton(QMessageBox::Save);
-        closeMsgBox.setButtonText(QMessageBox::Save, julyTr("YES", "Save"));
-        closeMsgBox.setButtonText(QMessageBox::No, julyTr("NO", "Discard"));
-        closeMsgBox.setButtonText(QMessageBox::Cancel, julyTranslator.translateButton("TRCANCEL", "Cancel"));
         closeMsgBox.setIcon(QMessageBox::Warning);
+        auto buttonYes = closeMsgBox.addButton(julyTr("YES", "Yes"), QMessageBox::AcceptRole);
+        auto buttonNo = closeMsgBox.addButton(julyTr("NO", "Discard"), QMessageBox::RejectRole);
+        closeMsgBox.addButton(julyTr("TRCANCEL", "Cancel"), QMessageBox::ResetRole);
+        closeMsgBox.exec();
 
-        switch (closeMsgBox.exec())
-        {
-        case QMessageBox::Save:
+        if (closeMsgBox.clickedButton() == buttonYes)
             settingsSave();
-            break;
-
-        case QMessageBox::Discard:
+        else if (closeMsgBox.clickedButton() == buttonNo)
             settingsDiscard();
-            break;
-
-        case QMessageBox::Cancel:
-            return;
-
-        default:
-            break;
-        }
     }
 
     listListElement.at(ui.settingsStackedWidget->currentIndex())->clearSelection();
@@ -218,29 +204,17 @@ void SettingsDialog::closeEvent(QCloseEvent* event)
     QMessageBox closeMsgBox;
     closeMsgBox.setWindowTitle(julyTr("SETTINGS_MODIFIED", "The settings has been modified"));
     closeMsgBox.setText(julyTr("SETTINGS_WANT_SAVE_CHANGES", "Do you want to save your changes?"));
-    closeMsgBox.setStandardButtons(QMessageBox::Save | QMessageBox::No | QMessageBox::Cancel);
-    closeMsgBox.setDefaultButton(QMessageBox::Save);
-    closeMsgBox.setButtonText(QMessageBox::Save, julyTr("YES", "Save"));
-    closeMsgBox.setButtonText(QMessageBox::No, julyTr("NO", "Discard"));
-    closeMsgBox.setButtonText(QMessageBox::Cancel, julyTranslator.translateButton("TRCANCEL", "Cancel"));
     closeMsgBox.setIcon(QMessageBox::Warning);
 
-    switch (closeMsgBox.exec())
-    {
-    case QMessageBox::Save:
+    auto buttonYes = closeMsgBox.addButton(julyTr("YES", "Yes"), QMessageBox::AcceptRole);
+    closeMsgBox.addButton(julyTr("NO", "Discard"), QMessageBox::RejectRole);
+    auto buttonCancel = closeMsgBox.addButton(julyTr("TRCANCEL", "Cancel"), QMessageBox::ResetRole);
+    closeMsgBox.exec();
+
+    if (closeMsgBox.clickedButton() == buttonYes)
         settingsSave();
-        break;
-
-    case QMessageBox::No:
-        break;
-
-    case QMessageBox::Cancel:
+    else if (closeMsgBox.clickedButton() == buttonCancel)
         event->ignore();
-        break;
-
-    default:
-        break;
-    }
 }
 
 void SettingsDialog::disableTranslateButton()

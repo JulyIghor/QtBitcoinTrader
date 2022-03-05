@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@
 #define JULYRSA_H
 
 #include <QObject>
-#include <openssl/rsa.h>
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
+#include <openssl/ssl.h>
 
 class JulyRSA : public QObject
 {

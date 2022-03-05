@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,26 +30,25 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "julylightchanges.h"
-#include <QApplication>
 #include "main.h"
+#include <QApplication>
 
-JulyLightChanges::JulyLightChanges(QDoubleSpinBox* parent)
-    : QObject()
+JulyLightChanges::JulyLightChanges(QDoubleSpinBox* parent) : QObject()
 {
     lastValue = 0.0;
     parentSpinBox = parent;
     setParent(parentSpinBox);
     changeTimer = new QTimer;
-    connect(changeTimer, SIGNAL(timeout()), this, SLOT(changeTimerSlot()));
+    connect(changeTimer, &QTimer::timeout, this, &JulyLightChanges::changeTimerSlot);
     changeTimer->setSingleShot(true);
     valueChanged(parentSpinBox->value());
-    connect(parent, SIGNAL(valueChanged(double)), this, SLOT(valueChanged(double)));
+    connect(parent, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &JulyLightChanges::valueChanged);
 }
 
 JulyLightChanges::~JulyLightChanges()
 {
-    
-        delete changeTimer;
+
+    delete changeTimer;
 }
 
 void JulyLightChanges::changeTimerSlot()
@@ -63,12 +62,12 @@ void JulyLightChanges::valueChanged(double val)
 
     if (lastValue <= val)
         parentSpinBox->setStyleSheet("QDoubleSpinBox:disabled{color:" + baseValues.appTheme.black.name() + "; background: \"" +
-                                     baseValues.appTheme.lightGreen.name() + "\";} QDoubleSpinBox {color:" + baseValues.appTheme.black.name() +
-                                     ";background: \"" + baseValues.appTheme.lightGreen.name() + "\";}");
+                                     baseValues.appTheme.lightGreen.name() + "\";} QDoubleSpinBox {color:" +
+                                     baseValues.appTheme.black.name() + ";background: \"" + baseValues.appTheme.lightGreen.name() + "\";}");
     else
         parentSpinBox->setStyleSheet("QDoubleSpinBox:disabled{color:" + baseValues.appTheme.black.name() + "; background: \"" +
-                                     baseValues.appTheme.lightRed.name() + "\";} QDoubleSpinBox {color:" + baseValues.appTheme.black.name() +
-                                     ";background: \"" + baseValues.appTheme.lightRed.name() + "\";}");
+                                     baseValues.appTheme.lightRed.name() + "\";} QDoubleSpinBox {color:" +
+                                     baseValues.appTheme.black.name() + ";background: \"" + baseValues.appTheme.lightRed.name() + "\";}");
 
     lastValue = val;
     changeTimer->start(2000);

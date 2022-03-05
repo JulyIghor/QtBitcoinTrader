@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,19 +31,18 @@
 
 #include "julylockfile.h"
 #include "main.h"
+#include "timesync.h"
 #include <QCryptographicHash>
-#include <QUdpSocket>
-#include <QNetworkProxy>
-#include <QFile>
 #include <QDir>
+#include <QFile>
+#include <QNetworkProxy>
+#include <QRandomGenerator>
 #include <QTime>
 #include <QTimer>
-#include "timesync.h"
+#include <QUdpSocket>
 
-JulyLockFile::JulyLockFile(const QString& imageName, QString tempDir)
-    : QObject()
+JulyLockFile::JulyLockFile(const QString& imageName, QString tempDir) : QObject()
 {
-    qsrand(QDateTime::fromTime_t(TimeSync::getTimeT()).time().msecsTo(QTime(23, 59, 59, 999)));
     lockFile = new QFile;
     lockSocket = new QUdpSocket;
     QNetworkProxy proxy;
@@ -55,11 +54,9 @@ JulyLockFile::JulyLockFile(const QString& imageName, QString tempDir)
     if (tempDir.isEmpty())
         tempDir = QDir().tempPath();
 
-    lockFilePath = QDir().tempPath() + "/Locked_" + QCryptographicHash::hash(imageName.toUtf8(),
-                   QCryptographicHash::Md5).toHex() + ".lockfile";
+    lockFilePath = tempDir + "/Locked_" + QCryptographicHash::hash(imageName.toUtf8(), QCryptographicHash::Md5).toHex() + ".lockfile";
 
-    if (QFile::exists(lockFilePath) &&
-        QFileInfo(lockFilePath).lastModified().addSecs(240).toTime_t() < TimeSync::getTimeT())
+    if (QFile::exists(lockFilePath) && QFileInfo(lockFilePath).lastModified().addSecs(240).toSecsSinceEpoch() < TimeSync::getTimeT())
         QFile::remove(lockFilePath);
 
     lockFile->setFileName(lockFilePath);
@@ -83,7 +80,7 @@ JulyLockFile::JulyLockFile(const QString& imageName, QString tempDir)
 
     if (lockPort == 0 || lockSocket->state() != QUdpSocket::BoundState)
     {
-        lockPort = 1999 + qrand() % 2000;
+        lockPort = QRandomGenerator::global()->bounded(2000, 4000);
         int i = 0;
 
         while (!lockSocket->bind(QHostAddress::LocalHost, ++lockPort, QUdpSocket::DontShareAddress))
@@ -105,7 +102,7 @@ JulyLockFile::JulyLockFile(const QString& imageName, QString tempDir)
     }
 
     auto* minuteTimer = new QTimer(this);
-    connect(minuteTimer, SIGNAL(timeout()), this, SLOT(updateLockFile()));
+    connect(minuteTimer, &QTimer::timeout, this, &JulyLockFile::updateLockFile);
     minuteTimer->start(60000);
     updateLockFile();
     isLockedFile = lockSocket->state() != QUdpSocket::BoundState;

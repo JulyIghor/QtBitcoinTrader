@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,15 +30,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "julyspinboxpicker.h"
-#include <QDesktopWidget>
+#include "main.h"
 #include <QApplication>
 #include <QDoubleSpinBox>
 #include <QMouseEvent>
+#include <QScreen>
 #include <QtCore/qmath.h>
-#include "main.h"
 
-JulySpinBoxPicker::JulySpinBoxPicker(QDoubleSpinBox* parent, double* forceMinValue, double intMinV)
-    : QLabel()
+JulySpinBoxPicker::JulySpinBoxPicker(QDoubleSpinBox* parent, double* forceMinValue, double intMinV) : QLabel()
 {
     internalMinimumValue = intMinV;
 
@@ -58,7 +57,6 @@ JulySpinBoxPicker::JulySpinBoxPicker(QDoubleSpinBox* parent, double* forceMinVal
 
 JulySpinBoxPicker::~JulySpinBoxPicker()
 {
-
 }
 
 void JulySpinBoxPicker::setIcon(int state)
@@ -70,21 +68,21 @@ void JulySpinBoxPicker::setIcon(int state)
 
     switch (state)
     {
-        case -1:
-            setPixmap(mouseDragUpDown);
-            break;
+    case -1:
+        setPixmap(mouseDragUpDown);
+        break;
 
-        case 0:
-            setPixmap(mouse);
-            break;
+    case 0:
+        setPixmap(mouse);
+        break;
 
-        case 1:
-            setPixmap(mouseDragLeftRight);
-            break;
+    case 1:
+        setPixmap(mouseDragLeftRight);
+        break;
 
-        case 2:
-            setPixmap(mouseDrag);
-            break;
+    case 2:
+        setPixmap(mouseDrag);
+        break;
     }
 }
 
@@ -103,12 +101,7 @@ void JulySpinBoxPicker::mousePressEvent(QMouseEvent* event)
         scrollDirection = 0;
         setIcon(2);
 
-        for (int n = 0; n < QApplication::desktop()->screenCount(); n++)
-            if (QApplication::desktop()->screenGeometry(n).contains(j_cursorLastPos))
-            {
-                currentScreenRect = QApplication::desktop()->screenGeometry(n);
-                break;
-            }
+        currentScreenRect = QApplication::screenAt(j_cursorLastPos)->geometry();
 
         maximumValue = 10.0;
 
@@ -183,10 +176,8 @@ void JulySpinBoxPicker::mouseMoveEvent(QMouseEvent* event)
 
         int t_deltaXY = 100;
 
-        if ((t_x < currentScreenRect.left() + t_deltaXY) ||
-            (t_y < currentScreenRect.top() + t_deltaXY) ||
-            (t_x > currentScreenRect.right() - t_deltaXY) ||
-            (t_y > currentScreenRect.bottom() - t_deltaXY))
+        if ((t_x < currentScreenRect.left() + t_deltaXY) || (t_y < currentScreenRect.top() + t_deltaXY) ||
+            (t_x > currentScreenRect.right() - t_deltaXY) || (t_y > currentScreenRect.bottom() - t_deltaXY))
             QCursor::setPos(currentScreenRect.center());
     }
 

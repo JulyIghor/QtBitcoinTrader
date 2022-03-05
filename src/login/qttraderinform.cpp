@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,29 +29,29 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "qttraderinform.h"
+#include "main.h"
 #include <QApplication>
-#include <QDesktopWidget>
-#include <QPushButton>
-#include <QTextEdit>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QCheckBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QPixmap>
-#include "main.h"
-#include "qttraderinform.h"
+#include <QPushButton>
+#include <QScreen>
+#include <QTextEdit>
+#include <QVBoxLayout>
 
-QtTraderInform::QtTraderInform(QDialog* parent)
-    : QDialog(parent),
-      m_mainLayout(new QVBoxLayout()),
-      m_titleLayout(new QHBoxLayout()),
-      m_logo(new QLabel()),
-      m_title(new QLabel(julyTr("NEW_EXCHANGE_QTTRADER", "HFT exchange\nQt Trader 2.0"))),
-      m_info(new QLabel()),
-      m_buttonsLayout(new QHBoxLayout()),
-      m_registerButton(new QPushButton(julyTr("SIGN_UP_FOR_ACCESS", "Sign up\nfor Early Access"))),
-      m_again(new QCheckBox(julyTr("DONT_SHOW_AGAIN", "Don't show again"))),
-      m_againIsChecked(false)
+QtTraderInform::QtTraderInform(QDialog* parent) :
+    QDialog(parent),
+    m_mainLayout(new QVBoxLayout()),
+    m_titleLayout(new QHBoxLayout()),
+    m_logo(new QLabel()),
+    m_title(new QLabel(julyTr("NEW_EXCHANGE_QTTRADER", "HFT exchange\nQt Trader 2.0"))),
+    m_info(new QLabel()),
+    m_buttonsLayout(new QHBoxLayout()),
+    m_registerButton(new QPushButton(julyTr("SIGN_UP_FOR_ACCESS", "Sign up\nfor Early Access"))),
+    m_again(new QCheckBox(julyTr("DONT_SHOW_AGAIN", "Don't show again"))),
+    m_againIsChecked(false)
 {
     m_info->setTextFormat(Qt::TextFormat::RichText);
     m_info->setOpenExternalLinks(true);
@@ -87,12 +87,11 @@ QtTraderInform::QtTraderInform(QDialog* parent)
     setFixedSize(minimumSizeHint());
 
     connect(m_registerButton.data(), &QPushButton::clicked, this, &QDialog::accept);
-    connect(m_again.data(),          &QCheckBox::toggled,   this, &QtTraderInform::againToggled);
+    connect(m_again.data(), &QCheckBox::toggled, this, &QtTraderInform::againToggled);
 }
 
 QtTraderInform::~QtTraderInform()
 {
-
 }
 
 void QtTraderInform::againToggled(bool checked)

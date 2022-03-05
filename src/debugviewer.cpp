@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,15 +30,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "debugviewer.h"
-#include <QScrollBar>
 #include "main.h"
+#include "timesync.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QScrollBar>
 #include <QSysInfo>
-#include "timesync.h"
 
-DebugViewer::DebugViewer()
-    : QWidget()
+DebugViewer::DebugViewer() : QWidget()
 {
     savingFile = false;
     ui.setupUi(this);
@@ -54,7 +53,7 @@ DebugViewer::DebugViewer()
     }
 
     logThread = new LogThread(false);
-    connect(logThread, &LogThread::sendLogSignal, this,  &DebugViewer::sendLogSlot, Qt::QueuedConnection);
+    connect(logThread, &LogThread::sendLogSignal, this, &DebugViewer::sendLogSlot, Qt::QueuedConnection);
     debugLevel = 2;
     show();
 }
@@ -73,8 +72,11 @@ DebugViewer::~DebugViewer()
 void DebugViewer::on_buttonSaveAs_clicked()
 {
     savingFile = true;
-    QString fileName = QFileDialog::getSaveFileName(this, "Save Debug Information",
-                       QDateTime::fromTime_t(TimeSync::getTimeT()).toUTC().toString("yyyy-MM-dd HH.mm.ss") + ".log", "Log file (*.log)");
+    QString fileName =
+        QFileDialog::getSaveFileName(this,
+                                     "Save Debug Information",
+                                     QDateTime::fromSecsSinceEpoch(TimeSync::getTimeT()).toUTC().toString("yyyy-MM-dd HH.mm.ss") + ".log",
+                                     "Log file (*.log)");
 
     if (fileName.isEmpty())
     {
@@ -90,15 +92,17 @@ void DebugViewer::on_buttonSaveAs_clicked()
 
         QByteArray osLine;
 #ifdef Q_OS_WIN
-        osLine = "OS: Windows " + QByteArray::number(QSysInfo::windowsVersion()) + "\r\n";
+        osLine = "OS: Windows ";
 #endif
 
 #ifdef Q_OS_MAC
-        osLine = "OS: Mac OS " + QByteArray::number(QSysInfo::MacintoshVersion) + "\r\n";
+        osLine = "OS: Mac OS ";
+#else
 #endif
 
         if (osLine.isEmpty())
             osLine = "OS: Linux\r\n";
+        osLine += QSysInfo::productVersion().toLatin1() + "\r\n";
 
         writeLog.write(osLine);
         writeLog.write(ui.debugText->toPlainText().toLatin1());

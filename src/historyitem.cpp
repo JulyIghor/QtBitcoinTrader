@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "historyitem.h"
-#include "main.h"
-#include "julymath.h"
 #include "iniengine.h"
+#include "julymath.h"
+#include "main.h"
 
 HistoryItem::HistoryItem()
 {
@@ -46,7 +46,7 @@ HistoryItem::HistoryItem()
 
 void HistoryItem::cacheStrings()
 {
-    QDateTime cachedDateTime = QDateTime::fromTime_t(dateTimeInt);
+    QDateTime cachedDateTime = QDateTime::fromSecsSinceEpoch(dateTimeInt);
 
     if (baseValues_->use24HourTimeFormat)
     {
@@ -68,7 +68,7 @@ void HistoryItem::cacheStrings()
     }
 
     cachedDateTime.setTime(QTime(0, 0, 0, 0));
-    dateInt = cachedDateTime.toTime_t();
+    dateInt = cachedDateTime.toSecsSinceEpoch();
 
     QString currAStr, currBStr;
     int posSplitter = symbol.indexOf('/');
@@ -91,8 +91,7 @@ void HistoryItem::cacheStrings()
 
     if (volume > 0.0)
     {
-        volumeStr = IniEngine::getCurrencyInfo(currAStr).sign +
-                    JulyMath::textFromDouble(volume, baseValues.decimalsAmountMyTransactions);
+        volumeStr = IniEngine::getCurrencyInfo(currAStr).sign + JulyMath::textFromDouble(volume, baseValues.decimalsAmountMyTransactions);
     }
 
     if (volume > 0.0 && price > 0.0)

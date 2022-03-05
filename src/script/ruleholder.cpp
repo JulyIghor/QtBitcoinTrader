@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -50,9 +50,8 @@ RuleHolder::RuleHolder()
 
 bool RuleHolder::isValidComparation(const QString& text)
 {
-    return text == QLatin1String("=") || text == QLatin1String("<") || text == QLatin1String(">") ||
-           text == QLatin1String("<=") || text == QLatin1String(">=") || text == QLatin1String("!=") ||
-           text == QLatin1String("==") || text == QLatin1String("<>");
+    return text == QLatin1String("=") || text == QLatin1String("<") || text == QLatin1String(">") || text == QLatin1String("<=") ||
+           text == QLatin1String(">=") || text == QLatin1String("!=") || text == QLatin1String("==") || text == QLatin1String("<>");
 }
 
 bool RuleHolder::isValidSymbol(const QString& symbol)
@@ -71,11 +70,8 @@ bool RuleHolder::isValidPlusMinus(const QString& plusMinus)
 
 bool RuleHolder::isValidCode(const QString& code)
 {
-    return code == QLatin1String("EXACT") ||
-           code == QLatin1String("IMMEDIATELY") ||
-           code == QLatin1String("LastTrade") ||
-           code == QLatin1String("MyLastTrade") ||
-           mainWindow.indicatorsMap.value(code, nullptr) != nullptr;
+    return code == QLatin1String("EXACT") || code == QLatin1String("IMMEDIATELY") || code == QLatin1String("LastTrade") ||
+           code == QLatin1String("MyLastTrade") || mainWindow.indicatorsMap.value(code, nullptr) != nullptr;
 }
 
 bool RuleHolder::isTradingRule() const

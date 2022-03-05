@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,12 +29,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "exchange_bitfinex.h"
 #include "iniengine.h"
 #include "timesync.h"
-#include "exchange_bitfinex.h"
 
-Exchange_Bitfinex::Exchange_Bitfinex(const QByteArray& pRestSign, const QByteArray& pRestKey)
-    : Exchange()
+Exchange_Bitfinex::Exchange_Bitfinex(const QByteArray& pRestSign, const QByteArray& pRestKey) : Exchange()
 {
     orderBookItemIsDedicatedOrder = true;
     clearHistoryOnCurrencyChanged = true;
@@ -89,14 +88,11 @@ void Exchange_Bitfinex::quitThread()
 {
     clearValues();
 
-    
-        delete depthAsks;
+    delete depthAsks;
 
-    
-        delete depthBids;
+    delete depthBids;
 
-    
-        delete julyHttp;
+    delete julyHttp;
 }
 
 void Exchange_Bitfinex::clearVariables()
@@ -149,8 +145,11 @@ void Exchange_Bitfinex::secondSlot()
 
     case 2:
         if (!isReplayPending(109))
-            sendToApi(109, "trades/" + baseValues.currentPair.currRequestPair + "?timestamp=" + lastTradesDateCache +
-                      "&limit_trades=200"/*astTradesDateCache*/, false, true);
+            sendToApi(109,
+                      "trades/" + baseValues.currentPair.currRequestPair + "?timestamp=" + lastTradesDateCache +
+                          "&limit_trades=200" /*astTradesDateCache*/,
+                      false,
+                      true);
 
         break;
 
@@ -164,8 +163,11 @@ void Exchange_Bitfinex::secondSlot()
         if (isDepthEnabled() && (forceDepthLoad || !isReplayPending(111)))
         {
             emit depthRequested();
-            sendToApi(111, "book/" + baseValues.currentPair.currRequestPair + "?limit_bids=" + baseValues.depthCountLimitStr +
-                      "&limit_asks=" + baseValues.depthCountLimitStr, false, true);
+            sendToApi(111,
+                      "book/" + baseValues.currentPair.currRequestPair + "?limit_bids=" + baseValues.depthCountLimitStr +
+                          "&limit_asks=" + baseValues.depthCountLimitStr,
+                      false,
+                      true);
             forceDepthLoad = false;
         }
 
@@ -175,9 +177,12 @@ void Exchange_Bitfinex::secondSlot()
         if (lastHistory.isEmpty())
         {
             if (!isReplayPending(208))
-                sendToApi(208, "mytrades", true, true,
+                sendToApi(208,
+                          "mytrades",
+                          true,
+                          true,
                           ", \"symbol\": \"" + baseValues.currentPair.currRequestPair + "\", \"timestamp\": " + historyLastTimestamp +
-                          ", \"limit_trades\": 200");
+                              ", \"limit_trades\": 200");
 
             if (!isReplayPending(209))
                 sendToApi(209, "account_infos", true, true);
@@ -212,9 +217,12 @@ void Exchange_Bitfinex::getHistory(bool force)
         lastHistory.clear();
 
     if (!isReplayPending(208))
-        sendToApi(208, "mytrades", true, true,
+        sendToApi(208,
+                  "mytrades",
+                  true,
+                  true,
                   ", \"symbol\": \"" + baseValues.currentPair.currRequestPair + "\", \"timestamp\": " + historyLastTimestamp +
-                  ", \"limit_trades\": 100");
+                      ", \"limit_trades\": 100");
 
     if (!isReplayPending(209))
         sendToApi(209, "account_infos", true, true);
@@ -299,12 +307,12 @@ void Exchange_Bitfinex::sendToApi(int reqType, const QByteArray& method, bool au
             julyHttp->setPortForced(port);
         }
 
-        connect(julyHttp, SIGNAL(anyDataReceived()), baseValues_->mainWindow_, SLOT(anyDataReceived()));
-        connect(julyHttp, SIGNAL(setDataPending(bool)), baseValues_->mainWindow_, SLOT(setDataPending(bool)));
-        connect(julyHttp, SIGNAL(apiDown(bool)), baseValues_->mainWindow_, SLOT(setApiDown(bool)));
-        connect(julyHttp, SIGNAL(errorSignal(QString)), baseValues_->mainWindow_, SLOT(showErrorMessage(QString)));
-        connect(julyHttp, SIGNAL(sslErrorSignal(const QList<QSslError>&)), this, SLOT(sslErrors(const QList<QSslError>&)));
-        connect(julyHttp, SIGNAL(dataReceived(QByteArray, int, int)), this, SLOT(dataReceivedAuth(const QByteArray&, int, int)));
+        connect(julyHttp, &JulyHttp::anyDataReceived, baseValues_->mainWindow_, &QtBitcoinTrader::anyDataReceived);
+        connect(julyHttp, &JulyHttp::setDataPending, baseValues_->mainWindow_, &QtBitcoinTrader::setDataPending);
+        connect(julyHttp, &JulyHttp::apiDown, baseValues_->mainWindow_, &QtBitcoinTrader::setApiDown);
+        connect(julyHttp, &JulyHttp::errorSignal, baseValues_->mainWindow_, &QtBitcoinTrader::showErrorMessage);
+        connect(julyHttp, &JulyHttp::sslErrorSignal, this, &Exchange_Bitfinex::sslErrors);
+        connect(julyHttp, &JulyHttp::dataReceived, this, &Exchange_Bitfinex::dataReceivedAuth);
     }
 
     if (auth)
@@ -316,10 +324,16 @@ void Exchange_Bitfinex::sendToApi(int reqType, const QByteArray& method, bool au
         QByteArray forHash = hmacSha384(getApiSign(), payload).toHex();
 
         if (sendNow)
-            julyHttp->sendData(reqType, m_pairChangeCount, "POST /v1/" + method, postData,
+            julyHttp->sendData(reqType,
+                               m_pairChangeCount,
+                               "POST /v1/" + method,
+                               postData,
                                "X-BFX-PAYLOAD: " + payload + "\r\nX-BFX-SIGNATURE: " + forHash + "\r\n");
         else
-            julyHttp->prepareData(reqType, m_pairChangeCount, "POST /v1/" + method, postData,
+            julyHttp->prepareData(reqType,
+                                  m_pairChangeCount,
+                                  "POST /v1/" + method,
+                                  postData,
                                   "X-BFX-PAYLOAD: " + payload + "\r\nX-BFX-SIGNATURE: " + forHash + "\r\n");
     }
     else
@@ -362,8 +376,11 @@ void Exchange_Bitfinex::depthUpdateOrder(const QString& symbol, double price, do
     }
 }
 
-void Exchange_Bitfinex::depthSubmitOrder(const QString& symbol, QMap<double, double>* currentMap, double priceDouble,
-        double amount, bool isAsk)
+void Exchange_Bitfinex::depthSubmitOrder(const QString& symbol,
+                                         QMap<double, double>* currentMap,
+                                         double priceDouble,
+                                         double amount,
+                                         bool isAsk)
 {
     if (symbol != baseValues.currentPair.symbol)
         return;
@@ -413,7 +430,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
 
     switch (reqType)
     {
-    case 103: //ticker
+    case 103: // ticker
         if (!success)
             break;
 
@@ -496,9 +513,9 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
         else if (debugLevel)
             logThread->writeLog("Invalid ticker fast data:" + data, 2);
 
-        break;//ticker
+        break; // ticker
 
-    case 109: //money/trades/fetch
+    case 109: // money/trades/fetch
         if (success && data.size() > 32)
         {
             QStringList tradeList = QString(data).split("},{");
@@ -542,7 +559,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
 
         break;
 
-    case 111: //depth
+    case 111: // depth
         if (data.startsWith("{\"bids\""))
         {
             emit depthRequestReceived();
@@ -591,7 +608,10 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
                             if (!matchCurrentGroup || n == asksList.size() - 1)
                             {
                                 depthSubmitOrder(baseValues.currentPair.symbol,
-                                                 &currentAsksMap, groupedPrice + baseValues.groupPriceValue, groupedVolume, true);
+                                                 &currentAsksMap,
+                                                 groupedPrice + baseValues.groupPriceValue,
+                                                 groupedVolume,
+                                                 true);
                                 rowCounter++;
                                 groupedVolume = amount;
                                 groupedPrice += baseValues.groupPriceValue;
@@ -600,8 +620,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
                     }
                     else
                     {
-                        depthSubmitOrder(baseValues.currentPair.symbol,
-                                         &currentAsksMap, priceDouble, amount, true);
+                        depthSubmitOrder(baseValues.currentPair.symbol, &currentAsksMap, priceDouble, amount, true);
                         rowCounter++;
                     }
                 }
@@ -610,8 +629,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
 
                 for (int n = 0; n < currentAsksList.size(); n++)
                     if (currentAsksMap.value(currentAsksList.at(n), 0) == 0)
-                        depthUpdateOrder(baseValues.currentPair.symbol,
-                                         currentAsksList.at(n), 0.0, true); //Remove price
+                        depthUpdateOrder(baseValues.currentPair.symbol, currentAsksList.at(n), 0.0, true); // Remove price
 
                 lastDepthAsksMap = currentAsksMap;
 
@@ -651,7 +669,10 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
                             if (!matchCurrentGroup || n == bidsList.size() - 1)
                             {
                                 depthSubmitOrder(baseValues.currentPair.symbol,
-                                                 &currentBidsMap, groupedPrice - baseValues.groupPriceValue, groupedVolume, false);
+                                                 &currentBidsMap,
+                                                 groupedPrice - baseValues.groupPriceValue,
+                                                 groupedVolume,
+                                                 false);
                                 rowCounter++;
                                 groupedVolume = amount;
                                 groupedPrice -= baseValues.groupPriceValue;
@@ -660,8 +681,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
                     }
                     else
                     {
-                        depthSubmitOrder(baseValues.currentPair.symbol,
-                                         &currentBidsMap, priceDouble, amount, false);
+                        depthSubmitOrder(baseValues.currentPair.symbol, &currentBidsMap, priceDouble, amount, false);
                         rowCounter++;
                     }
                 }
@@ -670,8 +690,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
 
                 for (int n = 0; n < currentBidsList.size(); n++)
                     if (currentBidsMap.value(currentBidsList.at(n), 0) == 0)
-                        depthUpdateOrder(baseValues.currentPair.symbol,
-                                         currentBidsList.at(n), 0.0, false); //Remove price
+                        depthUpdateOrder(baseValues.currentPair.symbol, currentBidsList.at(n), 0.0, false); // Remove price
 
                 lastDepthBidsMap = currentBidsMap;
 
@@ -693,7 +712,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
 
         break;
 
-    case 202: //info
+    case 202: // info
         {
             if (!success)
                 break;
@@ -738,9 +757,9 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
             else if (debugLevel)
                 logThread->writeLog("Invalid Info data:" + data, 2);
         }
-        break;//info
+        break; // info
 
-    case 204://orders
+    case 204: // orders
         if (!success)
             break;
 
@@ -774,7 +793,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
 
                 bool isCanceled = getMidData("is_cancelled\":", ",", &currentOrderData) == "true";
 
-                //0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
+                // 0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
                 if (isCanceled)
                     currentOrder.status = 0;
                 else
@@ -793,16 +812,14 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
             lastInfoReceived = false;
         }
 
-        break;//orders
+        break; // orders
 
-    //case 210: //positions
-    //  {
-    //      data="[{\"id\":72119,\"symbol\":\"btcusd\",\"status\":\"ACTIVE\",\"base\":\"804.7899\",\"amount\":\"0.001\",\"timestamp\":\"1389624548.0\",\"swap\":\"0.0\",\"pl\":\"-0.0055969\"},{\"id\":72120,\"symbol\":\"ltcbtc\",\"status\":\"ACTIVE\",\"base\":\"0.02924999\",\"amount\":\"0.001\",\"timestamp\":\"1389624559.0\",\"swap\":\"0.0\",\"pl\":\"-0.00000067280018\"},{\"id\":72122,\"symbol\":\"ltcusd\",\"status\":\"ACTIVE\",\"base\":\"23.23\",\"amount\":\"0.001\",\"timestamp\":\"1389624576.0\",\"swap\":\"0.0\",\"pl\":\"-0.00016465\"}]";
-
-
+    // case 210: //positions
+    //   {
+    //       data="[{\"id\":72119,\"symbol\":\"btcusd\",\"status\":\"ACTIVE\",\"base\":\"804.7899\",\"amount\":\"0.001\",\"timestamp\":\"1389624548.0\",\"swap\":\"0.0\",\"pl\":\"-0.0055969\"},{\"id\":72120,\"symbol\":\"ltcbtc\",\"status\":\"ACTIVE\",\"base\":\"0.02924999\",\"amount\":\"0.001\",\"timestamp\":\"1389624559.0\",\"swap\":\"0.0\",\"pl\":\"-0.00000067280018\"},{\"id\":72122,\"symbol\":\"ltcusd\",\"status\":\"ACTIVE\",\"base\":\"23.23\",\"amount\":\"0.001\",\"timestamp\":\"1389624576.0\",\"swap\":\"0.0\",\"pl\":\"-0.00016465\"}]";
 
     //  }//positions
-    case 305: //order/cancel
+    case 305: // order/cancel
         {
             if (!success)
                 break;
@@ -814,9 +831,9 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
             else if (debugLevel)
                 logThread->writeLog("Invalid Order/Cancel data:" + data, 2);
         }
-        break;//order/cancel
+        break; // order/cancel
 
-    case 306: //order/buy
+    case 306: // order/buy
         if (!success || !debugLevel)
             break;
 
@@ -825,9 +842,9 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
         else
             logThread->writeLog("Invalid Order Buy Data:" + data);
 
-        break;//order/buy
+        break; // order/buy
 
-    case 307: //order/sell
+    case 307: // order/sell
         if (!success || !debugLevel)
             break;
 
@@ -836,9 +853,9 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
         else
             logThread->writeLog("Invalid Order Sell Data:" + data);
 
-        break;//order/sell
+        break; // order/sell
 
-    case 208: //money/wallet/history
+    case 208: // money/wallet/history
         if (!success)
             break;
 
@@ -911,9 +928,9 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
         else if (debugLevel)
             logThread->writeLog("Invalid History data:" + data.left(200), 2);
 
-        break;//money/wallet/history
+        break; // money/wallet/history
 
-    case 209: //fee
+    case 209: // fee
         if (!success)
             break;
 
@@ -947,7 +964,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
             lastFee = newFee;
         }
 
-        break;//fee
+        break; // fee
 
     default:
         break;

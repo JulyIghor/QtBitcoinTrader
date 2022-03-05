@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,12 +30,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "aboutdialog.h"
+#include "logobutton.h"
 #include "main.h"
 #include "translationdialog.h"
-#include "logobutton.h"
 
-TranslationAbout::TranslationAbout(QWidget* par)
-    : QDialog()
+TranslationAbout::TranslationAbout(QWidget* par) : QDialog()
 {
     ui.setupUi(this);
     ui.buttonCheckUpdates->setVisible(false);
@@ -43,9 +42,10 @@ TranslationAbout::TranslationAbout(QWidget* par)
     setWindowFlags(Qt::WindowCloseButtonHint | par->windowFlags());
     setWindowModality(Qt::ApplicationModal);
     setAttribute(Qt::WA_DeleteOnClose, true);
-    //setFixedSize(size());
+    // setFixedSize(size());
     ui.aboutTextLabel->setStyleSheet("QLabel {color: " + baseValues.appTheme.black.name() + "; border: 1px solid " +
-                                     baseValues.appTheme.gray.name() + "; background: " + baseValues.appTheme.white.name() + "; padding:6px}");
+                                     baseValues.appTheme.gray.name() + "; background: " + baseValues.appTheme.white.name() +
+                                     "; padding:6px}");
     ui.translationAuthor->setStyleSheet(ui.aboutTextLabel->styleSheet());
 
     ui.label_info->setText("Centrabit AG, Zug\nreg. CHE-114.254.375\nVersion: " + baseValues.appVerStr);
@@ -83,8 +83,11 @@ void TranslationAbout::showWindow()
     ui.languageField->setText(julyTr("LANGUAGE_NAME", "Invalid Language"));
     ui.translationAuthor->setText(julyTr("LANGUAGE_AUTHOR", "Invalid About"));
     ui.aboutBitcoinTraderGroupBox->setTitle(julyTr("ABOUT_QT_BITCOIN_TRADER", "About %1").arg("Qt Bitcoin Trader"));
-    ui.aboutTextLabel->setText(julyTr("ABOUT_QT_BITCOIN_TRADER_TEXT",
-                                      "Qt Bitcoin Trader is a free Open Source project<br>developed on C++ Qt and OpenSSL.<br>If you want to help make project better please donate.<br>Feel free to send me recommendations and fixes to: %1").arg("<a href=\"mailto:julyighor@gmail.com\">julyighor@gmail.com</a>"));
+    ui.aboutTextLabel->setText(
+        julyTr(
+            "ABOUT_QT_BITCOIN_TRADER_TEXT",
+            "Qt Bitcoin Trader is a free Open Source project<br>developed on C++ Qt and OpenSSL.<br>If you want to help make project better please donate.<br>Feel free to send me recommendations and fixes to: %1")
+            .arg("<a href=\"mailto:julyighor@gmail.com\">julyighor@gmail.com</a>"));
     show();
 }
 

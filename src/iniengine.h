@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@
 #ifndef INIENGINE_H
 #define INIENGINE_H
 
-#include <QObject>
-#include <QMap>
-#include <QHash>
-#include <atomic>
 #include "currencyinfo.h"
 #include "currencypairitem.h"
+#include <QHash>
+#include <QMap>
+#include <QObject>
+#include <atomic>
 
 class QThread;
 class JulyHttp;
@@ -60,7 +60,7 @@ public:
     static QString getPairSymbol(int);
     static QString getPairSymbolSecond(int);
     static int getPairsCount();
-//    void loadPairs(QStringList* pairsList);
+    //    void loadPairs(QStringList* pairsList);
     static const QString& checkSymbol(const QString& symbol);
     static QString getSymbolByRequest(const QString& request);
 

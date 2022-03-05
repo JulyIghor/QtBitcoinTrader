@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,24 +29,24 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "charts/chartsview.h"
+#include "charts/chartsmodel.h"
+#include "main.h"
+#include "ui_chartsview.h"
+#include <QElapsedTimer>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
-#include <QElapsedTimer>
-#include "main.h"
-#include "charts/chartsmodel.h"
-#include "charts/chartsview.h"
-#include "ui_chartsview.h"
 
-ChartsView::ChartsView()
-    : QWidget(),
-      ui(new Ui::ChartsView),
-      isChartsVisible(false),
-      sizeIsChanged(false),
-      refreshTimer(new QTimer),
-      perfomanceTimer(new QElapsedTimer),
-      timeRefreshCharts(5000),
-      lastResize(0),
-      lastNewData(0)
+ChartsView::ChartsView() :
+    QWidget(),
+    ui(new Ui::ChartsView),
+    isChartsVisible(false),
+    sizeIsChanged(false),
+    refreshTimer(new QTimer),
+    perfomanceTimer(new QElapsedTimer),
+    timeRefreshCharts(5000),
+    lastResize(0),
+    lastNewData(0)
 {
     ui->setupUi(this);
     ui->chartsBorder->setMinimumSize(550, 220);
@@ -80,7 +80,6 @@ ChartsView::ChartsView()
     ui->descriptionAmountImgLabel->setPixmap(descriptionPixmap);
     ui->descriptionAmountLabel->setText("- " + julyTr("CHARTS_AMOUNT", "Amount"));
 
-
     sceneCharts.reset(new QGraphicsScene);
     ui->graphicsView->scale(1, -1);
     ui->graphicsView->setScene(sceneCharts.data());
@@ -96,8 +95,11 @@ ChartsView::ChartsView()
     ui->bottomGraphicsView->scale(1, -1);
     ui->bottomGraphicsView->setScene(bottomSceneCharts.data());
     ui->bottomGraphicsView->setFixedHeight(fontHeight + 3);
-    drawText(sceneCharts.data(), julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
-             0, 0, "font-size:28px;color:" + baseValues.appTheme.gray.name());
+    drawText(sceneCharts.data(),
+             julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
+             0,
+             0,
+             "font-size:28px;color:" + baseValues.appTheme.gray.name());
 
     chartsModel.reset(new ChartsModel);
 
@@ -191,18 +193,18 @@ void ChartsView::drawRect(qint16 x, qint16 h)
 
 bool ChartsView::prepareCharts()
 {
-    if (!chartsModel->prepareChartsData(ui->bottomGraphicsView->width(),
-                                        ui->graphicsView->height() - fontHeightHalf))
+    if (!chartsModel->prepareChartsData(ui->bottomGraphicsView->width(), ui->graphicsView->height() - fontHeightHalf))
         return false;
 
     bottomSceneCharts->clear();
-    bottomSceneCharts->setSceneRect(1, -fontHeight - 5,
-                                    ui->bottomGraphicsView->width(), ui->bottomGraphicsView->height());
+    bottomSceneCharts->setSceneRect(1, -fontHeight - 5, ui->bottomGraphicsView->width(), ui->bottomGraphicsView->height());
 
     for (qint32 i = 0; i < chartsModel->graphDateText.size(); ++i)
     {
-        drawText(bottomSceneCharts.data(), chartsModel->graphDateText.at(i),
-                 chartsModel->graphDateTextX.at(i) - 12 + chartsModel->widthAmountYAxis, -4);
+        drawText(bottomSceneCharts.data(),
+                 chartsModel->graphDateText.at(i),
+                 chartsModel->graphDateTextX.at(i) - 12 + chartsModel->widthAmountYAxis,
+                 -4);
     }
 
     leftSceneCharts->clear();
@@ -211,11 +213,12 @@ bool ChartsView::prepareCharts()
 
     for (qint32 i = 0; i < chartsModel->graphAmountText.size(); ++i)
     {
-        leftSceneCharts->addLine(ui->leftGraphicsView->width() - 4, chartsModel->graphAmountTextY.at(i),
-                                 ui->leftGraphicsView->width(), chartsModel->graphAmountTextY.at(i),
+        leftSceneCharts->addLine(ui->leftGraphicsView->width() - 4,
+                                 chartsModel->graphAmountTextY.at(i),
+                                 ui->leftGraphicsView->width(),
+                                 chartsModel->graphAmountTextY.at(i),
                                  QPen("#777777"));
-        drawText(leftSceneCharts.data(), chartsModel->graphAmountText.at(i),
-                 5, chartsModel->graphAmountTextY.at(i) + 7);
+        drawText(leftSceneCharts.data(), chartsModel->graphAmountText.at(i), 5, chartsModel->graphAmountTextY.at(i) + 7);
     }
 
     rightSceneCharts->clear();
@@ -224,10 +227,8 @@ bool ChartsView::prepareCharts()
 
     for (qint32 i = 0; i < chartsModel->graphPriceText.size(); ++i)
     {
-        rightSceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i),
-                                  5, chartsModel->graphPriceTextY.at(i), QPen("#777777"));
-        drawText(rightSceneCharts.data(), chartsModel->graphPriceText.at(i),
-                 11, chartsModel->graphPriceTextY.at(i) + 7);
+        rightSceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i), 5, chartsModel->graphPriceTextY.at(i), QPen("#777777"));
+        drawText(rightSceneCharts.data(), chartsModel->graphPriceText.at(i), 11, chartsModel->graphPriceTextY.at(i) + 7);
     }
 
     ui->graphicsView->setScene(nullptr);
@@ -237,20 +238,18 @@ bool ChartsView::prepareCharts()
     int graphWidth = chartsModel->chartsWidth;
     int graphHeight = chartsModel->chartsHeight;
     sceneCharts->setSceneRect(0, -5, graphWidth + 1, ui->graphicsView->height());
-    sceneCharts->addLine(0, 0, graphWidth, 0,  QPen("#777777"));
+    sceneCharts->addLine(0, 0, graphWidth, 0, QPen("#777777"));
     sceneCharts->addLine(0, 0, 0, graphHeight, QPen("#777777"));
     sceneCharts->addLine(graphWidth, 0, graphWidth, graphHeight, QPen("#777777"));
 
     for (qint32 i = 0; i < chartsModel->graphDateText.size(); ++i)
     {
-        sceneCharts->addLine(chartsModel->graphDateTextX.at(i), -5,
-                             chartsModel->graphDateTextX.at(i), 0, QPen("#777777"));
+        sceneCharts->addLine(chartsModel->graphDateTextX.at(i), -5, chartsModel->graphDateTextX.at(i), 0, QPen("#777777"));
     }
 
     for (qint32 i = 1; i < chartsModel->graphPriceText.size(); ++i)
     {
-        sceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i),
-                             graphWidth - 1, chartsModel->graphPriceTextY.at(i), QPen("#DDDDDD"));
+        sceneCharts->addLine(1, chartsModel->graphPriceTextY.at(i), graphWidth - 1, chartsModel->graphPriceTextY.at(i), QPen("#DDDDDD"));
     }
 
     return true;
@@ -263,8 +262,11 @@ void ChartsView::clearCharts()
     leftSceneCharts->clear();
     rightSceneCharts->clear();
     sceneCharts->clear();
-    drawText(sceneCharts.data(), julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
-             0, 0, "font-size:28px;color:" + baseValues.appTheme.gray.name());
+    drawText(sceneCharts.data(),
+             julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
+             0,
+             0,
+             "font-size:28px;color:" + baseValues.appTheme.gray.name());
     sceneCharts->setSceneRect(sceneCharts->itemsBoundingRect());
     refreshTimer->start(timeRefreshCharts);
 }
@@ -282,8 +284,11 @@ void ChartsView::refreshCharts()
         bottomSceneCharts->clear();
         leftSceneCharts->clear();
         rightSceneCharts->clear();
-        drawText(sceneCharts.data(), julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
-                 0, 0, "font-size:28px;color:" + baseValues.appTheme.gray.name());
+        drawText(sceneCharts.data(),
+                 julyTr("CHARTS_WAITING_FOR_DATA", "Waiting for data..."),
+                 0,
+                 0,
+                 "font-size:28px;color:" + baseValues.appTheme.gray.name());
         return;
     }
 
@@ -296,14 +301,12 @@ void ChartsView::refreshCharts()
 
     for (qint32 i = 0; i < chartsModel->graphBoundsSellX.size(); ++i)
     {
-        boundsPolygon << QPointF(chartsModel->graphBoundsSellX.at(i),
-                                 chartsModel->graphBoundsSellY.at(i));
+        boundsPolygon << QPointF(chartsModel->graphBoundsSellX.at(i), chartsModel->graphBoundsSellY.at(i));
     }
 
     for (qint32 i = chartsModel->graphBoundsBuyX.size() - 1; i >= 0; --i)
     {
-        boundsPolygon << QPointF(chartsModel->graphBoundsBuyX.at(i),
-                                 chartsModel->graphBoundsBuyY.at(i));
+        boundsPolygon << QPointF(chartsModel->graphBoundsBuyX.at(i), chartsModel->graphBoundsBuyY.at(i));
     }
 
     if (!boundsPolygon.empty())
@@ -315,8 +318,7 @@ void ChartsView::refreshCharts()
     {
         for (qint32 i = 0; i < chartsModel->graphTradesX.size(); ++i)
         {
-            tradesPolygon << QPointF(chartsModel->graphTradesX.at(i),
-                                     chartsModel->graphTradesY.at(i));
+            tradesPolygon << QPointF(chartsModel->graphTradesX.at(i), chartsModel->graphTradesY.at(i));
         }
     }
 
@@ -338,8 +340,7 @@ void ChartsView::refreshCharts()
             else
                 pen = QPen("#0000FF");
 
-            sceneCharts->addEllipse(chartsModel->graphTradesX.at(i) - 2,
-                                    chartsModel->graphTradesY.at(i) - 2, 4, 4, pen);
+            sceneCharts->addEllipse(chartsModel->graphTradesX.at(i) - 2, chartsModel->graphTradesY.at(i) - 2, 4, 4, pen);
         }
     }
 

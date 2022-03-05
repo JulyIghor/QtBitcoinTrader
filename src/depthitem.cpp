@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "depthitem.h"
-#include "main.h"
 #include "julymath.h"
+#include "main.h"
 
 bool DepthItem::isValid()
 {

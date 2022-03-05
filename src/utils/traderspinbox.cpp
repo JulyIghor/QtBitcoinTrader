@@ -1,7 +1,6 @@
 #include "traderspinbox.h"
 
-TraderSpinBox::TraderSpinBox(QWidget* parent)
-    : QDoubleSpinBox(parent)
+TraderSpinBox::TraderSpinBox(QWidget* parent) : QDoubleSpinBox(parent)
 {
     installEventFilter(this);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);

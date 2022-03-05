@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "main.h"
 #include "iniengine.h"
+#include "main.h"
 
 CurrencyPairItem::CurrencyPairItem()
 {
@@ -44,16 +44,16 @@ CurrencyPairItem::CurrencyPairItem()
     currABalanceDecimals = 8;
     currBBalanceDecimals = 5;
 
-    //currASign="BTC";
-    //currAStr="BTC";
-    //currAStrLow="btc";
+    // currASign="BTC";
+    // currAStr="BTC";
+    // currAStrLow="btc";
 
-    //currBStr="USD";
-    //currBStrLow="usd";
-    //currBSign="USD";
+    // currBStr="USD";
+    // currBStrLow="usd";
+    // currBSign="USD";
 
-    //currSymbol="BTCUSD";
-    //currRequestPair="BTCUSD";
+    // currSymbol="BTCUSD";
+    // currRequestPair="BTCUSD";
 }
 
 void CurrencyPairItem::setSymbol(QByteArray symb)
@@ -81,7 +81,6 @@ void CurrencyPairItem::setSymbol(QByteArray symb)
 
     currAStrLow = currAStr.toLower();
     currBStrLow = currBStr.toLower();
-
 
     currAInfo = IniEngine::getCurrencyInfo(currAStr);
     currBInfo = IniEngine::getCurrencyInfo(currBStr);

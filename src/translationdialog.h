@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@
 #ifndef TRANSLATIONDIALOG_H
 #define TRANSLATIONDIALOG_H
 
-#include <QDialog>
+#include "julytranslator.h"
 #include "translationline.h"
 #include "ui_translationdialog.h"
+#include <QDialog>
 #include <QResizeEvent>
-#include "julytranslator.h"
 
 class TranslationDialog : public QDialog
 {
@@ -50,7 +50,7 @@ private:
     void resizeEvent(QResizeEvent* event);
     QGridLayout* gridLayout;
     TranslationLine* authorAbout;
-    void fillLayoutByMap(QMap<QString, QString>*, QString subName, QMap<QString, QString>* dMap);
+    void fillLayoutByMap(QMap<QString, QString>*, const QString& subName, QMap<QString, QString>* dMap);
     QList<TranslationLine*> lineEdits;
     QWidget fonWidget;
     Ui::TranslationDialog ui;

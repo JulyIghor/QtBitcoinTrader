@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,22 +30,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "addscriptwindow.h"
-#include "ui_addscriptwindow.h"
 #include "main.h"
-#include <QFileDialog>
 #include "scriptwidget.h"
+#include "ui_addscriptwindow.h"
+#include <QFileDialog>
 #include <QMessageBox>
 
-AddScriptWindow::AddScriptWindow(QWidget* parent) :
-    QDialog(parent),
-    ui(new Ui::AddScriptWindow)
+AddScriptWindow::AddScriptWindow(QWidget* parent) : QDialog(parent), ui(new Ui::AddScriptWindow)
 {
     ui->setupUi(this);
     setWindowFlags(Qt::WindowCloseButtonHint);
 
     for (ScriptWidget* currentScript : mainWindow.ui.tabRules->findChildren<ScriptWidget*>())
         ui->existingScriptList->addItem(currentScript->windowTitle(), currentScript->property("FileName"));
-
 
     QString groupLabel = julyTr("SCRIPT_NAME", "Script");
     QString newGroupName = groupLabel;
@@ -65,12 +62,10 @@ AddScriptWindow::AddScriptWindow(QWidget* parent) :
 
     ui->scriptName->setText(newGroupName);
 
-
     ui->checkExistingScript->setEnabled(ui->existingScriptList->count());
     ui->existingScriptList->setEnabled(ui->existingScriptList->count());
 
     julyTranslator.translateUi(this);
-
 
     setWindowTitle(julyTranslator.translateButton("ADD_SCRIPT", "Add script"));
 
@@ -134,7 +129,7 @@ void AddScriptWindow::on_openFile_clicked()
 
     QString scriptNameFile = QSettings(fileName, QSettings::IniFormat).value("JLScript/Name", "").toString();
     {
-        //Validate saved file
+        // Validate saved file
         if (scriptNameFile.isEmpty())
         {
             QMessageBox::warning(this, windowTitle(), julyTr("OPEN_INVALID_SCRIPT", "Invalid script \"%1\"").arg(fileName));
@@ -207,7 +202,6 @@ void AddScriptWindow::checkValidButton()
 
     if (ui->checkUseFile->isChecked())
         isAbleToSave = ui->scriptFileName->text().length() > 3 && QFile::exists(ui->scriptFileName->text());
-
 
     ui->buttonAddScript->setEnabled(isAbleToSave);
 }

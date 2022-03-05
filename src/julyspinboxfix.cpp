@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,7 @@
 #include "julyspinboxfix.h"
 #include "main.h"
 
-JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox* parentSB, int minWid)
-    : QObject()
+JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox* parentSB, int minWid) : QObject()
 {
     if (baseValues.forceDotInSpinBoxes)
         parentSB->setLocale(QLocale::English);
@@ -56,7 +55,7 @@ JulySpinBoxFix::JulySpinBoxFix(QDoubleSpinBox* parentSB, int minWid)
         widthFix(parentSB->text());
     }
 
-    connect(parentSB, SIGNAL(valueChanged(QString)), this, SLOT(widthFix(QString)));
+    connect(parentSB, &QDoubleSpinBox::textChanged, this, &JulySpinBoxFix::widthFix);
 }
 
 void JulySpinBoxFix::widthFix(const QString& text)

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,11 +30,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ordersmodel.h"
-#include "main.h"
 #include "exchange/exchange.h"
+#include "main.h"
 
-OrdersModel::OrdersModel()
-    : QAbstractItemModel()
+OrdersModel::OrdersModel() : QAbstractItemModel()
 {
     lastOrdersCount = 0;
     lastAsksCount = 0;
@@ -48,12 +47,15 @@ OrdersModel::OrdersModel()
     countWidth = 20;
     statusWidth = 100;
 
-    textStatusList << "CANCELED" << "OPEN" << "PENDING" << "POST-PENDING" << "INVALID";
+    textStatusList << "CANCELED"
+                   << "OPEN"
+                   << "PENDING"
+                   << "POST-PENDING"
+                   << "INVALID";
 }
 
 OrdersModel::~OrdersModel()
 {
-
 }
 
 int OrdersModel::rowCount(const QModelIndex& /*parent*/) const
@@ -101,7 +103,6 @@ void OrdersModel::clear()
 
     emit volumeAmountChanged(0.0, 0.0);
     endResetModel();
-
 
     ordersCountChanged();
     ordersAsksCountChanged();
@@ -197,10 +198,9 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
 
         if (matchListRang && oidList.at(currentIndex) == ordersRcv->at(n).oid)
         {
-            //Update
+            // Update
             if (statusList.at(currentIndex) &&
-                (statusList.at(currentIndex) != ordersRcv->at(n).status ||
-                 amountList.at(currentIndex) != ordersRcv->at(n).amount ||
+                (statusList.at(currentIndex) != ordersRcv->at(n).status || amountList.at(currentIndex) != ordersRcv->at(n).amount ||
                  priceList.at(currentIndex) != ordersRcv->at(n).price))
             {
                 statusList[currentIndex] = ordersRcv->at(n).status;
@@ -217,7 +217,7 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
         }
         else
         {
-            //Insert
+            // Insert
             beginInsertRows(QModelIndex(), currentIndex, currentIndex);
 
             oidList.insert(currentIndex, ordersRcv->at(n).oid);
@@ -248,7 +248,7 @@ void OrdersModel::orderBookChanged(QList<OrderItem>* ordersRcv)
 
     asksCount = newAsksCount;
 
-    for (int n = oidList.size() - 1; n >= 0; n--) //Removing Order
+    for (int n = oidList.size() - 1; n >= 0; n--) // Removing Order
         if (!existingOids.value(oidList.at(n), false))
         {
             beginRemoveRows(QModelIndex(), n, n);
@@ -439,7 +439,7 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
         case 0:
             return baseValues.appTheme.lightRed;
 
-        case 2: //return baseValues.appTheme.lightGreen;
+        case 2: // return baseValues.appTheme.lightGreen;
         case 3:
             return baseValues.appTheme.lightRedGreen;
 
@@ -455,7 +455,7 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
 
     switch (indexColumn)
     {
-    case -1://Counter
+    case -1: // Counter
         {
             if (role == Qt::ToolTipRole)
                 return oidList.at(currentRow);
@@ -466,21 +466,21 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
 
     case 0:
         {
-            //Date
+            // Date
             return dateStrList.at(currentRow);
         }
         break;
 
     case 1:
         {
-            //Type
+            // Type
             return typesList.at(currentRow) ? textAsk : textBid;
         }
         break;
 
     case 2:
         {
-            //Status
+            // Status
             switch (statusList.at(currentRow))
             {
             case 0:
@@ -508,28 +508,28 @@ QVariant OrdersModel::data(const QModelIndex& index, int role) const
 
     case 3:
         {
-            //Amount
+            // Amount
             return amountStrList.at(currentRow);
         }
         break;
 
     case 4:
         {
-            //Price
+            // Price
             return priceStrList.at(currentRow);
         }
         break;
 
     case 5:
         {
-            //Total
+            // Total
             return totalStrList.at(currentRow);
         }
         break;
 
     case 6:
         {
-            //X
+            // X
             return QVariant();
         }
 
@@ -610,19 +610,19 @@ QVariant OrdersModel::headerData(int section, Qt::Orientation orientation, int r
         switch (section)
         {
         case 0:
-            return QSize(countWidth, defaultHeightForRow); //Counter
+            return QSize(countWidth, defaultHeightForRow); // Counter
 
         case 1:
-            return QSize(dateWidth, defaultHeightForRow); //Date
+            return QSize(dateWidth, defaultHeightForRow); // Date
 
         case 2:
-            return QSize(typeWidth, defaultHeightForRow); //Type
+            return QSize(typeWidth, defaultHeightForRow); // Type
 
         case 3:
-            return QSize(statusWidth, defaultHeightForRow); //Status
+            return QSize(statusWidth, defaultHeightForRow); // Status
 
         case 7:
-            return QSize(defaultHeightForRow, defaultHeightForRow); //X
+            return QSize(defaultHeightForRow, defaultHeightForRow); // X
         }
 
         return QVariant();
@@ -658,9 +658,10 @@ void OrdersModel::setHorizontalHeaderLabels(QStringList list)
     textStatusList[3] = julyTr("ORDER_STATE_POST-PENDING", textStatusList.at(3));
     textStatusList[4] = julyTr("ORDER_STATE_INVALID", textStatusList.at(4));
 
-    dateWidth = qMax(qMax(textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(23, 59, 59,
-                                        999)).toString(baseValues.dateTimeFormat)), textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(12, 59, 59,
-                                                999)).toString(baseValues.dateTimeFormat))), textFontWidth(list.at(0))) + 10;
+    dateWidth = qMax(qMax(textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(23, 59, 59, 999)).toString(baseValues.dateTimeFormat)),
+                          textFontWidth(QDateTime(QDate(2000, 12, 30), QTime(12, 59, 59, 999)).toString(baseValues.dateTimeFormat))),
+                     textFontWidth(list.at(0))) +
+                10;
     typeWidth = qMax(qMax(textFontWidth(textAsk), textFontWidth(textBid)), textFontWidth(list.at(1))) + 10;
 
     for (int n = 0; n < 4; n++)

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rulescriptparser.h"
+#include "julymath.h"
 #include "main.h"
 #include <QSettings>
-#include "julymath.h"
 
 RuleScriptParser::RuleScriptParser()
 {
@@ -120,8 +120,7 @@ RuleHolder RuleScriptParser::readHolderFromFile(QString& file, QString section)
 QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
 {
     bool execImmediately = holder.variableACode == QLatin1String("IMMEDIATELY");
-    bool eventIsTrade = holder.variableACode == QLatin1String("LastTrade") ||
-                        holder.variableACode == QLatin1String("MyLastTrade");
+    bool eventIsTrade = holder.variableACode == QLatin1String("LastTrade") || holder.variableACode == QLatin1String("MyLastTrade");
 
     QString script = "function executeRule()\n{\n";
 
@@ -132,13 +131,12 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
     {
         if (holder.isTradingRule())
         {
-            script +=
-                " if(trader.get(\"ApiLag\")>10)\n"
-                " {\n"
-                " trader.log(\"Api lag is to high\");\n"
-                " trader.delay(1,\"executeRule()\");\n"
-                " return;\n"
-                " }\n\n";
+            script += " if(trader.get(\"ApiLag\")>10)\n"
+                      " {\n"
+                      " trader.log(\"Api lag is to high\");\n"
+                      " trader.delay(1,\"executeRule()\");\n"
+                      " return;\n"
+                      " }\n\n";
         }
 
         if (holder.thanTypeIndex < 4)
@@ -179,7 +177,8 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                 script += " var price = trader.get(\"" + holder.tradeSymbolCode + "\" , \"" + holder.thanPriceTypeCode + "\");\n";
 
                 if (holder.thanPricePercentChecked)
-                    script += " price " + holder.thanPricePlusMinusText + "= price * " + JulyMath::textFromDouble(holder.thanPrice / 100.0) + ";\n";
+                    script += " price " + holder.thanPricePlusMinusText + "= price * " +
+                              JulyMath::textFromDouble(holder.thanPrice / 100.0) + ";\n";
                 else if (holder.thanPrice != 0.0)
                     script += " price " + holder.thanPricePlusMinusText + "= " + JulyMath::textFromDouble(holder.thanPrice) + ";\n";
 
@@ -195,28 +194,28 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
 
             switch (holder.thanTypeIndex)
             {
-                case 0: //Sell
-                    script += " trader.sell(\"" + holder.tradeSymbolCode + "\" , amount , price)";
-                    break;
+            case 0: // Sell
+                script += " trader.sell(\"" + holder.tradeSymbolCode + "\" , amount , price)";
+                break;
 
-                case 1: //Buy
-                    if (holder.thanAmountPercentChecked)
-                        script += " trader.buy(\"" + holder.tradeSymbolCode + "\" , amount / price , price)";
-                    else
-                        script += " trader.buy(\"" + holder.tradeSymbolCode + "\" , amount , price)";
-
-                    break;
-
-                case 2: //Receive
-                    script += " trader.sell(\"" + holder.tradeSymbolCode + "\" , amount / price , price)";
-                    break;
-
-                case 3: //Spend
+            case 1: // Buy
+                if (holder.thanAmountPercentChecked)
                     script += " trader.buy(\"" + holder.tradeSymbolCode + "\" , amount / price , price)";
-                    break;
+                else
+                    script += " trader.buy(\"" + holder.tradeSymbolCode + "\" , amount , price)";
 
-                default:
-                    break;
+                break;
+
+            case 2: // Receive
+                script += " trader.sell(\"" + holder.tradeSymbolCode + "\" , amount / price , price)";
+                break;
+
+            case 3: // Spend
+                script += " trader.buy(\"" + holder.tradeSymbolCode + "\" , amount / price , price)";
+                break;
+
+            default:
+                break;
             }
 
             if (!script.isEmpty())
@@ -226,48 +225,48 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
         {
             switch (holder.thanTypeIndex)
             {
-                case 4: //Cancel all Orders
-                    script += " trader.cancelOrders();\n";
-                    break;
+            case 4: // Cancel all Orders
+                script += " trader.cancelOrders();\n";
+                break;
 
-                case 5: //Cancel Asks
-                    script += " trader.cancelAsks();\n";
-                    break;
+            case 5: // Cancel Asks
+                script += " trader.cancelAsks();\n";
+                break;
 
-                case 6: //Cancel Bids
-                    script += " trader.cancelBids();\n";
-                    break;
+            case 6: // Cancel Bids
+                script += " trader.cancelBids();\n";
+                break;
 
-                case 7://Start group
-                    script += " trader.groupStart(\"" + holder.thanText + "\");\n";
-                    break;
+            case 7: // Start group
+                script += " trader.groupStart(\"" + holder.thanText + "\");\n";
+                break;
 
-                case 8://Stop group
-                    script += " trader.groupStop(\"" + holder.thanText + "\");\n";
-                    break;
+            case 8: // Stop group
+                script += " trader.groupStop(\"" + holder.thanText + "\");\n";
+                break;
 
-                case 9://Beep
-                    script += " trader.beep();\n";
-                    break;
+            case 9: // Beep
+                script += " trader.beep();\n";
+                break;
 
-                case 10://Play Sound
-                    script += " trader.playWav(\"" + holder.thanText + "\");\n";
-                    break;
+            case 10: // Play Sound
+                script += " trader.playWav(\"" + holder.thanText + "\");\n";
+                break;
 
-                case 11://Start app
-                    script += " trader.startApp(\"" + holder.thanText + "\");\n";
-                    break;
+            case 11: // Start app
+                script += " trader.startApp(\"" + holder.thanText + "\");\n";
+                break;
 
-                case 12://Say text
-                    {
-                        QString sayText;
+            case 12: // Say text
+                {
+                    QString sayText;
 
-                        if (!holder.sayCode.isEmpty())
-                            sayText = ", trader.get(\"" + holder.sayCode + "\")";
+                    if (!holder.sayCode.isEmpty())
+                        sayText = ", trader.get(\"" + holder.sayCode + "\")";
 
-                        script += " trader.say(\"" + holder.thanText + "\"" + sayText + ");\n";
-                    }
-                    break;
+                    script += " trader.say(\"" + holder.thanText + "\"" + sayText + ");\n";
+                }
+                break;
             }
         }
 
@@ -283,7 +282,7 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
     QString executeRuleLine;
 
     if (haveDelay)
-        executeRuleLine = " trader.delay(" + JulyMath::textFromDouble(holder.delayMilliseconds, 3, 0) + ",\"executeRule()\");";
+        executeRuleLine = " trader.delay(" + JulyMath::textFromDoubleStr(holder.delayMilliseconds, 3, 0) + ",\"executeRule()\");";
     else
         executeRuleLine = " executeRule();";
 
@@ -317,15 +316,17 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                 indicatorB = indicatorBValue + ";\n";
 
                 if (holder.variableBPercentChecked)
-                    indicatorB += " baseVariable " + holder.variableBplusMinus + "= baseVariable*" + JulyMath::textFromDouble(
-                                      holder.variableBExact / 100.0) + ";\n";
+                    indicatorB += " baseVariable " + holder.variableBplusMinus + "= baseVariable*" +
+                                  JulyMath::textFromDouble(holder.variableBExact / 100.0) + ";\n";
                 else if (holder.variableBExact != 0.0)
-                    indicatorB += " baseVariable " + holder.variableBplusMinus + "= " + JulyMath::textFromDouble(holder.variableBExact) + ";\n";
+                    indicatorB +=
+                        " baseVariable " + holder.variableBplusMinus + "= " + JulyMath::textFromDouble(holder.variableBExact) + ";\n";
 
                 if (holder.variableBFeeIndex > 0)
                 {
                     QString sign = (holder.variableBFeeIndex == 1 ? "+" : "-");
-                    indicatorB += " baseVariable *= (1.0 " + sign + " trader.get(\"" + holder.valueBSymbolCode + "\" , \"Fee\") / 100.0);\n";
+                    indicatorB +=
+                        " baseVariable *= (1.0 " + sign + " trader.get(\"" + holder.valueBSymbolCode + "\" , \"Fee\") / 100.0);\n";
                 }
 
                 if (holder.variableBModeIndex == 0)
@@ -346,7 +347,8 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                 script += "\n\nvar baseVariable = calcBaseVariable();\n"
                           "function calcBaseVariable()\n"
                           "{\n"
-                          " baseVariable = " + indicatorB +
+                          " baseVariable = " +
+                          indicatorB +
                           " return baseVariable;\n"
                           "}";
             }
@@ -382,12 +384,13 @@ QString RuleScriptParser::holderToScript(RuleHolder& holder, bool testMode)
                 eventName = "Balance\",\"" + currBStr;
         }
 
-        script += "\n\ntrader.on(\"" + eventName + "\").changed()\n"
+        script += "\n\ntrader.on(\"" + eventName +
+                  "\").changed()\n"
                   "{\n"
                   " if(executed)return;\n"
-                  " if(symbol != \"" + holder.valueASymbolCode + "\")return;\n";
-        script += realtime +
-                  ifLine + executeRuleLine;
+                  " if(symbol != \"" +
+                  holder.valueASymbolCode + "\")return;\n";
+        script += realtime + ifLine + executeRuleLine;
 
         if (testMode)
             script += "\n else { trader.test(2); trader.stopGroup(); }\n";

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,27 +29,23 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QDesktopServices>
-#include <QSettings>
-#include <QtCore/qmath.h>
-#include <QLabel>
-#include <QTimer>
-#include "main.h"
-#include "julyhttp.h"
-#include "exchangebutton.h"
 #include "featuredexchangesdialog.h"
+#include "exchangebutton.h"
+#include "julyhttp.h"
+#include "main.h"
 #include "ui_featuredexchangesdialog.h"
+#include <QDesktopServices>
+#include <QLabel>
+#include <QSettings>
+#include <QTimer>
+#include <QtCore/qmath.h>
 
-FeaturedExchangesDialog::FeaturedExchangesDialog() :
-    QDialog(),
-    exchangeNum(-1),
-    ui(new Ui::FeaturedExchangesDialog)
+FeaturedExchangesDialog::FeaturedExchangesDialog() : QDialog(), exchangeNum(-1), ui(new Ui::FeaturedExchangesDialog)
 {
     ui->setupUi(this);
     ui->okButton->setEnabled(false);
     setWindowFlags(Qt::WindowCloseButtonHint | Qt::MSWindowsFixedSizeDialogHint);
-    setWindowTitle("Qt Bitcoin Trader v" + baseValues.appVerStr + " - " + julyTr("FEATURED_EXCHANGES",
-                   "Featured Exchanges"));
+    setWindowTitle("Qt Bitcoin Trader v" + baseValues.appVerStr + " - " + julyTr("FEATURED_EXCHANGES", "Featured Exchanges"));
 
     QSettings listSettings(":/Resources/Exchanges/List.ini", QSettings::IniFormat);
     allExchangesList = listSettings.childGroups();
@@ -130,14 +126,13 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
         if (currentName.isEmpty() || currentLogo.isEmpty() || currentURL.isEmpty())
             continue;
 
-        auto* exchangeItem = new ExchangeButton(currentLogo, loadCurrencies(currentName), currentURL,
-                featuredExchangesListIndex.at(i), this);
+        auto* exchangeItem =
+            new ExchangeButton(currentLogo, loadCurrencies(currentName), currentURL, featuredExchangesListIndex.at(i), this);
 
-        if (countCol == 3 && i == featuredExchangesList.size() - 1 && (i - qFloor(i / countCol)*countCol) == 0)
+        if (countCol == 3 && i == featuredExchangesList.size() - 1 && (i - qFloor(i / countCol) * countCol) == 0)
             i++;
 
-        ui->gridLayoutExchange->addWidget(exchangeItem, qFloor(i / countCol), i - qFloor(i / countCol)*countCol,
-                                          Qt::AlignCenter);
+        ui->gridLayoutExchange->addWidget(exchangeItem, qFloor(i / countCol), i - qFloor(i / countCol) * countCol, Qt::AlignCenter);
     }
 
     julyTranslator.translateUi(this);
@@ -150,7 +145,6 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() :
 
 FeaturedExchangesDialog::~FeaturedExchangesDialog()
 {
-
 }
 
 void FeaturedExchangesDialog::dataReceived(const QByteArray& data, int /*unused*/, int /*unused*/)
@@ -269,7 +263,7 @@ void FeaturedExchangesDialog::on_okButton_clicked() const
         return;
     }
 
-//    accept();
+    //    accept();
 }
 
 void FeaturedExchangesDialog::on_otherExchangesButton_clicked()

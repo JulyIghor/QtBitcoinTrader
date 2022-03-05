@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,22 +29,22 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "utils/traderspinbox.h"
 #include "feecalculator.h"
-#include "main.h"
+#include "indicatorengine.h"
 #include "julyspinboxfix.h"
 #include "julyspinboxpicker.h"
-#include "indicatorengine.h"
+#include "main.h"
+#include "utils/traderspinbox.h"
 
-FeeCalculator::FeeCalculator()
-    : QDialog(),
-      buyTotalBtcBox(new TraderSpinBox(this)),
-      buyPriceBox(new TraderSpinBox(this)),
-      totalPaidBox(new TraderSpinBox(this)),
-      btcReceivedBox(new TraderSpinBox(this)),
-      sellPriceBox(new TraderSpinBox(this)),
-      feeValueBox(new TraderSpinBox(this)),
-      locked(true)
+FeeCalculator::FeeCalculator() :
+    QDialog(),
+    buyTotalBtcBox(new TraderSpinBox(this)),
+    buyPriceBox(new TraderSpinBox(this)),
+    totalPaidBox(new TraderSpinBox(this)),
+    btcReceivedBox(new TraderSpinBox(this)),
+    sellPriceBox(new TraderSpinBox(this)),
+    feeValueBox(new TraderSpinBox(this)),
+    locked(true)
 {
     ui.setupUi(this);
     setupWidgets();
@@ -89,10 +89,10 @@ FeeCalculator::FeeCalculator()
     julyTranslator.translateUi(this);
 
     languageChanged();
-    connect(&julyTranslator, SIGNAL(languageChanged()), this, SLOT(languageChanged()));
+    connect(&julyTranslator, &JulyTranslator::languageChanged, this, &FeeCalculator::languageChanged);
 
-    ui.groupBox->setStyleSheet("QGroupBox {background: rgba(255,255,255,60); border: 1px solid " +
-                               baseValues.appTheme.gray.name() + ";border-radius: 3px;margin-top: 7px;}");
+    ui.groupBox->setStyleSheet("QGroupBox {background: rgba(255,255,255,60); border: 1px solid " + baseValues.appTheme.gray.name() +
+                               ";border-radius: 3px;margin-top: 7px;}");
 
     if (mainWindow.ui.widgetStaysOnTop->isChecked())
         ui.widgetStaysOnTop->setChecked(true);
@@ -294,9 +294,9 @@ void FeeCalculator::setupWidgets()
     ui.feeLayout->addWidget(feeValueBox);
 
     connect(buyTotalBtcBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyBtcChanged);
-    connect(buyPriceBox,    QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyPriceChanged);
-    connect(totalPaidBox,   QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyTotalPaidChanged);
+    connect(buyPriceBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyPriceChanged);
+    connect(totalPaidBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyTotalPaidChanged);
     connect(btcReceivedBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::buyBtcReceivedChanged);
-    connect(sellPriceBox,   QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::sellPriceChanged);
-    connect(feeValueBox,    QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::feeChanged);
+    connect(sellPriceBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::sellPriceChanged);
+    connect(feeValueBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &FeeCalculator::feeChanged);
 }

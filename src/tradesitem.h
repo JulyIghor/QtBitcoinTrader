@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -53,11 +53,11 @@ struct TradesItem
     double total;
     QString totalStr;
 
-    QString symbol;//Like a "BTCUSD" 6 symbols only
+    QString symbol; // Like a "BTCUSD" 6 symbols only
 
-    int orderType;//-1:Bid; 0:None; 1:Ask
+    int orderType; //-1:Bid; 0:None; 1:Ask
 
-    int direction;//-1:Down; 0: None; 1:Up
+    int direction; //-1:Down; 0: None; 1:Up
 
     void cacheStrings();
 

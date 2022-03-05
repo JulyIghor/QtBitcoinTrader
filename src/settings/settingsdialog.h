@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,13 +32,13 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <QDialog>
-#include <QStandardItemModel>
+#include "settingsdecimals.h"
 #include "settingsdialoglistelement.h"
 #include "settingsgeneral.h"
 #include "settingsnetworkproxy.h"
-#include "settingsdecimals.h"
 #include "ui_settingsdialog.h"
+#include <QDialog>
+#include <QStandardItemModel>
 
 class SettingsDialogListElement;
 
@@ -49,7 +49,7 @@ class SettingsDialog : public QDialog
 public:
     SettingsDialog();
     ~SettingsDialog();
-    void reject() {};
+    void reject(){};
 
     void clickOnList(qint32);
     void disableTranslateButton();

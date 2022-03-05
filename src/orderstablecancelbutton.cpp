@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,23 +30,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "orderstablecancelbutton.h"
-#include <QPushButton>
 #include "main.h"
+#include <QPushButton>
 #include <QTableView>
 
-OrdersTableCancelButton::OrdersTableCancelButton(QObject* parent)
-    : QItemDelegate(parent)
+OrdersTableCancelButton::OrdersTableCancelButton(QObject* parent) : QItemDelegate(parent)
 {
     parentTable = dynamic_cast<QTableView*>(parent);
 }
 
 OrdersTableCancelButton::~OrdersTableCancelButton()
 {
-
 }
 
-void OrdersTableCancelButton::paint(QPainter* painter, const QStyleOptionViewItem& option,
-                                    const QModelIndex& index) const
+void OrdersTableCancelButton::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     if (parentTable && !mainWindow.currentlyAddingOrders)
     {
@@ -56,7 +53,7 @@ void OrdersTableCancelButton::paint(QPainter* painter, const QStyleOptionViewIte
         {
             buttonCancel = new QPushButton("X");
             buttonCancel->setFixedSize(defaultHeightForRow, defaultHeightForRow);
-            connect(buttonCancel, SIGNAL(clicked()), baseValues.mainWindow_, SLOT(cancelOrderByXButton()));
+            connect(buttonCancel, &QPushButton::clicked, baseValues.mainWindow_, &QtBitcoinTrader::cancelOrderByXButton);
             parentTable->setIndexWidget(index, buttonCancel);
         }
 

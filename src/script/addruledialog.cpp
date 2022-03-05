@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,28 +30,23 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "addruledialog.h"
-#include "ui_addruledialog.h"
-#include "main.h"
-#include <QFileDialog>
+#include "exchange/exchange.h"
+#include "iniengine.h"
+#include "julymath.h"
 #include "julyspinboxfix.h"
+#include "main.h"
 #include "percentpicker.h"
 #include "rulescriptparser.h"
-#include "exchange/exchange.h"
-#include <QMessageBox>
-#include "scriptobject.h"
-#include "julymath.h"
-#include <QComboBox>
-#include "utils/traderspinbox.h"
 #include "rulewidget.h"
-#include "iniengine.h"
+#include "scriptobject.h"
+#include "ui_addruledialog.h"
+#include "utils/traderspinbox.h"
+#include <QComboBox>
+#include <QFileDialog>
+#include <QMessageBox>
 
 AddRuleDialog::AddRuleDialog(const QString& grName, QWidget* par) :
-    QDialog(par),
-    saveClicked(false),
-    groupName(grName),
-    pendingFix(true),
-    ruleIsEnabled(false),
-    ui(new Ui::AddRuleDialog)
+    QDialog(par), saveClicked(false), groupName(grName), pendingFix(true), ruleIsEnabled(false), ui(new Ui::AddRuleDialog)
 {
     ui->setupUi(this);
     ui->buttonSaveRule->setVisible(false);
@@ -71,8 +66,8 @@ AddRuleDialog::AddRuleDialog(const QString& grName, QWidget* par) :
         if (scriptName.isEmpty())
             continue;
 
-        QString translatedName = julyTranslator.translateString("INDICATOR_" + (scriptName.startsWith("Balance")
-                                 ? "BALANCE" : scriptName.toUpper()), scriptName);
+        QString translatedName = julyTranslator.translateString(
+            "INDICATOR_" + (scriptName.startsWith("Balance") ? "BALANCE" : scriptName.toUpper()), scriptName);
 
         if (scriptName.startsWith("BalanceA"))
             translatedName = translatedName.arg(baseValues.currentPair.currAStr);
@@ -92,41 +87,35 @@ AddRuleDialog::AddRuleDialog(const QString& grName, QWidget* par) :
         usedSpinBoxes << spinBox;
     }
 
-    ui->variableA->insertItem(ui->variableA->count(), julyTr("RULE_IMMEDIATELY_EXECUTION", "Execute Immediately"),
-                              "IMMEDIATELY");
+    ui->variableA->insertItem(ui->variableA->count(), julyTr("RULE_IMMEDIATELY_EXECUTION", "Execute Immediately"), "IMMEDIATELY");
 
-    ui->variableA->insertItem(ui->variableB->count(), julyTr("RULE_MY_LASTTRADE_CHANGED", "My order sold or bought"),
-                              "MyLastTrade");
-    ui->variableA->insertItem(ui->variableB->count(), julyTr("RULE_LASTTRADE_CHANGED", "Market order sold or bought"),
-                              "LastTrade");
+    ui->variableA->insertItem(ui->variableB->count(), julyTr("RULE_MY_LASTTRADE_CHANGED", "My order sold or bought"), "MyLastTrade");
+    ui->variableA->insertItem(ui->variableB->count(), julyTr("RULE_LASTTRADE_CHANGED", "Market order sold or bought"), "LastTrade");
 
     ui->variableB->insertItem(ui->variableB->count(), julyTr("RULE_EXACT_VALUE", "Exact value"), "EXACT");
     ui->thanPriceType->insertItem(ui->thanPriceType->count(), julyTr("RULE_EXACT_VALUE", "Exact value"), "EXACT");
 
     int lastPriceInt = ui->variableA->findData("LastPrice");
 
-    if (lastPriceInt > - 1)
+    if (lastPriceInt > -1)
         ui->variableA->setCurrentIndex(lastPriceInt);
 
     lastPriceInt = ui->variableB->findData("LastPrice");
 
-    if (lastPriceInt > - 1)
+    if (lastPriceInt > -1)
         ui->variableB->setCurrentIndex(lastPriceInt);
 
     lastPriceInt = ui->thanPriceType->findData("LastPrice");
 
-    if (lastPriceInt > - 1)
+    if (lastPriceInt > -1)
         ui->thanPriceType->setCurrentIndex(lastPriceInt);
 
-    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SELL",
-                             "Sell %1").arg(baseValues.currentPair.currAStr), "TRADE");
-    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_BUY", "Buy %1").arg(baseValues.currentPair.currAStr),
-                             "TRADE");
+    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SELL", "Sell %1").arg(baseValues.currentPair.currAStr), "TRADE");
+    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_BUY", "Buy %1").arg(baseValues.currentPair.currAStr), "TRADE");
 
-    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_RECEIVE",
-                             "Receive %1").arg(baseValues.currentPair.currBStr), "TRADE");
-    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SPEND",
-                             "Spend %1").arg(baseValues.currentPair.currBStr), "TRADE");
+    ui->thanType->insertItem(
+        ui->thanType->count(), julyTr("RULE_THAN_RECEIVE", "Receive %1").arg(baseValues.currentPair.currBStr), "TRADE");
+    ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_SPEND", "Spend %1").arg(baseValues.currentPair.currBStr), "TRADE");
 
     ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_CANCEL_ALL", "Cancel All Orders"), "NOPARAMS");
     ui->thanType->insertItem(ui->thanType->count(), julyTr("RULE_THAN_CANCEL_ASKS", "Cancel Asks"), "NOPARAMS");
@@ -180,7 +169,7 @@ AddRuleDialog::AddRuleDialog(const QString& grName, QWidget* par) :
             if (curSymbol == baseSymbol)
                 selectedRow = n;
 
-            //else if(!currentExchange->multiCurrencyTradeSupport)continue;
+            // else if(!currentExchange->multiCurrencyTradeSupport)continue;
             comboBox->insertItem(comboBox->count(), IniEngine::getPairName(n), curSymbol);
         }
 
@@ -194,7 +183,7 @@ AddRuleDialog::AddRuleDialog(const QString& grName, QWidget* par) :
         connect(comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AddRuleDialog::reCacheCode);
 
     for (QDoubleSpinBox* spinBox : findChildren<QDoubleSpinBox*>())
-        connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this,  &AddRuleDialog::reCacheCode);
+        connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AddRuleDialog::reCacheCode);
 
     for (QCheckBox* checkBox : findChildren<QCheckBox*>())
         connect(checkBox, &QCheckBox::toggled, this, &AddRuleDialog::reCacheCode);
@@ -337,7 +326,7 @@ void AddRuleDialog::setComboIndexByData(QComboBox* list, QString& data)
 
     if (find < 0)
     {
-        //qDebug()<<"Critical error. Can't find:"<<data;
+        // qDebug()<<"Critical error. Can't find:"<<data;
         return;
     }
 
@@ -353,7 +342,7 @@ void AddRuleDialog::setComboIndex(QComboBox* list, QString& text)
 
     if (find < 0)
     {
-        //qDebug()<<"Critical error. Can't find:"<<text;
+        // qDebug()<<"Critical error. Can't find:"<<text;
         return;
     }
 
@@ -423,7 +412,7 @@ void AddRuleDialog::reCacheCode()
     QString descriptionText;
 
     if (ui->delayValue->value() > 0)
-        descriptionText = julyTr("DELAY_SEC", "Delay %1 sec").arg(JulyMath::textFromDouble(ui->delayValue->value())) + " ";
+        descriptionText = julyTr("DELAY_SEC", "Delay %1 sec").arg(JulyMath::textFromDoubleStr(ui->delayValue->value())) + " ";
 
     QString currentAType = comboCurrentData(ui->variableA);
 
@@ -710,7 +699,7 @@ void AddRuleDialog::on_playButton_clicked()
     else if (currentThanType == "BEEP")
         mainWindow.beep();
     else if (currentThanType == "PLAY")
-        mainWindow.playWav(ui->thanText->text());
+        mainWindow.play(ui->thanText->text());
 }
 
 void AddRuleDialog::on_thanTextBrowse_clicked()
@@ -916,8 +905,12 @@ void AddRuleDialog::on_buttonAddRule_clicked()
         if (comboCurrentData(ui->valueASymbol) != currentSymbol || comboCurrentData(ui->valueBSymbol) != currentSymbol ||
             comboCurrentData(ui->thanSymbol) != currentSymbol)
         {
-            QMessageBox::warning(this, windowTitle(), julyTr("RULE_MULTITRADE_NOTSUPPORTED",
-                                 "Warning. Multi currency trading is not supported yet.\nRule will works only with the same currency pair as current.\nSet up all symbols as current main currency."));
+            QMessageBox::warning(
+                this,
+                windowTitle(),
+                julyTr(
+                    "RULE_MULTITRADE_NOTSUPPORTED",
+                    "Warning. Multi currency trading is not supported yet.\nRule will works only with the same currency pair as current.\nSet up all symbols as current main currency."));
             saveClicked = false;
             return;
         }

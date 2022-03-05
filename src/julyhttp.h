@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,13 +32,13 @@
 #ifndef JULYHTTP_H
 #define JULYHTTP_H
 
+#include <QElapsedTimer>
+#include <QNetworkAccessManager>
+#include <QNetworkCookie>
+#include <QNetworkReply>
 #include <QObject>
 #include <QSslSocket>
 #include <QTime>
-#include <QNetworkCookie>
-#include <QElapsedTimer>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 
 class QTimer;
 
@@ -67,16 +67,28 @@ public:
     void clearPendingData();
     void reConnect(bool forceAbort = true);
     bool isReqTypePending(int);
-    void sendData(int reqType, int pairChangeCount, const QByteArray& method, QByteArray postData = nullptr,
-                  const QByteArray& restSignLine = nullptr, const int& forceRetryCount = -1);
+    void sendData(int reqType,
+                  int pairChangeCount,
+                  const QByteArray& method,
+                  QByteArray postData = nullptr,
+                  const QByteArray& restSignLine = nullptr,
+                  const int& forceRetryCount = -1);
 
-    void prepareData(int reqType, int pairChangeCount, const QByteArray& method, QByteArray postData = nullptr,
-                     const QByteArray& restSignLine = nullptr, const int& forceRetryCount = -1);
+    void prepareData(int reqType,
+                     int pairChangeCount,
+                     const QByteArray& method,
+                     QByteArray postData = nullptr,
+                     const QByteArray& restSignLine = nullptr,
+                     const int& forceRetryCount = -1);
     void prepareDataSend();
     void prepareDataClear();
 
-    JulyHttp(const QString& hostName, const QByteArray& restKeyLine, QObject* parent, const bool& secure = true,
-             const bool& keepAlive = true, const QByteArray& contentType = "application/x-www-form-urlencoded");
+    JulyHttp(const QString& hostName,
+             const QByteArray& restKeyLine,
+             QObject* parent,
+             const bool& secure = true,
+             const bool& keepAlive = true,
+             const QByteArray& contentType = "application/x-www-form-urlencoded");
     ~JulyHttp();
 
     void setPortForced(quint16 port)
@@ -85,6 +97,7 @@ public:
     }
 
     static bool requestWait(const QUrl& url, QByteArray& result, QString* errorString = nullptr);
+
 private:
     quint16 forcedPort;
     QByteArray outBuffer;
@@ -124,10 +137,10 @@ private:
     void retryRequest();
 
     QElapsedTimer requestTimeOut;
-    QList<PacketItem>requestList;
+    QList<PacketItem> requestList;
     QMap<int, int> reqTypePending;
 
-    QList<PacketItem>preparedList;
+    QList<PacketItem> preparedList;
 
     void takeFirstRequest();
     void takeRequestAt(int);

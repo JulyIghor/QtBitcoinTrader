@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -32,9 +32,9 @@
 #ifndef TRANSLATIONLINE_H
 #define TRANSLATIONLINE_H
 
-#include <QTextEdit>
-#include <QResizeEvent>
 #include <QFocusEvent>
+#include <QResizeEvent>
+#include <QTextEdit>
 
 class TranslationLine : public QTextEdit
 {
@@ -50,6 +50,7 @@ public:
     void setDefaultText(const QString& defText);
     explicit TranslationLine(QWidget* parent = 0);
     ~TranslationLine();
+
 private:
     void focusInEvent(QFocusEvent* e);
     void focusOutEvent(QFocusEvent* e);

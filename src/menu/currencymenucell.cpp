@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,18 +29,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "currencymenu.h"
 #include "currencymenucell.h"
+#include "currencymenu.h"
 #include "ui_currencymenucell.h"
 
-CurrencyMenuCell::CurrencyMenuCell(const QString& currency,
-                                   const QString& currencyStyle,
-                                   const int _index,
-                                   CurrencyMenu* _parentMenu) :
-    QWidget(),
-    ui(new Ui::CurrencyMenuCell),
-    index(_index),
-    parentMenu(_parentMenu)
+CurrencyMenuCell::CurrencyMenuCell(const QString& currency, const QString& currencyStyle, const int _index, CurrencyMenu* _parentMenu) :
+    QWidget(), ui(new Ui::CurrencyMenuCell), index(_index), parentMenu(_parentMenu)
 {
     ui->setupUi(this);
     ui->currencyLabel->setText(currency);

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,27 +29,20 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QTimeZone>
-#include <QThread>
+#include "timesync.h"
+#include "main.h"
 #include <QElapsedTimer>
+#include <QMessageBox>
+#include <QStandardPaths>
+#include <QThread>
+#include <QTimeZone>
 #include <QUdpSocket>
 #include <QtEndian>
-#include <QStandardPaths>
-#include <QMessageBox>
-#include "main.h"
-#include "timesync.h"
 
 const qint64 c_deltaTime = 3600000;
 const int c_maxErrorCount = 20;
 
-TimeSync::TimeSync()
-    : QObject(),
-      dateUpdateThread(new QThread),
-      mutex(),
-      started(false),
-      startTime(0LL),
-      timeShift(0LL),
-      additionalTimer()
+TimeSync::TimeSync() : QObject(), dateUpdateThread(new QThread), started(false), timeShift(0LL)
 {
     dateUpdateThread->setObjectName("Time Sync");
     connect(dateUpdateThread.data(), &QThread::started, this, &TimeSync::runThread, Qt::DirectConnection);
@@ -69,18 +62,7 @@ TimeSync::~TimeSync()
 
 void TimeSync::runThread()
 {
-    connect(QThread::currentThread(), &QThread::finished, this, &TimeSync::quitThread, Qt::DirectConnection);
-
-    additionalTimer.reset(new QElapsedTimer);
-    additionalTimer->start();
-    startTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
-
     started = true;
-}
-
-void TimeSync::quitThread()
-{
-    additionalTimer.reset();
 }
 
 void TimeSync::syncNow()
@@ -101,30 +83,12 @@ TimeSync* TimeSync::global()
 
 qint64 TimeSync::getMSecs()
 {
-    TimeSync* timeSync = TimeSync::global();
-
-    if (timeSync->additionalTimer == nullptr)
-        return QDateTime::currentDateTime().toMSecsSinceEpoch();
-
-    timeSync->mutex.lock();
-    qint64 additionalBuffer = timeSync->additionalTimer->elapsed();
-    timeSync->mutex.unlock();
-
-    return timeSync->startTime + timeSync->timeShift + additionalBuffer;
+    return QDateTime::currentDateTime().toMSecsSinceEpoch() + TimeSync::global()->timeShift;
 }
 
 qint64 TimeSync::getTimeT()
 {
-    TimeSync* timeSync = TimeSync::global();
-
-    if (timeSync->additionalTimer == nullptr)
-        return QDateTime::currentDateTimeUtc().toTime_t();
-
-    timeSync->mutex.lock();
-    qint64 additionalBuffer = timeSync->additionalTimer->elapsed();
-    timeSync->mutex.unlock();
-
-    return (timeSync->startTime + timeSync->timeShift + additionalBuffer) / 1000;
+    return QDateTime::currentDateTimeUtc().toSecsSinceEpoch() + (TimeSync::global()->timeShift / 1000);
 }
 
 void TimeSync::getNTPTime()
@@ -176,8 +140,8 @@ void TimeSync::getNTPTime()
         return;
     }
 
-    data            = sock.readAll();
-    qint64 seconds  = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[40])));
+    data = sock.readAll();
+    qint64 seconds = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[40])));
     qint64 fraction = qToBigEndian(*(reinterpret_cast<quint32*>(&data.data()[44])));
 
     if (seconds < 1 || fraction > 4290672329)
@@ -213,16 +177,16 @@ void TimeSync::getNTPTime()
 
         if (showMessage)
         {
-            QDateTime local  = QDateTime::currentDateTime();
+            QDateTime local = QDateTime::currentDateTime();
             QDateTime server = QDateTime::fromMSecsSinceEpoch(getMSecs());
 
             emit warningMessage(julyTr("TIME_SYNC_ERROR",
                                        "Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. "
-                                       "Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys.")
-                                + "<br><br>" + julyTr("LOCAL_TIME", "Local time") + ": " + local.toString(baseValues.dateTimeFormat)
-                                + " " + local.timeZone().displayName(local, QTimeZone::OffsetName)
-                                + "<br>" + julyTr("SERVER_TIME", "Server time") + ": " + server.toString(baseValues.dateTimeFormat)
-                                + " " + server.timeZone().displayName(server, QTimeZone::OffsetName));
+                                       "Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys.") +
+                                "<br><br>" + julyTr("LOCAL_TIME", "Local time") + ": " + local.toString(baseValues.dateTimeFormat) + " " +
+                                local.timeZone().displayName(local, QTimeZone::OffsetName) + "<br>" + julyTr("SERVER_TIME", "Server time") +
+                                ": " + server.toString(baseValues.dateTimeFormat) + " " +
+                                server.timeZone().displayName(server, QTimeZone::OffsetName));
             showMessage = false;
         }
     }

@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2021 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,23 +30,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rulesmodel.h"
-#include "main.h"
-#include "timesync.h"
-#include "rulescriptparser.h"
 #include "exchange/exchange.h"
+#include "main.h"
+#include "rulescriptparser.h"
+#include "timesync.h"
+#include <QRandomGenerator>
 
-RulesModel::RulesModel(const QString& _gName)
-    : QAbstractItemModel()
+RulesModel::RulesModel(const QString& _gName) : QAbstractItemModel(), groupName(_gName)
 {
     runningCount = 0;
     lastRuleGroupIsRunning = false;
-    groupName = _gName;
-    lastRuleId = qrand() % 1000 + 1;
+    lastRuleId = QRandomGenerator::global()->bounded(1, 1001);
     stateWidth = 80;
     isConcurrentMode = false;
     columnsCount = 2;
-    connect(this, SIGNAL(setRuleTabRunning(QString, bool)), baseValues_->mainWindow_, SLOT(setRuleTabRunning(QString,
-            bool)));
+    connect(this, &RulesModel::setRuleTabRunning, baseValues_->mainWindow_, &QtBitcoinTrader::setRuleTabRunning);
 }
 
 RulesModel::~RulesModel()
@@ -91,9 +89,9 @@ void RulesModel::addRule(RuleHolder& holder, bool running)
     beginInsertRows(QModelIndex(), holderList.size(), holderList.size());
     holderList << holder;
     auto* newScript = new ScriptObject(QString::number(lastRuleId++));
-    connect(newScript, SIGNAL(runningChanged(bool)), this, SLOT(runningChanged(bool)));
-    connect(newScript, SIGNAL(setGroupDone(QString)), this, SLOT(setGroupDone(QString)));
-    connect(newScript, SIGNAL(writeLog(QString)), this, SLOT(writeLogSlot(QString)));
+    connect(newScript, &ScriptObject::runningChanged, this, &RulesModel::runningChanged);
+    connect(newScript, &ScriptObject::setGroupDone, this, &RulesModel::setGroupDone);
+    connect(newScript, &ScriptObject::writeLog, this, &RulesModel::writeLogSlot);
 
     scriptList << newScript;
     stateList << 0;
@@ -240,11 +238,11 @@ void RulesModel::moveRowDown(int row)
 
 void RulesModel::swapRows(int a, int b)
 {
-    pauseList.swap(a, b);
-    stateList.swap(a, b);
-    scriptList.swap(a, b);
-    holderList.swap(a, b);
-    doneList.swap(a, b);
+    pauseList.swapItemsAt(a, b);
+    stateList.swapItemsAt(a, b);
+    scriptList.swapItemsAt(a, b);
+    holderList.swapItemsAt(a, b);
+    doneList.swapItemsAt(a, b);
 }
 
 bool RulesModel::isRowPaused(int curRow)
@@ -432,7 +430,7 @@ QVariant RulesModel::data(const QModelIndex& index, int role) const
 
     switch (indexColumn)
     {
-    case 0://State
+    case 0: // State
         switch (stateList.at(currentRow))
         {
         case 1:
@@ -457,7 +455,7 @@ QVariant RulesModel::data(const QModelIndex& index, int role) const
             break;
         }
 
-    case 1://Description
+    case 1: // Description
         return holderList.at(currentRow).description;
         break;
 
@@ -490,8 +488,8 @@ QVariant RulesModel::headerData(int section, Qt::Orientation orientation, int ro
         switch (section)
         {
         case 0:
-            return QSize(stateWidth, defaultHeightForRow); //State
-            //case 2: return QSize(typeWidth,defaultSectionSize);//Type
+            return QSize(stateWidth, defaultHeightForRow); // State
+            // case 2: return QSize(typeWidth,defaultSectionSize);//Type
         }
 
         return QVariant();
