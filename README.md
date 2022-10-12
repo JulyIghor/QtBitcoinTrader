@@ -45,6 +45,13 @@ Next ToDo:
 
 ## Change Log
 
+v1.42.00 Released!
+
+- Fixed crash while running some scripts/rules
+- Updated API integration to fix Bitstamp, Poloniex and Bittrex
+- Fixed a bug when trade history stays empty
+- Fixed UI bugs
+
 v1.41.00 Released!
 
 - Fixed time syncronization in Binance

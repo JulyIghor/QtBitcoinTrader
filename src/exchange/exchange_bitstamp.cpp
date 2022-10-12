@@ -375,76 +375,72 @@ void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, in
     switch (reqType)
     {
     case 103: // ticker
+    {
         if (!success)
             break;
 
-        if (data.startsWith("{\"high\":"))
+        double tickerHigh = getMidData("\"high\": \"", "\"", &data).toDouble();
+
+        if (tickerHigh > 0.0 && !qFuzzyCompare(tickerHigh, lastTickerHigh))
         {
-            double tickerHigh = getMidData("\"high\": \"", "\"", &data).toDouble();
-
-            if (tickerHigh > 0.0 && !qFuzzyCompare(tickerHigh, lastTickerHigh))
-            {
-                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "High", tickerHigh);
-                lastTickerHigh = tickerHigh;
-            }
-
-            double tickerLow = getMidData("\"low\": \"", "\"", &data).toDouble();
-
-            if (tickerLow > 0.0 && !qFuzzyCompare(tickerLow, lastTickerLow))
-            {
-                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Low", tickerLow);
-                lastTickerLow = tickerLow;
-            }
-
-            double tickerVolume = getMidData("\"volume\": \"", "\"", &data).toDouble();
-
-            if (tickerVolume > 0.0 && !qFuzzyCompare(tickerVolume, lastTickerVolume))
-            {
-                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Volume", tickerVolume);
-                lastTickerVolume = tickerVolume;
-            }
-
-            qint64 tickerTimestamp = getMidData("\"timestamp\": \"", "\"", &data).toUInt();
-
-            if (tickerTimestamp > lastBidAskTimestamp)
-            {
-                double tickerSell = getMidData("\"bid\": \"", "\"", &data).toDouble();
-
-                if (tickerSell > 0.0 && !qFuzzyCompare(tickerSell, lastTickerSell))
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Sell", tickerSell);
-                    lastTickerSell = tickerSell;
-                }
-
-                double tickerBuy = getMidData("\"ask\": \"", "\"", &data).toDouble();
-
-                if (tickerBuy > 0.0 && !qFuzzyCompare(tickerBuy, lastTickerBuy))
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Buy", tickerBuy);
-                    lastTickerBuy = tickerBuy;
-                }
-
-                lastBidAskTimestamp = tickerTimestamp;
-            }
-
-            if (tickerTimestamp > lastTickerDate)
-            {
-                double tickerLast = getMidData("\"last\": \"", "\"", &data).toDouble();
-
-                if (tickerLast > 0.0 && !qFuzzyCompare(tickerLast, lastTickerLast))
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", tickerLast);
-                    lastTickerLast = tickerLast;
-                }
-
-                lastTickerDate = tickerTimestamp;
-            }
+            IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "High", tickerHigh);
+            lastTickerHigh = tickerHigh;
         }
-        else if (debugLevel)
-            logThread->writeLog("Invalid ticker data:" + data, 2);
+
+        double tickerLow = getMidData("\"low\": \"", "\"", &data).toDouble();
+
+        if (tickerLow > 0.0 && !qFuzzyCompare(tickerLow, lastTickerLow))
+        {
+            IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Low", tickerLow);
+            lastTickerLow = tickerLow;
+        }
+
+        double tickerVolume = getMidData("\"volume\": \"", "\"", &data).toDouble();
+
+        if (tickerVolume > 0.0 && !qFuzzyCompare(tickerVolume, lastTickerVolume))
+        {
+            IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Volume", tickerVolume);
+            lastTickerVolume = tickerVolume;
+        }
+
+        qint64 tickerTimestamp = getMidData("\"timestamp\": \"", "\"", &data).toUInt();
+
+        if (tickerTimestamp > lastBidAskTimestamp)
+        {
+            double tickerSell = getMidData("\"bid\": \"", "\"", &data).toDouble();
+
+            if (tickerSell > 0.0 && !qFuzzyCompare(tickerSell, lastTickerSell))
+            {
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Sell", tickerSell);
+                lastTickerSell = tickerSell;
+            }
+
+            double tickerBuy = getMidData("\"ask\": \"", "\"", &data).toDouble();
+
+            if (tickerBuy > 0.0 && !qFuzzyCompare(tickerBuy, lastTickerBuy))
+            {
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Buy", tickerBuy);
+                lastTickerBuy = tickerBuy;
+            }
+
+            lastBidAskTimestamp = tickerTimestamp;
+        }
+
+        if (tickerTimestamp > lastTickerDate)
+        {
+            double tickerLast = getMidData("\"last\": \"", "\"", &data).toDouble();
+
+            if (tickerLast > 0.0 && !qFuzzyCompare(tickerLast, lastTickerLast))
+            {
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", tickerLast);
+                lastTickerLast = tickerLast;
+            }
+
+            lastTickerDate = tickerTimestamp;
+        }
 
         break; // ticker
-
+    }
     case 109: // api/transactions
         if (success && data.size() > 32)
         {
@@ -702,13 +698,13 @@ void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, in
                 {
                     OrderItem currentOrder;
                     QByteArray currentOrderData = ordersList.at(n).toLatin1();
-                    currentOrder.oid = getMidData("\"id\": \"", "\",", &currentOrderData);
+                    currentOrder.oid = getMidData("\"id\": \"", "\"", &currentOrderData);
 
                     QByteArray dateTimeData = getMidData("\"datetime\": \"", "\"", &currentOrderData);
                     QDateTime orderDateTime = QDateTime::fromString(dateTimeData, "yyyy-MM-dd HH:mm:ss");
                     orderDateTime.setTimeSpec(Qt::UTC);
                     currentOrder.date = orderDateTime.toSecsSinceEpoch();
-                    currentOrder.type = getMidData("\"type\": \"", "\",", &currentOrderData) == "1";
+                    currentOrder.type = getMidData("\"type\": \"", "\"", &currentOrderData) == "1";
                     currentOrder.status = 1;
                     currentOrder.amount = getMidData("\"amount\": \"", "\"", &currentOrderData).toDouble();
                     currentOrder.price = getMidData("\"price\": \"", "\"", &currentOrderData).toDouble();

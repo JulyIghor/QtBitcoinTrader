@@ -191,6 +191,7 @@ private slots:
     void secondSlot();
     void indicatorValueChanged(double);
     void fileReadResult(const QByteArray& data, quint32);
+    void groupDoneSlot();
 signals:
     void eventSignal(const QString& symbol, const QString& name, double value);
     void startAppSignal(QString, QStringList);
@@ -209,6 +210,7 @@ signals:
     void performFileRead(QString, qint64, quint32);
     void performFileReadAll(QString, quint32);
     void fileReadExitLoop();
+    void groupDoneSignal();
 };
 
 #endif // SCRIPTOBJECT_H

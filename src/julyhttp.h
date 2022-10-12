@@ -67,6 +67,8 @@ public:
     void clearPendingData();
     void reConnect(bool forceAbort = true);
     bool isReqTypePending(int);
+    void setHeader(const QByteArray& header);
+    const QByteArray& getHeader() const;
     void sendData(int reqType,
                   int pairChangeCount,
                   const QByteArray& method,

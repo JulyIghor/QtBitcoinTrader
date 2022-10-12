@@ -735,6 +735,16 @@ void JulyHttp::prepareDataClear()
     preparedList.clear();
 }
 
+void JulyHttp::setHeader(const QByteArray& header)
+{
+    httpHeader = header;
+}
+
+const QByteArray& JulyHttp::getHeader() const
+{
+    return httpHeader;
+}
+
 void JulyHttp::sendData(int reqType,
                         int pairChangeCount,
                         const QByteArray& method,

@@ -125,6 +125,7 @@ ScriptObject::ScriptObject(const QString& _scriptName) : QObject(), scriptName(_
     connect(this, &ScriptObject::performFileRead, &performThread, &ScriptObjectThread::performFileRead);
     connect(this, &ScriptObject::performFileReadAll, &performThread, &ScriptObjectThread::performFileReadAll);
     connect(&performThread, &ScriptObjectThread::fileReadResult, this, &ScriptObject::fileReadResult);
+    connect(this, &ScriptObject::groupDoneSignal, this, &ScriptObject::groupDoneSlot, Qt::QueuedConnection);
     fileOperationNumber = 0;
     fileOpenCount = 0;
 }
@@ -471,6 +472,11 @@ void ScriptObject::groupDone()
     if (testMode)
         return;
 
+    emit groupDoneSignal();
+}
+
+void ScriptObject::groupDoneSlot()
+{
     pendingStop = true;
     emit setGroupDone(scriptName);
     setRunning(false);

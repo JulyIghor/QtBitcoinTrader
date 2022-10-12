@@ -17,7 +17,8 @@ INCLUDEPATH	+= .
 QT += network widgets
 
 lessThan(QT_MAJOR_VERSION, 6) {
-QT += script texttospeech
+QT += script
+!win32: QT += texttospeech
 } else {
 QT += qml
 }
@@ -286,7 +287,7 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
 
 #
 # Resources
-# 
+#
 RESOURCES += $${PWD}/QtResource.qrc
 
 #

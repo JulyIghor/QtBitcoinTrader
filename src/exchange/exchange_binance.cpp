@@ -369,7 +369,7 @@ void Exchange_Binance::dataReceivedAuth(const QByteArray& data, int reqType, int
                             if (matchCurrentGroup)
                                 groupedVolume += amount;
 
-                            if (!matchCurrentGroup || n == asksList.size() - 1)
+                            if (!matchCurrentGroup || n == bidsList.size() - 1)
                             {
                                 depthSubmitOrder(baseValues.currentPair.symbol,
                                                  &currentBidsMap,

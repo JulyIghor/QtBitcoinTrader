@@ -60,17 +60,18 @@ private:
     void clearVariables();
     void depthSubmitOrder(const QString&, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
     void depthUpdateOrder(const QString&, double, double, bool);
-    void sendToApi(int reqType, const QByteArray& method, bool auth = false);
+    void sendToApi(int reqType, const QByteArray& method, bool auth = false,
+                   const QByteArray& type = "GET", const QByteArray& postData = nullptr);
     bool isReplayPending(int);
 
 private:
     bool isFirstAccInfo;
 
-    QByteArray lastTickerTime;
-    qint64 lastTradesId;
+    qint64 lastTradesTime;
+    QHash<QByteArray, bool> lastTradesIds;
     qint64 lastHistoryTime;
+    QHash<QByteArray, bool> lastHistoryIds;
     qint64 privateNonce;
-    QByteArray lastCanceledId;
 
     JulyHttp* julyHttp;
 
@@ -79,6 +80,8 @@ private:
 
     QMap<double, double> lastDepthAsksMap;
     QMap<double, double> lastDepthBidsMap;
+
+    QByteArray baseHeader;
 };
 
 #endif // EXCHANGE_BITTREX_H

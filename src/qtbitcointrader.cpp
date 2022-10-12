@@ -1902,10 +1902,15 @@ void QtBitcoinTrader::setCurrencyPairsList()
         currencyItems << pairItem.name;
     }
 
+    currencyMenu->clear();
+    ui.filterOrdersCurrency->clear();
+
+    if (currencyItems.isEmpty())
+        return;
+
     currencyMenu->setPairs(currencyItems);
     currencyMenu->setCurrentIndex(indexCurrency);
 
-    ui.filterOrdersCurrency->clear();
     ui.filterOrdersCurrency->insertItems(0, filterItems.isEmpty() ? currencyItems : filterItems);
     ui.filterOrdersCurrency->setCurrentIndex(0);
 }
@@ -2745,10 +2750,10 @@ void QtBitcoinTrader::sellBitcoinButton()
                 .arg(baseValues.currentPair.currBSign + " " +
                      JulyMath::textFromDouble(sellPricePerCoinV, baseValues.currentPair.priceDecimals))
                 .arg(baseValues.exchangeName));
-
         auto buttonYes = msgBox.addButton(julyTr("YES", "Yes"), QMessageBox::YesRole);
         msgBox.addButton(julyTr("NO", "No"), QMessageBox::NoRole);
         msgBox.exec();
+
         if (msgBox.clickedButton() != buttonYes)
             return;
     }
@@ -2922,11 +2927,10 @@ void QtBitcoinTrader::buyBitcoinsButton()
                 .arg(baseValues.currentPair.currASign + " " + JulyMath::textFromDouble(btcToBuy, baseValues.currentPair.currADecimals))
                 .arg(baseValues.currentPair.currBSign + " " + JulyMath::textFromDouble(priceToBuy, baseValues.currentPair.priceDecimals))
                 .arg(baseValues.exchangeName));
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::Yes);
         auto buttonYes = msgBox.addButton(julyTr("YES", "Yes"), QMessageBox::YesRole);
         msgBox.addButton(julyTr("NO", "No"), QMessageBox::NoRole);
         msgBox.exec();
+
         if (msgBox.clickedButton() != buttonYes)
             return;
     }

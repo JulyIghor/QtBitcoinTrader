@@ -29,17 +29,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <QMessageAuthenticationCode>
 #include "timesync.h"
 #include "exchange_bittrex.h"
 
 Exchange_Bittrex::Exchange_Bittrex(const QByteArray &pRestSign, const QByteArray &pRestKey)
     : Exchange(),
       isFirstAccInfo(true),
-      lastTickerTime(),
-      lastTradesId(0),
-      lastHistoryTime(0),
-      privateNonce((TimeSync::getTimeT() - 1371854884) * 10),
-      lastCanceledId(),
+      lastTradesTime(0LL),
+      lastHistoryTime(0LL),
+      privateNonce((TimeSync::getTimeT() - 1371854884LL) * 10LL),
       julyHttp(nullptr),
       depthAsks(nullptr),
       depthBids(nullptr),
@@ -97,10 +96,10 @@ void Exchange_Bittrex::quitThread()
 void Exchange_Bittrex::clearVariables()
 {
     isFirstAccInfo = true;
-    lastTickerTime.clear();
-    lastTradesId = 0;
-    lastHistoryTime = 0;
-    lastCanceledId.clear();
+    lastTradesTime = 0LL;
+    lastTradesIds.clear();
+    lastHistoryTime = 0LL;
+    lastHistoryIds.clear();
     Exchange::clearVariables();
     lastHistory.clear();
     lastOrders.clear();
@@ -132,407 +131,417 @@ void Exchange_Bittrex::dataReceivedAuth(const QByteArray& data, int reqType, int
     if (debugLevel)
         logThread->writeLog("RCV: " + data);
 
-    if (data.size() && data.at(0) == QLatin1Char('<'))
+    if (!data.size() || (data.at(0) != QLatin1Char('{') && data.at(0) != QLatin1Char('[')))
         return;
 
-    bool success = data.startsWith("{\"success\":true");
+    bool fail = data.startsWith("{\"code\":\"");
     QString errorString;
 
-    if (!success)
+    if (fail)
     {
-        errorString = getMidData("\"message\":\"", "\"", &data);
+        errorString = getMidData("\"detail\":\"", "\"", &data);
+
+        if (errorString.isEmpty())
+            errorString = getMidData("\"code\":\"", "\"", &data);
 
         if (debugLevel)
             logThread->writeLog("Invalid data:" + data, 2);
     }
     else switch (reqType)
     {
-        case 103: //ticker
+    case 103: //ticker
+        {
+            double tickerHigh = getMidData("\"high\":\"", "\"", &data).toDouble();
+
+            if (tickerHigh > 0.0 && !qFuzzyCompare(tickerHigh, lastTickerHigh))
             {
-                double tickerHigh = getMidData("\"High\":", ",", &data).toDouble();
-
-                if (tickerHigh > 0.0 && !qFuzzyCompare(tickerHigh, lastTickerHigh))
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "High", tickerHigh);
-                    lastTickerHigh = tickerHigh;
-                }
-
-                double tickerLow = getMidData("\"Low\":", ",", &data).toDouble();
-
-                if (tickerLow > 0.0 && !qFuzzyCompare(tickerLow, lastTickerLow))
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Low", tickerLow);
-                    lastTickerLow = tickerLow;
-                }
-
-                double tickerSell = getMidData("\"Bid\":", ",", &data).toDouble();
-
-                if (tickerSell > 0.0 && !qFuzzyCompare(tickerSell, lastTickerSell))
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Sell", tickerSell);
-                    lastTickerSell = tickerSell;
-                }
-
-                double tickerBuy = getMidData("\"Ask\":", ",", &data).toDouble();
-
-                if (tickerBuy > 0.0 && !qFuzzyCompare(tickerBuy, lastTickerBuy))
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Buy", tickerBuy);
-                    lastTickerBuy = tickerBuy;
-                }
-
-                double tickerVolume = getMidData("\"Volume\":", ",", &data).toDouble();
-
-                if (tickerVolume > 0.0 && !qFuzzyCompare(tickerVolume, lastTickerVolume))
-                {
-                    IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Volume", tickerVolume);
-                    lastTickerVolume = tickerVolume;
-                }
-
-                QByteArray tickerTime = getMidData("\"TimeStamp\":\"", "\"", &data);
-
-                if (tickerTime != lastTickerTime)
-                {
-                    lastTickerTime = tickerTime;
-                    double tickerLastDouble = getMidData("\"Last\":", ",", &data).toDouble();
-
-                    if (tickerLastDouble > 0.0 && !qFuzzyCompare(tickerLastDouble, lastTickerLast))
-                    {
-                        IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", tickerLastDouble);
-                        lastTickerLast = tickerLastDouble;
-                    }
-                }
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "High", tickerHigh);
+                lastTickerHigh = tickerHigh;
             }
-            break;//ticker
 
-        case 109: //trades
+            double tickerLow = getMidData("\"low\":\"", "\"", &data).toDouble();
+
+            if (tickerLow > 0.0 && !qFuzzyCompare(tickerLow, lastTickerLow))
             {
-                qint64 time10Min = TimeSync::getTimeT() - 600;
-                QStringList tradeList = QString(data).split("},{");
-                auto* newTradesItems = new QList<TradesItem>;
-
-                for (int n = tradeList.size() - 1; n >= 0; --n)
-                {
-                    QByteArray tradeData = tradeList.at(n).toLatin1();
-                    qint64 currentTid = getMidData("\"Id\":", ",", &tradeData).toLongLong();
-
-                    if (currentTid <= lastTradesId)
-                        continue;
-
-                    lastTradesId = currentTid;
-                    TradesItem newItem;
-
-                    QDateTime date = QDateTime::fromString(getMidData("\"TimeStamp\":\"", "\"", &tradeData), Qt::ISODate);
-                    date.setTimeSpec(Qt::UTC);
-                    newItem.date = date.toSecsSinceEpoch();
-
-                    if (newItem.date < time10Min)
-                        continue;
-
-                    newItem.amount = getMidData("\"Quantity\":", ",", &tradeData).toDouble();
-                    newItem.price  = getMidData("\"Price\":",    ",", &tradeData).toDouble();
-                    newItem.symbol = baseValues.currentPair.symbol;
-                    newItem.orderType = getMidData("\"OrderType\":\"", "\"", &tradeData) == "BUY" ? 1 : -1;
-
-                    if (newItem.isValid())
-                        (*newTradesItems) << newItem;
-                    else if (debugLevel)
-                        logThread->writeLog("Invalid trades fetch data line:" + tradeData, 2);
-                }
-
-                if (!newTradesItems->empty())
-                    emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
-                else
-                    delete newTradesItems;
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Low", tickerLow);
+                lastTickerLow = tickerLow;
             }
-            break;//trades
 
-        case 111: //depth
+            double tickerVolume = getMidData("\"volume\":\"", "\"", &data).toDouble();
+
+            if (tickerVolume > 0.0 && !qFuzzyCompare(tickerVolume, lastTickerVolume))
             {
-                emit depthRequestReceived();
-
-                if (data != lastDepthData)
-                {
-                    lastDepthData = data;
-                    depthAsks = new QList<DepthItem>;
-                    depthBids = new QList<DepthItem>;
-
-                    QMap<double, double> currentAsksMap;
-                    QStringList asksList = QString(getMidData("\"sell\":[{\"Quantity\":", "}]}}", &data)).split("},{\"Quantity\":");
-                    double groupedPrice = 0.0;
-                    double groupedVolume = 0.0;
-                    int rowCounter = 0;
-
-                    for (int n = 0; n < asksList.size(); n++)
-                    {
-                        if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
-                            break;
-
-                        QStringList currentPair = asksList.at(n).split(",\"Rate\":");
-
-                        if (currentPair.size() != 2)
-                            continue;
-
-                        double priceDouble = currentPair.last().toDouble();
-                        double amount      = currentPair.first().toDouble();
-
-                        if (baseValues.groupPriceValue > 0.0)
-                        {
-                            if (n == 0)
-                            {
-                                emit depthFirstOrder(baseValues.currentPair.symbol, priceDouble, amount, true);
-                                groupedPrice = baseValues.groupPriceValue * static_cast<int>(priceDouble / baseValues.groupPriceValue);
-                                groupedVolume = amount;
-                            }
-                            else
-                            {
-                                bool matchCurrentGroup = priceDouble < groupedPrice + baseValues.groupPriceValue;
-
-                                if (matchCurrentGroup)
-                                    groupedVolume += amount;
-
-                                if (!matchCurrentGroup || n == asksList.size() - 1)
-                                {
-                                    depthSubmitOrder(baseValues.currentPair.symbol,
-                                                     &currentAsksMap, groupedPrice + baseValues.groupPriceValue, groupedVolume, true);
-                                    rowCounter++;
-                                    groupedVolume = amount;
-                                    groupedPrice += baseValues.groupPriceValue;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            depthSubmitOrder(baseValues.currentPair.symbol,
-                                             &currentAsksMap, priceDouble, amount, true);
-                            rowCounter++;
-                        }
-                    }
-
-                    QList<double> currentAsksList = lastDepthAsksMap.keys();
-
-                    for (int n = 0; n < currentAsksList.size(); n++)
-                        if (qFuzzyIsNull(currentAsksMap.value(currentAsksList.at(n), 0)))
-                            depthUpdateOrder(baseValues.currentPair.symbol,
-                                             currentAsksList.at(n), 0.0, true);
-
-                    lastDepthAsksMap = currentAsksMap;
-
-                    QMap<double, double> currentBidsMap;
-                    QStringList bidsList = QString(getMidData("\"buy\":[{\"Quantity\":", "}],", &data)).split("},{\"Quantity\":");
-                    groupedPrice = 0.0;
-                    groupedVolume = 0.0;
-                    rowCounter = 0;
-
-                    for (int n = 0; n < bidsList.size(); n++)
-                    {
-                        if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
-                            break;
-
-                        QStringList currentPair = bidsList.at(n).split(",\"Rate\":");
-
-                        if (currentPair.size() != 2)
-                            continue;
-
-                        double priceDouble = currentPair.last().toDouble();
-                        double amount      = currentPair.first().toDouble();
-
-                        if (baseValues.groupPriceValue > 0.0)
-                        {
-                            if (n == 0)
-                            {
-                                emit depthFirstOrder(baseValues.currentPair.symbol, priceDouble, amount, false);
-                                groupedPrice = baseValues.groupPriceValue * static_cast<int>(priceDouble / baseValues.groupPriceValue);
-                                groupedVolume = amount;
-                            }
-                            else
-                            {
-                                bool matchCurrentGroup = priceDouble > groupedPrice - baseValues.groupPriceValue;
-
-                                if (matchCurrentGroup)
-                                    groupedVolume += amount;
-
-                                if (!matchCurrentGroup || n == asksList.size() - 1)
-                                {
-                                    depthSubmitOrder(baseValues.currentPair.symbol,
-                                                     &currentBidsMap, groupedPrice - baseValues.groupPriceValue, groupedVolume, false);
-                                    rowCounter++;
-                                    groupedVolume = amount;
-                                    groupedPrice -= baseValues.groupPriceValue;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            depthSubmitOrder(baseValues.currentPair.symbol,
-                                             &currentBidsMap, priceDouble, amount, false);
-                            rowCounter++;
-                        }
-                    }
-
-                    QList<double> currentBidsList = lastDepthBidsMap.keys();
-
-                    for (int n = 0; n < currentBidsList.size(); n++)
-                        if (qFuzzyIsNull(currentBidsMap.value(currentBidsList.at(n), 0)))
-                            depthUpdateOrder(baseValues.currentPair.symbol,
-                                             currentBidsList.at(n), 0.0, false);
-
-                    lastDepthBidsMap = currentBidsMap;
-
-                    emit depthSubmitOrders(baseValues.currentPair.symbol, depthAsks, depthBids);
-                    depthAsks = nullptr;
-                    depthBids = nullptr;
-                }
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Volume", tickerVolume);
+                lastTickerVolume = tickerVolume;
             }
-            break;
+        }
+        break;//ticker
 
-        case 202: //info
+    case 104: //ticker
+        {
+            double tickerSell = getMidData("\"bidRate\":\"", "\"", &data).toDouble();
+
+            if (tickerSell > 0.0 && !qFuzzyCompare(tickerSell, lastTickerSell))
             {
-                QByteArray btcBalance = getMidData("\"Currency\":\"" + baseValues.currentPair.currAStr + "\"", "}", &data);
-                QByteArray usdBalance = getMidData("\"Currency\":\"" + baseValues.currentPair.currBStr + "\"", "}", &data);
-                btcBalance = getMidData("\"Available\":", ",", &btcBalance);
-                usdBalance = getMidData("\"Available\":", ",", &usdBalance);
-
-                if (checkValue(btcBalance, lastBtcBalance))
-                    emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
-
-                if (checkValue(usdBalance, lastUsdBalance))
-                    emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Sell", tickerSell);
+                lastTickerSell = tickerSell;
             }
-            break;//info
 
-        case 204://orders
+            double tickerBuy = getMidData("\"askRate\":\"", "\"", &data).toDouble();
+
+            if (tickerBuy > 0.0 && !qFuzzyCompare(tickerBuy, lastTickerBuy))
             {
-                if (lastOrders != data)
-                {
-                    lastOrders = data;
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Buy", tickerBuy);
+                lastTickerBuy = tickerBuy;
+            }
 
-                    if (data == "{\"success\":true,\"message\":\"\",\"result\":[]}")
-                    {
-                        emit ordersIsEmpty();
+            double tickerLastDouble = getMidData("\"lastTradeRate\":\"", "\"", &data).toDouble();
+
+            if (tickerLastDouble > 0.0 && !qFuzzyCompare(tickerLastDouble, lastTickerLast))
+            {
+                IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Last", tickerLastDouble);
+                lastTickerLast = tickerLastDouble;
+            }
+        }
+        break;//ticker
+
+    case 109: //trades
+        {
+            qint64 time10Min = TimeSync::getMSecs() - 600000;
+            QStringList tradeList = QString(data).split("},{");
+            auto* newTradesItems = new QList<TradesItem>;
+
+            for (int n = tradeList.size() - 1; n >= 0; --n)
+            {
+                QByteArray tradeData = tradeList.at(n).toLatin1();
+
+                QDateTime date = QDateTime::fromString(getMidData("\"executedAt\":\"", "\"", &tradeData), Qt::ISODate);
+                date.setTimeSpec(Qt::UTC);
+                qint64 dateInt = date.toMSecsSinceEpoch();
+
+                if (dateInt < lastTradesTime || dateInt < time10Min)
+                    continue;
+
+                QByteArray id = getMidData("\"id\":\"", "\"", &tradeData);
+
+                if (dateInt > lastTradesTime)
+                    lastTradesIds.clear();
+                else if (lastTradesIds.contains(id))
+                    continue;
+
+                lastTradesTime = dateInt;
+                lastTradesIds[id] = true;
+
+                TradesItem newItem;
+                newItem.date = dateInt / 1000;
+                newItem.amount = getMidData("\"quantity\":\"", "\"", &tradeData).toDouble();
+                newItem.price  = getMidData("\"rate\":\"",     "\"", &tradeData).toDouble();
+                newItem.symbol = baseValues.currentPair.symbol;
+                newItem.orderType = getMidData("\"takerSide\":\"", "\"", &tradeData) == "BUY" ? 1 : -1;
+
+                if (newItem.isValid())
+                    (*newTradesItems) << newItem;
+                else if (debugLevel)
+                    logThread->writeLog("Invalid trades fetch data line:" + tradeData, 2);
+            }
+
+            if (!newTradesItems->empty())
+                emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
+            else
+                delete newTradesItems;
+        }
+        break;//trades
+
+    case 111: //depth
+        {
+            emit depthRequestReceived();
+
+            if (data != lastDepthData)
+            {
+                lastDepthData = data;
+                depthAsks = new QList<DepthItem>;
+                depthBids = new QList<DepthItem>;
+
+                QMap<double, double> currentAsksMap;
+                QStringList asksList = QString(getMidData("\"ask\":[{\"quantity\":\"", "\"}]}", &data)).split("\"},{\"quantity\":\"");
+                double groupedPrice = 0.0;
+                double groupedVolume = 0.0;
+                int rowCounter = 0;
+
+                for (int n = 0; n < asksList.size(); n++)
+                {
+                    if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                         break;
-                    }
 
-                    QStringList ordersList = QString(data).split("},{");
-                    auto* orders = new QList<OrderItem>;
+                    QStringList currentPair = asksList.at(n).split("\",\"rate\":\"");
 
-                    for (int n = 0; n < ordersList.size(); ++n)
+                    if (currentPair.size() != 2)
+                        continue;
+
+                    double priceDouble = currentPair.last().toDouble();
+                    double amount      = currentPair.first().toDouble();
+
+                    if (baseValues.groupPriceValue > 0.0)
                     {
-                        OrderItem currentOrder;
-                        QByteArray currentOrderData = ordersList.at(n).toLatin1();
-
-                        //0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
-                        if (currentOrderData.contains("\"Closed\":null"))
-                            currentOrder.status = 1;
+                        if (n == 0)
+                        {
+                            emit depthFirstOrder(baseValues.currentPair.symbol, priceDouble, amount, true);
+                            groupedPrice = baseValues.groupPriceValue * static_cast<int>(priceDouble / baseValues.groupPriceValue);
+                            groupedVolume = amount;
+                        }
                         else
-                            currentOrder.status = 0;
+                        {
+                            bool matchCurrentGroup = priceDouble < groupedPrice + baseValues.groupPriceValue;
 
-                        QDateTime date = QDateTime::fromString(getMidData("\"Opened\":\"", "\"", &currentOrderData), Qt::ISODate);
-                        date.setTimeSpec(Qt::UTC);
-                        currentOrder.date   = date.toSecsSinceEpoch();
-                        currentOrder.oid    = getMidData("\"OrderUuid\":\"", "\"", &currentOrderData);
-                        currentOrder.type   = getMidData("\"OrderType\":\"", "\"", &currentOrderData) == "LIMIT_SELL";
-                        currentOrder.amount = getMidData("\"Quantity\":",    ",",  &currentOrderData).toDouble();
-                        currentOrder.price  = getMidData("\"Limit\":",       ",",  &currentOrderData).toDouble();
-                        QList<QByteArray> p = getMidData("\"Exchange\":\"",  "\"", &currentOrderData).split('-');
-                        currentOrder.symbol = p.last() + '/' + p.first();
+                            if (matchCurrentGroup)
+                                groupedVolume += amount;
 
-                        if (currentOrder.isValid())
-                            (*orders) << currentOrder;
+                            if (!matchCurrentGroup || n == asksList.size() - 1)
+                            {
+                                depthSubmitOrder(baseValues.currentPair.symbol,
+                                                 &currentAsksMap, groupedPrice + baseValues.groupPriceValue, groupedVolume, true);
+                                rowCounter++;
+                                groupedVolume = amount;
+                                groupedPrice += baseValues.groupPriceValue;
+                            }
+                        }
                     }
-
-                    if (!orders->empty())
-                        emit orderBookChanged(baseValues.currentPair.symbol, orders);
                     else
-                        delete orders;
-                }
-
-                break;//orders
-            }
-
-        case 305: //order/cancel
-            if (!lastCanceledId.isEmpty())
-            {
-                emit orderCanceled(baseValues.currentPair.symbol, lastCanceledId);
-                lastCanceledId.clear();
-            }
-
-            break;//order/cancel
-
-        case 306:
-            if (debugLevel)
-                logThread->writeLog("Buy OK: " + data, 2);
-
-            break;//order/buy
-
-        case 307:
-            if (debugLevel)
-                logThread->writeLog("Sell OK: " + data, 2);
-
-            break;//order/sell
-
-        case 208: //history
-            {
-                if (data.size() < 50)
-                    break;
-
-                if (lastHistory != data)
-                {
-                    lastHistory = data;
-
-                    QStringList historyList = QString(data).split("},{");
-                    qint64 maxTime = 0;
-                    auto* historyItems = new QList<HistoryItem>;
-
-                    for (int n = 0; n < historyList.size(); ++n)
                     {
-                        QByteArray logData(historyList.at(n).toLatin1());
-
-                        QDateTime date = QDateTime::fromString(getMidData("\"Closed\":\"", "\"", &logData), Qt::ISODate);
-                        date.setTimeSpec(Qt::UTC);
-                        qint64 dateInt = date.toMSecsSinceEpoch();
-
-                        if (dateInt <= lastHistoryTime)
-                            break;
-
-                        if (dateInt > maxTime)
-                            maxTime = dateInt;
-
-                        HistoryItem currentHistoryItem;
-
-                        if (getMidData("\"OrderType\":\"", "\"", &logData).contains("SELL")) // LIMIT_SELL MARKET_SELL
-                            currentHistoryItem.type = 1;
-                        else
-                            currentHistoryItem.type = 2;
-
-                        QList<QByteArray> pair         = getMidData("\"Exchange\":\"",   "\"", &logData).split('-');
-                        currentHistoryItem.symbol      = pair.last() + '/' + pair.first();
-                        currentHistoryItem.price       = getMidData("\"PricePerUnit\":", ",",  &logData).toDouble();
-                        currentHistoryItem.volume      = getMidData("\"Quantity\":",     ",",  &logData).toDouble();
-                        currentHistoryItem.dateTimeInt = dateInt / 1000;
-
-                        if (currentHistoryItem.isValid())
-                            (*historyItems) << currentHistoryItem;
+                        depthSubmitOrder(baseValues.currentPair.symbol,
+                                         &currentAsksMap, priceDouble, amount, true);
+                        rowCounter++;
                     }
-
-                    if (maxTime > lastHistoryTime)
-                        lastHistoryTime = maxTime;
-
-                    emit historyChanged(historyItems);
                 }
 
-                break;//money/wallet/history
+                QList<double> currentAsksList = lastDepthAsksMap.keys();
+
+                for (int n = 0; n < currentAsksList.size(); n++)
+                    if (qFuzzyIsNull(currentAsksMap.value(currentAsksList.at(n), 0)))
+                        depthUpdateOrder(baseValues.currentPair.symbol,
+                                         currentAsksList.at(n), 0.0, true);
+
+                lastDepthAsksMap = currentAsksMap;
+
+                QMap<double, double> currentBidsMap;
+                QStringList bidsList = QString(getMidData("\"bid\":[{\"quantity\":\"", "\"}],", &data)).split("\"},{\"quantity\":\"");
+                groupedPrice = 0.0;
+                groupedVolume = 0.0;
+                rowCounter = 0;
+
+                for (int n = 0; n < bidsList.size(); n++)
+                {
+                    if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
+                        break;
+
+                    QStringList currentPair = bidsList.at(n).split("\",\"rate\":\"");
+
+                    if (currentPair.size() != 2)
+                        continue;
+
+                    double priceDouble = currentPair.last().toDouble();
+                    double amount      = currentPair.first().toDouble();
+
+                    if (baseValues.groupPriceValue > 0.0)
+                    {
+                        if (n == 0)
+                        {
+                            emit depthFirstOrder(baseValues.currentPair.symbol, priceDouble, amount, false);
+                            groupedPrice = baseValues.groupPriceValue * static_cast<int>(priceDouble / baseValues.groupPriceValue);
+                            groupedVolume = amount;
+                        }
+                        else
+                        {
+                            bool matchCurrentGroup = priceDouble > groupedPrice - baseValues.groupPriceValue;
+
+                            if (matchCurrentGroup)
+                                groupedVolume += amount;
+
+                            if (!matchCurrentGroup || n == bidsList.size() - 1)
+                            {
+                                depthSubmitOrder(baseValues.currentPair.symbol,
+                                                 &currentBidsMap, groupedPrice - baseValues.groupPriceValue, groupedVolume, false);
+                                rowCounter++;
+                                groupedVolume = amount;
+                                groupedPrice -= baseValues.groupPriceValue;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        depthSubmitOrder(baseValues.currentPair.symbol,
+                                         &currentBidsMap, priceDouble, amount, false);
+                        rowCounter++;
+                    }
+                }
+
+                QList<double> currentBidsList = lastDepthBidsMap.keys();
+
+                for (int n = 0; n < currentBidsList.size(); n++)
+                    if (qFuzzyIsNull(currentBidsMap.value(currentBidsList.at(n), 0)))
+                        depthUpdateOrder(baseValues.currentPair.symbol,
+                                         currentBidsList.at(n), 0.0, false);
+
+                lastDepthBidsMap = currentBidsMap;
+
+                emit depthSubmitOrders(baseValues.currentPair.symbol, depthAsks, depthBids);
+                depthAsks = nullptr;
+                depthBids = nullptr;
+            }
+        }
+        break;
+
+    case 202: //info
+        {
+            QByteArray btcBalance = getMidData("\"currencySymbol\":\"" + baseValues.currentPair.currAStr + "\"", "}", &data);
+            QByteArray usdBalance = getMidData("\"currencySymbol\":\"" + baseValues.currentPair.currBStr + "\"", "}", &data);
+            btcBalance = getMidData("\"available\":\"", "\"", &btcBalance);
+            usdBalance = getMidData("\"available\":\"", "\"", &usdBalance);
+
+            if (checkValue(btcBalance, lastBtcBalance))
+                emit accBtcBalanceChanged(baseValues.currentPair.symbol, lastBtcBalance);
+
+            if (checkValue(usdBalance, lastUsdBalance))
+                emit accUsdBalanceChanged(baseValues.currentPair.symbol, lastUsdBalance);
+        }
+        break;//info
+
+    case 204://orders
+        {
+            if (lastOrders != data)
+            {
+                lastOrders = data;
+
+                if (data == "[]")
+                {
+                    emit ordersIsEmpty();
+                    break;
+                }
+
+                QStringList ordersList = QString(data).split("},{");
+                auto* orders = new QList<OrderItem>;
+
+                for (int n = 0; n < ordersList.size(); ++n)
+                {
+                    OrderItem currentOrder;
+                    QByteArray currentOrderData = ordersList.at(n).toLatin1();
+
+                    //0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
+                    if (getMidData("\"status\":\"", "\"", &currentOrderData) == "CLOSED")
+                        currentOrder.status = 0;
+                    else
+                        currentOrder.status = 1;
+
+                    QDateTime date = QDateTime::fromString(getMidData("\"createdAt\":\"", "\"", &currentOrderData), Qt::ISODate);
+                    date.setTimeSpec(Qt::UTC);
+                    currentOrder.date   = date.toSecsSinceEpoch();
+                    currentOrder.oid    = getMidData("\"id\":\"",           "\"", &currentOrderData);
+                    currentOrder.type   = getMidData("\"direction\":\"",    "\"", &currentOrderData) == "SELL";
+                    currentOrder.amount = getMidData("\"quantity\":\"",     "\"", &currentOrderData).toDouble();
+                    currentOrder.price  = getMidData("\"limit\":\"",        "\"", &currentOrderData).toDouble();
+                    QList<QByteArray> p = getMidData("\"marketSymbol\":\"", "\"", &currentOrderData).split('-');
+                    currentOrder.symbol = p.first() + '/' + p.last();
+
+                    if (currentOrder.isValid())
+                        (*orders) << currentOrder;
+                }
+
+                if (!orders->empty())
+                    emit orderBookChanged(baseValues.currentPair.symbol, orders);
+                else
+                    delete orders;
             }
 
-        default:
-            break;
+            break;//orders
+        }
+
+    case 305: //order/cancel
+    {
+        QByteArray id      = getMidData("\"id\":\"",           "\"", &data);
+        QByteArray request = getMidData("\"marketSymbol\":\"", "\"", &data);
+
+        if (request == baseValues.currentPair.currRequestPair)
+            emit orderCanceled(request, id);
+
+        break;//order/cancel
+    }
+    case 306:
+        if (debugLevel)
+            logThread->writeLog("Buy OK: " + data, 2);
+
+        break;//order/buy
+
+    case 307:
+        if (debugLevel)
+            logThread->writeLog("Sell OK: " + data, 2);
+
+        break;//order/sell
+
+    case 208: //history
+        {
+            if (data.size() < 50)
+                break;
+
+            if (lastHistory != data)
+            {
+                lastHistory = data;
+
+                QStringList historyList = QString(data).split("},{");
+                auto* historyItems = new QList<HistoryItem>;
+
+                for (int n = historyList.size() - 1; n >= 0; --n)
+                {
+                    QByteArray logData(historyList.at(n).toLatin1());
+
+                    QDateTime date = QDateTime::fromString(getMidData("\"closedAt\":\"", "\"", &logData), Qt::ISODate);
+                    date.setTimeSpec(Qt::UTC);
+                    qint64 dateInt = date.toMSecsSinceEpoch();
+
+                    if (dateInt < lastHistoryTime)
+                        continue;
+
+                    QByteArray id = getMidData("\"id\":\"", "\"", &logData);
+
+                    if (dateInt > lastHistoryTime)
+                        lastHistoryIds.clear();
+                    else if (lastHistoryIds.contains(id))
+                        continue;
+
+                    lastHistoryTime = dateInt;
+                    lastHistoryIds[id] = true;
+
+                    HistoryItem currentHistoryItem;
+
+                    if (getMidData("\"direction\":\"", "\"", &logData) == "SELL")
+                        currentHistoryItem.type = 1;
+                    else
+                        currentHistoryItem.type = 2;
+
+                    QList<QByteArray> pair         = getMidData("\"marketSymbol\":\"", "\"", &logData).split('-');
+                    currentHistoryItem.symbol      = pair.first() + '/' + pair.last();
+                    currentHistoryItem.price       = getMidData("\"limit\":\"",    "\"", &logData).toDouble();
+                    currentHistoryItem.volume      = getMidData("\"quantity\":\"", "\"", &logData).toDouble();
+                    currentHistoryItem.dateTimeInt = dateInt / 1000;
+
+                    if (currentHistoryItem.isValid())
+                        historyItems->prepend(currentHistoryItem);
+                }
+
+                emit historyChanged(historyItems);
+            }
+
+            break;//money/wallet/history
+        }
+
+    default:
+        break;
     }
 
     if (reqType >= 200 && reqType < 300)
     {
         static int authErrorCount = 0;
 
-        if (!success)
+        if (fail)
         {
             authErrorCount++;
 
@@ -552,7 +561,7 @@ void Exchange_Bittrex::dataReceivedAuth(const QByteArray& data, int reqType, int
     {
         static int errorCount = 0;
 
-        if (!success)
+        if (fail)
         {
             errorCount++;
 
@@ -640,41 +649,46 @@ void Exchange_Bittrex::secondSlot()
 
     switch (sendCounter)
     {
-        case 0:
+    case 0:
             if (!isReplayPending(103))
-                sendToApi(103, "getmarketsummary?market=" + baseValues.currentPair.currRequestPair);
-
+                sendToApi(103, "markets/" + baseValues.currentPair.currRequestPair + "/summary");
             break;
 
-        case 1:
-            if (!isReplayPending(202))
-                sendToApi(202, "account/getbalances?", true);
-
+    case 1:
+            if (!isReplayPending(104))
+                sendToApi(104, "markets/" + baseValues.currentPair.currRequestPair + "/ticker");
             break;
 
         case 2:
-            if (!isReplayPending(109))
-                sendToApi(109, "getmarkethistory?market=" + baseValues.currentPair.currRequestPair);
+            if (!isReplayPending(202))
+                sendToApi(202, "balances", true);
 
             break;
 
         case 3:
-            if (!tickerOnly && !isReplayPending(204))
-                sendToApi(204, "market/getopenorders?market=" + baseValues.currentPair.currRequestPair + "&", true);
+            if (!isReplayPending(109))
+                sendToApi(109, "markets/" + baseValues.currentPair.currRequestPair + "/trades");
 
             break;
 
         case 4:
+            if (!tickerOnly && !isReplayPending(204))
+                sendToApi(204, "orders/open", true);
+            //https://bittrex.github.io/guides/v3/upgrade
+
+            break;
+
+        case 5:
             if (isDepthEnabled() && (forceDepthLoad || !isReplayPending(111)))
             {
                 emit depthRequested();
-                sendToApi(111, "getorderbook?type=both&market=" + baseValues.currentPair.currRequestPair);
+                sendToApi(111, "markets/" + baseValues.currentPair.currRequestPair + "/orderbook?depth=500");
                 forceDepthLoad = false;
             }
 
             break;
 
-        case 5:
+        case 6:
             if (lastHistory.isEmpty())
                 getHistory(false);
 
@@ -699,7 +713,7 @@ void Exchange_Bittrex::getHistory(bool force)
         lastHistory.clear();
 
     if (!isReplayPending(208))
-        sendToApi(208, "account/getorderhistory?market=" + baseValues.currentPair.currRequestPair + "&", true);
+        sendToApi(208, "orders/closed?marketSymbol=" + baseValues.currentPair.currRequestPair, true);
 }
 
 void Exchange_Bittrex::buy(const QString& symbol, double apiBtcToBuy, double apiPriceToBuy)
@@ -713,14 +727,16 @@ void Exchange_Bittrex::buy(const QString& symbol, double apiBtcToBuy, double api
     if (pairItem.symbol.isEmpty())
         return;
 
-    QByteArray data = "market=" + pairItem.currRequestPair + "&quantity=" +
-            JulyMath::byteArrayFromDouble(apiBtcToBuy, pairItem.currADecimals, 0) + "&rate=" +
-            JulyMath::byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0) + "&";
+    QByteArray data = "{\"marketSymbol\":\"" + pairItem.currRequestPair +
+            "\",\"direction\":\"BUY\",\"type\":\"LIMIT\"," +
+            "\"quantity\":\"" + JulyMath::byteArrayFromDouble(apiBtcToBuy,   pairItem.currADecimals, 0) +
+            "\",\"limit\":\"" + JulyMath::byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0) +
+            "\",\"timeInForce\":\"GOOD_TIL_CANCELLED\"}";
 
     if (debugLevel)
         logThread->writeLog("Buy: " + data, 2);
 
-    sendToApi(306, "market/buylimit?" + data, true);
+    sendToApi(306, "orders", true, "POST", data);
 }
 
 void Exchange_Bittrex::sell(const QString& symbol, double apiBtcToSell, double apiPriceToSell)
@@ -734,14 +750,16 @@ void Exchange_Bittrex::sell(const QString& symbol, double apiBtcToSell, double a
     if (pairItem.symbol.isEmpty())
         return;
 
-    QByteArray data = "market=" + pairItem.currRequestPair + "&quantity=" +
-            JulyMath::byteArrayFromDouble(apiBtcToSell, pairItem.currADecimals, 0) + "&rate=" +
-            JulyMath::byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0) + "&";
+    QByteArray data = "{\"marketSymbol\":\"" + pairItem.currRequestPair +
+            "\",\"direction\":\"SELL\",\"type\":\"LIMIT\"," +
+            "\"quantity\":\"" + JulyMath::byteArrayFromDouble(apiBtcToSell,   pairItem.currADecimals, 0) +
+            "\",\"limit\":\"" + JulyMath::byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0) +
+            "\",\"timeInForce\":\"GOOD_TIL_CANCELLED\"}";
 
     if (debugLevel)
         logThread->writeLog("Sell: " + data, 2);
 
-    sendToApi(307, "market/selllimit?" + data, true);
+    sendToApi(307, "orders", true, "POST", data);
 }
 
 void Exchange_Bittrex::cancelOrder(const QString& /*unused*/, const QByteArray& order)
@@ -749,26 +767,26 @@ void Exchange_Bittrex::cancelOrder(const QString& /*unused*/, const QByteArray& 
     if (tickerOnly)
         return;
 
-    lastCanceledId  = order;
-    QByteArray data = "uuid=" + order + "&";
-
     if (debugLevel)
-        logThread->writeLog("Cancel order: " + data, 2);
+        logThread->writeLog("Cancel order: " + order, 2);
 
-    sendToApi(305, "market/cancel?" + data, true);
+    sendToApi(305, "orders/" + order, true, "DELETE");
 }
 
-void Exchange_Bittrex::sendToApi(int reqType, const QByteArray &method, bool auth)
+void Exchange_Bittrex::sendToApi(int reqType, const QByteArray& method, bool auth,
+                                 const QByteArray& type, const QByteArray& postData)
 {
     if (julyHttp == nullptr)
     {
         if (domain.isEmpty() || port == 0)
-            julyHttp = new JulyHttp("bittrex.com", "apisign:", this);
+            julyHttp = new JulyHttp("api.bittrex.com", "", this, true, true, "application/json");
         else
         {
-            julyHttp = new JulyHttp(domain, "apisign:", this, useSsl);
+            julyHttp = new JulyHttp(domain, "", this, useSsl, true, "application/json");
             julyHttp->setPortForced(port);
         }
+
+        baseHeader = julyHttp->getHeader();
 
         connect(julyHttp, &JulyHttp::anyDataReceived, baseValues_->mainWindow_, &QtBitcoinTrader::anyDataReceived);
         connect(julyHttp, &JulyHttp::apiDown, baseValues_->mainWindow_, &QtBitcoinTrader::setApiDown);
@@ -780,15 +798,23 @@ void Exchange_Bittrex::sendToApi(int reqType, const QByteArray &method, bool aut
 
     if (auth)
     {
-        QByteArray path = "/api/v1.1/" + method + "apikey=" + getApiKey() + "&nonce=" + QByteArray::number(++privateNonce);
-        QByteArray url  = "https://bittrex.com" + path;
-        QByteArray sign = hmacSha512(getApiSign(), url).toHex();
+        QByteArray timestamp = QByteArray::number(TimeSync::getMSecs());
+        QByteArray contentHash = QCryptographicHash::hash(postData, QCryptographicHash::Sha512).toHex();//from requestBody
+        QByteArray signBody = timestamp + "https://api.bittrex.com/v3/" + method + type + contentHash;
+        QByteArray sign = QMessageAuthenticationCode::hash(signBody, getApiSign(), QCryptographicHash::Sha512).toHex();
 
-        julyHttp->sendData(reqType, m_pairChangeCount, "GET " + path, "", sign + "\r\n\r\n");
+        julyHttp->setHeader(baseHeader +
+                            "Api-Key: " + getApiKey() + "\r\n" +
+                            "Api-Timestamp: " + timestamp + "\r\n" +
+                            "Api-Content-Hash: " + contentHash + "\r\n" +
+                            "Api-Signature: " + sign + "\r\n");
+
+        julyHttp->sendData(reqType, m_pairChangeCount, type + " /v3/" + method, postData);
     }
     else
     {
-        julyHttp->sendData(reqType, m_pairChangeCount, "GET /api/v1.1/public/" + method);
+        julyHttp->setHeader(baseHeader);
+        julyHttp->sendData(reqType, m_pairChangeCount, "GET /v3/" + method);
     }
 }
 

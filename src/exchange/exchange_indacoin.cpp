@@ -375,7 +375,7 @@ void Exchange_Indacoin::dataReceivedAuth(const QByteArray& data, int reqType, in
                             if (matchCurrentGroup)
                                 groupedVolume += amount;
 
-                            if (!matchCurrentGroup || n == asksList.size() - 1)
+                            if (!matchCurrentGroup || n == bidsList.size() - 1)
                             {
                                 depthSubmitOrder(baseValues.currentPair.symbol,
                                                  &currentBidsMap,
