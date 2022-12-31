@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2023 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -101,6 +101,7 @@ void Exchange_Poloniex::quitThread()
 void Exchange_Poloniex::clearVariables()
 {
     isFirstAccInfo = true;
+    tickerRegEx.reset();
     lastTradesId = 0;
     lastTradesDate = 0;
     lastHistoryTime = TimeSync::getTimeT() - c_detlaHistoryTime;
@@ -151,9 +152,11 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
     {
     case 103: //ticker
     {
-        static const QRegularExpression regEx("\"" + baseValues.currentPair.currRequestPair + "\"\\s*:\\s*({[\\w\\s\"':,._-]+})",
-                                              QRegularExpression::CaseInsensitiveOption);
-        QRegularExpressionMatch match = regEx.match(data);
+        if (tickerRegEx.isNull())
+            tickerRegEx.reset(new QRegularExpression("\"" + baseValues.currentPair.currRequestPair + "\"\\s*:\\s*({[\\w\\s\"':,._-]+})",
+                                                     QRegularExpression::CaseInsensitiveOption));
+
+        QRegularExpressionMatch match = tickerRegEx->match(data);
 
         if (!match.hasMatch())
             break;
@@ -345,7 +348,7 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
                 if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                     break;
 
-                QJsonArray currentPair = asksList.at(n).toArray();
+                QJsonArray currentPair = bidsList.at(n).toArray();
 
                 if (currentPair.size() != 2)
                     continue;

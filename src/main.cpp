@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2023 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ BaseValues::BaseValues()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4200";
+    appVerStr = "1.4210";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)

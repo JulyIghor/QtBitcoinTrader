@@ -1,6 +1,6 @@
 //  This file is part of Qt Bitcoin Trader
 //      https://github.com/JulyIGHOR/QtBitcoinTrader
-//  Copyright (C) 2013-2022 July Ighor <julyighor@gmail.com>
+//  Copyright (C) 2013-2023 July Ighor <julyighor@gmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -444,7 +444,7 @@ void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, in
     case 109: // api/transactions
         if (success && data.size() > 32)
         {
-            if (data.startsWith("[{\"date\":"))
+            if (data.contains("\"date\":"))
             {
                 QStringList tradeList = QString(data).split("}, {");
                 auto* newTradesItems = new QList<TradesItem>;
@@ -493,7 +493,7 @@ void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, in
         break;
 
     case 111: // api/order_book
-        if (data.startsWith("{\"timestamp\":"))
+        if (data.contains("\"asks\":"))
         {
             emit depthRequestReceived();
 

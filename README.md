@@ -1,14 +1,8 @@
 ## Qt Bitcoin Trader
 
-This software helps you open and cancel orders very fast. Real time data monitoring.
+This software helps you open and cancel orders very fast. Real time data monitoring. Automated trading using JavaScript powered scripts.
 
 Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
-
-I want to develop this Trader App so that it can be configured for any rule and strategy.
-
-Next ToDo:
-- Add realtime charts
-- Make rules more advanced
 
 ## Official website
 
@@ -44,6 +38,11 @@ Next ToDo:
 * http://vk.com/QtBitcoinTrader `RUS`
 
 ## Change Log
+
+v1.42.10 Released!
+
+- Updated API integration to fix Bitstamp and Poloniex
+- Synchronized currency pairs
 
 v1.42.00 Released!
 
