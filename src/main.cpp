@@ -71,8 +71,8 @@
 #endif
 
 #ifdef Q_OS_UNIX
-#include <initializer_list>
 #include <csignal>
+#include <initializer_list>
 void quitOnSignals(std::initializer_list<int> quitSignals)
 {
     auto handler = [](int sig) -> void
@@ -112,7 +112,7 @@ BaseValues::BaseValues()
     gzipEnabled = true;
     appVerIsBeta = false;
     jlScriptVersion = 1.0;
-    appVerStr = "1.4210";
+    appVerStr = "1.4220";
     appVerReal = appVerStr.toDouble();
 
     if (appVerStr.size() > 4)

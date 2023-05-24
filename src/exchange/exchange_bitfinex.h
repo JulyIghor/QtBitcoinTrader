@@ -43,7 +43,7 @@ public:
     ~Exchange_Bitfinex();
 
 private:
-    QByteArray historyLastTimestamp;
+    qint64 lastHistoryTime;
 
     bool isFirstAccInfo;
     bool isReplayPending(int);
@@ -53,12 +53,13 @@ private:
     int secondPart;
 
     JulyHttp* julyHttp;
+    QByteArray restKeyLineV1;
+    QByteArray restKeyLineV2;
 
     QByteArray lastTradesDateCache;
 
     qint64 lastTradesDate;
     qint64 tickerLastDate;
-    qint64 lastHistoryId;
 
     QList<DepthItem>* depthAsks;
     QList<DepthItem>* depthBids;
@@ -74,6 +75,7 @@ private:
     void depthSubmitOrder(const QString&, QMap<double, double>*, double, double, bool);
     void depthUpdateOrder(const QString&, double, double, bool);
     void sendToApi(int reqType, const QByteArray& method, bool auth = false, bool sendNow = true, QByteArray commands = nullptr);
+    void sendToApiAuthV2(int reqType, const QByteArray& method, QByteArray commands = nullptr);
 private slots:
     void secondSlot();
 public slots:

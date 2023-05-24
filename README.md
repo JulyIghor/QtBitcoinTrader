@@ -39,6 +39,12 @@ Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
 
 ## Change Log
 
+v1.42.20 Released!
+
+- Updated API integration for Poloniex
+- Fixed trade history issue in Bitfinex
+- Synchronized currency pairs
+
 v1.42.10 Released!
 
 - Updated API integration to fix Bitstamp and Poloniex

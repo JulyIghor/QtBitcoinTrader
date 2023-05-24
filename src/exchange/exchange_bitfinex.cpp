@@ -29,6 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <QMessageAuthenticationCode>
 #include "exchange_bitfinex.h"
 #include "iniengine.h"
 #include "timesync.h"
@@ -36,10 +37,10 @@
 Exchange_Bitfinex::Exchange_Bitfinex(const QByteArray& pRestSign, const QByteArray& pRestKey) : Exchange()
 {
     orderBookItemIsDedicatedOrder = true;
-    clearHistoryOnCurrencyChanged = true;
+    clearHistoryOnCurrencyChanged = false;
     isLastTradesTypeSupported = false;
     calculatingFeeMode = 1;
-    historyLastTimestamp = "0";
+    lastHistoryTime = 0LL;
     lastTradesDate = 0;
     tickerLastDate = 0;
     isFirstAccInfo = true;
@@ -97,7 +98,6 @@ void Exchange_Bitfinex::quitThread()
 
 void Exchange_Bitfinex::clearVariables()
 {
-    historyLastTimestamp = "0";
     isFirstAccInfo = true;
     lastTickerHigh = 0.0;
     lastTickerLow = 0.0;
@@ -114,7 +114,6 @@ void Exchange_Bitfinex::clearVariables()
     tickerLastDate = 0;
     lastTradesDate = 0;
     lastTradesDateCache = "0";
-    lastHistoryId = 0LL;
 }
 
 void Exchange_Bitfinex::clearValues()
@@ -139,7 +138,7 @@ void Exchange_Bitfinex::secondSlot()
 
     case 1:
         if (!isReplayPending(202))
-            sendToApi(202, "balances", true, true);
+            sendToApiAuthV2(202, "wallets");
 
         break;
 
@@ -155,7 +154,7 @@ void Exchange_Bitfinex::secondSlot()
 
     case 3:
         if (!tickerOnly && !isReplayPending(204))
-            sendToApi(204, "orders", true, true);
+            sendToApiAuthV2(204, "orders");
 
         break;
 
@@ -177,12 +176,8 @@ void Exchange_Bitfinex::secondSlot()
         if (lastHistory.isEmpty())
         {
             if (!isReplayPending(208))
-                sendToApi(208,
-                          "mytrades",
-                          true,
-                          true,
-                          ", \"symbol\": \"" + baseValues.currentPair.currRequestPair + "\", \"timestamp\": " + historyLastTimestamp +
-                              ", \"limit_trades\": 200");
+                sendToApiAuthV2(208, "trades/hist",
+                                "\"start\": " + QByteArray::number(lastHistoryTime + 1) + ", \"limit\": 2500, \"sort\": 1");
 
             if (!isReplayPending(209))
                 sendToApi(209, "account_infos", true, true);
@@ -217,12 +212,9 @@ void Exchange_Bitfinex::getHistory(bool force)
         lastHistory.clear();
 
     if (!isReplayPending(208))
-        sendToApi(208,
-                  "mytrades",
-                  true,
-                  true,
-                  ", \"symbol\": \"" + baseValues.currentPair.currRequestPair + "\", \"timestamp\": " + historyLastTimestamp +
-                      ", \"limit_trades\": 100");
+        if (!isReplayPending(208))
+            sendToApiAuthV2(208, "trades/hist",
+                            "\"start\": " + QByteArray::number(lastHistoryTime + 1) + ", \"limit\": 2500, \"sort\": 1");
 
     if (!isReplayPending(209))
         sendToApi(209, "account_infos", true, true);
@@ -300,13 +292,15 @@ void Exchange_Bitfinex::sendToApi(int reqType, const QByteArray& method, bool au
     if (julyHttp == nullptr)
     {
         if (domain.isEmpty() || port == 0)
-            julyHttp = new JulyHttp("api.bitfinex.com", "X-BFX-APIKEY: " + getApiKey() + "\r\n", this);
+            julyHttp = new JulyHttp("api.bitfinex.com", QByteArray(), this, true, true, "application/json");
         else
         {
-            julyHttp = new JulyHttp(domain, "X-BFX-APIKEY: " + getApiKey() + "\r\n", this, useSsl);
+            julyHttp = new JulyHttp(domain, QByteArray(), this, useSsl);
             julyHttp->setPortForced(port);
         }
 
+        restKeyLineV1 = "X-BFX-APIKEY: " + getApiKey() + "\r\n";
+        restKeyLineV2 = "bfx-apikey: " + getApiKey() + "\r\n";
         connect(julyHttp, &JulyHttp::anyDataReceived, baseValues_->mainWindow_, &QtBitcoinTrader::anyDataReceived);
         connect(julyHttp, &JulyHttp::setDataPending, baseValues_->mainWindow_, &QtBitcoinTrader::setDataPending);
         connect(julyHttp, &JulyHttp::apiDown, baseValues_->mainWindow_, &QtBitcoinTrader::setApiDown);
@@ -328,13 +322,13 @@ void Exchange_Bitfinex::sendToApi(int reqType, const QByteArray& method, bool au
                                m_pairChangeCount,
                                "POST /v1/" + method,
                                postData,
-                               "X-BFX-PAYLOAD: " + payload + "\r\nX-BFX-SIGNATURE: " + forHash + "\r\n");
+                               restKeyLineV1 + "X-BFX-PAYLOAD: " + payload + "\r\nX-BFX-SIGNATURE: " + forHash + "\r\n");
         else
             julyHttp->prepareData(reqType,
                                   m_pairChangeCount,
                                   "POST /v1/" + method,
                                   postData,
-                                  "X-BFX-PAYLOAD: " + payload + "\r\nX-BFX-SIGNATURE: " + forHash + "\r\n");
+                                  restKeyLineV1 + "X-BFX-PAYLOAD: " + payload + "\r\nX-BFX-SIGNATURE: " + forHash + "\r\n");
     }
     else
     {
@@ -343,6 +337,23 @@ void Exchange_Bitfinex::sendToApi(int reqType, const QByteArray& method, bool au
         else
             julyHttp->prepareData(reqType, m_pairChangeCount, "GET /v1/" + method);
     }
+}
+
+void Exchange_Bitfinex::sendToApiAuthV2(int reqType, const QByteArray& method, QByteArray commands)
+{
+    if (julyHttp == nullptr)
+        return;
+
+    QByteArray nonce = QByteArray::number(++privateNonce);
+    QByteArray body = "{" + commands + "}";
+    QByteArray signature = QMessageAuthenticationCode::hash("/api/v2/auth/r/" + method + nonce + body,
+                                                            getApiSign(), QCryptographicHash::Sha384).toHex();
+
+    julyHttp->sendData(reqType,
+                       m_pairChangeCount,
+                       "POST /v2/auth/r/" + method,
+                       body,
+                       "bfx-nonce: " + nonce + "\r\n" + restKeyLineV2 + "bfx-signature: " + signature +  + "\r\n");
 }
 
 void Exchange_Bitfinex::depthUpdateOrder(const QString& symbol, double price, double amount, bool isAsk)
@@ -717,7 +728,7 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
             if (!success)
                 break;
 
-            if (data.startsWith("[{\"type\""))
+            if (data.startsWith("[["))
             {
                 lastInfoReceived = true;
 
@@ -727,25 +738,24 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
                 QByteArray btcBalance;
                 QByteArray usdBalance;
 
-                QStringList balances = QString(data).split("},{");
+                QStringList balances = QString(getMidData("[[", "]]", &data)).split("],[");
 
                 for (int n = 0; n < balances.size(); n++)
                 {
-                    QByteArray currentBalance = balances.at(n).toLatin1();
-                    QByteArray balanceType = getMidData("type\":\"", "\"", &currentBalance);
+                    QList<QByteArray> balance = balances.at(n).toLatin1().split(',');
 
-                    if (balanceType != baseValues.currentPair.currRequestSecond)
+                    if (balance.size() < 5 || balance.at(0) != '"' + baseValues.currentPair.currRequestSecond + '"')
                         continue;
 
-                    QByteArray balanceCurrency = getMidData("currency\":\"", "\"", &currentBalance);
+                    QByteArray balanceCurrency = balance.at(1);
+                    balanceCurrency.remove(0, 1);
+                    balanceCurrency.chop(1);
 
-                    if (btcBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currAStrLow)
-                        btcBalance = getMidData("available\":\"", "\"", &currentBalance);
+                    if (btcBalance.isEmpty() && balanceCurrency.toLower() == baseValues.currentPair.currAStrLow)
+                        btcBalance = balance.at(4);
 
-                    if (usdBalance.isEmpty() && balanceCurrency == baseValues.currentPair.currBStrLow)
-                    {
-                        usdBalance = getMidData("available\":\"", "\"", &currentBalance);
-                    }
+                    if (usdBalance.isEmpty() && balanceCurrency.toLower() == baseValues.currentPair.currBStrLow)
+                        usdBalance = balance.at(4);
                 }
 
                 if (checkValue(btcBalance, lastBtcBalance))
@@ -773,35 +783,43 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
         if (lastOrders != data)
         {
             lastOrders = data;
-            QStringList ordersList = QString(data).split("},{");
+            QStringList ordersList = QString(getMidData("[[", "]]", &data)).split("],[");
             auto* orders = new QList<OrderItem>;
-            QByteArray filterType = "limit";
-
-            if (baseValues.currentPair.currRequestSecond == "exchange")
-                filterType.prepend("exchange ");
+            QByteArray filterType = baseValues.currentPair.currRequestSecond == "exchange" ? "\"EXCHANGE LIMIT\"" : "\"LIMIT\"";
 
             for (int n = 0; n < ordersList.size(); n++)
             {
-                if (!ordersList.at(n).contains("\"type\":\"" + filterType + "\""))
+                QList<QByteArray> order = ordersList.at(n).toLatin1().split(',');
+
+                if (order.size() < 17 || order.at(8) != filterType)
                     continue;
 
-                QByteArray currentOrderData = ordersList.at(n).toLatin1();
                 OrderItem currentOrder;
-                currentOrder.oid = getMidData("\"id\":", ",", &currentOrderData);
-                currentOrder.date = getMidData("timestamp\":\"", "\"", &currentOrderData).split('.').first().toUInt();
-                currentOrder.type = getMidData("side\":\"", "\"", &currentOrderData).toLower() == "sell";
+                currentOrder.oid = order.at(0);
+                currentOrder.date = order.at(4).toLongLong() / 1000;
 
-                bool isCanceled = getMidData("is_cancelled\":", ",", &currentOrderData) == "true";
-
-                // 0=Canceled, 1=Open, 2=Pending, 3=Post-Pending
-                if (isCanceled)
+                if (order.at(13).toUpper().contains("CANCELED"))
                     currentOrder.status = 0;
                 else
                     currentOrder.status = 1;
 
-                currentOrder.amount = getMidData("remaining_amount\":\"", "\"", &currentOrderData).toDouble();
-                currentOrder.price = getMidData("price\":\"", "\"", &currentOrderData).toDouble();
-                currentOrder.symbol = IniEngine::getSymbolByRequest(getMidData("symbol\":\"", "\"", &currentOrderData));
+                QByteArray amount = order.at(6);
+
+                if (!amount.isEmpty() && amount.at(0) == '-')
+                {
+                    currentOrder.type = true;
+                    amount.remove(0, 1);
+                }
+                else
+                    currentOrder.type = false;
+
+                currentOrder.amount = amount.toDouble();
+                currentOrder.price = order.at(16).toDouble();
+
+                QByteArray symbol = order.at(3);
+                symbol.remove(0, 2);
+                symbol.chop(1);
+                currentOrder.symbol = IniEngine::getSymbolByRequest(symbol.toLower());
 
                 if (currentOrder.isValid())
                     (*orders) << currentOrder;
@@ -859,68 +877,53 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
         if (!success)
             break;
 
-        if (data.startsWith("["))
+        if (data.startsWith("[["))
         {
             if (lastHistory != data)
             {
                 lastHistory = data;
 
                 auto* historyItems = new QList<HistoryItem>;
-                bool firstTimestampReceived = false;
-                QStringList dataList = QString(data).split("},{");
-                qint64 maxId = 0LL;
+                QStringList dataList = QString(data).split("],[");
 
                 for (int n = 0; n < dataList.size(); n++)
                 {
-                    QByteArray curLog(dataList.at(n).toLatin1() + "}");
-                    qint64 currentId = getMidData("tid\":", ",", &curLog).toLongLong();
+                    QList<QByteArray> curLog(dataList.at(n).toLatin1().split(','));
 
-                    if (currentId <= lastHistoryId)
-                        break;
+                    if (curLog.size() < 7)
+                        continue;
 
-                    if (currentId > maxId)
-                        maxId = currentId;
+                    qint64 time = curLog.at(2).toLongLong();
 
-                    QByteArray currentTimeStamp = getMidData("\"timestamp\":\"", "\"", &curLog).split('.').first();
+                    if (time < lastHistoryTime)
+                        continue;
 
-                    if (!firstTimestampReceived && !currentTimeStamp.isEmpty())
-                    {
-                        historyLastTimestamp = currentTimeStamp;
-                        firstTimestampReceived = true;
-                    }
-
+                    lastHistoryTime = time;
                     HistoryItem currentHistoryItem;
-                    QByteArray logType = getMidData("\"type\":\"", "\"", &curLog);
 
-                    if (logType == "Sell")
-                        currentHistoryItem.type = 1;
-                    else if (logType == "Buy")
-                        currentHistoryItem.type = 2;
-                    else if (logType == "fee")
-                        currentHistoryItem.type = 3;
-                    else if (logType == "deposit")
-                        currentHistoryItem.type = 4;
-                    else if (logType == "withdraw")
-                        currentHistoryItem.type = 5;
+                    QByteArray symbol = curLog.at(1);
+                    symbol.remove(0, 2);
+                    symbol.chop(1);
 
-                    if (currentHistoryItem.type)
+                    QByteArray amount = curLog.at(4);
+
+                    if (!amount.isEmpty() && amount.at(0) == '-')
                     {
-                        currentHistoryItem.price = getMidData("\"price\":\"", "\"", &curLog).toDouble();
-                        currentHistoryItem.volume = getMidData("\"amount\":\"", "\"", &curLog).toDouble();
-                        currentHistoryItem.dateTimeInt = currentTimeStamp.toLongLong();
-                        currentHistoryItem.symbol = baseValues.currentPair.symbol;
-                        currentHistoryItem.currRequestSecond = baseValues.currentPair.currRequestSecond;
-
-                        if (currentHistoryItem.isValid())
-                        {
-                            currentHistoryItem.description += getMidData("exchange\":\"", "\"", &curLog);
-                            (*historyItems) << currentHistoryItem;
-                        }
+                        currentHistoryItem.type = 1;
+                        amount.remove(0, 1);
                     }
-                }
+                    else
+                        currentHistoryItem.type = 2;
 
-                if (maxId > lastHistoryId)
-                    lastHistoryId = maxId;
+                    currentHistoryItem.price = curLog.at(5).toDouble();
+                    currentHistoryItem.volume = amount.toDouble();
+                    currentHistoryItem.dateTimeInt = time;
+                    currentHistoryItem.symbol = IniEngine::getSymbolByRequest(symbol.toLower());
+                    currentHistoryItem.currRequestSecond = curLog.at(6).contains("EXCHANGE") ? "exchange" : "trading";
+
+                    if (currentHistoryItem.isValid())
+                        (*historyItems) << currentHistoryItem;
+                }
 
                 emit historyChanged(historyItems);
             }

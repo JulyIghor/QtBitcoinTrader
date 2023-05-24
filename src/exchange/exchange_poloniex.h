@@ -60,16 +60,15 @@ private:
     void clearVariables();
     void depthSubmitOrder(const QString&, QMap<double, double>* currentMap, double priceDouble, double amount, bool isAsk);
     void depthUpdateOrder(const QString&, double, double, bool);
-    void sendToApi(int reqType, const QByteArray& method, bool auth = false);
+    void sendToApi(int reqType, const QByteArray& path, const QByteArray& type = nullptr,
+                   const QByteArray& params = nullptr, const QByteArray& body = nullptr, bool auth = false);
     bool isReplayPending(int);
 
 private:
     bool isFirstAccInfo;
 
-    qint64 lastTradesId;
-    qint64 lastTradesDate;
-    qint64 lastHistoryTime;
-    qint64 privateNonce;
+    qint64 lastTradeId;
+    qint64 lastHistoryId;
 
     JulyHttp* julyHttp;
 
@@ -78,8 +77,6 @@ private:
 
     QMap<double, double> lastDepthAsksMap;
     QMap<double, double> lastDepthBidsMap;
-
-    QSharedPointer<QRegularExpression> tickerRegEx;
 };
 
 #endif // EXCHANGE_POLONIEX_H

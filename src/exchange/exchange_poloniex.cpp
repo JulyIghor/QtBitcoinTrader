@@ -33,6 +33,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include "timesync.h"
+#include "iniengine.h"
 #include "exchange_poloniex.h"
 
 static const int c_detlaHistoryTime = 27 * 24 * 60 * 60;
@@ -40,17 +41,15 @@ static const int c_detlaHistoryTime = 27 * 24 * 60 * 60;
 Exchange_Poloniex::Exchange_Poloniex(const QByteArray &pRestSign, const QByteArray &pRestKey)
     : Exchange(),
       isFirstAccInfo(true),
-      lastTradesId(0),
-      lastTradesDate(0),
-      lastHistoryTime(TimeSync::getTimeT() - c_detlaHistoryTime),
-      privateNonce((TimeSync::getTimeT() - 1371854884) * 10),
+      lastTradeId(0),
+      lastHistoryId(0),
       julyHttp(nullptr),
       depthAsks(nullptr),
       depthBids(nullptr),
       lastDepthAsksMap(),
       lastDepthBidsMap()
 {
-    clearHistoryOnCurrencyChanged = true;
+    clearHistoryOnCurrencyChanged = false;
     calculatingFeeMode = 1;
     baseValues.exchangeName = "Poloniex";
     baseValues.currentPair.name = "ETH/BTC";
@@ -101,10 +100,7 @@ void Exchange_Poloniex::quitThread()
 void Exchange_Poloniex::clearVariables()
 {
     isFirstAccInfo = true;
-    tickerRegEx.reset();
-    lastTradesId = 0;
-    lastTradesDate = 0;
-    lastHistoryTime = TimeSync::getTimeT() - c_detlaHistoryTime;
+    lastTradeId = 0;
     Exchange::clearVariables();
     lastHistory.clear();
     lastOrders.clear();
@@ -152,18 +148,9 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
     {
     case 103: //ticker
     {
-        if (tickerRegEx.isNull())
-            tickerRegEx.reset(new QRegularExpression("\"" + baseValues.currentPair.currRequestPair + "\"\\s*:\\s*({[\\w\\s\"':,._-]+})",
-                                                     QRegularExpression::CaseInsensitiveOption));
+        QJsonObject ticker = QJsonDocument::fromJson(data).object();
 
-        QRegularExpressionMatch match = tickerRegEx->match(data);
-
-        if (!match.hasMatch())
-            break;
-
-        QJsonObject ticker = QJsonDocument::fromJson(match.captured(1).toLatin1()).object();
-
-        double tickerHigh =  ticker.value("high24hr").toString().toDouble();
+        double tickerHigh =  ticker.value("high").toString().toDouble();
 
         if (tickerHigh > 0.0 && !qFuzzyCompare(tickerHigh, lastTickerHigh))
         {
@@ -171,7 +158,7 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
             lastTickerHigh = tickerHigh;
         }
 
-        double tickerLow = ticker.value("low24hr").toString().toDouble();
+        double tickerLow = ticker.value("low").toString().toDouble();
 
         if (tickerLow > 0.0 && !qFuzzyCompare(tickerLow, lastTickerLow))
         {
@@ -179,7 +166,7 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
             lastTickerLow = tickerLow;
         }
 
-        double tickerSell = ticker.value("highestBid").toString().toDouble();
+        double tickerSell = ticker.value("bid").toString().toDouble();
 
         if (tickerSell > 0.0 && !qFuzzyCompare(tickerSell, lastTickerSell))
         {
@@ -187,7 +174,7 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
             lastTickerSell = tickerSell;
         }
 
-        double tickerBuy = ticker.value("lowestAsk").toString().toDouble();
+        double tickerBuy = ticker.value("ask").toString().toDouble();
 
         if (tickerBuy > 0.0 && !qFuzzyCompare(tickerBuy, lastTickerBuy))
         {
@@ -195,7 +182,7 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
             lastTickerBuy = tickerBuy;
         }
 
-        double tickerVolume = ticker.value("quoteVolume").toString().toDouble();
+        double tickerVolume = ticker.value("quantity").toString().toDouble();
 
         if (tickerVolume > 0.0 && !qFuzzyCompare(tickerVolume, lastTickerVolume))
         {
@@ -203,7 +190,7 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
             lastTickerVolume = tickerVolume;
         }
 
-        double tickerLast = ticker.value("last").toString().toDouble();
+        double tickerLast = ticker.value("close").toString().toDouble();
 
         if (tickerLast > 0.0 && !qFuzzyCompare(tickerLast, lastTickerLast))
         {
@@ -217,44 +204,41 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
         if (data.size() > 10)
         {
             QJsonArray tradeList = QJsonDocument::fromJson(data).array();
-
             qint64 time10Min = TimeSync::getTimeT() - 600;
             auto* newTradesItems = new QList<TradesItem>;
+            qint64 packetLastTradeId = 0;
 
-            for (int n = tradeList.size() - 1; n >= 0; --n)
+            for (int n = 0; n < tradeList.size(); ++n)
             {
                 QJsonObject tradeData = tradeList.at(n).toObject();
-                TradesItem newItem;
+                QString tradeIdStr = tradeData.value("id").toString();
+                qint64 tradeId = tradeIdStr.toLongLong();
 
-                QDateTime date = QDateTime::fromString(tradeData.value("date").toString(), "yyyy-MM-dd HH:mm:ss");
-                date.setTimeSpec(Qt::UTC);
-                newItem.date   = date.toLocalTime().toSecsSinceEpoch();
-
-                if (newItem.date < 0)
+                if (tradeId <= lastTradeId)
                     break;
 
-                lastTradesDate = newItem.date;
+                if (!packetLastTradeId)
+                    packetLastTradeId = tradeId;
+
+                TradesItem newItem;
+                newItem.date = tradeData.value("ts").toVariant().toLongLong() / 1000;
 
                 if (newItem.date < time10Min)
-                    continue;
+                    break;
 
-                qint64 currentTid = tradeData.value("tradeID").toString().toInt();
-
-                if (currentTid <= lastTradesId)
-                    continue;
-
-                lastTradesId = currentTid;
-
-                newItem.amount    = tradeData.value("total").toString().toDouble();
-                newItem.price     = tradeData.value("rate").toString().toDouble();
+                newItem.amount    = tradeData.value("quantity").toString().toDouble();
+                newItem.price     = tradeData.value("price").toString().toDouble();
                 newItem.symbol    = baseValues.currentPair.symbol;
-                newItem.orderType = tradeData.value("type").toString() == "1" ? 1 : -1;
+                newItem.orderType = tradeData.value("takerSide").toString() == "BUY" ? -1 : 1;
 
                 if (newItem.isValid())
-                    (*newTradesItems) << newItem;
+                    newTradesItems->prepend(newItem);
                 else if (debugLevel)
-                    logThread->writeLog("Invalid trades fetch data id:" + QByteArray::number(currentTid), 2);
+                    logThread->writeLog("Invalid trades fetch data id:" + QByteArray::number(tradeId), 2);
             }
+
+            if (packetLastTradeId)
+                lastTradeId = packetLastTradeId;
 
             if (!newTradesItems->empty())
                 emit addLastTrades(baseValues.currentPair.symbol, newTradesItems);
@@ -284,18 +268,13 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
             double groupedVolume = 0.0;
             int rowCounter = 0;
 
-            for (int n = 0; n < asksList.size(); n++)
+            for (int n = 1; n < asksList.size(); n += 2)
             {
                 if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                     break;
 
-                QJsonArray currentPair = asksList.at(n).toArray();
-
-                if (currentPair.size() != 2)
-                    continue;
-
-                double priceDouble = currentPair.first().toString().toDouble();
-                double amount      = currentPair.last().toDouble();
+                double priceDouble = asksList.at(n - 1).toString().toDouble();
+                double amount      = asksList.at(n    ).toString().toDouble();
 
                 if (baseValues.groupPriceValue > 0.0)
                 {
@@ -343,18 +322,13 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
             groupedVolume = 0.0;
             rowCounter = 0;
 
-            for (int n = 0; n < bidsList.size(); n++)
+            for (int n = 1; n < bidsList.size(); n += 2)
             {
                 if (baseValues.depthCountLimit && rowCounter >= baseValues.depthCountLimit)
                     break;
 
-                QJsonArray currentPair = bidsList.at(n).toArray();
-
-                if (currentPair.size() != 2)
-                    continue;
-
-                double priceDouble = currentPair.first().toString().toDouble();
-                double amount      = currentPair.last().toDouble();
+                double priceDouble = bidsList.at(n - 1).toString().toDouble();
+                double amount      = bidsList.at(n    ).toString().toDouble();
 
                 if (baseValues.groupPriceValue > 0.0)
                 {
@@ -407,10 +381,27 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
 
     case 202: //info
         {
-            QJsonObject balances = QJsonDocument::fromJson(data).object().value("exchange").toObject();
+            QJsonArray account = QJsonDocument::fromJson(data).array();//.object().value("exchange").toArray();
 
-            QByteArray btcBalance = balances.value(baseValues.currentPair.currAStr).toString().toLatin1();
-            QByteArray usdBalance = balances.value(baseValues.currentPair.currBStr).toString().toLatin1();
+            if (account.isEmpty())
+                break;
+
+            QByteArray btcBalance;
+            QByteArray usdBalance;
+
+            QJsonArray balances = account.at(0).toObject().value("balances").toArray();
+
+            for (int i = 0; i < balances.size(); ++i)
+            {
+                if (balances.at(i).toObject().value("currency").toString() == baseValues.currentPair.currAStr)
+                    btcBalance = balances.at(i).toObject().value("available").toString().toLatin1();
+
+                if (balances.at(i).toObject().value("currency").toString() == baseValues.currentPair.currBStr)
+                    usdBalance = balances.at(i).toObject().value("available").toString().toLatin1();
+
+                if (!btcBalance.isEmpty() && !usdBalance.isEmpty())
+                    break;
+            }
 
             if (btcBalance.isEmpty())
                 btcBalance = "0";
@@ -429,8 +420,8 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
     case 203: //fee
     {
         QJsonObject fees = QJsonDocument::fromJson(data).object();
-        QString makerFee = fees.value("makerFee").toString();
-        QString takerFee = fees.value("takerFee").toString();
+        QString makerFee = fees.value("makerRate").toString();
+        QString takerFee = fees.value("takerRate").toString();
 
         if (!makerFee.isEmpty() && !takerFee.isEmpty())
         {
@@ -452,37 +443,24 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
             {
                 lastOrders = data;
                 auto* orders = new QList<OrderItem>;
-                static const QRegularExpression regEx("\"(\\w+)_(\\w+)\"\\s*:\\s*(\\[\\s{[\\w\\s\"':,.{}_-]+\\])",
-                                                      QRegularExpression::CaseInsensitiveOption);
-                QRegularExpressionMatchIterator iMatch = regEx.globalMatch(data);
+                QJsonArray ordersList = QJsonDocument::fromJson(data).array();
 
-                while (iMatch.hasNext())
+                for (int i = 0; i < ordersList.size(); ++i)
                 {
-                    QRegularExpressionMatch match = iMatch.next();
+                    QJsonObject orderData = ordersList.at(i).toObject();
+                    OrderItem currentOrder;
 
-                    QByteArray symbol = match.captured(2).toLatin1() + '/' + match.captured(1).toLatin1();
-                    QJsonArray ordersList = QJsonDocument::fromJson(match.captured(3).toLatin1()).array();
+                    currentOrder.date   = orderData.value("createTime").toVariant().toLongLong() / 1000;
+                    currentOrder.oid    = orderData.value("id").toString().toLatin1();
+                    currentOrder.type   = orderData.value("side").toString() == "SELL";
+                    currentOrder.amount = orderData.value("quantity").toString().toDouble();
+                    currentOrder.price  = orderData.value("price").toString().toDouble();
+                    currentOrder.symbol = IniEngine::getSymbolByRequest(orderData.value("symbol").toString().toLatin1());
+                    currentOrder.status = 1;
 
-                    for (int i = 0; i < ordersList.size(); ++i)
-                    {
-                        QJsonObject orderData = ordersList.at(i).toObject();
-                        OrderItem currentOrder;
-
-                        QDateTime date = QDateTime::fromString(orderData.value("date").toString(), Qt::ISODate);
-                        date.setTimeSpec(Qt::UTC);
-                        currentOrder.date   = date.toLocalTime().toSecsSinceEpoch();
-                        currentOrder.oid    = orderData.value("orderNumber").toString().toLatin1();
-                        currentOrder.type   = orderData.value("type").toString() == "sell";
-                        currentOrder.amount = orderData.value("amount").toString().toDouble();
-                        currentOrder.price  = orderData.value("rate").toString().toDouble();
-                        currentOrder.symbol = symbol;
-                        currentOrder.status = 1;
-
-                        if (currentOrder.isValid())
-                            (*orders) << currentOrder;
-                    }
+                    if (currentOrder.isValid())
+                        (*orders) << currentOrder;
                 }
-
                 if (!orders->empty())
                     emit orderBookChanged(baseValues.currentPair.symbol, orders);
                 else
@@ -526,51 +504,31 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
                 lastHistory = data;
 
                 QJsonArray historyList = QJsonDocument::fromJson(data).array();
-                qint64 maxTime = 0;
                 auto* historyItems = new QList<HistoryItem>;
 
-                for (int n = 0; n < historyList.size(); ++n)
+                for (int n = historyList.size() - 1; n >= 0; --n)
                 {
                     QJsonObject logData = historyList.at(n).toObject();
+                    qint64 id = logData.value("pageId").toString().toLongLong();
 
-                    QDateTime date = QDateTime::fromString(logData.value("date").toString(), Qt::ISODate);
-                    date.setTimeSpec(Qt::UTC);
-                    qint64 dateInt = date.toLocalTime().toSecsSinceEpoch();
+                    if (id <= lastHistoryId)
+                        continue;
 
-                    if (dateInt <= lastHistoryTime)
-                        break;
-
-                    if (dateInt > maxTime)
-                        maxTime = dateInt;
-
+                    lastHistoryId = id;
                     HistoryItem currentHistoryItem;
+                    currentHistoryItem.symbol      = IniEngine::getSymbolByRequest(logData.value("symbol").toString().toLatin1());
+                    currentHistoryItem.price       = logData.value("price").toString().toDouble();
+                    currentHistoryItem.volume      = logData.value("quantity").toString().toDouble();
+                    currentHistoryItem.dateTimeInt = logData.value("createTime").toVariant().toLongLong();
 
-                    if (logData.value("category").toString() == "settlement")
-                    {
-                        if (logData.value("type").toString() == "sell")
-                            currentHistoryItem.type = 4;
-                        else
-                            currentHistoryItem.type = 5;
-                    }
+                    if (logData.value("side").toString() == "SELL")
+                        currentHistoryItem.type = 1;
                     else
-                    {
-                        if (logData.value("type").toString() == "sell")
-                            currentHistoryItem.type = 1;
-                        else
-                            currentHistoryItem.type = 2;
-                    }
-
-                    currentHistoryItem.symbol      = baseValues.currentPair.symbol;
-                    currentHistoryItem.price       = logData.value("rate").toString().toDouble();
-                    currentHistoryItem.volume      = logData.value("amount").toString().toDouble();
-                    currentHistoryItem.dateTimeInt = dateInt;
+                        currentHistoryItem.type = 2;
 
                     if (currentHistoryItem.isValid())
                         (*historyItems) << currentHistoryItem;
                 }
-
-                if (maxTime > lastHistoryTime)
-                    lastHistoryTime = maxTime;
 
                 emit historyChanged(historyItems);
             }
@@ -696,39 +654,48 @@ void Exchange_Poloniex::secondSlot()
     {
     case 0:
         if (!isReplayPending(103))
-            sendToApi(103, "returnTicker");
+            sendToApi(103, baseValues.currentPair.currRequestPair + "/ticker24h");
 
         break;
 
     case 1:
         if (!isReplayPending(202))
-            sendToApi(202, "returnAvailableAccountBalances", true);
+            sendToApi(202, "/accounts/balances", "GET", "", "", true);
 
         break;
 
     case 2:
         if (!isReplayPending(109))
-        {
-            QByteArray start;
+            sendToApi(109, baseValues.currentPair.currRequestPair + "/trades?limit=" + (lastTradeId ? "50" : "1000"));
 
-            if (lastTradesDate)
-                start = "&start=" + QByteArray::number(lastTradesDate + 1);
-
-            sendToApi(109, "returnTradeHistory&currencyPair=" + baseValues.currentPair.currRequestPair + start);
-        }
         break;
 
     case 3:
         if (!tickerOnly && !isReplayPending(204))
-            sendToApi(204, "returnOpenOrders&currencyPair=all", true);
+            sendToApi(204, "/orders", "GET", "limit=2000", "", true);
 
         break;
 
     case 4:
         if (isDepthEnabled() && (forceDepthLoad || !isReplayPending(111)))
         {
+            QByteArray limit; //Valid limit values are: 5, 10, 20, 50, 100, 150.
+
+            if (baseValues.depthCountLimit <= 5)
+                limit = "5";
+            else if (baseValues.depthCountLimit <= 10)
+                limit = "10";
+            else if (baseValues.depthCountLimit <= 20)
+                limit = "20";
+            else if (baseValues.depthCountLimit <= 50)
+                limit = "50";
+            else if (baseValues.depthCountLimit <= 100)
+                limit = "100";
+            else if (baseValues.depthCountLimit <= 150)
+                limit = "150";
+
             emit depthRequested();
-            sendToApi(111, "returnOrderBook&currencyPair=" + baseValues.currentPair.currRequestPair + "&depth=" + baseValues.depthCountLimitStr);
+            sendToApi(111, baseValues.currentPair.currRequestPair + "/orderBook?limit=" + limit);
             forceDepthLoad = false;
         }
         break;
@@ -761,11 +728,10 @@ void Exchange_Poloniex::getHistory(bool force)
         lastHistory.clear();
 
     if (!isReplayPending(208))
-        sendToApi(208, "returnTradeHistory&currencyPair=" + baseValues.currentPair.currRequestPair +
-                  "&start=" + QByteArray::number(lastHistoryTime + 1) + "&limit=10000", true);
+        sendToApi(208, "/trades", "GET", (lastHistoryId ? "from=" + QByteArray::number(lastHistoryId + 1) + "&" : "") + "limit=1000", "", true);
 
     if (!isReplayPending(203))
-        sendToApi(203, "returnFeeInfo", true);
+        sendToApi(203, "/feeinfo", "GET", "", "", true);
 }
 
 void Exchange_Poloniex::buy(const QString& symbol, double apiBtcToBuy, double apiPriceToBuy)
@@ -779,14 +745,15 @@ void Exchange_Poloniex::buy(const QString& symbol, double apiBtcToBuy, double ap
     if (pairItem.symbol.isEmpty())
         return;
 
-    QByteArray data = "currencyPair=" + pairItem.currRequestPair + "&rate=" +
-            JulyMath::byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0) + "&amount=" +
-            JulyMath::byteArrayFromDouble(apiBtcToBuy, pairItem.currADecimals, 0) + "&";
+    QByteArray quantity = JulyMath::byteArrayFromDouble(apiBtcToBuy,   pairItem.currADecimals, 0);
+    QByteArray price    = JulyMath::byteArrayFromDouble(apiPriceToBuy, pairItem.priceDecimals, 0);
+    QByteArray body = "{\"symbol\":\"" + pairItem.currRequestPair + "\",\"type\":\"LIMIT\",\"quantity\":\""
+            + quantity + "\",\"side\":\"BUY\",\"price\":\"" + price + "\"}";
 
     if (debugLevel)
-        logThread->writeLog("Buy: " + data, 2);
+        logThread->writeLog("Buy: " + body, 2);
 
-    sendToApi(306, "buy&" + data, true);
+    sendToApi(306, "/orders", "POST", "", body, true);
 }
 
 void Exchange_Poloniex::sell(const QString& symbol, double apiBtcToSell, double apiPriceToSell)
@@ -800,14 +767,15 @@ void Exchange_Poloniex::sell(const QString& symbol, double apiBtcToSell, double 
     if (pairItem.symbol.isEmpty())
         return;
 
-    QByteArray data = "currencyPair=" + pairItem.currRequestPair + "&rate=" +
-            JulyMath::byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0) + "&amount=" +
-            JulyMath::byteArrayFromDouble(apiBtcToSell, pairItem.currADecimals, 0) + "&";
+    QByteArray quantity = JulyMath::byteArrayFromDouble(apiBtcToSell,   pairItem.currADecimals, 0);
+    QByteArray price    = JulyMath::byteArrayFromDouble(apiPriceToSell, pairItem.priceDecimals, 0);
+    QByteArray body = "{\"symbol\":\"" + pairItem.currRequestPair + "\",\"type\":\"LIMIT\",\"quantity\":\""
+            + quantity + "\",\"side\":\"SELL\",\"price\":\"" + price + "\"}";
 
     if (debugLevel)
-        logThread->writeLog("Sell: " + data, 2);
+        logThread->writeLog("Sell: " + body, 2);
 
-    sendToApi(306, "sell&" + data, true);
+    sendToApi(307, "/orders", "POST", "", body, true);
 }
 
 void Exchange_Poloniex::cancelOrder(const QString& /*unused*/, const QByteArray& order)
@@ -815,23 +783,26 @@ void Exchange_Poloniex::cancelOrder(const QString& /*unused*/, const QByteArray&
     if (tickerOnly)
         return;
 
-    QByteArray data = "orderNumber=" + order + "&";
-
     if (debugLevel)
-        logThread->writeLog("Cancel order: " + data, 2);
+        logThread->writeLog("Cancel order: " + order, 2);
 
-    sendToApi(305, "cancelOrder&" + data, true);
+    sendToApi(305, "/orders/" + order, "DELETE", "", "", true);
 }
 
-void Exchange_Poloniex::sendToApi(int reqType, const QByteArray &method, bool auth)
+void Exchange_Poloniex::sendToApi(int reqType, const QByteArray& path, const QByteArray& type,
+                                  const QByteArray& params, const QByteArray& body, bool auth)
 {
     if (julyHttp == nullptr)
     {
         if (domain.isEmpty() || port == 0)
-            julyHttp = new JulyHttp("poloniex.com", "Key: " + getApiKey() + "\r\n", this);
+            julyHttp = new JulyHttp("api.poloniex.com", "key: " + getApiKey() +
+                                    "\r\nrecvWindow: 300000\r\nsignatureMethod: HmacSHA256\r\nsignatureVersion: 2\r\n",
+                                    this, true, true, "application/json");
         else
         {
-            julyHttp = new JulyHttp(domain, "Key: " + getApiKey() + "\r\n", this, useSsl);
+            julyHttp = new JulyHttp(domain, "key: " + getApiKey() +
+                                    "\r\nrecvWindow: 300000\r\nsignatureMethod: HmacSHA256\r\nsignatureVersion: 2\r\n",
+                                    this, useSsl, true, "application/json");
             julyHttp->setPortForced(port);
         }
 
@@ -845,15 +816,21 @@ void Exchange_Poloniex::sendToApi(int reqType, const QByteArray &method, bool au
 
     if (auth)
     {
-        QByteArray postData = "command=" + method + "&nonce=" + QByteArray::number(++privateNonce);
+        QByteArray signTimestamp = QByteArray::number(TimeSync::getMSecs() - 0);
+        QByteArray paramsData = "signTimestamp=" + signTimestamp;
 
-        julyHttp->sendData(reqType, m_pairChangeCount, "POST /tradingApi", postData,
-                           "Sign: " + hmacSha512(getApiSign(), postData).toHex() + "\r\n");
+        if (reqType == 306 || reqType == 307)
+            paramsData.prepend("requestBody=" + body + '&');
+        else if (!params.isEmpty())
+            paramsData.prepend(params + '&');
+
+        QByteArray signData = type + "\n" + path + "\n" + paramsData;
+
+        julyHttp->sendData(reqType, m_pairChangeCount, type + ' ' + path + (params.isEmpty() ? "" : "?" + params), body,
+                           "signature: " + hmacSha256(getApiSign(), signData).toBase64() + "\r\nsignTimestamp: " + signTimestamp + "\r\n");
     }
     else
-    {
-        julyHttp->sendData(reqType, m_pairChangeCount, "GET /public?command=" + method);
-    }
+        julyHttp->sendData(reqType, m_pairChangeCount, "GET /markets/" + path);
 }
 
 void Exchange_Poloniex::sslErrors(const QList<QSslError>& errors)
