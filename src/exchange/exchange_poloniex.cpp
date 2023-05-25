@@ -519,7 +519,7 @@ void Exchange_Poloniex::dataReceivedAuth(const QByteArray& data, int reqType, in
                     currentHistoryItem.symbol      = IniEngine::getSymbolByRequest(logData.value("symbol").toString().toLatin1());
                     currentHistoryItem.price       = logData.value("price").toString().toDouble();
                     currentHistoryItem.volume      = logData.value("quantity").toString().toDouble();
-                    currentHistoryItem.dateTimeInt = logData.value("createTime").toVariant().toLongLong();
+                    currentHistoryItem.dateTimeInt = logData.value("createTime").toVariant().toLongLong() / 1000;
 
                     if (logData.value("side").toString() == "SELL")
                         currentHistoryItem.type = 1;
