@@ -503,9 +503,9 @@ void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, in
                 depthAsks = new QList<DepthItem>;
                 depthBids = new QList<DepthItem>;
 
-                qint64 tickerTimestamp = getMidData("\"timestamp\": \"", "\"", &data).toUInt();
+                qint64 tickerTimestamp = getMidData("\"timestamp\":\"", "\"", &data).toUInt();
                 QMap<double, double> currentAsksMap;
-                QStringList asksList = QString(getMidData("\"asks\": [[", "]]", &data)).split("], [");
+                QStringList asksList = QString(getMidData("\"asks\":[[", "]]", &data)).split("],[");
                 double groupedPrice = 0.0;
                 double groupedVolume = 0.0;
                 int rowCounter = 0;
@@ -521,7 +521,7 @@ void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, in
 
                     QByteArray currentRow = asksList.at(n).toLatin1();
                     double priceDouble = getMidData("\"", "\"", &currentRow).toDouble();
-                    double amount = getMidData(", \"", "\"", &currentRow).toDouble();
+                    double amount = getMidData(",\"", "\"", &currentRow).toDouble();
 
                     if (n == 0 && updateTicker)
                         IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Buy", priceDouble);
@@ -570,7 +570,7 @@ void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, in
                 lastDepthAsksMap = currentAsksMap;
 
                 QMap<double, double> currentBidsMap;
-                QStringList bidsList = QString(getMidData("\"bids\": [[", "]]", &data)).split("], [");
+                QStringList bidsList = QString(getMidData("\"bids\":[[", "]]", &data)).split("],[");
                 groupedPrice = 0.0;
                 groupedVolume = 0.0;
                 rowCounter = 0;
@@ -582,7 +582,7 @@ void Exchange_Bitstamp::dataReceivedAuth(const QByteArray& data, int reqType, in
 
                     QByteArray currentRow = bidsList.at(n).toLatin1();
                     double priceDouble = getMidData("\"", "\"", &currentRow).toDouble();
-                    double amount = getMidData(", \"", "\"", &currentRow).toDouble();
+                    double amount = getMidData(",\"", "\"", &currentRow).toDouble();
 
                     if (n == 0 && updateTicker)
                         IndicatorEngine::setValue(baseValues.exchangeName, baseValues.currentPair.symbol, "Sell", priceDouble);

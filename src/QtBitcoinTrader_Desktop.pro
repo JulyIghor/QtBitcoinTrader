@@ -36,8 +36,6 @@ linux {
 }
 
 win32 {
-    LIBS += -lgdi32 -lws2_32 -lole32 -lwinmm
-
     contains(QMAKE_TARGET.arch, x86_64) {
         DEFINES += QTBUILDTARGETWIN64
     }
@@ -115,7 +113,6 @@ HEADERS += $${PWD}/script/addrulegroup.h \
            $${PWD}/exchange/exchange.h \
            $${PWD}/exchange/exchange_bitfinex.h \
            $${PWD}/exchange/exchange_bitstamp.h \
-           $${PWD}/exchange/exchange_indacoin.h \
            $${PWD}/exchange/exchange_yobit.h \
            $${PWD}/exchange/exchange_binance.h \
            $${PWD}/exchange/exchange_bittrex.h \
@@ -234,7 +231,6 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
           $${PWD}/exchange/exchange.cpp \
           $${PWD}/exchange/exchange_bitfinex.cpp \
           $${PWD}/exchange/exchange_bitstamp.cpp \
-          $${PWD}/exchange/exchange_indacoin.cpp \
           $${PWD}/exchange/exchange_yobit.cpp \
           $${PWD}/exchange/exchange_binance.cpp \
           $${PWD}/exchange/exchange_bittrex.cpp \

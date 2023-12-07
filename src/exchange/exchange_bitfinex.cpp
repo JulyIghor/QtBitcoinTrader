@@ -917,12 +917,12 @@ void Exchange_Bitfinex::dataReceivedAuth(const QByteArray& data, int reqType, in
 
                     currentHistoryItem.price = curLog.at(5).toDouble();
                     currentHistoryItem.volume = amount.toDouble();
-                    currentHistoryItem.dateTimeInt = time;
+                    currentHistoryItem.dateTimeInt = time / 1000;
                     currentHistoryItem.symbol = IniEngine::getSymbolByRequest(symbol.toLower());
                     currentHistoryItem.currRequestSecond = curLog.at(6).contains("EXCHANGE") ? "exchange" : "trading";
 
                     if (currentHistoryItem.isValid())
-                        (*historyItems) << currentHistoryItem;
+                        historyItems->prepend(currentHistoryItem);
                 }
 
                 emit historyChanged(historyItems);

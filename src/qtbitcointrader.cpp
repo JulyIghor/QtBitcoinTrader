@@ -41,7 +41,6 @@
 #include "exchange/exchange_bitstamp.h"
 #include "exchange/exchange_bittrex.h"
 #include "exchange/exchange_hitbtc.h"
-#include "exchange/exchange_indacoin.h"
 #include "exchange/exchange_poloniex.h"
 #include "exchange/exchange_yobit.h"
 #include "indicatorengine.h"
@@ -609,10 +608,6 @@ void QtBitcoinTrader::setupClass()
     case 4:
         currentExchange = new Exchange_Bitfinex(baseValues.restSign, baseValues.restKey);
         break; // Bitfinex
-
-    case 6:
-        currentExchange = new Exchange_Indacoin(baseValues.restSign, baseValues.restKey);
-        break; // Indacoin
 
     case 10:
         currentExchange = new Exchange_YObit(baseValues.restSign, baseValues.restKey);

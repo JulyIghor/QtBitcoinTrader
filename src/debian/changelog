@@ -1,7 +1,164 @@
-qtbitcointrader (1.40.0-9) stable; urgency=medium
+qtbitcointrader (1.42.22) stable; urgency=medium
 
-  * Initial release
- 
+v1.42.22 Released!
+
+- Fixed Bitfinex history
+- Fixed Bitstamp depth
+- Pairs synchronised
+- Removed Indacoin exchange
+
+v1.42.21 Released!
+
+- Poloniex date format hot fix
+
+v1.42.20 Released!
+
+- Updated API integration for Poloniex
+- Fixed trade history issue in Bitfinex
+- Synchronized currency pairs
+
+v1.42.10 Released!
+
+- Updated API integration to fix Bitstamp and Poloniex
+- Synchronized currency pairs
+
+v1.42.00 Released!
+
+- Fixed crash while running some scripts/rules
+- Updated API integration to fix Bitstamp, Poloniex and Bittrex
+- Fixed a bug when trade history stays empty
+- Fixed UI bugs
+
+v1.41.00 Released!
+
+- Fixed time syncronization in Binance
+- Translation fixes, added Korean language
+- Fixed bug in trade history of Bittrex exchange
+- Improved request interval limits for Poloniex
+- Qt 6 support, using QJSEngine instead of QtScript
+- Optimized CPU usage
+- Updated currency pairs list
+
+v1.40.55 Released!
+
+- Fixed trader.groupStop(..) script command
+- Synchronized currency pairs
+
+v1.40.54 Released!
+
+- Fixed trader.say(..) script command
+- Fixed crash on unix systems
+
+v1.40.53 Released!
+
+- Fixed critical bug causing missing public trade history items
+- Fixed bug when zero/incorrect balance reached script/rules events
+- Fixed missing script events/wrong rule state for Bitfinex
+- Fixed own trade history items missing for Bitfinex
+- Fixed rounding of buy/sell total calculations
+- Fixed Hitbtc exchange api keys impossible to add
+- Fixed translation issues. French language updated
+- Optimized memory usage
+- Removed exchanges bitmarket.pl, okcoin.cn, btcchina.com, goc.io
+
+v1.40.52 Released!
+
+- Enabled experimental vnc server on a Linux
+- Fixed yobit api, if you ever get nonce error, re-create API keys
+- Improved minimum request interval for Binance to prevent IP bans
+
+v1.40.51 Released!
+
+- Fixed hitbtc balance
+- Fixed binance balance
+
+v1.40.50 Released!
+
+- Fixed hitbtc authorization bug
+- Fixed transaction history in bitstamp
+- Smart paste for spinbox values
+- Synchronized currency pairs
+- Improved text to speech engine
+
+v1.40.43 Released!
+
+- Request interval now can be set less than 0.5 seconds
+- Fixed bug when timers wasn't stopped on group stop
+- Fixed crash when open Debug dialog
+- Fixed incorrect fee value in Bitfinex
+- Fixed filter open orders in Bitfinex
+- Fixed tray icon in Linux
+- Fixed bug caused long delay after network down
+- Fixed on top mode for dock widgets
+- Fixed bug when password was incorrectly detected as weak
+- Currency pairs synchronized in all exchanges
+
+v1.40.42 Released!
+
+- Fixed start window position
+- Removed duplicated info in log view
+- Fixed Own transactions display in Bitstamp
+- Fixed problem with false time
+- Added option to change hostname and port for exchange profile
+- Fixed wrong order amount for Bitfinex, when order partly filled
+- Minor UI fixes, fixed crash in log view
+
+v1.40.41
+- Bitstamp API integration fixed
+- Rules generator dialog critical bug fixed when price with fee used
+- Time sync bug fixed
+- Binance orderbook table fixed
+- Removed Wex exchange
+- Added alternative domain for Yobit
+- Fixed dock panel issue caused blinks
+- Many small fixes
+
+v1.40.40
+- New exchange Poloniex
+- Fixed script language command cancel ask and bid for Binance
+- Fixed bug caused forever API down in some cases
+- Minor fixes
+
+v1.40.30
+- Added new exchange HitBTC
+- Added more decimals for Fee Calculator
+- Fixed canceling order via rule or script for Binance
+- Fixed bug in charts
+- Fixed wex mirror
+- Minor cleanup and optimizations
+
+v1.40.23
+- Added new exchange Bittrex
+- Portable mode for Linux and macOS
+- Secure auto update for Linux x86_64
+- Uninstall option in help menu
+- Fixed Binance own trade history order
+- Time Sync bug fixed
+- HDPI bug fixed
+- Minor fixes
+
+v1.40.22
+- Added new exchange Binance
+- Many small fixes
+- Subscribe to beta of Qt Trader exchange www.QtTrader.com
+
+v1.40.21
+- Qt Trader 2.0 Announced! Visit www.QtTrader.com
+- Fixed bug of Rules dialog
+- Fixed HiDPI mode
+- Fixed Script and Rules enable-disable command
+- Fixed Last Buy and Sell price event bug
+- Memory optimisations, refractoring
+- Minor fixes
+
+v1.40.12
+- Dropped support of Windows XP and macOS 10.9, but you still can compile it manually
+- Removed update size limit for future bigger updates
+- Fixed Bitfinex trade history bug
+- Fixed Bitstamp certificate issue
+- Switched to OpenSSL 1.1, no UPX in release binaries
+- Minor improvements
+
 v1.40.09
 - Fixed FeeCalculator crash
 - Fixed account open orders filtering and calculations
