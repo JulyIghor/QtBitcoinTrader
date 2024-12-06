@@ -4,11 +4,6 @@ This software helps you open and cancel orders very fast. Real time data monitor
 
 Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
 
-## Official website
-
-* https://centrabit.com/downloads/
-* https://qttrader.com
-
 ## Download binaries
 
 * https://sourceforge.net/projects/bitcointrader/  `Win32`,`Mac`,`Linux`
@@ -35,7 +30,6 @@ Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
 
 * http://www.facebook.com/QtBitcoinTrader
 * http://twitter.com/QtBitcoinTrader
-* http://vk.com/QtBitcoinTrader `RUS`
 
 ## Change Log
 
@@ -179,10 +173,8 @@ v1.40.23
 v1.40.22
 - Added new exchange Binance
 - Many small fixes
-- Subscribe to beta of Qt Trader exchange www.QtTrader.com
 
 v1.40.21
-- Qt Trader 2.0 Announced! Visit www.QtTrader.com
 - Fixed bug of Rules dialog
 - Fixed HiDPI mode
 - Fixed Script and Rules enable-disable command
