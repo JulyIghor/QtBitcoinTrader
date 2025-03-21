@@ -536,7 +536,7 @@ String_TAB_CHAT=Чат
 
 String_TIME_SYNC_ERROR=Ваши часы не установлены. Пожалуйста, закройте QtBitcoinTrader и установите часы. Изменение времени при включенном QtBitcoinTrader может привести к ошибкам и испортить ключи.
 String_TIME_ERROR=Ошибка времени
-String_PROGRAM_CORRUPTED=Программа повреждена. Загрузите с официального сайта https://centrabit.com.
+String_PROGRAM_CORRUPTED=Программа повреждена. Загрузите с официального сайта https://qtbitcointrader.com.
 String_CAN_NOT_WRITE_TO_FOLDER=Не могу записать в папку
 String_MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT=Вы действительно хотите очистить скрипт?
 

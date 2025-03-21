@@ -8,11 +8,11 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Centrabit AG"
+            VALUE "CompanyName", "Ihor July"
             VALUE "FileDescription", "Qt Bitcoin Trader"
             VALUE "FileVersion", "1.42.22"
             VALUE "InternalName", "Qt Bitcoin Trader"
-            VALUE "LegalCopyright", "Ighor July (C) 2023"
+            VALUE "LegalCopyright", "Ihor July (C) 2025"
             VALUE "OriginalFilename", "QtBitcoinTrader.exe"
             VALUE "ProductName", "Qt Bitcoin Trader Application"
             VALUE "ProductVersion", "1.42.22"

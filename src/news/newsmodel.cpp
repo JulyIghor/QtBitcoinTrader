@@ -32,7 +32,8 @@
 #include "news/newsmodel.h"
 #include <QThread>
 
-NewsModel::NewsModel() : QObject(), downloadThread(new QThread), runningJulyHttp(false)
+NewsModel::NewsModel() :
+    QObject(), downloadThread(new QThread), runningJulyHttp(false)
 {
     downloadThread->setObjectName("News Model");
     connect(downloadThread.data(), &QThread::started, this, &NewsModel::run);
@@ -59,7 +60,7 @@ void NewsModel::destroyedJulyHttp()
 void NewsModel::run()
 {
     connect(QThread::currentThread(), &QThread::finished, this, &NewsModel::quit, Qt::DirectConnection);
-    julyHttp.reset(new JulyHttp("centrabit.com", "", this));
+    julyHttp.reset(new JulyHttp("qtbitcointrader.com", "", this));
     connect(julyHttp.data(), &JulyHttp::dataReceived, this, &NewsModel::dataReceived);
     connect(julyHttp.data(), &JulyHttp::destroyed, this, &NewsModel::destroyedJulyHttp);
     runningJulyHttp = true;

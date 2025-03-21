@@ -40,7 +40,8 @@
 #include <QMessageBox>
 #include <QSettings>
 
-PasswordDialog::PasswordDialog(QWidget* parent) : QDialog(parent)
+PasswordDialog::PasswordDialog(QWidget* parent) :
+    QDialog(parent)
 {
     resetData = false;
     newProfile = false;
@@ -61,7 +62,7 @@ PasswordDialog::PasswordDialog(QWidget* parent) : QDialog(parent)
         QMessageBox::warning(
             nullptr,
             windowTitle(),
-            julyTr("PROGRAM_CORRUPTED", "The program is corrupted. Download from the official site https://centrabit.com."));
+            julyTr("PROGRAM_CORRUPTED", "The program is corrupted. Download from the official site https://qtbitcointrader.com."));
         exit(0);
     }
 
@@ -138,7 +139,7 @@ PasswordDialog::PasswordDialog(QWidget* parent) : QDialog(parent)
     if (lastProfileIndex > -1)
         ui.profileComboBox->setCurrentIndex(lastProfileIndex);
 
-    ui.label_info->setText("Centrabit AG, Zug\nreg. CHE-114.254.375\nVersion: " + baseValues.appVerStr);
+    ui.label_info->setText("Version: " + baseValues.appVerStr);
 
     julyTranslator.translateUi(this);
 

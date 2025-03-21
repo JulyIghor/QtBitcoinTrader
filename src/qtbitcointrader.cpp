@@ -3891,7 +3891,7 @@ void QtBitcoinTrader::on_helpButton_clicked()
             helpType = "JLScript";
     }
 
-    QDesktopServices::openUrl(QUrl("https://qbtapi.centrabit.com/?Object=Help&Method=" + helpType + "&Locale=" + QLocale().name()));
+    QDesktopServices::openUrl(QUrl("https://qbtapi.qtbitcointrader.com/?Object=Help&Method=" + helpType + "&Locale=" + QLocale().name()));
 }
 
 void QtBitcoinTrader::initDocks()

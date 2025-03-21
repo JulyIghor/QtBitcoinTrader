@@ -537,7 +537,7 @@ String_TAB_CHAT=Chat
 
 String_TIME_SYNC_ERROR=Your clock is not set. Please close the Qt Bitcoin Trader and set the clock. Changing time at Qt Bitcoin Trader enabled can cause errors and damage the keys.
 String_TIME_ERROR=Time error
-String_PROGRAM_CORRUPTED=The program is corrupted. Download from the official site https://centrabit.com.
+String_PROGRAM_CORRUPTED=The program is corrupted. Download from the official site https://qtbitcointrader.com.
 String_CAN_NOT_WRITE_TO_FOLDER=Can not write to folder
 String_MESSAGE_CONFIRM_CLEAR_SCRIPT_TEXT=Do you really want to clear the scrypt
 

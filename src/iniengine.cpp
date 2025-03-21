@@ -66,7 +66,7 @@ IniEngine::~IniEngine()
 
 void IniEngine::exitFromProgram()
 {
-    qDebug() << "The program is corrupted. Download from the official site https://centrabit.com.";
+    qDebug() << "The program is corrupted. Download from the official site https://qtbitcointrader.com.";
     exit(0);
 }
 
@@ -122,7 +122,7 @@ void IniEngine::runThread()
             exitFromProgram();
     }
 
-    julyHttp = new JulyHttp("centrabit.com", "", this, true, false);
+    julyHttp = new JulyHttp("qtbitcointrader.com", "", this, true, false);
     connect(julyHttp, &JulyHttp::dataReceived, this, &IniEngine::dataReceived);
     julyHttp->secondTimer->stop();
     julyHttp->noReconnect = true;
@@ -275,7 +275,7 @@ void IniEngine::loadExchange(const QString& exchangeIniFileName)
 
     if (julyHttp == nullptr)
     {
-        julyHttp = new JulyHttp("centrabit.com", "", this, true, false);
+        julyHttp = new JulyHttp("qtbitcointrader.com", "", this, true, false);
         connect(julyHttp, &JulyHttp::dataReceived, this, &IniEngine::dataReceived);
         julyHttp->secondTimer->stop();
         julyHttp->noReconnect = true;

@@ -40,7 +40,8 @@
 #include <QTimer>
 #include <QtCore/qmath.h>
 
-FeaturedExchangesDialog::FeaturedExchangesDialog() : QDialog(), exchangeNum(-1), ui(new Ui::FeaturedExchangesDialog)
+FeaturedExchangesDialog::FeaturedExchangesDialog() :
+    QDialog(), exchangeNum(-1), ui(new Ui::FeaturedExchangesDialog)
 {
     ui->setupUi(this);
     ui->okButton->setEnabled(false);
@@ -51,7 +52,7 @@ FeaturedExchangesDialog::FeaturedExchangesDialog() : QDialog(), exchangeNum(-1),
     allExchangesList = listSettings.childGroups();
 
     {
-        QScopedPointer<JulyHttp> httpGet(new JulyHttp("qbtapi.centrabit.com", nullptr, this, true, false));
+        QScopedPointer<JulyHttp> httpGet(new JulyHttp("qbtapi.qtbitcointrader.com", nullptr, this, true, false));
         connect(httpGet.data(), &JulyHttp::dataReceived, this, &FeaturedExchangesDialog::dataReceived);
         httpGet->secondTimer->stop();
         httpGet->noReconnect = true;

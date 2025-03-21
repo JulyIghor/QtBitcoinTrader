@@ -46,7 +46,8 @@
 #include "windows.h"
 #endif
 
-UpdaterDialog::UpdaterDialog(bool fbMess) : QDialog()
+UpdaterDialog::UpdaterDialog(bool fbMess) :
+    QDialog()
 {
     forceUpdate = false;
 
@@ -68,14 +69,6 @@ UpdaterDialog::UpdaterDialog(bool fbMess) : QDialog()
 #endif
 
     QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
-    int updateCheckRetryCount = settings.value("UpdateCheckRetryCount", 0).toInt();
-    settings.setValue("UpdateCheckRetryCount", updateCheckRetryCount);
-
-    if (updateCheckRetryCount > 10)
-    {
-        settings.setValue("UpdateCheckRetryCount", 0);
-        updateCheckRetryCount = 0;
-    }
 
     downloaded100 = false;
     feedbackMessage = fbMess;
@@ -103,10 +96,7 @@ UpdaterDialog::UpdaterDialog(bool fbMess) : QDialog()
         }
     }
 
-    if (updateCheckRetryCount > 3)
-        httpGet = new JulyHttp("api.qtbitcointrader.com", nullptr, this, false, false);
-    else
-        httpGet = new JulyHttp("qbtapi.centrabit.com", nullptr, this, false, false);
+    httpGet = new JulyHttp("api.qtbitcointrader.com", nullptr, this, false, false);
 
     httpGet->noReconnect = true;
     timeOutTimer = new QTimer(this);
@@ -501,8 +491,6 @@ void UpdaterDialog::dataReceived(QByteArray dataReceived, int reqType, int /*unu
                     windowTitle(),
                     julyTr("UPDATED_SUCCESSFULLY", "Application updated successfully. Please restart application to apply changes."));
 
-            QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
-            settings.setValue("UpdateCheckRetryCount", 0);
             exitSlot();
         }
         else
@@ -572,9 +560,6 @@ void UpdaterDialog::downloadError(int val)
                          julyTr("DOWNLOAD_ERROR", "Download error. Please try again.") + "<br>" + httpGet->errorString() +
                              "<br>CODE: " + QString::number(val));
 
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
-    settings.setValue("UpdateCheckRetryCount", settings.value("UpdateCheckRetryCount", 0).toInt() + 1);
-
     exitSlot();
 }
 
@@ -587,9 +572,6 @@ void UpdaterDialog::downloadErrorFile(int val)
                          windowTitle(),
                          julyTr("DOWNLOAD_ERROR", "Download error. Please try again.") + "<br>" + httpGetFile->errorString() +
                              "<br>CODE: " + QString::number(val));
-
-    QSettings settings(appDataDir + "/QtBitcoinTrader.cfg", QSettings::IniFormat);
-    settings.setValue("UpdateCheckRetryCount", settings.value("UpdateCheckRetryCount", 0).toInt() + 1);
 
     exitSlot();
 }

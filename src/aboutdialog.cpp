@@ -34,7 +34,8 @@
 #include "main.h"
 #include "translationdialog.h"
 
-TranslationAbout::TranslationAbout(QWidget* par) : QDialog()
+TranslationAbout::TranslationAbout(QWidget* par) :
+    QDialog()
 {
     ui.setupUi(this);
     ui.buttonCheckUpdates->setVisible(false);
@@ -48,7 +49,7 @@ TranslationAbout::TranslationAbout(QWidget* par) : QDialog()
                                      "; padding:6px}");
     ui.translationAuthor->setStyleSheet(ui.aboutTextLabel->styleSheet());
 
-    ui.label_info->setText("Centrabit AG, Zug\nreg. CHE-114.254.375\nVersion: " + baseValues.appVerStr);
+    ui.label_info->setText("Version: " + baseValues.appVerStr);
 
     QLayout* groupboxLayout = ui.LogoGroupBox->layout();
 
