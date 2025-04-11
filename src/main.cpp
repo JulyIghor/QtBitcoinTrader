@@ -815,17 +815,6 @@ int main(int argc, char* argv[])
                         }
                         break;
 
-                    case 12:
-                        {
-                            // Bittrex
-                            baseValues.restSign = newPassword.getRestSign().toLatin1();
-                            encryptedData =
-                                JulyAES256::encrypt("Qt Bitcoin Trader\r\n" + baseValues.restKey + "\r\n" + baseValues.restSign.toBase64() +
-                                                        "\r\n" + QUuid::createUuid().toString().toLatin1(),
-                                                    tryPassword.toUtf8());
-                        }
-                        break;
-
                     case 13:
                         {
                             // HitBTC

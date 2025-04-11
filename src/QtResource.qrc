@@ -7,7 +7,6 @@
         <file>Resources/Exchanges/Logos/QtTrader.png</file>
         <file>Resources/Exchanges/Logos/Bitstamp.png</file>
         <file>Resources/Exchanges/Logos/Unknown.png</file>
-        <file>Resources/Exchanges/Logos/Bitfinex.png</file>
         <file>Resources/Exchanges/Logos/YObit.png</file>
         <file>Resources/Exchanges/Logos/Binance.png</file>
         <file>Resources/Exchanges/Logos/QtTrader_Big.png</file>
@@ -120,9 +119,6 @@
         <file>Resources/Exchanges/QtTrader.ini</file>
         <file>Resources/QtTraderDay.png</file>
         <file>Resources/QtTraderNight.png</file>
-        <file>Resources/Exchanges/Bittrex.ini</file>
-        <file>Resources/Exchanges/Logos/Bittrex.png</file>
-        <file>Resources/Exchanges/Logos/Bittrex_Big.png</file>
         <file>Resources/Exchanges/HitBTC.ini</file>
         <file>Resources/Exchanges/Logos/HitBTC.png</file>
         <file>Resources/Exchanges/Logos/HitBTC_Big.png</file>

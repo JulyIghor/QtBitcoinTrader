@@ -39,7 +39,6 @@
 #include "exchange/exchange_binance.h"
 #include "exchange/exchange_bitfinex.h"
 #include "exchange/exchange_bitstamp.h"
-#include "exchange/exchange_bittrex.h"
 #include "exchange/exchange_hitbtc.h"
 #include "exchange/exchange_poloniex.h"
 #include "exchange/exchange_yobit.h"
@@ -616,10 +615,6 @@ void QtBitcoinTrader::setupClass()
     case 11:
         currentExchange = new Exchange_Binance(baseValues.restSign, baseValues.restKey);
         break; // Binance
-
-    case 12:
-        currentExchange = new Exchange_Bittrex(baseValues.restSign, baseValues.restKey);
-        break; // Bittrex
 
     case 13:
         currentExchange = new Exchange_HitBTC(baseValues.restSign, baseValues.restKey);

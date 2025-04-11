@@ -115,7 +115,6 @@ HEADERS += $${PWD}/script/addrulegroup.h \
            $${PWD}/exchange/exchange_bitstamp.h \
            $${PWD}/exchange/exchange_yobit.h \
            $${PWD}/exchange/exchange_binance.h \
-           $${PWD}/exchange/exchange_bittrex.h \
            $${PWD}/exchange/exchange_hitbtc.h \
            $${PWD}/exchange/exchange_poloniex.h \
            $${PWD}/feecalculator.h \
@@ -233,7 +232,6 @@ SOURCES +=$${PWD}/script/addrulegroup.cpp \
           $${PWD}/exchange/exchange_bitstamp.cpp \
           $${PWD}/exchange/exchange_yobit.cpp \
           $${PWD}/exchange/exchange_binance.cpp \
-          $${PWD}/exchange/exchange_bittrex.cpp \
           $${PWD}/exchange/exchange_hitbtc.cpp \
           $${PWD}/exchange/exchange_poloniex.cpp \
           $${PWD}/feecalculator.cpp \
