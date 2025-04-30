@@ -6,7 +6,7 @@ Founded in **2013** by **[Ihor July](https://github.com/JulyIghor)**, the softwa
 - Native C++/Qt desktop app  
 - Real-time exchange data  
 - Supports JavaScript-powered automated strategies  
-- Exchange API key protection using AES-256 encryption and optional startup password  
+- Exchange API key protection using AES-256 encryption  
 - No telemetry or external data collection  
 
 **Official website**: [https://qtbitcointrader.com](https://qtbitcointrader.com)   
