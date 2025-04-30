@@ -1,21 +1,25 @@
 ## Qt Bitcoin Trader
 
-This software helps you open and cancel orders very fast. Real time data monitoring. Automated trading using JavaScript powered scripts.
+**Qt Bitcoin Trader** is a cross-platform open-source application for cryptocurrency trading. Founded in **2013** by **[Ihor July](https://github.com/JulyIghor)**, the software helps users place and cancel orders rapidly, monitor market data in real time, and automate trading using JavaScript-based scripting.
 
-Developed on pure Qt, uses OpenSSL, AES 256 key and secret protection.
+- Native C++/Qt desktop app  
+- Real-time exchange data  
+- Supports JavaScript-powered automated strategies  
+- Exchange API key protection using AES-256 encryption and optional startup password  
+- No telemetry or external data collection  
 
-## Download binaries
+**Official website**: [https://qtbitcointrader.com](https://qtbitcointrader.com)   
+**Privacy Policy**: [https://qtbitcointrader.com/privacy-qt-bitcoin-trader](https://qtbitcointrader.com/privacy-qt-bitcoin-trader)  
 
-* https://sourceforge.net/projects/bitcointrader/  `Win32`,`Mac`,`Linux`
-* http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml `Win32`
-* http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml `Mac`
+---
 
-## Compilation on Linux
-* `sudo apt-get install g++ libssl-dev libglu1-mesa-dev qt5-qmake qtscript5-dev qtmultimedia5-dev git`
-* `git clone https://github.com/JulyIGHOR/QtBitcoinTrader.git`
-* `cd ./QtBitcoinTrader/src`
-* `QT_SELECT=5 qmake QtBitcoinTrader_Desktop.pro`
-* `make && make install && make clean`
+## Download
+
+Precompiled binaries:
+
+- [SourceForge](https://sourceforge.net/projects/bitcointrader/) — `Windows`, `macOS`, `Linux`  
+- [Softpedia (Windows)](http://www.softpedia.com/get/Others/Finances-Business/Bitcoin-Trader.shtml)  
+- [Softpedia (macOS)](http://mac.softpedia.com/get/Finance/Qt-Bitcoin-Trader.shtml)  
 
 ## Demos
 
