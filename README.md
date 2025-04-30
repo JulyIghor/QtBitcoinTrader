@@ -1,6 +1,7 @@
 ## Qt Bitcoin Trader
 
-**Qt Bitcoin Trader** is a cross-platform open-source application for cryptocurrency trading. Founded in **2013** by **[Ihor July](https://github.com/JulyIghor)**, the software helps users place and cancel orders rapidly, monitor market data in real time, and automate trading using JavaScript-based scripting.
+**Qt Bitcoin Trader** is a cross-platform open-source application for cryptocurrency trading.  
+Founded in **2013** by **[Ihor July](https://github.com/JulyIghor)**, the software helps users place and cancel orders rapidly, monitor market data in real time, and automate trading using JavaScript-based scripting.
 
 - Native C++/Qt desktop app  
 - Real-time exchange data  
