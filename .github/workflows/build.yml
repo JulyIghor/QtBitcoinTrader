@@ -2,7 +2,7 @@ name: Build Qt Static App
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
 
 jobs:
