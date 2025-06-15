@@ -1,0 +1,47 @@
+name: Build Qt Static App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      packages: read
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target:
+          - os: windows
+            arch: x86_64
+            tag: qt-windows:arch64-static_6
+          - os: windows
+            arch: i686
+            tag: qt-windows:arch32-static_6
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull Qt cross-build image
+        run: docker pull ghcr.io/julyighor/${{ matrix.target.tag }}
+
+      - name: Build with qmake inside container
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/build" \
+            ghcr.io/julyighor/${{ matrix.target.tag }} \
+            sh -c 'mkdir -p build && cd build && qmake ../src && make -j$(nproc)'
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target.os }}-${{ matrix.target.arch }}
+          path: |
+            ./build/release/QtBitcoinTrader.exe
