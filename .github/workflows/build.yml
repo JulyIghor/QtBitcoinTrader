@@ -37,11 +37,11 @@ jobs:
           docker run --rm \
             -v "${{ github.workspace }}:/build" \
             ghcr.io/julyighor/${{ matrix.target.tag }} \
-            sh -c 'mkdir -p build && cd build && qmake ../src && make -j$(nproc)'
+            sh -c 'mkdir -p build && cd build && qmake ../src && make -j$(nproc) && strip ./release/*.exe'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target.os }}-${{ matrix.target.arch }}
           path: |
-            ./build/release/QtBitcoinTrader.exe
+            ./build/release/*.exe
