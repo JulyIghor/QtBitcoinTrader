@@ -18,9 +18,6 @@ jobs:
           - os: windows
             arch: x86_64
             tag: qt-windows:arch64-static_6
-          - os: windows
-            arch: i686
-            tag: qt-windows:arch32-static_6
 
     steps:
       - name: Checkout repository
