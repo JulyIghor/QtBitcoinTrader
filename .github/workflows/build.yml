@@ -44,7 +44,7 @@ jobs:
             qmake ../src
             make -j$(nproc)
             strip ./release/${{ env.APP_NAME }}.exe
-            mv ./release/${{ env.APP_NAME }}.exe ../${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}_unsigned.exe
+            mv ./release/${{ env.APP_NAME }}.exe ../${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
             cd ..
             rm -rf ./build
           '
@@ -53,8 +53,8 @@ jobs:
         id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}_unsigned.exe
-          path: ./${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}_unsigned.exe
+          name: ${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}-unsigned.exe
+          path: ./${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
 
       - name: Sign artifact
         uses: signpath/github-action-submit-signing-request@v1.1
@@ -71,4 +71,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
-          path: ./signed-artifacts/signed-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
+          path: ./signed-artifacts/${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
