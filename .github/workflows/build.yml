@@ -19,6 +19,10 @@ jobs:
             arch: x86_64
             tag: qt-windows:arch64-static_6
 
+    env:
+      IMAGE_PREFIX: ghcr.io/julyighor
+      APP_NAME: QtBitcoinTrader
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,18 +31,44 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Pull Qt cross-build image
-        run: docker pull ghcr.io/julyighor/${{ matrix.target.tag }}
+        run: docker pull ${{ env.IMAGE_PREFIX }}/${{ matrix.target.tag }}
 
-      - name: Build with qmake inside container
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}:/build" \
-            ghcr.io/julyighor/${{ matrix.target.tag }} \
-            sh -c 'mkdir -p build && cd build && qmake ../src && make -j$(nproc) && strip ./release/*.exe'
+      - name: Build and Package App
+        run: >
+          docker run --rm
+          -v "${{ github.workspace }}:/build"
+          ${{ env.IMAGE_PREFIX }}/${{ matrix.target.tag }}
+          sh -c '
+            set -e
+            mkdir -p build && cd build
+            qmake ../src
+            make -j$(nproc)
+            strip ./release/${{ env.APP_NAME }}.exe
+            mv ./release/${{ env.APP_NAME }}.exe ../${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
+            cd ..
+            zip -9 ${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.zip ./${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
+            rm -rf ./build
+          '
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target.os }}-${{ matrix.target.arch }}
-          path: |
-            ./build/release/*.exe
+          path: ./${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.zip
+
+      - name: Sign artifact
+        uses: signpath/github-action-submit-signing-request@v1.1
+        with:
+          api-token:              ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id:        ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
+          project-slug:           ${{ secrets.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug:    ${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id:     ${{ steps.upload-unsigned-artifact.outputs.artifact-id }}
+          wait-for-completion:    true
+          output-artifact-directory: .
+
+      - name: Upload signed artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-${{ matrix.target.os }}-${{ matrix.target.arch }}
+          path: ./${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.zip
