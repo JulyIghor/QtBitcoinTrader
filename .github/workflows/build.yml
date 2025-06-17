@@ -65,10 +65,10 @@ jobs:
           signing-policy-slug:    ${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}
           github-artifact-id:     ${{ steps.upload-unsigned-artifact.outputs.artifact-id }}
           wait-for-completion:    true
-          output-artifact-directory: .
+          output-artifact-directory: signed-artifacts
 
       - name: Upload signed artifact
         uses: actions/upload-artifact@v4
         with:
           name: signed-${{ matrix.target.os }}-${{ matrix.target.arch }}
-          path: ./${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
+          path: ./signed-artifacts/${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
