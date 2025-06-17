@@ -53,7 +53,7 @@ jobs:
         id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.target.os }}-${{ matrix.target.arch }}
+          name: ${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
           path: ./${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
 
       - name: Sign artifact
