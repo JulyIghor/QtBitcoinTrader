@@ -71,4 +71,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
-          path: ./signed-artifacts/${{ env.APP_NAME }}-${{ matrix.target.os }}-${{ matrix.target.arch }}.exe
+          path: ./signed-artifacts/signed-${{ matrix.target.os }}-${{ matrix.target.arch }}
