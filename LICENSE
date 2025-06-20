@@ -1,13 +1,22 @@
-                    GNU GENERAL PUBLIC LICENSE
+                 GNU GENERAL PUBLIC LICENSE
+                   Version 3, 29 June 2007
 
- The Qt Bitcoin Trader is Copyright (C) 2013-2022 July IGHOR.
- I want to create Bitcoin Trader that can be configured for any rule and strategy.
- If you want to help me please Donate: 1d6iMwjjNo8ZGYeJBZKXgcgVk9o7fXcjc
- For any questions please use contact form at http://gigasoftgroup.com
- Or send e-mail directly to julyighor@gmail.com
+    Copyright (C) 2013-2025 Ihor July <julyighor@gmail.com>
 
- You may use, distribute and copy the Qt Bitcoin Trader under the terms of
- GNU General Public License version 3, which is displayed below.
+This file is part of Qt Bitcoin Trader.
+
+Qt Bitcoin Trader is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Qt Bitcoin Trader is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Qt Bitcoin Trader. If not, see <https://www.gnu.org/licenses/>.
 
 -------------------------------------------------------------------------
 
