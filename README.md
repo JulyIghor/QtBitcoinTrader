@@ -36,5 +36,6 @@ Precompiled binaries:
 * [x.com/QtBitcoinTrader](http://x.com/QtBitcoinTrader)
 
 ## Sponsorship
-| :-----: | ----- |
+| Sponsor | Details |
+|:-------:|---------|
 | [![SignPath logo](https://avatars.githubusercontent.com/u/34448643?s=32)](https://signpath.io/) | Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
