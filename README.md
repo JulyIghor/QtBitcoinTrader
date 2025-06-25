@@ -38,4 +38,4 @@ Precompiled binaries:
 ## Sponsorship
 | | |
 | :-----: | ----- |
-| [![SignPath logo](https://avatars.githubusercontent.com/u/34448643?s=80)](https://signpath.io/) | Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
+| [![SignPath logo](https://avatars.githubusercontent.com/u/34448643?s=32)](https://signpath.io/) | Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
