@@ -33,5 +33,9 @@ Precompiled binaries:
 
 ## Social
 
-* http://www.facebook.com/QBTNext
-* http://twitter.com/QBTNext
+* [x.com/QtBitcoinTrader](http://x.com/QtBitcoinTrader)
+
+## Sponsorship
+| | |
+| :-----: | ----- |
+| [![SignPath logo](https://avatars.githubusercontent.com/u/34448643?s=80)](https://signpath.io/) | Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
